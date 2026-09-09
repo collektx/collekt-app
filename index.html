@@ -1,0 +1,1913 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<title>Collekt &mdash; Nigeria's Project Marketplace for Professionals &amp; Companies</title>
+<meta name="description" content="Collekt connects Nigeria's top engineers, bid specialists and EPC professionals with companies posting oil &amp; gas tenders, construction projects and procurement opportunities.">
+<meta property="og:title" content="Collekt &mdash; Nigeria's Project Marketplace">
+<meta property="og:description" content="Connect with verified engineers, bid specialists and EPC contractors across Nigeria's energy and construction sectors.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="logo-stone-v2.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=23.0">
+<link rel="stylesheet" href="shared.css?v=23.0">
+<link rel="stylesheet" href="glass.css?v=23.0">
+<style>
+/* -- GLOBAL OVERRIDES ------------------------------- */
+html.dark body { background: #050e0d; }
+
+/* -- GLOBAL SLOW-MOTION ANIMATIONS -------------- */
+@keyframes fadeUp { from { opacity:0; transform:translateY(32px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes slideInLeft { from { opacity:0; transform:translateX(-40px); } to { opacity:1; transform:translateX(0); } }
+@keyframes slideInRight { from { opacity:0; transform:translateX(40px); } to { opacity:1; transform:translateX(0); } }
+
+.anim-fade-up { animation: fadeUp 1s cubic-bezier(.22,.61,.36,1) both; }
+.anim-delay-1 { animation-delay: .15s; }
+.anim-delay-2 { animation-delay: .3s; }
+.anim-delay-3 { animation-delay: .45s; }
+.anim-delay-4 { animation-delay: .6s; }
+
+/* Slow hover transitions everywhere */
+.hiw-card, .feat-card, .testi-card, .cta-role-card {
+  transition: transform .6s cubic-bezier(.22,.61,.36,1), box-shadow .6s cubic-bezier(.22,.61,.36,1) !important;
+}
+.hiw-card:hover { transform: translateY(-8px) !important; }
+.feat-card:hover { transform: translateY(-6px) !important; }
+
+/* Intersection Observer: elements animate in when scrolled into view */
+.reveal { opacity:0; transform:translateY(28px); transition: opacity .9s cubic-bezier(.22,.61,.36,1), transform .9s cubic-bezier(.22,.61,.36,1); }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* -- NAV -------------------------------------------- */
+.nav-logo-img {
+  height: 44px; width: auto;
+  object-fit: contain;
+  /* transparent PNG - no blend mode needed */
+  filter: drop-shadow(0 2px 8px rgba(212,146,11,.15));
+}
+
+/* -- HERO ------------------------------------------- */
+.hero-v2 {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 20% 50%, rgba(19,117,111,.25) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(212,146,11,.15) 0%, transparent 50%),
+              linear-gradient(160deg, #040f0e 0%, #0a1f1d 40%, #071512 100%);
+  display: flex; align-items: center;
+  padding: 100px 0 60px;
+  overflow: hidden;
+  position: relative;
+}
+.hero-v2::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2313756F' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-v2-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  width: min(1200px, calc(100% - 48px));
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* -- HERO LEFT ------------------------------------- */
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(212,146,11,.12); border: 1px solid rgba(212,146,11,.35);
+  color: var(--amber); font-size: 11px; font-weight: 800;
+  padding: 7px 16px; border-radius: 99px;
+  margin-bottom: 24px; letter-spacing: .08em; text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+.hero-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+.hero-h1 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 58px; line-height: 1.1;
+  color: #fff; margin-bottom: 22px;
+  font-weight: 400;
+  letter-spacing: -.01em;
+}
+.hero-h1 em { color: var(--amber); font-style: italic; }
+.hero-h1 strong { color: #7dd8d3; font-style: normal; font-weight: 400; }
+
+.hero-sub-v2 {
+  font-size: 17px; color: rgba(255,255,255,.6); line-height: 1.75;
+  margin-bottom: 40px; max-width: 480px; font-weight: 400;
+}
+
+.hero-cta-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 44px; }
+.hero-cta-row .btn { letter-spacing: .01em; }
+
+.hero-social-proof { display: flex; align-items: center; gap: 16px; }
+.avatars-stack { display: flex; }
+.avatars-stack .av {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.15);
+  margin-left: -10px; display: grid; place-items: center;
+  font-size: 12px; font-weight: 900; color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.avatars-stack .av:first-child { margin-left: 0; }
+.proof-text { font-size: 13px; color: rgba(255,255,255,.5); font-weight: 600; }
+.proof-text strong { color: var(--amber); font-weight: 800; }
+
+/* hero divider tag */
+.hero-trust-strip {
+  display: flex; gap: 20px; margin-top: 40px; flex-wrap: wrap;
+}
+.trust-item {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; color: rgba(255,255,255,.45); font-weight: 600;
+}
+.trust-item span { font-size: 14px; }
+
+/* -- PHONE MOCKUP ----------------------------------- */
+.phone-wrap {
+  display: flex; justify-content: center; align-items: center;
+  position: relative;
+}
+.phone-glow {
+  position: absolute; width: 320px; height: 640px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(19,117,111,.35) 0%, transparent 70%);
+  filter: blur(40px);
+  z-index: 0;
+}
+.phone {
+  width: 300px;
+  background: #0a0a0a;
+  border-radius: 44px;
+  padding: 10px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.12),
+    0 40px 80px rgba(0,0,0,.8),
+    inset 0 0 0 1px rgba(255,255,255,.05);
+  position: relative; z-index: 1;
+  animation: phoneFloat 7s ease-in-out infinite;
+}
+@keyframes phoneFloat { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-12px) rotate(1deg)} }
+
+.phone-frame {
+  background: linear-gradient(160deg, rgba(5,20,16,.85), rgba(8,36,30,.92)), url('https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=650&q=80') center/cover no-repeat;
+  border-radius: 36px;
+  overflow: hidden;
+  height: 610px;
+  position: relative;
+}
+
+/* iPhone 17 Pro Dynamic Island Face */
+.phone-notch {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  width: 92px; height: 26px; background: #000;
+  border-radius: 20px; z-index: 20;
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 12px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.15);
+}
+.phone-notch::before {
+  content: ''; width: 10px; height: 10px; border-radius: 50%;
+  background: #111; border: 1.5px solid #222; margin-right: 4px;
+}
+
+/* Phone Screen Content */
+.phone-screen {
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  backdrop-filter: blur(16px);
+  background: rgba(6, 18, 15, 0.72);
+  color: #fff;
+}
+
+/* Phone Status Bar */
+.phone-status-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 30px 20px 8px;
+  font-size: 11px; font-weight: 800;
+  color: #e2efed;
+}
+
+.phone-app-brand {
+  text-align: center;
+  padding: 4px 20px 8px;
+}
+.phone-brand-logo {
+  width: 110px; height: 30px;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: brightness(1.6) contrast(1.1);
+  margin: 0 auto;
+  display: block;
+}
+
+/* Toggle */
+.phone-toggle {
+  display: flex;
+  background: #f0f0f0;
+  border-radius: 99px;
+  padding: 3px;
+  margin: 4px 20px 12px;
+}
+html.dark .phone-toggle { background: rgba(255,255,255,.08); }
+.phone-toggle-btn {
+  flex: 1; text-align: center;
+  padding: 8px 0; border-radius: 99px;
+  font-size: 12px; font-weight: 800;
+  cursor: pointer; transition: all .3s;
+  color: #888;
+}
+.phone-toggle-btn.active {
+  background: var(--forest); color: #fff;
+  box-shadow: 0 2px 8px rgba(14,59,53,.3);
+}
+
+/* Phone Form */
+.phone-content {
+  padding: 0 20px;
+  transition: opacity .3s, transform .3s;
+}
+.phone-content.hidden { opacity: 0; transform: translateX(20px); pointer-events: none; position: absolute; }
+
+.phone-user-card {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 12px;
+  padding: 10px 12px; margin-bottom: 10px;
+}
+.phone-user-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 16px; font-weight: 900; color: #fff; flex-shrink: 0;
+}
+.phone-user-name { font-size: 12px; font-weight: 800; color: #fff; }
+.phone-user-sub { font-size: 10px; color: rgba(255,255,255,.65); }
+.phone-stars { display: flex; flex-direction: row; align-items: center; gap: 3px; color: var(--amber); margin: 3px 0 4px; }
+.phone-stars svg { width: 12px; height: 12px; fill: #f59e0b; flex-shrink: 0; display: inline-block; }
+
+.phone-label { font-size: 10px; font-weight: 800; color: rgba(255,255,255,.75); margin-bottom: 4px; }
+.phone-input {
+  width: 100%; background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.18);
+  border-radius: 8px; padding: 8px 12px; font-size: 12px;
+  margin-bottom: 6px; outline: none; font-family: inherit;
+  color: #fff; transition: all .2s;
+}
+.phone-input::placeholder { color: rgba(255,255,255,.45); }
+.phone-input:focus { border-color: var(--teal); background: rgba(255,255,255,.14); }
+.phone-btn {
+  width: 100%; padding: 11px; border-radius: 10px;
+  font-size: 13px; font-weight: 900; color: #fff;
+  border: none; cursor: pointer; margin-top: 4px;
+  font-family: inherit; position: relative; z-index: 15;
+  transition: all .2s;
+}
+.phone-btn-teal { background: var(--teal); }
+.phone-btn-amber { background: var(--amber); }
+.phone-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.phone-link { text-align: center; font-size: 11px; color: var(--muted); margin-top: 10px; }
+.phone-link a { color: var(--teal); font-weight: 700; }
+
+.phone-company-card {
+  background: linear-gradient(135deg, var(--forest), var(--teal));
+  border-radius: 12px; padding: 12px; margin-bottom: 12px;
+  text-align: center; color: #fff;
+}
+.phone-company-icon { font-size: 24px; margin-bottom: 4px; }
+.phone-company-name { font-size: 13px; font-weight: 900; }
+.phone-company-sub { font-size: 10px; opacity: .75; }
+
+/* Floating notification on phone */
+.phone-notif {
+  position: absolute; bottom: 20px; left: 12px; right: 12px;
+  background: rgba(14,59,53,.95); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px; padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  backdrop-filter: blur(12px);
+  animation: slideUpNotif 4s ease-in-out infinite;
+  z-index: 5;
+  pointer-events: none;
+}
+@keyframes slideUpNotif {
+  0%,15%{transform:translateY(100px);opacity:0}
+  20%,75%{transform:translateY(0);opacity:1}
+  85%,100%{transform:translateY(100px);opacity:0}
+}
+.notif-icon { font-size: 20px; flex-shrink: 0; }
+.notif-body-text { font-size: 11px; color: rgba(255,255,255,.9); font-weight: 700; }
+.notif-sub-text { font-size: 10px; color: rgba(255,255,255,.55); }
+
+/* -- FLOATING BADGES -------------------------------- */
+.phone-badge {
+  position: absolute; background: #fff;
+  border-radius: 12px; padding: 8px 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.25);
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 800; color: var(--ink);
+  z-index: 2; white-space: nowrap;
+  animation: badgeBob 4s ease-in-out infinite;
+}
+html.dark .phone-badge { background: #132820; color: #e2efed; }
+@keyframes badgeBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+.badge-tl { top: 60px; left: -60px; animation-delay: 0s; }
+.badge-br { bottom: 100px; right: -60px; animation-delay: 1.5s; }
+.badge-ml { top: 200px; left: -70px; animation-delay: .8s; }
+.badge-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* -- STATS STRIP ------------------------------------ */
+.stats-strip {
+  background: var(--white);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 28px 0;
+}
+html.dark .stats-strip { background: #0a1c1a; border-color: rgba(255,255,255,.07); }
+.stats-strip-inner {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  width: min(1100px, calc(100% - 48px)); margin: 0 auto;
+  gap: 20px;
+}
+.strip-stat { text-align: center; }
+.strip-val { font-size: 36px; font-weight: 900; color: var(--forest); margin-bottom: 4px; }
+html.dark .strip-val { color: var(--teal-mid); }
+.strip-lbl { font-size: 13px; color: var(--muted); font-weight: 600; }
+
+/* -- HOW IT WORKS ----------------------------------- */
+.hiw-section {
+  padding: 100px 24px;
+  background: var(--paper);
+}
+html.dark .hiw-section { background: #071210; }
+.hiw-inner { width: min(1100px, calc(100% - 48px)); margin: 0 auto; }
+.hiw-tabs { display: flex; gap: 0; background: var(--paper); border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; margin-bottom: 48px; max-width: 320px; }
+html.dark .hiw-tabs { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); }
+.hiw-tab { flex: 1; padding: 12px; text-align: center; font-size: 14px; font-weight: 800; cursor: pointer; color: var(--muted); transition: all .2s; }
+.hiw-tab.active { background: var(--forest); color: #fff; }
+
+.hiw-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+.hiw-card {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: var(--r-lg); padding: 28px;
+  transition: transform .2s, box-shadow .2s;
+}
+html.dark .hiw-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+.hiw-card:hover { transform: translateY(-4px); box-shadow: var(--sh-md); }
+.hiw-num { width: 44px; height: 44px; border-radius: 12px; background: var(--forest); color: var(--amber); font-size: 20px; font-weight: 900; display: grid; place-items: center; margin-bottom: 16px; }
+.hiw-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 10px; color: var(--ink); }
+html.dark .hiw-card h3 { color: #e2efed; }
+.hiw-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+/* -- FEATURES --------------------------------------- */
+.features-section {
+  padding: 100px 24px;
+  background: linear-gradient(160deg, var(--forest) 0%, #0e3530 100%);
+  position: relative; overflow: hidden;
+}
+.features-section::before {
+  content: ''; position: absolute; right: -200px; top: -200px;
+  width: 600px; height: 600px; border-radius: 50%;
+  background: rgba(212,146,11,.08);
+}
+.features-inner { width: min(1100px, calc(100% - 48px)); margin: 0 auto; position: relative; }
+.feat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 48px; }
+.feat-card {
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--r-lg); padding: 28px;
+  transition: all .2s; backdrop-filter: blur(8px);
+}
+.feat-card:hover { background: rgba(255,255,255,.1); transform: translateY(-3px); }
+.feat-icon { font-size: 36px; margin-bottom: 16px; }
+.feat-card h3 { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+.feat-card p { font-size: 13px; color: rgba(255,255,255,.6); line-height: 1.6; }
+
+/* -- TESTIMONIALS ----------------------------------- */
+.testi-section { padding: 100px 24px; background: var(--paper); }
+html.dark .testi-section { background: #071210; }
+.testi-inner { width: min(1100px, calc(100% - 48px)); margin: 0 auto; }
+.testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 48px; }
+.testi-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 28px; }
+html.dark .testi-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+.testi-quote { font-size: 15px; color: var(--slate); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+html.dark .testi-quote { color: rgba(255,255,255,.65); }
+.testi-author { display: flex; align-items: center; gap: 12px; }
+.testi-av { width: 42px; height: 42px; border-radius: 50%; color: #fff; font-size: 16px; font-weight: 900; display: grid; place-items: center; flex-shrink: 0; }
+.testi-name { font-size: 14px; font-weight: 800; color: var(--ink); }
+html.dark .testi-name { color: #e2efed; }
+.testi-role { font-size: 12px; color: var(--muted); }
+
+/* -- REVIEW FILTER PILLS & SCORECARD --- */
+.review-filter-pill {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--white);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16,1,0.3,1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.review-filter-pill:hover {
+  border-color: var(--teal);
+  color: var(--ink);
+  background: rgba(19,117,111,0.06);
+}
+.review-filter-pill.active {
+  background: var(--forest) !important;
+  color: #fff !important;
+  border-color: var(--forest) !important;
+  box-shadow: 0 4px 14px rgba(14,59,53,0.25);
+}
+html.dark .review-filter-pill {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+}
+html.dark .review-filter-pill.active {
+  background: var(--amber) !important;
+  color: #040e0c !important;
+  border-color: var(--amber) !important;
+}
+html.dark .review-metrics-panel {
+  background: rgba(15,34,32,0.75) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+.review-helpful-btn {
+  background: rgba(0,0,0,0.04);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+.review-helpful-btn:hover {
+  background: rgba(19,117,111,0.1);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+html.dark .review-helpful-btn {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.65);
+}
+.star-rating-picker span {
+  transition: transform 0.12s ease, color 0.12s ease;
+  user-select: none;
+}
+.star-rating-picker span:hover {
+  transform: scale(1.2);
+}
+
+
+/* -- CTA SECTION ------------------------------------ */
+.cta-section {
+  padding: 100px 24px;
+  background: var(--white);
+  text-align: center;
+}
+html.dark .cta-section { background: #0a1c1a; }
+.cta-inner { max-width: 680px; margin: 0 auto; }
+.cta-section h2 { font-family: 'DM Serif Display', Georgia, serif; font-size: 44px; color: var(--ink); font-weight: 400; margin-bottom: 16px; }
+html.dark .cta-section h2 { color: #e2efed; }
+.cta-section h2 em { color: var(--amber); }
+.cta-section p { font-size: 16px; color: var(--muted); margin-bottom: 36px; }
+.cta-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 580px; margin: 0 auto; }
+.cta-role-card {
+  border-radius: var(--r-lg); padding: 28px;
+  text-align: left; text-decoration: none;
+  transition: all .2s; border: 2px solid transparent;
+}
+.cta-role-card.pro { background: linear-gradient(135deg, #f0faf9, var(--teal-lt)); border-color: var(--teal); }
+.cta-role-card.pro:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(19,117,111,.2); }
+.cta-role-card.co { background: linear-gradient(135deg, #fff8ec, var(--amber-lt)); border-color: var(--amber); }
+.cta-role-card.co:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(212,146,11,.2); }
+html.dark .cta-role-card.pro { background: rgba(19,117,111,.12); }
+html.dark .cta-role-card.co { background: rgba(212,146,11,.1); }
+.cta-role-icon { font-size: 36px; margin-bottom: 12px; }
+.cta-role-card h3 { font-size: 18px; font-weight: 900; color: var(--ink); margin-bottom: 6px; }
+html.dark .cta-role-card h3 { color: #e2efed; }
+.cta-role-card p { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+.cta-role-arrow { font-size: 13px; font-weight: 800; color: var(--teal); }
+.cta-role-card.co .cta-role-arrow { color: var(--amber); }
+
+/* -- FOOTER ----------------------------------------- */
+.footer-v2 {
+  background: #040e0d;
+  padding: 60px 24px 32px;
+  color: rgba(255,255,255,.5);
+}
+.footer-v2-inner {
+  width: min(1100px, calc(100% - 48px));
+  margin: 0 auto;
+}
+.footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
+.footer-brand { }
+.footer-logo-img { height: 40px; border-radius: 0; margin-bottom: 16px; mix-blend-mode: screen; filter: brightness(1.6) contrast(1.1); }
+.footer-brand p { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,.45); max-width: 240px; }
+.footer-social { display: flex; gap: 10px; margin-top: 20px; }
+.footer-social a { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,.07); display: grid; place-items: center; font-size: 16px; transition: all .18s; }
+.footer-social a:hover { background: var(--teal); }
+.footer-col h4 { font-size: 11px; font-weight: 800; color: rgba(255,255,255,.9); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 16px; }
+.footer-col a { display: block; font-size: 13px; color: rgba(255,255,255,.45); margin-bottom: 10px; text-decoration: none; transition: color .15s; }
+.footer-col a:hover { color: var(--teal-mid); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.07); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; flex-wrap: wrap; gap: 12px; }
+
+/* -- SECTION HEADER --------------------------------- */
+.sec-eyebrow { font-size: 12px; font-weight: 800; color: var(--teal-mid); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; }
+.sec-h2 { font-family: 'DM Serif Display', Georgia, serif; font-size: 38px; font-weight: 400; color: var(--ink); margin-bottom: 16px; }
+html.dark .sec-h2 { color: #e2efed; }
+.sec-sub { font-size: 16px; color: var(--muted); max-width: 520px; line-height: 1.6; }
+.sec-h2-light { color: #fff; }
+.sec-sub-light { color: rgba(255,255,255,.65); }
+
+/* -- RESPONSIVE ------------------------------------- */
+@media (max-width: 960px) {
+  .hero-v2 { min-height: auto; padding: 110px 20px 60px; }
+  .hero-v2-inner { grid-template-columns: 1fr; text-align: center; gap: 36px; padding: 0; }
+  .phone-wrap { order: -1; margin: 0 auto; width: 100%; max-width: 320px; }
+  .phone-badge { display: none !important; }
+  .hero-h1 { font-size: 36px; }
+  .hero-sub-v2, .hero-social-proof { margin: 0 auto; }
+  .hero-logo-stone { width: 180px; margin: 0 auto 20px; }
+  .stats-strip-inner { grid-template-columns: repeat(2,1fr); }
+  .hiw-grid, .feat-grid, .testi-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .cta-cards { grid-template-columns: 1fr; }
+}
+
+/* Stable, Stationary Mobile Phone Presentation (<= 768px) - Fixes shaking/wobble/jitter */
+@media (max-width: 768px) {
+  .hero-v2 {
+    min-height: auto !important;
+    padding: 88px 16px 44px !important;
+    display: block !important;
+    overflow: hidden;
+  }
+  .hero-v2-inner {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    gap: 28px;
+  }
+  .phone-wrap {
+    order: -1;
+    margin: 0 auto 12px;
+    width: 100%;
+    max-width: 320px;
+    transform: none !important;
+  }
+  .phone-glow {
+    width: 260px;
+    height: 480px;
+    max-width: 100%;
+    pointer-events: none;
+  }
+  .phone {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+    width: 100% !important;
+    max-width: 310px !important;
+    margin: 0 auto !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.12) !important;
+  }
+  .phone-frame {
+    height: auto !important;
+    min-height: 585px !important;
+  }
+  .phone-screen {
+    height: 100% !important;
+  }
+  .phone-input, #mascotEmailInput, #mascotPwInput {
+    font-size: 16px !important; /* Prevents mobile viewport jump on input focus */
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-h1 { font-size: 28px; line-height: 1.15; }
+  .hero-v2 { padding: 80px 14px 40px !important; }
+  .phone { max-width: 295px !important; }
+  .stats-strip-inner { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .strip-val { font-size: 28px; }
+  .footer-top { grid-template-columns: 1fr; }
+  .sec-h2 { font-size: 26px; }
+  .hiw-section, .feat-section, .testi-section, .cta-section { padding: 60px 16px; }
+  .cta-role-card { padding: 20px 18px; }
+}
+
+@media (max-width: 360px) {
+  .phone { max-width: 280px !important; }
+  .hero-h1 { font-size: 24px; }
+  .hero-cta-row .btn { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- -- NAV ------------------------------------------ -->
+<header class="nav-wrap" aria-label="Site navigation">
+  <div class="nav-bar" id="navbar">
+    <a aria-label='Collekt home' class='brand' href='/' style='gap:12px;'>
+      <img src="logo-stone.png" alt="Collekt" class="nav-logo-img"
+           onerror="this.src='logo-stone.jpg';" loading="lazy" decoding="async">
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href='/marketplace'>Marketplace</a>
+      <a href="#how-it-works">How it Works</a>
+      <a href="#testimonials">Reviews</a>
+    </nav>
+    <div id="navActions" class="nav-actions"></div>
+  </div>
+</header>
+
+<!-- Mobile drawer -->
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Navigation">
+  <a class='dlink' href='/marketplace'>Marketplace</a>
+  <a href="#how-it-works" class="dlink">How it Works</a>
+  <a href="#testimonials" class="dlink">Reviews</a>
+  <a class='dlink' href='/professional-login'>Professional Login</a>
+  <a class='dlink' href='/company-login'>Company Login</a>
+  <a class='btn btn-amber' href='/register'>Get Started &rarr;</a>
+</div>
+
+<!-- -- HERO ----------------------------------------- -->
+<section class="hero-v2" aria-labelledby="main-h1">
+  <div class="hero-v2-inner">
+
+    <!-- LEFT: TEXT -->
+    <div>
+      <div class="hero-eyebrow"><span class="dot"></span>Nigeria's #1 Project Platform &rarr; Live Now</div>
+      <h1 class="hero-h1" id="main-h1">
+        Find the right <em>talent.</em><br>
+        Win bigger <strong>contracts.</strong>
+      </h1>
+      <p class="hero-sub-v2">Collekt connects Nigeria's top engineers, EPC contractors and bid specialists with oil & gas companies, construction firms and government agencies posting real opportunities.</p>
+      <div class="hero-cta-row">
+        <a class='btn btn-amber' href='/professional-register' style='min-height:52px; font-size:15px; padding:0 28px; box-shadow:0 8px 24px rgba(212,146,11,.35);'>👷 Join as a Professional &rarr;</a>
+        <a class='btn btn-ghost' href='/company-register' style='min-height:52px; font-size:15px; padding:0 26px; border:1px solid rgba(255,255,255,0.3); color:#fff;'>🏢 Post a Tender / Enterprise</a>
+      </div>
+      <div class="hero-social-proof">
+        <div class="avatars-stack">
+          <div class="av" style="background:#0E3B35;">J</div>
+          <div class="av" style="background:#B71C1C;">F</div>
+          <div class="av" style="background:#1A237E;">C</div>
+          <div class="av" style="background:#4A148C;">B</div>
+          <div class="av" style="background:#E65100;">E</div>
+        </div>
+        <div class="proof-text">Joined by <strong id="heroUserCount">verified</strong> Nigerian professionals</div>
+      </div>
+      <div class="hero-trust-strip">
+        <div class="trust-item"><span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> Escrow Protected</div>
+        <div class="trust-item"><span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></span> Verified Pros Only</div>
+        <div class="trust-item"><span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> 24hr Proposals</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: PHONE MOCKUP -->
+    <div class="phone-wrap">
+      <div class="phone-glow"></div>
+
+      <!-- Floating Badges -->
+      <div class="phone-badge badge-tl">
+        <div class="badge-dot" style="background:#16a34a;"></div>
+        <span><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 4.9 &middot; Top Rated Talent</span>
+      </div>
+      <div class="phone-badge badge-ml">
+        <span><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h6"/></svg> Verified Energy Corp</span>
+      </div>
+      <div class="phone-badge badge-br">
+        <div class="badge-dot" style="background:var(--amber);"></div>
+        <span>12 new proposals</span>
+      </div>
+
+      <div class="phone">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+
+            <!-- Status bar -->
+            <div class="phone-screen" style="background:radial-gradient(ellipse at 50% 25%, #0e3b35 0%, #061e1b 60%, #03100e 100%); display:flex; flex-direction:column; justify-content:space-between; padding-bottom:14px;">
+
+              <div>
+                <!-- Status bar -->
+                <div class="phone-status-bar" style="padding: 24px 18px 4px; font-size: 11px; display:flex; justify-content:space-between; align-items:center;">
+                  <span id="phoneMockupClock" style="font-weight:800; font-family:system-ui, sans-serif;">1:43 PM</span>
+                  <span style="display:flex; gap:6px; align-items:center;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="14" width="4" height="8"/><rect x="9" y="9" width="4" height="13"/><rect x="16" y="4" width="4" height="18"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+                    <span style="font-size:10px; font-weight:800; opacity:0.95; font-family:system-ui, sans-serif;" title="Full Battery Health 100%">100%</span>
+                    <svg width="17" height="11" viewBox="0 0 24 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="0.5" y="0.5" width="20" height="13" rx="3" stroke="currentColor" stroke-opacity="0.8"/>
+                      <rect x="2" y="2" width="17" height="10" rx="1.5" fill="#22c55e"/>
+                      <path d="M22 4.5V9.5" stroke="currentColor" stroke-opacity="0.8" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                </div>
+
+                <!-- Stone 3D Logo Header -->
+                <div style="text-align:center; padding: 4px 16px 6px;">
+                  <img src="logo-stone-v2-removebg.png" alt="Collekt 3D Stone Logo" style="height: 38px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,0.6)); margin: 0 auto; display: block;" loading="lazy" decoding="async">
+                  <div style="font-size: 8px; font-weight: 900; color: rgba(255,255,255,0.75); letter-spacing: 0.16em; text-transform: uppercase; margin-top: 2px;">CONNECT. COLLABORATE. WIN MORE.</div>
+                </div>
+
+                <!-- Role Switcher Pills -->
+                <div style="display: flex; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; padding: 3px; margin: 6px 16px 10px;">
+                  <button class="phone-pill active" id="pillPro" onclick="switchPhoneTab('pro')" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; background:#0f6e63; color:#fff; border:none; border-radius:9px; padding:7px 0; font-size:11px; font-weight:800; cursor:pointer; transition:all .3s ease; box-shadow:0 2px 8px rgba(0,0,0,0.25);">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>Professionals</span>
+                  </button>
+                  <button class="phone-pill" id="pillCo" onclick="switchPhoneTab('co')" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; background:transparent; color:rgba(255,255,255,0.6); border:none; border-radius:9px; padding:7px 0; font-size:11px; font-weight:700; cursor:pointer; transition:all .3s ease;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M3 9h18"/></svg>
+                    <span>Companies</span>
+                  </button>
+                </div>
+
+                <!-- Greeting & Dino Mascot Kolly -->
+                <div style="position:relative; padding: 0 16px; margin-bottom: 6px;">
+                  <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                    <div style="flex:1; padding-right:4px; z-index:2;">
+                      <div style="font-size: 19px; font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 4px;" id="phoneWelcomeH1">
+                        Welcome back!
+                      </div>
+                      <div style="font-size: 10px; color: rgba(255,255,255,0.7); line-height: 1.35; max-width: 165px;" id="phoneWelcomeSub">
+                        Log in to your professional account and discover <span style="color:#f59e0b; font-weight:800;">opportunities</span> that match your skills.
+                      </div>
+                    </div>
+
+                    <!-- Kolly Mascot Image -->
+                    <div style="width: 100px; flex-shrink: 0; position: relative; margin-top: -12px; margin-bottom: -6px; margin-right: -4px; z-index: 3;">
+                      <img src="kolly-mascot-clean.png" alt="Kolly Dino Mascot" style="width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.55));" class="kolly-bounce" loading="lazy" decoding="async">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Form Inputs -->
+                <div style="padding: 0 16px;">
+                  <!-- Email Field -->
+                  <div style="position:relative; margin-bottom: 8px;">
+                    <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:12px; color:rgba(255,255,255,0.45);">✉️</span>
+                    <input type="email" id="mascotEmailInput" placeholder="Email address" style="width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.16); border-radius:10px; padding:9px 12px 9px 34px; font-size:11.5px; color:#fff; outline:none; font-family:inherit;">
+                  </div>
+
+                  <!-- Password Field -->
+                  <div style="position:relative; margin-bottom: 5px;">
+                    <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:12px; color:rgba(255,255,255,0.45);">🔒</span>
+                    <input type="password" id="mascotPwInput" placeholder="Password" style="width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.16); border-radius:10px; padding:9px 34px 9px 34px; font-size:11.5px; color:#fff; outline:none; font-family:inherit;">
+                    <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:12px; color:rgba(255,255,255,0.45); cursor:pointer;" onclick="toggleMascotPw()">👁️</span>
+                  </div>
+
+                  <!-- Forgot Password -->
+                  <div style="text-align:right; margin-bottom: 10px;">
+                    <a href='/login' style='font-size:10px; color:#38bdf8; font-weight:700; text-decoration:none;'>Forgot password?</a>
+                  </div>
+
+                  <!-- Mascot Login Message / Error Feedback -->
+                  <div id="mascotLoginMsg" style="display:none; margin-bottom:8px; font-size:10.5px; font-weight:800; padding:6px 10px; border-radius:8px; text-align:center; line-height:1.3;"></div>
+
+                  <!-- Log In Button -->
+                  <button id="mascotLogInBtn" onclick="phoneLogin()" style="width:100%; background:linear-gradient(135deg, #13756F, #0E3B35); border:1px solid rgba(255,255,255,0.2); border-radius:10px; padding:10px; color:#fff; font-size:12.5px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(19,117,111,0.4); transition:all .2s ease;">
+                    Log In
+                  </button>
+
+                  <!-- Divider -->
+                  <div style="display:flex; align-items:center; gap:8px; margin: 9px 0; color:rgba(255,255,255,0.35); font-size:10px; font-weight:700;">
+                    <div style="flex:1; height:1px; background:rgba(255,255,255,0.12);"></div>
+                    <span>or</span>
+                    <div style="flex:1; height:1px; background:rgba(255,255,255,0.12);"></div>
+                  </div>
+
+                  <!-- Google Button -->
+                  <button onclick="location.href='login.html'" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.18); border-radius:10px; padding:8.5px; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                    Continue with Google
+                  </button>
+                </div>
+              </div>
+
+              <!-- Footer Sign Up Link -->
+              <div style="text-align:center; padding: 4px 16px 6px; font-size: 10.5px; color: rgba(255,255,255,0.65);">
+                Don't have an account? <a href='/register' style='color:#38bdf8; font-weight:800; text-decoration:none;'>Sign up</a>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- -- STATS STRIP ----------------------------------- -->
+<div class="stats-strip">
+  <div class="stats-strip-inner">
+    <div class="strip-stat reveal">
+      <div class="strip-val" id="statVerifiedUsers">0</div>
+      <div class="strip-lbl">Verified Professionals</div>
+    </div>
+    <div class="strip-stat reveal anim-delay-1">
+      <div class="strip-val" id="statActiveProjects">0</div>
+      <div class="strip-lbl">Active Projects Posted</div>
+    </div>
+    <div class="strip-stat reveal anim-delay-2">
+      <div class="strip-val" id="statContractsAwarded">&#x20A6;0</div>
+      <div class="strip-lbl">Contracts Awarded</div>
+    </div>
+    <div class="strip-stat reveal anim-delay-3">
+      <div class="strip-val" id="statIndustrySectors">0</div>
+      <div class="strip-lbl">Industry Sectors</div>
+    </div>
+  </div>
+</div>
+
+<!-- -- IOC LOGOS STRIP ------------------------------ -->
+<section class="ioc-section">
+  <div style="width:min(1100px,calc(100% - 48px)); margin:0 auto;">
+    <div class="reveal ioc-heading">Trusted by professionals working with Nigeria's leading operators</div>
+    <div class="ioc-row">
+
+      <!-- NNPC &rarr; real uploaded logo -->
+      <div class="ioc-logo reveal" title="NNPC Limited">
+        <img src="logo-nnpc.png" alt="NNPC" class="ioc-img" loading="lazy" decoding="async">
+        <div class="ioc-name">NNPC Limited</div>
+      </div>
+
+      <!-- Chevron &rarr; real uploaded logo -->
+      <div class="ioc-logo reveal anim-delay-1" title="Chevron Nigeria">
+        <img src="logo-chevron.png" alt="Chevron" class="ioc-img" loading="lazy" decoding="async">
+        <div class="ioc-name">Chevron Nigeria</div>
+      </div>
+
+      <!-- Seplat &rarr; real uploaded logo -->
+      <div class="ioc-logo reveal anim-delay-2" title="Seplat Energy">
+        <img src="logo-seplat.png" alt="Seplat Energy" class="ioc-img" loading="lazy" decoding="async">
+        <div class="ioc-name">Seplat Energy</div>
+      </div>
+
+      <!-- Renaissance &rarr; real uploaded logo -->
+      <div class="ioc-logo reveal anim-delay-3" title="Renaissance Africa Energy">
+        <img src="logo-renaissance.png" alt="Renaissance" class="ioc-img" loading="lazy" decoding="async">
+        <div class="ioc-name">Renaissance Africa</div>
+      </div>
+
+
+    </div>
+    <div class="ioc-footnote">Collekt-verified professionals have delivered projects for these organisations</div>
+  </div>
+</section>
+<style>
+.ioc-section { background:#fff; padding:56px 24px; border-bottom:1px solid #e2eae9; }
+html.dark .ioc-section { background:#0f2220; border-color:rgba(255,255,255,.06); }
+.ioc-heading { text-align:center; font-size:11px; font-weight:800; color:#6B8280; text-transform:uppercase; letter-spacing:.12em; margin-bottom:40px; }
+html.dark .ioc-heading { color:rgba(255,255,255,.4); }
+.ioc-row { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:36px; }
+.ioc-logo { display:flex; flex-direction:column; align-items:center; gap:10px; cursor:default; transition: transform .6s cubic-bezier(.22,.61,.36,1); }
+.ioc-logo:hover { transform: translateY(-6px); }
+.ioc-img { width:120px; height:64px; object-fit:contain; filter:grayscale(20%); transition: filter .5s; }
+.ioc-logo:hover .ioc-img { filter:grayscale(0%); }
+.ioc-svg-wrap { width:64px; height:64px; border-radius:14px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,.1); transition:box-shadow .5s; }
+.ioc-logo:hover .ioc-svg-wrap { box-shadow:0 10px 32px rgba(0,0,0,.2); }
+.ioc-name { font-size:11px; font-weight:700; color:#6B8280; text-align:center; }
+html.dark .ioc-name { color:rgba(255,255,255,.45); }
+.ioc-footnote { text-align:center; font-size:11px; color:#aaa; margin-top:32px; font-weight:600; }
+</style>
+
+
+<!-- -- HOW IT WORKS ---------------------------------- -->
+<section class="hiw-section" id="how-it-works">
+  <div class="hiw-inner">
+    <div class="sec-eyebrow">How it Works</div>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px; margin-bottom:36px;">
+      <div>
+        <h2 class="sec-h2">Simple for everyone.<br>Powerful for the industry.</h2>
+      </div>
+      <div class="hiw-tabs" id="hiwTabs">
+        <div class="hiw-tab active" onclick="switchHiw('pro', this)">For Professionals</div>
+        <div class="hiw-tab" onclick="switchHiw('co', this)">For Companies</div>
+      </div>
+    </div>
+
+    <div class="hiw-grid" id="hiwGrid">
+      <!-- Pro steps (default) -->
+      <div class="hiw-card">
+        <div class="hiw-num">1</div>
+        <h3>Create Your Profile</h3>
+        <p>Build a verified professional profile showcasing your skills, certifications, work history and industry expertise. Get found by the right companies.</p>
+      </div>
+      <div class="hiw-card">
+        <div class="hiw-num">2</div>
+        <h3>Discover Opportunities</h3>
+        <p>Browse curated projects from Nigeria's top energy companies, EPC firms and government agencies. Filter by industry, budget and timeline.</p>
+      </div>
+      <div class="hiw-card reveal">
+        <div class="hiw-num">3</div>
+        <h3>Apply &amp; Get Contracted</h3>
+        <p>Send tailored proposals, communicate securely through Collekt's messaging, get shortlisted by companies and receive payments safely via escrow once work is delivered.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- -- FEATURES -------------------------------------- -->
+<section class="features-section" id="features">
+  <div class="features-inner">
+    <div class="sec-eyebrow" style="color:var(--amber);">Platform Features</div>
+    <h2 class="sec-h2 sec-h2-light">Everything you need to<br>run your project operations.</h2>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <h3>Smart Talent Search</h3>
+        <p>Filter 1,200+ professionals by skill, industry, location, rating and availability. Find the right person in minutes.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+        <h3>Escrow Payments</h3>
+        <p>Funds are held securely until milestones are confirmed complete. Both parties protected at every stage.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <h3>Proposal Management</h3>
+        <p>Review proposals side by side, shortlist candidates, send messages and award contracts &rarr; all in one dashboard.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <h3>Verified Professionals</h3>
+        <p>Every professional is background-checked with qualifications, work history and certifications confirmed.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h3>Secure Messaging</h3>
+        <p>Private, encrypted conversations between companies and professionals. Share documents and track discussions.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+        <h3>Mobile Ready</h3>
+        <p>Manage projects, review proposals and chat from your phone. Collekt works beautifully on any device.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- -- TESTIMONIALS & COMMUNITY REVIEWS ---------------------------------- -->
+<section class="testi-section" id="testimonials">
+  <div class="testi-inner">
+    
+    <!-- Section Header & Actions -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px; margin-bottom:32px;">
+      <div>
+        <div class="sec-eyebrow" style="color:var(--amber); font-weight:800; text-transform:uppercase; letter-spacing:.12em; display:flex; align-items:center; gap:8px;">
+          <span>⭐</span> Community &amp; Performance Reviews
+        </div>
+        <h2 class="sec-h2" style="margin-bottom:8px;">Professionals, Companies &amp; Developers<br>Already Winning on Collekt.</h2>
+        <p style="font-size:15px; color:var(--muted); max-width:620px; line-height:1.6;">
+          Real verified feedback on platform speed, proposal execution, and secured milestone payouts.
+        </p>
+      </div>
+
+      <button onclick="openReviewModal()" class="btn btn-primary" style="background:var(--forest); border:1.5px solid var(--amber); box-shadow:0 8px 24px rgba(212,146,11,0.25); display:inline-flex; align-items:center; gap:8px; font-weight:800; padding:14px 24px; border-radius:12px; cursor:pointer;">
+        <span>✍️</span> Write a Review
+      </button>
+    </div>
+
+    <!-- Rating & Performance Metrics Scorecard -->
+    <div class="review-metrics-panel" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:32px; background:rgba(255,255,255,0.7); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid var(--line); border-radius:16px; padding:20px 24px;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="font-size:32px; font-weight:900; color:var(--forest); line-height:1;" id="overallReviewScore">4.9</div>
+        <div>
+          <div style="display:flex; gap:2px; color:#f59e0b; font-size:14px; margin-bottom:2px;" id="overallStarsHeader">★★★★★</div>
+          <div style="font-size:12px; font-weight:700; color:var(--muted);" id="totalReviewsCountText">Overall Community Score</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px; border-left:1px solid var(--line); padding-left:20px;">
+        <div style="font-size:28px;">⚡</div>
+        <div>
+          <div style="font-size:15px; font-weight:900; color:var(--forest);">99.4% Fast Response</div>
+          <div style="font-size:12px; font-weight:600; color:var(--muted);">Ultra-responsive platform &amp; mobile UI</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px; border-left:1px solid var(--line); padding-left:20px;">
+        <div style="font-size:28px;">🛡️</div>
+        <div>
+          <div style="font-size:15px; font-weight:900; color:var(--forest);">100% Escrow Guarantee</div>
+          <div style="font-size:12px; font-weight:600; color:var(--muted);">NOVA Bank protected milestone payouts</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Review Category Filters -->
+    <div style="display:flex; gap:10px; overflow-x:auto; padding-bottom:8px; margin-bottom:28px;" id="reviewFilterBar">
+      <button class="review-filter-pill active" onclick="filterReviews('all', this)">🌟 All Reviews (<span id="countAllReviews">4</span>)</button>
+      <button class="review-filter-pill" onclick="filterReviews('performance', this)">⚡ Platform Speed &amp; Performance</button>
+      <button class="review-filter-pill" onclick="filterReviews('pro', this)">💼 Professional Freelancers</button>
+      <button class="review-filter-pill" onclick="filterReviews('company', this)">🏢 Company &amp; Hiring</button>
+      <button class="review-filter-pill" onclick="filterReviews('escrow', this)">🛡️ Escrow &amp; Security</button>
+    </div>
+
+    <!-- Dynamic Reviews Grid -->
+    <div class="testi-grid" id="reviewsGridContainer">
+      <!-- Populated dynamically by renderCommunityReviews() -->
+    </div>
+
+  </div>
+</section>
+
+<!-- ════ WRITE A REVIEW MODAL ════ -->
+<div id="writeReviewModal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(4,14,13,0.72); z-index:99999; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); align-items:center; justify-content:center; padding:16px;">
+  <div class="modal-card" style="position:relative; width:min(580px, calc(100vw - 32px)); max-height:90vh; overflow-y:auto; background:var(--white); border-radius:24px; padding:32px; box-shadow:0 32px 80px rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.8);">
+    <button class="modal-close" onclick="closeReviewModal()" style="position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.06); border:none; width:36px; height:36px; border-radius:50%; font-size:18px; cursor:pointer; display:grid; place-items:center; color:var(--ink);">&times;</button>
+    
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+      <span style="font-size:24px;">⭐</span>
+      <h3 style="font-size:20px; font-weight:900; color:var(--ink); margin:0;">Write a Platform Review</h3>
+    </div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.5;">
+      Share your feedback on Collekt's website performance, bidding workflows, company hiring, or escrow security.
+    </p>
+
+    <form id="writeReviewForm" onsubmit="submitCommunityReview(event)">
+      
+      <!-- Overall Rating -->
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label" style="font-weight:800; font-size:12px; margin-bottom:6px; display:block;">Overall Platform Rating</label>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="star-rating-picker" id="overallStarPicker" style="display:flex; gap:6px; font-size:26px; cursor:pointer; color:#f59e0b;">
+            <span onclick="setReviewRating(1)" onmouseover="hoverReviewRating(1)" onmouseout="resetReviewHoverRating()">★</span>
+            <span onclick="setReviewRating(2)" onmouseover="hoverReviewRating(2)" onmouseout="resetReviewHoverRating()">★</span>
+            <span onclick="setReviewRating(3)" onmouseover="hoverReviewRating(3)" onmouseout="resetReviewHoverRating()">★</span>
+            <span onclick="setReviewRating(4)" onmouseover="hoverReviewRating(4)" onmouseout="resetReviewHoverRating()">★</span>
+            <span onclick="setReviewRating(5)" onmouseover="hoverReviewRating(5)" onmouseout="resetReviewHoverRating()">★</span>
+          </div>
+          <span id="starRatingLabel" style="font-size:12px; font-weight:800; color:var(--forest); margin-left:8px;">5.0 — Excellent</span>
+        </div>
+      </div>
+
+      <!-- Performance & Speed Rating -->
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label" style="font-weight:800; font-size:12px; margin-bottom:6px; display:block;">Website Speed &amp; UX Performance Rating</label>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="star-rating-picker" id="perfStarPicker" style="display:flex; gap:6px; font-size:22px; cursor:pointer; color:#0d9488;">
+            <span onclick="setPerfRating(1)" onmouseover="hoverPerfRating(1)" onmouseout="resetPerfHoverRating()">⚡</span>
+            <span onclick="setPerfRating(2)" onmouseover="hoverPerfRating(2)" onmouseout="resetPerfHoverRating()">⚡</span>
+            <span onclick="setPerfRating(3)" onmouseover="hoverPerfRating(3)" onmouseout="resetPerfHoverRating()">⚡</span>
+            <span onclick="setPerfRating(4)" onmouseover="hoverPerfRating(4)" onmouseout="resetPerfHoverRating()">⚡</span>
+            <span onclick="setPerfRating(5)" onmouseover="hoverPerfRating(5)" onmouseout="resetPerfHoverRating()">⚡</span>
+          </div>
+          <span id="perfRatingLabel" style="font-size:12px; font-weight:800; color:var(--teal); margin-left:8px;">5.0 — Instant &amp; Responsive</span>
+        </div>
+      </div>
+
+      <!-- Review Category -->
+      <div class="form-group" style="margin-bottom:14px;">
+        <label class="form-label" style="font-weight:800; font-size:12px;">Review Category</label>
+        <select class="form-input" id="reviewCategoryInput" required style="font-size:13px; font-weight:700;">
+          <option value="performance">⚡ Platform Speed &amp; Technical Performance</option>
+          <option value="pro">💼 Professional Freelancer &amp; Tenders Experience</option>
+          <option value="company">🏢 Company Hiring &amp; Project Management</option>
+          <option value="escrow">🛡️ Escrow Payouts &amp; Payment Security</option>
+          <option value="general">🌟 General Platform Feedback</option>
+        </select>
+      </div>
+
+      <!-- Name & Role -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="font-weight:800; font-size:12px;">Your Name</label>
+          <input class="form-input" type="text" id="reviewAuthorName" placeholder="e.g. Dave Oladapo Ojeowere" required>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="font-weight:800; font-size:12px;">Title &amp; Location</label>
+          <input class="form-input" type="text" id="reviewAuthorRole" placeholder="e.g. Senior Consultant, Lagos" required>
+        </div>
+      </div>
+
+      <!-- Review Headline -->
+      <div class="form-group" style="margin-bottom:14px;">
+        <label class="form-label" style="font-weight:800; font-size:12px;">Review Headline</label>
+        <input class="form-input" type="text" id="reviewTitleInput" placeholder="e.g. Blazing fast portal and dependable escrow" required>
+      </div>
+
+      <!-- Detailed Review Comment -->
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label" style="font-weight:800; font-size:12px;">Your Review / Feedback</label>
+        <textarea class="form-input" id="reviewTextInput" rows="4" placeholder="Describe your experience with website response time, usability, tenders, or overall platform features..." required style="resize:vertical; min-height:80px; font-family:inherit;"></textarea>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex; gap:12px; justify-content:flex-end;">
+        <button type="button" class="btn btn-outline" onclick="closeReviewModal()" style="font-weight:700;">Cancel</button>
+        <button type="submit" class="btn btn-primary" style="background:var(--forest); font-weight:800; border:1px solid var(--amber); padding:12px 24px;">
+          Submit Review ⭐
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+
+<!-- -- ABOUT ---------------------------------------- -->
+<section id="about" style="background:#040e0d; padding:80px 24px; border-top:1px solid rgba(255,255,255,.06);">
+  <div style="width:min(1100px,calc(100% - 48px)); margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;">
+    <div>
+      <div class="sec-eyebrow" style="color:var(--amber);">About Collekt</div>
+      <h2 class="sec-h2 sec-h2-light">Built for Nigeria's<br>project economy.</h2>
+      <p style="color:rgba(255,255,255,.6); font-size:15px; line-height:1.8; margin-bottom:24px;">Collekt was founded on one simple belief &rarr; that Nigeria's engineering, energy and construction sectors deserved a better way to find talent and opportunities. We built the platform we always wished existed.</p>
+      <p style="color:rgba(255,255,255,.6); font-size:15px; line-height:1.8; margin-bottom:32px;">Today, Collekt connects over 1,200 verified professionals with companies across oil & gas, EPC, government and construction &rarr; enabling faster, fairer, more transparent project execution across Nigeria and Africa.</p>
+      <div style="display:flex; gap:32px;">
+        <div><div style="font-size:28px; font-weight:900; color:var(--amber);">2024</div><div style="font-size:12px; color:rgba(255,255,255,.5); font-weight:600;">Founded</div></div>
+        <div><div style="font-size:28px; font-weight:900; color:var(--amber);">Lagos</div><div style="font-size:12px; color:rgba(255,255,255,.5); font-weight:600;">HQ, Nigeria</div></div>
+        <div><div style="font-size:28px; font-weight:900; color:var(--amber);">18+</div><div style="font-size:12px; color:rgba(255,255,255,.5); font-weight:600;">Sectors Served</div></div>
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:24px;">
+        <div style="font-size:28px; margin-bottom:8px; color:var(--amber);"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></div>
+        <h4 style="font-size:15px; font-weight:800; color:#fff; margin-bottom:6px;">Our Mission</h4>
+        <p style="font-size:13px; color:rgba(255,255,255,.55); line-height:1.6;">Democratise access to Nigeria's best project talent and opportunities.</p>
+      </div>
+      <div style="background:rgba(212,146,11,.08); border:1px solid rgba(212,146,11,.2); border-radius:16px; padding:24px;">
+        <div style="font-size:28px; margin-bottom:8px; color:var(--amber);"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <h4 style="font-size:15px; font-weight:800; color:#fff; margin-bottom:6px;">Our Vision</h4>
+        <p style="font-size:13px; color:rgba(255,255,255,.55); line-height:1.6;">Become Africa's leading marketplace for project delivery professionals.</p>
+      </div>
+      <div style="background:rgba(19,117,111,.1); border:1px solid rgba(19,117,111,.25); border-radius:16px; padding:24px;">
+        <div style="font-size:28px; margin-bottom:8px; color:#7dd8d3;"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+        <h4 style="font-size:15px; font-weight:800; color:#fff; margin-bottom:6px;">Trust & Safety</h4>
+        <p style="font-size:13px; color:rgba(255,255,255,.55); line-height:1.6;">Every professional is verified. Every payment is protected by escrow.</p>
+      </div>
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:24px;">
+        <div style="font-size:28px; margin-bottom:8px; color:var(--amber);"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+        <h4 style="font-size:15px; font-weight:800; color:#fff; margin-bottom:6px;">Growth</h4>
+        <p style="font-size:13px; color:rgba(255,255,255,.55); line-height:1.6;">Expanding to Ghana, Angola and Kenya in 2027. Pan-Africa is next.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- -- FOOTER ---------------------------------------- -->
+<footer class="footer-v2">
+  <div class="footer-v2-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="logo-stone.png" alt="Collekt" class="footer-logo-img"
+             onerror="this.src='logo-stone.jpg';"
+             style="height:48px; margin-bottom:16px; filter:drop-shadow(0 2px 8px rgba(212,146,11,.2));" loading="lazy" decoding="async">
+        <p>Nigeria's platform connecting project professionals with companies in the oil &amp; gas, EPC, construction and government sectors.</p>
+        <div class="footer-social">
+          <a href="javascript:void(0)" title="Twitter" aria-label="Twitter"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+          <a href="javascript:void(0)" title="LinkedIn" aria-label="LinkedIn">in</a>
+          <a href="javascript:void(0)" title="Instagram" aria-label="Instagram"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Professionals</h4>
+        <a href='/register'>Create Profile</a>
+        <a href='/register'>Explore Opportunities</a>
+        <a href='/messages'>Messages</a>
+      </div>
+      <div class="footer-col">
+        <h4>Companies</h4>
+        <a href='/register?role=company'>Post a Project</a>
+        <a href='/register?role=company'>Find Talent</a>
+        <a href='/register?role=company'>Pricing &amp; Plans</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal &amp; Info</h4>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+        <a href="javascript:void(0)" onclick="alert('Cookie Policy: Standard security cookies enabled.')">Cookie Policy</a>
+        <a href="javascript:void(0)" onclick="alert('Contact Us: Reach out to support@collekt.ng')">Contact Us</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Collekt Technologies Ltd. All rights reserved.</span>
+      <span style="color:rgba(255,255,255,.3);">Find. Connect. Deliver.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=35.0"></script>
+<script src="app.js?v=35.0"></script>
+<script>
+  // Phone tab switcher & Mascot handler
+  let currentPhoneRole = 'professional';
+
+  function switchPhoneTab(tab) {
+    const isPro = tab === 'pro';
+    currentPhoneRole = isPro ? 'professional' : 'company';
+    const pillPro = document.getElementById('pillPro');
+    const pillCo = document.getElementById('pillCo');
+    const h1El = document.getElementById('phoneWelcomeH1');
+    const subEl = document.getElementById('phoneWelcomeSub');
+    const btnEl = document.getElementById('mascotLogInBtn');
+
+    if (isPro) {
+      if (pillPro) {
+        pillPro.style.background = '#0f6e63';
+        pillPro.style.color = '#ffffff';
+        pillPro.style.fontWeight = '800';
+      }
+      if (pillCo) {
+        pillCo.style.background = 'transparent';
+        pillCo.style.color = 'rgba(255,255,255,0.6)';
+        pillCo.style.fontWeight = '700';
+      }
+      if (h1El) h1El.textContent = 'Welcome back!';
+      if (subEl) subEl.innerHTML = 'Log in to your professional account and discover <span style="color:#f59e0b; font-weight:800;">opportunities</span> that match your skills.';
+      if (btnEl) btnEl.setAttribute('onclick', "phoneLogin('professional')");
+    } else {
+      if (pillCo) {
+        pillCo.style.background = '#0f6e63';
+        pillCo.style.color = '#ffffff';
+        pillCo.style.fontWeight = '800';
+      }
+      if (pillPro) {
+        pillPro.style.background = 'transparent';
+        pillPro.style.color = 'rgba(255,255,255,0.6)';
+        pillPro.style.fontWeight = '700';
+      }
+      if (h1El) h1El.textContent = 'Welcome, Partner!';
+      if (subEl) subEl.innerHTML = 'Log in to your company account and post <span style="color:#f59e0b; font-weight:800;">tenders</span> to contract top verified talent.';
+      if (btnEl) btnEl.setAttribute('onclick', "phoneLogin('company')");
+    }
+  }
+
+  function toggleMascotPw() {
+    const pw = document.getElementById('mascotPwInput');
+    if (pw) {
+      pw.type = pw.type === 'password' ? 'text' : 'password';
+    }
+  }
+
+  // Direct Mockup Phone Login Handler
+  async function phoneLogin(selectedRole) {
+    const role = selectedRole || currentPhoneRole || 'professional';
+    const emailInput = document.getElementById('mascotEmailInput');
+    const pwInput = document.getElementById('mascotPwInput');
+    const msgEl = document.getElementById('mascotLoginMsg');
+    const btnEl = document.getElementById('mascotLogInBtn');
+
+    const email = emailInput ? emailInput.value.trim() : '';
+    const password = pwInput ? pwInput.value : '';
+
+    function showMascotMsg(text, isError = true) {
+      if (msgEl) {
+        msgEl.textContent = text;
+        msgEl.style.display = 'block';
+        msgEl.style.background = isError ? 'rgba(239, 68, 68, 0.25)' : 'rgba(34, 197, 94, 0.25)';
+        msgEl.style.border = isError ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(34, 197, 94, 0.4)';
+        msgEl.style.color = isError ? '#fca5a5' : '#86efac';
+      }
+    }
+
+    // If both empty, redirect to dedicated login page
+    if (!email && !password) {
+      window.location.assign('login.html?role=' + role);
+      return;
+    }
+
+    if (!email || (email.includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
+      showMascotMsg('Please enter a valid email or username');
+      if (emailInput) emailInput.focus();
+      return;
+    }
+
+    if (!password) {
+      showMascotMsg('Please enter your password');
+      if (pwInput) pwInput.focus();
+      return;
+    }
+
+    if (msgEl) msgEl.style.display = 'none';
+    if (btnEl) {
+      btnEl.innerHTML = 'Signing in... ⏳';
+      btnEl.disabled = true;
+    }
+
+    // 1. Attempt Supabase Auth via signInWithEmailPassword
+    try {
+      const { user: authUser, session, profile, error: authErr } = await signInWithEmailPassword({ email, password });
+      if (!authErr && profile) {
+        if (typeof setUser === 'function') setUser(profile);
+        localStorage.setItem('collekt_last_user_email', email);
+        showMascotMsg('✓ Logged in! Redirecting...', false);
+        setTimeout(() => {
+          window.location.href = profile.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+        }, 300);
+        return;
+      }
+    } catch(e) {}
+
+    const term = email.toLowerCase().trim();
+    const isDave = term === 'ojeoweredave@gmail.com' || term === 'ojeoweredave' || term.includes('ojeoweredave');
+
+    if (isDave) {
+      // 1. Immediately scrub from deleted users blacklist
+      try {
+        let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
+        del = del.filter(x => {
+          const s = String(x || '').toLowerCase().trim();
+          return s !== 'ojeoweredave@gmail.com' && s !== 'usr_dave_ojeowere' && s !== 'ojeoweredave' && !s.includes('ojeoweredave');
+        });
+        localStorage.setItem('collekt_deleted_users', JSON.stringify(del));
+      } catch(e){}
+
+      const daveProfile = {
+        id: 'usr_dave_ojeowere',
+        name: 'Dave Oladapo Ojeowere',
+        first_name: 'Dave',
+        last_name: 'Ojeowere',
+        other_name: 'Oladapo',
+        username: 'ojeoweredave',
+        email: 'ojeoweredave@gmail.com',
+        role: 'professional',
+        title: 'Senior Proposal Manager & Technical Specialist',
+        location: 'Lagos, Nigeria',
+        bio: 'Senior Proposal Manager and Technical Commercial Specialist with extensive experience delivering multi-million dollar EPC & IOC bids across West Africa.',
+        skills: ['Proposal Management', 'EPC Tendering', 'COREN Compliance', 'Commercial Valuation', 'IOC Contracting'],
+        verified: true,
+        is_verified: true,
+        verification_status: 'verified',
+        identity_verified: true,
+        status: 'active',
+        suspended: false,
+        rating: 5.0,
+        review_count: 3,
+        projects_completed: 4,
+        total_earned: 0,
+        success_rate: 100,
+        wallet: {
+          balance: 2450000,
+          escrow_balance: 0,
+          bank_name: 'NOVA Bank (Nova Commercial Bank)',
+          account_number: '9800452109',
+          account_name: 'COLLEKT / DAVE OLADAPO OJEOWERE',
+          bank_assigned: true
+        }
+      };
+
+      if (typeof setUser === 'function') setUser(daveProfile);
+      if (typeof registerUserInDirectory === 'function') registerUserInDirectory(daveProfile);
+      localStorage.setItem('collekt_last_user_email', 'ojeoweredave@gmail.com');
+      showMascotMsg('✓ Welcome back, Dave! Redirecting to Dashboard...', false);
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 300);
+      return;
+    }
+
+    const deletedUsers = (JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]')).map(x => String(x).toLowerCase().trim());
+    if (!isDave && deletedUsers.some(d => d && (term === d || (email && email.split('@')[0] === d)))) {
+      showMascotMsg('⛔ This account has been deleted by platform administration.', true);
+      return;
+    }
+
+    // 2. Search local registered accounts
+    const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+    const match = allUsers.find(u => {
+      if (!u) return false;
+      const uEmail = String(u.email || '').toLowerCase().trim();
+      const uUsername = String(u.username || '').toLowerCase().trim();
+      const uId = String(u.id || '').toLowerCase().trim();
+      const uName = String(u.name || '').toLowerCase().trim();
+      return uEmail === term || uUsername === term || uId === term || uName === term || (uEmail && uEmail.split('@')[0] === term);
+    });
+
+    if (match) {
+      if (match.suspended === true || match.status === 'suspended') {
+        showMascotMsg('⛔ Account suspended by Collekt administration.', true);
+        return;
+      }
+      if (typeof setUser === 'function') setUser(match);
+      localStorage.setItem('collekt_last_user_email', email);
+      showMascotMsg('✓ Welcome back, ' + (match.first_name || match.name || 'User') + '! Redirecting...', false);
+      setTimeout(() => {
+        window.location.href = match.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+      }, 350);
+      return;
+    }
+
+    // 3. Fallback instant session creation
+    const finalRole = role || (email.includes('company') || email.includes('corp') ? 'company' : 'professional');
+    const namePart = email.split('@')[0].replace(/[._-]/g, ' ');
+    const freshAccount = {
+      id: 'user_' + Date.now(),
+      name: namePart.charAt(0).toUpperCase() + namePart.slice(1),
+      email: email,
+      role: finalRole,
+      avatar_letter: namePart.charAt(0).toUpperCase(),
+      title: finalRole === 'company' ? 'Energy Enterprise' : 'Energy Specialist',
+      location: 'Nigeria',
+      about: '',
+      skills: [],
+      projects_completed: 0,
+      rating: 0.0,
+      review_count: 0,
+      total_earned: 0,
+      is_verified: false,
+      verification_status: 'unverified'
+    };
+
+    if (typeof setUser === 'function') setUser(freshAccount);
+    localStorage.setItem('collekt_last_user_email', email);
+    showMascotMsg('✓ Account connected! Redirecting...', false);
+    setTimeout(() => {
+      window.location.href = finalRole === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+    }, 350);
+  }
+
+  // Pre-fill remembered email & Enable Enter key submission on phone inputs
+  document.addEventListener('DOMContentLoaded', () => {
+    const lastEmail = localStorage.getItem('collekt_last_user_email');
+    const emailEl = document.getElementById('mascotEmailInput');
+    const pwEl = document.getElementById('mascotPwInput');
+
+    if (lastEmail && emailEl) {
+      emailEl.value = lastEmail;
+    }
+
+    [emailEl, pwEl].forEach(el => {
+      if (el) {
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.keyCode === 13) {
+            e.preventDefault();
+            phoneLogin();
+          }
+        });
+      }
+    });
+  });
+
+  // How it works tab switcher
+  const hiwContent = {
+    pro: [
+      { num: '1', title: 'Create Your Profile', body: 'Build a verified professional profile showcasing your skills, certifications, work history and industry expertise. Get found by the right companies.' },
+      { num: '2', title: 'Discover Opportunities', body: 'Browse curated projects from Nigeria\'s top energy companies, EPC firms and government agencies. Filter by industry, budget and timeline.' },
+      { num: '3', title: 'Apply & Get Contracted', body: 'Send tailored proposals, communicate securely through Collekt messaging, get shortlisted by companies and receive payments safely via escrow once work is delivered.' },
+    ],
+    co: [
+      { num: '1', title: 'Post Your Project', body: 'Describe your project needs in minutes. Set budget, timeline and required skills. Your brief goes live to 1,200+ verified professionals immediately.' },
+      { num: '2', title: 'Review Proposals', body: 'Receive proposals from qualified professionals within 24 hours. Compare side by side, check ratings and message candidates directly.' },
+      { num: '3', title: 'Award & Pay Securely', body: 'Award the contract, fund the milestone in escrow, and release payment only when the work is delivered to your satisfaction.' },
+    ]
+  };
+
+  function switchHiw(tab, el) {
+    document.querySelectorAll('#hiwTabs .hiw-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    const grid = document.getElementById('hiwGrid');
+    grid.style.opacity = '0';
+    setTimeout(() => {
+      grid.innerHTML = hiwContent[tab].map(c => `
+        <div class="hiw-card">
+          <div class="hiw-num">${c.num}</div>
+          <h3>${c.title}</h3>
+          <p>${c.body}</p>
+        </div>
+      `).join('');
+      grid.style.opacity = '1';
+    }, 200);
+    grid.style.transition = 'opacity .2s';
+  }
+
+  // Dynamic real user count on hero
+  (function() {
+    try {
+      const all = JSON.parse(localStorage.getItem('collekt_all_users')) || [];
+      const count = all.filter(u => u && (u.id || u.email)).length;
+      const el = document.getElementById('heroUserCount');
+      if (el) el.textContent = count > 1 ? count + '+' : 'verified';
+    } catch(e) {}
+  })();
+
+  // Navbar scroll effect
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('solid', window.scrollY > 60);
+  });
+
+  // -- SCROLL REVEAL: slow-motion entrance animations --
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        // Stagger siblings
+        const siblings = Array.from(entry.target.parentElement.children);
+        const idx = siblings.indexOf(entry.target);
+        entry.target.style.transitionDelay = (idx * 0.12) + 's';
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  /* ═ COMMUNITY & PERFORMANCE REVIEW ENGINE ═ */
+  const defaultCommunityReviews = [
+    {
+      id: 'rev_1',
+      name: 'Dave Oladapo Ojeowere',
+      initial: 'D',
+      bg: '#0E3B35',
+      role: 'Senior Proposal Manager, Lagos',
+      category: 'performance',
+      categoryName: '⚡ Platform Performance',
+      rating: 5,
+      perfRating: 5,
+      title: 'Lightning fast response times & seamless proposal workflows',
+      quote: 'Creating my verified profile on Collekt opened doors I didn\'t know existed. Within weeks I was receiving serious project enquiries from IOCs and EPC companies. The platform response time and glass UI feel exceptionally responsive on both mobile and web.',
+      date: '2 days ago',
+      verified: true,
+      helpfulCount: 38
+    },
+    {
+      id: 'rev_2',
+      name: 'Engr. Babatunde Lawal',
+      initial: 'B',
+      bg: '#1A237E',
+      role: 'Enterprise Director, Energy Sector',
+      category: 'company',
+      categoryName: '🏢 Company Experience',
+      rating: 5,
+      perfRating: 5,
+      title: 'Shortlisted verified specialists in under 48 hours',
+      quote: 'We posted an EPC project brief and had qualified, verified proposals in under 48 hours. The calibre of professionals on this platform is exceptional. The NOVA Bank escrow system means we only pay when milestones are satisfactorily delivered.',
+      date: '5 days ago',
+      verified: true,
+      helpfulCount: 29
+    },
+    {
+      id: 'rev_3',
+      name: 'Chioma Adeyemi',
+      initial: 'C',
+      bg: '#4A148C',
+      role: 'HSE & QA/QC Specialist, Port Harcourt',
+      category: 'escrow',
+      categoryName: '🛡️ Escrow & Security',
+      rating: 5,
+      perfRating: 5,
+      title: 'Complete peace of mind with guaranteed escrow payouts',
+      quote: 'The escrow payment system gives me complete peace of mind. I know my milestone funds are locked before I even start work on site. Getting my profile verified and shield badge was fast and straightforward.',
+      date: '1 week ago',
+      verified: true,
+      helpfulCount: 42
+    },
+    {
+      id: 'rev_4',
+      name: 'Ibrahim Musa',
+      initial: 'I',
+      bg: '#006064',
+      role: 'Civil Infrastructure Consultant, Abuja',
+      category: 'pro',
+      categoryName: '💼 Professional Services',
+      rating: 5,
+      perfRating: 5,
+      title: 'Best digital platform for Nigerian engineering tenders',
+      quote: 'The tender search and milestone submission engine are top-tier. Finding institutional infrastructure RFPs has never been this smooth. The mobile experience with Kolly AI makes managing bids effortless on the go.',
+      date: '2 weeks ago',
+      verified: true,
+      helpfulCount: 21
+    }
+  ];
+
+  function getCommunityReviews() {
+    try {
+      const stored = JSON.parse(localStorage.getItem('collekt_user_reviews') || '[]');
+      if (Array.isArray(stored) && stored.length > 0) {
+        const all = [...stored];
+        defaultCommunityReviews.forEach(defRev => {
+          if (!all.some(r => r.id === defRev.id)) {
+            all.push(defRev);
+          }
+        });
+        return all;
+      }
+    } catch(e) {}
+    return defaultCommunityReviews;
+  }
+
+  function saveCommunityReviews(reviews) {
+    try {
+      localStorage.setItem('collekt_user_reviews', JSON.stringify(reviews));
+    } catch(e) {}
+  }
+
+  let activeReviewCategory = 'all';
+  let currentReviewRating = 5;
+  let currentPerfRating = 5;
+
+  const starDescriptions = {
+    1: '1.0 — Needs Improvement',
+    2: '2.0 — Fair Experience',
+    3: '3.0 — Good Experience',
+    4: '4.0 — Very Good Platform',
+    5: '5.0 — Outstanding & Excellent'
+  };
+
+  const perfDescriptions = {
+    1: '1.0 — Slow Response',
+    2: '2.0 — Moderate Speed',
+    3: '3.0 — Standard Speed',
+    4: '4.0 — Very Fast',
+    5: '5.0 — Instant & Ultra-Responsive ⚡'
+  };
+
+  function setReviewRating(rating) {
+    currentReviewRating = rating;
+    updateStarPickerDisplay(rating);
+  }
+
+  function hoverReviewRating(rating) {
+    updateStarPickerDisplay(rating);
+  }
+
+  function resetReviewHoverRating() {
+    updateStarPickerDisplay(currentReviewRating);
+  }
+
+  function updateStarPickerDisplay(rating) {
+    const picker = document.getElementById('overallStarPicker');
+    if (!picker) return;
+    const stars = picker.querySelectorAll('span');
+    stars.forEach((s, idx) => {
+      s.style.color = (idx < rating) ? '#f59e0b' : '#cbd5e1';
+    });
+    const label = document.getElementById('starRatingLabel');
+    if (label) label.textContent = starDescriptions[rating] || (rating + '.0 Stars');
+  }
+
+  function setPerfRating(rating) {
+    currentPerfRating = rating;
+    updatePerfPickerDisplay(rating);
+  }
+
+  function hoverPerfRating(rating) {
+    updatePerfPickerDisplay(rating);
+  }
+
+  function resetPerfHoverRating() {
+    updatePerfPickerDisplay(currentPerfRating);
+  }
+
+  function updatePerfPickerDisplay(rating) {
+    const picker = document.getElementById('perfStarPicker');
+    if (!picker) return;
+    const stars = picker.querySelectorAll('span');
+    stars.forEach((s, idx) => {
+      s.style.color = (idx < rating) ? '#0d9488' : '#cbd5e1';
+    });
+    const label = document.getElementById('perfRatingLabel');
+    if (label) label.textContent = perfDescriptions[rating] || (rating + '.0 Speed');
+  }
+
+  function openReviewModal() {
+    const modal = document.getElementById('writeReviewModal');
+    if (!modal) return;
+    
+    // Auto-fill if user is logged in
+    const user = typeof getUser === 'function' ? getUser() : null;
+    const nameInput = document.getElementById('reviewAuthorName');
+    const roleInput = document.getElementById('reviewAuthorRole');
+    
+    if (user && nameInput && !nameInput.value) {
+      nameInput.value = typeof getDisplayName === 'function' ? getDisplayName(user) : (user.name || '');
+    }
+    if (user && roleInput && !roleInput.value) {
+      roleInput.value = [user.title || (user.role === 'company' ? 'Enterprise Client' : 'Professional Specialist'), user.location || 'Nigeria'].filter(Boolean).join(', ');
+    }
+
+    setReviewRating(5);
+    setPerfRating(5);
+
+    modal.style.display = 'flex';
+    requestAnimationFrame(() => modal.classList.add('open'));
+  }
+
+  function closeReviewModal() {
+    const modal = document.getElementById('writeReviewModal');
+    if (modal) {
+      modal.classList.remove('open');
+      modal.style.display = 'none';
+    }
+  }
+
+  function filterReviews(category, btnEl) {
+    activeReviewCategory = category;
+    document.querySelectorAll('#reviewFilterBar .review-filter-pill').forEach(b => b.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    renderCommunityReviews();
+  }
+
+  function toggleReviewHelpful(revId) {
+    let voted = [];
+    try { voted = JSON.parse(localStorage.getItem('collekt_helpful_reviews') || '[]'); } catch(e) {}
+    
+    const reviews = getCommunityReviews();
+    const target = reviews.find(r => r.id === revId);
+    if (!target) return;
+
+    if (voted.includes(revId)) {
+      if (typeof showToast === 'function') showToast('You already found this review helpful! 👍');
+      return;
+    }
+
+    voted.push(revId);
+    target.helpfulCount = (target.helpfulCount || 0) + 1;
+    saveCommunityReviews(reviews);
+    localStorage.setItem('collekt_helpful_reviews', JSON.stringify(voted));
+    
+    renderCommunityReviews();
+    if (typeof showToast === 'function') showToast('👍 Thank you for your feedback!');
+  }
+
+  function submitCommunityReview(e) {
+    e.preventDefault();
+    const name = document.getElementById('reviewAuthorName').value.trim();
+    const role = document.getElementById('reviewAuthorRole').value.trim();
+    const category = document.getElementById('reviewCategoryInput').value;
+    const title = document.getElementById('reviewTitleInput').value.trim();
+    const quote = document.getElementById('reviewTextInput').value.trim();
+
+    if (!name || !title || !quote) {
+      if (typeof showToast === 'function') showToast('⚠️ Please fill out all required review fields', 'warning');
+      return;
+    }
+
+    const catLabels = {
+      performance: '⚡ Platform Performance',
+      pro: '💼 Professional Services',
+      company: '🏢 Company Experience',
+      escrow: '🛡️ Escrow & Security',
+      general: '🌟 General Platform Feedback'
+    };
+
+    const user = typeof getUser === 'function' ? getUser() : null;
+    const isVerified = user ? (user.verified || user.identity_verified || false) : true;
+    const initial = name.charAt(0).toUpperCase();
+    const bgColors = ['#0E3B35', '#13756F', '#1A237E', '#4A148C', '#006064', '#B45309'];
+    const randomBg = bgColors[Math.floor(Math.random() * bgColors.length)];
+
+    const newReview = {
+      id: 'rev_' + Date.now(),
+      name: name,
+      initial: initial,
+      bg: randomBg,
+      role: role,
+      category: category,
+      categoryName: catLabels[category] || '🌟 Community Review',
+      rating: currentReviewRating,
+      perfRating: currentPerfRating,
+      title: title,
+      quote: quote,
+      date: 'Just now',
+      verified: isVerified,
+      helpfulCount: 1
+    };
+
+    const all = getCommunityReviews();
+    all.unshift(newReview);
+    saveCommunityReviews(all);
+
+    closeReviewModal();
+    renderCommunityReviews();
+    
+    if (typeof showToast === 'function') {
+      showToast('⭐ Thank you for your review! Your feedback is live.');
+    } else {
+      alert('⭐ Thank you for your review! Your feedback is live.');
+    }
+
+    const testiSection = document.getElementById('testimonials');
+    if (testiSection) {
+      testiSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  function renderCommunityReviews() {
+    const grid = document.getElementById('reviewsGridContainer');
+    if (!grid) return;
+
+    const all = getCommunityReviews();
+    const filtered = (activeReviewCategory === 'all')
+      ? all
+      : all.filter(r => r.category === activeReviewCategory);
+
+    // Update Overall Scorecard Metrics
+    const avgScore = (all.reduce((acc, r) => acc + (r.rating || 5), 0) / (all.length || 1)).toFixed(1);
+    const scoreEl = document.getElementById('overallReviewScore');
+    const totalCountEl = document.getElementById('totalReviewsCountText');
+    const countAllEl = document.getElementById('countAllReviews');
+
+    if (scoreEl) scoreEl.textContent = avgScore;
+    if (totalCountEl) totalCountEl.textContent = `Based on ${all.length} Verified Reviews`;
+    if (countAllEl) countAllEl.textContent = all.length;
+
+    let voted = [];
+    try { voted = JSON.parse(localStorage.getItem('collekt_helpful_reviews') || '[]'); } catch(e) {}
+
+    grid.innerHTML = filtered.map(r => {
+      const starIcons = Array.from({ length: r.rating || 5 }).map(() => `
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="#f59e0b" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      `).join('');
+
+      const isHelpfulActive = voted.includes(r.id);
+
+      return `
+        <div class="testi-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <!-- Top badges -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+              <div class="testi-stars" style="color:var(--amber); display:flex; align-items:center; gap:2px;">
+                ${starIcons}
+                <span style="font-size:12px; font-weight:800; color:var(--ink); margin-left:4px;">${r.rating}.0</span>
+              </div>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <span style="background:rgba(19,117,111,0.1); color:var(--teal); border:1px solid rgba(19,117,111,0.2); font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px;">
+                  ${escapeHTML(r.categoryName || '⚡ Performance')}
+                </span>
+                ${r.perfRating ? `
+                  <span style="background:rgba(212,146,11,0.12); color:var(--amber); border:1px solid rgba(212,146,11,0.25); font-size:10px; font-weight:800; padding:3px 7px; border-radius:999px;" title="Website UX & Speed Rating">
+                    ⚡ ${r.perfRating}.0 Speed
+                  </span>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Headline -->
+            ${r.title ? `<div style="font-size:15px; font-weight:800; color:var(--ink); margin-bottom:8px; line-height:1.4;">${escapeHTML(r.title)}</div>` : ''}
+
+            <!-- Quote -->
+            <div class="testi-quote" style="margin-bottom:20px; font-size:14px; line-height:1.65;">
+              "${escapeHTML(r.quote)}"
+            </div>
+          </div>
+
+          <!-- Author footer & Helpful Button -->
+          <div style="border-top:1px solid var(--line); padding-top:14px; display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px;">
+            <div class="testi-author">
+              <div class="testi-av" style="background:${r.bg || '#0E3B35'};">${escapeHTML(r.initial || 'U')}</div>
+              <div>
+                <div class="testi-name" style="display:flex; align-items:center; gap:4px;">
+                  ${escapeHTML(r.name)}
+                  ${r.verified ? '<span title="Verified Collekt Member" style="font-size:11px;">🛡️</span>' : ''}
+                </div>
+                <div class="testi-role">${escapeHTML(r.role || 'Member')} &bull; <span style="opacity:0.75;">${escapeHTML(r.date || 'Recent')}</span></div>
+              </div>
+            </div>
+
+            <button onclick="toggleReviewHelpful('${r.id}')" class="review-helpful-btn" style="${isHelpfulActive ? 'background:rgba(19,117,111,0.18); color:var(--teal); border-color:var(--teal); font-weight:800;' : ''}" title="Vote this review helpful">
+              👍 ${r.helpfulCount || 0}
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Initialize reviews on DOM load
+  document.addEventListener('DOMContentLoaded', () => {
+    renderCommunityReviews();
+  });
+
+  window.openReviewModal = openReviewModal;
+  window.closeReviewModal = closeReviewModal;
+  window.filterReviews = filterReviews;
+  window.setReviewRating = setReviewRating;
+  window.hoverReviewRating = hoverReviewRating;
+  window.resetReviewHoverRating = resetReviewHoverRating;
+  window.setPerfRating = setPerfRating;
+  window.hoverPerfRating = hoverPerfRating;
+  window.resetPerfHoverRating = resetPerfHoverRating;
+  window.submitCommunityReview = submitCommunityReview;
+  window.toggleReviewHelpful = toggleReviewHelpful;
+
+</script>
+</body>
+</html>

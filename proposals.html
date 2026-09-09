@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<script>
+  (function() {
+    try {
+      var u = JSON.parse(localStorage.getItem('collekt_user'));
+      if (!u || typeof u !== 'object' || (!u.id && !u.email && !u.role)) {
+        window.location.replace('login.html');
+        return;
+      }
+      if (u.role === 'company') {
+        window.location.replace('company-dashboard.html');
+        return;
+      }
+    } catch(e) {
+      window.location.replace('login.html');
+    }
+  })();
+</script>
+<title>My Proposals &mdash; Collekt</title>
+<meta name="description" content="View, track and manage your submitted bidding proposals for engineering tenders and EPC contracts on Collekt.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=23.0">
+<link rel="stylesheet" href="shared.css?v=23.0">
+<link rel="stylesheet" href="glass.css?v=23.0">
+<style>
+html, body {
+  background: var(--paper);
+  font-family: 'Manrope', sans-serif;
+  overflow-x: hidden;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+.app-page {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.app-main {
+  flex: 1;
+  margin-left: 240px;
+  width: calc(100vw - 240px);
+  max-width: calc(100vw - 240px);
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.prop-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 28px 32px 60px;
+  box-sizing: border-box;
+}
+
+/* ═ HEADER BANNER ═ */
+.prop-header-banner {
+  background: linear-gradient(135deg, #0E3B35 0%, #13756F 60%, #071210 100%);
+  border-radius: 20px;
+  padding: 32px 28px;
+  color: #fff;
+  margin-bottom: 24px;
+  box-shadow: 0 16px 40px rgba(14,59,53,0.18);
+  position: relative;
+  overflow: hidden;
+}
+.prop-header-banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 80% 20%, rgba(212,146,11,0.2) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.prop-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 32px; color: #fff; margin-bottom: 6px; line-height: 1.15;
+}
+.prop-title em { color: var(--amber); font-style: italic; }
+.prop-sub { font-size: 13px; color: rgba(255,255,255,0.85); max-width: 520px; }
+
+/* ═ STATS GRID ═ */
+.prop-stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;
+  margin-bottom: 24px; width: 100%; box-sizing: border-box;
+}
+.prop-stat-card {
+  background: var(--white); border: 1px solid var(--line); border-radius: 16px;
+  padding: 18px 20px; display: flex; flex-direction: column; gap: 4px;
+  box-shadow: 0 4px 16px rgba(14,59,53,0.04);
+}
+html.dark .prop-stat-card { background: #0f2220; border-color: rgba(255,255,255,0.08); }
+.prop-stat-lbl { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.prop-stat-val { font-size: 24px; font-weight: 900; color: var(--ink); }
+html.dark .prop-stat-val { color: #e2efed; }
+
+/* ═ STATUS FILTER PILLS ═ */
+.prop-filter-bar {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+  gap: 12px; margin-bottom: 20px; width: 100%; box-sizing: border-box;
+}
+.prop-pills-wrap { display: flex; gap: 8px; flex-wrap: wrap; }
+.prop-pill {
+  padding: 7px 16px; border-radius: 99px; font-size: 12px; font-weight: 800;
+  background: var(--white); border: 1px solid var(--line); color: var(--muted);
+  cursor: pointer; transition: all .2s ease; display: inline-flex; align-items: center; gap: 6px;
+}
+html.dark .prop-pill { background: #0f2220; border-color: rgba(255,255,255,.08); color: #a1b5b2; }
+.prop-pill.active { background: var(--teal); color: #fff; border-color: var(--teal); box-shadow: 0 4px 16px rgba(19,117,111,0.25); }
+
+/* ═ PROPOSALS LIST ═ */
+.prop-list-grid {
+  display: flex; flex-direction: column; gap: 16px; width: 100%; box-sizing: border-box;
+}
+
+.prop-card {
+  background: var(--white); border: 1px solid var(--line); border-radius: 18px;
+  padding: 22px 24px; display: flex; flex-direction: column; gap: 14px;
+  box-shadow: 0 4px 20px rgba(14,59,53,0.05); transition: all .25s ease;
+  position: relative;
+}
+html.dark .prop-card { background: #0f2220; border-color: rgba(255,255,255,0.08); }
+.prop-card:hover { border-color: var(--teal); box-shadow: 0 10px 32px rgba(14,59,53,0.12); }
+
+.prop-card-header {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap;
+}
+.prop-card-title {
+  font-size: 18px; font-weight: 900; color: var(--ink); line-height: 1.3; margin-bottom: 4px;
+}
+html.dark .prop-card-title { color: #e2efed; }
+.prop-company-line {
+  font-size: 12px; font-weight: 700; color: var(--muted); display: flex; align-items: center; gap: 6px;
+}
+
+.prop-status-badge {
+  font-size: 11px; font-weight: 900; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: .04em;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.badge-review { background: #fef9c3; color: #b45309; border: 1px solid #fde047; }
+.badge-awarded { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+.badge-declined { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+.prop-details-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px;
+}
+html.dark .prop-details-row { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
+.prop-detail-item { display: flex; flex-direction: column; }
+.prop-detail-lbl { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+.prop-detail-val { font-size: 15px; font-weight: 900; color: var(--ink); }
+html.dark .prop-detail-val { color: #e2efed; }
+
+.prop-pitch-text {
+  font-size: 13px; color: var(--ink); line-height: 1.6; background: var(--white);
+  border-left: 3px solid var(--teal); padding: 10px 14px; border-radius: 0 8px 8px 0;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1; }
+
+.prop-card-footer {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+  padding-top: 12px; border-top: 1px solid var(--line); margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .app-main { margin-left: 0 !important; width: 100vw !important; max-width: 100vw !important; }
+  .prop-container { padding: 16px 16px 40px; }
+  .prop-header-banner { padding: 24px 18px; }
+  .prop-title { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-page" id="appPageLayout">
+  <!-- Dynamic Sidebar -->
+  <aside class="app-sidebar" id="appSidebar"></aside>
+
+  <!-- Main Workspace Layout -->
+  <main class="app-main" id="appMainLayout">
+    <!-- Dynamic Topbar -->
+    <header class="app-topbar" id="appTopbar"></header>
+
+    <div class="prop-container">
+
+      <!-- ═ HEADER BANNER ═ -->
+      <div class="prop-header-banner">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; position:relative; z-index:2;">
+          <div>
+            <h1 class="prop-title">My Bidding <em>Proposals</em></h1>
+            <p class="prop-sub">Track submitted tender proposals, review client contract status, and manage active engineering bids.</p>
+          </div>
+          <a href="marketplace.html" class="btn btn-amber" style="font-weight:800; padding:10px 22px;">
+            🔍 Browse Live Tenders &rarr;
+          </a>
+        </div>
+      </div>
+
+      <!-- ═ STATS GRID ═ -->
+      <div class="prop-stats-grid">
+        <div class="prop-stat-card">
+          <span class="prop-stat-lbl">Total Submitted Proposals</span>
+          <span class="prop-stat-val" id="statTotalProps">0</span>
+        </div>
+        <div class="prop-stat-card">
+          <span class="prop-stat-lbl">Under Active Review</span>
+          <span class="prop-stat-val" style="color:var(--amber);" id="statActiveProps">0</span>
+        </div>
+        <div class="prop-stat-card">
+          <span class="prop-stat-lbl">Contracts Awarded</span>
+          <span class="prop-stat-val" style="color:#16a34a;" id="statAwardedProps">0</span>
+        </div>
+        <div class="prop-stat-card">
+          <span class="prop-stat-lbl">Active Bid Pipeline Value</span>
+          <span class="prop-stat-val" style="color:var(--teal);" id="statPipelineVal">₦0</span>
+        </div>
+      </div>
+
+      <!-- ═ FILTER & SEARCH BAR ═ -->
+      <div class="prop-filter-bar">
+        <div class="prop-pills-wrap" id="propPills">
+          <div class="prop-pill active" onclick="filterProposals('all', this)">All Proposals</div>
+          <div class="prop-pill" onclick="filterProposals('review', this)">⏳ Under Review</div>
+          <div class="prop-pill" onclick="filterProposals('awarded', this)">🎉 Shortlisted / Awarded</div>
+          <div class="prop-pill" onclick="filterProposals('declined', this)">❌ Declined</div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px; min-width:240px;">
+          <input type="text" class="form-input" id="propSearchInput" placeholder="Search proposals..." onkeyup="renderProposalsList()" style="padding:8px 14px; font-size:12px; border-radius:99px;">
+        </div>
+      </div>
+
+      <!-- ═ PROPOSALS LIST CONTAINER ═ -->
+      <div class="prop-list-grid" id="propListContainer">
+        <!-- Populated dynamically by JS -->
+      </div>
+
+    </div><!-- /.prop-container -->
+  </main>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=35.0"></script>
+<script src="app.js?v=35.0"></script>
+<script src="collekt-ai.js?v=35.0"></script>
+<script src="settings-popup.js"></script>
+<script>
+  /* ═════════════════════════════════════════════════════════
+     MY PROPOSALS PAGE ENGINE v1.0
+     ═════════════════════════════════════════════════════════ */
+
+  let _activePropFilter = 'all';
+
+  function filterProposals(status, el) {
+    _activePropFilter = status;
+    document.querySelectorAll('#propPills .prop-pill').forEach(p => p.classList.remove('active'));
+    if (el) el.classList.add('active');
+    renderProposalsList();
+  }
+
+  function getMyProposalsList() {
+    let localProps = [];
+    try {
+      localProps = JSON.parse(localStorage.getItem('collekt_proposals')) || [];
+    } catch(e){}
+
+    const me = typeof getUser === 'function' ? getUser() : null;
+    if (me) {
+      localProps = localProps.filter(p => !p.userId || p.userId === me.id || p.userEmail === me.email);
+    }
+
+    // Only real user submitted proposals
+    let combined = [].concat(localProps);
+
+    // Deduplicate
+    const seen = new Set();
+    return combined.filter(p => {
+      if (seen.has(p.id)) return false;
+      seen.add(p.id);
+      return true;
+    });
+  }
+
+  function renderProposalsList() {
+    const container = document.getElementById('propListContainer');
+    const q = document.getElementById('propSearchInput')?.value.toLowerCase().trim() || '';
+    if (!container) return;
+
+    let props = getMyProposalsList();
+
+    // Stats calculations
+    const totalCount = props.length;
+    const activeCount = props.filter(p => p.status === 'submitted' || p.status === 'pending' || p.status === 'review').length;
+    const awardedCount = props.filter(p => p.status === 'awarded' || p.status === 'accepted').length;
+    const pipelineSum = props.reduce((acc, p) => acc + Number(p.bidAmount || 0), 0);
+
+    if (document.getElementById('statTotalProps')) document.getElementById('statTotalProps').textContent = totalCount;
+    if (document.getElementById('statActiveProps')) document.getElementById('statActiveProps').textContent = activeCount;
+    if (document.getElementById('statAwardedProps')) document.getElementById('statAwardedProps').textContent = awardedCount;
+    if (document.getElementById('statPipelineVal')) document.getElementById('statPipelineVal').textContent = typeof formatNaira === 'function' ? formatNaira(pipelineSum, true) : '₦' + pipelineSum;
+
+    // Filter by tab pill
+    let filtered = props.filter(p => {
+      if (_activePropFilter === 'review') return p.status === 'submitted' || p.status === 'pending' || p.status === 'review';
+      if (_activePropFilter === 'awarded') return p.status === 'awarded' || p.status === 'accepted';
+      if (_activePropFilter === 'declined') return p.status === 'rejected' || p.status === 'declined' || p.status === 'withdrawn';
+      return true;
+    });
+
+    // Filter by text search
+    if (q) {
+      filtered = filtered.filter(p => {
+        const text = (p.jobTitle || '') + ' ' + (p.companyName || '') + ' ' + (p.pitchText || '');
+        return text.toLowerCase().includes(q);
+      });
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div style="background:var(--white); border:2px dashed var(--line); border-radius:20px; padding:60px 24px; text-align:center;">
+          <div style="font-size:48px; margin-bottom:12px;">📝</div>
+          <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:6px;">No Proposals Match Your View</div>
+          <div style="font-size:13px; color:var(--muted); margin-bottom:20px;">Submit proposals on open energy tenders in the marketplace to see them here.</div>
+          <a href="marketplace.html" class="btn btn-amber btn-sm" style="font-weight:800; padding:8px 20px;">Browse Live Tenders</a>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filtered.map(p => {
+      const isAwarded = p.status === 'awarded' || p.status === 'accepted';
+      const isDeclined = p.status === 'rejected' || p.status === 'declined' || p.status === 'withdrawn';
+
+      const statusBadge = isAwarded
+        ? `<span class="prop-status-badge badge-awarded">🎉 Contract Awarded</span>`
+        : isDeclined
+        ? `<span class="prop-status-badge badge-declined">❌ Proposal Declined</span>`
+        : `<span class="prop-status-badge badge-review">⏳ Under Review</span>`;
+
+      const bidFormatted = p.bidAmount ? (typeof formatNaira === 'function' ? formatNaira(p.bidAmount, false) : '₦' + p.bidAmount) : 'Negotiable';
+      const dateStr = p.created_at ? new Date(p.created_at).toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' }) : 'Recent';
+      const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+      const compProfile = allUsers.find(x => x && ((p.companyId && x.id === p.companyId) || (p.companyName && (x.company_name === p.companyName || x.name === p.companyName))));
+      const badge = (compProfile && typeof getShieldBadgeHTML === 'function') ? getShieldBadgeHTML(15, compProfile) : '';
+
+      return `
+        <div class="prop-card">
+          <div class="prop-card-header">
+            <div>
+              <div class="prop-card-title">${escapeHTML(p.jobTitle || 'Engineering Tender Bid')}</div>
+              <div class="prop-company-line">
+                <span>🏢 Client: <strong>${escapeHTML(p.companyName || 'Verified Energy Enterprise')}</strong></span>
+                ${badge}
+                <span>&bull; Submitted: ${dateStr}</span>
+              </div>
+            </div>
+            <div>${statusBadge}</div>
+          </div>
+
+          <div class="prop-details-row">
+            <div class="prop-detail-item">
+              <span class="prop-detail-lbl">Your Proposed Bid</span>
+              <span class="prop-detail-val" style="color:var(--forest);">${bidFormatted}</span>
+            </div>
+            <div class="prop-detail-item">
+              <span class="prop-detail-lbl">Proposed Delivery</span>
+              <span class="prop-detail-val">${escapeHTML(p.timeline || '2 Weeks')}</span>
+            </div>
+            <div class="prop-detail-item">
+              <span class="prop-detail-lbl">Client Review Status</span>
+              <span class="prop-detail-val" style="font-size:13px;">${isAwarded ? 'Accepted ✅' : isDeclined ? 'Closed' : 'Reviewing Bid ⏳'}</span>
+            </div>
+          </div>
+
+          <div class="prop-pitch-text">
+            <strong>Technical Execution Pitch:</strong> "${escapeHTML(p.pitchText || 'Full bidding specifications and HSE execution strategy submitted to client.')}"
+          </div>
+
+          <div class="prop-card-footer">
+            <div style="font-size:11px; color:var(--muted); font-weight:700;">
+              ID: <code style="font-size:11px;">${p.id}</code>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <a href="messages.html" class="btn btn-outline btn-sm" style="font-weight:800; font-size:12px;">
+                💬 Message Client
+              </a>
+              <button class="btn btn-primary btn-sm" style="font-weight:800; font-size:12px; background:var(--teal);" onclick="openAIProposalGeneratorModal('${encodeURIComponent(p.jobTitle || 'Tender Proposal')}', '${encodeURIComponent(p.pitchText || '')}')">
+                ✨ Improve Pitch with AI
+              </button>
+              ${!isAwarded && !isDeclined ? `
+                <button class="btn btn-outline btn-sm" style="color:#b91c1c; border-color:#fca5a5; font-weight:800; font-size:12px;" onclick="withdrawUserProposal('${p.id}')">
+                  🗑️ Withdraw Bid
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function withdrawUserProposal(propId) {
+    if (!confirm('Are you sure you want to withdraw this proposal?')) return;
+    
+    let localProps = [];
+    try {
+      localProps = JSON.parse(localStorage.getItem('collekt_proposals')) || [];
+      const idx = localProps.findIndex(p => p.id === propId);
+      if (idx !== -1) {
+        localProps[idx].status = 'withdrawn';
+        localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
+      }
+    } catch(e){}
+
+    if (typeof showToast === 'function') showToast('🗑️ Proposal withdrawn successfully');
+    renderProposalsList();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof requireAuth === 'function') requireAuth();
+    if (typeof buildSidebar === 'function') buildSidebar('proposals');
+    if (typeof buildTopbar === 'function') buildTopbar();
+
+    renderProposalsList();
+
+    if (typeof initCollektAICopilot === 'function') {
+      initCollektAICopilot();
+    }
+  });
+</script>
+</body>
+</html>

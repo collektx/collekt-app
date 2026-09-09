@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<title>Live Energy Marketplace &mdash; Collekt</title>
+<meta name="description" content="Browse Nigeria's leading live marketplace for oil &amp; gas tenders, EPC opportunities and verified engineering talent.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=23.0">
+<link rel="stylesheet" href="shared.css?v=23.0">
+<link rel="stylesheet" href="glass.css?v=23.0">
+<style>
+/* ═ LIVE MARKETPLACE STYLES ═ */
+html, body {
+  background: var(--paper);
+  font-family: 'Manrope', sans-serif;
+  overflow-x: hidden;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+.app-page {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.app-main {
+  flex: 1;
+  margin-left: 240px;
+  width: calc(100vw - 240px);
+  max-width: calc(100vw - 240px);
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.mkt-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 24px 28px 60px;
+  box-sizing: border-box;
+}
+
+/* ═ HERO SEARCH BANNER ═ */
+.mkt-hero-banner {
+  background: linear-gradient(135deg, #0E3B35 0%, #13756F 60%, #071210 100%);
+  border-radius: 24px;
+  padding: 32px 28px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(14,59,53,0.22);
+  margin-bottom: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.mkt-hero-banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 80% 20%, rgba(212,146,11,0.2) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 80%, rgba(74,222,128,0.15) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.mkt-hero-header {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 16px; position: relative; z-index: 2;
+  margin-bottom: 24px;
+}
+.mkt-hero-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 32px; line-height: 1.15; font-weight: 400; color: #fff;
+}
+.mkt-hero-title em { color: var(--amber); font-style: italic; }
+.mkt-hero-sub {
+  font-size: 13px; color: rgba(255,255,255,0.85); margin-top: 4px; max-width: 520px;
+}
+
+/* ═ MODE TOGGLE BAR (Tenders vs Talent) ═ */
+.mode-toggle-group {
+  display: inline-flex; background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 99px;
+  padding: 4px; backdrop-filter: blur(8px);
+}
+.mode-toggle-btn {
+  padding: 8px 18px; border-radius: 99px; font-size: 12px; font-weight: 800;
+  color: rgba(255,255,255,0.8); border: none; background: none; cursor: pointer;
+  transition: all .25s ease; display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.mode-toggle-btn.active {
+  background: var(--amber); color: #fff; box-shadow: 0 4px 16px rgba(212,146,11,0.4);
+}
+
+/* ═ SEARCH BAR ═ */
+.mkt-search-wrap {
+  display: grid; grid-template-columns: 1.8fr 1.1fr auto; gap: 10px;
+  background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 18px; padding: 8px; backdrop-filter: blur(12px);
+  position: relative; z-index: 2; width: 100%; box-sizing: border-box;
+}
+.mkt-search-input {
+  background: var(--white); border: none; border-radius: 12px;
+  padding: 12px 18px; font-size: 13px; font-weight: 600; color: var(--ink); outline: none; width: 100%;
+}
+html.dark .mkt-search-input { background: #0f2220; color: #e2efed; }
+.mkt-search-select {
+  background: var(--white); border: none; border-radius: 12px;
+  padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--ink); outline: none; cursor: pointer; width: 100%;
+}
+html.dark .mkt-search-select { background: #0f2220; color: #e2efed; }
+.mkt-search-btn {
+  background: var(--amber); color: #fff; border: none; border-radius: 12px;
+  padding: 0 24px; font-size: 13px; font-weight: 800; cursor: pointer;
+  transition: all .2s ease; box-shadow: 0 6px 20px rgba(212,146,11,0.35); white-space: nowrap;
+}
+.mkt-search-btn:hover { transform: translateY(-2px); background: #e8a612; }
+
+/* ═ FILTER & CATEGORY CHIPS ═ */
+.cats-bar {
+  display: flex; flex-wrap: wrap; gap: 8px 10px; margin-bottom: 20px;
+  width: 100%; max-width: 100%; box-sizing: border-box;
+}
+.cat-chip {
+  padding: 7px 16px; border-radius: 99px; font-size: 12px; font-weight: 800;
+  background: var(--white); border: 1px solid var(--line); color: var(--muted);
+  white-space: nowrap; cursor: pointer; transition: all .2s ease;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+html.dark .cat-chip { background: #0f2220; border-color: rgba(255,255,255,.08); color: #a1b5b2; }
+.cat-chip:hover { border-color: var(--teal); color: var(--teal); }
+.cat-chip.active { background: var(--teal); color: #fff; border-color: var(--teal); box-shadow: 0 4px 16px rgba(19,117,111,0.25); }
+
+/* ═ GRID LAYOUT ═ */
+.mkt-results-bar {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+  gap: 12px; margin-bottom: 20px; font-size: 13px; font-weight: 700; color: var(--muted);
+  width: 100%; box-sizing: border-box;
+}
+
+.tenders-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;
+  width: 100%; box-sizing: border-box;
+}
+
+/* ═ TENDER CARD ═ */
+.tender-card {
+  background: var(--white); border: 1px solid var(--line); border-radius: 20px;
+  padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
+  box-shadow: 0 6px 24px rgba(14,59,53,0.06); transition: all .3s ease;
+  position: relative; overflow: hidden;
+}
+html.dark .tender-card { background: #0f2220; border-color: rgba(255,255,255,0.08); }
+.tender-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(14,59,53,0.14); border-color: var(--teal); }
+
+.tender-badge-row {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.tender-cat-tag {
+  font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em;
+  padding: 4px 10px; border-radius: 99px; background: var(--teal-lt); color: var(--teal);
+}
+.tender-deadline {
+  font-size: 11px; font-weight: 700; color: var(--muted); display: flex; align-items: center; gap: 4px;
+}
+
+.tender-title {
+  font-size: 17px; font-weight: 900; color: var(--ink); line-height: 1.35; margin-bottom: 10px;
+}
+html.dark .tender-title { color: #e2efed; }
+
+.tender-company-line {
+  display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 14px;
+}
+
+.tender-scope {
+  font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.tender-skills {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;
+}
+.tender-skill-chip {
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px;
+  background: var(--paper); color: var(--ink); border: 1px solid var(--line);
+}
+html.dark .tender-skill-chip { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #cbd5e1; }
+
+.tender-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 16px; border-top: 1px solid var(--line); margin-top: auto;
+}
+.tender-budget {
+  display: flex; flex-direction: column;
+}
+.tender-budget-lbl { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+.tender-budget-val { font-size: 18px; font-weight: 900; color: var(--forest); }
+html.dark .tender-budget-val { color: #4ade80; }
+
+/* ═ TALENT CARD ═ */
+.talent-card-v2 {
+  background: var(--white); border: 1px solid var(--line); border-radius: 20px;
+  padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
+  box-shadow: 0 6px 24px rgba(14,59,53,0.06); transition: all .3s ease;
+}
+html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,0.08); }
+.talent-card-v2:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(14,59,53,0.14); border-color: var(--teal); }
+
+.talent-header-row {
+  display: flex; gap: 14px; align-items: center; margin-bottom: 14px;
+}
+.talent-avatar-box {
+  width: 56px; height: 56px; border-radius: 50%; background: var(--forest);
+  color: #fff; font-size: 22px; font-weight: 900; display: grid; place-items: center;
+  flex-shrink: 0; overflow: hidden; border: 2px solid var(--teal);
+}
+
+@media (max-width: 1180px) {
+  .mkt-search-wrap { grid-template-columns: 1fr 1fr; }
+  .mkt-search-btn { grid-column: span 2; padding: 12px; }
+}
+
+@media (max-width: 900px) {
+  .app-main { margin-left: 0 !important; width: 100vw !important; max-width: 100vw !important; }
+  .mkt-container { padding: 16px 16px 40px; }
+  .mkt-hero-banner { padding: 24px 18px; }
+  .mkt-hero-title { font-size: 24px; }
+  .mkt-search-wrap { grid-template-columns: 1fr; }
+  .mkt-search-btn { grid-column: auto; }
+  .tenders-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-page" id="appPageLayout">
+  <!-- Dynamic Sidebar -->
+  <aside class="app-sidebar" id="appSidebar"></aside>
+
+  <!-- Main Workspace Layout -->
+  <main class="app-main" id="appMainLayout">
+    <!-- Dynamic Topbar -->
+    <header class="app-topbar" id="appTopbar"></header>
+
+    <div class="mkt-container">
+
+      <!-- ═ HERO BANNER ═ -->
+      <div class="mkt-hero-banner">
+        <div class="mkt-hero-header">
+          <div>
+            <h1 class="mkt-hero-title">Nigeria's Live <em>Energy &amp; EPC</em><br>Opportunities Marketplace</h1>
+            <p class="mkt-hero-sub">Direct access to open jobs, EPC tenders, oil &amp; gas RFPs, and verified engineering specialists across West Africa.</p>
+          </div>
+
+          <!-- Mode Toggle -->
+          <div class="mode-toggle-group">
+            <button class="mode-toggle-btn active" id="btnModeTenders" onclick="setMarketplaceMode('tenders')">
+              💼 Jobs &amp; Opportunities
+            </button>
+            <button class="mode-toggle-btn" id="btnModeTalent" onclick="setMarketplaceMode('talent')">
+              👥 Verified Talent &amp; Firms
+            </button>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="mkt-search-wrap">
+          <input type="text" class="mkt-search-input" id="mktSearchInput" placeholder="Search jobs, opportunities, tenders, keywords (e.g. Pipeline, EPC, AutoCAD, Solar, QA/QC)..." onkeydown="if(event.key==='Enter') applyMktFilters()">
+          
+          <select class="mkt-search-select" id="mktSectorSelect" onchange="applyMktFilters()">
+            <option value="All">All Sectors</option>
+            <option value="Oil & Gas">Oil &amp; Gas (Upstream / Midstream)</option>
+            <option value="EPC & Construction">EPC &amp; Civil Construction</option>
+            <option value="Renewable Energy">Renewable Energy &amp; Power</option>
+            <option value="HAZOP & HSE">HAZOP &amp; Environmental Safety</option>
+            <option value="Subsea Engineering">Subsea &amp; Offshore</option>
+            <option value="Legal & Compliance">Legal &amp; NOGICD Compliance</option>
+          </select>
+
+          <button class="mkt-search-btn" onclick="applyMktFilters()">🔍 Find Opportunities</button>
+        </div>
+      </div>
+
+      <!-- ═ CATEGORY CHIPS ═ -->
+      <div class="cats-bar" id="mktCatPills">
+        <div class="cat-chip active" onclick="filterMktCategory('All', this)">All Categories</div>
+        <div class="cat-chip" onclick="filterMktCategory('Engineering', this)">⚡ EPC &amp; Engineering</div>
+        <div class="cat-chip" onclick="filterMktCategory('Pipeline', this)">🧪 Pipeline &amp; HAZOP</div>
+        <div class="cat-chip" onclick="filterMktCategory('Bid', this)">📝 Bids &amp; Tenders</div>
+        <div class="cat-chip" onclick="filterMktCategory('HSE', this)">🛡️ HSE &amp; Compliance</div>
+        <div class="cat-chip" onclick="filterMktCategory('Subsea', this)">⚓ Subsea &amp; Offshore</div>
+        <div class="cat-chip" onclick="filterMktCategory('Solar', this)">☀️ Solar &amp; Renewables</div>
+        <div class="cat-chip" onclick="filterMktCategory('Legal', this)">🏛️ Legal &amp; NOGICD</div>
+      </div>
+
+      <!-- ═ RESULTS BAR ═ -->
+      <div class="mkt-results-bar">
+        <div id="mktResultsCount">Showing <strong>0</strong> live opportunities</div>
+        
+        <div style="display:flex; align-items:center; gap:12px;">
+          <select class="mkt-search-select" id="mktSortSelect" style="padding:6px 14px; font-size:12px;" onchange="applyMktFilters()">
+            <option value="newest">Sort: Newest First</option>
+            <option value="budget_high">Budget: High to Low</option>
+            <option value="budget_low">Budget: Low to High</option>
+          </select>
+
+          <button class="btn btn-amber btn-sm" id="mktPostTenderBtn" onclick="openPostTenderModal()" style="font-weight:800; padding:7px 16px; display:none;">
+            + Post Job / Opportunity
+          </button>
+        </div>
+      </div>
+
+      <!-- ═ MAIN GRID CONTAINER ═ -->
+      <div class="tenders-grid" id="mktMainGrid">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+
+    </div><!-- /.mkt-container -->
+  </main>
+</div>
+
+<!-- ═ DETAILED TENDER PROPOSAL SUBMISSION MODAL ═ -->
+<div class="modal-overlay" id="tenderDetailModal" style="z-index:99999;">
+  <div class="modal-card" style="position:relative; max-width:680px; width:100%; max-height:92vh; overflow-y:auto; border-radius:24px; padding:28px; background:var(--white); font-family:'Manrope',sans-serif;">
+    <button class="modal-close" onclick="closeModal('tenderDetailModal')">&times;</button>
+    
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px;">
+      <span class="tender-cat-tag" id="tModalCategory">EPC &amp; Engineering</span>
+      <span style="font-size:12px; font-weight:700; color:var(--muted);" id="tModalDeadline">Deadline: 14 Days</span>
+    </div>
+
+    <h2 style="font-size:22px; font-weight:900; color:var(--ink); line-height:1.3; margin-bottom:8px;" id="tModalTitle">Pipeline Integrity Survey &amp; HAZOP Assessment</h2>
+    <div style="font-size:13px; font-weight:800; color:var(--teal); margin-bottom:16px; display:flex; align-items:center; gap:6px;" id="tModalCompanyLine">
+      <!-- Company Name & Badge -->
+    </div>
+
+    <div style="background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:20px;">
+      <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px;">Project Scope &amp; Deliverables</div>
+      <div style="font-size:13px; color:var(--ink); line-height:1.7; white-space:pre-wrap;" id="tModalScope">Scope details...</div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 16px;">
+        <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase;">Contract Budget</div>
+        <div style="font-size:20px; font-weight:900; color:var(--forest);" id="tModalBudget">₦0</div>
+      </div>
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 16px;">
+        <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase;">Location / State</div>
+        <div style="font-size:16px; font-weight:800; color:var(--ink);" id="tModalLocation">Lagos State</div>
+      </div>
+    </div>
+
+    <!-- Proposal Form Box -->
+    <div style="border-top:1px solid var(--line); padding-top:20px; margin-top:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div style="font-size:16px; font-weight:900; color:var(--ink);">Submit Bidding Proposal</div>
+        <button class="btn btn-outline btn-sm" onclick="triggerAIPropForTender()" style="color:var(--teal); border-color:var(--teal); font-weight:800; font-size:12px;">
+          ✨ AI Pitch Writer
+        </button>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="font-size:12px; font-weight:700;">Proposed Bid Amount (₦)</label>
+          <input class="form-input" type="number" id="propBidAmount" placeholder="e.g. 1500000">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="font-size:12px; font-weight:700;">Delivery Timeline (Weeks)</label>
+          <input class="form-input" type="text" id="propTimeline" placeholder="e.g. 3 Weeks">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label" style="font-size:12px; font-weight:700;">Proposal Pitch &amp; Technical Execution Strategy</label>
+        <textarea class="form-input" id="propPitchText" rows="4" placeholder="Detail your domain experience, HSE compliance, and execution plan..."></textarea>
+      </div>
+
+      <button class="btn btn-primary" onclick="submitTenderProposalClick()" style="width:100%; min-height:46px; font-weight:800; background:linear-gradient(135deg,#0E3B35,#13756F); border:none; box-shadow:0 8px 24px rgba(14,59,53,0.25);">
+        📝 Submit Proposal &amp; Place Bid
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═ POST NEW JOB / OPPORTUNITY MODAL ═ -->
+<div class="modal-overlay" id="postTenderModal" style="z-index:99999;">
+  <div class="modal-card" style="position:relative; max-width:640px; width:100%; max-height:90vh; overflow-y:auto; border-radius:24px; padding:28px; background:var(--white); font-family:'Manrope',sans-serif;">
+    <button class="modal-close" onclick="closeModal('postTenderModal')">&times;</button>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+      <div style="width:44px; height:44px; border-radius:14px; background:rgba(212,146,11,0.15); color:var(--amber); display:grid; place-items:center; font-size:22px;">💼</div>
+      <div>
+        <div style="font-size:19px; font-weight:900; color:var(--ink); margin-bottom:2px;">Post a Job / Opportunity</div>
+        <div style="font-size:12px; color:var(--muted);">Reach 1,200+ verified Nigerian &amp; international energy specialists</div>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:12px;">
+      <label class="form-label" style="font-size:12px; font-weight:800;">Opportunity / Job Title</label>
+      <input class="form-input" type="text" id="postTitle" placeholder="e.g. Senior Subsea Piping Engineer, 33kV Substation EPC Tender">
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Opportunity Type</label>
+        <select class="form-input" id="postType">
+          <option value="Short-Term Job">Short-Term Job (Contract / Fixed Duration)</option>
+          <option value="Tender / RFP">Tender / EPC RFP Project</option>
+          <option value="Project Contract">Fixed-Price Project Contract</option>
+          <option value="Consultancy">Short-Term Consultancy &amp; Advisory</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Industry / Sector</label>
+        <select class="form-input" id="postCategory">
+          <option value="EPC &amp; Engineering">EPC &amp; Engineering</option>
+          <option value="Oil &amp; Gas (Upstream)">Oil &amp; Gas (Upstream / Exploration)</option>
+          <option value="Pipeline &amp; HAZOP">Pipeline &amp; HAZOP</option>
+          <option value="Subsea &amp; Offshore">Subsea &amp; Offshore</option>
+          <option value="Solar &amp; Renewables">Solar &amp; Renewables</option>
+          <option value="HSE &amp; Safety Compliance">HSE &amp; Safety Compliance</option>
+          <option value="Bids &amp; Technical Writing">Bids &amp; Technical Writing</option>
+          <option value="Legal &amp; NOGICJDA">Legal &amp; NOGICJDA Compliance</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Experience Level</label>
+        <select class="form-input" id="postExperience">
+          <option value="Any Experience Level">Any Experience Level</option>
+          <option value="Junior (1 - 3 Years)">Junior (1 &ndash; 3 Years)</option>
+          <option value="Mid-Level (4 - 7 Years)">Mid-Level (4 &ndash; 7 Years)</option>
+          <option value="Senior Specialist (8 - 14 Years)" selected>Senior Specialist (8 &ndash; 14 Years)</option>
+          <option value="Lead / Principal (15+ Years)">Lead / Principal (15+ Years)</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Location &amp; Work Mode</label>
+        <select class="form-input" id="postLocation">
+          <option value="Lagos State (On-site)">Lagos State (On-site)</option>
+          <option value="Port Harcourt, Rivers (On-site)">Port Harcourt, Rivers (On-site)</option>
+          <option value="Warri, Delta (On-site)">Warri, Delta (On-site)</option>
+          <option value="FCT Abuja (On-site)">FCT Abuja (On-site)</option>
+          <option value="Akwa Ibom (On-site)">Akwa Ibom (On-site)</option>
+          <option value="Offshore Platform / Rig">Offshore Platform / Rig</option>
+          <option value="Hybrid (On-site &amp; Remote)">Hybrid (On-site &amp; Remote)</option>
+          <option value="100% Remote (Nigeria)">100% Remote (Nigeria)</option>
+          <option value="100% Remote (Global)">100% Remote (Global)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Budget / Compensation (₦)</label>
+        <input class="form-input" type="number" id="postBudget" placeholder="e.g. 2500000">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Rate Type</label>
+        <select class="form-input" id="postBudgetRateType">
+          <option value="Total Contract Budget">Total Contract Budget</option>
+          <option value="Monthly Salary">Monthly Salary / Retainer</option>
+          <option value="Daily / Hourly Rate">Daily / Hourly Rate</option>
+          <option value="Negotiable">Negotiable</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Duration / Contract Length</label>
+        <input class="form-input" type="text" id="postDuration" placeholder="e.g. 1 Month, 3 Months, 6 Months (Short-Term)">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Application / Bid Deadline</label>
+        <input class="form-input" type="text" id="postDeadline" placeholder="e.g. 14 Days, 30 Days">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:12px;">
+      <label class="form-label" style="font-size:12px; font-weight:800;">Required Skills &amp; Certifications <span style="font-size:11px; font-weight:600; color:var(--muted);">(Comma separated)</span></label>
+      <input class="form-input" type="text" id="postSkills" placeholder="e.g. AutoCAD, Caesar II, API 570, NOGICJDA, BOSIET">
+    </div>
+
+    <div class="form-group" style="margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <label class="form-label" style="font-size:12px; font-weight:800; margin-bottom:0;">Scope of Work / Job Description</label>
+        <button type="button" class="btn btn-outline btn-xs" onclick="generateAiTenderSpec('postTitle', 'postScope')" style="font-weight:800; font-size:11px; color:var(--teal); border-color:rgba(19,117,111,0.3);">
+          ✨ AI Generate Spec
+        </button>
+      </div>
+      <textarea class="form-input" id="postScope" rows="4" placeholder="Detail deliverables, required certifications (COREN/NOGICD), and technical scope..."></textarea>
+    </div>
+
+    <button class="btn btn-amber" onclick="submitNewTenderProject()" style="width:100%; min-height:46px; font-weight:800; border:none; box-shadow:0 6px 20px rgba(212,146,11,0.3);">
+      🚀 Publish Job / Opportunity Live
+    </button>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=35.0"></script>
+<script src="app.js?v=35.0"></script>
+<script src="collekt-ai.js?v=35.0"></script>
+<script src="settings-popup.js"></script>
+<script>
+  /* ═════════════════════════════════════════════════════════
+     LIVE MARKETPLACE ENGINE v3.0
+     ═════════════════════════════════════════════════════════ */
+
+  let _mktMode = 'tenders'; // 'tenders' | 'talent'
+  let _mktActiveCategory = 'All';
+  let _activeTenderJob = null;
+
+  function setMarketplaceMode(mode) {
+    _mktMode = mode;
+    document.getElementById('btnModeTenders').classList.toggle('active', mode === 'tenders');
+    document.getElementById('btnModeTalent').classList.toggle('active', mode === 'talent');
+    applyMktFilters();
+  }
+
+  function filterMktCategory(cat, el) {
+    _mktActiveCategory = cat;
+    document.querySelectorAll('#mktCatPills .cat-chip').forEach(c => c.classList.remove('active'));
+    if (el) el.classList.add('active');
+    applyMktFilters();
+  }
+
+  function applyMktFilters() {
+    const q = document.getElementById('mktSearchInput')?.value.toLowerCase().trim() || '';
+    const sector = document.getElementById('mktSectorSelect')?.value || 'All';
+    const sort = document.getElementById('mktSortSelect')?.value || 'newest';
+    const grid = document.getElementById('mktMainGrid');
+    if (!grid) return;
+
+    const u = typeof getUser === 'function' ? getUser() : null;
+    const isCompany = !!(u && u.role === 'company');
+    const postBtn = document.getElementById('mktPostTenderBtn');
+    if (postBtn) {
+      postBtn.style.display = isCompany ? 'inline-flex' : 'none';
+    }
+
+    if (_mktMode === 'tenders') {
+      renderLiveTendersGrid(q, sector, sort);
+    } else {
+      renderLiveTalentGrid(q, sector, sort);
+    }
+  }
+
+  function clearMktFilters() {
+    const sInput = document.getElementById('mktSearchInput');
+    if (sInput) sInput.value = '';
+    const sectorSel = document.getElementById('mktSectorSelect');
+    if (sectorSel) sectorSel.value = 'All';
+    _mktActiveCategory = 'All';
+    document.querySelectorAll('#mktCatPills .cat-chip').forEach((c, idx) => {
+      c.classList.toggle('active', idx === 0);
+    });
+    applyMktFilters();
+  }
+
+  function renderLiveTendersGrid(q, sector, sort) {
+    const grid = document.getElementById('mktMainGrid');
+    const userPostedJobs = typeof getPostedJobs === 'function' ? getPostedJobs() : [];
+    
+    // Only real user posted jobs
+    let allTenders = [].concat(userPostedJobs);
+
+    // Deduplicate by ID
+    const seen = new Set();
+    allTenders = allTenders.filter(j => {
+      if (seen.has(j.id)) return false;
+      seen.add(j.id);
+      return true;
+    });
+
+    // Filter by Search Query & Category/Sector
+    let filtered = allTenders.filter(j => {
+      const matchCat = _mktActiveCategory === 'All' || (j.category && j.category.toLowerCase().includes(_mktActiveCategory.toLowerCase()));
+      const matchSector = sector === 'All' || (j.category && j.category.toLowerCase().includes(sector.toLowerCase())) || (j.title && j.title.toLowerCase().includes(sector.toLowerCase())) || (j.type && j.type.toLowerCase().includes(sector.toLowerCase()));
+      
+      const text = (j.title || '') + ' ' + (j.type || '') + ' ' + (j.companyName || '') + ' ' + (j.company_name || '') + ' ' + (j.scope || '') + ' ' + (j.description || '') + ' ' + (j.skills || []).join(' ');
+      const matchText = !q || text.toLowerCase().includes(q);
+
+      return matchCat && matchSector && matchText;
+    });
+
+    // Sorting
+    if (sort === 'budget_high') filtered.sort((a, b) => Number(b.budget || 0) - Number(a.budget || 0));
+    if (sort === 'budget_low') filtered.sort((a, b) => Number(a.budget || 0) - Number(b.budget || 0));
+
+    // Update Results Counter
+    const countEl = document.getElementById('mktResultsCount');
+    if (countEl) countEl.innerHTML = `Showing <strong>${filtered.length}</strong> live job &amp; tender opportunity${filtered.length === 1 ? '' : 'ies'}`;
+
+    const u = typeof getUser === 'function' ? getUser() : null;
+    const isCompany = !!(u && u.role === 'company');
+    const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; background: var(--white); border: 2px dashed var(--line); border-radius: 20px; padding: 60px 24px; text-align: center;">
+          <div style="font-size: 48px; margin-bottom: 12px;">💼</div>
+          <div style="font-size: 18px; font-weight: 900; color: var(--ink); margin-bottom: 6px;">No Live Opportunities Found</div>
+          <div style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">Try adjusting your search keywords or category filters.</div>
+          ${isCompany 
+            ? `<button class="btn btn-amber btn-sm" onclick="openPostTenderModal()" style="font-weight:800; padding:8px 20px;">+ Post a Job / Opportunity</button>` 
+            : `<button class="btn btn-primary btn-sm" onclick="clearMktFilters()" style="font-weight:800; padding:8px 20px;">🔄 Clear Filters &amp; View All</button>`}
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(j => {
+      // Find company profile and verify strictly against 100% rule
+      const compProfile = allUsers.find(x => x && (x.id === j.company_id || (x.company_name && x.company_name === j.company_name) || (x.name && x.name === j.company_name)));
+      const shieldBadge = (compProfile && typeof getShieldBadgeHTML === 'function') ? getShieldBadgeHTML(14, compProfile) : '';
+
+      const budgetFormatted = j.budget ? (typeof formatNaira === 'function' ? formatNaira(j.budget, true) : '₦' + Number(j.budget).toLocaleString()) : 'Negotiable';
+      const rateTypeLabel = j.budget_rate_type || 'Contract Budget';
+      const skillsHtml = (j.skills && j.skills.length)
+        ? j.skills.map(s => `<span class="tender-skill-chip">${escapeHTML(s)}</span>`).join('')
+        : `<span class="tender-skill-chip">${escapeHTML(j.category || 'Engineering')}</span>`;
+
+      const typeTag = (j.type === 'Job Opening' ? 'Short-Term Job' : j.type) || 'Short-Term Job';
+
+      // Company-only Edit & Delete corner controls
+      const companyControlsHtml = isCompany ? `
+        <div class="job-company-actions" style="position:absolute; top:12px; right:12px; display:inline-flex; align-items:center; gap:6px; z-index:3;">
+          <button type="button" class="btn-job-action btn-job-edit" onclick="event.stopPropagation(); editJobPosting('${j.id}')" title="Edit this Opportunity" style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:4px 9px; font-size:11px; font-weight:800; cursor:pointer; color:var(--ink); display:inline-flex; align-items:center; gap:4px; box-shadow:0 1px 4px rgba(0,0,0,0.06); transition:all .2s;">
+            ✏️ Edit
+          </button>
+          <button type="button" class="btn-job-action btn-job-delete" onclick="event.stopPropagation(); deleteJobPosting('${j.id}')" title="Delete this Opportunity" style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:4px 9px; font-size:11px; font-weight:800; cursor:pointer; color:#ef4444; display:inline-flex; align-items:center; gap:4px; box-shadow:0 1px 4px rgba(239,68,68,0.08); transition:all .2s;">
+            🗑️ Delete
+          </button>
+        </div>
+      ` : '';
+
+      return `
+        <div class="tender-card" style="position:relative;">
+          ${companyControlsHtml}
+          <div>
+            <div class="tender-badge-row" style="${isCompany ? 'padding-right:145px;' : ''}">
+              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                <span style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; padding:3px 8px; border-radius:99px; background:rgba(212,146,11,0.15); color:var(--amber);">${escapeHTML(typeTag)}</span>
+                <span class="tender-cat-tag">${escapeHTML(j.category || 'EPC Project')}</span>
+              </div>
+              <span class="tender-deadline">⏳ ${escapeHTML(j.deadline || 'Ongoing')}</span>
+            </div>
+
+            <div class="tender-title" style="margin-top:6px;">${escapeHTML(j.title)}</div>
+            
+            <div class="tender-company-line">
+              <span>🏢 ${escapeHTML(j.companyName || j.company_name || 'Verified Energy Enterprise')}</span>
+              ${shieldBadge}
+              <span>&bull; 📍 ${escapeHTML(j.location || 'Nigeria')}</span>
+            </div>
+
+            <div class="tender-scope">${escapeHTML(j.scope || j.description || 'Full technical deliverables and bidding specifications available upon application review.')}</div>
+            
+            <div class="tender-skills">${skillsHtml}</div>
+          </div>
+
+          <div class="tender-footer">
+            <div class="tender-budget">
+              <span class="tender-budget-lbl">${escapeHTML(rateTypeLabel)}</span>
+              <span class="tender-budget-val">${budgetFormatted}</span>
+            </div>
+            <button class="btn btn-primary btn-sm" style="font-weight:800; min-height:36px; padding:0 18px;" onclick="openTenderDetailModal('${j.id}')">
+              📝 Apply / View
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function editJobPosting(jobId) {
+    window.location.href = 'post-job.html?edit=' + encodeURIComponent(jobId);
+  }
+
+  async function deleteJobPosting(jobId) {
+    const u = typeof getUser === 'function' ? getUser() : null;
+    if (!u || u.role !== 'company') {
+      if (typeof showToast === 'function') showToast('🏢 Only company accounts can delete opportunities.', 'warning');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this job posting? This cannot be undone.')) {
+      return;
+    }
+
+    try {
+      if (typeof deletePostedJob === 'function') deletePostedJob(jobId);
+      if (typeof deleteJobFromSupabase === 'function') await deleteJobFromSupabase(jobId);
+      if (typeof showToast === 'function') showToast('🗑️ Opportunity deleted successfully.');
+      applyMktFilters();
+    } catch(err) {
+      console.warn('Delete job error:', err);
+      if (typeof showToast === 'function') showToast('Opportunity deleted.');
+      applyMktFilters();
+    }
+  }
+
+  function renderLiveTalentGrid(q, sector, sort) {
+    const grid = document.getElementById('mktMainGrid');
+    const allRegistered = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+    
+    // Filter active professionals only (exclude companies and exclude suspended accounts)
+    let talents = allRegistered.filter(u => u && u.name && !u.suspended && u.status !== 'suspended' && (u.role === 'professional' || (!u.role && u.role !== 'company')));
+
+    const cur = typeof getUser === 'function' ? getUser() : null;
+    if (cur && cur.role === 'professional' && !cur.suspended && cur.status !== 'suspended') {
+      const exists = talents.some(t => (cur.id && t.id === cur.id) || (cur.email && t.email && t.email.toLowerCase() === cur.email.toLowerCase()));
+      if (!exists) talents.push(cur);
+    }
+
+    let filtered = talents.filter(u => {
+      const text = (u.name || '') + ' ' + (u.title || '') + ' ' + (u.about || u.bio || '') + ' ' + (u.skills || []).join(' ');
+      return !q || text.toLowerCase().includes(q);
+    });
+
+    const countEl = document.getElementById('mktResultsCount');
+    if (countEl) countEl.innerHTML = `Showing <strong>${filtered.length}</strong> verified talent specialist${filtered.length === 1 ? '' : 's'}`;
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; background: var(--white); border: 2px dashed var(--line); border-radius: 20px; padding: 60px 24px; text-align: center;">
+          <div style="font-size: 48px; margin-bottom: 12px;">👥</div>
+          <div style="font-size: 18px; font-weight: 900; color: var(--ink); margin-bottom: 6px;">No Registered Talent Matches</div>
+          <div style="font-size: 13px; color: var(--muted);">Try searching for specific technical skills or roles.</div>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(u => {
+      const isCo = u.role === 'company';
+      const initial = (u.name || 'P').charAt(0).toUpperCase();
+      const badge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(16, u) : '';
+      const avatarContent = u.avatar || u.company_logo
+        ? `<img src="${u.avatar || u.company_logo}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async">`
+        : initial;
+
+      const metrics = (typeof getRealTimeUserMetrics === 'function') ? getRealTimeUserMetrics(u) : { rating: 0, review_count: 0 };
+      const rateVal = u.hourly_rate ? (typeof formatNaira === 'function' ? formatNaira(u.hourly_rate, true) : '₦' + u.hourly_rate) : 'Negotiable';
+      const ratingVal = metrics.rating > 0 ? `★ ${metrics.rating.toFixed(1)} (${metrics.review_count})` : '★ 0.0 (New)';
+
+      return `
+        <div class="talent-card-v2">
+          <div>
+            <div class="talent-header-row">
+              <div class="talent-avatar-box">${avatarContent}</div>
+              <div>
+                <div style="font-size:16px; font-weight:900; color:var(--ink); display:flex; align-items:center; gap:4px;">
+                  ${escapeHTML(u.name)}${badge}
+                </div>
+                <div style="font-size:12px; color:var(--teal); font-weight:700;">${escapeHTML(u.title || (isCo ? 'Enterprise Employer' : 'Project Specialist'))}</div>
+                <div style="font-size:11px; color:var(--muted);">📍 ${escapeHTML(u.location || 'Nigeria')}</div>
+              </div>
+            </div>
+
+            <div class="tender-scope">${escapeHTML(u.bio || u.about || 'Verified energy specialist available for tender bidding, technical writing, and EPC contract execution.')}</div>
+          </div>
+
+          <div class="tender-footer">
+            <div>
+              <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase;">Rating / Rate</div>
+              <div style="font-size:14px; font-weight:900; color:var(--ink);">${ratingVal} &bull; <span style="color:var(--forest);">${rateVal}</span></div>
+            </div>
+            <a href="public-profile.html?id=${u.id || u.email}" class="btn btn-primary btn-sm" style="font-weight:800; min-height:36px; padding:0 18px;">
+              👁️ View Profile
+            </a>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  /* ═ TENDER / JOB PROPOSAL MODAL ACTIONS ═ */
+  function openTenderDetailModal(jobId) {
+    const userPostedJobs = typeof getPostedJobs === 'function' ? getPostedJobs() : [];
+    const job = userPostedJobs.find(j => j.id === jobId);
+    if (!job) return;
+    
+    _activeTenderJob = job;
+
+    const typeStr = job.type ? `${job.type} &bull; ` : '';
+    if (document.getElementById('tModalCategory')) document.getElementById('tModalCategory').innerHTML = `${typeStr}${escapeHTML(job.category || 'EPC Project')}`;
+    if (document.getElementById('tModalTitle')) document.getElementById('tModalTitle').textContent = job.title;
+    if (document.getElementById('tModalDeadline')) document.getElementById('tModalDeadline').textContent = 'Deadline: ' + (job.deadline || 'Ongoing');
+    if (document.getElementById('tModalCompanyLine')) {
+      const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+      const compProfile = allUsers.find(x => x && (x.id === job.company_id || (x.company_name && x.company_name === (job.company_name || job.companyName))));
+      const badge = (compProfile && typeof getShieldBadgeHTML === 'function') ? getShieldBadgeHTML(16, compProfile) : '';
+      document.getElementById('tModalCompanyLine').innerHTML = `🏢 ${escapeHTML(job.companyName || job.company_name || 'Verified Enterprise')} ${badge} &bull; 📍 ${escapeHTML(job.location || 'Nigeria')}`;
+    }
+    if (document.getElementById('tModalScope')) document.getElementById('tModalScope').textContent = job.scope || job.description;
+    if (document.getElementById('tModalBudget')) {
+      const bText = job.budget ? (typeof formatNaira === 'function' ? formatNaira(job.budget, false) : '₦' + Number(job.budget).toLocaleString()) : 'Negotiable';
+      const rText = job.budget_rate_type ? ` (${job.budget_rate_type})` : '';
+      document.getElementById('tModalBudget').textContent = bText + rText;
+    }
+    if (document.getElementById('tModalLocation')) document.getElementById('tModalLocation').textContent = job.location || 'Nigeria';
+
+    // Reset inputs
+    if (document.getElementById('propBidAmount')) document.getElementById('propBidAmount').value = job.budget || '';
+    if (document.getElementById('propTimeline')) document.getElementById('propTimeline').value = job.duration || '2 Weeks';
+    if (document.getElementById('propPitchText')) document.getElementById('propPitchText').value = '';
+
+    openModal('tenderDetailModal');
+  }
+
+  function triggerAIPropForTender() {
+    if (!_activeTenderJob) return;
+    generateAiProposalDraft(_activeTenderJob.title, 'propPitchText');
+  }
+
+  async function submitTenderProposalClick() {
+    const amount = document.getElementById('propBidAmount')?.value;
+    const timeline = document.getElementById('propTimeline')?.value.trim();
+    const pitch = document.getElementById('propPitchText')?.value.trim();
+
+    if (!pitch || pitch.length < 15) {
+      if (typeof showToast === 'function') showToast('⚠️ Please provide a technical pitch letter / proposal (min 15 characters)', 'warning');
+      return;
+    }
+
+    const user = typeof getUser === 'function' ? getUser() : null;
+    const proposalData = {
+      id: 'prop_' + Date.now(),
+      jobId: _activeTenderJob?.id,
+      jobTitle: _activeTenderJob?.title,
+      companyName: _activeTenderJob?.companyName || _activeTenderJob?.company_name,
+      userId: user?.id || 'usr_pro_101',
+      userName: user?.name || 'Professional Candidate',
+      userEmail: user?.email || 'pro@collekt.com',
+      bidAmount: amount || _activeTenderJob?.budget || 0,
+      timeline: timeline || '2 Weeks',
+      pitchText: pitch,
+      coverLetter: pitch,
+      status: 'submitted',
+      created_at: new Date().toISOString()
+    };
+
+    // Save to user proposals
+    if (typeof saveUserProposal === 'function') {
+      saveUserProposal(proposalData);
+    } else {
+      try {
+        const props = JSON.parse(localStorage.getItem('collekt_proposals')) || [];
+        props.unshift(proposalData);
+        localStorage.setItem('collekt_proposals', JSON.stringify(props));
+      } catch(e){}
+    }
+
+    closeModal('tenderDetailModal');
+    if (typeof showToast === 'function') showToast('🎉 Application & Proposal submitted successfully!');
+  }
+
+  /* ═ POST JOB / TENDER MODAL ACTIONS ═ */
+  function openPostTenderModal() {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user || user.role !== 'company') {
+      if (typeof showToast === 'function') {
+        showToast('🏢 Only registered Company accounts can post jobs, tenders & RFPs.', 'warning');
+      }
+      return;
+    }
+    openModal('postTenderModal');
+  }
+
+  function submitNewTenderProject() {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user || user.role !== 'company') {
+      if (typeof showToast === 'function') {
+        showToast('🏢 Only registered Company accounts can publish jobs and tenders.', 'warning');
+      }
+      return;
+    }
+
+    const title          = document.getElementById('postTitle')?.value.trim();
+    const type           = document.getElementById('postType')?.value || 'Short-Term Job';
+    const cat            = document.getElementById('postCategory')?.value || 'EPC & Engineering';
+    const experience     = document.getElementById('postExperience')?.value || 'Any Experience Level';
+    const location       = document.getElementById('postLocation')?.value || 'Nigeria';
+    const budget         = document.getElementById('postBudget')?.value;
+    const budgetRateType = document.getElementById('postBudgetRateType')?.value || 'Total Contract Budget';
+    const duration       = document.getElementById('postDuration')?.value.trim() || 'Flexible';
+    const deadline       = document.getElementById('postDeadline')?.value.trim() || 'Ongoing';
+    const skillsStr      = document.getElementById('postSkills')?.value.trim() || '';
+    const skills         = skillsStr ? skillsStr.split(',').map(s => s.trim()).filter(Boolean) : [cat, type];
+    const scope          = document.getElementById('postScope')?.value.trim();
+
+    if (!title || !scope) {
+      if (typeof showToast === 'function') showToast('⚠️ Please enter an opportunity title and job description / scope', 'warning');
+      return;
+    }
+
+    const jobData = {
+      id: 'job_' + Date.now(),
+      title: title,
+      type: type,
+      category: cat,
+      experience: experience,
+      companyName: user.name || user.company_name || 'Verified Corporate Employer',
+      company_name: user.name || user.company_name || 'Verified Corporate Employer',
+      company_id: user.id || user.email || 'company',
+      company_logo: user.company_logo || '',
+      companyVerified: !!(user.identity_verified || user.is_verified || user.verified),
+      location: location,
+      budget: budget ? Number(budget) : 0,
+      budget_rate_type: budgetRateType,
+      duration: duration,
+      deadline: deadline,
+      skills: skills,
+      scope: scope,
+      description: scope,
+      status: 'open',
+      createdAt: new Date().toISOString(),
+      posted_at: new Date().toISOString()
+    };
+
+    if (typeof savePostedJob === 'function') {
+      savePostedJob(jobData);
+    }
+    if (typeof publishJobToSupabase === 'function') {
+      try { await publishJobToSupabase(jobData); } catch(e){ console.warn("Supabase publish notice:", e); }
+    }
+
+    closeModal('postTenderModal');
+    if (typeof showToast === 'function') showToast('🚀 Job / Opportunity published live to Marketplace!');
+    
+    // Reset inputs
+    if (document.getElementById('postTitle')) document.getElementById('postTitle').value = '';
+    if (document.getElementById('postBudget')) document.getElementById('postBudget').value = '';
+    if (document.getElementById('postSkills')) document.getElementById('postSkills').value = '';
+    if (document.getElementById('postScope')) document.getElementById('postScope').value = '';
+
+    applyMktFilters();
+  }
+
+  // Auto initialize on DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (typeof requireAuth === 'function') requireAuth();
+    try { if (typeof buildSidebar === 'function') buildSidebar('marketplace'); } catch(e){}
+    try { if (typeof buildTopbar === 'function') buildTopbar(); } catch(e){}
+
+    // Fetch live opportunities directly from Supabase
+    if (typeof fetchLiveJobsFromSupabase === 'function') {
+      try {
+        await fetchLiveJobsFromSupabase();
+      } catch(e){}
+    }
+
+    applyMktFilters();
+
+    // Listen to real-time project additions / deletions from Supabase
+    if (typeof initSupabaseRealtimeProjects === 'function') {
+      initSupabaseRealtimeProjects(() => {
+        applyMktFilters();
+      });
+    }
+
+    window.addEventListener('collekt_projects_updated', () => {
+      applyMktFilters();
+    });
+
+    // Auto initialize Gemini AI Copilot FAB
+    if (typeof initCollektAICopilot === 'function') {
+      initCollektAICopilot();
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<script>
+  (function() {
+    try {
+      var u = JSON.parse(localStorage.getItem('collekt_user'));
+      if (!u || typeof u !== 'object' || (!u.id && !u.email && !u.role)) {
+        window.location.replace('login.html');
+        return;
+      }
+      if (u.role === 'professional') {
+        window.location.replace('dashboard.html');
+        return;
+      }
+    } catch(e) {
+      window.location.replace('login.html');
+    }
+  })();
+</script>
+<title>Company Dashboard &mdash; Collekt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=23.0">
+<link rel="stylesheet" href="shared.css?v=23.0">
+<link rel="stylesheet" href="glass.css?v=23.0">
+
+<style>
+  body { background: var(--paper); }
+  .co-welcome { background: linear-gradient(135deg, #0e2a26 0%, var(--forest) 50%, #1a4a40 100%); border-radius: var(--r-lg); padding: 28px 32px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; border: 1px solid rgba(212,146,11,.25); position:relative; overflow:hidden; }
+  .co-welcome::after { content:''; position:absolute; right:-40px; top:-40px; width:200px; height:200px; border-radius:50%; background:rgba(212,146,11,.06); }
+  .co-welcome h1 { font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 6px; }
+  .co-welcome p { font-size: 14px; color: rgba(255,255,255,.75); }
+  .post-card { background: linear-gradient(135deg, #fff8ec, #fff); border: 2px dashed var(--amber); border-radius: var(--r-lg); padding: 28px; text-align: center; cursor: pointer; transition: all .2s; margin-bottom: 24px; }
+  .post-card:hover { background: var(--amber-lt); border-style: solid; transform: translateY(-2px); }
+  html.dark .post-card { background: rgba(212,146,11,.08); border-color: rgba(212,146,11,.4); }
+  html.dark .post-card:hover { background: rgba(212,146,11,.15); }
+  .applicant-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  html.dark .applicant-row { border-color: rgba(255,255,255,.07); }
+  .applicant-row:last-child { border-bottom: none; }
+  .ap-avatar { width: 40px; height: 40px; border-radius: 50%; color: #fff; font-size: 16px; font-weight: 900; display: grid; place-items: center; flex-shrink: 0; }
+  .ap-name { font-weight: 800; font-size: 14px; color: var(--ink); }
+  html.dark .ap-name { color: #e2efed; }
+  .ap-sub { font-size: 12px; color: var(--muted); }
+  .ap-actions { margin-left: auto; display: flex; gap: 8px; }
+  .proj-status-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 99px; }
+  .pill-open { background: #dcfce7; color: #16a34a; }
+  .pill-review { background: var(--amber-lt); color: var(--amber); }
+  .pill-awarded { background: var(--teal-lt); color: var(--teal); }
+  .pill-closed { background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
+  .co-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .talent-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; text-align: center; transition: all .2s; }
+  html.dark .talent-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+  .talent-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); }
+  .talent-avatar { width: 60px; height: 60px; border-radius: 50%; color: #fff; font-size: 22px; font-weight: 900; display: grid; place-items: center; margin: 0 auto 12px; }
+  .talent-name { font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 4px; }
+  html.dark .talent-name { color: #e2efed; }
+  .talent-title { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .talent-rating { font-size: 12px; color: var(--amber); font-weight: 700; margin-bottom: 12px; }
+  .talent-tags { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+  @media (max-width: 900px) { .co-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .co-grid { grid-template-columns: 1fr; } }
+  .doc-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); transition: all .2s; }
+  .doc-item:hover { border-color: var(--teal); transform: translateY(-1px); }
+  html.dark .doc-item { background: rgba(255,255,255,.02); border-color: rgba(255,255,255,.08); }
+  html.dark .doc-item:hover { border-color: var(--teal); }
+</style>
+</head>
+<body>
+<div class="app-page">
+  <aside class="app-sidebar" id="appSidebar"></aside>
+  <main class="app-main">
+    <div class="app-topbar" id="appTopbar"></div>
+    <div class="page-inner">
+
+      <!-- Welcome -->
+      <div class="co-welcome fade-in">
+        <div>
+          <div style="font-size:11px; font-weight:800; color:var(--amber); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;">Company Dashboard</div>
+          <h1 style="font-size:22px; font-weight:900; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">Welcome, <span id="companyWelcomeName">Company Account</span><span id="coWelcomeBadge"></span> &#x1F44F;</h1>
+          <p style="font-size:14px; color:rgba(255,255,255,.7);">Find verified talent, post jobs or opportunities and manage contracts &mdash; all in one place.</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a href="marketplace.html" class="btn btn-ghost btn-sm" style="min-height:40px;">&#x1F50D; Browse Talent</a>
+          <a href="wallet.html" class="btn btn-outline btn-sm" style="min-height:40px; color:#fff; border-color:rgba(255,255,255,0.3); font-weight:800; display:inline-flex; align-items:center; gap:6px;">💸 Pay Professionals</a>
+          <a href="post-job.html" class="btn btn-amber" style="min-height:40px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center;">+ Post Job / Opportunity</a>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row fade-in">
+        <div class="stat-card">
+          <div class="stat-icon">💼</div>
+          <div class="stat-value" id="statActiveProj">0</div>
+          <div class="stat-label">Active Jobs &amp; Opportunities</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📩</div>
+          <div class="stat-value" id="statProposalsReceived">0</div>
+          <div class="stat-label">Proposals &amp; Applications</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📜</div>
+          <div class="stat-value" id="statContractsAwarded">0</div>
+          <div class="stat-label">Contracts Awarded</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💰</div>
+          <div class="stat-value" id="statTotalContracted">&#x20A6;0</div>
+          <div class="stat-label">Total Contracted</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div>
+
+          <!-- Post a Job / Opportunity Quick Card -->
+          <div class="post-card fade-in" id="postQuickCard" onclick="window.location.href='post-job.html'" style="cursor:pointer;">
+            <div style="font-size:36px; margin-bottom:10px;">💼</div>
+            <div style="font-size:18px; font-weight:900; color:var(--amber); margin-bottom:8px;">Post a Job / Opportunity</div>
+            <div style="font-size:14px; color:var(--muted); line-height:1.5;">Reach 1,200+ verified professionals and specialists. Post full-time jobs, tenders, EPC contracts, or consultant requests and receive applications within 24 hours.</div>
+            <div style="margin-top:14px;">
+              <a href="post-job.html" class="btn btn-amber btn-sm" style="font-weight:800; cursor:pointer; text-decoration:none; display:inline-block;">+ Create New Listing &rarr;</a>
+            </div>
+          </div>
+
+          <!-- My Jobs & Opportunities -->
+          <div class="content-card fade-in" style="margin-bottom:24px;">
+            <div class="card-header">
+              <h3>My Posted Jobs &amp; Opportunities</h3>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <a href="my-jobs.html" style="font-size:12px; color:var(--teal); font-weight:800; text-decoration:none;">View All &rarr;</a>
+                <a href="post-job.html" class="btn btn-amber btn-sm" style="text-decoration:none;">+ Post New</a>
+              </div>
+            </div>
+            <div style="overflow-x:auto;" id="myProjectsContainer">
+              <!-- rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Active Contracts & Escrow -->
+          <div class="content-card fade-in">
+            <div class="card-header">
+              <h3>Active Contracts & Escrow</h3>
+              <a href="wallet.html" style="font-size:13px; color:var(--teal); font-weight:700;">View Payments &rarr;</a>
+            </div>
+            <div class="card-body" id="activeContractsContainer">
+              <!-- rendered dynamically -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Panel -->
+        <div>
+          <!-- Recent Applicants -->
+          <div class="content-card fade-in" style="margin-bottom:20px;">
+            <div class="card-header">
+              <h3>Recent Applicants</h3>
+            </div>
+            <div class="card-body" style="padding:12px 20px;" id="recentApplicantsContainer">
+              <!-- rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; margin-bottom:16px;">
+            <h4 style="font-size:14px; font-weight:800; margin-bottom:14px;">Quick Actions</h4>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <button class="btn btn-amber" style="width:100%; min-height:40px; font-size:13px; font-weight:800;" onclick="openPostModal()">+ Post a Job / Opportunity</button>
+              <a href="marketplace.html" class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center;">&#x1F91D; Browse All Professionals</a>
+              <a href="messages.html" id="quickLinkMessages" class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center;">&#x1F4AC; Open Messages</a>
+              <a href="wallet.html" class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center;">&#x1F4B0; Manage Payments</a>
+              <button class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center;" onclick="openUploadModal('company-docs', onDashDocUploaded)">&#x1F4C4; Upload Document</button>
+            </div>
+          </div>
+
+          <!-- Profile Strength / Completion -->
+          <div class="content-card fade-in" style="margin-bottom:16px;" id="profileStrengthCard">
+            <!-- Populated dynamically by renderGlobalProfileStrength() -->
+          </div>
+
+          <!-- Company Documents -->
+          <div class="content-card fade-in" style="margin-bottom:16px;">
+            <div class="card-header">
+              <h3>&#x1F4C4; Recent Documents</h3>
+            </div>
+            <div class="card-body" style="padding:12px 20px;">
+              <div id="dashDocsList" style="display:flex; flex-direction:column; gap:8px;">
+                <!-- documents rendered here -->
+              </div>
+              <div style="margin-top:12px; text-align:center;">
+                <a href="javascript:void(0)" onclick="openUploadModal('company-docs', onDashDocUploaded)" style="font-size:12px; color:var(--teal); font-weight:700;">+ Upload New</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Company Verification -->
+          <div style="background:linear-gradient(135deg,var(--forest),#1a7a6f); border-radius:var(--r-lg); padding:20px; color:#fff;">
+            <div style="font-size:24px; margin-bottom:8px;">&#x1F6E1;&#xFE0F;</div>
+            <h4 style="font-size:14px; font-weight:800; margin-bottom:6px;">Verify Your Company</h4>
+            <a href="company-profile.html" class="btn btn-amber btn-sm" style="width:100%; justify-content:center; min-height:38px;">Start Verification &rarr;</a>
+          </div>
+
+          <!-- Enterprise Membership Upgrade Card -->
+          <div id="premiumUpgradeCard" style="margin-top:16px;">
+            <div style="background:linear-gradient(135deg, var(--forest), #1a7a6f); border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.12); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=company'">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div style="font-size:24px;">🏢</div>
+                <span style="background:rgba(255,255,255,0.28); color:#fff; font-size:11px; font-weight:900; padding:3px 8px; border-radius:99px; letter-spacing:0.3px;">$50 / Month</span>
+              </div>
+              <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Company Enterprise ($50 / Month)</h4>
+              <p style="font-size:12px; opacity:.9; margin-bottom:14px; line-height:1.4;">Post unlimited RFPs &amp; tenders, access AI candidate matching, automated tax invoices, and verified enterprise badge.</p>
+              <a href="upgrade.html?role=company" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=company';" style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.4); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">Learn More &amp; Upgrade &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Recommended Professionals -->
+      <h2 class="section-heading" style="margin-top:8px;">Recommended Professionals for Your Projects</h2>
+      <div class="co-grid fade-in" id="recommendedTalentGrid">
+        <!-- Rendered dynamically from real registered professionals -->
+      </div>
+
+    </div><!-- end page-inner -->
+  </main>
+</div>
+
+<!-- Post a Job / Opportunity Modal -->
+<div class="modal-overlay" id="postModal">
+  <div class="modal-card" style="position:relative; max-width:640px; width:100%; max-height:90vh; overflow-y:auto; border-radius:24px; padding:28px;">
+    <button class="modal-close" onclick="closePostModal()">&times;</button>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+      <div style="width:44px; height:44px; border-radius:14px; background:rgba(212,146,11,0.15); color:var(--amber); display:grid; place-items:center; font-size:22px;">💼</div>
+      <div>
+        <div class="modal-title" style="font-size:19px; font-weight:900; color:var(--ink); margin-bottom:2px;">Post a Job / Opportunity</div>
+        <div style="font-size:12px; color:var(--muted);">Publish openings, tenders, contracts, or consultant requests to the live marketplace</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" style="font-weight:800;">Opportunity / Job Title</label>
+      <input class="form-input" type="text" id="projTitle" placeholder="e.g. Senior Subsea Piping Engineer, 33kV Substation EPC Tender">
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label class="form-label" style="font-weight:800;">Opportunity Type</label>
+        <select class="form-input form-select" id="projType">
+          <option value="Short-Term Job">Short-Term Job (Contract / Fixed Duration)</option>
+          <option value="Tender / RFP">Tender / EPC RFP Project</option>
+          <option value="Project Contract">Fixed-Price Project Contract</option>
+          <option value="Consultancy">Short-Term Consultancy &amp; Advisory</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-weight:800;">Industry / Sector</label>
+        <select class="form-input form-select" id="projCategory">
+          <option value="Engineering &amp; EPC">Engineering &amp; EPC (Mechanical, Electrical, Civil)</option>
+          <option value="Oil &amp; Gas (Upstream)">Oil &amp; Gas (Upstream / Exploration)</option>
+          <option value="Oil &amp; Gas (Midstream / Pipelines)">Oil &amp; Gas (Midstream / Pipelines)</option>
+          <option value="Oil &amp; Gas (Downstream)">Oil &amp; Gas (Downstream / Refining)</option>
+          <option value="Solar &amp; Renewable Energy">Solar &amp; Renewable Energy</option>
+          <option value="Subsea &amp; Marine Operations">Subsea &amp; Marine Operations</option>
+          <option value="HSE &amp; Environmental Safety">HSE &amp; Environmental Safety</option>
+          <option value="Bids &amp; Technical Procurement">Bids &amp; Technical Procurement</option>
+          <option value="Project Management &amp; QA/QC">Project Management &amp; QA/QC</option>
+          <option value="IT, Automation &amp; SCADA">IT, Automation &amp; SCADA</option>
+          <option value="Legal &amp; NOGICJDA Compliance">Legal &amp; NOGICJDA Compliance</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label class="form-label" style="font-weight:800;">Required Experience Level</label>
+        <select class="form-input form-select" id="projExperience">
+          <option value="Any Experience Level">Any Experience Level</option>
+          <option value="Junior (1 - 3 Years)">Junior (1 &ndash; 3 Years)</option>
+          <option value="Mid-Level (4 - 7 Years)">Mid-Level (4 &ndash; 7 Years)</option>
+          <option value="Senior Specialist (8 - 14 Years)" selected>Senior Specialist (8 &ndash; 14 Years)</option>
+          <option value="Lead / Principal (15+ Years)">Lead / Principal (15+ Years)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-weight:800;">Location &amp; Work Mode</label>
+        <select class="form-input form-select" id="projLocation">
+          <option value="Lagos State (On-site)">Lagos State (On-site)</option>
+          <option value="Port Harcourt, Rivers (On-site)">Port Harcourt, Rivers State (On-site)</option>
+          <option value="Warri, Delta State (On-site)">Warri, Delta State (On-site)</option>
+          <option value="FCT Abuja (On-site)">FCT Abuja (On-site)</option>
+          <option value="Akwa Ibom State (On-site)">Akwa Ibom State (On-site)</option>
+          <option value="Offshore Platform / Rig">Offshore Platform / Rig</option>
+          <option value="Hybrid (On-site &amp; Remote)">Hybrid (On-site &amp; Remote)</option>
+          <option value="100% Remote (Nigeria)">100% Remote (Nigeria)</option>
+          <option value="100% Remote (Global)">100% Remote (Global)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label class="form-label" style="font-weight:800;">Budget / Compensation (₦)</label>
+        <input class="form-input" type="number" id="projBudget" placeholder="e.g. 2500000">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-weight:800;">Rate Type</label>
+        <select class="form-input form-select" id="projBudgetRateType">
+          <option value="Total Contract Budget">Total Contract Budget</option>
+          <option value="Monthly Salary">Monthly Salary / Retainer</option>
+          <option value="Daily / Hourly Rate">Daily / Hourly Rate</option>
+          <option value="Negotiable">Negotiable</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label class="form-label" style="font-weight:800;">Duration / Contract Length</label>
+        <input class="form-input" type="text" id="projDuration" placeholder="e.g. 1 Month, 3 Months, 6 Months (Short-Term)">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-weight:800;">Application / Bid Deadline</label>
+        <input class="form-input" type="text" id="projDeadline" placeholder="e.g. 14 Days, 30 Days">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" style="font-weight:800;">Required Skills &amp; Certifications <span style="font-size:11px; font-weight:600; color:var(--muted);">(Comma separated)</span></label>
+      <input class="form-input" type="text" id="projSkills" placeholder="e.g. AutoCAD, Caesar II, API 570, NOGICJDA, BOSIET">
+    </div>
+
+    <div class="form-group">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <label class="form-label" style="font-weight:800; margin-bottom:0;">Scope of Work / Job Description</label>
+        <button type="button" class="btn btn-outline btn-xs" onclick="generateAiTenderSpec('projTitle', 'projDesc')" style="font-weight:800; font-size:11px; color:var(--teal); border-color:rgba(19,117,111,0.3);">
+          ✨ AI Generate Spec
+        </button>
+      </div>
+      <textarea class="form-input" rows="4" id="projDesc" placeholder="Describe the responsibilities, technical deliverables, compliance requirements and execution timeline..." style="resize:vertical;"></textarea>
+    </div>
+
+    <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:8px;">
+      <button type="button" class="btn btn-outline" onclick="closePostModal()">Cancel</button>
+      <button type="button" class="btn btn-amber" id="postSubmitBtn" style="font-weight:900; padding:10px 24px;" onclick="submitProject()">🚀 Publish to Marketplace</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Proposals Modal -->
+<div class="modal-overlay" id="applicantsModal">
+  <div class="modal-card" style="position:relative; max-width:620px; width:100%; max-height:80vh; overflow-y:auto;">
+    <button class="modal-close" onclick="closeModal('applicantsModal')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="modal-title" id="applicantsModalTitle">Proposals</div>
+    <div id="applicantsList" style="display:flex; flex-direction:column; gap:0;">
+      <!-- Loaded dynamically by openApplicantsModal() -->
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=35.0"></script>
+<script src="app.js?v=35.0"></script>
+<script src="collekt-ai.js?v=25.0"></script>
+<script>
+  requireCompany();
+  
+  function onDashDocUploaded(fileData) {
+    renderDashDocs();
+    if (typeof renderGlobalProfileStrength === 'function') {
+      renderGlobalProfileStrength('#profileStrengthCard');
+    }
+  }
+
+  function renderDashDocs() {
+    const listEl = document.getElementById('dashDocsList');
+    if (!listEl) return;
+    const docs = typeof getUploadedFiles === 'function' ? getUploadedFiles('company-docs') : [];
+    if (docs.length === 0) {
+      listEl.innerHTML = '<div style="font-size:12px; color:var(--muted); text-align:center; padding:12px 0;">No documents uploaded yet.</div>';
+      return;
+    }
+    listEl.innerHTML = docs.slice(0, 4).map(d => {
+      const icon = typeof getFileTypeIcon === 'function' ? getFileTypeIcon(d.type, d.name) : '📄';
+      const shortName = d.name.length > 20 ? d.name.substring(0, 20) + '...' : d.name;
+      const sizeStr = typeof formatFileSize === 'function' ? formatFileSize(d.size) : '';
+      const dateStr = d.timestamp ? new Date(d.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
+      return `
+        <div style="display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--line);">
+          <span style="font-size:18px;">${icon}</span>
+          <div style="flex:1; overflow:hidden;">
+            <div style="font-size:13px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${shortName}</div>
+            <div style="font-size:11px; color:var(--muted);">${sizeStr} &bull; ${dateStr}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    let user = typeof getUser === 'function' ? getUser() : null;
+    if (user && user.role === 'professional') {
+      window.location.replace('dashboard.html');
+      return;
+    }
+
+    const initialUser = user;
+
+    buildSidebar('dashboard');
+    buildTopbar();
+
+    if (initialUser) {
+      const nameEl = document.getElementById('companyWelcomeName');
+      if (nameEl) nameEl.textContent = getDisplayName(initialUser);
+      const coWelcomeBadge = document.getElementById('coWelcomeBadge');
+      if (coWelcomeBadge) coWelcomeBadge.innerHTML = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(22, initialUser) : '';
+    }
+
+    renderDashDocs();
+    if (typeof renderGlobalProfileStrength === 'function') {
+      renderGlobalProfileStrength('#profileStrengthCard');
+    }
+    if (typeof renderPremiumUpgradeCard === 'function') {
+      renderPremiumUpgradeCard('premiumUpgradeCard', 'company');
+    }
+
+    try {
+      await syncUser();
+    } catch (e) {
+      console.warn("User sync error:", e);
+    }
+
+    buildSidebar('dashboard');
+    buildTopbar();
+    user = typeof getUser === 'function' ? getUser() : user;
+    if (user) {
+      const nameEl = document.getElementById('companyWelcomeName');
+      if (nameEl) nameEl.textContent = getDisplayName(user);
+      const coWelcomeBadge = document.getElementById('coWelcomeBadge');
+      if (coWelcomeBadge) coWelcomeBadge.innerHTML = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(22, user) : '';
+    }
+
+    if (typeof renderGlobalProfileStrength === 'function') {
+      renderGlobalProfileStrength('#profileStrengthCard');
+    }
+    if (typeof renderPremiumUpgradeCard === 'function') {
+      renderPremiumUpgradeCard('premiumUpgradeCard', 'company');
+    }
+
+
+    // Render dynamic local data
+    renderDashboardData();
+
+    if (window.location.hash === '#post' || window.location.hash.includes('post')) {
+      setTimeout(() => { if (typeof openPostModal === 'function') openPostModal(); }, 100);
+    }
+
+    window.addEventListener('hashchange', () => {
+      if (window.location.hash === '#post' || window.location.hash.includes('post')) {
+        if (typeof openPostModal === 'function') openPostModal();
+      } else {
+        if (typeof closeModal === 'function') closeModal('postModal');
+        if (typeof buildSidebar === 'function') buildSidebar('dashboard');
+      }
+    });
+  });
+
+  function renderDashboardData() {
+    const user = getUser();
+    const jobs = (typeof getPostedJobs === 'function' ? getPostedJobs() : []) || [];
+    
+    // 1. Calculate real proposals submitted to company's jobs
+    let totalProposals = 0;
+    let awardedContracts = 0;
+    let totalContractedAmount = 0;
+
+    try {
+      const allProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      const jobIds = jobs.map(j => String(j.id));
+      allProps.forEach(p => {
+        if (jobIds.includes(String(p.jobId)) || (user && p.company_id === user.id)) {
+          totalProposals++;
+          if (p.status === 'accepted' || p.status === 'hired' || p.status === 'completed') {
+            awardedContracts++;
+            totalContractedAmount += Number(p.bidAmount || p.amount || 0);
+          }
+        }
+      });
+    } catch(e){}
+
+    // Update Real Stats
+    const statActiveProj = document.getElementById('statActiveProj');
+    if (statActiveProj) statActiveProj.textContent = jobs.length;
+
+    const statProposals = document.getElementById('statProposalsReceived');
+    if (statProposals) statProposals.textContent = totalProposals;
+
+    const statContracts = document.getElementById('statContractsAwarded');
+    if (statContracts) statContracts.textContent = awardedContracts;
+
+    const statContracted = document.getElementById('statTotalContracted');
+    if (statContracted) {
+      statContracted.textContent = totalContractedAmount > 0 
+        ? (typeof formatNaira === 'function' ? formatNaira(totalContractedAmount, true) : '₦' + totalContractedAmount.toLocaleString()) 
+        : '₦0';
+    }
+
+    // Render Posted Projects / Opportunities
+    const projectsContainer = document.getElementById('myProjectsContainer');
+    if (projectsContainer) {
+      if (jobs.length === 0) {
+        projectsContainer.innerHTML = `
+          <div style="padding:40px 20px; text-align:center;">
+            <div style="font-size:40px; margin-bottom:12px;">📁</div>
+            <h4 style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Posted Jobs or Opportunities Yet</h4>
+            <p style="font-size:13px; color:var(--muted); max-width:340px; margin:0 auto 16px;">Post employment openings, EPC tenders, contracts, or consultant requests to start receiving proposals from top verified talent across Nigeria.</p>
+            <button class="btn btn-amber btn-sm" onclick="openPostModal()" style="margin:0 auto; font-weight:800;">+ Post Your First Job / Opportunity &rarr;</button>
+          </div>
+        `;
+      } else {
+        const allProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+        projectsContainer.innerHTML = `
+          <table class="data-table" style="min-width:640px;">
+            <thead class="table-head">
+              <tr><th>Title &amp; Type</th><th>Category / Level</th><th>Budget / Compensation</th><th>Proposals</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              ${jobs.map(p => {
+                const pProps = allProps.filter(pr => String(pr.jobId) === String(p.id) || String(pr.project_id) === String(p.id));
+                const bVal = p.budget ? (typeof formatNaira === 'function' ? formatNaira(p.budget, true) : '₦' + Number(p.budget).toLocaleString()) : ((p.budgetMax || p.budgetMin) ? ('₦' + (p.budgetMin||0).toLocaleString() + ' - ₦' + (p.budgetMax||0).toLocaleString()) : 'Negotiable');
+                const typeLabel = (p.type === 'Job Opening' ? 'Short-Term Job' : p.type) || 'Short-Term Job';
+                const safeTitle = (p.title || 'Untitled Opportunity').replace(/'/g, "\\'");
+                return `
+                  <tr class="tx-row">
+                    <td>
+                      <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;">
+                        <span style="font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:99px; background:rgba(19,117,111,0.12); color:var(--teal);">${escapeHTML(typeLabel)}</span>
+                      </div>
+                      <div style="font-weight:800; color:var(--ink); font-size:13.5px;">${escapeHTML(p.title || 'Opportunity')}</div>
+                    </td>
+                    <td>
+                      <div style="font-size:13px; color:var(--ink); font-weight:700;">${escapeHTML(p.category || 'Engineering')}</div>
+                      <div style="font-size:11px; color:var(--muted);">${escapeHTML(p.experience || p.location || '')}</div>
+                    </td>
+                    <td>
+                      <div style="font-weight:800; color:var(--ink);">${bVal}</div>
+                      <div style="font-size:11px; color:var(--muted);">${escapeHTML(p.budget_rate_type || 'Fixed')}</div>
+                    </td>
+                    <td><strong style="color:var(--teal);">${pProps.length}</strong> proposal${pProps.length === 1 ? '' : 's'}</td>
+                    <td><span class="proj-status-pill pill-open">🟢 Open</span></td>
+                    <td><button class="btn btn-primary btn-sm" style="min-height:32px; font-weight:800;" onclick="openApplicantsModal('${p.id||''}','${safeTitle}')">Proposals (${pProps.length})</button></td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    }
+
+    // Render Active Contracts
+    const contractsContainer = document.getElementById('activeContractsContainer');
+    if (contractsContainer) {
+      const contracts = (typeof getUserContracts === 'function' ? getUserContracts() : []) || [];
+      if (contracts.length === 0) {
+        contractsContainer.innerHTML = `
+          <div style="padding:30px 20px; text-align:center;">
+            <div style="font-size:32px; margin-bottom:12px;">&#x1F6E1;&#xFE0F;</div>
+            <h4 style="font-size:15px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Active Contracts</h4>
+            <p style="font-size:13px; color:var(--muted); max-width:300px; margin:0 auto;">When you award a project to a professional, your contract and escrow milestone status will appear here.</p>
+          </div>
+        `;
+      } else {
+        contractsContainer.innerHTML = contracts.map(c => `
+          <div class="project-row">
+            <div style="width:44px; height:44px; border-radius:50%; background:var(--teal); color:#fff; display:grid; place-items:center; font-weight:900; flex-shrink:0;">${c.name ? c.name.charAt(0) : 'C'}</div>
+            <div style="flex:1;">
+              <div style="font-weight:800; font-size:14px; color:var(--ink);">${c.name || 'Contractor'}</div>
+              <div style="font-size:12px; color:var(--muted);">${c.details || 'Active Milestone'}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:900; font-size:16px; color:var(--ink);">&#x20A6;${(c.amount||0).toLocaleString()}</div>
+              <span class="status-pill pill-processing">In Escrow</span>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Render Recent Applicants
+    const applicantsContainer = document.getElementById('recentApplicantsContainer');
+    if (applicantsContainer) {
+      applicantsContainer.innerHTML = `
+        <div style="padding:20px; text-align:center;">
+          <div style="font-size:28px; margin-bottom:12px;">&#x1F465;</div>
+          <h4 style="font-size:14px; font-weight:800; color:var(--ink); margin-bottom:6px;">No Applicants Yet</h4>
+          <p style="font-size:12px; color:var(--muted);">Post a project tender to start receiving proposals from qualified professionals.</p>
+        </div>
+      `;
+    }
+
+    renderRecommendedProfessionals();
+  }
+
+  async function renderRecommendedProfessionals() {
+    const container = document.getElementById('recommendedTalentGrid');
+    if (!container) return;
+
+    let pros = [];
+
+    // 1. Fetch real professionals from Supabase
+    if (window.sb) {
+      try {
+        const { data: subaPros } = await sb
+          .from('profiles')
+          .select('*')
+          .eq('role', 'professional')
+          .order('registered_at', { ascending: false });
+
+        if (subaPros && subaPros.length > 0) {
+          pros = [...subaPros];
+        }
+      } catch (e) {
+        console.warn('Supabase fetch error for professionals:', e);
+      }
+    }
+
+    // 2. Merge with Local Directory (guarantees instant visibility for newly registered professionals)
+    if (typeof getAllRegisteredUsers === 'function') {
+      const allUsers = getAllRegisteredUsers();
+      const localPros = allUsers.filter(u => u && (u.role === 'professional' || (!u.role && u.role !== 'company')));
+      
+      localPros.forEach(lp => {
+        const idx = pros.findIndex(p => (lp.id && p.id === lp.id) || (lp.email && p.email && p.email.toLowerCase() === lp.email.toLowerCase()));
+        if (idx === -1) {
+          pros.push(lp);
+        } else {
+          pros[idx] = { ...pros[idx], ...lp };
+        }
+      });
+    }
+
+    if (!pros || pros.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; background: var(--paper); border: 2px dashed var(--line); border-radius: var(--r-lg); padding: 44px 24px; text-align: center; color: var(--muted);">
+          <div style="font-size: 38px; margin-bottom: 12px;">👥</div>
+          <div style="font-size: 16px; font-weight: 800; color: var(--ink); margin-bottom: 6px;">No Registered Professionals Yet</div>
+          <div style="font-size: 13px; max-width: 460px; margin: 0 auto; color: var(--muted);">As real professionals sign up and set up their accounts on Collekt, their profiles will automatically appear here for your direct review and hiring.</div>
+        </div>
+      `;
+      return;
+    }
+
+    const bgColors = ['#0E3B35', '#1A237E', '#B71C1C', '#4A148C', '#E65100', '#1B5E20'];
+
+    container.innerHTML = pros.map((p, idx) => {
+      const bg = bgColors[idx % bgColors.length];
+      const initial = (p.name || p.username || 'P').charAt(0).toUpperCase();
+      const avatarContent = (p.avatar && p.avatar.startsWith('data:'))
+        ? `<img src="${p.avatar}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" loading="lazy" decoding="async">`
+        : initial;
+
+      const skillsTags = (p.skills && p.skills.length)
+        ? p.skills.slice(0, 2).map(s => `<span class="gig-tag">${escapeHTML(s)}</span>`).join('')
+        : `<span class="gig-tag">Specialist</span>`;
+
+      const ratingVal = (p.rating != null && Number(p.rating) > 0) ? Number(p.rating).toFixed(1) : '0.0';
+      const reviewsStr = p.review_count ? `(${p.review_count} reviews)` : '(0 reviews)';
+      const verifiedBadge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(14, p) : '';
+
+      return `
+        <div class="talent-card">
+          <div class="talent-avatar" style="background:${bg}; overflow:hidden;">${avatarContent}</div>
+          <div class="talent-name" style="font-weight:800; display:inline-flex; align-items:center;">${escapeHTML(p.name || p.username || 'Professional')}${verifiedBadge}</div>
+          <div class="talent-title">${escapeHTML(p.title || 'Energy Specialist')}</div>
+          <div class="talent-rating">★ ${ratingVal} <span style="font-size:11px; color:var(--muted);">${reviewsStr}</span></div>
+          <div class="talent-tags">${skillsTags}</div>
+          <a href="public-profile.html?id=${p.id || p.email}" class="btn btn-primary btn-sm" style="width:100%; min-height:34px;">View Profile</a>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openPostModal() {
+    openModal('postModal');
+    try {
+      if (window.location.hash !== '#post') {
+        history.replaceState(null, null, '#post');
+      }
+      if (typeof buildSidebar === 'function') {
+        buildSidebar('post');
+      }
+    } catch(e){}
+  }
+
+  function closePostModal() {
+    closeModal('postModal');
+    try {
+      if (window.location.hash === '#post') {
+        history.replaceState(null, null, window.location.pathname);
+      }
+      if (typeof buildSidebar === 'function') {
+        buildSidebar('dashboard');
+      }
+    } catch(e){}
+  }
+
+  async function openApplicantsModal(projectId, projectTitle) {
+    // Update modal header
+    const titleEl = document.getElementById('applicantsModalTitle');
+    if (titleEl) titleEl.innerHTML = 'Proposals &mdash; ' + escapeHTML(projectTitle || 'Project');
+
+    const listEl = document.getElementById('applicantsList');
+    if (!listEl) { openModal('applicantsModal'); return; }
+
+    listEl.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">Loading proposals...</div>';
+    openModal('applicantsModal');
+
+    let allProposals = [];
+
+    // 1. Fetch from Supabase
+    if (projectId && window.sb) {
+      try {
+        const { data: proposals } = await sb
+          .from('proposals')
+          .select('*, profiles(name, title, location, rating)')
+          .eq('project_id', projectId)
+          .order('created_at', { ascending: false });
+        if (proposals && proposals.length) {
+          allProposals = proposals;
+        }
+      } catch (err) {
+        console.warn("Supabase proposals query notice:", err);
+      }
+    }
+
+    // 2. Combine with Local Proposals
+    try {
+      const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      const matchingLocal = localProps.filter(p => p.jobId === projectId || p.projectId === projectId || p.id === projectId);
+      matchingLocal.forEach(lp => {
+        if (!allProposals.some(p => p.id === lp.id)) {
+          allProposals.push({
+            id: lp.id,
+            bid_amount: lp.bidAmount || lp.rate || 0,
+            cover_letter: lp.coverLetter || lp.pitchText || lp.message || '',
+            status: lp.status || 'submitted',
+            profiles: {
+              name: lp.freelancerName || lp.userName || 'Professional Candidate',
+              title: lp.freelancerTitle || lp.role || 'Verified Specialist',
+              location: lp.location || 'Nigeria',
+              rating: lp.rating || '5.0'
+            }
+          });
+        }
+      });
+    } catch(e) {}
+
+    if (allProposals.length === 0) {
+      listEl.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">No proposals submitted for this opportunity yet.</div>';
+      return;
+    }
+
+    listEl.innerHTML = allProposals.map(prop => {
+      const pro = prop.profiles || {};
+      const name = pro.name || 'Professional Candidate';
+      const title = pro.title || 'Specialist';
+      const loc = pro.location || 'Nigeria';
+      const rating = pro.rating ? ` ⭐ ${escapeHTML(String(pro.rating))}` : '';
+      const cover = prop.cover_letter ? (prop.cover_letter.slice(0, 140) + (prop.cover_letter.length > 140 ? '...' : '')) : '';
+      const isAwarded = prop.status === 'awarded' || prop.status === 'accepted';
+
+      return `
+        <div class="applicant-row" style="border-bottom:1px solid var(--line); padding:16px 0; display:flex; gap:14px; align-items:flex-start;">
+          <div class="ap-avatar" style="background:var(--teal); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; flex-shrink:0;">${escapeHTML(name.charAt(0))}</div>
+          <div style="flex:1; min-width:0;">
+            <div class="ap-name" style="font-weight:800; font-size:15px; color:var(--ink);">${escapeHTML(name)}</div>
+            <div class="ap-sub" style="font-size:12px; color:var(--muted); margin-top:2px;">${escapeHTML(title)}${rating} &bull; ${escapeHTML(loc)}</div>
+            ${cover ? `<div style="font-size:13px; color:var(--slate); margin-top:8px; line-height:1.4; background:var(--paper); padding:8px 12px; border-radius:var(--r);">${escapeHTML(cover)}</div>` : ''}
+          </div>
+          <div class="ap-actions" style="display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0;">
+            <div style="font-weight:800; font-size:15px; color:var(--teal);">${formatNaira(prop.bid_amount || 0)}</div>
+            ${isAwarded ? `<span class="status-pill status-open" style="background:rgba(19,117,111,0.15); color:var(--teal); font-size:11px; padding:4px 10px; border-radius:20px; font-weight:700;">Awarded</span>` : `<button class="btn btn-primary btn-sm" style="min-height:30px; font-size:11px; padding:0 14px;" onclick="awardContract('${escapeHTML(prop.id)}')">Award Contract</button>`}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function submitProject() {
+    const title          = document.getElementById('projTitle')?.value.trim();
+    const type           = document.getElementById('projType')?.value || 'Short-Term Job';
+    const category       = document.getElementById('projCategory')?.value || 'Engineering & EPC';
+    const experience     = document.getElementById('projExperience')?.value || 'Any Experience Level';
+    const location       = document.getElementById('projLocation')?.value || 'Nigeria';
+    const budget         = parseFloat(document.getElementById('projBudget')?.value) || 0;
+    const budgetRateType = document.getElementById('projBudgetRateType')?.value || 'Total Contract Budget';
+    const duration       = document.getElementById('projDuration')?.value.trim() || 'Flexible';
+    const deadline       = document.getElementById('projDeadline')?.value.trim() || 'Ongoing';
+    const skillsStr      = document.getElementById('projSkills')?.value.trim() || '';
+    const skills         = skillsStr ? skillsStr.split(',').map(s => s.trim()).filter(Boolean) : [category, type];
+    const desc           = document.getElementById('projDesc')?.value.trim() || '';
+
+    if (!title) {
+      if (typeof showToast === 'function') showToast('⚠️ Please enter an opportunity or job title.', 'warning');
+      return;
+    }
+    if (!desc) {
+      if (typeof showToast === 'function') showToast('⚠️ Please provide a brief job description or scope of work.', 'warning');
+      return;
+    }
+
+    const btn = document.getElementById('postSubmitBtn');
+    if (btn) { btn.innerHTML = 'Publishing...'; btn.disabled = true; }
+
+    const user = typeof getUser === 'function' ? getUser() : {};
+    const jobData = {
+      id: 'job_' + Date.now(),
+      title,
+      type,
+      category,
+      experience,
+      location,
+      budget,
+      budgetMin: budget,
+      budgetMax: budget,
+      budget_rate_type: budgetRateType,
+      duration,
+      deadline,
+      skills,
+      description: desc,
+      scope: desc,
+      companyName: user.name || user.company_name || 'Verified Corporate Employer',
+      company_name: user.name || user.company_name || 'Verified Corporate Employer',
+      company_id: user.id || user.email || 'company',
+      company_logo: user.company_logo || '',
+      company_verified: !!(user.identity_verified || user.is_verified || user.verified),
+      status: 'open',
+      createdAt: new Date().toISOString(),
+      posted_at: new Date().toISOString()
+    };
+
+    if (typeof savePostedJob === 'function') {
+      savePostedJob(jobData);
+    }
+
+    if (typeof publishJobToSupabase === 'function') {
+      try {
+        await publishJobToSupabase(jobData);
+      } catch (err) {
+        console.warn("Supabase project sync notice:", err);
+      }
+    }
+
+    if (btn) { btn.textContent = '🚀 Publish to Marketplace'; btn.disabled = false; }
+
+    closePostModal();
+    if (typeof showToast === 'function') {
+      showToast('🎉 Job / Opportunity published live to the Marketplace!');
+    }
+
+    // Reset inputs
+    if (document.getElementById('projTitle')) document.getElementById('projTitle').value = '';
+    if (document.getElementById('projBudget')) document.getElementById('projBudget').value = '';
+    if (document.getElementById('projSkills')) document.getElementById('projSkills').value = '';
+    if (document.getElementById('projDesc')) document.getElementById('projDesc').value = '';
+
+    renderDashboardData();
+  }
+
+  async function awardContract(proposalId) {
+    if (window.sb) {
+      try {
+        await sb.from('proposals').update({ status: 'awarded' }).eq('id', proposalId);
+      } catch(e) {}
+    }
+    try {
+      const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      const idx = localProps.findIndex(p => p.id === proposalId);
+      if (idx !== -1) {
+        localProps[idx].status = 'awarded';
+        localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
+      }
+    } catch(e) {}
+
+    closeModal('applicantsModal');
+    showToast('✅ Contract awarded! Head to Payments to fund the milestone.');
+  }
+
+  function releaseFunds() {
+    showToast('✅ Payment release initiated. The professional will be notified.');
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+  });
+</script>
+<script src="settings-popup.js"></script>
+<script src="upload-modal.js"></script>
+</body>
+</html>
+

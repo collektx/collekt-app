@@ -1,0 +1,818 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Collekt Pitch Deck - Africa's Energy & EPC Talent Infrastructure</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="logo-stone-v2-removebg.png">
+  <style>
+    :root {
+      --bg: #040e0c;
+      --surface: rgba(12, 38, 34, 0.85);
+      --surface-card: rgba(255, 255, 255, 0.05);
+      --teal: #13756F;
+      --teal-light: #2dd4bf;
+      --amber: #d4920b;
+      --ink: #f0fdfa;
+      --muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.12);
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'Manrope', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top presentation bar */
+    .deck-topbar {
+      height: 56px;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(4, 14, 13, 0.9);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+    }
+    .deck-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 18px;
+      color: #fff;
+    }
+    .deck-brand img { height: 26px; }
+    .deck-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .deck-btn {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .deck-btn:hover {
+      background: rgba(19, 117, 111, 0.3);
+      border-color: var(--teal-light);
+    }
+    .slide-counter {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      min-width: 60px;
+      text-align: center;
+    }
+
+    /* Presentation Slide Stage */
+    .deck-stage {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+    }
+    .slide {
+      position: absolute;
+      inset: 30px;
+      max-width: 1100px;
+      max-height: 680px;
+      margin: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 44px 50px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+      backdrop-filter: blur(28px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      transform: scale(0.96) translateY(20px);
+      pointer-events: none;
+      transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .slide.active {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Slide Typography & Elements */
+    .slide-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--teal-light);
+      background: rgba(45, 212, 191, 0.1);
+      border: 1px solid rgba(45, 212, 191, 0.25);
+      padding: 4px 12px;
+      border-radius: 999px;
+      width: fit-content;
+      margin-bottom: 12px;
+    }
+    .slide-title {
+      font-family: var(--font-display);
+      font-size: 38px;
+      font-weight: 800;
+      line-height: 1.15;
+      color: #ffffff;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+    .slide-subtitle {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 800px;
+      margin-bottom: 24px;
+    }
+
+    /* Grid layout inside slides */
+    .slide-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+      align-items: stretch;
+    }
+    .slide-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      flex: 1;
+      align-items: stretch;
+    }
+    .slide-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      flex: 1;
+      align-items: stretch;
+    }
+    .card-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      transition: all 0.25s;
+    }
+    .card-box:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(45, 212, 191, 0.3);
+      transform: translateY(-3px);
+    }
+    .card-icon {
+      font-size: 26px;
+      margin-bottom: 12px;
+    }
+    .card-head {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .card-desc {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .metric-num {
+      font-family: var(--font-display);
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--teal-light);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .metric-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .metric-sub {
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    /* Footer in slide */
+    .slide-footer {
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Bottom Navigator Bar */
+    .deck-bottom-bar {
+      height: 48px;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      background: rgba(4, 14, 13, 0.9);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+    }
+    .dot-track {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .slide-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .slide-dot.active {
+      width: 28px;
+      background: var(--teal-light);
+    }
+    .keyboard-hint {
+      font-size: 11.5px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .key-badge {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      color: #fff;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <div class="deck-topbar">
+    <div class="deck-brand">
+      <img src="logo-stone-v2-removebg.png" alt="Collekt Logo" onerror="this.style.display='none'" loading="lazy" decoding="async">
+      <span>COLLEKT</span>
+      <span style="font-size:11px; font-weight:600; background:rgba(212,146,11,0.15); color:var(--amber); border:1px solid rgba(212,146,11,0.3); padding:2px 8px; border-radius:999px; font-family:var(--font-body);">Investor Pitch Deck</span>
+    </div>
+
+    <div class="deck-controls">
+      <button class="deck-btn" onclick="prevSlide()">&#8592; Prev</button>
+      <span class="slide-counter" id="slideCounter">1 / 12</span>
+      <button class="deck-btn" onclick="nextSlide()">Next &#8594;</button>
+      <button class="deck-btn" onclick="toggleFullScreen()" title="Full Screen">&#x26F6; Full Screen</button>
+      <a href="Collekt_Pitch_Deck.pdf" download="Collekt_Pitch_Deck.pdf" class="deck-btn" style="text-decoration:none; background:rgba(45,212,191,0.15); border-color:var(--teal-light); color:var(--teal-light);" title="Download 12-Slide PDF Deck">
+        <span>📥</span> Download PDF
+      </a>
+      <a href="index.html" class="deck-btn" style="text-decoration:none;">Go to Platform &rarr;</a>
+    </div>
+
+  </div>
+
+  <!-- STAGE -->
+  <div class="deck-stage">
+
+    <!-- SLIDE 1: Title & Hook -->
+    <div class="slide active" id="slide-1">
+      <div>
+        <div class="slide-tag">Africa's B2B Talent &amp; Tendering Infrastructure</div>
+        <h1 class="slide-title" style="font-size:48px; max-width:860px;">The Trust &amp; Execution Layer for Africa's Energy, EPC &amp; Engineering Sector.</h1>
+        <p class="slide-subtitle" style="font-size:19px;">Connecting certified specialists, consultants, and contractors to institutional energy RFPs with guaranteed milestone escrow and AI bidding intelligence.</p>
+      </div>
+
+      <div class="slide-grid-3">
+        <div class="card-box" style="border-left: 3px solid var(--teal-light);">
+          <div class="card-icon">🛡️</div>
+          <div class="card-head">Verified Talent Registry</div>
+          <div class="card-desc">Statutory compliance vetting (COREN, CAC, NIPEX, NIN) for zero-risk contractor placement.</div>
+        </div>
+        <div class="card-box" style="border-left: 3px solid var(--amber);">
+          <div class="card-icon">🔒</div>
+          <div class="card-head">Milestone Escrow Payouts</div>
+          <div class="card-desc">Funds locked before work begins, released instantly upon deliverable approval via NOVA Bank DVA.</div>
+        </div>
+        <div class="card-box" style="border-left: 3px solid #38bdf8;">
+          <div class="card-icon">⚡</div>
+          <div class="card-head">Kolly AI Bidding Copilot</div>
+          <div class="card-desc">AI-assisted tender scoping, milestone generation, and instant technical proposal drafting.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Founder &amp; CEO: <strong>Dave Oladapo Ojeowere</strong></div>
+        <div>Platform: <strong>collektng.xyz</strong> &bull; Lagos, Nigeria</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: The Problem -->
+    <div class="slide" id="slide-2">
+      <div>
+        <div class="slide-tag" style="color:#f87171; background:rgba(248,113,113,0.1); border-color:rgba(248,113,113,0.25);">The $45B Procurement Problem</div>
+        <h2 class="slide-title">The African EPC Procurement Paradox</h2>
+        <p class="slide-subtitle">B2B infrastructure projects across Africa suffer from broken trust, 90+ day payment delays, and opaque contractor verification.</p>
+      </div>
+
+      <div class="slide-grid-3">
+        <div class="card-box">
+          <div class="card-icon">⚠️</div>
+          <div class="card-head">Credential Fraud &amp; Delays</div>
+          <div class="card-desc">Enterprises spend months manually verifying engineering certifications. Unverified contractor failures cost billions annually.</div>
+        </div>
+        <div class="card-box">
+          <div class="card-icon">⏳</div>
+          <div class="card-head">Severe Cash Flow Gridlock</div>
+          <div class="card-desc">Specialists wait 3 to 6 months for milestone payments; clients fear paying 100% upfront mobilization fees with zero guarantees.</div>
+        </div>
+        <div class="card-box">
+          <div class="card-icon">🌐</div>
+          <div class="card-head">Global Platforms Fail Africa</div>
+          <div class="card-desc">Upwork and Fiverr lack Nigerian NUBAN payouts, NOVA Bank/Paystack settlement, local tax compliance (WHT/VAT), and statutory EPC context.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Root Cause: Absence of an integrated verification &amp; escrow platform built specifically for Africa.</div>
+        <div>Slide 2 of 12</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: The Solution -->
+    <div class="slide" id="slide-3">
+      <div>
+        <div class="slide-tag">The Collekt Solution</div>
+        <h2 class="slide-title">An End-to-End Operating System for African Contracting</h2>
+        <p class="slide-subtitle">From tender discovery and proposal submission to milestone execution and instant bank payout.</p>
+      </div>
+
+      <div class="slide-grid-4">
+        <div class="card-box">
+          <div class="metric-num" style="font-size:28px;">01</div>
+          <div class="card-head">Vetting &amp; KYC</div>
+          <div class="card-desc">Multi-tier verification engine for COREN, CAC, and regulatory compliance.</div>
+        </div>
+        <div class="card-box">
+          <div class="metric-num" style="font-size:28px;">02</div>
+          <div class="card-head">Tenders &amp; RFPs</div>
+          <div class="card-desc">Institutional pipelines across Oil &amp; Gas, Power, Solar, and Civil EPC.</div>
+        </div>
+        <div class="card-box">
+          <div class="metric-num" style="font-size:28px;">03</div>
+          <div class="card-head">Smart Escrow</div>
+          <div class="card-desc">Funds locked securely before mobilization; instant NUBAN release on approval.</div>
+        </div>
+        <div class="card-box">
+          <div class="metric-num" style="font-size:28px;">04</div>
+          <div class="card-head">Kolly AI Copilot</div>
+          <div class="card-desc">Instant technical proposal drafting and rate estimation for high-velocity bidding.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Delivering 10x faster procurement cycle times and 100% payment certainty.</div>
+        <div>Slide 3 of 12</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Market Opportunity -->
+    <div class="slide" id="slide-4">
+      <div>
+        <div class="slide-tag">Market Size &amp; Opportunity</div>
+        <h2 class="slide-title">$120 Billion Underserved Market</h2>
+        <p class="slide-subtitle">Sub-Saharan Africa's energy transition, infrastructure boom, and local content regulations are driving explosive digital procurement growth.</p>
+      </div>
+
+      <div class="slide-grid-3">
+        <div class="card-box" style="background:rgba(19,117,111,0.12); border-color:var(--teal);">
+          <div class="metric-num">$120B</div>
+          <div class="metric-label">TAM (Total Addressable Market)</div>
+          <div class="metric-sub">Annual energy, infrastructure, power, and mining procurement spend in Sub-Saharan Africa.</div>
+        </div>
+        <div class="card-box" style="background:rgba(212,146,11,0.12); border-color:var(--amber);">
+          <div class="metric-num">$18.5B</div>
+          <div class="metric-label">SAM (Serviceable Market)</div>
+          <div class="metric-sub">Nigerian Oil &amp; Gas (NIPEX), Commercial Solar, and Industrial EPC tenders.</div>
+        </div>
+        <div class="card-box" style="background:rgba(56,189,248,0.12); border-color:#38bdf8;">
+          <div class="metric-num">$450M</div>
+          <div class="metric-label">SOM (Obtainable Market)</div>
+          <div class="metric-sub">Digital freelance, technical consultancy, and contractor marketplace volume by Year 3.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Key Catalyst: Nigerian Local Content Mandate (NOGICD Act) requires domestic technical staffing.</div>
+        <div>Slide 4 of 12</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Core Product Architecture -->
+    <div class="slide" id="slide-5">
+      <div>
+        <div class="slide-tag">Product Architecture</div>
+        <h2 class="slide-title">The Complete 3-Portal Ecosystem</h2>
+        <p class="slide-subtitle">Built with enterprise glassmorphism, instant virtual banking, and real-time collaboration tools.</p>
+      </div>
+
+      <div class="slide-grid-3">
+        <div class="card-box">
+          <div class="card-icon">👷</div>
+          <div class="card-head">Professionals Portal</div>
+          <div class="card-desc">Bidding dashboard, AI proposal generator, milestone deliverable submissions, and instant NUBAN wallet withdrawals.</div>
+        </div>
+        <div class="card-box">
+          <div class="card-icon">🏢</div>
+          <div class="card-head">Company Portal</div>
+          <div class="card-desc">Tender &amp; RFP posting manager, applicant comparison matrix, escrow milestone funding, and team workspace.</div>
+        </div>
+        <div class="card-box">
+          <div class="card-icon">👑</div>
+          <div class="card-head">Admin Command Center</div>
+          <div class="card-desc">KYC &amp; CAC statutory verification queue, Paystack/NOVA Bank settlement manager, and dispute mediation hub.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Features: Waveform voice notes (`seekAudio`), Google OAuth 2.0, and Kolly AI physics assistant.</div>
+        <div>Slide 5 of 12</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Business Model -->
+    <div class="slide" id="slide-6">
+      <div>
+        <div class="slide-tag">Monetization &amp; Unit Economics</div>
+        <h2 class="slide-title">High-Margin, Diversified Revenue Streams</h2>
+        <p class="slide-subtitle">Collekt captures value at transaction execution, recurring enterprise SaaS, and compliance verification.</p>
+      </div>
+
+      <div class="slide-grid-4">
+        <div class="card-box">
+          <div class="metric-num" style="font-size:32px;">5-8%</div>
+          <div class="metric-label">Escrow Take-Rate</div>
+          <div class="metric-sub">Platform commission charged on completed milestone payouts.</div>
+        </div>
+        <div class="card-box">
+          <div class="metric-num" style="font-size:32px;">$199/m</div>
+          <div class="metric-label">Enterprise Subscriptions</div>
+          <div class="metric-sub">Monthly SaaS fees for unlimited RFP postings and priority vetting.</div>
+        </div>
+        <div class="card-box">
+          <div class="metric-num" style="font-size:32px;">₦35,000</div>
+          <div class="metric-label">Verification Badge</div>
+          <div class="metric-sub">One-time background audit and COREN credential certification fee.</div>
+        </div>
+        <div class="card-box">
+          <div class="metric-num" style="font-size:32px;">2.5%</div>
+          <div class="metric-label">Dispute &amp; SLA Retainers</div>
+          <div class="metric-sub">Legal contract generation &amp; institutional mediation retainers.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Unit Economics: High LTV ($2,800+ Enterprise LTV), low CAC via institutional word-of-mouth.</div>
+        <div>Slide 6 of 12</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Competitive Moat -->
+    <div class="slide" id="slide-7">
+      <div>
+        <div class="slide-tag">Defensibility &amp; Moat</div>
+        <h2 class="slide-title">Why Collekt Wins in Africa</h2>
+        <p class="slide-subtitle">Global platforms cannot replicate our deep local regulatory and fintech infrastructure.</p>
+      </div>
+
+      <div class="slide-grid-3">
+        <div class="card-box" style="border-top: 3px solid var(--teal-light);">
+          <div class="card-head">Local Regulatory Vetting</div>
+          <div class="card-desc">Native verification for COREN engineers, CAC incorporation, NIPEX JQS readiness, and Nigerian Local Content compliance.</div>
+        </div>
+        <div class="card-box" style="border-top: 3px solid var(--amber);">
+          <div class="card-head">Direct NUBAN Virtual Escrow</div>
+          <div class="card-desc">NOVA Bank &amp; Paystack virtual DVA integration enables zero-FX friction, instant local payouts, and tax compliance (WHT/VAT).</div>
+        </div>
+        <div class="card-box" style="border-top: 3px solid #38bdf8;">
+          <div class="card-head">Domain-Specific AI Copilot</div>
+          <div class="card-desc">Kolly AI is trained on African energy tenders, EPC rate cards, and technical milestone structures.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Collekt creates a network effect: verified talent attracts top IOCs, which attracts more specialists.</div>
+        <div>Slide 7 of 12</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Traction & Partnerships -->
+    <div class="slide" id="slide-8">
+      <div>
+        <div class="slide-tag">Traction &amp; Milestones</div>
+        <h2 class="slide-title">Validated by Industry Partnerships</h2>
+        <p class="slide-subtitle">Proven technical execution and strategic corporate alliances.</p>
+      </div>
+
+      <div class="slide-grid-3">
+        <div class="card-box">
+          <div class="card-icon">🤝</div>
+          <div class="card-head">Shuttlers SLA Agreement</div>
+          <div class="card-desc">Executed institutional Service Level Agreement with corporate transport leader Shuttlers Metropolitan Mobility Ltd.</div>
+        </div>
+        <div class="card-box">
+          <div class="card-icon">⭐</div>
+          <div class="card-head">4.9 / 5.0 Community Rating</div>
+          <div class="card-desc">High satisfaction scores on platform response time, glass UI performance, and payout security.</div>
+        </div>
+        <div class="card-box">
+          <div class="card-icon">💳</div>
+          <div class="card-head">Live NOVA Bank DVA Integration</div>
+          <div class="card-desc">Automated Paystack dedicated virtual accounts powering 10-digit NUBAN escrow payouts.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>16 fully responsive web and mobile portal pages live and active at collektng.xyz.</div>
+        <div>Slide 8 of 12</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Financial Projections -->
+    <div class="slide" id="slide-9">
+      <div>
+        <div class="slide-tag">Financial Forecast (3-Year Outlook)</div>
+        <h2 class="slide-title">Rapid Growth &amp; Scalable Unit Economics</h2>
+        <p class="slide-subtitle">Projected Gross Merchandise Value (GMV) and Net Platform Revenue.</p>
+      </div>
+
+      <div class="slide-grid-3">
+        <div class="card-box">
+          <div class="slide-tag" style="margin-bottom:8px;">Year 1 (2026)</div>
+          <div class="metric-num">$3.2M</div>
+          <div class="metric-label">GMV Transacted</div>
+          <div class="card-desc" style="margin-top:8px;"><strong>$290,000</strong> Net Revenue<br>2,500 Verified Specialists<br>350 Corporate Clients</div>
+        </div>
+        <div class="card-box" style="background:rgba(19,117,111,0.1); border-color:var(--teal);">
+          <div class="slide-tag" style="margin-bottom:8px;">Year 2 (2027)</div>
+          <div class="metric-num">$14.8M</div>
+          <div class="metric-label">GMV Transacted</div>
+          <div class="card-desc" style="margin-top:8px;"><strong>$1.35M</strong> Net Revenue<br>12,000 Verified Specialists<br>1,800 Corporate Clients</div>
+        </div>
+        <div class="card-box" style="background:rgba(212,146,11,0.1); border-color:var(--amber);">
+          <div class="slide-tag" style="margin-bottom:8px;">Year 3 (2028)</div>
+          <div class="metric-num">$48.5M</div>
+          <div class="metric-label">GMV Transacted</div>
+          <div class="card-desc" style="margin-top:8px;"><strong>$4.40M</strong> Net Revenue<br>45,000 Verified Specialists<br>6,500 Corporate Clients</div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Path to Profitability: Cash-flow positive projected by Month 14 post-funding.</div>
+        <div>Slide 9 of 12</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Product Roadmap -->
+    <div class="slide" id="slide-10">
+      <div>
+        <div class="slide-tag">Strategic Roadmap</div>
+        <h2 class="slide-title">Scale, Automation &amp; Regional Expansion</h2>
+        <p class="slide-subtitle">Clear technical milestones to dominate West African technical procurement.</p>
+      </div>
+
+      <div class="slide-grid-3">
+        <div class="card-box">
+          <div class="card-head">Phase 1: Q1–Q2 2026</div>
+          <div class="card-desc">
+            &bull; Interactive Milestone Kanban Board<br>
+            &bull; Automated Tax Invoice &amp; VAT Generator<br>
+            &bull; Native Mobile PWA App Launch<br>
+            &bull; WhatsApp Instant Alert Engine
+          </div>
+        </div>
+        <div class="card-box">
+          <div class="card-head">Phase 2: Q3–Q4 2026</div>
+          <div class="card-desc">
+            &bull; Dual-Currency Escrow (USD &amp; NGN)<br>
+            &bull; Direct NIPEX JQS Registry API Connector<br>
+            &bull; Corporate Enterprise Team Workspaces<br>
+            &bull; AI Automated Contract Dispute Auditor
+          </div>
+        </div>
+        <div class="card-box">
+          <div class="card-head">Phase 3: 2027</div>
+          <div class="card-desc">
+            &bull; Regional Expansion to Ghana, Kenya, Angola<br>
+            &bull; Institutional Tender Financing &amp; Invoice Factoring<br>
+            &bull; Collekt Engineering Academy &amp; Certification
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Building the indispensable operating system for African infrastructure.</div>
+        <div>Slide 10 of 12</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: Team & Leadership -->
+    <div class="slide" id="slide-11">
+      <div>
+        <div class="slide-tag">Leadership &amp; Team</div>
+        <h2 class="slide-title">Experienced Execution &amp; Domain Expertise</h2>
+        <p class="slide-subtitle">Led by proven operators in African energy procurement, marketplace engineering, and fintech escrow.</p>
+      </div>
+
+      <div class="slide-grid-2">
+        <div class="card-box" style="display:flex; flex-direction:row; gap:20px; align-items:center;">
+          <div style="width:72px; height:72px; border-radius:50%; background:#0E3B35; color:#fff; font-size:28px; font-weight:800; display:grid; place-items:center; flex-shrink:0;">D</div>
+          <div>
+            <div class="card-head" style="font-size:20px; margin-bottom:2px;">Dave Oladapo Ojeowere</div>
+            <div style="font-size:13px; color:var(--teal-light); font-weight:700; margin-bottom:8px;">Founder &amp; Chief Executive Officer</div>
+            <div class="card-desc">Experienced Proposal Manager, Product Architect, and Technical Business Leader with deep domain expertise in Nigerian energy tenders, B2B procurement workflows, and marketplace operations.</div>
+          </div>
+        </div>
+
+        <div class="card-box">
+          <div class="card-head">Technical &amp; Industry Advisory</div>
+          <div class="card-desc" style="margin-top:6px;">
+            &bull; <strong>Senior Energy &amp; EPC Advisors</strong> — Former procurement directors at IOCs and EPC conglomerates.<br>
+            &bull; <strong>Fintech &amp; Escrow Regulatory Counsel</strong> — Specialists in Nigerian payment systems and NUBAN compliance.<br>
+            &bull; <strong>Full-Stack AI &amp; Platform Engineers</strong> — Building high-performance, real-time marketplace systems.
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Headquarters: Lekki, Lagos State, Nigeria &bull; contact@collektng.xyz</div>
+        <div>Slide 11 of 12</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: The Ask & Use of Funds -->
+    <div class="slide" id="slide-12">
+      <div>
+        <div class="slide-tag" style="background:rgba(212,146,11,0.15); color:var(--amber); border-color:rgba(212,146,11,0.3);">Investment Opportunity</div>
+        <h2 class="slide-title">The Ask: $500,000 Seed Round</h2>
+        <p class="slide-subtitle">Funding 18 months of aggressive growth, enterprise sales, and AI-powered product scaling.</p>
+      </div>
+
+      <div class="slide-grid-4">
+        <div class="card-box" style="border-top: 3px solid var(--teal-light);">
+          <div class="metric-num" style="font-size:32px;">40%</div>
+          <div class="metric-label">Engineering &amp; AI</div>
+          <div class="metric-sub">Kolly AI copilot enhancements, mobile PWA, and automated NIPEX/COREN connectors.</div>
+        </div>
+        <div class="card-box" style="border-top: 3px solid var(--amber);">
+          <div class="metric-num" style="font-size:32px;">35%</div>
+          <div class="metric-label">Enterprise BD &amp; Sales</div>
+          <div class="metric-sub">Direct onboarding of 500+ energy operators, EPC firms, and solar developers.</div>
+        </div>
+        <div class="card-box" style="border-top: 3px solid #38bdf8;">
+          <div class="metric-num" style="font-size:32px;">15%</div>
+          <div class="metric-label">Compliance &amp; Escrow</div>
+          <div class="metric-sub">Regulatory licensing, Escrow reserve guarantees, and legal compliance.</div>
+        </div>
+        <div class="card-box" style="border-top: 3px solid #a855f7;">
+          <div class="metric-num" style="font-size:32px;">10%</div>
+          <div class="metric-label">Operations &amp; Community</div>
+          <div class="metric-sub">Specialist vetting team, customer support, and QA/QC management.</div>
+        </div>
+      </div>
+
+      <div class="slide-footer" style="background:rgba(255,255,255,0.03); padding:14px 20px; border-radius:12px; margin-top:14px;">
+        <div style="font-size:14px; font-weight:700; color:#fff;">Join us in empowering Africa's engineering renaissance.</div>
+        <a href="mailto:ojeoweredave@gmail.com" class="deck-btn" style="background:var(--teal); border-color:var(--teal-light); text-decoration:none; color:#fff;">Contact Dave Ojeowere &rarr;</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR WITH SLIDE DOTS & SHORTCUTS -->
+  <div class="deck-bottom-bar">
+    <div class="keyboard-hint">
+      <span>Navigate with</span>
+      <span class="key-badge">&#8592;</span>
+      <span class="key-badge">&#8594;</span>
+      <span>or Spacebar</span>
+    </div>
+
+    <div class="dot-track" id="dotTrack">
+      <!-- Generated via JS -->
+    </div>
+
+    <div style="font-size:12px; color:var(--muted);">
+      Collekt Metropolitan Services &copy; 2026
+    </div>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 12;
+
+    function initDeck() {
+      const track = document.getElementById('dotTrack');
+      track.innerHTML = '';
+      for (let i = 1; i <= totalSlides; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'slide-dot' + (i === currentSlide ? ' active' : '');
+        dot.onclick = () => goToSlide(i);
+        track.appendChild(dot);
+      }
+      updateSlideDisplay();
+    }
+
+    function updateSlideDisplay() {
+      document.querySelectorAll('.slide').forEach((s, idx) => {
+        s.classList.toggle('active', (idx + 1) === currentSlide);
+      });
+      document.querySelectorAll('.slide-dot').forEach((d, idx) => {
+        d.classList.toggle('active', (idx + 1) === currentSlide);
+      });
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlideDisplay();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlideDisplay();
+      }
+    }
+
+    function goToSlide(num) {
+      if (num >= 1 && num <= totalSlides) {
+        currentSlide = num;
+        updateSlideDisplay();
+      }
+    }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      } else if (e.key === 'Home') {
+        goToSlide(1);
+      } else if (e.key === 'End') {
+        goToSlide(totalSlides);
+      }
+    });
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initDeck);
+  </script>
+</body>
+</html>

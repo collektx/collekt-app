@@ -1,0 +1,905 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<script>
+  (function() {
+    try {
+      var u = JSON.parse(localStorage.getItem('collekt_user'));
+      if (!u || typeof u !== 'object' || (!u.id && !u.email && !u.role)) {
+        window.location.replace('login.html');
+      }
+    } catch(e) {
+      window.location.replace('login.html');
+    }
+  })();
+</script>
+<title>Upgrade Membership &mdash; Collekt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=23.0">
+<link rel="stylesheet" href="shared.css?v=23.0">
+<link rel="stylesheet" href="glass.css?v=23.0">
+
+<style>
+  body {
+    background: var(--paper);
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .upgrade-container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 24px 20px 80px 20px;
+  }
+
+  .upgrade-hero {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 36px auto;
+  }
+
+  .upgrade-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 99px;
+    background: rgba(212,146,11,0.14);
+    border: 1px solid rgba(212,146,11,0.3);
+    color: var(--amber-dark, #b45309);
+    font-weight: 800;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  html.dark .upgrade-badge {
+    background: rgba(212,146,11,0.22);
+    color: #fbbf24;
+  }
+
+  .upgrade-title {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    line-height: 1.25;
+  }
+
+  .upgrade-sub {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* Billing Toggle */
+  .billing-toggle-wrap {
+    display: inline-flex;
+    align-items: center;
+    background: var(--white);
+    border: 1.5px solid var(--line);
+    border-radius: 99px;
+    padding: 5px;
+    gap: 6px;
+    margin: 24px auto 0 auto;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  }
+  html.dark .billing-toggle-wrap {
+    background: #0f2220;
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .billing-toggle-btn {
+    border: none;
+    background: transparent;
+    padding: 8px 18px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .billing-toggle-btn.active {
+    background: var(--forest);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(14,59,53,0.25);
+  }
+
+  .save-pill {
+    background: #16a34a;
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 900;
+    padding: 2px 7px;
+    border-radius: 99px;
+    margin-left: 4px;
+  }
+
+  /* 2-Column Layout */
+  .checkout-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  @media (max-width: 960px) {
+    .checkout-grid {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+
+  /* Plan Perks Card */
+  .plan-card {
+    background: var(--white);
+    border: 1.5px solid var(--line);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 10px 36px rgba(14,59,53,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  html.dark .plan-card {
+    background: #0c1e1c;
+    border-color: rgba(255,255,255,0.09);
+  }
+
+  .plan-header-banner {
+    background: linear-gradient(135deg, var(--forest), #13756f);
+    color: #fff;
+    padding: 24px;
+    border-radius: 18px;
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .plan-price-large {
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .plan-price-large span {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.85;
+  }
+
+  .perk-item {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 18px;
+    align-items: flex-start;
+  }
+
+  .perk-icon-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--teal-lt);
+    color: var(--teal);
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  html.dark .perk-icon-box {
+    background: rgba(19,117,111,0.25);
+    color: var(--teal-mid);
+  }
+
+  .perk-text h4 {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+
+  .perk-text p {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  /* Payment Form Card */
+  .payment-card {
+    background: var(--white);
+    border: 1.5px solid var(--line);
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 12px 40px rgba(14,59,53,0.08);
+  }
+  html.dark .payment-card {
+    background: #0c1e1c;
+    border-color: rgba(255,255,255,0.09);
+  }
+
+  /* Payment Method Tabs */
+  .pm-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .pm-tab-btn {
+    border: 1.5px solid var(--line);
+    background: var(--paper);
+    border-radius: 14px;
+    padding: 14px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  html.dark .pm-tab-btn {
+    background: #112825;
+    border-color: rgba(255,255,255,0.08);
+  }
+
+  .pm-tab-btn.active {
+    border-color: var(--teal);
+    background: var(--teal-lt);
+    box-shadow: 0 4px 16px rgba(19,117,111,0.16);
+  }
+  html.dark .pm-tab-btn.active {
+    background: rgba(19,117,111,0.3);
+    border-color: var(--teal-mid);
+  }
+
+  .pm-tab-btn .pm-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+
+  .pm-tab-btn .pm-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  /* Order Summary Box */
+  .order-summary-box {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px;
+    margin-top: 24px;
+  }
+  html.dark .order-summary-box {
+    background: #091715;
+    border-color: rgba(255,255,255,0.07);
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    margin-bottom: 10px;
+    color: var(--muted);
+  }
+
+  .summary-row.total {
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--ink);
+    border-top: 1.5px dashed var(--line);
+    padding-top: 12px;
+    margin-top: 12px;
+    margin-bottom: 0;
+  }
+
+  /* Card brand icon styling */
+  .card-brand-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="app-page">
+  <aside class="app-sidebar" id="appSidebar"></aside>
+  <main class="app-main">
+    <div class="app-topbar" id="appTopbar"></div>
+    
+    <div class="page-inner">
+      <div class="upgrade-container">
+
+        <!-- Breadcrumb navigation -->
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:20px; font-size:13px; font-weight:700;">
+          <a href="dashboard.html" id="upgradeBackLink" style="color:var(--muted); text-decoration:none;">&larr; Back to Dashboard</a>
+          <span style="color:var(--muted);">&bull;</span>
+          <span style="color:var(--teal);">Membership Upgrade</span>
+        </div>
+
+        <!-- Upgrade Hero Header -->
+        <div class="upgrade-hero fade-in">
+          <div class="upgrade-badge" id="tierBadge">
+            <span>⭐</span> <span id="tierBadgeText">Professional Tier</span>
+          </div>
+          <h1 class="upgrade-title" id="pageMainTitle">Upgrade to Professional Plus</h1>
+          <p class="upgrade-sub" id="pageMainSub">
+            Stand out in client searches, submit unlimited proposals, and lower your platform fees. Join the top 5% of energy &amp; engineering specialists on Collekt.
+          </p>
+
+          <!-- Billing Interval Toggle -->
+          <div class="billing-toggle-wrap">
+            <button class="billing-toggle-btn active" id="toggleMonthlyBtn" onclick="setBillingCycle('monthly')">
+              Monthly Billing
+            </button>
+            <button class="billing-toggle-btn" id="toggleAnnualBtn" onclick="setBillingCycle('annual')">
+              Annual Billing <span class="save-pill">Save 17%</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2-Column Checkout Layout -->
+        <div class="checkout-grid">
+
+          <!-- Left Column: Plan Overview & Features -->
+          <div class="plan-card fade-in">
+            <div class="plan-header-banner" id="planHeaderBanner">
+              <div>
+                <div style="font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; opacity:.9;" id="planHeaderLabel">Selected Plan</div>
+                <h3 style="font-size:22px; font-weight:900; margin-top:2px;" id="planHeaderTitle">Professional Plus</h3>
+                <div style="font-size:12px; opacity:.85; margin-top:2px;" id="planHeaderRateNaira">₦22,500 / month</div>
+              </div>
+              <div class="plan-price-large">
+                <span style="font-size:24px; font-weight:900;">$</span>
+                <span id="planPriceNumber">15</span>
+                <span id="planPriceInterval">/mo</span>
+              </div>
+            </div>
+
+            <div style="font-size:14px; font-weight:900; color:var(--ink); margin-bottom:18px; text-transform:uppercase; letter-spacing:0.04em;">
+              Included Plan Privileges:
+            </div>
+
+            <div id="perksListContainer">
+              <!-- Dynamically populated based on role -->
+            </div>
+
+            <div style="background:var(--paper); border-radius:14px; padding:16px; margin-top:24px; display:flex; align-items:center; gap:12px; border:1px solid var(--line);">
+              <div style="font-size:24px;">🛡️</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.4;">
+                <strong style="color:var(--ink);">Guaranteed Satisfaction:</strong> Subscriptions can be changed or cancelled anytime from your account settings with zero penalties.
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Checkout & Payment Methods -->
+          <div class="payment-card fade-in">
+            <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:6px;">Select Payment Method</h3>
+            <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">Choose your preferred payment method to activate your subscription instantly.</p>
+
+            <!-- Payment Method Tabs -->
+            <div class="pm-tabs">
+              <div class="pm-tab-btn active" id="pmTabCard" onclick="switchPaymentMethod('card')">
+                <div style="font-size:22px;">💳</div>
+                <div class="pm-title">Debit / Credit Card</div>
+                <div class="pm-sub">Paystack / Mastercard / Visa</div>
+              </div>
+
+              <div class="pm-tab-btn" id="pmTabWallet" onclick="switchPaymentMethod('wallet')">
+                <div style="font-size:22px;">💼</div>
+                <div class="pm-title">Collekt Wallet</div>
+                <div class="pm-sub" id="pmWalletBalanceSub">Balance: ₦0.00</div>
+              </div>
+            </div>
+
+            <!-- PAYMENT FORM 1: DEBIT / CREDIT CARD -->
+            <div id="formCardSection">
+              <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label">Cardholder Full Name</label>
+                <input class="form-input" type="text" id="cardHolderName" placeholder="e.g. Dave Oladapo Ojeowere" value="">
+              </div>
+
+              <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label">Card Number</label>
+                <div style="position:relative;">
+                  <input class="form-input" type="text" id="cardNumberInput" placeholder="5399 •••• •••• ••••" maxlength="19" oninput="formatCardNumberInput(this)" style="font-family:monospace; font-size:15px; font-weight:700; padding-right:45px; letter-spacing:0.08em;">
+                  <span class="card-brand-icon" id="cardBrandIcon">💳</span>
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
+                <div class="form-group">
+                  <label class="form-label">Expiry Date</label>
+                  <input class="form-input" type="text" id="cardExpiryInput" placeholder="MM / YY" maxlength="5" oninput="formatExpiryInput(this)" style="font-family:monospace; text-align:center; font-weight:700;">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">CVV / CVC</label>
+                  <input class="form-input" type="password" id="cardCvvInput" placeholder="•••" maxlength="4" style="font-family:monospace; text-align:center; font-weight:700;">
+                </div>
+              </div>
+
+              <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--muted); font-weight:600; cursor:pointer; margin-bottom:20px;">
+                <input type="checkbox" id="saveCardCheckbox" checked style="accent-color:var(--teal); width:16px; height:16px;">
+                <span>Save card securely for seamless renewals (Cancel anytime)</span>
+              </label>
+            </div>
+
+            <!-- PAYMENT FORM 2: COLLEGKT WALLET BALANCE -->
+            <div id="formWalletSection" style="display:none;">
+              <div style="background:var(--paper); border:1.5px solid var(--line); border-radius:16px; padding:20px; margin-bottom:20px; text-align:center;">
+                <div style="font-size:12px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;">Available Wallet Balance</div>
+                <div style="font-size:26px; font-weight:900; color:var(--forest); margin:4px 0;" id="walletBalanceDisplay">₦0.00</div>
+                <div id="walletSufficiencyPill" style="display:inline-block; font-size:11.5px; font-weight:800; padding:3px 12px; border-radius:99px; background:#dcfce7; color:#166534;">
+                  ✓ Sufficient Balance Available
+                </div>
+              </div>
+
+              <div class="form-group" id="walletPinGroup" style="margin-bottom:20px;">
+                <label class="form-label" style="display:flex; justify-content:space-between;">
+                  <span>Enter 4-Digit Wallet PIN</span>
+                  <a href="wallet.html" style="font-size:11.5px; color:var(--teal); font-weight:700; text-decoration:none;">Set / Reset PIN</a>
+                </label>
+                <input class="form-input" type="password" id="walletPinInput" maxlength="4" placeholder="• • • •" style="font-size:24px; font-weight:900; letter-spacing:0.4em; text-align:center; max-width:200px; margin:0 auto; font-family:monospace;">
+              </div>
+
+              <div id="walletTopUpAlert" style="display:none; background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:14px; margin-bottom:20px; font-size:12.5px; color:#991b1b;">
+                <strong>Insufficient wallet balance.</strong> You need an additional <span id="walletShortfallAmount" style="font-weight:800;">₦0</span> to complete this subscription.
+                <div style="margin-top:10px;">
+                  <button type="button" class="btn btn-sm btn-primary" onclick="window.location.href='wallet.html'" style="background:#ea580c; font-size:12px; padding:6px 14px;">
+                    💳 Top Up Wallet Now &rarr;
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Breakdown Summary -->
+            <div class="order-summary-box">
+              <div class="summary-row">
+                <span id="summaryItemLabel">Professional Plus (Monthly)</span>
+                <span id="summaryItemPrice" style="font-weight:700; color:var(--ink);">₦22,500</span>
+              </div>
+              <div class="summary-row">
+                <span>Value Added Tax (VAT 0%)</span>
+                <span style="color:#16a34a; font-weight:700;">₦0.00 (Waived)</span>
+              </div>
+              <div class="summary-row">
+                <span>Payment Processing Fee</span>
+                <span style="color:#16a34a; font-weight:700;">FREE (Collekt Covered)</span>
+              </div>
+              <div class="summary-row total">
+                <span>Total Due Now</span>
+                <span id="summaryTotalPrice" style="color:var(--forest); font-size:18px;">₦22,500 ($15.00)</span>
+              </div>
+            </div>
+
+            <!-- Main Payment Submission Button -->
+            <button class="btn btn-primary" id="executePayBtn" onclick="processUpgradePayment()" 
+                    style="width:100%; min-height:50px; font-size:15px; font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f); margin-top:20px; justify-content:center; box-shadow:0 8px 24px rgba(14,59,53,0.25);">
+              Pay ₦22,500 &amp; Upgrade Now ⚡
+            </button>
+
+            <div style="display:flex; justify-content:center; align-items:center; gap:16px; margin-top:16px; font-size:11px; color:var(--muted); font-weight:700;">
+              <span>🔒 256-Bit SSL Encrypted</span>
+              <span>&bull;</span>
+              <span>🛡️ CBN Escrow Standard</span>
+              <span>&bull;</span>
+              <span>⚡ Instant Activation</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- SUCCESS CONFIRMATION MODAL -->
+<div class="modal-overlay" id="upgradeSuccessModal" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(4,14,13,0.85); backdrop-filter:blur(12px); align-items:center; justify-content:center; padding:20px;">
+  <div class="modal-card" style="max-width:520px; width:100%; text-align:center; padding:36px 28px; border-radius:28px; background:var(--white); border:1px solid var(--line); box-shadow:0 24px 80px rgba(0,0,0,0.4);">
+    <div style="font-size:56px; margin-bottom:14px; animation:bounce 1s infinite alternate;">🎉</div>
+    
+    <div style="display:inline-block; background:#dcfce7; color:#15803d; font-size:12px; font-weight:900; padding:4px 14px; border-radius:99px; margin-bottom:12px; letter-spacing:.05em;">
+      SUBSCRIPTION ACTIVE &amp; VERIFIED
+    </div>
+
+    <h2 style="font-size:24px; font-weight:900; color:var(--ink); margin-bottom:8px;" id="successModalTitle">
+      Welcome to Professional Plus!
+    </h2>
+
+    <p style="font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:24px;" id="successModalMessage">
+      Your payment has been successfully authorized and your account upgraded. All tier privileges, search boosts, and badge highlights are now live.
+    </p>
+
+    <div style="background:var(--paper); border:1px dashed var(--teal); border-radius:16px; padding:16px; margin-bottom:24px; text-align:left; font-size:13px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <span style="color:var(--muted);">Transaction Reference:</span>
+        <strong id="receiptRef" style="font-family:monospace; color:var(--ink);">SUB-829142</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <span style="color:var(--muted);">Subscribed Tier:</span>
+        <strong id="receiptTier" style="color:var(--teal);">Professional Plus</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <span style="color:var(--muted);">Amount Paid:</span>
+        <strong id="receiptAmount" style="color:var(--forest);">₦22,500.00</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between;">
+        <span style="color:var(--muted);">Valid Until:</span>
+        <strong id="receiptExpiry" style="color:var(--ink);">September 27, 2026</strong>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:12px;">
+      <button class="btn btn-primary" onclick="goToDashboardAfterUpgrade()" style="flex:1; background:var(--forest); font-weight:900; justify-content:center;">
+        Go to Dashboard &rarr;
+      </button>
+      <button class="btn btn-outline" onclick="goToProfileAfterUpgrade()" style="flex:1; font-weight:800; justify-content:center;">
+        View Profile 👤
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="supabase.js?v=22.0"></script>
+<script src="app.js?v=23.0"></script>
+<script src="settings-popup.js"></script>
+
+<script>
+  let activeRole = 'professional';
+  let activeCycle = 'monthly';
+  let activePaymentMethod = 'card';
+
+  const PRICING = {
+    professional: {
+      tierName: 'Professional Plus',
+      monthlyUSD: 15,
+      annualUSD: 150,
+      monthlyNGN: 22500,
+      annualNGN: 225000,
+      badgeText: 'Professional Tier',
+      title: 'Upgrade to Professional Plus',
+      sub: 'Unlock top search placement, unlimited proposal submissions, and a 5% platform commission rate across all contracts.',
+      perks: [
+        { icon: '🌟', title: 'Top Ranked Placement & Search Boost', desc: 'Appear at the top of client search results when IOCs and EPCs search for specialists.' },
+        { icon: '⚡', title: 'Unlimited Proposal Submissions', desc: 'Apply to all open tenders on the live Energy Marketplace with zero monthly submission caps.' },
+        { icon: '💰', title: '50% Platform Fee Discount', desc: 'Your platform commission rate drops from 10% to just 5% on all paid milestones.' },
+        { icon: '🛡️', title: 'Golden Verified Pro Badge', desc: 'Pro badge displayed prominently on your profile, proposals, and marketplace bids.' },
+        { icon: '📊', title: 'Bid & Client Analytics', desc: 'Track which hiring managers view your profile and analyze competitor bidding patterns.' },
+        { icon: '💬', title: 'Direct Client Direct-Line & Support', desc: 'Direct message clients without proposal friction plus 24/7 dedicated dispute concierge.' }
+      ]
+    },
+    company: {
+      tierName: 'Company Enterprise',
+      monthlyUSD: 50,
+      annualUSD: 500,
+      monthlyNGN: 75000,
+      annualNGN: 750000,
+      badgeText: 'Company Enterprise Tier',
+      title: 'Upgrade to Company Enterprise',
+      sub: 'Post unlimited engineering tenders, access AI candidate matching, and receive verified enterprise status.',
+      perks: [
+        { icon: '📋', title: 'Unlimited Tender & Project Postings', desc: 'Publish unlimited engineering RFPs, FEED studies, and infrastructure contracts.' },
+        { icon: '🤖', title: 'Kolly AI Candidate Matching', desc: 'Instant automated matching with the top 1% pre-screened technical project specialists.' },
+        { icon: '🏢', title: 'IOC Verified Enterprise Badge', desc: 'Verified enterprise shield displayed across all your public tenders and corporate profile.' },
+        { icon: '💸', title: '0% Surcharge on Escrow Payouts', desc: 'Zero payment processing fees on contractor disbursements and milestone settlements.' },
+        { icon: '📁', title: '100GB Secure Technical Vault', desc: 'Cloud document vault for CAD, engineering specifications, and confidential bid files.' },
+        { icon: '👔', title: 'Dedicated Account Executive', desc: 'Direct personal account manager with 24-hour turnaround SLA for milestone settlements.' }
+      ]
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Determine active role from query param or session
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramRole = urlParams.get('role');
+    const user = getUser() || {};
+
+    if (paramRole === 'company' || user.role === 'company') {
+      activeRole = 'company';
+    } else {
+      activeRole = 'professional';
+    }
+
+    // 2. Pre-fill cardholder name if available
+    const nameInput = document.getElementById('cardHolderName');
+    if (nameInput) {
+      nameInput.value = getDisplayName(user) || (activeRole === 'company' ? 'Enterprise Procurement' : 'Technical Specialist');
+    }
+
+    // 3. Update back link
+    const backLink = document.getElementById('upgradeBackLink');
+    if (backLink) {
+      backLink.href = activeRole === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+      backLink.textContent = activeRole === 'company' ? '← Back to Company Dashboard' : '← Back to Dashboard';
+    }
+
+    // 4. Render UI
+    renderUpgradeView();
+    updateWalletDisplay();
+
+    // 5. Build standard navigation
+    try { buildSidebar('upgrade'); } catch(e){}
+    try { buildTopbar(); } catch(e){}
+  });
+
+  function setBillingCycle(cycle) {
+    activeCycle = cycle;
+    document.getElementById('toggleMonthlyBtn').classList.toggle('active', cycle === 'monthly');
+    document.getElementById('toggleAnnualBtn').classList.toggle('active', cycle === 'annual');
+    renderUpgradeView();
+  }
+
+  function switchPaymentMethod(method) {
+    activePaymentMethod = method;
+    document.getElementById('pmTabCard').classList.toggle('active', method === 'card');
+    document.getElementById('pmTabWallet').classList.toggle('active', method === 'wallet');
+
+    document.getElementById('formCardSection').style.display = method === 'card' ? 'block' : 'none';
+    document.getElementById('formWalletSection').style.display = method === 'wallet' ? 'block' : 'none';
+    updatePayButtonText();
+  }
+
+  function renderUpgradeView() {
+    const config = PRICING[activeRole];
+    const isAnnual = activeCycle === 'annual';
+
+    const priceUSD = isAnnual ? config.annualUSD : config.monthlyUSD;
+    const priceNGN = isAnnual ? config.annualNGN : config.monthlyNGN;
+    const intervalStr = isAnnual ? '/yr' : '/mo';
+    const cycleWord = isAnnual ? 'Annual' : 'Monthly';
+
+    // Top Hero
+    document.getElementById('tierBadgeText').textContent = config.badgeText;
+    document.getElementById('pageMainTitle').textContent = config.title;
+    document.getElementById('pageMainSub').textContent = config.sub;
+
+    // Header Banner
+    document.getElementById('planHeaderTitle').textContent = config.tierName;
+    document.getElementById('planHeaderRateNaira').textContent = `₦${priceNGN.toLocaleString()} ${intervalStr}`;
+    document.getElementById('planPriceNumber').textContent = priceUSD;
+    document.getElementById('planPriceInterval').textContent = intervalStr;
+
+    // Perks
+    const perksContainer = document.getElementById('perksListContainer');
+    perksContainer.innerHTML = config.perks.map(p => `
+      <div class="perk-item">
+        <div class="perk-icon-box">${p.icon}</div>
+        <div class="perk-text">
+          <h4>${p.title}</h4>
+          <p>${p.desc}</p>
+        </div>
+      </div>
+    `).join('');
+
+    // Summary Box
+    document.getElementById('summaryItemLabel').textContent = `${config.tierName} (${cycleWord})`;
+    document.getElementById('summaryItemPrice').textContent = `₦${priceNGN.toLocaleString()}`;
+    document.getElementById('summaryTotalPrice').textContent = `₦${priceNGN.toLocaleString()} ($${priceUSD}.00)`;
+
+    updatePayButtonText();
+    updateWalletDisplay();
+  }
+
+  function updatePayButtonText() {
+    const config = PRICING[activeRole];
+    const isAnnual = activeCycle === 'annual';
+    const priceNGN = isAnnual ? config.annualNGN : config.monthlyNGN;
+    const btn = document.getElementById('executePayBtn');
+
+    if (activePaymentMethod === 'card') {
+      btn.innerHTML = `💳 Pay ₦${priceNGN.toLocaleString()} via Card &amp; Upgrade ⚡`;
+      btn.disabled = false;
+    } else {
+      const user = getUser() || {};
+      const wallet = typeof getOrCreateUserWallet === 'function' ? getOrCreateUserWallet(user) : { balance: 1450000 };
+      if (wallet.balance < priceNGN) {
+        btn.innerHTML = `⚠️ Insufficient Wallet Balance`;
+        btn.disabled = true;
+      } else {
+        btn.innerHTML = `💼 Deduct ₦${priceNGN.toLocaleString()} from Wallet &amp; Upgrade ⚡`;
+        btn.disabled = false;
+      }
+    }
+  }
+
+  function updateWalletDisplay() {
+    const user = getUser() || {};
+    const wallet = typeof getOrCreateUserWallet === 'function' ? getOrCreateUserWallet(user) : { balance: 1450000 };
+    const config = PRICING[activeRole];
+    const isAnnual = activeCycle === 'annual';
+    const priceNGN = isAnnual ? config.annualNGN : config.monthlyNGN;
+
+    const balFormatted = `₦${(wallet.balance || 0).toLocaleString()}.00`;
+    document.getElementById('pmWalletBalanceSub').textContent = `Balance: ${balFormatted}`;
+    document.getElementById('walletBalanceDisplay').textContent = balFormatted;
+
+    const isSufficient = (wallet.balance || 0) >= priceNGN;
+    const pill = document.getElementById('walletSufficiencyPill');
+    const pinGroup = document.getElementById('walletPinGroup');
+    const alertBox = document.getElementById('walletTopUpAlert');
+
+    if (isSufficient) {
+      pill.style.display = 'inline-block';
+      pill.style.background = '#dcfce7';
+      pill.style.color = '#166534';
+      pill.textContent = '✓ Sufficient Balance Available';
+      pinGroup.style.display = 'block';
+      alertBox.style.display = 'none';
+    } else {
+      pill.style.display = 'inline-block';
+      pill.style.background = '#fee2e2';
+      pill.style.color = '#991b1b';
+      pill.textContent = '✕ Insufficient Funds';
+      pinGroup.style.display = 'none';
+      alertBox.style.display = 'block';
+      document.getElementById('walletShortfallAmount').textContent = `₦${(priceNGN - wallet.balance).toLocaleString()}`;
+    }
+  }
+
+  function formatCardNumberInput(input) {
+    let val = input.value.replace(/\D/g, '');
+    let formatted = val.match(/.{1,4}/g)?.join(' ') || val;
+    input.value = formatted.substring(0, 19);
+
+    const brandIcon = document.getElementById('cardBrandIcon');
+    if (val.startsWith('4')) {
+      brandIcon.textContent = '💳 Visa';
+    } else if (/^(5[1-5]|2[2-7])/.test(val)) {
+      brandIcon.textContent = '💳 Mastercard';
+    } else if (/^(506|650|507)/.test(val)) {
+      brandIcon.textContent = '💳 Verve';
+    } else {
+      brandIcon.textContent = '💳';
+    }
+  }
+
+  function formatExpiryInput(input) {
+    let val = input.value.replace(/\D/g, '');
+    if (val.length >= 2) {
+      input.value = val.substring(0, 2) + '/' + val.substring(2, 4);
+    } else {
+      input.value = val;
+    }
+  }
+
+  async function processUpgradePayment() {
+    const user = getUser() || {};
+    const config = PRICING[activeRole];
+    const isAnnual = activeCycle === 'annual';
+    const priceNGN = isAnnual ? config.annualNGN : config.monthlyNGN;
+    const priceUSD = isAnnual ? config.annualUSD : config.monthlyUSD;
+    const btn = document.getElementById('executePayBtn');
+
+    // Validation
+    if (activePaymentMethod === 'card') {
+      const cardNum = document.getElementById('cardNumberInput')?.value.replace(/\s/g, '') || '';
+      const expiry = document.getElementById('cardExpiryInput')?.value.trim() || '';
+      const cvv = document.getElementById('cardCvvInput')?.value.trim() || '';
+      const name = document.getElementById('cardHolderName')?.value.trim() || '';
+
+      if (!name) {
+        alert('Please enter the cardholder name.');
+        return;
+      }
+      if (cardNum.length < 12) {
+        alert('Please enter a valid 16-digit card number.');
+        return;
+      }
+      if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+        alert('Please enter a valid card expiry date (MM/YY).');
+        return;
+      }
+      if (cvv.length < 3) {
+        alert('Please enter a valid 3-digit CVV.');
+        return;
+      }
+    } else {
+      const pin = document.getElementById('walletPinInput')?.value.trim() || '';
+      if (pin.length !== 4) {
+        alert('Please enter your 4-digit Wallet Transaction PIN.');
+        return;
+      }
+    }
+
+    // Processing animation
+    btn.disabled = true;
+    btn.innerHTML = 'Authorizing Payment &amp; Upgrading... ⏳';
+
+    setTimeout(async () => {
+      // 1. Process wallet transaction if method is wallet
+      if (activePaymentMethod === 'wallet') {
+        const wallet = typeof getOrCreateUserWallet === 'function' ? getOrCreateUserWallet(user) : { balance: 1450000 };
+        wallet.balance = Math.max(0, wallet.balance - priceNGN);
+        wallet.transactions = wallet.transactions || [];
+        wallet.transactions.unshift({
+          id: 'tx_sub_' + Date.now(),
+          type: 'debit',
+          category: 'subscription',
+          title: `${config.tierName} (${isAnnual ? 'Annual' : 'Monthly'})`,
+          amount: priceNGN,
+          amount_usd: priceUSD,
+          status: 'completed',
+          date: new Date().toISOString(),
+          reference: 'SUB-' + Math.floor(100000 + Math.random() * 900000)
+        });
+        localStorage.setItem(`collekt_wallet_${user.id || user.email}`, JSON.stringify(wallet));
+      }
+
+      // 2. Compute subscription expiration
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + (isAnnual ? 365 : 30));
+
+      const updatedUser = {
+        ...user,
+        role: activeRole,
+        is_premium: true,
+        subscription_tier: activeRole === 'company' ? 'company_enterprise' : 'pro_plus',
+        subscription_cycle: activeCycle,
+        subscription_expiry: expiryDate.toISOString(),
+        subscription_amount_usd: priceUSD
+      };
+
+      setUser(updatedUser);
+
+      // 3. Update Supabase if available
+      if (window.sb && user.id) {
+        try {
+          await sb.from('profiles').update({
+            is_premium: true,
+            subscription_tier: activeRole === 'company' ? 'company_enterprise' : 'pro_plus',
+            subscription_expiry: expiryDate.toISOString()
+          }).eq('id', user.id);
+        } catch(e) {}
+      }
+
+      // 4. Populate Success Modal
+      const ref = 'SUB-' + Math.floor(100000 + Math.random() * 900000);
+      document.getElementById('receiptRef').textContent = ref;
+      document.getElementById('receiptTier').textContent = config.tierName;
+      document.getElementById('receiptAmount').textContent = `₦${priceNGN.toLocaleString()}.00 ($${priceUSD}.00)`;
+      
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('receiptExpiry').textContent = expiryDate.toLocaleDateString('en-US', options);
+
+      document.getElementById('successModalTitle').textContent = `Welcome to ${config.tierName}!`;
+      document.getElementById('successModalMessage').textContent = `Your payment has been authorized and your ${activeRole === 'company' ? 'Enterprise' : 'Professional'} privileges are active immediately.`;
+
+      const modal = document.getElementById('upgradeSuccessModal');
+      modal.style.display = 'flex';
+
+    }, 900);
+  }
+
+  function goToDashboardAfterUpgrade() {
+    window.location.href = activeRole === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+  }
+
+  function goToProfileAfterUpgrade() {
+    window.location.href = activeRole === 'company' ? 'company-profile.html' : 'profile.html';
+  }
+</script>
+</body>
+</html>

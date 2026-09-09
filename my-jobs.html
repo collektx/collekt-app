@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<script>
+  (function() {
+    try {
+      var u = JSON.parse(localStorage.getItem('collekt_user'));
+      if (!u || typeof u !== 'object' || (!u.id && !u.email && !u.role)) {
+        window.location.replace('login.html');
+        return;
+      }
+      if (u.role === 'professional') {
+        window.location.replace('dashboard.html');
+        return;
+      }
+    } catch(e) {
+      window.location.replace('login.html');
+    }
+  })();
+</script>
+<title>My Jobs &amp; Opportunities &mdash; Collekt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=23.0">
+<link rel="stylesheet" href="shared.css?v=23.0">
+<link rel="stylesheet" href="glass.css?v=23.0">
+
+<style>
+  body { background: var(--paper); }
+  .jobs-hero-banner {
+    background: linear-gradient(135deg, #0e2a26 0%, var(--forest) 50%, #1a4a40 100%);
+    border-radius: var(--r-lg);
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    border: 1px solid rgba(212,146,11,.25);
+    position: relative;
+    overflow: hidden;
+  }
+  .jobs-hero-banner::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(212,146,11,.06);
+  }
+  .job-manage-card {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 24px;
+    margin-bottom: 16px;
+    transition: all .2s ease;
+    box-shadow: 0 4px 18px rgba(14,59,53,0.05);
+  }
+  html.dark .job-manage-card {
+    background: #0f2220;
+    border-color: rgba(255,255,255,0.08);
+  }
+  .job-manage-card:hover {
+    border-color: var(--teal);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(14,59,53,0.12);
+  }
+  .filter-pills-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    margin-bottom: 20px;
+  }
+  .filter-pill-btn {
+    padding: 7px 16px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 800;
+    background: var(--white);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  html.dark .filter-pill-btn {
+    background: #0f2220;
+    border-color: rgba(255,255,255,0.08);
+    color: #a1b5b2;
+  }
+  .filter-pill-btn:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+  .filter-pill-btn.active {
+    background: var(--teal);
+    color: #fff;
+    border-color: var(--teal);
+    box-shadow: 0 4px 14px rgba(19,117,111,0.25);
+  }
+</style>
+</head>
+<body>
+
+<div class="app-page">
+  <aside class="app-sidebar" id="appSidebar"></aside>
+  
+  <main class="app-main">
+    <div class="app-topbar" id="appTopbar"></div>
+    
+    <div class="page-inner">
+
+      <!-- Header Banner -->
+      <div class="jobs-hero-banner fade-in">
+        <div>
+          <div style="font-size:11px; font-weight:800; color:var(--amber); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;">Employer Management</div>
+          <h1 style="font-size:24px; font-weight:900; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+            &#128203; My Jobs &amp; Opportunities
+          </h1>
+          <p style="font-size:14px; color:rgba(255,255,255,.8); max-width:620px;">
+            Track your published listings, review incoming proposals, assess specialist credentials, and award contracts.
+          </p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <a href="post-job.html" class="btn btn-amber btn-sm" style="min-height:40px; font-weight:800; padding:0 20px; text-decoration:none; display:inline-flex; align-items:center;">
+            + Post New Opportunity
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row fade-in">
+        <div class="stat-card">
+          <div class="stat-icon">&#128188;</div>
+          <div class="stat-value" id="statTotalJobs">0</div>
+          <div class="stat-label">Total Listings Posted</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#9889;</div>
+          <div class="stat-value" id="statOpenJobs">0</div>
+          <div class="stat-label">Active / Open Listings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#128233;</div>
+          <div class="stat-value" id="statTotalApplicants">0</div>
+          <div class="stat-label">Candidate Proposals</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#128220;</div>
+          <div class="stat-value" id="statAwarded">0</div>
+          <div class="stat-label">Awarded Contracts</div>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-pills-bar fade-in">
+        <button class="filter-pill-btn active" onclick="filterJobList('all', this)">All Listings</button>
+        <button class="filter-pill-btn" onclick="filterJobList('Short-Term Job', this)">&#127991;&#65039; Short-Term Jobs</button>
+        <button class="filter-pill-btn" onclick="filterJobList('Tender / RFP', this)">&#127959;&#65039; Tenders / RFPs</button>
+        <button class="filter-pill-btn" onclick="filterJobList('Project Contract', this)">&#9889; Project Contracts</button>
+        <button class="filter-pill-btn" onclick="filterJobList('Consultancy', this)">&#128161; Consultancies</button>
+      </div>
+
+      <!-- Job Listings Container -->
+      <div id="jobsListContainer" class="fade-in">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+
+    </div><!-- /.page-inner -->
+  </main>
+</div>
+
+<!-- Proposals / Applicants Review Modal -->
+<div class="modal-overlay" id="applicantsModal" style="z-index:99999;">
+  <div class="modal-card" style="position:relative; max-width:680px; width:100%; max-height:85vh; overflow-y:auto; border-radius:24px; padding:28px;">
+    <button class="modal-close" onclick="closeModal('applicantsModal')">&times;</button>
+    <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px;" id="applicantsModalTitle">Proposals &amp; Applicants</div>
+    <div style="font-size:12px; color:var(--muted); margin-bottom:16px;">Review candidate pitches, verified credentials, proposed budget, and timeline</div>
+    
+    <div id="applicantsList" style="display:flex; flex-direction:column; gap:12px;">
+      <!-- Loaded dynamically by openApplicantsModal() -->
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=35.0"></script>
+<script src="app.js?v=35.0"></script>
+
+<script>
+  let _activeFilter = 'all';
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    try { buildSidebar('projects'); } catch(e){}
+    try { buildTopbar(); } catch(e){}
+    if (typeof fetchLiveJobsFromSupabase === 'function') {
+      try { await fetchLiveJobsFromSupabase(); } catch(e){}
+    }
+    renderJobsPage();
+    if (typeof initSupabaseRealtimeProjects === 'function') {
+      initSupabaseRealtimeProjects(() => renderJobsPage());
+    }
+  });
+
+  function filterJobList(typeFilter, btn) {
+    _activeFilter = typeFilter;
+    document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderJobsPage();
+  }
+
+  function renderJobsPage() {
+    const jobs = (typeof getPostedJobs === 'function' ? getPostedJobs() : []) || [];
+    const proposals = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+
+    let activeCount = 0;
+    let totalProps = 0;
+    let awardedCount = 0;
+
+    jobs.forEach(j => {
+      if (j.status === 'open' || !j.status) activeCount++;
+      const matched = proposals.filter(p => String(p.jobId) === String(j.id));
+      totalProps += matched.length;
+      if (matched.some(p => p.status === 'awarded' || p.status === 'hired' || p.status === 'accepted')) {
+        awardedCount++;
+      }
+    });
+
+    if (document.getElementById('statTotalJobs')) document.getElementById('statTotalJobs').textContent = jobs.length;
+    if (document.getElementById('statOpenJobs')) document.getElementById('statOpenJobs').textContent = activeCount;
+    if (document.getElementById('statTotalApplicants')) document.getElementById('statTotalApplicants').textContent = totalProps;
+    if (document.getElementById('statAwarded')) document.getElementById('statAwarded').textContent = awardedCount;
+
+    const filtered = jobs.filter(j => {
+      if (_activeFilter === 'all') return true;
+      const jType = (j.type === 'Job Opening' ? 'Short-Term Job' : j.type) || 'Short-Term Job';
+      return jType.toLowerCase() === _activeFilter.toLowerCase();
+    });
+
+    const container = document.getElementById('jobsListContainer');
+    if (!container) return;
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div style="background:var(--white); border:2px dashed var(--line); border-radius:20px; padding:60px 24px; text-align:center;">
+          <div style="font-size:48px; margin-bottom:12px;">&#128188;</div>
+          <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:6px;">No Listings Found</div>
+          <div style="font-size:13px; color:var(--muted); margin-bottom:20px;">You haven't posted any opportunities in this category yet.</div>
+          <a href="post-job.html" class="btn btn-amber btn-sm" style="font-weight:800; padding:9px 24px; text-decoration:none; display:inline-block;">+ Post a Job / Opportunity</a>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filtered.map(j => {
+      const matchedProps = proposals.filter(p => String(p.jobId) === String(j.id));
+      const propCount = matchedProps.length;
+      const budgetFormatted = j.budget ? (typeof formatNaira === 'function' ? formatNaira(j.budget, true) : '&#8358;' + Number(j.budget).toLocaleString()) : 'Negotiable';
+      const rateType = j.budget_rate_type || 'Contract Budget';
+      const typeTag = (j.type === 'Job Opening' ? 'Short-Term Job' : j.type) || 'Short-Term Job';
+
+      return `
+        <div class="job-manage-card" style="position:relative;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:10px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+                <span style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; padding:3px 8px; border-radius:99px; background:rgba(212,146,11,0.15); color:var(--amber);">${escapeHTML(typeTag)}</span>
+                <span style="font-size:11px; font-weight:800; color:var(--teal); text-transform:uppercase;">${escapeHTML(j.category || 'EPC & Engineering')}</span>
+                <span class="proj-status-pill pill-open">&#9679; Live on Marketplace</span>
+              </div>
+              <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px;">${escapeHTML(j.title)}</h3>
+              <div style="font-size:12px; color:var(--muted);">&#128204; ${escapeHTML(j.location || 'Nigeria')} &bull; &#9203; Deadline: ${escapeHTML(j.deadline || 'Ongoing')} &bull; Posted ${j.posted_at ? new Date(j.posted_at).toLocaleDateString() : 'Recently'}</div>
+            </div>
+
+            <div style="text-align:right;">
+              <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase;">${escapeHTML(rateType)}</div>
+              <div style="font-size:18px; font-weight:900; color:var(--forest);">${budgetFormatted}</div>
+            </div>
+          </div>
+
+          <div style="font-size:13px; color:var(--ink); line-height:1.6; margin-bottom:16px; background:var(--paper); padding:12px 16px; border-radius:12px; border:1px solid var(--line);">
+            ${escapeHTML(j.scope || j.description || 'Full technical deliverables and job requirements.')}
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-top:1px solid var(--line); padding-top:14px;">
+            <div style="font-size:13px; font-weight:800; color:var(--ink); display:flex; align-items:center; gap:6px;">
+              <span>&#128233; <strong>${propCount}</strong> Proposal${propCount === 1 ? '' : 's'} Received</span>
+            </div>
+
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-outline btn-sm" onclick="openApplicantsModal('${j.id}')" style="font-weight:800;">
+                &#128101; Proposals (${propCount})
+              </button>
+              <a href="post-job.html?edit=${encodeURIComponent(j.id)}" class="btn btn-outline btn-sm" style="font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                ✏️ Edit
+              </a>
+              <button class="btn btn-sm" onclick="deleteMyJob('${j.id}')" style="font-weight:800; background:#fef2f2; border:1px solid #fecaca; color:#ef4444; border-radius:8px; padding:0 12px; display:inline-flex; align-items:center; gap:4px; cursor:pointer;">
+                🗑️ Delete
+              </button>
+              <a href="marketplace.html" class="btn btn-ghost btn-sm" style="font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                &#128065;&#65039; View in Marketplace
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function deleteMyJob(jobId) {
+    if (!confirm('Are you sure you want to delete this job posting? This cannot be undone.')) return;
+    try {
+      if (typeof deletePostedJob === 'function') deletePostedJob(jobId);
+      if (typeof deleteJobFromSupabase === 'function') await deleteJobFromSupabase(jobId);
+      if (typeof showToast === 'function') showToast('🗑️ Opportunity deleted.');
+      renderJobsPage();
+    } catch(e) {
+      if (typeof showToast === 'function') showToast('Opportunity deleted locally.');
+      renderJobsPage();
+    }
+  }
+
+  function openApplicantsModal(jobId) {
+    const jobs = (typeof getPostedJobs === 'function' ? getPostedJobs() : []) || [];
+    const job = jobs.find(j => String(j.id) === String(jobId)) || {};
+    const jobTitle = job.title || 'Opportunity';
+    const proposals = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+    const matched = proposals.filter(p => String(p.jobId) === String(jobId));
+
+    const titleEl = document.getElementById('applicantsModalTitle');
+    if (titleEl) titleEl.textContent = 'Proposals — ' + jobTitle;
+
+    const listEl = document.getElementById('applicantsList');
+    if (!listEl) return;
+
+    if (matched.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align:center; padding:32px 20px; color:var(--muted);">
+          <div style="font-size:32px; margin-bottom:8px;">📭</div>
+          <div style="font-weight:800; color:var(--ink); font-size:15px; margin-bottom:4px;">No Proposals Received Yet</div>
+          <p style="font-size:12px; margin:0;">Certified professionals viewing your tender on the marketplace will submit bids here.</p>
+        </div>
+      `;
+    } else {
+      listEl.innerHTML = matched.map(p => `
+        <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:10px;">
+            <div>
+              <div style="font-weight:800; font-size:14px; color:var(--ink);">${escapeHTML(p.freelancerName || p.userName || 'Professional Candidate')}</div>
+              <div style="font-size:12px; color:var(--muted);">${escapeHTML(p.freelancerTitle || 'Specialist')}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:900; font-size:15px; color:var(--teal);">${typeof formatNaira === 'function' ? formatNaira(p.bidAmount || 0) : '₦' + (p.bidAmount || 0).toLocaleString()}</div>
+              <div style="font-size:11px; color:var(--muted);">${escapeHTML(p.deliveryTime || 'Flexible timeline')}</div>
+            </div>
+          </div>
+          
+          <div style="font-size:13px; color:var(--ink); line-height:1.5; margin-bottom:12px; background:var(--white); padding:10px 14px; border-radius:10px; border:1px solid var(--line);">
+            "${escapeHTML(p.pitchText || p.coverLetter || 'No cover letter pitch text provided.')}"
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:11px; font-weight:800; color:var(--muted);">Status: <span style="color:var(--teal); text-transform:uppercase;">${escapeHTML(p.status || 'submitted')}</span></span>
+            ${p.status === 'awarded' || p.status === 'accepted' ? `<span class="status-pill status-open" style="background:rgba(19,117,111,0.15); color:var(--teal); font-size:11px; padding:4px 12px; border-radius:20px; font-weight:700;">Awarded ✅</span>` : `
+            <button class="btn btn-primary btn-sm" onclick="awardProposalContract('${p.id}')" style="font-weight:800; padding:4px 14px; font-size:12px;">
+              🏆 Award Contract &amp; Fund Escrow
+            </button>`}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    openModal('applicantsModal');
+  }
+
+  function awardProposalContract(propId) {
+    try {
+      const proposals = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      const prop = proposals.find(p => p.id === propId);
+      if (prop) {
+        prop.status = 'awarded';
+        localStorage.setItem('collekt_proposals', JSON.stringify(proposals));
+
+        // Sync with awarded contracts
+        const awardedList = JSON.parse(localStorage.getItem('collekt_awarded_contracts') || '[]');
+        if (!awardedList.some(c => c.id === 'CTR-' + prop.id)) {
+          awardedList.unshift({
+            id: 'CTR-' + prop.id,
+            proposalId: prop.id,
+            title: prop.jobTitle || 'Awarded Tender Execution',
+            amount: prop.bidAmount || 0,
+            contractor: prop.freelancerName || prop.userName || 'Professional Candidate',
+            status: 'Active Escrow',
+            created_at: new Date().toISOString()
+          });
+          localStorage.setItem('collekt_awarded_contracts', JSON.stringify(awardedList));
+        }
+      }
+
+      if (window.sb) {
+        sb.from('proposals').update({ status: 'awarded' }).eq('id', propId).then(()=>{}).catch(()=>{});
+      }
+    } catch(e){}
+
+    closeModal('applicantsModal');
+    if (typeof showToast === 'function') {
+      showToast('🎉 Contract awarded! Milestone funds are ready for Escrow deposit.');
+    }
+    renderJobsPage();
+  }
+</script>
+</body>
+</html>

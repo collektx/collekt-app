@@ -1,0 +1,33 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<title>Create Account &rarr; Collekt</title>
+<meta name="description" content="Join Collekt &rarr; Nigeria's project marketplace.">
+<script>
+  // Redirect all traffic from legacy signup.html to register.html,
+  // preserving any query params (?role= / ?type=) with normalisation.
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    // Normalise ?type=company ? ?role=company for backwards compat
+    if (params.get('type') && !params.get('role')) {
+      params.set('role', params.get('type'));
+      params.delete('type');
+    }
+    var qs = params.toString();
+    window.location.replace('register.html' + (qs ? '?' + qs : ''));
+  })();
+</script>
+</head>
+<body>
+  <p style="font-family:sans-serif;padding:40px;text-align:center;color:#666;">
+    Redirecting to registration&hellip;
+    <a href="register.html">Click here if not redirected</a>
+  </p>
+</body>
+</html>

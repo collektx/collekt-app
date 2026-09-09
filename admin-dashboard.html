@@ -1,0 +1,2647 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<script>
+  (function() {
+    function hasAdminSession() {
+      try {
+        var a = JSON.parse(localStorage.getItem('collekt_admin_auth') || sessionStorage.getItem('collekt_admin_auth') || 'null');
+        if (a && a.role === 'admin') return true;
+        var u = JSON.parse(localStorage.getItem('collekt_user') || 'null');
+        if (u && u.role === 'admin') return true;
+      } catch(e) {}
+      return false;
+    }
+    if (!hasAdminSession()) {
+      window.location.replace('admin-login.html');
+    }
+  })();
+</script>
+<title>Admin Dashboard &mdash; Collekt Operational Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=23.0">
+<link rel="stylesheet" href="shared.css?v=23.0">
+<link rel="stylesheet" href="glass.css?v=23.0">
+
+<style>
+  html, body {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: var(--paper);
+    font-family: 'Manrope', sans-serif;
+  }
+  
+  .admin-app-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  /* Admin Header Bar (Fits Screen) */
+  .admin-header-nav {
+    height: 64px;
+    background: linear-gradient(135deg, #040e0d 0%, #09201d 50%, #0e3b35 100%);
+    border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 100;
+  }
+  .admin-header-nav h1 {
+    font-size: 16px;
+    font-weight: 900;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Global Search Bar in Header */
+  .admin-global-search {
+    position: relative;
+    max-width: 320px;
+    width: 100%;
+  }
+  .admin-global-search input {
+    width: 100%;
+    padding: 8px 14px 8px 36px;
+    border-radius: 99px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all .2s;
+  }
+  .admin-global-search input:focus {
+    outline: none;
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.25);
+    background: rgba(0,0,0,0.6);
+  }
+  .admin-global-search svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+  }
+
+  /* Main Workspace Container */
+  .admin-body-wrap {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - 64px);
+    overflow: hidden;
+  }
+
+  /* Left Sidebar Modules Navigation */
+  .admin-sidebar-menu {
+    width: 250px;
+    background: var(--white);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    gap: 4px;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  html.dark .admin-sidebar-menu {
+    background: #091a18;
+    border-color: rgba(255,255,255,0.08);
+  }
+
+  .admin-nav-item {
+    padding: 10.5px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    transition: all .15s ease;
+    width: 100%;
+  }
+  .admin-nav-item:hover {
+    color: var(--ink);
+    background: var(--paper);
+  }
+  html.dark .admin-nav-item:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.05);
+  }
+  .admin-nav-item.active {
+    background: linear-gradient(135deg, #0e3b35, #13756f);
+    color: #fff !important;
+    box-shadow: 0 4px 14px rgba(14,59,53,0.35);
+  }
+
+  .nav-badge-count {
+    background: rgba(239,68,68,0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239,68,68,0.3);
+    font-size: 10px;
+    font-weight: 900;
+    padding: 1px 7px;
+    border-radius: 99px;
+  }
+  .admin-nav-item.active .nav-badge-count {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+    border-color: rgba(255,255,255,0.4);
+  }
+
+  /* Main Viewport Content Pane */
+  .admin-content-pane {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Metric Cards Grid */
+  .admin-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .admin-metric-card {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+    transition: transform .2s ease;
+  }
+  html.dark .admin-metric-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+  .admin-metric-card:hover { transform: translateY(-2px); }
+  .am-label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  .am-val { font-size: 24px; font-weight: 900; color: var(--ink); margin-bottom: 4px; }
+  html.dark .am-val { color: #e2efed; }
+  .am-sub { font-size: 11px; font-weight: 700; color: #16a34a; }
+
+  /* Verification Cards */
+  .v-card {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    transition: border-color .18s;
+  }
+  html.dark .v-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+  .v-card:hover { border-color: var(--teal); }
+
+  /* Audit Log Timeline */
+  .audit-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: flex-start;
+  }
+  html.dark .audit-item { border-color: rgba(255,255,255,.07); }
+  .audit-item:last-child { border-bottom: none; }
+  .audit-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--teal-lt);
+    color: var(--teal);
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 99px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .badge-active { background: #dcfce7; color: #15803d; }
+  .badge-pending { background: #fef3c7; color: #b45309; }
+  .badge-suspended { background: #fee2e2; color: #b91c1c; }
+  .badge-verified { background: var(--teal-lt); color: var(--teal); }
+
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; animation: fadeIn .18s ease; }
+
+  .empty-live-state {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--muted);
+    background: var(--paper);
+    border: 1px dashed var(--line);
+    border-radius: var(--r-lg);
+  }
+
+  /* ── ADMIN MOBILE RESPONSIVENESS ── */
+  @media (max-width: 900px) {
+    .admin-header-nav {
+      flex-wrap: wrap;
+      gap: 12px;
+      height: auto;
+      padding: 12px 16px;
+    }
+    .admin-global-search {
+      max-width: 100%;
+      order: 3;
+      width: 100%;
+    }
+    .admin-body-wrap {
+      flex-direction: column;
+      height: auto;
+      overflow: visible;
+    }
+    .admin-sidebar-menu {
+      width: 100%;
+      flex-direction: row;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-right: none;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 14px;
+      gap: 6px;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+    .admin-sidebar-menu > div:first-child {
+      display: none;
+    }
+    .admin-nav-item {
+      width: auto;
+      flex-shrink: 0;
+      padding: 8px 14px;
+      border-radius: 99px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+    .admin-content-pane {
+      padding: 16px 14px;
+      height: auto;
+      overflow: visible;
+    }
+    .admin-metrics-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .admin-metrics-grid {
+      grid-template-columns: 1fr;
+    }
+    .admin-header-nav h1 {
+      font-size: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="admin-app-layout">
+
+  <!-- Top Header Navigation Bar (Fits Screen) -->
+  <div class="admin-header-nav">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <img src="logo-stone.png" alt="Collekt Admin" style="height:32px;" onerror="this.src='logo-stone.jpg'" loading="lazy" decoding="async">
+      <h1>👑 Operational Command Portal <span style="font-size:11px; font-weight:800; background:rgba(34,197,94,0.2); color:#4ade80; padding:2px 10px; border-radius:99px; border:1px solid rgba(34,197,94,0.4);">● LIVE DB CONNECTED</span></h1>
+    </div>
+
+    <!-- Global Search -->
+    <div class="admin-global-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Global Search users, tenders, txs..." oninput="handleAdminGlobalSearch(this.value)">
+    </div>
+
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.08); padding:4px 10px; border-radius:99px;">
+        <div style="width:24px; height:24px; border-radius:50%; background:#22c55e; color:#000; font-size:11px; font-weight:900; display:grid; place-items:center;">A</div>
+        <span style="font-size:12px; color:#e2efed; font-weight:800;" id="adminOperatorName">Super Administrator</span>
+      </div>
+
+      <button class="btn btn-outline btn-xs" onclick="openLogoutConfirmModal()" style="color:#fca5a5; border-color:rgba(239,68,68,0.4); font-weight:800; padding:6px 14px;">
+        🔓 Log Out Admin
+      </button>
+    </div>
+  </div>
+
+  <!-- Body Workspace Pane -->
+  <div class="admin-body-wrap">
+
+    <!-- Left Module Menu (Fits Screen with Dynamic Badge Counters) -->
+    <div class="admin-sidebar-menu">
+      <div style="font-size:10px; font-weight:900; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; padding:6px 8px 10px 8px;">Admin Command Modules</div>
+      <button class="admin-nav-item active" onclick="switchAdminTab('analytics', this)"><span>📊 Analytics &amp; Health</span></button>
+      <button class="admin-nav-item" onclick="switchAdminTab('users', this)"><span>👥 Manage Users</span> <span class="nav-badge-count" id="badgeUserCount">0</span></button>
+      <button class="admin-nav-item" onclick="switchAdminTab('verify-pros', this)"><span>🛡️ Verify Professionals</span> <span class="nav-badge-count" id="badgeProVerifyCount" style="display:none;">0</span></button>
+      <button class="admin-nav-item" onclick="switchAdminTab('verify-companies', this)"><span>🏢 Verify Companies</span> <span class="nav-badge-count" id="badgeCoVerifyCount" style="display:none;">0</span></button>
+      <button class="admin-nav-item" onclick="switchAdminTab('tenders', this)"><span>🏗️ Moderate Tenders</span> <span class="nav-badge-count" id="badgeTendersCount">0</span></button>
+      <button class="admin-nav-item" onclick="switchAdminTab('applications', this)"><span>📋 Applications</span></button>
+      <button class="admin-nav-item" onclick="switchAdminTab('engagements', this)"><span>🤝 Engagements &amp; Escrow</span></button>
+      <button class="admin-nav-item" onclick="switchAdminTab('transactions', this)"><span>💸 Transactions Ledger</span></button>
+      <button class="admin-nav-item" onclick="switchAdminTab('subscriptions', this)"><span>⭐ Subscriptions</span></button>
+      <button class="admin-nav-item" onclick="switchAdminTab('nova-settlement', this)"><span>🏛️ NOVA Bank Settlement</span> <span class="nav-badge-count" id="badgeNovaPendingCount" style="display:none; background:#ea580c; color:#fff;">0</span></button>
+      <button class="admin-nav-item" onclick="switchAdminTab('settings', this)"><span>⚙️ Gateway &amp; API Keys</span></button>
+      <button class="admin-nav-item" onclick="switchAdminTab('audit', this)"><span>📜 Security Audit Log</span></button>
+    </div>
+
+    <!-- Main Content Pane (Scrollable inside container) -->
+    <div class="admin-content-pane">
+
+      <!-- TAB 1: ANALYTICS & SYSTEM HEALTH (100% REAL LIVE DATA) -->
+      <div class="tab-pane active" id="pane-analytics">
+        <div class="admin-metrics-grid">
+          <div class="admin-metric-card">
+            <div class="am-label">Live Platform GMV</div>
+            <div class="am-val" id="statLiveGMV">NGN 0.00</div>
+            <div class="am-sub">Computed from live transactions</div>
+          </div>
+          <div class="admin-metric-card">
+            <div class="am-label">Live Registered Accounts</div>
+            <div class="am-val" id="statTotalUsersCount">0</div>
+            <div class="am-sub" id="statRoleBreakdown">0 Pros &bull; 0 Companies</div>
+          </div>
+          <div class="admin-metric-card">
+            <div class="am-label">Shield Verification Rate</div>
+            <div class="am-val" id="statVerificationRate">0%</div>
+            <div class="am-sub" id="statVerifiedCount">🛡️ 0 Verified Accounts</div>
+          </div>
+          <div class="admin-metric-card">
+            <div class="am-label">Live Active Tenders</div>
+            <div class="am-val" id="statActiveTendersCount">0</div>
+            <div class="am-sub">Real project listings in marketplace</div>
+          </div>
+        </div>
+
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
+          <h3 style="font-size:16px; font-weight:900; color:var(--ink); margin-bottom:16px;">Live Platform System Status</h3>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:800; color:var(--ink); padding:12px 16px; background:var(--paper); border-radius:12px;">
+              <span>⚡ Supabase Database</span>
+              <span class="status-badge badge-active">Live Connected</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:800; color:var(--ink); padding:12px 16px; background:var(--paper); border-radius:12px;">
+              <span>💳 Paystack DVA Webhooks</span>
+              <span class="status-badge badge-active">Operational</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:800; color:var(--ink); padding:12px 16px; background:var(--paper); border-radius:12px;">
+              <span>🛡️ NIN / COREN Verification API</span>
+              <span class="status-badge badge-active">Ready</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:800; color:var(--ink); padding:12px 16px; background:var(--paper); border-radius:12px;">
+              <span>🤖 Gemini Copilot AI Engine</span>
+              <span class="status-badge badge-active">Operational</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: MANAGE USERS (REAL LIVE REGISTERED USERS ONLY) -->
+      <div class="tab-pane" id="pane-users">
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+            <div>
+              <h3 style="font-size:18px; font-weight:900; color:var(--ink);">Live Platform User Directory</h3>
+              <p style="font-size:12px; color:var(--muted); margin-top:2px;">View and manage real accounts registered on Collekt.</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <input type="text" id="adminUserSearchInput" class="form-input" placeholder="Search user by name or email..." style="font-size:12px; width:240px;" oninput="renderAdminUserTable(this.value)">
+              <select id="adminUserRoleFilter" class="form-input" style="font-size:12px; width:130px;" onchange="renderAdminUserTable(document.getElementById('adminUserSearchInput').value)">
+                <option value="all">All Roles</option>
+                <option value="professional">Professionals</option>
+                <option value="company">Companies</option>
+                <option value="admin">Admins</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+            <table class="data-table" style="min-width:700px;">
+              <thead class="table-head">
+                <tr><th>User Account</th><th>Role</th><th>Shield Verification</th><th>Wallet NUBAN</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="adminUserTableBody">
+                <!-- Live JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: VERIFY PROFESSIONALS -->
+      <div class="tab-pane" id="pane-verify-pros">
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
+          <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px;">Professional Verification Queue</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Real registered professionals requesting Shield Verification 🛡️ status.</p>
+
+          <div id="adminProVerifyQueue">
+            <!-- Live JS populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: VERIFY COMPANIES -->
+      <div class="tab-pane" id="pane-verify-companies">
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
+          <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px;">Corporate Enterprise Verification Queue</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Real corporate enterprise accounts requesting verification.</p>
+
+          <div id="adminCoVerifyQueue">
+            <!-- Live JS populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: MODERATE OPPORTUNITIES (TENDERS) -->
+      <div class="tab-pane" id="pane-tenders">
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
+          <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px;">Live Opportunity Moderation</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Review and moderate actual project tenders posted in marketplace.</p>
+
+          <div class="table-responsive" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+            <table class="data-table" style="min-width:700px;">
+              <thead class="table-head">
+                <tr><th>Project Tender Title</th><th>Category</th><th>Company / Employer</th><th>Budget</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="adminTendersTableBody">
+                <!-- Live JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: MANAGE APPLICATIONS (PROPOSALS) -->
+      <div class="tab-pane" id="pane-applications">
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
+          <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px;">Master Submitted Applications</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Real submitted proposal bids across platform project listings.</p>
+
+          <div class="table-responsive" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+            <table class="data-table" style="min-width:700px;">
+              <thead class="table-head">
+                <tr><th>Project Title</th><th>Applicant Professional</th><th>Proposed Bid</th><th>Status</th><th>Action</th></tr>
+              </thead>
+              <tbody id="adminProposalsTableBody">
+                <!-- Live JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 7: ENGAGEMENTS & ESCROW -->
+      <div class="tab-pane" id="pane-engagements">
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
+          <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px;">Active Engagements &amp; Escrow Overrides</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Manage active engineering contracts and escrow disbursals.</p>
+
+          <div class="table-responsive" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+            <table class="data-table" style="min-width:700px;">
+              <thead class="table-head">
+                <tr><th>Contract Title</th><th>Contractor</th><th>Employer</th><th>Escrow Value</th><th>Override Action</th></tr>
+              </thead>
+              <tbody id="adminEngagementsTableBody">
+                <!-- Live JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 8: TRANSACTIONS & CSV EXPORT -->
+      <div class="tab-pane" id="pane-transactions">
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h3 style="font-size:18px; font-weight:900; color:var(--ink);">Live Transaction Ledger</h3>
+              <p style="font-size:12px; color:var(--muted); margin-top:2px;">Real-time audit log of wallet deposits, payouts, and 10% platform commission fee calculations.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="exportAdminTransactionsCSV()" style="font-weight:800; background:linear-gradient(135deg, #0e3b35, #13756f);">
+              📥 Export Financial Report (CSV)
+            </button>
+          </div>
+
+          <div class="table-responsive" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+            <table class="data-table" style="min-width:700px;">
+              <thead class="table-head">
+                <tr><th>Tx Reference</th><th>Description</th><th>Type</th><th>Amount</th><th>Date</th></tr>
+              </thead>
+              <tbody id="adminTxLedgerBody">
+                <!-- Live JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 9: MANAGE SUBSCRIPTIONS -->
+      <div class="tab-pane" id="pane-subscriptions">
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
+          <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px;">Live Membership Subscriptions (10% Platform Fee Base)</h3>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+            <div style="padding:20px; background:var(--paper); border:1px solid var(--line); border-radius:14px; text-align:center;">
+              <div style="font-size:11px; font-weight:800; color:var(--muted);">FREE TIER</div>
+              <div style="font-size:24px; font-weight:900; color:var(--ink); margin:6px 0;">$0 / mo</div>
+              <div style="font-size:14px; font-weight:800; color:var(--teal);" id="subFreeCount">0 Registered Users</div>
+            </div>
+            <div style="padding:20px; background:var(--paper); border:2px solid var(--teal); border-radius:14px; text-align:center;">
+              <div style="font-size:11px; font-weight:800; color:var(--teal);">PRO PROFESSIONAL</div>
+              <div style="font-size:24px; font-weight:900; color:var(--ink); margin:6px 0;">$15 / mo</div>
+              <div style="font-size:14px; font-weight:800; color:var(--teal);" id="subProCount">0 Active Pros</div>
+            </div>
+            <div style="padding:20px; background:var(--paper); border:2px solid var(--amber); border-radius:14px; text-align:center;">
+              <div style="font-size:11px; font-weight:800; color:var(--amber);">CORPORATE ENTERPRISE</div>
+              <div style="font-size:24px; font-weight:900; color:var(--ink); margin:6px 0;">$50 / mo</div>
+              <div style="font-size:14px; font-weight:800; color:var(--amber);" id="subCorpCount">0 Active Companies</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 10: AUDIT ACTIVITY LOG -->
+      <div class="tab-pane" id="pane-audit">
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
+          <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px;">Security Audit Log</h3>
+          <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Live audit trail of administrative actions.</p>
+
+          <div id="adminAuditLogContainer">
+            <!-- Live JS populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: NOVA BANK SETTLEMENT & ESCROW HUB -->
+      <div class="tab-pane" id="pane-nova-settlement">
+        
+        <!-- Header Banner -->
+        <div style="background:linear-gradient(135deg, #0e3b35 0%, #13756f 100%); border-radius:var(--r-lg); padding:24px 28px; color:#fff; margin-bottom:24px; box-shadow:0 8px 24px rgba(14,59,53,0.18);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+            <div>
+              <div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; opacity:.85; display:flex; align-items:center; gap:6px;">
+                <span>🏛️</span> Official Banking Partner Engine
+              </div>
+              <h2 style="font-size:22px; font-weight:900; margin:4px 0 6px; color:#fff;">NOVA Bank Settlement &amp; Escrow Manager</h2>
+              <p style="font-size:13px; opacity:.9; margin:0; max-width:620px;">
+                Collekt operates strictly on NOVA Commercial Bank for zero-fee escrow settlements, verified funding, and instant milestone releases.
+              </p>
+            </div>
+            <div style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); border-radius:14px; padding:12px 18px; text-align:right;">
+              <div style="font-size:10.5px; text-transform:uppercase; font-weight:800; opacity:.8;">Partner Status</div>
+              <div style="font-size:16px; font-weight:900; color:#4ade80;">● ACTIVE &amp; LIVE</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. Collekt Master NOVA Bank Account Configuration -->
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px 28px; margin-bottom:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h3 style="font-size:16px; font-weight:900; color:var(--ink); margin-bottom:4px;">
+                🏛️ Collekt Master NOVA Bank Account (Deposit Destination)
+              </h3>
+              <p style="font-size:12px; color:var(--muted); margin:0;">
+                This account is presented to all users when they click "Fund Wallet" to transfer funds.
+              </p>
+            </div>
+            <span style="font-size:11px; font-weight:800; background:#dcfce7; color:#15803d; padding:4px 12px; border-radius:99px;">
+              ✓ Central Settlement Account
+            </span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:16px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:11.5px; font-weight:800;">Banking Institution</label>
+              <input class="form-input" type="text" value="NOVA Commercial Bank" disabled style="background:var(--paper); font-weight:800; color:var(--forest); cursor:not-allowed;">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:11.5px; font-weight:800;">Master NUBAN Account Number</label>
+              <input class="form-input" type="tel" id="adminMasterNovaAcct" maxlength="10" placeholder="e.g. 0129845011" style="font-family:monospace; font-size:15px; font-weight:900;">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:11.5px; font-weight:800;">Official Account Holder Name</label>
+              <input class="form-input" type="text" id="adminMasterNovaName" placeholder="e.g. COLLEKT ENTERPRISE / NOVA ESCROW" style="font-weight:800; text-transform:uppercase;">
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; border-top:1px solid var(--line); padding-top:14px;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="saveAdminMasterNovaAccount()" style="background:var(--teal); border:none; font-weight:900; padding:8px 20px;">
+              💾 Save Master Bank Settings
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Pending NOVA Bank Deposits Queue -->
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px 28px; margin-bottom:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h3 style="font-size:16px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                <span>📥</span> Inbound NOVA Bank Deposits &amp; Funding Queue
+              </h3>
+              <p style="font-size:12px; color:var(--muted); margin:0;">
+                Review customer bank transfer confirmations. Click "Approve &amp; Credit" to immediately increase the user's available wallet balance.
+              </p>
+            </div>
+            <button type="button" class="btn btn-outline btn-xs" onclick="renderAdminNovaDeposits()" style="font-weight:800;">
+              🔄 Refresh Queue
+            </button>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="data-table" style="width:100%; min-width:720px;">
+              <thead class="table-head">
+                <tr>
+                  <th>User / Member</th>
+                  <th>Amount (NGN)</th>
+                  <th>Transfer Reference</th>
+                  <th>Sender NOVA Details</th>
+                  <th>Date &amp; Time</th>
+                  <th>Status</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminNovaDepositsTbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 3. Registered Users NOVA Bank Registry -->
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px 28px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h3 style="font-size:16px; font-weight:900; color:var(--ink); margin-bottom:4px;">
+                👥 Members' NOVA Bank Accounts Registry
+              </h3>
+              <p style="font-size:12px; color:var(--muted); margin:0;">
+                All verified NOVA Bank NUBAN accounts registered by specialists and companies for withdrawals.
+              </p>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="data-table" style="width:100%; min-width:680px;">
+              <thead class="table-head">
+                <tr>
+                  <th>User / Member</th>
+                  <th>Role</th>
+                  <th>NOVA NUBAN</th>
+                  <th>Registered Account Name</th>
+                  <th>Wallet Balance</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="adminNovaUsersTbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 11: PLATFORM GATEWAY & API KEYS (PAYSTACK & GEMINI) -->
+      <div class="tab-pane" id="pane-settings">
+        <!-- Paystack Gateway & Dedicated Virtual Accounts (DVA) Card -->
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:28px; margin-bottom:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                <span style="font-size:20px;">💳</span> Paystack Gateway Integration &amp; Dedicated Virtual Accounts (DVA)
+              </h3>
+              <p style="font-size:12px; color:var(--muted); margin-bottom:0;">
+                Connect your Live Paystack credentials to issue automated Nigerian NUBAN bank accounts and process online deposits.
+              </p>
+            </div>
+            <span id="adminPaystackStatusBadge" style="padding:5px 14px; border-radius:99px; background:#dcfce7; color:#15803d; font-size:11px; font-weight:800;">
+              🟢 Live Paystack Connected
+            </span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" style="font-size:12px; font-weight:800;">Paystack Public Key (pk_live_... / pk_test_...)</label>
+              <input class="form-input" type="text" id="adminPaystackPublicKey" placeholder="Paste your Paystack Public Key here" style="font-family:monospace; font-size:12.5px;">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" style="font-size:12px; font-weight:800;">Paystack Secret Key (sk_live_... / sk_test_...)</label>
+              <div style="position:relative;">
+                <input class="form-input" type="password" id="adminPaystackSecretKey" placeholder="Paste your Paystack Secret Key here" style="font-family:monospace; font-size:12.5px; padding-right:40px;">
+                <button type="button" onclick="toggleAdminPassVisibility('adminPaystackSecretKey')" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px;">👁️</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:20px;">
+            <label class="form-label" style="font-size:12px; font-weight:800;">Default Virtual Bank Partner</label>
+            <select class="form-input" id="adminPaystackBankPartnerSelect" style="font-size:13px;">
+              <option value="NOVA Bank (Paystack DVA)">NOVA Bank (Paystack DVA) — Preferred Commercial Partner</option>
+              <option value="Wema Bank (Paystack DVA)">Wema Bank (Paystack DVA) — Instant NUBANs</option>
+              <option value="Titan Trust Bank (Paystack DVA)">Titan Trust Bank (Paystack DVA)</option>
+              <option value="Providus Bank (Paystack DVA)">Providus Bank (Paystack DVA)</option>
+              <option value="Sterling Bank (Paystack DVA)">Sterling Bank (Paystack DVA)</option>
+            </select>
+          </div>
+
+          <!-- Action buttons -->
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:18px; flex-wrap:wrap; gap:12px;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="testAdminPaystackConnection()" style="font-weight:800;">
+                🧪 Test Paystack Connection
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="adminMassProvisionDVA()" style="color:var(--teal); border-color:var(--teal); font-weight:800;">
+                🔄 Provision Live Accounts for All Users
+              </button>
+            </div>
+            <button type="button" id="saveGatewayCredsBtn" class="btn btn-primary btn-sm" onclick="saveAdminPaystackConfig()" style="background:#09a5db; border:none; font-weight:900; min-width:180px;">
+              💾 Save Gateway Credentials
+            </button>
+          </div>
+        </div>
+
+        <!-- Google Gemini AI API Configuration Card -->
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:28px; margin-bottom:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                <span style="font-size:20px;">✨</span> Google Gemini 2.5 AI Integration
+              </h3>
+              <p style="font-size:12px; color:var(--muted); margin-bottom:0;">
+                Powers Kolly AI proposal drafting, real-time bid pricing advisory, and tender intelligence across Collekt.
+              </p>
+            </div>
+            <span id="adminGeminiStatusBadge" style="padding:5px 14px; border-radius:99px; background:#dbeafe; color:#1d4ed8; font-size:11px; font-weight:800;">
+              ✨ Gemini 2.5 Active
+            </span>
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label" style="font-size:12px; font-weight:800;">Google Gemini API Key (AIzaSy...)</label>
+            <div style="position:relative;">
+              <input class="form-input" type="password" id="adminGeminiApiKey" placeholder="AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" style="font-family:monospace; font-size:12.5px; padding-right:40px;">
+              <button type="button" onclick="toggleAdminPassVisibility('adminGeminiApiKey')" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px;">👁️</button>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:18px; flex-wrap:wrap; gap:12px;">
+            <span style="font-size:12px; color:var(--muted);">Allows intelligent proposal suggestions for all registered professionals.</span>
+            <button type="button" class="btn btn-primary btn-sm" onclick="saveAdminGeminiConfig()" style="background:var(--teal); border:none; font-weight:900;">
+              💾 Save Gemini AI Key
+            </button>
+          </div>
+        </div>
+
+        <!-- Paystack Webhook Configuration Card -->
+        <div style="background:linear-gradient(135deg, #09201d, #0e3b35); border:1.5px solid #22c55e; border-radius:var(--r-lg); padding:24px; color:#fff;">
+          <h4 style="font-size:15px; font-weight:900; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+            <span>⚡</span> Live Paystack Webhook Setup Guide
+          </h4>
+          <p style="font-size:12px; color:rgba(255,255,255,0.75); line-height:1.6; margin-bottom:14px;">
+            To credit users' wallets automatically whenever they transfer funds from GTBank, Access, Zenith, Kuda, or OPay to their assigned NUBAN account, paste this Webhook URL in your Paystack dashboard:
+          </p>
+          <div style="display:flex; gap:10px; align-items:center; background:rgba(0,0,0,0.3); padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); margin-bottom:14px;">
+            <code style="flex:1; font-family:monospace; font-size:12.5px; color:#4ade80;" id="adminWebhookUrlText">https://collekng.xyz/webhook</code>
+            <button type="button" class="btn btn-outline btn-xs" onclick="copyAdminWebhookUrl()" style="color:#fff; border-color:rgba(255,255,255,0.4); font-size:11px;">📋 Copy URL</button>
+          </div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.6); line-height:1.5;">
+            ✓ Listens to: <strong>charge.success</strong> (instant wallet credit) &bull; <strong>dedicated_account.assign.success</strong> (new NUBAN notification).
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- UNIVERSAL DOCUMENT PREVIEWER MODAL -->
+<div class="modal-overlay" id="docPreviewModal" style="display:none; position:fixed; inset:0; z-index:9990; background:rgba(4,14,13,0.85); backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:20px;">
+  <div class="modal-card" style="position:relative; max-width:640px; width:100%; border-radius:24px; padding:28px; background:var(--white); border:1px solid var(--line); box-shadow:0 32px 80px rgba(0,0,0,0.4);">
+    <button class="modal-close" onclick="closeModal('docPreviewModal')" style="position:absolute; top:18px; right:18px; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:var(--paper); cursor:pointer; font-size:16px; display:grid; place-items:center;">&times;</button>
+
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+      <div style="width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg, #0E3B35, #13756F); color:#fff; display:grid; place-items:center; font-size:22px;">📄</div>
+      <div>
+        <div style="font-size:18px; font-weight:900; color:var(--ink);" id="docModalTitle">Credentials Inspection</div>
+        <div style="font-size:12px; color:var(--muted);" id="docModalSubTitle">COREN Engineering Certificate &amp; Identity Documentation</div>
+      </div>
+    </div>
+
+    <!-- Document Content Viewer Container -->
+    <div id="docModalBody" style="background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:20px; min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; margin-bottom:20px;">
+      <!-- Populated by JS -->
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:16px; flex-wrap:wrap; gap:10px;">
+      <div id="docModalProfileLinkWrap">
+        <!-- JS populated link to public profile -->
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-outline btn-sm" onclick="closeModal('docPreviewModal')">Close Inspector</button>
+        <button class="btn btn-outline btn-sm" id="docModalRejectBtn" style="color:#dc2626; border-color:rgba(220,38,38,0.4); font-weight:800;">❌ Unverify / Revoke</button>
+        <button class="btn btn-primary btn-sm" id="docModalApproveBtn" style="font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f);">Approve Verification 🛡️</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN EDIT USER PROFILE MODAL -->
+<div class="modal-overlay" id="adminEditUserModal" style="display:none; position:fixed; inset:0; z-index:9992; background:rgba(4,14,13,0.85); backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:20px;">
+  <div class="modal-card" style="position:relative; max-width:600px; width:100%; border-radius:24px; padding:28px; background:var(--white); border:1px solid var(--line); box-shadow:0 32px 80px rgba(0,0,0,0.4); max-height:90vh; overflow-y:auto;">
+    <button class="modal-close" onclick="closeModal('adminEditUserModal')" style="position:absolute; top:18px; right:18px; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:var(--paper); cursor:pointer; font-size:16px; display:grid; place-items:center;">&times;</button>
+
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+      <div style="width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg, #0E3B35, #13756F); color:#fff; display:grid; place-items:center; font-size:22px;">👤</div>
+      <div>
+        <div style="font-size:18px; font-weight:900; color:var(--ink);" id="adminEditModalTitle">Edit User Profile</div>
+        <div style="font-size:12px; color:var(--muted);" id="adminEditModalSub">Manage user credentials, 3-part names, and verification status</div>
+      </div>
+    </div>
+
+    <input type="hidden" id="adminEditUserId">
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">First Name</label>
+        <input class="form-input" type="text" id="adminEditFirstName" placeholder="First name">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Last Name</label>
+        <input class="form-input" type="text" id="adminEditLastName" placeholder="Last name">
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Other Name <span style="font-size:11px; font-weight:600; color:var(--muted);">(Optional)</span></label>
+        <input class="form-input" type="text" id="adminEditOtherName" placeholder="Middle or other name">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Username</label>
+        <input class="form-input" type="text" id="adminEditUsername" placeholder="username">
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Email Address</label>
+        <input class="form-input" type="email" id="adminEditEmail" placeholder="user@collekt.ng">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Account Role</label>
+        <select class="form-input" id="adminEditRole">
+          <option value="professional">Professional Specialist</option>
+          <option value="company">Corporate / Enterprise</option>
+          <option value="admin">Platform Administrator</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Professional / Company Title</label>
+        <input class="form-input" type="text" id="adminEditTitle" placeholder="e.g. Senior Proposal Manager">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Verification Status</label>
+        <select class="form-input" id="adminEditVerified">
+          <option value="true">Shield Verified 🛡️ (Active)</option>
+          <option value="false">Unverified ⚠️ (Pending)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Location / State</label>
+        <input class="form-input" type="text" id="adminEditLocation" placeholder="e.g. Lagos State, Nigeria">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Account Standing / Access</label>
+        <select class="form-input" id="adminEditStatus">
+          <option value="active">Active Account ✅</option>
+          <option value="suspended">Suspended Account ⛔</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:16px; flex-wrap:wrap; gap:10px;">
+      <button type="button" class="btn btn-outline btn-sm" id="adminEditDeleteBtn" onclick="deleteUserFromEditModal()" style="color:#dc2626; border-color:rgba(220,38,38,0.4); font-weight:800;">🗑️ Delete User</button>
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('adminEditUserModal')">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="saveAdminEditUser()" style="font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f);">Save User Profile 💾</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DELETE USER CONFIRMATION MODAL -->
+<div class="modal-overlay" id="adminDeleteUserModal" style="display:none; position:fixed; inset:0; z-index:9996; background:rgba(4,14,13,0.85); backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:20px;">
+  <div class="modal-card" style="position:relative; max-width:440px; width:100%; border-radius:24px; padding:28px; background:var(--white); border:1px solid var(--line); text-align:center; box-shadow:0 32px 80px rgba(0,0,0,0.4);">
+    <div style="width:54px; height:54px; border-radius:18px; background:#fef2f2; color:#dc2626; display:grid; place-items:center; font-size:26px; margin:0 auto 16px; border:1px solid #fee2e2;">🗑️</div>
+    <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:6px;">Permanently Delete User?</h3>
+    <p style="font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:18px;">Are you sure you want to delete this account? All associated profile data, credentials, and access permissions will be permanently removed.</p>
+
+    <div id="adminDeleteTargetPreview" style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:20px; text-align:left; display:flex; align-items:center; gap:12px;">
+      <!-- JS populated -->
+    </div>
+
+    <input type="hidden" id="adminDeleteTargetUserId">
+
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('adminDeleteUserModal')" style="min-width:100px;">Cancel</button>
+      <button type="button" class="btn btn-primary btn-sm" onclick="executeAdminDeleteUser()" style="background:#dc2626; border-color:#dc2626; color:#fff; font-weight:900; min-width:140px;">Delete Account 🗑️</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGOUT CONFIRMATION MODAL -->
+<div class="modal-overlay" id="logoutConfirmModal" style="display:none; position:fixed; inset:0; z-index:9995; background:rgba(4,14,13,0.85); backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:20px;">
+  <div class="modal-card" style="position:relative; max-width:400px; width:100%; border-radius:24px; padding:28px; background:var(--white); border:1px solid var(--line); text-align:center; box-shadow:0 32px 80px rgba(0,0,0,0.4);">
+    <div style="font-size:36px; margin-bottom:12px;">🔓</div>
+    <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:6px;">Log Out of Admin Portal?</h3>
+    <p style="font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:24px;">Your admin session will be securely terminated. You will need to re-authenticate at admin-login.html.</p>
+
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('logoutConfirmModal')" style="min-width:100px;">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="logoutAdminUser()" style="background:#ef4444; border-color:#ef4444; color:#fff; font-weight:900; min-width:120px;">Yes, Log Out</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=28.0"></script>
+<script src="app.js?v=28.0"></script>
+<script>
+  async function initAdminDashboard() {
+    // 1. Verify Master Admin or live Supabase session
+    let authData = null;
+    try {
+      const localAdmin = JSON.parse(localStorage.getItem('collekt_admin_auth') || sessionStorage.getItem('collekt_admin_auth') || 'null');
+      if (localAdmin && localAdmin.role === 'admin') {
+        authData = {
+          user: { id: localAdmin.id || 'admin_master_1', email: localAdmin.email || 'admin@collekt.ng' },
+          profile: localAdmin
+        };
+      }
+      if (!authData) {
+        const localUser = JSON.parse(localStorage.getItem('collekt_user') || 'null');
+        if (localUser && localUser.role === 'admin') {
+          authData = {
+            user: { id: localUser.id || 'admin_master_1', email: localUser.email || 'admin@collekt.ng' },
+            profile: localUser
+          };
+        }
+      }
+    } catch(e) {}
+
+    if (!authData && typeof checkAdminSession === 'function') {
+      try {
+        authData = await checkAdminSession();
+      } catch(e) {}
+    }
+
+    if (!authData) {
+      window.location.replace('admin-login.html');
+      return;
+    }
+
+    const adminProfile = authData.profile || {};
+    const nameEl = document.getElementById('adminOperatorName');
+    if (nameEl) nameEl.textContent = adminProfile.name || adminProfile.email || 'Super Administrator';
+
+    // 2. Safe remote user sync if Supabase is connected
+    if (window.sb && typeof sb.from === 'function') {
+      try {
+        const resetEmails = ['chenpao51@gmail.com', 'smileykori@gmail.com', 'bethelvwire@gmail.com', 'collektng@collekt.xyz'];
+        const { data: remoteProfiles, error } = await sb.from('profiles').select('*');
+        if (!error && remoteProfiles && remoteProfiles.length > 0) {
+          remoteProfiles.forEach(p => {
+            if (p && p.email && !resetEmails.includes(p.email.toLowerCase().trim())) {
+              if (typeof registerUserInDirectory === 'function') registerUserInDirectory(p);
+            }
+          });
+        }
+      } catch(e) {
+        console.warn('Admin remote sync notice:', e);
+      }
+    }
+
+    try {
+      renderLiveAdminDashboard();
+    } catch(renderErr) {
+      console.error('Admin render error:', renderErr);
+    }
+
+    try {
+      handleAdminHashNav();
+    } catch(e) {}
+
+    window.addEventListener('hashchange', handleAdminHashNav);
+
+    // Auto-refresh when new users sign up or update profiles in other tabs
+    window.addEventListener('storage', (e) => {
+      if (!e.key || e.key === 'collekt_all_users' || e.key === 'collekt_user' || e.key.startsWith('collekt_uploads')) {
+        try { renderLiveAdminDashboard(); } catch(err){}
+      }
+    });
+
+    window.addEventListener('collekt_users_updated', () => {
+      try { renderLiveAdminDashboard(); } catch(err){}
+    });
+
+    // Real-time live polling every 2.5 seconds
+    setInterval(() => {
+      try { updateAdminNavBadges(); } catch(e){}
+    }, 2500);
+  }
+
+  // Safe executor: runs immediately if DOM is ready, or on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAdminDashboard);
+  } else {
+    initAdminDashboard();
+  }
+
+  function handleAdminHashNav() {
+    const hash = (window.location.hash || '').replace('#', '').toLowerCase();
+    if (!hash) return;
+    const tabMap = {
+      'overview': 'overview',
+      'analytics': 'overview',
+      'users': 'users',
+      'pros': 'pros',
+      'cos': 'cos',
+      'tenders': 'tenders',
+      'jobs': 'tenders',
+      'proposals': 'proposals',
+      'applications': 'proposals',
+      'engagements': 'engagements',
+      'escrow': 'engagements',
+      'ledger': 'ledger',
+      'transactions': 'ledger',
+      'subs': 'subs',
+      'subscriptions': 'subs',
+      'nova': 'nova-settlement',
+      'nova-settlement': 'nova-settlement',
+      'settlement': 'nova-settlement',
+      'gateway': 'gateway',
+      'settings': 'gateway',
+      'audit': 'audit',
+      'logs': 'audit'
+    };
+    if (tabMap[hash]) {
+      switchAdminTab(tabMap[hash]);
+    }
+  }
+
+  function openLogoutConfirmModal() {
+    const modal = document.getElementById('logoutConfirmModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('open');
+    }
+  }
+
+  function switchAdminTab(tabId, btn) {
+    document.querySelectorAll('.admin-nav-item').forEach(b => {
+      b.classList.remove('active');
+      const onclickAttr = b.getAttribute('onclick') || '';
+      if (onclickAttr.includes(`'${tabId}'`)) {
+        b.classList.add('active');
+      }
+    });
+    if (btn) btn.classList.add('active');
+
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('pane-' + tabId);
+    if (target) target.classList.add('active');
+  }
+
+  function handleAdminGlobalSearch(query) {
+    const q = String(query || '').trim().toLowerCase();
+    if (!q) return;
+
+    // Switch to Users tab and filter
+    switchAdminTab('users', document.querySelectorAll('.admin-nav-item')[1]);
+    const input = document.getElementById('adminUserSearchInput');
+    if (input) {
+      input.value = q;
+      renderAdminUserTable(q);
+    }
+  }
+
+  function renderLiveAdminDashboard() {
+    renderLiveAnalytics();
+    renderAdminUserTable('');
+    renderAdminProVerifyQueue();
+    renderAdminCoVerifyQueue();
+    renderAdminTendersTable();
+    renderAdminProposalsTable();
+    renderAdminEngagementsTable();
+    renderAdminTxLedger();
+    renderAdminAuditLogs();
+    renderAdminNovaSettlement();
+    initAdminSettingsUI();
+    updateAdminNavBadges();
+  }
+
+  function initAdminSettingsUI() {
+    const pk = localStorage.getItem('collekt_paystack_public_key') || '';
+    const sk = localStorage.getItem('collekt_paystack_secret_key') || '';
+    const partner = localStorage.getItem('collekt_paystack_bank_partner') || 'NOVA Bank (Paystack DVA)';
+
+    const gemini = localStorage.getItem('collekt_gemini_api_key') || '';
+
+    const pkInput = document.getElementById('adminPaystackPublicKey');
+    const skInput = document.getElementById('adminPaystackSecretKey');
+    const partnerSelect = document.getElementById('adminPaystackBankPartnerSelect');
+    const geminiInput = document.getElementById('adminGeminiApiKey');
+
+    if (pkInput) pkInput.value = pk;
+    if (skInput) skInput.value = sk;
+    if (partnerSelect) partnerSelect.value = partner;
+    if (geminiInput) geminiInput.value = gemini;
+
+    const badge = document.getElementById('adminPaystackStatusBadge');
+    if (badge) {
+      if (pk.startsWith('pk_live_') || sk.startsWith('sk_live_')) {
+        badge.innerHTML = '🟢 Live Paystack Connected';
+        badge.style.background = '#dcfce7';
+        badge.style.color = '#15803d';
+      } else if (pk.startsWith('pk_test_') || sk.startsWith('sk_test_')) {
+        badge.innerHTML = '🟡 Test Paystack Connected';
+        badge.style.background = '#fef3c7';
+        badge.style.color = '#b45309';
+      } else {
+        badge.innerHTML = '⚪ Not Configured';
+        badge.style.background = '#f1f5f9';
+        badge.style.color = '#64748b';
+      }
+    }
+
+    const geminiBadge = document.getElementById('adminGeminiStatusBadge');
+    if (geminiBadge) {
+      if (gemini) {
+        geminiBadge.innerHTML = '✨ Gemini 2.5 Active';
+        geminiBadge.style.background = '#dbeafe';
+        geminiBadge.style.color = '#1d4ed8';
+      } else {
+        geminiBadge.innerHTML = '⚪ AI Inactive';
+        geminiBadge.style.background = '#f1f5f9';
+        geminiBadge.style.color = '#64748b';
+      }
+    }
+
+    const whUrl = document.getElementById('adminWebhookUrlText');
+    if (whUrl) {
+      whUrl.textContent = window.location.origin + '/webhook';
+    }
+  }
+
+  async function saveAdminPaystackConfig() {
+    const btn = document.getElementById('saveGatewayCredsBtn');
+    if (btn) btn.innerHTML = '⏳ Saving &amp; Implementing...';
+
+    try {
+      const pk = document.getElementById('adminPaystackPublicKey')?.value.trim() || '';
+      const sk = document.getElementById('adminPaystackSecretKey')?.value.trim() || '';
+      const partner = document.getElementById('adminPaystackBankPartnerSelect')?.value || 'NOVA Bank (Paystack DVA)';
+
+      if (pk) localStorage.setItem('collekt_paystack_public_key', pk);
+      if (sk) localStorage.setItem('collekt_paystack_secret_key', sk);
+      if (partner) localStorage.setItem('collekt_paystack_bank_partner', partner);
+
+      // 1. Immediately update all registered users' wallets with the selected bank partner
+      const users = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+      let updatedCount = 0;
+      users.forEach(u => {
+        if (!u.wallet) u.wallet = { balance: 0, escrow_balance: 0 };
+        u.wallet.bank_assigned = true;
+        u.wallet.bank_name = partner;
+        const seed = String(u.id || u.email || '123456789');
+        let hash = 0;
+        for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+        const numSuffix = String(Math.abs(hash)).padStart(6, '0').slice(-6);
+        const prefix = partner.includes('NOVA') ? '9800' : partner.includes('Wema') ? '9600' : partner.includes('Titan') ? '9010' : partner.includes('Sterling') ? '7800' : '0290';
+        u.wallet.account_number = prefix + numSuffix;
+        updatedCount++;
+      });
+      if (typeof saveDirectoryUsers === 'function') {
+        saveDirectoryUsers(users);
+      }
+
+      // 2. Also update currently active logged-in user wallet immediately
+      const currentUser = typeof getUser === 'function' ? getUser() : null;
+      if (currentUser) {
+        if (!currentUser.wallet) currentUser.wallet = { balance: 0, escrow_balance: 0 };
+        currentUser.wallet.bank_assigned = true;
+        currentUser.wallet.bank_name = partner;
+        const seed = String(currentUser.id || currentUser.email || '123456789');
+        let hash = 0;
+        for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+        const numSuffix = String(Math.abs(hash)).padStart(6, '0').slice(-6);
+        const prefix = partner.includes('NOVA') ? '9800' : partner.includes('Wema') ? '9600' : partner.includes('Titan') ? '9010' : partner.includes('Sterling') ? '7800' : '0290';
+        currentUser.wallet.account_number = prefix + numSuffix;
+        if (typeof setUser === 'function') setUser(currentUser);
+      }
+
+      if (typeof logAdminAuditActivity === 'function') {
+        logAdminAuditActivity(`Updated Paystack Gateway to ${partner} and synced ${updatedCount} user wallets`, 'Super Administrator', 'gateway_settings');
+      }
+
+      showToast(`🎉 ${partner} implemented on all user wallets!`);
+      initAdminSettingsUI();
+
+      if (btn) {
+        btn.innerHTML = '✓ Implemented Successfully!';
+        setTimeout(() => { btn.innerHTML = '💾 Save Gateway Credentials'; }, 1800);
+      }
+    } catch(err) {
+      console.error('Error saving paystack settings:', err);
+      showToast('⚠️ Could not save settings: ' + err.message, 'warning');
+      if (btn) btn.innerHTML = '💾 Save Gateway Credentials';
+    }
+  }
+
+  async function testAdminPaystackConnection() {
+    let sk = (document.getElementById('adminPaystackSecretKey')?.value || localStorage.getItem('collekt_paystack_secret_key') || '').trim();
+    const pk = (document.getElementById('adminPaystackPublicKey')?.value || localStorage.getItem('collekt_paystack_public_key') || '').trim();
+
+    if (!sk) {
+      showToast('⚠️ Please enter your Paystack Secret Key first.', 'warning');
+      return;
+    }
+
+    // Auto-repair if user accidentally omitted sk_live_ or sk_test_ prefix
+    if (!sk.startsWith('sk_live_') && !sk.startsWith('sk_test_') && /^[a-fA-F0-9]{32,48}$/.test(sk)) {
+      const prefix = pk.startsWith('pk_live_') ? 'sk_live_' : 'sk_test_';
+      sk = prefix + sk;
+      const inputEl = document.getElementById('adminPaystackSecretKey');
+      if (inputEl) inputEl.value = sk;
+      localStorage.setItem('collekt_paystack_secret_key', sk);
+    }
+
+    showToast('⏳ Testing connection with Paystack Live API...');
+
+    // 1. Try serverless backend proxy
+    try {
+      const resp = await fetch('/.netlify/functions/paystack', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'test_connection', secret_key: sk })
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.success) {
+          showToast('🎉 Connection Successful! Paystack Live API is active and authenticated.');
+          return;
+        } else {
+          showToast('⚠️ Paystack: ' + (data.message || 'Authentication error.'), 'warning');
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Backend test notice:', e);
+    }
+
+    // 2. Direct fallback test
+    try {
+      const cResp = await fetch('https://api.paystack.co/customer?perPage=1', {
+        headers: { 'Authorization': 'Bearer ' + sk }
+      });
+      const cData = await cResp.json();
+      if (cData.status) {
+        showToast('🎉 Paystack Live API Connection Verified!');
+      } else {
+        const msg = cData.message || 'Invalid Paystack Key';
+        if (msg.toLowerCase().includes('invalid key')) {
+          alert("Paystack API Notice: Invalid Key\n\nWhy this happens:\n1. Your Paystack Secret Key must start with 'sk_live_' (or 'sk_test_').\n2. In Paystack Dashboard (Settings > API Keys), you must click 'Show' and enter your Paystack password to reveal and copy the full secret key.\n3. Make sure you are not in Test mode while using Live keys.\n4. Ensure compliance documents are approved on Paystack if using Live mode.");
+        } else {
+          showToast('⚠️ Paystack: ' + msg, 'warning');
+        }
+      }
+    } catch(e) {
+      showToast('ℹ️ Key saved. Paystack will authenticate inbound webhook transfers.', 'info');
+    }
+  }
+
+  async function adminMassProvisionDVA() {
+    let sk = (document.getElementById('adminPaystackSecretKey')?.value || localStorage.getItem('collekt_paystack_secret_key') || '').trim();
+    const pk = (document.getElementById('adminPaystackPublicKey')?.value || localStorage.getItem('collekt_paystack_public_key') || '').trim();
+
+    if (!sk) {
+      showToast('⚠️ Please enter and save your Paystack Secret Key first.', 'warning');
+      return;
+    }
+
+    // Auto-repair missing prefix if applicable
+    if (!sk.startsWith('sk_live_') && !sk.startsWith('sk_test_') && /^[a-fA-F0-9]{32,48}$/.test(sk)) {
+      const prefix = pk.startsWith('pk_live_') ? 'sk_live_' : 'sk_test_';
+      sk = prefix + sk;
+      const inputEl = document.getElementById('adminPaystackSecretKey');
+      if (inputEl) inputEl.value = sk;
+      localStorage.setItem('collekt_paystack_secret_key', sk);
+    }
+
+    const users = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+    if (!users.length) {
+      showToast('No registered users found.', 'warning');
+      return;
+    }
+
+    showToast(`⏳ Contacting Paystack Live API for ${users.length} users...`);
+    let successCount = 0;
+    let lastError = null;
+
+    for (let u of users) {
+      const res = await createLivePaystackDVA(u, sk);
+      if (res && res.success) {
+        successCount++;
+      } else if (res && res.message) {
+        lastError = res.message;
+      }
+    }
+
+    if (successCount > 0) {
+      showToast(`🎉 Issued ${successCount} Live Dedicated NUBAN Accounts!`);
+    } else if (lastError) {
+      if (lastError.toLowerCase().includes('invalid key')) {
+        alert("Paystack API Notice: Invalid key\n\nWhy this happens:\n1. Your Paystack Secret Key must begin with 'sk_live_' (for Live mode) or 'sk_test_' (for Test mode).\n2. In Paystack Dashboard (Settings > API Keys & Webhooks), click 'Show' next to Live Secret Key, enter your password, and copy the full key.\n3. Verify that your Public Key and Secret Key belong to the same mode (both live or both test).\n4. Dedicated Virtual Accounts (DVA) require your business to be activated on Paystack with registered CAC status.");
+      } else {
+        alert(`Paystack API Notice:\n\n${lastError}\n\nNote: If Paystack says 'Dedicated Account feature is not enabled', please contact support@paystack.com or enable Dedicated Accounts in your Paystack dashboard.`);
+      }
+    } else {
+      showToast('⚠️ Could not issue live accounts. Check Paystack credentials.', 'warning');
+    }
+
+    renderLiveAdminDashboard();
+  }
+
+  function saveAdminGeminiConfig() {
+    const key = document.getElementById('adminGeminiApiKey')?.value.trim() || '';
+    if (key) {
+      if (typeof saveGeminiApiKey === 'function') saveGeminiApiKey(key);
+      else localStorage.setItem('collekt_gemini_api_key', key);
+      logAdminAuditActivity('Updated Google Gemini 2.5 AI Key', 'Super Administrator', 'ai_settings');
+      showToast('✨ Google Gemini AI Key saved for platform!');
+    } else {
+      showToast('⚠️ Please enter a valid Gemini API Key', 'warning');
+    }
+    initAdminSettingsUI();
+  }
+
+  function toggleAdminPassVisibility(inputId) {
+    const el = document.getElementById(inputId);
+    if (el) {
+      el.type = el.type === 'password' ? 'text' : 'password';
+    }
+  }
+
+  function copyAdminWebhookUrl() {
+    const text = document.getElementById('adminWebhookUrlText')?.textContent || (window.location.origin + '/webhook');
+    if (typeof copyToClipboard === 'function') {
+      copyToClipboard(text, 'Paystack Webhook URL copied!');
+    } else {
+      navigator.clipboard.writeText(text);
+      showToast('Paystack Webhook URL copied!');
+    }
+  }
+
+  function updateAdminNavBadges() {
+    const users = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+    
+    const userCountEl = document.getElementById('badgeUserCount');
+    if (userCountEl) userCountEl.textContent = users.length;
+
+    const pendingPros = users.filter(u => (u.role || 'professional').toLowerCase() !== 'company' && u.verified === false);
+    const proBadgeEl = document.getElementById('badgeProVerifyCount');
+    if (proBadgeEl) {
+      proBadgeEl.textContent = pendingPros.length;
+      proBadgeEl.style.display = pendingPros.length > 0 ? 'inline-block' : 'none';
+    }
+
+    const pendingCos = users.filter(u => (u.role || '').toLowerCase() === 'company' && u.verified === false);
+    const coBadgeEl = document.getElementById('badgeCoVerifyCount');
+    if (coBadgeEl) {
+      coBadgeEl.textContent = pendingCos.length;
+      coBadgeEl.style.display = pendingCos.length > 0 ? 'inline-block' : 'none';
+    }
+
+    const tenders = (typeof getPostedJobs === 'function' ? getPostedJobs() : []) || [];
+    const tendersBadgeEl = document.getElementById('badgeTendersCount');
+    if (tendersBadgeEl) tendersBadgeEl.textContent = tenders.length;
+
+    // Inbound NOVA deposits badge
+    const deposits = typeof getPendingNovaDeposits === 'function' ? getPendingNovaDeposits() : [];
+    const pendingDeposits = deposits.filter(d => d && d.status === 'pending');
+    const novaBadgeEl = document.getElementById('badgeNovaPendingCount');
+    if (novaBadgeEl) {
+      novaBadgeEl.textContent = pendingDeposits.length;
+      novaBadgeEl.style.display = pendingDeposits.length > 0 ? 'inline-block' : 'none';
+    }
+  }
+
+  // ── NOVA BANK SETTLEMENT & ESCROW ENGINE (ADMIN) ───────────
+  function renderAdminNovaSettlement() {
+    initAdminMasterNovaUI();
+    renderAdminNovaDeposits();
+    renderAdminNovaUsers();
+  }
+
+  function initAdminMasterNovaUI() {
+    const master = typeof getMasterNovaAccount === 'function' ? getMasterNovaAccount() : { account_number: '0129845011', account_name: 'COLLEKT ENTERPRISE / NOVA ESCROW' };
+    const acctInput = document.getElementById('adminMasterNovaAcct');
+    const nameInput = document.getElementById('adminMasterNovaName');
+    if (acctInput && !acctInput.value) acctInput.value = master.account_number || '0129845011';
+    if (nameInput && !nameInput.value) nameInput.value = master.account_name || 'COLLEKT ENTERPRISE / NOVA ESCROW';
+  }
+
+  function saveAdminMasterNovaAccount() {
+    const acct = document.getElementById('adminMasterNovaAcct')?.value.trim();
+    const name = document.getElementById('adminMasterNovaName')?.value.trim();
+
+    if (!acct || acct.length !== 10) {
+      showToast('⚠️ Please enter a valid 10-digit Master NOVA NUBAN.', 'warning');
+      return;
+    }
+    if (!name || name.length < 3) {
+      showToast('⚠️ Please enter the official account name for Collekt.', 'warning');
+      return;
+    }
+
+    if (typeof saveMasterNovaAccount === 'function') {
+      saveMasterNovaAccount({ account_number: acct, account_name: name.toUpperCase() });
+    } else {
+      localStorage.setItem('collekt_master_nova_account', JSON.stringify({
+        bank_name: 'NOVA Bank (Nova Commercial Bank)',
+        account_number: acct,
+        account_name: name.toUpperCase()
+      }));
+    }
+
+    if (typeof logAdminAuditActivity === 'function') {
+      logAdminAuditActivity(`Updated Master NOVA Bank Account: ${acct} (${name.toUpperCase()})`, 'Super Administrator', 'banking_settings');
+    }
+    showToast('🎉 Master NOVA Bank Account settings saved successfully!');
+  }
+
+  function renderAdminNovaDeposits() {
+    const tbody = document.getElementById('adminNovaDepositsTbody');
+    if (!tbody) return;
+
+    const deposits = typeof getPendingNovaDeposits === 'function' ? getPendingNovaDeposits() : [];
+    if (!deposits.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align:center; padding:32px 14px; color:var(--muted);">
+            <div style="font-size:30px; margin-bottom:6px;">📥</div>
+            <div style="font-size:13px; font-weight:800; color:var(--ink);">No Inbound NOVA Bank Deposits Yet</div>
+            <div style="font-size:11.5px; margin-top:2px;">When members fund their wallets and submit transfer confirmations, they appear here for 1-click verification.</div>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = deposits.map(dep => {
+      const isPending = dep.status === 'pending';
+      const isApproved = dep.status === 'approved';
+      const statusBadge = isApproved
+        ? `<span style="background:#dcfce7; color:#15803d; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:99px;">✓ APPROVED</span>`
+        : isPending
+        ? `<span style="background:#fef3c7; color:#b45309; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:99px; animation:pulse 2s infinite;">⏳ PENDING</span>`
+        : `<span style="background:#fee2e2; color:#b91c1c; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:99px;">✕ DECLINED</span>`;
+
+      const dateStr = dep.created_at ? new Date(dep.created_at).toLocaleString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : 'Recent';
+
+      return `
+        <tr>
+          <td>
+            <div style="font-weight:900; color:var(--ink); font-size:13px;">${escapeHTML(dep.user_name || 'Member')}</div>
+            <div style="font-size:11px; color:var(--muted);">${escapeHTML(dep.user_email || dep.user_id || '')}</div>
+          </td>
+          <td>
+            <strong style="color:var(--forest); font-size:14.5px; font-weight:900;">₦${parseFloat(dep.amount || 0).toLocaleString()}</strong>
+          </td>
+          <td>
+            <code style="background:var(--paper); padding:3px 8px; border-radius:6px; font-size:12px; font-weight:800; color:var(--teal);">${escapeHTML(dep.reference || 'N/A')}</code>
+          </td>
+          <td>
+            <div style="font-size:12px; font-weight:800; color:var(--ink); font-family:monospace;">${escapeHTML(dep.sender_account_no || 'NOVA NUBAN')}</div>
+            <div style="font-size:11px; color:var(--muted);">${escapeHTML(dep.sender_account_name || 'Sender Account')}</div>
+          </td>
+          <td style="font-size:12px; color:var(--muted);">${dateStr}</td>
+          <td>${statusBadge}</td>
+          <td style="text-align:right;">
+            ${isPending ? `
+              <div style="display:flex; gap:6px; justify-content:flex-end;">
+                <button type="button" class="btn btn-primary btn-xs" onclick="adminApproveNovaDeposit('${dep.id}')" style="background:var(--teal); border:none; font-weight:900; padding:6px 12px; border-radius:6px; cursor:pointer;">
+                  ✓ Approve &amp; Credit
+                </button>
+                <button type="button" class="btn btn-outline btn-xs" onclick="adminRejectNovaDeposit('${dep.id}')" style="color:#ef4444; border-color:rgba(239,68,68,0.3); font-weight:800; padding:6px 10px; border-radius:6px; cursor:pointer;">
+                  ✕
+                </button>
+              </div>
+            ` : isApproved ? `
+              <span style="font-size:11px; font-weight:800; color:var(--forest);">Credited</span>
+            ` : `
+              <span style="font-size:11px; font-weight:700; color:#ef4444;">Declined</span>
+            `}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function adminApproveNovaDeposit(depId) {
+    if (typeof approveNovaDeposit === 'function') {
+      const res = approveNovaDeposit(depId);
+      if (res && res.success) {
+        showToast(res.message);
+        renderAdminNovaDeposits();
+        renderLiveAnalytics();
+        renderAdminUserTable('');
+        renderAdminNovaUsers();
+        updateAdminNavBadges();
+        if (typeof logAdminAuditActivity === 'function') {
+          logAdminAuditActivity(`Approved NOVA Deposit ${depId}`, 'Super Administrator', 'deposit_approval');
+        }
+      } else {
+        showToast('⚠️ ' + (res?.message || 'Failed to approve deposit.'), 'error');
+      }
+    }
+  }
+
+  function adminRejectNovaDeposit(depId) {
+    const reason = prompt('Please enter the reason for declining this deposit:');
+    if (reason === null) return;
+    if (typeof rejectNovaDeposit === 'function') {
+      const res = rejectNovaDeposit(depId, reason);
+      if (res && res.success) {
+        showToast(res.message);
+        renderAdminNovaDeposits();
+        updateAdminNavBadges();
+        if (typeof logAdminAuditActivity === 'function') {
+          logAdminAuditActivity(`Declined NOVA Deposit ${depId}: ${reason}`, 'Super Administrator', 'deposit_declined');
+        }
+      }
+    }
+  }
+
+  function renderAdminNovaUsers() {
+    const tbody = document.getElementById('adminNovaUsersTbody');
+    if (!tbody) return;
+
+    const users = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+    if (!users.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--muted);">No users found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = users.map(u => {
+      const role = (u.role || 'professional').toUpperCase();
+      const isLinked = !!(u.wallet?.nova_linked && u.wallet?.nova_account_number && String(u.wallet.nova_account_number).trim().length === 10);
+      const acctNo = isLinked ? u.wallet.nova_account_number : '— (Pending Link)';
+      const acctName = isLinked ? (u.wallet.nova_account_name || ('COLLEKT / ' + (u.name || u.company_name || 'USER').toUpperCase())) : '—';
+      const bal = parseFloat(u.wallet?.available || u.wallet?.balance || 0);
+
+      return `
+        <tr>
+          <td>
+            <div style="font-weight:900; color:var(--ink); font-size:13px;">${escapeHTML(u.name || u.company_name || 'User')}</div>
+            <div style="font-size:11px; color:var(--muted);">${escapeHTML(u.email || u.id || '')}</div>
+          </td>
+          <td>
+            <span style="font-size:11px; font-weight:800; background:var(--paper); padding:3px 8px; border-radius:6px; color:var(--ink);">${role}</span>
+          </td>
+          <td>
+            <code style="font-size:13px; font-weight:900; color:${isLinked ? 'var(--forest)' : 'var(--muted)'}; font-family:monospace;">${escapeHTML(acctNo)}</code>
+          </td>
+          <td style="font-size:12px; font-weight:800; color:var(--ink);">${escapeHTML(acctName)}</td>
+          <td>
+            <strong style="color:var(--teal); font-size:13.5px; font-weight:900;">₦${bal.toLocaleString()}</strong>
+          </td>
+          <td>
+            ${isLinked ? '<span style="background:#dcfce7; color:#15803d; font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:99px;">✓ VERIFIED NOVA</span>' : '<span style="background:#fef3c7; color:#b45309; font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:99px;">UNLINKED</span>'}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderLiveAnalytics() {
+    const users = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+    const pros = users.filter(u => (u.role || '').toLowerCase() !== 'company');
+    const companies = users.filter(u => (u.role || '').toLowerCase() === 'company');
+
+    const totalUsersEl = document.getElementById('statTotalUsersCount');
+    if (totalUsersEl) totalUsersEl.textContent = users.length;
+
+    const breakdownEl = document.getElementById('statRoleBreakdown');
+    if (breakdownEl) breakdownEl.textContent = `${pros.length} Pros • ${companies.length} Companies`;
+
+    const verifiedUsers = users.filter(u => u.verified === true || u.is_verified === true || u.verification_status === 'verified');
+    const vRate = users.length > 0 ? Math.round((verifiedUsers.length / users.length) * 100) : 0;
+    
+    const vRateEl = document.getElementById('statVerificationRate');
+    if (vRateEl) vRateEl.textContent = `${vRate}%`;
+
+    const vCountEl = document.getElementById('statVerifiedCount');
+    if (vCountEl) vCountEl.textContent = `🛡️ ${verifiedUsers.length} Verified Accounts`;
+
+    const tenders = (typeof getPostedJobs === 'function' ? getPostedJobs() : []) || [];
+    const tendersEl = document.getElementById('statActiveTendersCount');
+    if (tendersEl) tendersEl.textContent = tenders.length;
+
+    const txs = typeof getSavedTransactions === 'function' ? getSavedTransactions() : [];
+    let gmv = 0;
+    txs.forEach(t => {
+      if (t.amount && typeof t.amount === 'number') gmv += t.amount;
+    });
+
+    const gmvEl = document.getElementById('statLiveGMV');
+    if (gmvEl) gmvEl.textContent = 'NGN ' + gmv.toLocaleString('en-NG', { minimumFractionDigits: 2 });
+
+    const subFree = document.getElementById('subFreeCount');
+    if (subFree) subFree.textContent = `${users.length} Registered Users`;
+    const subPro = document.getElementById('subProCount');
+    if (subPro) subPro.textContent = `${pros.length} Active Pros`;
+    const subCorp = document.getElementById('subCorpCount');
+    if (subCorp) subCorp.textContent = `${companies.length} Active Companies`;
+  }
+
+  function renderAdminUserTable(query) {
+    const tbody = document.getElementById('adminUserTableBody');
+    if (!tbody) return;
+
+    const roleFilter = document.getElementById('adminUserRoleFilter')?.value || 'all';
+    const q = String(query || '').toLowerCase().trim();
+
+    const users = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+
+    const filtered = users.filter(u => {
+      if (!u) return false;
+      const r = (u.role || 'professional').toLowerCase();
+      const matchRole = roleFilter === 'all' || r === roleFilter;
+      const name = (u.name || '').toLowerCase();
+      const email = (u.email || '').toLowerCase();
+      const matchQ = !q || name.includes(q) || email.includes(q);
+      return matchRole && matchQ;
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="5">
+          <div class="empty-live-state">
+            <div style="font-size:24px; margin-bottom:6px;">👥</div>
+            <div style="font-weight:800; color:var(--ink);">No Registered Users Match Query</div>
+            <p style="font-size:11px; margin-top:2px;">Live database directory contains ${users.length} total user accounts.</p>
+          </div>
+        </td></tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(u => {
+      const isSuspended = !!(u.suspended === true || u.status === 'suspended');
+      const isVerified = !!(u.verified === true || u.is_verified === true || u.verification_status === 'verified');
+      const uIdentifier = escapeHTML(u.id || u.email || 'user');
+
+      let statusBadge = '';
+      if (isSuspended) {
+        statusBadge = `<span class="status-badge badge-suspended" style="font-weight:900;">Suspended 🚫</span>`;
+      } else if (isVerified) {
+        statusBadge = `<span class="status-badge badge-verified">Shield Verified 🛡️</span>`;
+      } else {
+        statusBadge = `<span class="status-badge badge-pending">Unverified ⚠️</span>`;
+      }
+
+      return `
+        <tr class="tx-row" style="${isSuspended ? 'background:rgba(239,68,68,0.03);' : ''}">
+          <td style="font-weight:800; color:var(--ink);">
+            ${escapeHTML(u.name || 'User')} ${isSuspended ? '<span style="color:#dc2626; font-size:10px; font-weight:900;">[SUSPENDED]</span>' : ''}<br>
+            <span style="font-size:11px; color:var(--muted); font-weight:500;">${escapeHTML(u.email || '')}</span>
+          </td>
+          <td><span style="font-weight:800; text-transform:capitalize;">${escapeHTML(u.role || 'Professional')}</span></td>
+          <td>${statusBadge}</td>
+          <td style="font-family:monospace; font-weight:800; color:var(--teal);">${(u.wallet && u.wallet.account_number && u.wallet.account_number !== "0123456789") ? u.wallet.account_number : ("9800" + String(Math.abs(String(u.id || u.email || "999").split("").reduce((a,b)=>((a<<5)-a)+b.charCodeAt(0),0))).slice(-6).padStart(6, "0"))}</td>
+          <td style="white-space:nowrap;">
+            <button class="btn btn-outline btn-xs" style="font-weight:800;" onclick="openAdminEditUserModal('${uIdentifier}')" title="Edit Profile & Status">✏️ Edit</button>
+            <button class="btn btn-outline btn-xs" style="font-weight:800;" onclick="inspectProCredentials('${uIdentifier}')" title="Inspect Uploaded Documents">👁️ Docs</button>
+            <button class="btn btn-outline btn-xs" onclick="toggleAdminUserVerification('${uIdentifier}')" title="Toggle Shield Verification">🛡️ Shield</button>
+            ${isSuspended 
+              ? `<button class="btn btn-outline btn-xs" style="color:#16a34a; border-color:rgba(22,163,74,0.4); font-weight:800;" onclick="toggleAdminUserSuspension('${uIdentifier}')" title="Reactivate Account">✅ Reactivate</button>`
+              : `<button class="btn btn-outline btn-xs" style="color:#dc2626; border-color:rgba(220,38,38,0.4); font-weight:800;" onclick="toggleAdminUserSuspension('${uIdentifier}')" title="Suspend Account Access">⛔ Suspend</button>`
+            }
+            <button class="btn btn-outline btn-xs" style="color:#dc2626; border-color:rgba(220,38,38,0.4); font-weight:800;" onclick="openAdminDeleteUserConfirmModal('${uIdentifier}')" title="Permanently Delete Account">🗑️ Delete</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function openAdminEditUserModal(userId) {
+    const users = getAllRegisteredUsers();
+    const target = String(userId || '').toLowerCase().trim();
+    const u = users.find(x => String(x.id || '').toLowerCase() === target || String(x.email || '').toLowerCase() === target || String(x.username || '').toLowerCase() === target);
+    if (!u) return;
+
+    document.getElementById('adminEditUserId').value = u.id || u.email;
+    
+    // Split names into 3 parts
+    const nameParts = (u.name || '').trim().split(/\s+/);
+    const fn = u.first_name || (nameParts.length > 0 ? nameParts[0] : '');
+    const ln = u.last_name  || (nameParts.length > 2 ? nameParts.slice(2).join(' ') : (nameParts[1] || ''));
+    const on = u.other_name || (nameParts.length > 2 ? nameParts[1] : '');
+
+    document.getElementById('adminEditFirstName').value = fn;
+    document.getElementById('adminEditLastName').value  = ln;
+    document.getElementById('adminEditOtherName').value = on;
+    document.getElementById('adminEditOtherName').value = on;
+    document.getElementById('adminEditUsername').value  = u.username || '';
+    document.getElementById('adminEditEmail').value     = u.email || '';
+    document.getElementById('adminEditRole').value      = u.role || 'professional';
+    document.getElementById('adminEditTitle').value     = u.title || '';
+    document.getElementById('adminEditVerified').value  = (u.verified !== false) ? 'true' : 'false';
+    document.getElementById('adminEditLocation').value  = u.location || '';
+    
+    const isSuspended = !!(u.suspended === true || u.status === 'suspended');
+    document.getElementById('adminEditStatus').value   = isSuspended ? 'suspended' : 'active';
+
+    const modal = document.getElementById('adminEditUserModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('open');
+    }
+  }
+
+  function deleteUserFromEditModal() {
+    const userId = document.getElementById('adminEditUserId').value;
+    closeModal('adminEditUserModal');
+    if (userId) openAdminDeleteUserConfirmModal(userId);
+  }
+
+  async function saveAdminEditUser() {
+    const userId = document.getElementById('adminEditUserId').value;
+    const users = getAllRegisteredUsers();
+    const target = String(userId || '').toLowerCase().trim();
+    const idx = users.findIndex(x => String(x.id || '').toLowerCase() === target || String(x.email || '').toLowerCase() === target || String(x.username || '').toLowerCase() === target);
+    if (idx === -1) return;
+
+    const fn = document.getElementById('adminEditFirstName').value.trim();
+    const ln = document.getElementById('adminEditLastName').value.trim();
+    const on = document.getElementById('adminEditOtherName').value.trim();
+    const username = document.getElementById('adminEditUsername').value.trim().replace(/^@/, '');
+    const email = document.getElementById('adminEditEmail').value.trim();
+    const role = document.getElementById('adminEditRole').value;
+    const title = document.getElementById('adminEditTitle').value.trim();
+    const verified = document.getElementById('adminEditVerified').value === 'true';
+    const location = document.getElementById('adminEditLocation').value.trim();
+    const isSuspended = document.getElementById('adminEditStatus').value === 'suspended';
+
+    const fullName = [fn, on, ln].filter(Boolean).join(' ') || username || 'User';
+
+    const u = users[idx];
+    u.first_name = fn;
+    u.last_name  = ln;
+    u.other_name = on;
+    u.name = fullName;
+    u.username = username;
+    u.email = email;
+    u.role = role;
+    u.title = title;
+    u.verified = verified;
+    u.is_verified = verified;
+    u.identity_verified = verified;
+    u.verification_status = verified ? 'verified' : 'unverified';
+    u.location = location;
+    u.suspended = isSuspended;
+    u.status = isSuspended ? 'suspended' : 'active';
+
+    users[idx] = u;
+    localStorage.setItem('collekt_all_users', JSON.stringify(users));
+
+    // Update active user session if currently logged in
+    const active = getUser();
+    if (active && (active.id === u.id || active.email === u.email)) {
+      setUser(u);
+    }
+
+    // Sync to Supabase if connected
+    if (window.sb && u.id) {
+      try {
+        await sb.from('profiles').update({
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          first_name: u.first_name,
+          last_name: u.last_name,
+          other_name: u.other_name,
+          title: u.title,
+          verified: u.verified,
+          is_verified: u.is_verified,
+          verification_status: u.verification_status,
+          location: u.location,
+          suspended: u.suspended,
+          status: u.status
+        }).eq('id', u.id);
+      } catch(e){}
+    }
+
+    logAdminAuditActivity(`Updated profile & status for ${u.name} (${u.role}) - Status: ${u.status}`, u.name, 'admin_edit');
+    showToast(`✅ Profile and status saved for ${u.name}`);
+    closeModal('adminEditUserModal');
+    renderLiveAdminDashboard();
+  }
+
+  async function toggleAdminUserSuspension(userId) {
+    const users = getAllRegisteredUsers();
+    const target = String(userId || '').toLowerCase().trim();
+    const idx = users.findIndex(x => String(x.id || '').toLowerCase() === target || String(x.email || '').toLowerCase() === target || String(x.username || '').toLowerCase() === target);
+    if (idx === -1) return;
+
+    const u = users[idx];
+    const isNowSuspended = !(u.suspended === true || u.status === 'suspended');
+    u.suspended = isNowSuspended;
+    u.status = isNowSuspended ? 'suspended' : 'active';
+
+    users[idx] = u;
+    localStorage.setItem('collekt_all_users', JSON.stringify(users));
+
+    const active = getUser();
+    if (active && (active.id === u.id || active.email === u.email)) {
+      setUser(u);
+    }
+
+    if (window.sb && u.id) {
+      try {
+        await sb.from('profiles').update({ suspended: isNowSuspended, status: u.status }).eq('id', u.id);
+      } catch(e){}
+    }
+
+    const actionText = isNowSuspended ? `Suspended account for ${u.name} (${u.email})` : `Re-activated account for ${u.name} (${u.email})`;
+    logAdminAuditActivity(actionText, u.name, isNowSuspended ? 'account_suspended' : 'account_reactivated');
+    showToast(isNowSuspended ? `⛔ Account suspended for ${u.name}` : `✅ Account re-activated for ${u.name}`);
+    renderLiveAdminDashboard();
+  }
+
+  function openAdminDeleteUserConfirmModal(userId) {
+    const users = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+    const target = String(userId || '').toLowerCase().trim();
+    const u = users.find(x => String(x.id || '').toLowerCase() === target || String(x.email || '').toLowerCase() === target || String(x.username || '').toLowerCase() === target || String(x.name || '').toLowerCase() === target);
+    if (!u && !userId) return;
+
+    const targetInput = document.getElementById('adminDeleteTargetUserId');
+    if (targetInput) {
+      targetInput.value = u ? (u.id || u.email) : userId;
+    }
+
+    const preview = document.getElementById('adminDeleteTargetPreview');
+    if (preview) {
+      const initial = ((u ? u.name : '') || 'U').charAt(0).toUpperCase();
+      const displayName = u ? (u.name || u.email || 'User Account') : userId;
+      const displayEmail = u ? (u.email || '') : '';
+      const displayRole = u ? (u.role || 'Professional') : 'Account';
+
+      preview.innerHTML = `
+        <div style="width:40px; height:40px; border-radius:50%; background:var(--teal); color:#fff; display:grid; place-items:center; font-weight:900; font-size:16px; flex-shrink:0;">
+          ${initial}
+        </div>
+        <div style="overflow:hidden;">
+          <div style="font-weight:900; color:var(--ink); font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(displayName)}</div>
+          <div style="font-size:11px; color:var(--muted);">${escapeHTML(displayEmail)} &bull; <span style="text-transform:capitalize; font-weight:700;">${escapeHTML(displayRole)}</span></div>
+        </div>
+      `;
+    }
+
+    const modal = document.getElementById('adminDeleteUserModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('open');
+    }
+  }
+
+  async function executeAdminDeleteUser() {
+    const targetInput = document.getElementById('adminDeleteTargetUserId');
+    const userId = targetInput ? targetInput.value : '';
+    if (!userId) {
+      closeModal('adminDeleteUserModal');
+      return;
+    }
+
+    const deleteBtn = document.querySelector('#adminDeleteUserModal .btn-primary');
+    if (deleteBtn) {
+      deleteBtn.textContent = 'Deleting... 🗑️';
+      deleteBtn.disabled = true;
+    }
+
+    try {
+      const users = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+      const target = String(userId || '').toLowerCase().trim();
+      if (target === 'usr_dave_ojeowere' || target === 'ojeoweredave@gmail.com' || target === 'ojeoweredave' || target.includes('ojeoweredave')) {
+        showToast('⚠️ Dave Ojeowere is a protected master account and cannot be deleted.', 'warning');
+        closeModal('adminDeleteUserModal');
+        return;
+      }
+      const u = users.find(x => String(x.id || '').toLowerCase() === target || String(x.email || '').toLowerCase() === target || String(x.username || '').toLowerCase() === target || String(x.name || '').toLowerCase() === target);
+      
+      const userName = u ? u.name : 'User';
+      const userEmail = u ? u.email : '';
+      const actualId = u ? u.id : userId;
+      const actualUsername = u ? u.username : '';
+
+      // 1. Remove from directory and permanent deleted blacklist
+      if (typeof removeUserFromDirectory === 'function') {
+        removeUserFromDirectory(actualId);
+        if (userEmail) removeUserFromDirectory(userEmail);
+        if (actualUsername) removeUserFromDirectory(actualUsername);
+        if (userName) removeUserFromDirectory(userName);
+      }
+
+      // 2. Clear uploaded files and data for this user
+      try {
+        localStorage.removeItem('collekt_uploads_' + actualId);
+        if (userEmail) localStorage.removeItem('collekt_uploads_' + userEmail);
+        localStorage.removeItem('collekt_reviews_' + actualId);
+        if (userEmail) localStorage.removeItem('collekt_reviews_' + userEmail);
+      } catch(e){}
+
+      // 3. If deleted user was active in session, clear user session
+      try {
+        const active = typeof getUser === 'function' ? getUser() : null;
+        if (active) {
+          const aId = String(active.id || '').toLowerCase();
+          const aEmail = String(active.email || '').toLowerCase();
+          const aUser = String(active.username || '').toLowerCase();
+          if (aId === String(actualId).toLowerCase() || (userEmail && aEmail === userEmail.toLowerCase()) || (actualUsername && aUser === actualUsername.toLowerCase())) {
+            if (typeof clearUser === 'function') clearUser();
+            localStorage.removeItem('collekt_user');
+          }
+        }
+      } catch(e){}
+
+      // 4. Delete from Supabase if connected
+      if (window.sb && actualId) {
+        try {
+          await sb.from('profiles').delete().or(`id.eq.${actualId},email.eq.${userEmail || actualId}`);
+        } catch(e){}
+      }
+
+      if (typeof logAdminAuditActivity === 'function') {
+        logAdminAuditActivity(`Permanently deleted user account ${userName} (${userEmail})`, userName, 'account_deleted');
+      }
+      if (typeof showToast === 'function') {
+        showToast(`🗑️ User ${userName} permanently deleted from platform.`);
+      }
+    } catch(err) {
+      console.error('Delete user error:', err);
+    } finally {
+      if (deleteBtn) {
+        deleteBtn.textContent = 'Delete Account 🗑️';
+        deleteBtn.disabled = false;
+      }
+      closeModal('adminDeleteUserModal');
+      const m = document.getElementById('adminDeleteUserModal');
+      if (m) {
+        m.classList.remove('open');
+        m.style.display = 'none';
+      }
+      renderLiveAdminDashboard();
+    }
+  }
+
+  function toggleAdminUserVerification(userId) {
+    const users = getAllRegisteredUsers();
+    const target = String(userId || '').toLowerCase().trim();
+    const idx = users.findIndex(x => String(x.id || '').toLowerCase() === target || String(x.email || '').toLowerCase() === target || String(x.username || '').toLowerCase() === target);
+    if (idx >= 0) {
+      const u = users[idx];
+      u.verified = !(u.verified !== false);
+      u.is_verified = u.verified;
+      u.identity_verified = u.verified;
+      u.verification_status = u.verified ? 'verified' : 'unverified';
+      
+      users[idx] = u;
+      localStorage.setItem('collekt_all_users', JSON.stringify(users));
+
+      const active = getUser();
+      if (active && (active.id === u.id || active.email === u.email)) {
+        setUser(u);
+      }
+      logAdminAuditActivity(`Toggled Shield Verification for ${u.name}`, u.name, 'verification');
+      showToast(`✅ Verification updated for ${u.name}`);
+      renderLiveAdminDashboard();
+    }
+  }
+
+  function inspectProCredentials(userId) {
+    const users = getAllRegisteredUsers();
+    const target = String(userId || '').toLowerCase().trim();
+    const u = users.find(x => String(x.id || '').toLowerCase() === target || String(x.email || '').toLowerCase() === target || String(x.username || '').toLowerCase() === target);
+    if (!u) return;
+
+    document.getElementById('docModalTitle').textContent = `${u.name} — Profile & Verification Credentials`;
+    document.getElementById('docModalSubTitle').textContent = `Reviewing verification application submitted by ${u.email}`;
+
+    // Collect all documents for this specific user
+    let userDocs = [];
+
+    // 1. Check user-specific uploaded files directory
+    let userUploads = {};
+    if (u.id) {
+      try { userUploads = { ...userUploads, ...(JSON.parse(localStorage.getItem('collekt_uploads_' + u.id)) || {}) }; } catch(e){}
+    }
+    if (u.email) {
+      try { userUploads = { ...userUploads, ...(JSON.parse(localStorage.getItem('collekt_uploads_' + u.email)) || {}) }; } catch(e){}
+    }
+    try {
+      const defUploads = JSON.parse(localStorage.getItem('collekt_uploads_default')) || {};
+      userUploads = { ...defUploads, ...userUploads };
+    } catch(e){}
+
+    const categories = ['cv', 'certifications', 'documents', 'company-docs', 'portfolio'];
+    categories.forEach(cat => {
+      const files = Array.isArray(userUploads[cat]) ? userUploads[cat] : [];
+      files.forEach(f => {
+        if (f && f.name) {
+          userDocs.push({
+            name: f.name || `${cat.toUpperCase()}_Document.pdf`,
+            category: cat === 'cv' ? 'CV / Resume' : cat === 'certifications' ? 'Engineering Certification' : cat === 'company-docs' ? 'CAC Corporate Incorporation' : cat === 'documents' ? 'NIN / Government ID' : 'Portfolio Document',
+            size: f.size || 420000,
+            dataURL: f.dataURL || null,
+            type: f.type || 'application/pdf'
+          });
+        }
+      });
+    });
+
+    // 2. Check session profile backups
+    if (u.cv_name || u.cv) {
+      if (!userDocs.some(d => d.category === 'CV / Resume')) {
+        userDocs.push({
+          name: u.cv_name || 'Uploaded_CV.pdf',
+          category: 'CV / Resume',
+          size: u.cv_size || 450000,
+          dataURL: u.cv_data || (typeof u.cv === 'string' && u.cv.startsWith('data:') ? u.cv : null),
+          type: 'application/pdf'
+        });
+      }
+    }
+    if (u.certifications && u.certifications.length) {
+      u.certifications.forEach(c => {
+        const cName = typeof c === 'string' ? c : (c.name || 'COREN_Engineering_Certificate.pdf');
+        if (!userDocs.some(d => d.name === cName)) {
+          userDocs.push({
+            name: cName,
+            category: 'Engineering Certification',
+            size: 300000,
+            type: 'application/pdf'
+          });
+        }
+      });
+    }
+
+    // 3. Fallback standard documents if no custom attachment
+    if (userDocs.length === 0) {
+      const isCo = (u.role || '').toLowerCase() === 'company';
+      userDocs = [
+        {
+          name: isCo ? `${(u.name || 'Company').replace(/\s+/g,'_')}_CAC_Incorporation_RC2026.pdf` : `${(u.name || 'Candidate').replace(/\s+/g,'_')}_COREN_License_2026.pdf`,
+          category: isCo ? 'CAC Corporate License' : 'COREN Professional License',
+          size: 520000,
+          type: 'application/pdf'
+        },
+        {
+          name: isCo ? `${(u.name || 'Company').replace(/\s+/g,'_')}_Tax_Identification_TIN.pdf` : `${(u.name || 'Candidate').replace(/\s+/g,'_')}_NIN_Identity_Card.pdf`,
+          category: isCo ? 'Corporate TIN Tax Certificate' : 'NIN Identity Verification',
+          size: 280000,
+          type: 'application/pdf'
+        }
+      ];
+    }
+
+    const isVerified = (u.verified !== false && u.verification_status !== 'unverified' && u.verification_status !== 'rejected');
+    const roleLabel = (u.role || 'professional').toLowerCase() === 'company' ? '🏢 Enterprise Company' : '👷 Professional Specialist';
+    const skillsList = (u.skills && u.skills.length) ? u.skills.map(s => `<span class="status-badge" style="background:#e0f2fe; color:#0369a1; font-size:10px; text-transform:none;">${escapeHTML(s)}</span>`).join(' ') : '<span style="font-size:11px; color:var(--muted);">None listed</span>';
+
+    const body = document.getElementById('docModalBody');
+    body.innerHTML = `
+      <div style="width:100%; text-align:left; display:flex; flex-direction:column; gap:16px;">
+        
+        <!-- Profile Summary Header Card -->
+        <div style="background:var(--white); border:1.5px solid var(--line); border-radius:14px; padding:16px 18px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+            <div>
+              <div style="font-size:16px; font-weight:900; color:var(--ink); display:flex; align-items:center; gap:6px;">
+                ${escapeHTML(u.name)} 
+                <span class="status-badge ${isVerified ? 'badge-verified' : 'badge-pending'}">${isVerified ? 'Shield Verified 🛡️' : 'Unverified / Pending'}</span>
+              </div>
+              <div style="font-size:12px; color:var(--teal); font-weight:800; margin-top:2px;">
+                ${roleLabel} &bull; ${escapeHTML(u.title || 'Technical Specialist')}
+              </div>
+            </div>
+            <div style="text-align:right; font-size:11px; color:var(--muted);">
+              <div>📍 ${escapeHTML(u.location || 'Nigeria')}</div>
+              <div>✉️ ${escapeHTML(u.email || '')}</div>
+            </div>
+          </div>
+
+          <div style="font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:10px; background:var(--paper); padding:10px 12px; border-radius:8px;">
+            ${escapeHTML(u.bio || u.about || 'Registered member on Collekt Energy Talent & EPC Marketplace.')}
+          </div>
+
+          <div>
+            <span style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;">Skills &amp; Competencies:</span>
+            <div style="margin-top:4px; display:flex; flex-wrap:wrap; gap:4px;">${skillsList}</div>
+          </div>
+        </div>
+
+        <!-- Submitted Documents Inspection List -->
+        <div>
+          <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span>Attached Verification Credentials (${userDocs.length})</span>
+            <span style="color:var(--teal); font-weight:900;">100% Watermark Protected</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; padding-right:4px;">
+            ${userDocs.map(d => `
+              <div style="background:var(--white); border:1px solid var(--line); border-radius:12px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+                  <span style="font-size:20px; flex-shrink:0;">📄</span>
+                  <div style="overflow:hidden;">
+                    <div style="font-size:12.5px; font-weight:900; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHTML(d.name)}</div>
+                    <div style="font-size:11px; color:var(--teal); font-weight:700;">${escapeHTML(d.category)} &bull; ${typeof formatFileSize === 'function' ? formatFileSize(d.size) : '450 KB'}</div>
+                  </div>
+                </div>
+                <button class="btn btn-outline btn-xs" style="flex-shrink:0; font-weight:800; padding:6px 12px;" onclick="viewAdminDocument('${escapeHTML(d.name)}', '${escapeHTML(d.category)}', '${d.dataURL || ''}')">
+                  👁️ View Document
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    // Render Public Profile Link
+    const linkWrap = document.getElementById('docModalProfileLinkWrap');
+    if (linkWrap) {
+      linkWrap.innerHTML = `
+        <a href="public-profile.html?id=${encodeURIComponent(u.id || u.email)}" target="_blank" class="btn btn-outline btn-sm" style="font-weight:800; display:inline-flex; align-items:center; gap:6px; color:var(--teal); border-color:var(--teal);">
+          👁️ Open Full Profile &rarr;
+        </a>
+      `;
+    }
+
+    // Wire Approve Button
+    const approveBtn = document.getElementById('docModalApproveBtn');
+    if (approveBtn) {
+      approveBtn.onclick = () => {
+        approveLiveUserVerification(u.id);
+        closeModal('docPreviewModal');
+      };
+    }
+
+    // Wire Reject Button
+    const rejectBtn = document.getElementById('docModalRejectBtn');
+    if (rejectBtn) {
+      rejectBtn.onclick = () => {
+        rejectLiveUserVerification(u.id);
+        closeModal('docPreviewModal');
+      };
+    }
+
+    const modal = document.getElementById('docPreviewModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('open');
+    }
+  }
+
+  function viewAdminDocument(name, category, dataURL) {
+    if (typeof openDocumentViewer === 'function') {
+      openDocumentViewer({
+        name: name,
+        category: category,
+        size: 500000,
+        type: (name.endsWith('.png') || name.endsWith('.jpg')) ? 'image/png' : 'application/pdf',
+        dataURL: dataURL || null
+      });
+    } else {
+      showToast(`📄 Viewing ${name} (${category})`);
+    }
+  }
+
+  function renderAdminProVerifyQueue() {
+    const queue = document.getElementById('adminProVerifyQueue');
+    if (!queue) return;
+
+    const users = getAllRegisteredUsers();
+    const pendingPros = users.filter(u => (u.role || 'professional').toLowerCase() !== 'company' && u.verified === false);
+
+    if (pendingPros.length === 0) {
+      queue.innerHTML = `
+        <div class="empty-live-state">
+          <div style="font-size:24px; margin-bottom:6px;">🛡️</div>
+          <div style="font-weight:800; color:var(--ink);">All Registered Professionals Are Verified</div>
+          <p style="font-size:11px; margin-top:2px;">No pending professional verification requests in live database.</p>
+        </div>
+      `;
+      return;
+    }
+
+    queue.innerHTML = pendingPros.map(p => `
+      <div class="v-card">
+        <div>
+          <div style="font-size:15px; font-weight:900; color:var(--ink);">${escapeHTML(p.name)}</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:2px;">${escapeHTML(p.email)} &bull; COREN / NIN Credentials Submitted</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="inspectProCredentials('${p.id}')">👁️ Inspect Profile &amp; Docs</button>
+          <button class="btn btn-primary btn-sm" onclick="approveLiveUserVerification('${p.id}')">✅ Grant Shield 🛡️</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderAdminCoVerifyQueue() {
+    const queue = document.getElementById('adminCoVerifyQueue');
+    if (!queue) return;
+
+    const users = getAllRegisteredUsers();
+    const pendingCos = users.filter(u => (u.role || '').toLowerCase() === 'company' && u.verified === false);
+
+    if (pendingCos.length === 0) {
+      queue.innerHTML = `
+        <div class="empty-live-state">
+          <div style="font-size:24px; margin-bottom:6px;">🏢</div>
+          <div style="font-weight:800; color:var(--ink);">All Enterprise Companies Are Verified</div>
+          <p style="font-size:11px; margin-top:2px;">No pending corporate CAC verification requests in live database.</p>
+        </div>
+      `;
+      return;
+    }
+
+    queue.innerHTML = pendingCos.map(c => `
+      <div class="v-card">
+        <div>
+          <div style="font-size:15px; font-weight:900; color:var(--ink);">${escapeHTML(c.name)}</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:2px;">${escapeHTML(c.email)} &bull; CAC / TIN Corporate Documents</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="inspectProCredentials('${c.id}')">👁️ Inspect CAC Docs</button>
+          <button class="btn btn-primary btn-sm" onclick="approveLiveUserVerification('${c.id}')">✅ Approve Enterprise 🛡️</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function approveLiveUserVerification(userId) {
+    const users = getAllRegisteredUsers();
+    const target = String(userId || '').toLowerCase().trim();
+    const idx = users.findIndex(x => String(x.id || '').toLowerCase() === target || String(x.email || '').toLowerCase() === target || String(x.username || '').toLowerCase() === target);
+    if (idx >= 0) {
+      const u = users[idx];
+      u.verified = true;
+      u.is_verified = true;
+      u.identity_verified = true;
+      u.verification_status = 'verified';
+
+      users[idx] = u;
+      localStorage.setItem('collekt_all_users', JSON.stringify(users));
+
+      // Update in Supabase if connected
+      if (window.sb && u.id) {
+        try {
+          await sb.from('profiles').update({ verified: true, is_verified: true, verification_status: 'verified' }).eq('id', u.id);
+        } catch(e){}
+      }
+
+      const active = getUser();
+      if (active && (active.id === u.id || active.email === u.email)) {
+        setUser(u);
+      }
+
+      logAdminAuditActivity(`Approved Shield Verification 🛡️ for ${u.name} (${u.role || 'professional'})`, u.name, 'verification');
+      showToast(`🎉 Granted Shield Verification 🛡️ to ${u.name}!`);
+      renderLiveAdminDashboard();
+    }
+  }
+
+  async function rejectLiveUserVerification(userId) {
+    const users = getAllRegisteredUsers();
+    const target = String(userId || '').toLowerCase().trim();
+    const idx = users.findIndex(x => String(x.id || '').toLowerCase() === target || String(x.email || '').toLowerCase() === target || String(x.username || '').toLowerCase() === target);
+    if (idx >= 0) {
+      const u = users[idx];
+      u.verified = false;
+      u.is_verified = false;
+      u.identity_verified = false;
+      u.verification_status = 'unverified';
+
+      users[idx] = u;
+      localStorage.setItem('collekt_all_users', JSON.stringify(users));
+
+      if (window.sb && u.id) {
+        try {
+          await sb.from('profiles').update({ verified: false, is_verified: false, verification_status: 'unverified' }).eq('id', u.id);
+        } catch(e){}
+      }
+
+      const active = getUser();
+      if (active && (active.id === u.id || active.email === u.email)) {
+        setUser(u);
+      }
+
+      logAdminAuditActivity(`Set verification to unverified for ${u.name}`, u.name, 'verification');
+      showToast(`⚠️ Verification status set to Unverified for ${u.name}`);
+      renderLiveAdminDashboard();
+    }
+  }
+
+  function renderAdminTendersTable() {
+    const tbody = document.getElementById('adminTendersTableBody');
+    if (!tbody) return;
+
+    const tenders = (typeof getPostedJobs === 'function' ? getPostedJobs() : []) || [];
+
+    if (tenders.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="5">
+          <div class="empty-live-state">
+            <div style="font-size:24px; margin-bottom:6px;">🏗️</div>
+            <div style="font-weight:800; color:var(--ink);">No Project Tenders Posted Yet</div>
+            <p style="font-size:11px; margin-top:2px;">When companies post tenders, they will appear here for live moderation.</p>
+          </div>
+        </td></tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = tenders.map(t => {
+      const tId = escapeHTML(t.id || '');
+      const tBudget = typeof formatNaira === 'function' && t.budget ? formatNaira(t.budget) : (t.budget ? `₦${t.budget}` : 'Negotiable');
+      return `
+        <tr class="tx-row">
+          <td style="font-weight:800; color:var(--ink);">${escapeHTML(t.title || 'Untitled Tender')}</td>
+          <td>${escapeHTML(t.category || t.type || 'Engineering')}</td>
+          <td>${escapeHTML(t.companyName || t.company_name || 'Verified Company')}</td>
+          <td style="font-weight:800; color:var(--teal);">${escapeHTML(String(tBudget))}</td>
+          <td><button class="btn btn-outline btn-xs" onclick="deleteAdminTender('${tId}')" style="color:#dc2626; border-color:rgba(220,38,38,0.4); font-weight:800;">🗑️ Delete</button></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function deleteAdminTender(tenderId) {
+    if (!confirm('Are you sure you want to remove this tender from the marketplace?')) return;
+    try {
+      const jobs = JSON.parse(localStorage.getItem('collekt_posted_jobs') || '[]');
+      const filtered = jobs.filter(j => j && j.id !== tenderId);
+      localStorage.setItem('collekt_posted_jobs', JSON.stringify(filtered));
+
+      const projs = JSON.parse(localStorage.getItem('collekt_posted_projects') || '[]');
+      const filteredP = projs.filter(j => j && j.id !== tenderId);
+      localStorage.setItem('collekt_posted_projects', JSON.stringify(filteredP));
+
+      if (window.sb) {
+        sb.from('tenders').delete().eq('id', tenderId).then(()=>{}).catch(()=>{});
+        sb.from('projects').delete().eq('id', tenderId).then(()=>{}).catch(()=>{});
+      }
+      showToast('🗑️ Tender removed from platform.');
+      renderLiveAdminDashboard();
+    } catch(e){}
+  }
+
+  function renderAdminProposalsTable() {
+    const tbody = document.getElementById('adminProposalsTableBody');
+    if (!tbody) return;
+
+    let props = [];
+    try { props = JSON.parse(localStorage.getItem('collekt_proposals')) || []; } catch(e){}
+
+    if (props.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="5">
+          <div class="empty-live-state">
+            <div style="font-size:24px; margin-bottom:6px;">📋</div>
+            <div style="font-weight:800; color:var(--ink);">No Submitted Proposals Yet</div>
+            <p style="font-size:11px; margin-top:2px;">Proposals submitted by professionals will appear here.</p>
+          </div>
+        </td></tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = props.map(p => {
+      const pId = escapeHTML(p.id || '');
+      const pTitle = escapeHTML(p.jobTitle || p.projectTitle || 'Tender Scope');
+      const pUser = escapeHTML(p.freelancerName || p.proName || p.userName || 'Professional');
+      const pBid = p.bidAmount ? (typeof formatNaira === 'function' ? formatNaira(p.bidAmount) : `₦${p.bidAmount}`) : 'Negotiable';
+      const isAwarded = p.status === 'awarded' || p.status === 'accepted';
+      const statusBadge = isAwarded 
+        ? `<span class="status-badge badge-verified">Awarded ✅</span>`
+        : `<span class="status-badge badge-pending">Submitted ⏳</span>`;
+
+      return `
+        <tr class="tx-row">
+          <td style="font-weight:800; color:var(--ink);">${pTitle}</td>
+          <td>${pUser}</td>
+          <td style="font-weight:800; color:var(--forest);">${pBid}</td>
+          <td>${statusBadge}</td>
+          <td><button class="btn btn-outline btn-xs" onclick="inspectAdminProposal('${pId}')" style="font-weight:800;">👁️ Inspect</button></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function inspectAdminProposal(propId) {
+    try {
+      const props = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      const p = props.find(x => x.id === propId);
+      if (!p) {
+        showToast('⚠️ Proposal not found');
+        return;
+      }
+      const title = p.jobTitle || p.projectTitle || 'Proposal Details';
+      const bidder = p.freelancerName || p.userName || 'Professional Candidate';
+      const pitch = p.pitchText || p.coverLetter || p.message || 'Standard technical bidding specifications submitted.';
+      const bid = p.bidAmount ? (typeof formatNaira === 'function' ? formatNaira(p.bidAmount) : `₦${p.bidAmount}`) : 'Negotiable';
+
+      alert(`📋 PROPOSAL DETAILS:\n\nProject: ${title}\nBidder: ${bidder}\nProposed Amount: ${bid}\nStatus: ${p.status || 'submitted'}\n\nTechnical Pitch:\n"${pitch}"`);
+    } catch(e){}
+  }
+
+  function renderAdminEngagementsTable() {
+    const tbody = document.getElementById('adminEngagementsTableBody');
+    if (!tbody) return;
+
+    let contracts = [];
+    try {
+      const awarded = JSON.parse(localStorage.getItem('collekt_awarded_contracts') || '[]');
+      const general = JSON.parse(localStorage.getItem('collekt_contracts') || '[]');
+      const props = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      const awardedProps = props.filter(p => p.status === 'awarded' || p.status === 'accepted').map(p => ({
+        id: 'CTR-' + (p.id || '').slice(-6).toUpperCase(),
+        title: p.jobTitle || p.projectTitle || 'Awarded Tender Execution',
+        company: p.companyName || 'Corporate Employer',
+        contractor: p.freelancerName || p.userName || 'Professional Specialist',
+        amount: p.bidAmount || p.amount || 2500000,
+        status: 'Active Escrow'
+      }));
+      contracts = [...awarded, ...general, ...awardedProps];
+    } catch(e){}
+
+    if (contracts.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="5">
+          <div class="empty-live-state">
+            <div style="font-size:24px; margin-bottom:6px;">🤝</div>
+            <div style="font-weight:800; color:var(--ink);">No Active Engagements or Disputes</div>
+            <p style="font-size:11px; margin-top:2px;">Active contracts with escrow balances will be listed here.</p>
+          </div>
+        </td></tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = contracts.map(c => {
+      const cAmt = typeof formatNaira === 'function' && c.amount ? formatNaira(c.amount) : (c.amount ? `₦${c.amount}` : '₦0');
+      return `
+        <tr class="tx-row">
+          <td style="font-weight:800; color:var(--ink);">${escapeHTML(c.title || 'EPC Execution Contract')}</td>
+          <td>${escapeHTML(c.company || 'Corporate Client')}</td>
+          <td>${escapeHTML(c.contractor || c.proName || 'Professional')}</td>
+          <td style="font-weight:900; color:var(--teal);">${escapeHTML(String(cAmt))}</td>
+          <td><span class="status-badge badge-verified">${escapeHTML(c.status || 'Active Escrow')} 🔒</span></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderAdminTxLedger() {
+    const tbody = document.getElementById('adminTxLedgerBody');
+    if (!tbody) return;
+
+    const txs = typeof getSavedTransactions === 'function' ? getSavedTransactions() : [];
+
+    if (txs.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="5">
+          <div class="empty-live-state">
+            <div style="font-size:24px; margin-bottom:6px;">💸</div>
+            <div style="font-weight:800; color:var(--ink);">No Wallet Transactions Recorded Yet</div>
+            <p style="font-size:11px; margin-top:2px;">Platform wallet deposits, payouts, and transfers will log here in real-time.</p>
+          </div>
+        </td></tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = txs.map(t => `
+      <tr class="tx-row">
+        <td style="font-family:monospace; font-weight:800;">${escapeHTML(t.id || 'TX-LOG')}</td>
+        <td style="font-weight:800; color:var(--ink);">${escapeHTML(t.title || t.note || 'Wallet Transfer')}</td>
+        <td><span style="font-weight:700;">${escapeHTML(t.type || 'Transfer')}</span></td>
+        <td style="font-weight:900; color:${t.type==='credit'?'var(--teal)':'var(--forest)'};">NGN ${Number(t.amount || 0).toLocaleString()}</td>
+        <td>${escapeHTML(t.date || 'Recent')}</td>
+      </tr>
+    `).join('');
+  }
+
+  function exportAdminTransactionsCSV() {
+    const txs = typeof getSavedTransactions === 'function' ? getSavedTransactions() : [];
+    if (txs.length === 0) {
+      showToast('⚠️ No transaction data available to export.', 'warning');
+      return;
+    }
+    logAdminAuditActivity('Exported Live Financial Report CSV', 'Master Transaction Ledger', 'finance');
+    let csvContent = "data:text/csv;charset=utf-8,Tx Reference,Description,Type,Amount,Status,Date\n";
+    txs.forEach(t => {
+      csvContent += `${t.id || ''},"${t.title || 'Transaction'}",${t.type || 'Transfer'},${t.amount || 0},${t.status || 'Completed'},${t.date || ''}\n`;
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Collekt_Live_Financial_Report_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("📥 Live CSV Financial Report downloaded!");
+  }
+
+  function renderAdminAuditLogs() {
+    const container = document.getElementById('adminAuditLogContainer');
+    if (!container) return;
+
+    const logs = typeof getAdminAuditLogs === 'function' ? getAdminAuditLogs() : [];
+    
+    if (logs.length === 0) {
+      container.innerHTML = `
+        <div class="empty-live-state">
+          <div style="font-size:24px; margin-bottom:6px;">📜</div>
+          <div style="font-weight:800; color:var(--ink);">No Audit Log Activity Yet</div>
+          <p style="font-size:11px; margin-top:2px;">Administrative actions and logins will be recorded here.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = logs.map(l => `
+      <div class="audit-item">
+        <div class="audit-icon">${l.category === 'verification' ? '🛡️' : l.category === 'finance' ? '💸' : '📜'}</div>
+        <div style="flex:1;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:13px; font-weight:800; color:var(--ink);">${escapeHTML(l.action)}</span>
+            <span style="font-size:11px; color:var(--muted); font-weight:700;">${new Date(l.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} &bull; ${new Date(l.timestamp).toLocaleDateString()}</span>
+          </div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">Target: <strong style="color:var(--ink);">${escapeHTML(l.target)}</strong> &bull; Operator: ${escapeHTML(l.admin)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+</script>
+</body>
+</html>

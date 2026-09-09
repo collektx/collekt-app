@@ -1,0 +1,959 @@
+/* ═══════════════════════════════════════════════════════════
+   COLLEKT — PREMIUM GLASSMORPHISM SYSTEM  (glass.css)
+   Loaded last in every page. Pure visual layer only.
+   ═══════════════════════════════════════════════════════════ */
+
+/* 0. BODY GRADIENT CANVAS */
+body { background: linear-gradient(135deg, #e4f4f1 0%, #edf8f5 35%, #e8f5f2 65%, #e2f2ef 100%) !important; }
+html.dark body { background: linear-gradient(135deg, #040e0c 0%, #071310 40%, #060f0d 100%) !important; }
+
+/* 1. LANDING NAV */
+.nav-bar {
+  background: rgba(6,18,16,0.52) !important;
+  backdrop-filter: blur(32px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  box-shadow: 0 16px 56px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.10) !important;
+}
+.nav-bar.solid { background: rgba(6,18,16,0.88) !important; }
+
+/* 2. APP TOPBAR */
+.app-topbar {
+  background: rgba(255,255,255,0.78) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border-bottom: 1px solid rgba(19,117,111,0.13) !important;
+  box-shadow: 0 2px 24px rgba(14,59,53,0.08), inset 0 -1px 0 rgba(19,117,111,0.08) !important;
+}
+html.dark .app-topbar {
+  background: rgba(5,14,13,0.82) !important;
+  border-bottom-color: rgba(255,255,255,0.07) !important;
+  box-shadow: 0 2px 24px rgba(0,0,0,0.36) !important;
+}
+
+/* 3. SIDEBAR */
+.app-sidebar {
+  background: linear-gradient(170deg, rgba(8,26,23,0.97) 0%, rgba(12,38,34,0.96) 100%) !important;
+  backdrop-filter: blur(28px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
+  border-right: 1px solid rgba(255,255,255,0.07) !important;
+  box-shadow: 6px 0 48px rgba(0,0,0,0.28) !important;
+}
+.sidebar-nav-item.active { background: rgba(212,146,11,0.18) !important; box-shadow: inset 3px 0 0 var(--amber), 0 2px 12px rgba(212,146,11,0.14) !important; }
+.sidebar-nav-item:hover { background: rgba(255,255,255,0.09) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
+
+/* 4. MODAL OVERLAY & BACKDROP (iOS Blur Overlay) */
+.modal-overlay,
+.settings-backdrop {
+  background: rgba(0, 0, 0, 0.48) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+}
+html.dark .modal-overlay,
+html.dark .settings-backdrop {
+  background: rgba(0, 0, 0, 0.62) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+}
+
+/* 5. MODAL CARDS & PANELS (iOS Liquid Frosted Glass) */
+.modal-card,
+.settings-panel,
+.upload-modal-card,
+.settings-card {
+  background: rgba(255, 255, 255, 0.76) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  border-radius: 28px !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.06),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.04) !important;
+}
+html.dark .modal-card,
+html.dark .settings-panel,
+html.dark .upload-modal-card,
+html.dark .settings-card {
+  background: rgba(14, 30, 27, 0.72) !important;
+  backdrop-filter: blur(48px) saturate(210%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(210%) !important;
+  border-radius: 28px !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.60),
+    0 12px 36px rgba(0, 0, 0, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+
+
+/* 6. DROPDOWN PANELS */
+.notif-panel, .profile-menu {
+  background: rgba(255,255,255,0.88) !important;
+  backdrop-filter: blur(26px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(180%) !important;
+  border: 1px solid rgba(19,117,111,0.16) !important;
+  box-shadow: 0 20px 60px rgba(14,59,53,0.20), inset 0 1px 0 rgba(255,255,255,0.80) !important;
+}
+html.dark .notif-panel, html.dark .profile-menu { background: rgba(8,24,22,0.90) !important; border-color: rgba(255,255,255,0.09) !important; }
+.notif-item:hover { background: rgba(19,117,111,0.06) !important; }
+.profile-menu-item:hover { background: rgba(19,117,111,0.06) !important; }
+
+/* 7. STAT CARDS */
+.stat-card {
+  background: rgba(255,255,255,0.74) !important;
+  backdrop-filter: blur(16px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  border: 1px solid rgba(255,255,255,0.60) !important;
+  box-shadow: 0 4px 24px rgba(14,59,53,0.08), inset 0 1px 0 rgba(255,255,255,0.90) !important;
+  transition: all 0.25s cubic-bezier(0.16,1,0.3,1) !important;
+}
+.stat-card:hover { background: rgba(255,255,255,0.92) !important; box-shadow: 0 12px 40px rgba(14,59,53,0.15), inset 0 1px 0 rgba(255,255,255,1) !important; border-color: rgba(19,117,111,0.28) !important; transform: translateY(-4px) !important; }
+html.dark .stat-card { background: rgba(13,32,30,0.78) !important; border-color: rgba(255,255,255,0.08) !important; box-shadow: 0 4px 24px rgba(0,0,0,0.35) !important; }
+
+/* 8. CONTENT CARDS */
+.content-card, .card {
+  background: rgba(255,255,255,0.76) !important;
+  backdrop-filter: blur(16px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+  border: 1px solid rgba(255,255,255,0.60) !important;
+  box-shadow: 0 6px 28px rgba(14,59,53,0.09), inset 0 1px 0 rgba(255,255,255,0.85) !important;
+}
+html.dark .content-card, html.dark .card { background: rgba(12,30,28,0.80) !important; border-color: rgba(255,255,255,0.08) !important; }
+
+/* 9. WALLET CARDS */
+.shuttlers-balance-card, .shuttlers-bank-card, .wallet-history-section {
+  background: rgba(255,255,255,0.76) !important;
+  backdrop-filter: blur(18px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+  border: 1px solid rgba(255,255,255,0.62) !important;
+  box-shadow: 0 8px 36px rgba(14,59,53,0.10), inset 0 1px 0 rgba(255,255,255,0.90) !important;
+}
+html.dark .shuttlers-balance-card, html.dark .shuttlers-bank-card, html.dark .wallet-history-section { background: rgba(12,30,28,0.80) !important; border-color: rgba(255,255,255,0.08) !important; }
+
+/* 10. GIG CARDS */
+.gig-card {
+  background: rgba(255,255,255,0.76) !important;
+  backdrop-filter: blur(14px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+  border: 1px solid rgba(255,255,255,0.58) !important;
+  box-shadow: 0 4px 20px rgba(14,59,53,0.07), inset 0 1px 0 rgba(255,255,255,0.88) !important;
+  transition: all 0.25s cubic-bezier(0.16,1,0.3,1) !important;
+}
+.gig-card:hover { background: rgba(255,255,255,0.96) !important; border-color: rgba(19,117,111,0.26) !important; box-shadow: 0 16px 48px rgba(14,59,53,0.16) !important; transform: translateY(-6px) !important; }
+html.dark .gig-card { background: rgba(12,30,28,0.80) !important; border-color: rgba(255,255,255,0.08) !important; }
+
+/* 11. PROJECT ROWS */
+.project-row { background: rgba(255,255,255,0.72) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border: 1px solid rgba(255,255,255,0.56) !important; box-shadow: 0 2px 14px rgba(14,59,53,0.06) !important; }
+.project-row:hover { background: rgba(255,255,255,0.93) !important; border-color: rgba(19,117,111,0.24) !important; box-shadow: 0 8px 28px rgba(14,59,53,0.12) !important; }
+html.dark .project-row { background: rgba(12,30,28,0.78) !important; border-color: rgba(255,255,255,0.07) !important; }
+
+/* 12. LANDING ELEMENTS */
+.hero-panel { background: rgba(255,255,255,0.86) !important; backdrop-filter: blur(24px) saturate(160%) !important; -webkit-backdrop-filter: blur(24px) saturate(160%) !important; border: 1px solid rgba(255,255,255,0.65) !important; box-shadow: 0 40px 100px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.90) !important; }
+.vcard { background: rgba(255,255,255,0.78) !important; backdrop-filter: blur(14px) saturate(150%) !important; -webkit-backdrop-filter: blur(14px) saturate(150%) !important; border: 1px solid rgba(255,255,255,0.60) !important; box-shadow: 0 4px 22px rgba(14,59,53,0.08), inset 0 1px 0 rgba(255,255,255,0.88) !important; }
+.vcard:hover { background: rgba(255,255,255,0.96) !important; border-color: rgba(19,117,111,0.26) !important; box-shadow: 0 14px 44px rgba(14,59,53,0.15) !important; }
+.form-card { background: rgba(255,255,255,0.82) !important; backdrop-filter: blur(20px) saturate(170%) !important; -webkit-backdrop-filter: blur(20px) saturate(170%) !important; border: 1px solid rgba(255,255,255,0.64) !important; box-shadow: 0 20px 60px rgba(14,59,53,0.14), inset 0 1px 0 rgba(255,255,255,0.90) !important; }
+.side-card { background: rgba(255,255,255,0.80) !important; backdrop-filter: blur(18px) saturate(160%) !important; -webkit-backdrop-filter: blur(18px) saturate(160%) !important; border: 1px solid rgba(255,255,255,0.60) !important; box-shadow: 0 14px 48px rgba(14,59,53,0.14) !important; }
+details { background: rgba(255,255,255,0.78) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border: 1px solid rgba(255,255,255,0.56) !important; box-shadow: 0 4px 18px rgba(14,59,53,0.07) !important; }
+.coming-card { background: rgba(255,255,255,0.76) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border: 1px solid rgba(255,255,255,0.56) !important; }
+.launch-pill { background: rgba(255,255,255,0.13) !important; backdrop-filter: blur(16px) saturate(150%) !important; -webkit-backdrop-filter: blur(16px) saturate(150%) !important; border: 1px solid rgba(255,255,255,0.24) !important; }
+.persona-result { background: rgba(255,255,255,0.09) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border: 1px solid rgba(255,255,255,0.16) !important; }
+.ben { background: rgba(255,255,255,0.76) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255,255,255,0.52) !important; }
+.drawer { background: rgba(4,14,13,0.94) !important; backdrop-filter: blur(32px) saturate(160%) !important; -webkit-backdrop-filter: blur(32px) saturate(160%) !important; }
+
+/* 13. INPUTS */
+.form-input, .topbar-search, .whistory-filter-input {
+  background: rgba(248,252,251,0.72) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1.5px solid rgba(19,117,111,0.16) !important;
+  transition: all 0.22s cubic-bezier(0.16,1,0.3,1) !important;
+}
+.form-input:focus, .topbar-search:focus, .whistory-filter-input:focus {
+  background: rgba(255,255,255,0.96) !important;
+  border-color: rgba(26,158,150,0.65) !important;
+  box-shadow: 0 0 0 4px rgba(26,158,150,0.12), 0 4px 16px rgba(14,59,53,0.10) !important;
+}
+html.dark .form-input, html.dark .topbar-search, html.dark .whistory-filter-input { background: rgba(255,255,255,0.06) !important; border-color: rgba(255,255,255,0.12) !important; }
+
+/* 14. BUTTONS */
+.btn-ghost { background: rgba(255,255,255,0.12) !important; backdrop-filter: blur(14px) saturate(150%) !important; -webkit-backdrop-filter: blur(14px) saturate(150%) !important; border: 1px solid rgba(255,255,255,0.24) !important; }
+.btn-ghost:hover { background: rgba(255,255,255,0.22) !important; }
+.btn-outline { background: rgba(255,255,255,0.70) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
+.btn-outline:hover { background: rgba(255,255,255,0.92) !important; }
+.notif-btn, .theme-btn { background: rgba(255,255,255,0.68) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1.5px solid rgba(19,117,111,0.14) !important; }
+.notif-btn:hover, .theme-btn:hover { background: rgba(255,255,255,0.90) !important; border-color: rgba(19,117,111,0.30) !important; box-shadow: 0 4px 16px rgba(14,59,53,0.12) !important; }
+html.dark .notif-btn, html.dark .theme-btn { background: rgba(255,255,255,0.07) !important; }
+
+/* 15. AI CHAT WINDOW */
+.collekt-ai-chat-window { background: rgba(255,255,255,0.84) !important; backdrop-filter: blur(30px) saturate(200%) !important; -webkit-backdrop-filter: blur(30px) saturate(200%) !important; border: 1.5px solid rgba(255,255,255,0.65) !important; box-shadow: 0 32px 90px rgba(14,59,53,0.32), inset 0 1px 0 rgba(255,255,255,0.90) !important; }
+.ai-msg.bot { background: rgba(255,255,255,0.82) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; border: 1px solid rgba(19,117,111,0.12) !important; }
+.ai-chip-prompt { background: rgba(255,255,255,0.78) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; border: 1px solid rgba(19,117,111,0.16) !important; }
+
+/* 16. MOBILE BOTTOM NAV */
+.mobile-bottom-nav { background: rgba(7,22,20,0.88) !important; backdrop-filter: blur(28px) saturate(180%) !important; -webkit-backdrop-filter: blur(28px) saturate(180%) !important; border-top: 1px solid rgba(255,255,255,0.12) !important; box-shadow: 0 -6px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08) !important; }
+
+/* 17. TOAST */
+.toast { background: rgba(8,26,23,0.88) !important; backdrop-filter: blur(20px) saturate(160%) !important; -webkit-backdrop-filter: blur(20px) saturate(160%) !important; border: 1px solid rgba(255,255,255,0.14) !important; box-shadow: 0 20px 60px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.12) !important; }
+
+/* 18. SIDEBAR BACKDROP */
+.sidebar-backdrop { background: rgba(4,14,13,0.62) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
+
+/* 19. ADMIN */
+.audit-item { background: rgba(255,255,255,0.70) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; border: 1px solid rgba(255,255,255,0.52) !important; border-radius: 10px !important; transition: all 0.2s ease !important; }
+.audit-item:hover { background: rgba(255,255,255,0.92) !important; border-color: rgba(19,117,111,0.20) !important; box-shadow: 0 4px 18px rgba(14,59,53,0.10) !important; }
+html.dark .audit-item { background: rgba(12,30,28,0.70) !important; border-color: rgba(255,255,255,0.08) !important; }
+.login-card, .auth-card { background: rgba(255,255,255,0.84) !important; backdrop-filter: blur(24px) saturate(170%) !important; -webkit-backdrop-filter: blur(24px) saturate(170%) !important; border: 1px solid rgba(255,255,255,0.65) !important; box-shadow: 0 24px 72px rgba(14,59,53,0.22), inset 0 1px 0 rgba(255,255,255,0.90) !important; }
+
+/* 20. TABLES */
+.table-head th { background: rgba(244,248,247,0.80) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
+html.dark .table-head th { background: rgba(15,34,32,0.80) !important; }
+.tx-row:hover td { background: rgba(244,248,247,0.88) !important; }
+
+/* 21. PILLS, BADGES, MISC */
+.pill-btn { background: rgba(255,255,255,0.72) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; border: 1.5px solid rgba(19,117,111,0.14) !important; }
+.pill-btn:hover { background: rgba(255,255,255,0.92) !important; border-color: rgba(19,117,111,0.30) !important; }
+.pill-btn.active { background: rgba(14,59,53,0.90) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; box-shadow: 0 4px 16px rgba(14,59,53,0.30) !important; }
+.profile-trigger { background: rgba(255,255,255,0.62) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
+.profile-trigger:hover { background: rgba(255,255,255,0.88) !important; }
+.sidebar-badge { background: rgba(212,146,11,0.90) !important; box-shadow: 0 2px 10px rgba(212,146,11,0.35) !important; }
+.sbal-badge { background: rgba(244,248,247,0.82) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; border: 1px solid rgba(19,117,111,0.16) !important; }
+html.dark .sbal-badge { background: rgba(255,255,255,0.06) !important; border-color: rgba(255,255,255,0.10) !important; }
+.status-pill, .tx-status-badge { backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   22. MASTER DARK MODE TYPOGRAPHY & FONT VISIBILITY ENGINE
+   Applied across all user and admin pages.
+   Ensures 100% crisp, readable, high-contrast text in Dark Mode.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── CSS Token Overrides on Root ── */
+html.dark {
+  --ink: #FFFFFF !important;
+  --forest: #2DD4BF !important;
+  --teal: #14B8A6 !important;
+  --teal-mid: #2DD4BF !important;
+  --teal-lt: rgba(45, 212, 191, 0.18) !important;
+  --amber: #F59E0B !important;
+  --amber-lt: rgba(245, 158, 11, 0.18) !important;
+  --slate: #E2E8F0 !important;
+  --muted: #94A3B8 !important;
+  --line: rgba(255, 255, 255, 0.12) !important;
+  --paper: #091a18 !important;
+  --white: #0E2421 !important;
+}
+
+/* ── Base Text & Headings ── */
+html.dark body {
+  color: #F1F5F9 !important;
+}
+
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6,
+html.dark strong,
+html.dark b,
+html.dark th,
+html.dark .section-heading,
+html.dark .modal-title,
+html.dark .card-title,
+html.dark .form-title,
+html.dark .sbal-amount,
+html.dark .stat-value,
+html.dark .gig-title,
+html.dark .pm-name,
+html.dark .am-val,
+html.dark .sbank-val,
+html.dark .founder-name,
+html.dark .how-band h4,
+html.dark .coming-card h4 {
+  color: #FFFFFF !important;
+}
+
+/* ── Paragraphs, Spans & Body Copy ── */
+html.dark p,
+html.dark li,
+html.dark dd,
+html.dark .card-body,
+html.dark .tx-row td,
+html.dark .data-table td,
+html.dark .bubble.received,
+html.dark .how-band p,
+html.dark .coming-card p,
+html.dark .vcard p,
+html.dark details p {
+  color: #E2E8F0 !important;
+}
+
+/* ── Labels & Checkboxes (Fixes Invisible Notification/Form Text) ── */
+html.dark label,
+html.dark .form-label,
+html.dark .interests-label,
+html.dark .prog-label,
+html.dark .chk span,
+html.dark label span,
+html.dark .checks span {
+  color: #F8FAFC !important;
+}
+
+/* ── Muted, Secondary, & Metadata Text ── */
+html.dark .text-muted,
+html.dark .section-subheading,
+html.dark .stat-label,
+html.dark .gig-price,
+html.dark .form-note,
+html.dark .wcard-sub,
+html.dark .sbal-title-wrap,
+html.dark .sbank-lbl,
+html.dark .notif-item-time,
+html.dark .profile-menu-header .pm-email,
+html.dark .empty-state,
+html.dark .u-role,
+html.dark .sidebar-section-label,
+html.dark small,
+html.dark .am-label,
+html.dark .table-head th,
+html.dark .ft-copy,
+html.dark .profile-caret,
+html.dark .stat-lbl,
+html.dark .sh p {
+  color: #94A3B8 !important;
+}
+
+/* ── Form Controls & Inputs ── */
+html.dark input,
+html.dark select,
+html.dark textarea,
+html.dark .form-input,
+html.dark .topbar-search,
+html.dark .whistory-filter-input {
+  color: #FFFFFF !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+html.dark input::placeholder,
+html.dark select::placeholder,
+html.dark textarea::placeholder,
+html.dark .form-input::placeholder,
+html.dark .topbar-search::placeholder {
+  color: #64748B !important;
+}
+
+html.dark option,
+html.dark optgroup {
+  background-color: #0c201e !important;
+  color: #F1F5F9 !important;
+}
+
+/* ── Tabs & Nav Buttons ── */
+html.dark .wallet-tab-btn {
+  color: #94A3B8 !important;
+}
+html.dark .wallet-tab-btn:hover,
+html.dark .wallet-tab-btn.active {
+  color: #FFFFFF !important;
+}
+
+html.dark .pill-btn {
+  color: #CBD5E1 !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+html.dark .pill-btn.active {
+  color: #FFFFFF !important;
+  background: var(--teal) !important;
+}
+
+html.dark .nav-links a {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+html.dark .nav-links a:hover {
+  color: #FFFFFF !important;
+}
+
+/* ── Modals & Popups ── */
+html.dark .modal-card,
+html.dark .modal-card h2,
+html.dark .modal-card h3,
+html.dark .modal-card h4,
+html.dark .modal-card .modal-title {
+  color: #FFFFFF !important;
+}
+html.dark .modal-card p,
+html.dark .modal-card label {
+  color: #F1F5F9 !important;
+}
+html.dark .modal-close {
+  color: #CBD5E1 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ── Admin Dashboard Modules & Data ── */
+html.dark .admin-header-nav h1,
+html.dark .admin-pane h2,
+html.dark .admin-pane h3,
+html.dark .admin-pane h4,
+html.dark .admin-pane strong,
+html.dark .admin-pane label,
+html.dark .audit-item,
+html.dark .audit-desc,
+html.dark .audit-user,
+html.dark .admin-metric-value,
+html.dark .admin-stat-num {
+  color: #FFFFFF !important;
+}
+html.dark .admin-pane p,
+html.dark .admin-pane span:not(.badge-active):not(.badge-pending):not(.badge-suspended):not(.badge-verified):not(.status-badge) {
+  color: #E2E8F0 !important;
+}
+html.dark .admin-nav-item {
+  color: #94A3B8 !important;
+}
+html.dark .admin-nav-item:hover,
+html.dark .admin-nav-item.active {
+  color: #FFFFFF !important;
+}
+
+/* ── Dropdown Menus & Panels ── */
+html.dark .notif-head h4,
+html.dark .notif-item-text,
+html.dark .notif-item-text strong,
+html.dark .profile-menu-item,
+html.dark .profile-menu-header .pm-name {
+  color: #F8FAFC !important;
+}
+
+/* ── Hardcoded Color Fallback Overrides (Attribute Selectors) ── */
+html.dark [style*="color:var(--ink)"],
+html.dark [style*="color: var(--ink)"],
+html.dark [style*="color:#111918"],
+html.dark [style*="color: #111918"],
+html.dark [style*="color:#101515"],
+html.dark [style*="color: #101515"],
+html.dark [style*="color:#0E3B35"],
+html.dark [style*="color: #0E3B35"],
+html.dark [style*="color:#000"],
+html.dark [style*="color: #000"],
+html.dark [style*="color:#111"],
+html.dark [style*="color:#222"],
+html.dark [style*="color:#333"] {
+  color: #FFFFFF !important;
+}
+
+html.dark [style*="color:var(--slate)"],
+html.dark [style*="color: var(--slate)"],
+html.dark [style*="color:#3E5250"],
+html.dark [style*="color: #3E5250"],
+html.dark [style*="color:#444"],
+html.dark [style*="color:#555"] {
+  color: #CBD5E1 !important;
+}
+
+html.dark [style*="color:var(--muted)"],
+html.dark [style*="color: var(--muted)"],
+html.dark [style*="color:#6B8280"],
+html.dark [style*="color: #6B8280"],
+html.dark [style*="color:#666"],
+html.dark [style*="color:#777"],
+html.dark [style*="color:#888"] {
+  color: #94A3B8 !important;
+}
+
+/* ── Inline Background Overrides in Dark Mode ── */
+html.dark [style*="background:white"]:not(.btn):not(.badge):not(.status-badge),
+html.dark [style*="background: white"]:not(.btn):not(.badge):not(.status-badge),
+html.dark [style*="background:#fff"]:not(.btn):not(.badge):not(.status-badge),
+html.dark [style*="background: #fff"]:not(.btn):not(.badge):not(.status-badge),
+html.dark [style*="background:#ffffff"]:not(.btn):not(.badge):not(.status-badge),
+html.dark [style*="background: #ffffff"]:not(.btn):not(.badge):not(.status-badge),
+html.dark [style*="background:var(--white)"]:not(.btn):not(.badge):not(.status-badge),
+html.dark [style*="background: var(--white)"]:not(.btn):not(.badge):not(.status-badge),
+html.dark [style*="background:var(--paper)"]:not(.btn):not(.badge):not(.status-badge),
+html.dark [style*="background: var(--paper)"]:not(.btn):not(.badge):not(.status-badge) {
+  background: rgba(14, 34, 32, 0.85) !important;
+  color: #F1F5F9 !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   23. APPLE iOS FROSTED GLASS & LIQUID MATERIALS (LIGHT & DARK)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── iOS Frosted Glass Modals & Sheets (Light Mode) ── */
+.settings-panel,
+.modal-card,
+.upload-modal-card {
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  border-radius: 28px !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.06),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ── iOS Frosted Glass Modals & Sheets (Dark Mode) ── */
+html.dark .settings-panel,
+html.dark .modal-card,
+html.dark .upload-modal-card {
+  background: rgba(14, 30, 27, 0.72) !important;
+  backdrop-filter: blur(48px) saturate(210%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(210%) !important;
+  border-radius: 28px !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.60),
+    0 12px 36px rgba(0, 0, 0, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ── iOS Blur Backdrop ── */
+.settings-backdrop,
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.48) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+}
+html.dark .settings-backdrop,
+html.dark .modal-overlay {
+  background: rgba(0, 0, 0, 0.62) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+}
+
+/* ── iOS Switch Toggles ── */
+.sett-toggle {
+  position: relative; width: 51px; height: 31px; flex-shrink: 0;
+}
+.sett-slider {
+  position: absolute; inset: 0;
+  background: rgba(120, 120, 128, 0.20) !important;
+  border-radius: 99px !important;
+  cursor: pointer;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
+  transition: background 0.28s cubic-bezier(.22,.61,.36,1) !important;
+}
+.sett-slider::before {
+  content: '';
+  position: absolute;
+  width: 27px; height: 27px; left: 1px; top: 1px;
+  background: #FFFFFF !important;
+  border-radius: 50% !important;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.22), 0 1px 2px rgba(0,0,0,0.12) !important;
+  transition: transform 0.28s cubic-bezier(.22,.61,.36,1) !important;
+}
+.sett-toggle input:checked + .sett-slider {
+  background: #F59E0B !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35) !important;
+}
+.sett-toggle input:checked + .sett-slider::before {
+  transform: translateX(20px) !important;
+}
+html.dark .sett-slider {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+html.dark .sett-toggle input:checked + .sett-slider {
+  background: #F59E0B !important;
+  border-color: rgba(245, 158, 11, 0.50) !important;
+  box-shadow: 0 2px 14px rgba(245, 158, 11, 0.50) !important;
+}
+
+/* ── iOS Frosted Circle Close Button ── */
+.settings-close,
+.modal-close {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  background: rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  color: #111918 !important;
+  font-size: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(.22,.61,.36,1) !important;
+}
+.settings-close:hover,
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.12) !important;
+  transform: scale(1.08) !important;
+}
+html.dark .settings-close,
+html.dark .modal-close {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #FFFFFF !important;
+}
+html.dark .settings-close:hover,
+html.dark .modal-close:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+  border-color: rgba(255, 255, 255, 0.30) !important;
+  transform: scale(1.08) !important;
+}
+
+/* â”€â”€ Mobile-First Responsive Overrides (Glass Layer) â”€â”€ */
+@media (max-width: 639px) {
+  .modal-overlay,
+  .settings-backdrop {
+    padding: 0 !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+  }
+
+  .modal-card,
+  .settings-panel,
+  .upload-modal-card,
+  .settings-card {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 90vh !important;
+    max-height: 90dvh !important;
+    border-radius: 24px 24px 0 0 !important;
+    margin: 0 !important;
+    padding: 22px 16px calc(24px + env(safe-area-inset-bottom, 16px)) 16px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .collekt-ai-chat-window {
+    width: calc(100vw - 20px) !important;
+    max-width: 420px !important;
+    height: 72vh !important;
+    max-height: calc(100vh - 80px) !important;
+    bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 10px !important;
+    border-radius: 20px !important;
+  }
+
+  .collekt-ai-fab {
+    bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+    right: 16px;
+  }
+
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════
+   LIQUID GLASS NAVIGATION & OPTICAL LENS MAGNIFIER
+   ═════════════════════════════════════════════════════════ */
+
+/* The Floating Pill Bottom Navigation Bar (Mobile / Responsive) */
+.liquid-glass-nav {
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(400px, calc(100vw - 24px));
+  height: 62px;
+  border-radius: 9999px;
+  background: rgba(8, 24, 21, 0.72);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 20px 48px rgba(0, 0, 0, 0.55),
+    0 6px 18px rgba(10, 35, 30, 0.35),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1.5px 2px 0 rgba(0, 0, 0, 0.45);
+  z-index: 9995;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  box-sizing: border-box;
+  overflow: visible !important; /* CRITICAL: Enables active Liquid Glass lens to bulge outside! */
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+/* Navigation items track */
+.liquid-nav-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: space-around;
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+
+/* Individual Navigation Item */
+.liquid-nav-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: rgba(255, 255, 255, 0.60);
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  height: 100%;
+  flex: 1;
+  max-width: 72px;
+  cursor: pointer;
+  transition: color 0.28s ease, transform 0.28s cubic-bezier(0.34, 1.45, 0.64, 1);
+  -webkit-tap-highlight-color: transparent;
+  z-index: 5;
+}
+
+.liquid-nav-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  transition: transform 0.35s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+.liquid-nav-svg {
+  width: 21px;
+  height: 21px;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: all 0.28s ease;
+}
+
+.liquid-nav-label {
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  transition: all 0.28s ease;
+  line-height: 1.1;
+}
+
+/* ═════════════════════════════════════════════════════════
+   THE LIQUID GLASS OPTICAL LENS / MAGNIFIER BUBBLE
+   (Protruding bubble overlapping the bar with realistic glass physics)
+   ═════════════════════════════════════════════════════════ */
+.liquid-glass-lens {
+  position: absolute;
+  top: -5px; /* Protrudes prominently above & below the 62px pill bar */
+  left: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 46% 54% 50% 50% / 50% 48% 52% 50%;
+  pointer-events: none;
+  z-index: 3;
+  box-sizing: border-box;
+
+  /* Optical Glass Material & Refractive Caustics */
+  background: radial-gradient(
+    circle at 38% 22%,
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(255, 255, 255, 0.10) 26%,
+    rgba(19, 117, 111, 0.22) 62%,
+    rgba(6, 22, 19, 0.60) 100%
+  );
+
+  /* Optical Refraction & Backdrop Magnification */
+  backdrop-filter: blur(14px) brightness(1.26) contrast(1.12) saturate(195%);
+  -webkit-backdrop-filter: blur(14px) brightness(1.26) contrast(1.12) saturate(195%);
+
+  /* Multi-depth specular rim lights & outer elevation shadow */
+  border: 1.5px solid rgba(255, 255, 255, 0.32);
+  box-shadow:
+    0 16px 36px -2px rgba(0, 0, 0, 0.65),
+    0 8px 18px rgba(14, 59, 53, 0.45),
+    inset 0 2.5px 3.5px 0 rgba(255, 255, 255, 0.92),
+    inset 0 0 2px 1.5px rgba(255, 255, 255, 0.40),
+    inset 0 -3.5px 7px 0 rgba(0, 0, 0, 0.52),
+    inset 0 -1px 3px 0 rgba(255, 255, 255, 0.28);
+
+  /* Liquid Spring Glide Animation */
+  transition: transform 0.44s cubic-bezier(0.34, 1.45, 0.64, 1),
+              width 0.3s ease,
+              height 0.3s ease,
+              border-radius 0.35s ease;
+  will-change: transform;
+}
+
+/* Top Specular Crescent Highlight (Sun/Sky reflection on curved glass bubble) */
+.lens-specular-crescent {
+  position: absolute;
+  top: 4px;
+  left: 18%;
+  width: 64%;
+  height: 32%;
+  border-radius: 50% 50% 42% 42%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 100%
+  );
+  filter: blur(0.5px);
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+/* Inner Caustic Refraction Glow */
+.lens-caustic-ring {
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+  box-shadow: 
+    inset 0 0 14px rgba(74, 222, 128, 0.22),
+    inset 0 -2px 5px rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+
+/* ACTIVE ITEM OPTICAL MAGNIFICATION INSIDE LENS */
+.liquid-nav-item.active {
+  color: #ffffff;
+  z-index: 6;
+}
+
+.liquid-nav-item.active .liquid-nav-icon-wrap {
+  transform: scale(1.22) translateY(-2.5px);
+}
+
+.liquid-nav-item.active .liquid-nav-svg {
+  stroke: #ffffff;
+  filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.4));
+}
+
+.liquid-nav-item.active .liquid-nav-label {
+  color: #ffffff;
+  font-weight: 900;
+  transform: scale(1.06);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* ═════════════════════════════════════════════════════════
+   GREEN NOTIFICATION BADGE (e.g. "27" on Chats)
+   ═════════════════════════════════════════════════════════ */
+.liquid-nav-badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 10.5px;
+  font-weight: 900;
+  line-height: 19px;
+  text-align: center;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.liquid-nav-badge.green-badge {
+  background: #22c55e;
+  color: #ffffff;
+  border: 1.5px solid rgba(8, 24, 21, 0.95);
+  box-shadow: 
+    0 2.5px 8px rgba(34, 197, 94, 0.7),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  animation: badgePop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes badgePop {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ═════════════════════════════════════════════════════════
+   DESKTOP SIDEBAR INTEGRATION (> 900px)
+   ═════════════════════════════════════════════════════════ */
+@media (min-width: 901px) {
+  /* On desktop browser, dock into the sidebar as a vertical Liquid Glass dock */
+  .liquid-glass-nav.docked-sidebar,
+  .app-sidebar .liquid-glass-nav {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 20px;
+    padding: 8px 6px;
+    margin: 10px 0;
+    flex-direction: column;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  }
+
+  .liquid-glass-nav.docked-sidebar .liquid-nav-track,
+  .app-sidebar .liquid-glass-nav .liquid-nav-track {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .liquid-glass-nav.docked-sidebar .liquid-nav-item,
+  .app-sidebar .liquid-glass-nav .liquid-nav-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 10px 16px;
+    max-width: 100%;
+    width: 100%;
+    height: 48px;
+    border-radius: 14px;
+    gap: 12px;
+  }
+
+  .liquid-glass-nav.docked-sidebar .liquid-nav-label,
+  .app-sidebar .liquid-glass-nav .liquid-nav-label {
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .liquid-glass-nav.docked-sidebar .liquid-nav-item.active .liquid-nav-icon-wrap,
+  .app-sidebar .liquid-glass-nav .liquid-nav-item.active .liquid-nav-icon-wrap {
+    transform: scale(1.15);
+  }
+
+  .liquid-glass-nav.docked-sidebar .liquid-nav-item.active .liquid-nav-label,
+  .app-sidebar .liquid-glass-nav .liquid-nav-item.active .liquid-nav-label {
+    font-size: 13.5px;
+  }
+
+  /* Desktop lens covers the active item horizontally */
+  .liquid-glass-nav.docked-sidebar .liquid-glass-lens,
+  .app-sidebar .liquid-glass-nav .liquid-glass-lens {
+    width: calc(100% - 8px);
+    height: 48px;
+    left: 4px;
+    top: 0;
+    border-radius: 14px;
+  }
+
+  .liquid-glass-nav.docked-sidebar .lens-specular-crescent,
+  .app-sidebar .liquid-glass-nav .lens-specular-crescent {
+    top: 2px;
+    left: 10%;
+    width: 80%;
+    height: 40%;
+  }
+}

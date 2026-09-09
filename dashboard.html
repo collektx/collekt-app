@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<script>
+  (function() {
+    try {
+      var u = JSON.parse(localStorage.getItem('collekt_user'));
+      if (!u || typeof u !== 'object' || (!u.id && !u.email && !u.role)) {
+        window.location.replace('login.html');
+        return;
+      }
+      if (u.role === 'company') {
+        window.location.replace('company-dashboard.html');
+        return;
+      }
+    } catch(e) {
+      window.location.replace('login.html');
+    }
+  })();
+</script>
+<title>Dashboard &mdash; Collekt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=23.0">
+<link rel="stylesheet" href="shared.css?v=23.0">
+<link rel="stylesheet" href="glass.css?v=23.0">
+
+<style>
+  body { background: var(--paper); }
+  .rec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .rec-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; transition: transform .2s, box-shadow .2s; }
+  .rec-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); }
+  html.dark .rec-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+  .rec-badge { display: inline-block; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 99px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .06em; }
+  .badge-new { background: #dbeafe; color: #1d4ed8; }
+  .badge-urgent { background: #fee2e2; color: #dc2626; }
+  .badge-featured { background: var(--amber-lt); color: var(--amber); }
+  .rec-title { font-size: 15px; font-weight: 800; margin-bottom: 6px; color: var(--ink); }
+  html.dark .rec-title { color: #e2efed; }
+  .rec-company { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+  .rec-meta { display: flex; gap: 16px; font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 16px; }
+  .rec-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .rec-tag { font-size: 10px; padding: 3px 8px; border-radius: 4px; background: var(--teal-lt); color: var(--teal); font-weight: 700; }
+  .profile-strength-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; }
+  html.dark .profile-strength-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+  .activity-status { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+  .dash-welcome { background: linear-gradient(to right, var(--forest), var(--teal)); color: #fff; border-radius: var(--r-lg); padding: 28px 32px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; }
+  .dash-welcome h1 { font-size: 24px; font-weight: 900; margin-bottom: 6px; }
+  .dash-welcome p { font-size: 14px; opacity: .8; }
+  @media (max-width: 900px) { .rec-grid { grid-template-columns: 1fr; } }
+
+  /* Dashboard tab navigation */
+  .dash-tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 2px solid var(--line); }
+  .dash-tab { padding: 12px 24px; font-size: 14px; font-weight: 800; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all .2s; background: none; border-top: none; border-left: none; border-right: none; }
+  .dash-tab:hover { color: var(--ink); }
+  .dash-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+  .dash-tab-content { display: none; }
+  .dash-tab-content.active { display: block; }
+
+  /* Proposals tab styles */
+  .proposals-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .proposals-filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  .proposals-filters select { padding: 8px 12px; font-size: 13px; font-weight: 700; border: 1.5px solid var(--line); border-radius: var(--r); background: var(--white); color: var(--ink); cursor: pointer; font-family: 'Manrope', sans-serif; }
+  html.dark .proposals-filters select { background: #0f2220; border-color: rgba(255,255,255,.08); color: #e2efed; }
+  .proposal-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; margin-bottom: 12px; transition: transform .15s, box-shadow .15s; }
+  .proposal-card:hover { transform: translateY(-2px); box-shadow: var(--sh-md); }
+  html.dark .proposal-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+  .proposal-status { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 99px; text-transform: uppercase; letter-spacing: .04em; }
+  .status-pending { background: #fef9c3; color: #ca8a04; }
+  .status-accepted { background: #dcfce7; color: #16a34a; }
+  .status-rejected { background: #fee2e2; color: #dc2626; }
+  .status-review { background: #dbeafe; color: #1d4ed8; }
+</style>
+</head>
+<body>
+<div class="app-page">
+  <!-- Sidebar -->
+  <aside class="app-sidebar" id="appSidebar"></aside>
+
+  <!-- Main -->
+  <main class="app-main">
+    <div class="app-topbar" id="appTopbar"></div>
+    <div class="page-inner">
+
+      <div class="dash-welcome fade-in">
+        <div>
+          <h1 style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">Welcome back, <span id="welcomeName">Professional</span><span id="welcomeBadge"></span>! &#x1F44B;</h1>
+          <p id="welcomeMessage">Ready to win your first project?</p>
+        </div>
+        <a href="marketplace.html" class="btn btn-ghost">Browse Tenders &rarr;</a>
+      </div>
+
+      <!-- ========== OVERVIEW ========== -->
+      <div class="dash-tab-content active" id="tabContentOverview">
+        <!-- Stats -->
+        <div class="stats-row fade-in">
+          <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='proposals.html'" title="View All Submitted Proposals">
+            <div class="stat-icon">&#x1F4CC;</div>
+            <div class="stat-value" id="statActiveProposals">0</div>
+            <div class="stat-label">Active Proposals &rarr;</div>
+            <div class="stat-change" style="background:var(--paper); color:var(--muted); font-weight:700; padding:2px 8px; border-radius:99px; font-size:11px; display:inline-block;">View All</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">&#x1F3C6;</div>
+            <div class="stat-value" id="statProjectsWon">0</div>
+            <div class="stat-label">Projects Won</div>
+            <div class="stat-change" style="background:var(--paper); color:var(--muted); font-weight:700; padding:2px 8px; border-radius:99px; font-size:11px; display:inline-block;">Clean slate</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">&#x1F4B0;</div>
+            <div class="stat-value" id="statTotalEarnings">&#x20A6;0</div>
+            <div class="stat-label">Total Earnings</div>
+            <div class="stat-change" style="background:var(--paper); color:var(--muted); font-weight:700; padding:2px 8px; border-radius:99px; font-size:11px; display:inline-block;">New Account</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">&#x1F441;</div>
+            <div class="stat-value" id="statProfileViews">0</div>
+            <div class="stat-label">Profile Views</div>
+            <div class="stat-change" style="background:var(--paper); color:var(--muted); font-weight:700; padding:2px 8px; border-radius:99px; font-size:11px; display:inline-block;">New Account</div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div>
+            <!-- Recent Activity -->
+            <div class="content-card fade-in" style="margin-bottom:24px;" id="recentActivityContainer">
+              <!-- Populated by JS -->
+            </div>
+
+            <!-- Recommended Opportunities -->
+            <h2 class="section-heading">Recommended Opportunities</h2>
+            <div class="rec-grid fade-in" id="opportunitiesGrid">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Right Panel -->
+          <div>
+            <div class="profile-strength-card fade-in" style="margin-bottom:16px;" id="profileStrengthCard">
+              <!-- Populated by JS -->
+            </div>
+
+            <div style="background:linear-gradient(135deg, var(--forest), #1a7a6f); border-radius:var(--r-lg); padding:20px; color:#fff; margin-bottom:16px;">
+              <div style="font-size:20px; margin-bottom:8px;">&#x1F6E1;&#xFE0F;</div>
+              <h4 style="font-size:14px; font-weight:800; margin-bottom:6px;">Get Verified</h4>
+              <a href="profile.html" class="btn btn-amber btn-sm" style="width:100%; justify-content:center;">Start Verification &rarr;</a>
+            </div>
+
+            <!-- Premium Membership Card -->
+            <div id="premiumUpgradeCard" style="margin-bottom:16px;">
+
+              <div style="background:linear-gradient(135deg,var(--amber),#e8a612); border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.12); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=professional'">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <div style="font-size:24px;">⚡</div>
+                  <span style="background:rgba(255,255,255,0.28); color:#fff; font-size:11px; font-weight:900; padding:3px 8px; border-radius:99px; letter-spacing:0.3px;">$15 / Month</span>
+                </div>
+                <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Upgrade to Pro ($15 / Month)</h4>
+                <p style="font-size:12px; opacity:.9; margin-bottom:14px; line-height:1.4;">Unlock featured placement, unlimited proposals, 5% fee discount, and analytics.</p>
+                <a href="upgrade.html?role=professional" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=professional';" style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.4); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">Learn More &amp; Upgrade &rarr;</a>
+              </div>
+            </div>
+
+            <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; margin-bottom:16px;">
+              <h4 style="font-size:14px; font-weight:800; margin-bottom:14px;">Quick Links</h4>
+
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <a href="marketplace.html" style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--teal);">&#x1F6CD;&#xFE0F; Browse Marketplace</a>
+                <a href="messages.html" id="quickLinkMessages" style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--teal);">&#x1F4AC; Messages</a>
+                <a href="wallet.html" style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--teal);">&#x1F4B3; Check Wallet</a>
+                <a href="profile.html" style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--teal);">&#x1F464; My Profile</a>
+                <a href="#" onclick="openUploadModal('cv', onDocUploaded); return false;" style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--teal);">&#x1F4C4; Upload CV</a>
+                <a href="#" onclick="openUploadModal('document', onDocUploaded); return false;" style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--teal);">&#x1F4C1; Upload Document</a>
+              </div>
+            </div>
+
+            <!-- My Documents -->
+            <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; margin-bottom:16px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+                <span style="font-size:16px;">&#x1F4C4;</span>
+                <h4 style="font-size:14px; font-weight:800; color:var(--ink);">My Documents</h4>
+              </div>
+              <div id="myDocsList" style="display:flex; flex-direction:column; gap:12px; margin-bottom:16px;">
+                <!-- JS will populate this -->
+              </div>
+              <button onclick="openUploadModal('document', onDocUploaded)" class="btn btn-outline btn-sm" style="width:100%; justify-content:center;">Upload New</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=35.0"></script>
+<script src="app.js?v=35.0"></script>
+<script src="collekt-ai.js?v=25.0"></script>
+<script src="settings-popup.js"></script>
+<script>
+  requireAuth();
+
+  window.onDocUploaded = function(fileData) {
+    renderMyDocs();
+    renderProfileStrength();
+  };
+
+  function renderProfileStrength() {
+    if (typeof renderGlobalProfileStrength === 'function') {
+      renderGlobalProfileStrength('#profileStrengthCard');
+    }
+  }
+
+
+  function renderMyDocs() {
+    const cats = ['avatar', 'cv', 'document', 'portfolio', 'certifications', 'company-logo'];
+    let allFiles = [];
+    cats.forEach(c => {
+      const files = typeof getUploadedFiles === 'function' ? getUploadedFiles(c) : [];
+      files.forEach(f => {
+        f.category = c;
+        allFiles.push(f);
+      });
+    });
+    
+    allFiles.sort((a,b) => b.timestamp - a.timestamp);
+    const recent = allFiles.slice(0, 5);
+    
+    const list = document.getElementById('myDocsList');
+    if (!list) return;
+    
+    if (recent.length === 0) {
+      list.innerHTML = `<div style="border:1px dashed var(--line); border-radius:var(--r); padding:20px; text-align:center; color:var(--muted); font-size:12px; font-weight:600;">
+        No files uploaded yet &bull; Upload your first file
+      </div>`;
+      return;
+    }
+    
+    window.dashboardDocsRegistry = recent;
+    list.innerHTML = recent.map((f, idx) => {
+      const icon = typeof getFileTypeIcon === 'function' ? getFileTypeIcon(f.type, f.name) : '📄';
+      const name = f.name.length > 25 ? f.name.substring(0,25) + '...' : f.name;
+      const size = typeof formatFileSize === 'function' ? formatFileSize(f.size) : f.size;
+      return `
+        <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); cursor:pointer;" onclick="openDocumentViewer(window.dashboardDocsRegistry[${idx}])" title="Click to Preview Document">
+          <div style="font-size:20px; flex-shrink:0;">${icon}</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:13px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</div>
+            <div style="font-size:11px; color:var(--muted);">${size} &bull; <span style="text-transform:capitalize;">${f.category}</span></div>
+          </div>
+          <button style="padding:4px 10px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--teal); font-size:11px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); openDocumentViewer(window.dashboardDocsRegistry[${idx}])">👁️ Preview</button>
+        </div>
+      `;
+    }).join('');
+    
+    if (list.lastElementChild) list.lastElementChild.style.borderBottom = 'none';
+  }
+
+  function renderRecentActivity() {
+    const user = getUser();
+    const proposals = typeof getUserProposals === 'function' ? getUserProposals() : [];
+    const container = document.getElementById('recentActivityContainer');
+    const statProposals = document.getElementById('statActiveProposals');
+    const statProjectsWon = document.getElementById('statProjectsWon');
+    const statTotalEarnings = document.getElementById('statTotalEarnings');
+    
+    const metrics = (typeof getRealTimeUserMetrics === 'function' && user)
+      ? getRealTimeUserMetrics(user)
+      : { projects_completed: 0, total_earned: 0, success_rate: 0, rating: 0, review_count: 0 };
+
+    if (statProposals) {
+      statProposals.textContent = proposals.length;
+    }
+    if (statProjectsWon) {
+      statProjectsWon.textContent = metrics.projects_completed;
+    }
+    if (statTotalEarnings) {
+      statTotalEarnings.textContent = metrics.total_earned > 0 
+        ? (typeof formatNaira === 'function' ? formatNaira(metrics.total_earned, true) : '₦' + metrics.total_earned.toLocaleString()) 
+        : '₦0';
+    }
+
+    if (!container) return;
+
+    if (proposals.length === 0) {
+      container.innerHTML = `
+        <div style="padding:40px 20px; text-align:center;">
+          <div style="font-size:32px; margin-bottom:12px;">📋</div>
+          <h3 style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Proposals Submitted Yet</h3>
+          <p style="font-size:14px; color:var(--muted); max-width:400px; margin:0 auto; line-height:1.5;">Your active proposals and bid submissions will appear here. Browse open tenders on the Marketplace to submit your first proposal.</p>
+          <a href="marketplace.html" class="btn btn-primary btn-sm" style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;">🔍 Browse Marketplace &rarr;</a>
+        </div>
+      `;
+    } else {
+      let html = `
+        <div class="card-header">
+          <h3>Recent Activity</h3>
+          <a href="marketplace.html" style="font-size:13px; color:var(--teal); font-weight:700;">View all</a>
+        </div>
+        <div class="table-responsive" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+          <table class="data-table" style="min-width:600px;">
+            <thead class="table-head">
+              <tr><th>Project</th><th>Client</th><th>Status</th><th>Date</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+      `;
+      proposals.slice(0, 5).forEach(p => {
+        const dateStr = p.timestamp ? new Date(p.timestamp).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : 'Just now';
+        const title = (typeof escapeHTML === 'function') ? escapeHTML(p.jobTitle || 'Unknown Project') : (p.jobTitle || 'Unknown Project');
+        const company = (typeof escapeHTML === 'function') ? escapeHTML(p.companyName || 'Unknown Client') : (p.companyName || 'Unknown Client');
+        html += `
+          <tr class="tx-row">
+            <td style="font-weight:700; color:var(--ink);">${title}</td>
+            <td>${company}</td>
+            <td><span class="activity-status status-review">Under Review</span></td>
+            <td>${dateStr}</td>
+            <td><a href="messages.html" class="btn btn-outline btn-sm" style="min-height:32px;">Message</a></td>
+          </tr>
+        `;
+      });
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+      container.innerHTML = html;
+    }
+  }
+
+  function renderOpportunities() {
+    const jobs = typeof getPostedJobs === 'function' ? getPostedJobs() : [];
+    const grid = document.getElementById('opportunitiesGrid');
+    if (!grid) return;
+
+    if (jobs.length === 0) {
+      grid.style.display = 'block'; // override grid if empty state
+      grid.innerHTML = `
+        <div style="border:1px solid var(--line); border-radius:var(--r-lg); background:var(--white); padding:40px 20px; text-align:center;">
+          <div style="font-size:32px; margin-bottom:12px;">🏗️</div>
+          <h3 style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Open Tenders Listed Yet</h3>
+          <p style="font-size:14px; color:var(--muted); max-width:400px; margin:0 auto; line-height:1.5;">Companies post new engineering and energy tenders regularly. Check back soon or visit the Marketplace.</p>
+        </div>
+      `;
+      // dark mode support for empty state
+      if (document.documentElement.classList.contains('dark')) {
+        grid.firstElementChild.style.background = '#0f2220';
+        grid.firstElementChild.style.borderColor = 'rgba(255,255,255,.08)';
+      }
+    } else {
+      grid.style.display = 'grid'; // restore grid
+      grid.innerHTML = jobs.slice(0, 3).map(job => {
+        const title = (typeof escapeHTML === 'function') ? escapeHTML(job.title || 'Untitled Project') : (job.title || 'Untitled Project');
+        const company = (typeof escapeHTML === 'function') ? escapeHTML(job.companyName || 'Company') : (job.companyName || 'Company');
+        const budget = typeof formatNaira === 'function' ? formatNaira(job.budget, true) : ('₦' + (job.budget || 0));
+        return `
+          <div class="rec-card">
+            <div class="rec-badge badge-new">New</div>
+            <div class="rec-title">${title}</div>
+            <div class="rec-company">&#x1F3E2; ${company}</div>
+            <div class="rec-meta"><span>&#x1F4CC; ${budget}</span></div>
+            <a href="marketplace.html" class="btn btn-primary btn-sm" style="width:100%;">View Details &rarr;</a>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  function switchDashTab(tab) {
+    document.getElementById('tabOverview').classList.toggle('active', tab === 'overview');
+    document.getElementById('tabProposals').classList.toggle('active', tab === 'proposals');
+    document.getElementById('tabContentOverview').classList.toggle('active', tab === 'overview');
+    document.getElementById('tabContentProposals').classList.toggle('active', tab === 'proposals');
+    if (tab === 'proposals') renderProposalsTab();
+  }
+
+  function renderProposalsTab() {
+    const proposals = typeof getUserProposals === 'function' ? getUserProposals() : [];
+    const filterVal = document.getElementById('proposalStatusFilter').value;
+    const container = document.getElementById('proposalsListContainer');
+    if (!container) return;
+
+    let filtered = proposals;
+    if (filterVal !== 'all') {
+      filtered = proposals.filter(p => (p.status || 'pending') === filterVal);
+    }
+
+    if (filtered.length === 0) {
+      const isFiltered = filterVal !== 'all';
+      container.innerHTML = `
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:60px 20px; text-align:center;">
+          <div style="font-size:48px; margin-bottom:16px;">${isFiltered ? '🔍' : '📝'}</div>
+          <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:8px;">${isFiltered ? 'No Matching Proposals' : 'No Proposals Yet'}</h3>
+          <p style="font-size:14px; color:var(--muted); max-width:420px; margin:0 auto 20px; line-height:1.6;">${isFiltered ? 'No proposals match the selected filter. Try changing the status filter above.' : 'You haven\'t submitted any proposals or bids yet. Browse the Marketplace to find projects and submit your first proposal.'}</p>
+          ${isFiltered ? '' : '<a href="marketplace.html" class="btn btn-primary btn-sm" style="display:inline-flex; align-items:center; gap:6px;">🔍 Browse Marketplace →</a>'}
+        </div>
+      `;
+      if (document.documentElement.classList.contains('dark') && container.firstElementChild) {
+        container.firstElementChild.style.background = '#0f2220';
+        container.firstElementChild.style.borderColor = 'rgba(255,255,255,.08)';
+      }
+      return;
+    }
+
+    container.innerHTML = filtered.map(p => {
+      const title = (typeof escapeHTML === 'function') ? escapeHTML(p.jobTitle || 'Untitled Project') : (p.jobTitle || 'Untitled Project');
+      const company = (typeof escapeHTML === 'function') ? escapeHTML(p.companyName || 'Unknown Client') : (p.companyName || 'Unknown Client');
+      const status = p.status || 'pending';
+      const statusLabel = status === 'review' ? 'Under Review' : status.charAt(0).toUpperCase() + status.slice(1);
+      const statusClass = 'status-' + status;
+      const dateStr = p.created_at ? new Date(p.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : (p.timestamp ? new Date(p.timestamp).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : 'Recently');
+      const budget = p.budget ? ('₦' + parseInt(p.budget).toLocaleString()) : 'Negotiable';
+      const coverLetter = p.coverLetter || p.message || '';
+      const preview = coverLetter.length > 120 ? coverLetter.substring(0, 120) + '...' : coverLetter;
+
+      return `
+        <div class="proposal-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:0;">
+              <h3 style="font-size:15px; font-weight:800; color:var(--ink); margin-bottom:4px;">${title}</h3>
+              <p style="font-size:13px; color:var(--muted);">🏢 ${company}</p>
+            </div>
+            <span class="proposal-status ${statusClass}">${statusLabel}</span>
+          </div>
+          ${preview ? `<p style="font-size:13px; color:var(--slate); line-height:1.5; margin-bottom:12px; padding:12px; background:var(--paper); border-radius:var(--r);">${escapeHTML(preview)}</p>` : ''}
+          <div style="display:flex; align-items:center; gap:20px; font-size:12px; color:var(--muted); font-weight:600; flex-wrap:wrap;">
+            <span>📅 ${dateStr}</span>
+            <span>💰 ${budget}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (user && user.role === 'company') {
+      window.location.replace('company-dashboard.html');
+      return;
+    }
+
+    buildSidebar('dashboard');
+    buildTopbar();
+    
+    if (user) {
+      document.getElementById('welcomeName').textContent = getDisplayName(user).split(' ')[0];
+      const welcomeBadge = document.getElementById('welcomeBadge');
+      if (welcomeBadge) welcomeBadge.innerHTML = getShieldBadgeHTML(22, user);
+    }
+
+    renderProfileStrength();
+    renderMyDocs();
+    renderRecentActivity();
+    renderOpportunities();
+    if (typeof renderPremiumUpgradeCard === 'function') {
+      renderPremiumUpgradeCard('premiumUpgradeCard', 'professional');
+    }
+
+    try {
+      await syncUser();
+    } catch (e) {
+      console.warn("User sync error:", e);
+    }
+
+    buildSidebar('dashboard');
+    buildTopbar();
+    const updatedUser = getUser();
+    if (updatedUser) {
+      document.getElementById('welcomeName').textContent = getDisplayName(updatedUser);
+      const welcomeBadge = document.getElementById('welcomeBadge');
+      if (welcomeBadge) welcomeBadge.innerHTML = getShieldBadgeHTML(22, updatedUser);
+    }
+  });
+</script>
+<script src="upload-modal.js"></script>
+</body>
+</html>
+

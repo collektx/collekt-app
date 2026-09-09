@@ -1,0 +1,16 @@
+/signup /register.html 301
+/register /register.html 200
+/login /login.html 200
+/dashboard /dashboard.html 200
+/company-dashboard /company-dashboard.html 200
+/profile /profile.html 200
+/company-profile /company-profile.html 200
+/marketplace /marketplace.html 200
+/proposals /proposals.html 200
+/messages /messages.html 200
+/wallet /wallet.html 200
+/admin /admin-login.html 302
+/admin/dashboard /admin-dashboard.html 302
+/admin-dashboard /admin-dashboard.html 200
+/privacy /privacy.html 200
+/terms /terms.html 200

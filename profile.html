@@ -1,0 +1,2347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<script>
+  (function() {
+    try {
+      var u = JSON.parse(localStorage.getItem('collekt_user'));
+      if (!u || typeof u !== 'object' || (!u.id && !u.email && !u.role)) {
+        window.location.replace('login.html');
+        return;
+      }
+      if (u.role === 'company') {
+        window.location.replace('company-profile.html');
+        return;
+      }
+    } catch(e) {
+      window.location.replace('login.html');
+    }
+  })();
+</script>
+<title>My Profile &mdash; Collekt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=23.0">
+<link rel="stylesheet" href="shared.css?v=23.0">
+<link rel="stylesheet" href="glass.css?v=23.0">
+
+<style>
+  body { background: var(--paper); }
+  .profile-cover-wrap { height: 180px; background: linear-gradient(to right, var(--forest), var(--teal-mid)); border-radius: var(--r-lg) var(--r-lg) 0 0; position: relative; }
+  .profile-avatar-wrapper { position: absolute; bottom: -38px; left: 32px; width: 110px; height: 110px; z-index: 5; }
+  .profile-avatar-big { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; border: 4px solid var(--white); background: var(--amber); color: #fff; font-size: 40px; font-weight: 900; position: relative; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,.18); }
+  .profile-avatar-big:hover .avatar-hover-overlay { opacity: 1 !important; }
+  .profile-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); margin-bottom: 24px; overflow: hidden; }
+  html.dark .profile-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+  .profile-info-bar { padding: 52px 32px 24px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; }
+  .profile-name { font-size: 24px; font-weight: 900; color: var(--ink); margin-bottom: 4px; }
+  html.dark .profile-name { color: #e2efed; }
+  .profile-title { font-size: 15px; color: var(--muted); margin-bottom: 8px; }
+  .profile-location { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--muted); }
+  .avail-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: #16a34a; background: #dcfce7; padding: 4px 12px; border-radius: 99px; margin-top: 8px; }
+  .avail-dot { width: 6px; height: 6px; border-radius: 50%; background: #16a34a; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+  .profile-stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); padding: 16px 32px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); gap: 16px; }
+  html.dark .profile-stats-bar { border-color: rgba(255,255,255,.07); }
+  .ps-stat { text-align: center; }
+  .ps-stat .val { font-size: 22px; font-weight: 900; color: var(--ink); }
+  html.dark .ps-stat .val { color: #e2efed; }
+  .ps-stat .lbl { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .profile-tabs-bar { display: flex; gap: 0; padding: 0 32px; overflow-x: auto; }
+  .profile-tab { padding: 16px 20px; font-size: 14px; font-weight: 700; color: var(--muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: all .18s; }
+  .profile-tab:hover { color: var(--ink); }
+  .profile-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+  html.dark .profile-tab.active { color: var(--teal-mid); border-bottom-color: var(--teal-mid); }
+  .profile-grid { display: grid; grid-template-columns: 1fr 320px; gap: 24px; }
+  .content-section { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px; margin-bottom: 20px; }
+  html.dark .content-section { background: #0f2220; border-color: rgba(255,255,255,.08); }
+  .section-title-sm { font-size: 16px; font-weight: 800; margin-bottom: 16px; color: var(--ink); }
+  html.dark .section-title-sm { color: #e2efed; }
+  .bio-text { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  .skills-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+  .skill-chip { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 99px; background: var(--teal-lt); color: var(--teal); font-size: 12px; font-weight: 700; }
+  .skill-chip .remove { cursor: pointer; opacity: .7; font-size: 11px; }
+  .skill-chip .remove:hover { opacity: 1; }
+  .filter-chip { padding: 6px 14px; border-radius: 99px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all .2s; }
+  .filter-chip:hover { border-color: var(--teal); }
+  .filter-chip.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .add-skill-input { display: flex; gap: 8px; margin-top: 12px; }
+  .avail-toggle { display: flex; align-items: center; justify-content: space-between; }
+  .toggle-switch { position: relative; width: 44px; height: 24px; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; inset: 0; background: var(--line); border-radius: 12px; cursor: pointer; transition: .3s; }
+  .slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; }
+  input:checked + .slider { background: var(--teal); }
+  input:checked + .slider::before { transform: translateX(20px); }
+  @media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } .profile-stats-bar { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<div class="app-page">
+  <aside class="app-sidebar" id="appSidebar"></aside>
+  <main class="app-main">
+    <div class="app-topbar" id="appTopbar"></div>
+    <div class="page-inner">
+
+      <!-- Profile Header Card -->
+      <div class="profile-card fade-in">
+        <div class="profile-cover-wrap" id="profileCoverWrap" style="background-size:cover; background-position:center; position:relative;">
+          <button onclick="openCoverPhotoStudio()" 
+                  title="Change & edit cover banner photo"
+                  style="position:absolute; top:16px; right:20px; background:rgba(14,59,53,0.85); backdrop-filter:blur(10px); color:#fff; border:1.5px solid rgba(74,222,128,0.4); padding:8px 18px; border-radius:99px; font-weight:800; font-size:12.5px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 6px 20px rgba(0,0,0,0.3); z-index:10; transition:all .25s ease;"
+                  onmouseover="this.style.background='rgba(14,59,53,0.98)'; this.style.transform='translateY(-2px) scale(1.04)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.4)'"
+                  onmouseout="this.style.background='rgba(14,59,53,0.85)'; this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.3)'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="18" height="18" rx="4" stroke="currentColor" stroke-width="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+              <path d="M21 15L16 10L5 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M18 7.5L19.5 6L21 7.5L19.5 9L18 7.5Z" fill="#F59E0B"/>
+            </svg>
+            <span>Change Cover</span>
+          </button>
+          <div class="profile-avatar-wrapper">
+            <div class="profile-avatar-big" id="profileAvatarBig"
+                 onclick="openAvatarStudio()"
+                 title="Click to edit or upload profile photo"
+                 style="cursor:pointer;">
+              <div id="avatarInner" style="width:100%; height:100%; display:grid; place-items:center; background:var(--amber); color:#fff; font-size:40px; font-weight:900;">
+                U
+              </div>
+              <div class="avatar-hover-overlay" style="position:absolute; inset:0; background:rgba(4,14,13,0.55); backdrop-filter:blur(3px); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; transition:opacity .2s ease; z-index:3; border-radius:50%;">
+                <span style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em;">Edit Photo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="profile-info-bar">
+          <div>
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <div class="profile-name" id="profileName">Professional User</div>
+            </div>
+            <div class="profile-title" id="profileTitle">Senior Proposal Manager</div>
+            <div class="profile-location">&#x1F4CD; Lagos, Nigeria</div>
+            <div class="avail-badge"><span class="avail-dot"></span> Available for hire</div>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="openEditModal()">&#x270F;&#xFE0F; Edit Profile</button>
+            <a class="btn btn-primary btn-sm" href="public-profile.html?id=me" target="_blank" style="text-decoration:none;">&#x1F441;&#xFE0F; View as Public</a>
+            <button class="btn btn-outline btn-sm" id="openSettings" onclick="openSettingsModal()">&#x25B6; Settings</button>
+          </div>
+        </div>
+
+        <div class="profile-stats-bar">
+          <div class="ps-stat"><div class="val" id="statProjectsDone">0</div><div class="lbl">Projects Done</div></div>
+          <div class="ps-stat"><div class="val" id="statTotalEarned">&#x20A6;0</div><div class="lbl">Total Earned</div></div>
+          <div class="ps-stat"><div class="val" id="statSuccessRate">0%</div><div class="lbl">Success Rate</div></div>
+          <div class="ps-stat"><div class="val" id="statRating" style="color:var(--amber); font-weight:900;">★ 0.0</div><div class="lbl" id="statRatingCount">Rating (0 reviews)</div></div>
+        </div>
+
+        <div class="profile-tabs-bar" role="tablist" aria-label="Profile sections">
+          <div class="profile-tab active" role="tab" id="tab-btn-overview" aria-controls="tab-overview" aria-selected="true" tabindex="0" onclick="switchTab('overview', this)">👤 Overview</div>
+          <div class="profile-tab" role="tab" id="tab-btn-portfolio" aria-controls="tab-portfolio" aria-selected="false" tabindex="-1" onclick="switchTab('portfolio', this)">💼 Portfolio</div>
+          <div class="profile-tab" role="tab" id="tab-btn-reviews" aria-controls="tab-reviews" aria-selected="false" tabindex="-1" onclick="switchTab('reviews', this)">⭐ Reviews</div>
+          <div class="profile-tab" role="tab" id="tab-btn-certifications" aria-controls="tab-certifications" aria-selected="false" tabindex="-1" onclick="switchTab('certifications', this)">🎓 Certifications</div>
+          <div class="profile-tab" role="tab" id="tab-btn-identity" aria-controls="tab-identity" aria-selected="false" tabindex="-1" onclick="switchTab('identity', this)">🛡️ Identity</div>
+        </div>
+      </div>
+
+      <!-- Tab Content -->
+      <div id="tab-overview" class="profile-grid fade-in" role="tabpanel" aria-labelledby="tab-btn-overview" aria-hidden="false">
+        <!-- Left -->
+        <div>
+          <div class="content-section">
+            <div class="section-title-sm">About Me</div>
+            <div class="bio-text" id="bioText">No bio added yet. Click 'Edit Profile' to introduce yourself, your industry experience, and technical specializations to clients.</div>
+          </div>
+
+          <div class="content-section">
+            <div class="section-title-sm">Skills</div>
+            <div class="skills-wrap" id="skillsWrap">
+              <span class="empty-msg" style="font-size:14px; color:var(--muted); font-style:italic;">No skills added yet. Add your technical skills below to help companies find you.</span>
+            </div>
+            <div class="add-skill-input">
+              <input class="form-input" type="text" id="newSkill" placeholder="Add a skill..." style="flex:1;" onkeydown="if(event.key==='Enter'){ event.preventDefault(); addSkill(); }">
+              <button class="btn btn-outline btn-sm" onclick="addSkill()">+ Add</button>
+            </div>
+          </div>
+          <div class="content-section">
+            <div class="avail-toggle">
+              <div class="section-title-sm" style="margin-bottom:0;">Availability</div>
+              <label class="toggle-switch"><input type="checkbox" checked id="availToggle"><span class="slider"></span></label>
+            </div>
+            <p style="font-size:13px; color:var(--muted); margin-top:8px;" id="availText">You are currently showing as available for new projects.</p>
+          </div>
+        </div>
+
+        <!-- Right -->
+        <div>
+          <div class="content-section" id="profileStrengthWidget">
+            <!-- Rendered dynamically by renderProfileStrength() -->
+          </div>
+
+          <div id="premiumUpgradeCard">
+            <div style="background:linear-gradient(135deg,var(--amber),#e8a612); border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.12); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=professional'">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div style="font-size:24px;">⚡</div>
+                <span style="background:rgba(255,255,255,0.28); color:#fff; font-size:11px; font-weight:900; padding:3px 8px; border-radius:99px; letter-spacing:0.3px;">$15 / Month</span>
+              </div>
+              <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Upgrade to Pro ($15 / Month)</h4>
+              <p style="font-size:12px; opacity:.9; margin-bottom:14px; line-height:1.4;">Unlock featured placement, unlimited proposal submissions, 5% reduced platform fees, and analytics.</p>
+              <a href="upgrade.html?role=professional" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=professional';" style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.4); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">Learn More &amp; Upgrade &rarr;</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div id="tab-portfolio" style="display:none;" role="tabpanel" aria-labelledby="tab-btn-portfolio" aria-hidden="true">
+        <div class="content-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div class="section-title-sm" style="margin-bottom:0;">Portfolio</div>
+            <button class="btn btn-primary btn-sm" onclick="openUploadModal('portfolio', onPortfolioUploaded)">+ Add Item</button>
+          </div>
+          <div id="portfolioGrid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-reviews" style="display:none;" role="tabpanel" aria-labelledby="tab-btn-reviews" aria-hidden="true">
+        <div class="content-section">
+          <div class="section-title-sm">Client Reviews</div>
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 24px; text-align:center; background:var(--paper); border-radius:var(--r); border:1px dashed var(--line);">
+            <div style="font-size:32px; margin-bottom:12px;">⭐</div>
+            <div style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Reviews Yet</div>
+            <p style="font-size:14px; color:var(--muted); max-width:400px; line-height:1.6;">Client ratings and feedback will appear here after you win proposals and complete contracts on Collekt.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-certifications" style="display:none;" role="tabpanel" aria-labelledby="tab-btn-certifications" aria-hidden="true">
+        <div class="content-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+            <div class="section-title-sm" style="margin-bottom:0;">Certifications & Qualifications</div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('addQualModal')">🎓 + Add Degree / Qualification</button>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <!-- Uploaded certifications & listed qualifications -->
+            <div id="certsUploaded" style="display:flex; flex-direction:column; gap:10px;"></div>
+            <!-- Upload buttons -->
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-top:4px;">
+              <div style="border:2px dashed var(--line); border-radius:var(--r); padding:16px; text-align:center; cursor:pointer; transition:all .2s;" onclick="openModal('addQualModal')" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--line)'">
+                <div style="font-size:22px; margin-bottom:4px;">🎓</div>
+                <span style="font-size:12px; color:var(--muted); font-weight:700;">Add Degree</span>
+              </div>
+              <div style="border:2px dashed var(--line); border-radius:var(--r); padding:16px; text-align:center; cursor:pointer; transition:all .2s;" onclick="openUploadModal('cv', onCvUploaded)" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--line)'">
+                <div style="font-size:22px; margin-bottom:4px;">📄</div>
+                <span style="font-size:12px; color:var(--muted); font-weight:700;">Upload CV</span>
+              </div>
+              <div style="border:2px dashed var(--line); border-radius:var(--r); padding:16px; text-align:center; cursor:pointer; transition:all .2s;" onclick="openUploadModal('certifications', onCertUploaded)" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--line)'">
+                <div style="font-size:22px; margin-bottom:4px;">🏅</div>
+                <span style="font-size:12px; color:var(--muted); font-weight:700;">Upload Certificate</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Identity Tab Panel -->
+      <div id="tab-identity" style="display:none;" role="tabpanel" aria-labelledby="tab-btn-identity" aria-hidden="true">
+        <div class="content-section">
+          <!-- Header Status Banner -->
+          <div id="identityBannerWrap" style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div id="identityIconBox" style="width:48px; height:48px; border-radius:12px; background:#f1f5f9; display:grid; place-items:center; font-size:24px; flex-shrink:0;">🛡️</div>
+              <div>
+                <div style="font-size:16px; font-weight:900; color:var(--ink);" id="identityStatusTitle">Identity Verification Pending</div>
+                <div style="font-size:13px; color:var(--muted); margin-top:2px;" id="identityStatusSub">Verify your National ID &amp; Biometrics to unlock verified status and earn your green verified badge.</div>
+              </div>
+            </div>
+            <div id="identityBadgePill" style="padding:6px 14px; border-radius:99px; background:#f1f5f9; color:var(--muted); font-size:12px; font-weight:800;">
+              ○ Unverified
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+            <!-- Left Column: NIN & Facial Recognition -->
+            <div style="display:flex; flex-direction:column; gap:20px;">
+              <!-- 1. NIN Section -->
+              <div style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:20px;">
+                <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                  <span>🆔</span> National Identification Number (NIN)
+                </div>
+                <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Enter your 11-digit NIN issued by NIMC for identity verification.</p>
+                
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">11-Digit NIN Number</label>
+                  <input class="form-input" type="text" id="idNinNumber" placeholder="e.g. 12345678901" maxlength="11">
+                </div>
+
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label">Upload NIN Slip / Digital ID Card Scan</label>
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('document', onNinUploaded)">
+                    <div style="font-size:22px; margin-bottom:2px;" id="ninFileIcon">📄</div>
+                    <div style="font-size:12px; font-weight:700; color:var(--ink);" id="ninFileName">Upload NIN Document (PDF, JPG, PNG)</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Facial Recognition & Liveness Selfie -->
+              <div style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:20px;">
+                <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                  <span>📸</span> Facial Recognition &amp; Biometric Scan
+                </div>
+                <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Align your face within the frame and capture a live selfie for AI facial match.</p>
+
+                <!-- Camera / Preview Frame -->
+                <div style="position:relative; width:100%; height:230px; background:#0f172a; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; border:2px solid var(--line);" id="facialFrame">
+                  <video id="facialVideo" autoplay playsinline style="width:100%; height:100%; object-fit:cover; display:none; transform:scaleX(-1);"></video>
+                  <img id="facialCapturedImg" style="width:100%; height:100%; object-fit:contain; background:#0f172a; display:none;" alt="Biometric Face Capture" loading="lazy" decoding="async">
+                  
+                  <!-- Face Oval Outline Overlay -->
+                  <div id="facialOvalOverlay" style="position:absolute; width:130px; height:160px; border:3px dashed rgba(255,255,255,0.7); border-radius:50%; pointer-events:none; box-shadow:0 0 0 9999px rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center;">
+                    <span style="color:rgba(255,255,255,0.8); font-size:11px; font-weight:700;">Align Face Here</span>
+                  </div>
+
+                  <!-- Captured Photo Success Badge -->
+                  <div id="facialCapturedBadge" style="position:absolute; top:12px; right:12px; background:rgba(22,163,74,0.9); color:#fff; padding:4px 12px; border-radius:99px; font-size:11px; font-weight:800; display:none; align-items:center; gap:4px; backdrop-filter:blur(4px); box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+                    <span>✅ Biometric Match Captured</span>
+                  </div>
+
+                  <div id="facialPlaceholder" style="text-align:center; color:rgba(255,255,255,0.7); padding:20px; z-index:2;">
+                    <div style="font-size:36px; margin-bottom:6px;">👤</div>
+                    <div style="font-size:12px; font-weight:700;">Camera Idle</div>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:12px;">
+                  <button class="btn btn-outline btn-sm" id="btnStartCamera" onclick="startFacialCamera()" style="flex:1;">📹 Open Camera</button>
+                  <button class="btn btn-primary btn-sm" id="btnCaptureFace" onclick="captureFacialSnapshot()" style="flex:1; background:var(--teal);" disabled>📸 Capture Snapshot</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Gov ID, Proof of Address & Submit -->
+            <div style="display:flex; flex-direction:column; gap:20px;">
+              <!-- 3. Other Official Government ID -->
+              <div style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:20px;">
+                <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                  <span>🪪</span> Other Official Government ID
+                </div>
+                <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Select your secondary valid government ID type and upload clear front/back scans.</p>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">ID Document Type</label>
+                  <select class="form-input" id="idGovType">
+                    <option value="International Passport">International Passport</option>
+                    <option value="Driver's License">Driver's License</option>
+                    <option value="Permanent Voter's Card (PVC)">Permanent Voter's Card (PVC)</option>
+                  </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Document ID Number</label>
+                  <input class="form-input" type="text" id="idGovNumber" placeholder="e.g. A01234567">
+                </div>
+
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label">Upload Government ID Document</label>
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('document', onGovIdUploaded)">
+                    <div style="font-size:22px; margin-bottom:2px;" id="govIdFileIcon">💳</div>
+                    <div style="font-size:12px; font-weight:700; color:var(--ink);" id="govIdFileName">Upload ID Scan (PDF, JPG, PNG)</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. Proof of Address -->
+              <div style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:20px;">
+                <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                  <span>🏠</span> Proof of Residential Address
+                </div>
+                <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Upload a recent utility bill or bank statement showing your residential address.</p>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Proof of Address Type</label>
+                  <select class="form-input" id="idAddressType">
+                    <option value="Utility DisCo Bill">Electricity DisCo Bill (IKEDC, EKEDC, AEDC, etc.)</option>
+                    <option value="Water Bill">Water Board Bill</option>
+                    <option value="Bank Statement">Bank Account Statement (Last 3 Months)</option>
+                    <option value="Tenancy Agreement">Tenancy Agreement / Land Use Charge</option>
+                  </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label">Upload Address Document</label>
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('document', onAddressDocUploaded)">
+                    <div style="font-size:22px; margin-bottom:2px;" id="addressFileIcon">🧾</div>
+                    <div style="font-size:12px; font-weight:700; color:var(--ink);" id="addressFileName">Upload Utility Bill / Statement</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit Verification Action Box -->
+              <div style="background:linear-gradient(135deg, var(--teal), #0a2925); border-radius:var(--r); padding:20px; color:#fff;">
+                <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Ready to Submit Identity Verification?</h4>
+                <p style="font-size:12px; opacity:0.85; margin-bottom:16px; line-height:1.5;">Once submitted, our AI &amp; compliance verification system checks your NIN and facial biometrics to activate your Verified Professional Status instantly.</p>
+                <button class="btn btn-primary" onclick="submitIdentityVerification()" style="width:100%; min-height:44px; font-weight:900; background:var(--amber); color:#fff; border:none; box-shadow:0 6px 20px rgba(212,146,11,0.3);">
+                  🛡️ Submit &amp; Activate Identity Verification
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Edit Modal -->
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-card" style="position:relative; max-width:620px; width:100%; max-height:90vh; overflow-y:auto;">
+    <button class="modal-close" onclick="closeModal('editModal')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="modal-title" style="font-size:20px; font-weight:900; margin-bottom:20px;">Edit Professional Profile</div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input class="form-input" type="text" id="editFirstName" placeholder="e.g. Dave">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input class="form-input" type="text" id="editLastName" placeholder="e.g. Ojeowere">
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label class="form-label">Other Name <span style="font-size:11px; font-weight:600; color:var(--muted);">(Optional)</span></label>
+        <input class="form-input" type="text" id="editOtherName" placeholder="e.g. Oladapo">
+
+      </div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" type="text" id="editUsername" placeholder="e.g. ojeoweredave">
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label class="form-label">Professional Title</label>
+        <input class="form-input" type="text" id="editTitle" placeholder="e.g. Senior Proposal Manager">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Primary Industry Sector</label>
+        <select class="form-input" id="editSector">
+          <option value="Oil & Gas (Upstream/Midstream)">Oil & Gas (Upstream / Midstream)</option>
+          <option value="Civil & EPC Construction">Civil & EPC Construction</option>
+          <option value="Renewable Energy & Power">Renewable Energy & Power</option>
+          <option value="Infrastructure & Public Works">Infrastructure & Public Works</option>
+          <option value="Maritime & Logistics">Maritime & Logistics</option>
+          <option value="Telecommunications & IT">Telecommunications & IT</option>
+          <option value="Legal & Regulatory Compliance">Legal & Regulatory Compliance</option>
+          <option value="Mining & Minerals">Mining & Minerals</option>
+          <option value="General Consulting">General Consulting</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label class="form-label">Country</label>
+        <select class="form-input" id="editCountry" onchange="onCountryChange(this.value)">
+          <option value="Nigeria" selected>Nigeria 🇳🇬</option>
+          <option value="Ghana">Ghana 🇬🇭</option>
+          <option value="United Kingdom">United Kingdom 🇬🇧</option>
+          <option value="United States">United States 🇺🇸</option>
+          <option value="Canada">Canada 🇨🇦</option>
+          <option value="United Arab Emirates">United Arab Emirates 🇦🇪</option>
+          <option value="South Africa">South Africa 🇿🇦</option>
+          <option value="Kenya">Kenya 🇰🇪</option>
+          <option value="Germany">Germany 🇩🇪</option>
+          <option value="Netherlands">Netherlands 🇳🇱</option>
+          <option value="Other">Other Country</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">State / Region</label>
+        <select class="form-input" id="editState">
+          <option value="Lagos">Lagos State</option>
+          <option value="Rivers">Rivers State (Port Harcourt)</option>
+          <option value="FCT Abuja">FCT Abuja</option>
+          <option value="Akwa Ibom">Akwa Ibom State</option>
+          <option value="Delta">Delta State (Warri)</option>
+          <option value="Bayelsa">Bayelsa State</option>
+          <option value="Oyo">Oyo State (Ibadan)</option>
+          <option value="Ogun">Ogun State</option>
+          <option value="Edo">Edo State (Benin City)</option>
+          <option value="Kano">Kano State</option>
+          <option value="Kaduna">Kaduna State</option>
+          <option value="Enugu">Enugu State</option>
+          <option value="Anambra">Anambra State</option>
+          <option value="Abia">Abia State</option>
+          <option value="Cross River">Cross River State</option>
+          <option value="Imo">Imo State</option>
+          <option value="Ondo">Ondo State</option>
+          <option value="Osun">Osun State</option>
+          <option value="Kwara">Kwara State</option>
+          <option value="Benue">Benue State</option>
+          <option value="Plateau">Plateau State</option>
+          <option value="Borno">Borno State</option>
+          <option value="Katsina">Katsina State</option>
+          <option value="Sokoto">Sokoto State</option>
+          <option value="Bauchi">Bauchi State</option>
+          <option value="Adamawa">Adamawa State</option>
+          <option value="Taraba">Taraba State</option>
+          <option value="Niger">Niger State</option>
+          <option value="Kogi">Kogi State</option>
+          <option value="Ekiti">Ekiti State</option>
+          <option value="Ebonyi">Ebonyi State</option>
+          <option value="Zamfara">Zamfara State</option>
+          <option value="Kebbi">Kebbi State</option>
+          <option value="Yobe">Yobe State</option>
+          <option value="Jigawa">Jigawa State</option>
+          <option value="Gombe">Gombe State</option>
+          <option value="Nasarawa">Nasarawa State</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Languages Spoken</label>
+      <input class="form-input" type="text" id="editLanguages" placeholder="e.g. English, French, Hausa, Yoruba, Igbo">
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label class="form-label">Work Preference</label>
+        <select class="form-input" id="editWorkPref">
+          <option value="Hybrid">Hybrid (Remote & On-site)</option>
+          <option value="On-site Onshore">On-site Onshore</option>
+          <option value="On-site Offshore">On-site Offshore (Certified)</option>
+          <option value="Remote">100% Remote</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Availability Status</label>
+        <select class="form-input" id="editAvailability">
+          <option value="Available Immediately">Available Immediately</option>
+          <option value="Available Part-Time">Available Part-Time</option>
+          <option value="Project-Based Contract">Project-Based Contract</option>
+          <option value="Open to Offers">Open to Offers</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Professional Accreditation / License IDs</label>
+      <input class="form-input" type="text" id="editAccreditation" placeholder="e.g. COREN: R.45281 | NIPEX ID: 90214 | PMP# 284192">
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input class="form-input" type="tel" id="editPhone" placeholder="e.g. +234 801 234 5678">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>LinkedIn Profile URL</span>
+          <button type="button" onclick="linkLinkedInAccount(document.getElementById('editLinkedIn').value)" style="background:#0077b5; color:#fff; border:none; padding:2px 8px; border-radius:6px; font-size:10.5px; font-weight:800; cursor:pointer;">🔗 Connect</button>
+        </label>
+        <input class="form-input" type="url" id="editLinkedIn" placeholder="https://linkedin.com/in/username">
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label">Website / Portfolio Link</label>
+      <input class="form-input" type="url" id="editWebsite" placeholder="https://myportfolio.com">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Bio / Background Overview</label>
+      <textarea class="form-input" id="editBio" rows="4" style="resize:vertical;" placeholder="Tell clients about yourself, your background, past IOC/EPC clients and core technical expertise..."></textarea>
+    </div>
+
+    <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:16px;">
+      <button class="btn btn-outline" onclick="closeModal('editModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveProfileBtn" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Qualification Modal -->
+<div class="modal-overlay" id="addQualModal">
+  <div class="modal-card" style="position:relative; max-width:520px; width:100%;">
+    <button class="modal-close" onclick="closeModal('addQualModal')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="modal-title" style="font-size:18px; font-weight:900; margin-bottom:16px;">Add Degree / Qualification</div>
+    
+    <div class="form-group">
+      <label class="form-label">Degree / Qualification Title</label>
+      <input class="form-input" type="text" id="qualName" placeholder="e.g. B.Eng. Petroleum Engineering (First Class)">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Awarding Institution / Certification Body</label>
+      <input class="form-input" type="text" id="qualIssuer" placeholder="e.g. University of Lagos or PMI">
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-input" id="qualCategory">
+          <option value="Academic Degree">Academic Degree</option>
+          <option value="Professional Certification">Professional Certification</option>
+          <option value="Regulatory Licence">Regulatory Licence</option>
+          <option value="Technical Diploma">Technical Diploma</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Year Obtained</label>
+        <input class="form-input" type="text" id="qualYear" placeholder="e.g. 2022">
+      </div>
+    </div>
+
+    <!-- Upload Document / Certificate File Space -->
+    <div class="form-group" style="margin-top:8px;">
+      <label class="form-label">Attach Supporting Certificate / Document (PDF, Image, DOC)</label>
+      <div style="border:2px dashed var(--line); border-radius:14px; padding:16px 18px; text-align:center; background:var(--paper); cursor:pointer; position:relative; transition:all 0.2s;" id="qualDropzone" onclick="document.getElementById('qualFileInput').click()" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="if(!selectedQualFileName)this.style.borderColor='var(--line)'">
+        <input type="file" id="qualFileInput" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp" style="display:none;" onchange="handleQualFileSelect(this)">
+        <div style="font-size:26px; margin-bottom:4px;" id="qualFileIcon">📁</div>
+        <div style="font-size:13px; font-weight:800; color:var(--ink);" id="qualFileName">Click or Drag &amp; Drop Certificate File</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:2px;" id="qualFileSize">Supported formats: PDF, JPG, PNG, DOC (Max 50MB)</div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:16px;">
+      <button class="btn btn-outline" onclick="closeModal('addQualModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveQualification()">Save Qualification</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cover Photo / Banner Studio Modal -->
+<div class="modal-overlay" id="coverPhotoStudioModal" style="display:none; position:fixed; inset:0; z-index:9900; background:rgba(4,14,13,0.8); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:16px;">
+  <div class="modal-card" style="position:relative; max-width:580px; width:100%; max-height:calc(100vh - 32px); overflow-y:auto; border-radius:20px; padding:20px 22px; background:var(--white); border:1px solid var(--line); box-shadow:0 24px 60px rgba(0,0,0,0.3); font-family:'Manrope',sans-serif;">
+    <button class="modal-close" onclick="closeModal('coverPhotoStudioModal')" style="position:absolute; top:14px; right:14px; width:30px; height:30px; border-radius:50%; border:1px solid var(--line); background:var(--paper); cursor:pointer; font-size:16px; display:grid; place-items:center;">&times;</button>
+    
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+      <div style="width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg, #0E3B35, #13756F); color:#fff; display:grid; place-items:center; box-shadow:0 4px 10px rgba(14,59,53,0.25); flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="18" height="18" rx="4" stroke="currentColor" stroke-width="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+          <path d="M21 15L16 10L5 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div style="font-size:17px; font-weight:900; color:var(--ink); line-height:1.2;">Cover Photo Editor &amp; Banner Studio</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:2px;">Upload, position, zoom, rotate, and apply custom filters</div>
+      </div>
+    </div>
+
+    <!-- Interactive Canvas Cropper Viewport -->
+    <div style="position:relative; width:100%; height:140px; border-radius:14px; overflow:hidden; border:2.5px solid var(--teal); box-shadow:0 6px 20px rgba(0,0,0,.15); background:#0f172a; cursor:grab; user-select:none; margin-bottom:12px;"
+         id="coverCanvasViewport"
+         onmousedown="startCoverDrag(event)"
+         onmousemove="doCoverDrag(event)"
+         onmouseup="endCoverDrag()"
+         onmouseleave="endCoverDrag()"
+         ontouchstart="startCoverDrag(event)"
+         ontouchmove="doCoverDrag(event)"
+         ontouchend="endCoverDrag()">
+      
+      <canvas id="coverStudioCanvas" width="560" height="140" style="width:100%; height:100%; display:block;"></canvas>
+      
+      <!-- Drag hint overlay -->
+      <div id="coverDragHint" style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.72); color:#fff; font-size:10px; font-weight:800; padding:3px 12px; border-radius:99px; pointer-events:none; backdrop-filter:blur(4px); display:flex; align-items:center; gap:5px;">
+        <span>✋</span> Drag to adjust position &amp; crop
+      </div>
+    </div>
+
+    <!-- Zoom & Rotation Controls -->
+    <div style="width:100%; margin-bottom:12px; display:flex; flex-direction:column; gap:10px; background:var(--paper); padding:10px 14px; border-radius:12px; border:1px solid var(--line);">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:11px; font-weight:800; color:var(--ink); min-width:42px;">Zoom:</span>
+        <button class="btn btn-xs btn-outline" onclick="changeCoverZoom(-0.15)" style="padding:2px 8px; font-size:11px; font-weight:800;">🔍 -</button>
+        <input type="range" id="coverZoomRange" min="1" max="3.5" step="0.05" value="1" style="flex:1; accent-color:var(--teal); cursor:pointer; height:4px;" oninput="onCoverZoomInput(this.value)">
+        <button class="btn btn-xs btn-outline" onclick="changeCoverZoom(0.15)" style="padding:2px 8px; font-size:11px; font-weight:800;">🔍 +</button>
+        <button class="btn btn-xs btn-outline" onclick="rotateCoverImage()" title="Rotate 90 degrees" style="padding:2px 8px; font-size:11px; font-weight:800;">🔄 90°</button>
+      </div>
+
+      <!-- Color Filters -->
+      <div>
+        <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px;">Banner Color Filters</div>
+        <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;" id="coverFilterChips">
+          <button class="filter-chip active" onclick="setCoverFilter('none', this)" style="padding:3px 10px; font-size:11px;">Original</button>
+          <button class="filter-chip" onclick="setCoverFilter('warm', this)" style="padding:3px 10px; font-size:11px;">🌅 Warm Sunset</button>
+          <button class="filter-chip" onclick="setCoverFilter('cool', this)" style="padding:3px 10px; font-size:11px;">🧊 Cool Emerald</button>
+          <button class="filter-chip" onclick="setCoverFilter('bw', this)" style="padding:3px 10px; font-size:11px;">📷 B&amp;W Studio</button>
+          <button class="filter-chip" onclick="setCoverFilter('vintage', this)" style="padding:3px 10px; font-size:11px;">📻 Vintage</button>
+          <button class="filter-chip" onclick="setCoverFilter('contrast', this)" style="padding:3px 10px; font-size:11px;">⚡ Crisp</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option Selection & Presets -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+      <div>
+        <button onclick="document.getElementById('coverFileInput').click()" class="btn btn-outline" style="width:100%; font-size:12px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px;">
+          📁 Choose Custom Image
+        </button>
+        <input type="file" id="coverFileInput" accept="image/*" style="display:none;" onchange="handleCoverFileSelect(this)">
+      </div>
+      <div>
+        <button onclick="togglePresetCoverPicker()" class="btn btn-outline" style="width:100%; font-size:12px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px;">
+          🏙️ HD Energy Presets
+        </button>
+      </div>
+    </div>
+
+    <!-- Preset Grid -->
+    <div id="presetCoverContainer" style="display:none; margin-bottom:12px; background:var(--paper); padding:10px; border-radius:12px; border:1px solid var(--line);">
+      <div style="font-size:11px; font-weight:800; color:var(--ink); margin-bottom:8px;">Select HD Energy &amp; Infrastructure Preset Banners:</div>
+      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;" id="presetCoverGrid"></div>
+    </div>
+
+    <div style="display:flex; gap:8px; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:12px; margin-top:4px;">
+      <button class="btn btn-outline btn-xs" onclick="removeCoverPhoto()" style="color:#ef4444; border-color:rgba(239,68,68,0.3); font-weight:700;">🗑️ Reset</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline btn-xs" onclick="closeModal('coverPhotoStudioModal')" style="font-weight:700; padding:6px 14px;">Cancel</button>
+        <button class="btn btn-primary btn-xs" onclick="saveCoverPhotoFromStudio()" style="font-weight:800; background:var(--teal); padding:6px 18px;">Save Cover Photo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=35.0"></script>
+<script src="app.js?v=35.0"></script>
+<script src="collekt-ai.js?v=23.0"></script>
+<script>
+  requireAuth();
+
+  /* ═ PROFILE TAB SWITCHER ═ */
+  function switchTab(tab, el) {
+    // Update active tab button style
+    document.querySelectorAll('.profile-tab').forEach(t => {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+      t.setAttribute('tabindex', '-1');
+    });
+
+    if (el) {
+      el.classList.add('active');
+      el.setAttribute('aria-selected', 'true');
+      el.setAttribute('tabindex', '0');
+    }
+
+    // Toggle tab panels
+    ['overview', 'portfolio', 'reviews', 'certifications', 'identity'].forEach(id => {
+      const panel = document.getElementById('tab-' + id);
+      if (panel) {
+        if (id === tab) {
+          panel.style.display = id === 'overview' ? '' : 'block';
+          panel.classList.add('active');
+          panel.setAttribute('aria-hidden', 'false');
+          if (id === 'identity' && typeof renderIdentityStatus === 'function') {
+            renderIdentityStatus();
+          }
+        } else {
+          panel.style.display = 'none';
+          panel.classList.remove('active');
+          panel.setAttribute('aria-hidden', 'true');
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    let user = typeof getUser === 'function' ? getUser() : null;
+    if (user && user.role === 'company') {
+      window.location.replace('company-profile.html');
+      return;
+    }
+
+    try { await syncUser(); } catch(e) {}
+
+    user = (typeof getUser === 'function') ? getUser() : user;
+
+    buildSidebar('profile');
+    buildTopbar();
+
+    if (!user) return;
+
+    // Apply saved user profile data IMMEDIATELY from localStorage
+    _applyProfile(user);
+
+    // Load saved avatar & cover photo
+    const savedAvatar = getUploadedAvatar();
+    if (savedAvatar && savedAvatar.dataURL) {
+      _applyAvatarImage(savedAvatar.dataURL);
+    }
+    _applyCoverPhoto(getSavedCoverPhoto());
+
+    // Render uploaded files
+    renderPortfolio();
+    renderCvCard();
+    renderCertifications();
+    renderIdentityStatus();
+    renderProfileStrength();
+
+    if (typeof renderPremiumUpgradeCard === 'function') {
+      renderPremiumUpgradeCard('premiumUpgradeCard', 'professional');
+    }
+
+    // Load from Supabase if available & permanently sync role: 'professional' to cloud DB
+    if (window.sb) {
+      if (user.id) {
+        try {
+          const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
+          if (prof) {
+            const merged = { ...user, ...prof, role: 'professional' };
+            delete merged.company_name;
+            delete merged.rep_first_name;
+            delete merged.rep_last_name;
+            delete merged.rep_other_name;
+            delete merged.contact_person;
+            delete merged.cac;
+            _applyProfile(merged);
+          }
+        } catch(err) {
+          console.warn('Supabase profile load notice:', err);
+        }
+      }
+
+      sb.auth.getSession().then(({ data: { session } }) => {
+        if (session && session.user) {
+          sb.from('profiles').update({ role: 'professional' }).eq('id', session.user.id).catch(() => {});
+        }
+      }).catch(() => {});
+    }
+  });
+
+
+
+  /* ═ IDENTITY & BIOMETRIC VERIFICATION SYSTEM ═ */
+    let verificationTicker = null;
+  let facialStream = null;
+  let capturedFacialDataURL = null;
+  let uploadedNinFileData = null;
+  let uploadedGovIdFileData = null;
+  let uploadedAddressFileData = null;
+
+  function renderIdentityStatus() {
+    const user = getUser();
+    if (!user) return;
+
+    const titleEl = document.getElementById('identityStatusTitle');
+    const subEl = document.getElementById('identityStatusSub');
+    const badgeEl = document.getElementById('identityBadgePill');
+    const iconBox = document.getElementById('identityIconBox');
+    const bannerWrap = document.getElementById('identityBannerWrap');
+
+    const status = user.verification_status || (user.identity_verified || user.is_verified ? 'verified' : 'unverified');
+    const submittedAt = user.verification_submitted_at ? new Date(user.verification_submitted_at).getTime() : 0;
+
+    const fiveMinutesMs = 5 * 60 * 1000;
+    const elapsedMs = submittedAt ? (Date.now() - submittedAt) : 0;
+
+    // Auto-approve after 5 minutes review
+    if (status === 'under_review' && elapsedMs >= fiveMinutesMs) {
+      user.verification_status = 'verified';
+      user.identity_verified = true;
+      user.is_verified = true;
+      setUser(user);
+      if (verificationTicker) clearInterval(verificationTicker);
+    }
+
+    const savedNin = localStorage.getItem('collekt_user_nin') || user.nin || '';
+    if (savedNin && document.getElementById('idNinNumber')) {
+      document.getElementById('idNinNumber').value = savedNin;
+    }
+
+    const profStrength = typeof calculateUserProfileStrength === 'function' ? calculateUserProfileStrength(user) : null;
+    const is100 = (profStrength ? profStrength.percent >= 100 : false);
+
+    if (user.verification_status === 'verified' || user.identity_verified || user.is_verified) {
+      if (is100) {
+        if (titleEl) titleEl.textContent = '✅ Identity Verified & Verified Shield Badge Active';
+        if (subEl) subEl.textContent = 'Your National ID, Facial Biometrics, and Address documents have been verified. Your 100% complete profile now displays the green verified badge.';
+        if (badgeEl) {
+          badgeEl.style.background = '#dcfce7';
+          badgeEl.style.color = '#15803d';
+          badgeEl.innerHTML = '✅ Identity Verified';
+        }
+        if (iconBox) {
+          iconBox.style.background = '#dcfce7';
+          iconBox.textContent = '🛡️';
+        }
+        if (bannerWrap) bannerWrap.style.borderColor = '#16a34a';
+      } else {
+        if (titleEl) titleEl.textContent = '✅ Identity Documents Verified';
+        if (subEl) subEl.textContent = `Your ID documents are verified. Complete the remaining steps in Profile Strength (${profStrength ? profStrength.percent : 0}%) to activate your public verified shield badge.`;
+        if (badgeEl) {
+          badgeEl.style.background = 'rgba(212,146,11,0.15)';
+          badgeEl.style.color = 'var(--amber)';
+          badgeEl.innerHTML = `⚠️ Profile Setup ${profStrength ? profStrength.percent : 0}% / 100%`;
+        }
+        if (iconBox) {
+          iconBox.style.background = 'rgba(212,146,11,0.15)';
+          iconBox.textContent = '📋';
+        }
+        if (bannerWrap) bannerWrap.style.borderColor = 'var(--amber)';
+      }
+    } else if (user.verification_status === 'under_review') {
+      const remainingMs = Math.max(0, fiveMinutesMs - (Date.now() - submittedAt));
+      const remMins = Math.floor(remainingMs / (1000 * 60));
+      const remSecs = Math.floor((remainingMs % (1000 * 60)) / 1000);
+      const timeStr = `${remMins}m ${remSecs}s remaining`;
+
+      if (titleEl) titleEl.textContent = '⏳ Verification Under 5-Minute Review';
+      if (subEl) subEl.textContent = `Your NIN, Government ID & Biometrics are currently being reviewed. Account will be automatically verified in ${timeStr}.`;
+      if (badgeEl) {
+        badgeEl.style.background = '#e0f2fe';
+        badgeEl.style.color = '#0369a1';
+        badgeEl.innerHTML = `⏳ 5-Min Review (${remMins}m ${remSecs}s)`;
+      }
+      if (iconBox) {
+        iconBox.style.background = '#e0f2fe';
+        iconBox.textContent = '⏳';
+      }
+      if (bannerWrap) bannerWrap.style.borderColor = '#0284c7';
+
+      // Live 1-second countdown ticker
+      if (!verificationTicker) {
+        verificationTicker = setInterval(() => {
+          renderIdentityStatus();
+        }, 1000);
+      }
+    } else {
+      if (titleEl) titleEl.textContent = '🛡️ Identity Verification Pending';
+      if (subEl) subEl.textContent = 'Verify your National ID & Biometrics to unlock verified status and earn your green verified badge after a quick 5-minute review.';
+      if (badgeEl) {
+        badgeEl.style.background = '#fef3c7';
+        badgeEl.style.color = '#b45309';
+        badgeEl.innerHTML = '○ Unverified';
+      }
+    }
+  }
+
+  async function startFacialCamera() {
+    const video = document.getElementById('facialVideo');
+    const placeholder = document.getElementById('facialPlaceholder');
+    const btnStart = document.getElementById('btnStartCamera');
+    const btnCap = document.getElementById('btnCaptureFace');
+    const capturedImg = document.getElementById('facialCapturedImg');
+    const overlay = document.getElementById('facialOvalOverlay');
+    const badge = document.getElementById('facialCapturedBadge');
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showToast('⚠️ Camera access not supported in this browser.', 'warning');
+      return;
+    }
+
+    try {
+      facialStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } });
+      if (video) {
+        video.srcObject = facialStream;
+        video.style.display = 'block';
+      }
+      if (placeholder) placeholder.style.display = 'none';
+      if (capturedImg) capturedImg.style.display = 'none';
+      if (overlay) overlay.style.display = 'flex';
+      if (badge) badge.style.display = 'none';
+      if (btnStart) btnStart.textContent = '🔄 Retake Camera';
+      if (btnCap) btnCap.removeAttribute('disabled');
+      showToast('📹 Camera active. Align your face in the oval frame.');
+    } catch(err) {
+      console.warn('Camera stream notice:', err);
+      showToast('⚠️ Unable to access camera. Please allow camera permissions.', 'warning');
+    }
+  }
+
+  function captureFacialSnapshot() {
+    const video = document.getElementById('facialVideo');
+    const capturedImg = document.getElementById('facialCapturedImg');
+    const overlay = document.getElementById('facialOvalOverlay');
+    const badge = document.getElementById('facialCapturedBadge');
+
+    if (!video || !video.srcObject) return;
+
+    // Use native camera resolution so snapshot is crisp & un-distorted
+    const vW = video.videoWidth || 640;
+    const vH = video.videoHeight || 480;
+    const canvas = document.createElement('canvas');
+    canvas.width = vW;
+    canvas.height = vH;
+    const ctx = canvas.getContext('2d');
+
+    // Flip horizontally for natural mirror image
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    capturedFacialDataURL = canvas.toDataURL('image/jpeg', 0.95);
+
+    if (capturedImg) {
+      capturedImg.src = capturedFacialDataURL;
+      capturedImg.style.display = 'block';
+    }
+    if (video) video.style.display = 'none';
+    if (overlay) overlay.style.display = 'none'; // Remove darkening overlay for 100% crystal clear view!
+    if (badge) badge.style.display = 'flex';
+
+    if (facialStream) {
+      facialStream.getTracks().forEach(t => t.stop());
+      facialStream = null;
+    }
+
+    const btnStart = document.getElementById('btnStartCamera');
+    if (btnStart) btnStart.textContent = '🔄 Retake Snapshot';
+
+    showToast('📸 Clear facial biometric snapshot captured!');
+  }
+
+  window.onNinUploaded = function(fileData) {
+    uploadedNinFileData = fileData;
+    const fname = document.getElementById('ninFileName');
+    const icon = document.getElementById('ninFileIcon');
+    if (fname && fileData) fname.textContent = '✅ ' + fileData.name;
+    if (icon) icon.textContent = '✅';
+    showToast('📄 NIN document attached.');
+  };
+
+  window.onGovIdUploaded = function(fileData) {
+    uploadedGovIdFileData = fileData;
+    const fname = document.getElementById('govIdFileName');
+    const icon = document.getElementById('govIdFileIcon');
+    if (fname && fileData) fname.textContent = '✅ ' + fileData.name;
+    if (icon) icon.textContent = '✅';
+    showToast('💳 Government ID scan attached.');
+  };
+
+  window.onAddressDocUploaded = function(fileData) {
+    uploadedAddressFileData = fileData;
+    const fname = document.getElementById('addressFileName');
+    const icon = document.getElementById('addressFileIcon');
+    if (fname && fileData) fname.textContent = '✅ ' + fileData.name;
+    if (icon) icon.textContent = '✅';
+    showToast('🧾 Proof of address attached.');
+  };
+
+  function submitIdentityVerification() {
+    const nin = document.getElementById('idNinNumber')?.value.trim();
+    if (!nin || nin.length < 11) {
+      showToast('⚠️ Please enter a valid 11-digit NIN Number', 'warning');
+      return;
+    }
+
+    const user = getUser() || {};
+    user.nin = nin;
+    user.verification_status = 'under_review';
+    user.verification_submitted_at = new Date().toISOString();
+    user.facial_biometric = capturedFacialDataURL || true;
+    user.id_gov_type = document.getElementById('idGovType')?.value;
+    user.id_gov_number = document.getElementById('idGovNumber')?.value;
+    user.id_address_type = document.getElementById('idAddressType')?.value;
+    setUser(user);
+
+    localStorage.setItem('collekt_user_nin', nin);
+
+    if (window.sb && user.id) {
+      try {
+        sb.from('profiles').update({ nin, verification_status: 'under_review' }).eq('id', user.id);
+      } catch(e) {}
+    }
+
+    renderIdentityStatus();
+    if (typeof buildSidebar === 'function') buildSidebar('profile');
+    if (typeof buildTopbar === 'function') buildTopbar();
+    renderProfileStrength();
+
+    showToast('⏳ Identity Verification Submitted! Verification will take place on or before 24 hours.');
+  }
+
+  // -- Avatar upload handling --
+  function _applyAvatarImage(dataURL) {
+    const inner = document.getElementById('avatarInner');
+    if (inner) {
+      inner.innerHTML = `<img src="${dataURL}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;" alt="Profile photo" loading="lazy" decoding="async">`;
+    }
+  }
+
+  /* ═ PROFILE PHOTO STUDIO & CROPPER ═ */
+  let studioImg = new Image();
+  let studioZoom = 1.0;
+  let studioPanX = 0;
+  let studioPanY = 0;
+  let studioRotation = 0;
+  let studioFilter = 'none';
+  let isDraggingAvatar = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+
+  function openAvatarStudio() {
+    const savedAvatar = getUploadedAvatar();
+    if (savedAvatar && savedAvatar.dataURL) {
+      initStudioWithImage(savedAvatar.dataURL);
+    } else {
+      document.getElementById('studioFileInput').click();
+    }
+  }
+
+  function loadNewFileIntoStudio(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      initStudioWithImage(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function initStudioWithImage(src) {
+    studioImg = new Image();
+    studioImg.crossOrigin = "anonymous";
+    studioImg.onload = function() {
+      studioZoom = 1.0;
+      studioPanX = 0;
+      studioPanY = 0;
+      studioRotation = 0;
+      studioFilter = 'none';
+      const range = document.getElementById('avatarZoomRange');
+      if (range) range.value = 1.0;
+      
+      document.querySelectorAll('#avatarFilterChips .filter-chip').forEach((c, idx) => {
+        if (idx === 0) c.classList.add('active');
+        else c.classList.remove('active');
+      });
+
+      const modal = document.getElementById('avatarStudioModal');
+      if (modal) modal.style.display = 'block';
+
+      drawAvatarCanvas();
+    };
+    studioImg.src = src;
+  }
+
+  function closeAvatarStudio() {
+    const modal = document.getElementById('avatarStudioModal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function drawAvatarCanvas() {
+    const canvas = document.getElementById('avatarStudioCanvas');
+    if (!canvas || !studioImg.width) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Apply Filter
+    let filterStr = 'none';
+    if (studioFilter === 'warm') filterStr = 'sepia(0.25) contrast(1.1) saturate(1.2) brightness(1.02)';
+    else if (studioFilter === 'cool') filterStr = 'hue-rotate(15deg) contrast(1.08) saturate(1.1)';
+    else if (studioFilter === 'bw') filterStr = 'grayscale(1) contrast(1.2) brightness(1.05)';
+    else if (studioFilter === 'vintage') filterStr = 'sepia(0.55) contrast(0.95) brightness(0.95)';
+    else if (studioFilter === 'contrast') filterStr = 'contrast(1.3) saturate(1.15) brightness(1.02)';
+    
+    ctx.filter = filterStr;
+
+    ctx.save();
+    ctx.translate(w / 2 + studioPanX, h / 2 + studioPanY);
+    ctx.rotate((studioRotation * Math.PI) / 180);
+    ctx.scale(studioZoom, studioZoom);
+
+    // Calculate aspect fill scale
+    const scale = Math.max(w / studioImg.width, h / studioImg.height);
+    const nw = studioImg.width * scale;
+    const nh = studioImg.height * scale;
+
+    ctx.drawImage(studioImg, -nw / 2, -nh / 2, nw, nh);
+    ctx.restore();
+  }
+
+  function onAvatarZoomInput(val) {
+    studioZoom = parseFloat(val);
+    drawAvatarCanvas();
+  }
+
+  function changeAvatarZoom(delta) {
+    const range = document.getElementById('avatarZoomRange');
+    if (!range) return;
+    let val = Math.min(3.5, Math.max(1.0, parseFloat(range.value) + delta));
+    range.value = val;
+    studioZoom = val;
+    drawAvatarCanvas();
+  }
+
+  function rotateAvatarImage() {
+    studioRotation = (studioRotation + 90) % 360;
+    drawAvatarCanvas();
+  }
+
+  function setAvatarFilter(filterName, btnEl) {
+    studioFilter = filterName;
+    document.querySelectorAll('#avatarFilterChips .filter-chip').forEach(c => c.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    drawAvatarCanvas();
+  }
+
+  function startAvatarDrag(e) {
+    isDraggingAvatar = true;
+    const evt = e.touches ? e.touches[0] : e;
+    dragStartX = evt.clientX - studioPanX;
+    dragStartY = evt.clientY - studioPanY;
+    const vp = document.getElementById('canvasViewport');
+    if (vp) vp.style.cursor = 'grabbing';
+  }
+
+  function doAvatarDrag(e) {
+    if (!isDraggingAvatar) return;
+    e.preventDefault();
+    const evt = e.touches ? e.touches[0] : e;
+    studioPanX = evt.clientX - dragStartX;
+    studioPanY = evt.clientY - dragStartY;
+    drawAvatarCanvas();
+  }
+
+  function endAvatarDrag() {
+    isDraggingAvatar = false;
+    const vp = document.getElementById('canvasViewport');
+    if (vp) vp.style.cursor = 'grab';
+  }
+
+  function saveAvatarFromStudio() {
+    const canvas = document.getElementById('avatarStudioCanvas');
+    if (!canvas) return;
+
+    const dataURL = canvas.toDataURL('image/jpeg', 0.95);
+
+    saveUploadedFile('avatar', {
+      name: 'profile_photo.jpg',
+      dataURL: dataURL,
+      timestamp: Date.now()
+    });
+
+    const user = getUser();
+    if (user) {
+      user.avatar = dataURL;
+      setUser(user);
+    }
+
+    _applyAvatarImage(dataURL);
+    if (typeof buildSidebar === 'function') buildSidebar('profile');
+    if (typeof buildTopbar === 'function') buildTopbar();
+
+    showToast('✨ Profile photo updated and saved!');
+    renderProfileStrength();
+    closeAvatarStudio();
+  }
+
+  // Avatar upload callback
+  window.onAvatarUploaded = function(fileData) {
+    if (fileData && fileData.dataURL) {
+      if (typeof saveUploadedFile === 'function') {
+        saveUploadedFile('avatar', fileData);
+      }
+      const user = getUser();
+      if (user) {
+        user.avatar = fileData.dataURL;
+        setUser(user);
+      }
+      _applyAvatarImage(fileData.dataURL);
+      if (typeof buildSidebar === 'function') buildSidebar('profile');
+      if (typeof buildTopbar === 'function') buildTopbar();
+      showToast('✅ Profile photo updated across all pages!');
+      renderProfileStrength();
+    }
+  };
+
+  // -- Portfolio rendering --
+  function renderPortfolio() {
+    const grid = document.getElementById('portfolioGrid');
+    if (!grid) return;
+    const files = getUploadedFiles('portfolio');
+    window.uploadedPortfolioRegistry = files;
+    let html = '';
+    files.forEach((f, i) => {
+      const isImage = f.type && f.type.startsWith('image/');
+      html += `<div style="background:var(--paper);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;position:relative;transition:all .2s;cursor:pointer;" onclick="openDocumentViewer(window.uploadedPortfolioRegistry[${i}])" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        ${isImage && f.dataURL
+          ? `<div style="height:140px;background:url('${f.dataURL}') center/cover;position:relative;">
+               <div style="position:absolute;top:8px;left:8px;background:rgba(14,59,53,0.85);color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;backdrop-filter:blur(2px);">👁️ Preview</div>
+             </div>`
+          : `<div style="height:140px;display:grid;place-items:center;background:linear-gradient(135deg,var(--forest),var(--teal));color:#fff;font-size:48px;position:relative;">
+               ${getFileTypeIcon(f.type, f.name)}
+               <div style="position:absolute;top:8px;left:8px;background:rgba(14,59,53,0.85);color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;backdrop-filter:blur(2px);">👁️ Preview</div>
+             </div>`}
+        <div style="padding:12px;">
+          <div style="font-size:13px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">${formatFileSize(f.size)} &bull; Click to Preview</div>
+          <button onclick="event.stopPropagation(); deletePortfolioItem(${i})" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:12px;display:grid;place-items:center;opacity:.7;transition:.2s;" onmouseover="this.style.opacity='1';this.style.background='#dc2626'" onmouseout="this.style.opacity='.7';this.style.background='rgba(0,0,0,.6)'" title="Remove">✕</button>
+        </div>
+      </div>`;
+    });
+    // Add upload card
+    html += `<div style="background:var(--paper);border:2px dashed var(--line);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;transition:all .2s;" onclick="openUploadModal('portfolio', onPortfolioUploaded)" onmouseover="this.style.borderColor='var(--teal)';this.style.background='var(--teal-lt)'" onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--paper)'">
+      <div style="font-size:36px;margin-bottom:8px;">📁</div>
+      <div style="font-size:13px;font-weight:700;">Add Portfolio Item</div>
+      <div style="font-size:11px;margin-top:4px;">Images, PDFs, Documents</div>
+    </div>`;
+    grid.innerHTML = html;
+  }
+
+  window.onPortfolioUploaded = function(fileData) {
+    renderPortfolio();
+    showToast('✅ Portfolio item added!');
+    renderProfileStrength();
+  };
+
+  function deletePortfolioItem(index) {
+    removeUploadedFile('portfolio', index);
+    renderPortfolio();
+    renderProfileStrength();
+    showToast('Portfolio item removed.');
+  }
+
+  function onCountryChange(country) {
+    const stateSel = document.getElementById('editState');
+    if (!stateSel) return;
+    if (country === 'Nigeria') {
+      stateSel.innerHTML = `
+        <option value="Lagos">Lagos State</option>
+        <option value="Rivers">Rivers State (Port Harcourt)</option>
+        <option value="FCT Abuja">FCT Abuja</option>
+        <option value="Akwa Ibom">Akwa Ibom State</option>
+        <option value="Delta">Delta State (Warri)</option>
+        <option value="Bayelsa">Bayelsa State</option>
+        <option value="Oyo">Oyo State (Ibadan)</option>
+        <option value="Ogun">Ogun State</option>
+        <option value="Edo">Edo State (Benin City)</option>
+        <option value="Kano">Kano State</option>
+        <option value="Kaduna">Kaduna State</option>
+        <option value="Enugu">Enugu State</option>
+        <option value="Anambra">Anambra State</option>
+        <option value="Abia">Abia State</option>
+        <option value="Cross River">Cross River State</option>
+        <option value="Imo">Imo State</option>
+        <option value="Ondo">Ondo State</option>
+        <option value="Osun">Osun State</option>
+        <option value="Kwara">Kwara State</option>
+        <option value="Benue">Benue State</option>
+        <option value="Plateau">Plateau State</option>
+        <option value="Borno">Borno State</option>
+        <option value="Katsina">Katsina State</option>
+        <option value="Sokoto">Sokoto State</option>
+        <option value="Bauchi">Bauchi State</option>
+        <option value="Adamawa">Adamawa State</option>
+        <option value="Taraba">Taraba State</option>
+        <option value="Niger">Niger State</option>
+        <option value="Kogi">Kogi State</option>
+        <option value="Ekiti">Ekiti State</option>
+        <option value="Ebonyi">Ebonyi State</option>
+        <option value="Zamfara">Zamfara State</option>
+        <option value="Kebbi">Kebbi State</option>
+        <option value="Yobe">Yobe State</option>
+        <option value="Jigawa">Jigawa State</option>
+        <option value="Gombe">Gombe State</option>
+        <option value="Nasarawa">Nasarawa State</option>
+      `;
+    } else {
+      stateSel.innerHTML = `
+        <option value="Main State / Province">Main State / Province</option>
+        <option value="Capital Territory">Capital Region</option>
+        <option value="Commercial City">Commercial Center</option>
+      `;
+    }
+  }
+
+  let selectedQualDataURL = null;
+  let selectedQualFileName = null;
+  let selectedQualFileSize = 0;
+  let selectedQualFileType = null;
+
+  function handleQualFileSelect(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if (file.size > 50 * 1024 * 1024) {
+      showToast('⚠️ Maximum file size is 50MB', 'warning');
+      input.value = '';
+      return;
+    }
+
+    selectedQualFileName = file.name;
+    selectedQualFileSize = file.size;
+    selectedQualFileType = file.type || 'application/pdf';
+
+    const nameEl = document.getElementById('qualFileName');
+    const sizeEl = document.getElementById('qualFileSize');
+    const iconEl = document.getElementById('qualFileIcon');
+    const dropzone = document.getElementById('qualDropzone');
+
+    if (nameEl) nameEl.textContent = '📄 ' + file.name;
+    if (sizeEl) sizeEl.textContent = (typeof formatFileSize === 'function' ? formatFileSize(file.size) : Math.round(file.size/1024) + ' KB') + ' • File ready for attachment';
+    if (iconEl) iconEl.textContent = '✅';
+    if (dropzone) {
+      dropzone.style.borderColor = 'var(--teal)';
+      dropzone.style.background = 'var(--teal-lt)';
+    }
+
+    try {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        selectedQualDataURL = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } catch(e) {
+      console.warn('File read notice:', e);
+    }
+  }
+
+  function saveQualification() {
+    const title = document.getElementById('qualName')?.value.trim();
+    const issuer = document.getElementById('qualIssuer')?.value.trim();
+    const category = document.getElementById('qualCategory')?.value;
+    const year = document.getElementById('qualYear')?.value.trim();
+
+    if (!title) {
+      showToast('⚠️ Please enter a qualification title', 'warning');
+      return;
+    }
+
+    const qualObj = {
+      name: title,
+      issuer: issuer || 'Academic Institution / Board',
+      category: category || 'Academic Degree',
+      year: year || new Date().getFullYear(),
+      fileName: selectedQualFileName || null,
+      type: selectedQualFileType || 'application/pdf',
+      size: selectedQualFileSize || 0,
+      dataURL: selectedQualDataURL || null,
+      timestamp: Date.now()
+    };
+
+    const saved = JSON.parse(localStorage.getItem('collekt_custom_quals') || '[]');
+    saved.unshift(qualObj);
+    localStorage.setItem('collekt_custom_quals', JSON.stringify(saved));
+
+    // Reset state & inputs
+    selectedQualDataURL = null;
+    selectedQualFileName = null;
+    selectedQualFileSize = 0;
+    selectedQualFileType = null;
+
+    const fileInput = document.getElementById('qualFileInput');
+    if (fileInput) fileInput.value = '';
+    const nameEl = document.getElementById('qualFileName');
+    if (nameEl) nameEl.textContent = 'Click or Drag & Drop Certificate File';
+    const sizeEl = document.getElementById('qualFileSize');
+    if (sizeEl) sizeEl.textContent = 'Supported formats: PDF, JPG, PNG, DOC (Max 50MB)';
+    const iconEl = document.getElementById('qualFileIcon');
+    if (iconEl) iconEl.textContent = '📁';
+    const dropzone = document.getElementById('qualDropzone');
+    if (dropzone) {
+      dropzone.style.borderColor = 'var(--line)';
+      dropzone.style.background = 'var(--paper)';
+    }
+
+    renderCertifications();
+    renderProfileStrength();
+    showToast('🎓 Qualification & Certificate document saved!');
+    closeModal('addQualModal');
+    if (document.getElementById('qualName')) document.getElementById('qualName').value = '';
+    if (document.getElementById('qualIssuer')) document.getElementById('qualIssuer').value = '';
+    if (document.getElementById('qualYear')) document.getElementById('qualYear').value = '';
+  }
+
+  function deleteCustomQual(index) {
+    const saved = JSON.parse(localStorage.getItem('collekt_custom_quals') || '[]');
+    saved.splice(index, 1);
+    localStorage.setItem('collekt_custom_quals', JSON.stringify(saved));
+    renderCertifications();
+    renderProfileStrength();
+    showToast('Qualification removed.');
+  }
+
+  // -- CV Card Renderer --
+  function renderCvCard() {
+    const container = document.getElementById('overviewCvCard');
+    if (!container) return;
+
+    const cvFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('cv') : [];
+    if (!cvFiles || cvFiles.length === 0) {
+      container.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--paper); border:2px dashed var(--line); border-radius:var(--r); gap:12px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="font-size:28px; flex-shrink:0;">📄</div>
+            <div>
+              <div style="font-size:14px; font-weight:800; color:var(--ink);">No CV Uploaded Yet</div>
+              <div style="font-size:12px; color:var(--muted); margin-top:2px;">Upload your CV / Resume to boost your profile strength and rank higher for client proposals.</div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openUploadModal('cv', onCvUploaded)" style="flex-shrink:0;">+ Upload CV</button>
+        </div>
+      `;
+      return;
+    }
+
+    const latestCv = cvFiles[cvFiles.length - 1];
+    window.currentCvDoc = latestCv;
+    const sizeStr = typeof formatFileSize === 'function' ? formatFileSize(latestCv.size) : (latestCv.size ? Math.round(latestCv.size/1024) + ' KB' : '');
+    const dateStr = latestCv.timestamp ? new Date(latestCv.timestamp).toLocaleDateString() : 'Recently';
+
+    container.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:var(--paper); border:1px solid var(--teal); border-radius:var(--r); transition:all 0.2s;">
+        <div style="display:flex; align-items:center; gap:14px; min-width:0; flex:1;">
+          <div style="font-size:30px; flex-shrink:0;">${typeof getFileTypeIcon === 'function' ? getFileTypeIcon(latestCv.type, latestCv.name) : '📄'}</div>
+          <div style="min-width:0; flex:1;">
+            <div style="font-size:14px; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHTML(latestCv.name)}">${escapeHTML(latestCv.name)}</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px; display:flex; align-items:center; gap:8px;">
+              <span>${sizeStr}</span> &bull; 
+              <span style="color:var(--teal); font-weight:800;">✅ Active Resume</span> &bull; 
+              <span>Uploaded ${dateStr}</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; flex-shrink:0;">
+          <button class="btn btn-outline btn-sm" style="color:var(--teal); border-color:var(--line); padding:6px 12px; font-size:12px; font-weight:700;" onclick="openDocumentViewer(window.currentCvDoc)">👁️ Preview CV</button>
+          <button class="btn btn-outline btn-sm" style="padding:6px 12px; font-size:12px;" onclick="openUploadModal('cv', onCvUploaded)">🔄 Replace</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // -- Certifications & Documents rendering --
+  function renderCertifications() {
+    renderCvCard();
+    const container = document.getElementById('certsUploaded');
+    if (!container) return;
+
+    const customQuals = JSON.parse(localStorage.getItem('collekt_custom_quals') || '[]');
+    const cvFiles = getUploadedFiles('cv');
+    const certFiles = getUploadedFiles('certifications');
+    const docFiles = [...getUploadedFiles('document'), ...getUploadedFiles('documents')];
+
+    let html = '';
+
+    // Custom qualifications & uploaded files
+    const allFiles = [
+      ...cvFiles.map((f,i) => ({...f, cat: 'cv', label: 'CV / Resume', idx: i})),
+      ...certFiles.map((f,i) => ({...f, cat: 'certifications', label: 'Certification File', idx: i})),
+      ...docFiles.map((f,i) => ({...f, cat: 'document', label: 'Document', idx: i}))
+    ];
+
+    window.uploadedDocsRegistry = [...customQuals, ...allFiles];
+
+    if (customQuals.length > 0) {
+      customQuals.forEach((q, i) => {
+        html += `
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--paper);border-radius:var(--r);border:1px solid var(--line);transition:all .2s;" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--line)'">
+            <div style="font-size:24px;flex-shrink:0;">🎓</div>
+            <div style="flex:1;min-width:0;cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${i}])">
+              <div style="font-size:13px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${q.name}</div>
+              <div style="font-size:11px;color:var(--muted);">${q.issuer} &bull; ${q.category} &bull; ${q.year}</div>
+            </div>
+            <button onclick="openDocumentViewer(window.uploadedDocsRegistry[${i}])" style="padding:4px 10px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--teal); font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="Preview & Download with Watermark">👁️ Preview</button>
+            <button onclick="deleteCustomQual(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px;transition:.2s;" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='var(--muted)'" title="Remove">✕</button>
+          </div>
+        `;
+      });
+    }
+
+    allFiles.forEach((f, idx) => {
+      const globalIdx = customQuals.length + idx;
+      const isCv = f.cat === 'cv';
+      html += `
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:${isCv ? '#f0fdf4' : 'var(--paper)'};border-radius:var(--r);border:1.5px solid ${isCv ? '#16a34a' : 'var(--line)'};transition:all .2s;" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='${isCv ? '#16a34a' : 'var(--line)'}'">
+          <div style="font-size:26px;flex-shrink:0;">${isCv ? '📄' : getFileTypeIcon(f.type, f.name)}</div>
+          <div style="flex:1;min-width:0;cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${globalIdx}])">
+            <div style="font-size:14px;font-weight:800;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:8px;">
+              <span>${formatFileSize(f.size)}</span> &bull; 
+              <span style="color:${isCv ? '#15803d' : 'var(--teal)'}; font-weight:800;">${isCv ? '✅ Active Resume (CV)' : f.label}</span> &bull; 
+              <span>Uploaded ${new Date(f.timestamp).toLocaleDateString()}</span>
+            </div>
+          </div>
+          <button onclick="openDocumentViewer(window.uploadedDocsRegistry[${globalIdx}])" style="padding:6px 14px; border:1px solid ${isCv ? '#16a34a' : 'var(--line)'}; border-radius:8px; background:var(--white); color:var(--teal); font-size:12px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:6px;" title="Preview & Download with Watermark">👁️ Preview</button>
+          <button onclick="deleteCertFile('${f.cat}', ${f.idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px;transition:.2s;" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='var(--muted)'" title="Remove">✕</button>
+        </div>
+      `;
+    });
+
+    if (customQuals.length === 0 && allFiles.length === 0) {
+      container.innerHTML = `<div style="font-size:13px; color:var(--muted); font-style:italic; padding:16px; text-align:center; background:var(--paper); border-radius:var(--r);">No academic degrees, certifications or CVs added yet. Click one of the buttons below to add credentials.</div>`;
+      return;
+    }
+
+    container.innerHTML = html;
+  }
+
+  window.onCvUploaded = function(fileData) {
+    renderCvCard();
+    renderCertifications();
+    showToast('✅ CV uploaded successfully!');
+    renderProfileStrength();
+    if (fileData) {
+      setTimeout(() => {
+        if (typeof openDocumentViewer === 'function') {
+          openDocumentViewer(fileData);
+        }
+      }, 300);
+    }
+  };
+  window.onCoverLetterUploaded = function(fileData) {
+    renderCertifications();
+    showToast('✅ Master Cover Letter uploaded successfully!');
+    renderProfileStrength();
+    if (fileData) {
+      setTimeout(() => {
+        if (typeof openDocumentViewer === 'function') {
+          openDocumentViewer(fileData);
+        }
+      }, 300);
+    }
+  };
+  window.onCertUploaded = function(fileData) {
+    renderCertifications();
+    showToast('✅ Certification uploaded successfully!');
+    renderProfileStrength();
+  };
+
+  /* ═ COVER PHOTO / BANNER STUDIO CANVAS EDITOR ═ */
+  let coverStudioImg = new Image();
+  let coverStudioZoom = 1;
+  let coverStudioRotation = 0;
+  let coverStudioFilter = 'none';
+  let coverStudioPanX = 0;
+  let coverStudioPanY = 0;
+  let isDraggingCover = false;
+  let coverDragStartX = 0;
+  let coverDragStartY = 0;
+
+  window.openCoverPhotoStudio = function() {
+    const modal = document.getElementById('coverPhotoStudioModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    // Populate presets
+    const grid = document.getElementById('presetCoverGrid');
+    if (grid && !grid.children.length) {
+      const presets = [
+        { name: 'Solar Farm', url: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80', icon: '☀️' },
+        { name: 'Offshore Rig', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80', icon: '🛢️' },
+        { name: 'Substation', url: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1200&q=80', icon: '⚡' },
+        { name: 'Civil EPC', url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=1200&q=80', icon: '🏗️' },
+        { name: 'Teal Tech', url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80', icon: '🌊' },
+        { name: 'Cyber Mesh', url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80', icon: '🌌' }
+      ];
+
+      grid.innerHTML = presets.map(p => `
+        <div onclick="selectPresetCover('${p.url}', this)" 
+             style="height:64px; border-radius:10px; background:url('${p.url}') center/cover; position:relative; cursor:pointer; border:2px solid var(--line); transition:all .2s;"
+             onmouseover="this.style.transform='scale(1.03)'; this.style.borderColor='var(--teal)'"
+             onmouseout="if(!this.classList.contains('active')) this.style.borderColor='var(--line)'">
+          <div style="position:absolute; inset:0; background:rgba(0,0,0,0.35); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:800;">
+            ${p.icon} ${p.name}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    const currentCover = getSavedCoverPhoto();
+    if (currentCover) {
+      loadCoverImageIntoCanvas(currentCover);
+    } else {
+      loadCoverImageIntoCanvas('https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80');
+    }
+  };
+
+  window.loadCoverImageIntoCanvas = function(src) {
+    coverStudioImg = new Image();
+    coverStudioImg.crossOrigin = 'anonymous';
+    coverStudioImg.onload = function() {
+      coverStudioZoom = 1;
+      coverStudioRotation = 0;
+      coverStudioPanX = 0;
+      coverStudioPanY = 0;
+      const range = document.getElementById('coverZoomRange');
+      if (range) range.value = 1;
+      drawCoverStudioCanvas();
+    };
+    coverStudioImg.src = src;
+  };
+
+  window.drawCoverStudioCanvas = function() {
+    const canvas = document.getElementById('coverStudioCanvas');
+    if (!canvas || !coverStudioImg.width) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    let filterStr = 'none';
+    if (coverStudioFilter === 'warm') filterStr = 'sepia(0.25) contrast(1.1) saturate(1.2) brightness(1.02)';
+    else if (coverStudioFilter === 'cool') filterStr = 'hue-rotate(15deg) contrast(1.08) saturate(1.1)';
+    else if (coverStudioFilter === 'bw') filterStr = 'grayscale(1) contrast(1.2) brightness(1.05)';
+    else if (coverStudioFilter === 'vintage') filterStr = 'sepia(0.55) contrast(0.95) brightness(0.95)';
+    else if (coverStudioFilter === 'contrast') filterStr = 'contrast(1.3) saturate(1.15) brightness(1.02)';
+    
+    ctx.filter = filterStr;
+
+    ctx.save();
+    ctx.translate(w / 2 + coverStudioPanX, h / 2 + coverStudioPanY);
+    ctx.rotate((coverStudioRotation * Math.PI) / 180);
+    ctx.scale(coverStudioZoom, coverStudioZoom);
+
+    const scale = Math.max(w / coverStudioImg.width, h / coverStudioImg.height);
+    const nw = coverStudioImg.width * scale;
+    const nh = coverStudioImg.height * scale;
+
+    ctx.drawImage(coverStudioImg, -nw / 2, -nh / 2, nw, nh);
+    ctx.restore();
+  };
+
+  window.handleCoverFileSelect = function(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if (file.size > 20 * 1024 * 1024) {
+      showToast('⚠️ Banner image size must be under 20MB', 'warning');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      loadCoverImageIntoCanvas(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.selectPresetCover = function(url, el) {
+    document.querySelectorAll('#presetCoverGrid > div').forEach(d => {
+      d.style.borderColor = 'var(--line)';
+      d.classList.remove('active');
+    });
+    if (el) {
+      el.style.borderColor = 'var(--teal)';
+      el.classList.add('active');
+    }
+    loadCoverImageIntoCanvas(url);
+  };
+
+  window.togglePresetCoverPicker = function() {
+    const container = document.getElementById('presetCoverContainer');
+    if (container) {
+      container.style.display = container.style.display === 'none' ? 'block' : 'none';
+    }
+  };
+
+  window.onCoverZoomInput = function(val) {
+    coverStudioZoom = parseFloat(val);
+    drawCoverStudioCanvas();
+  };
+
+  window.changeCoverZoom = function(delta) {
+    const range = document.getElementById('coverZoomRange');
+    if (!range) return;
+    let val = Math.min(3.5, Math.max(1.0, parseFloat(range.value) + delta));
+    range.value = val;
+    coverStudioZoom = val;
+    drawCoverStudioCanvas();
+  };
+
+  window.rotateCoverImage = function() {
+    coverStudioRotation = (coverStudioRotation + 90) % 360;
+    drawCoverStudioCanvas();
+  };
+
+  window.setCoverFilter = function(filterName, btnEl) {
+    coverStudioFilter = filterName;
+    document.querySelectorAll('#coverFilterChips .filter-chip').forEach(c => c.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    drawCoverStudioCanvas();
+  };
+
+  window.startCoverDrag = function(e) {
+    isDraggingCover = true;
+    const evt = e.touches ? e.touches[0] : e;
+    coverDragStartX = evt.clientX - coverStudioPanX;
+    coverDragStartY = evt.clientY - coverStudioPanY;
+    const vp = document.getElementById('coverCanvasViewport');
+    if (vp) vp.style.cursor = 'grabbing';
+  };
+
+  window.doCoverDrag = function(e) {
+    if (!isDraggingCover) return;
+    e.preventDefault();
+    const evt = e.touches ? e.touches[0] : e;
+    coverStudioPanX = evt.clientX - coverDragStartX;
+    coverStudioPanY = evt.clientY - coverDragStartY;
+    drawCoverStudioCanvas();
+  };
+
+  window.endCoverDrag = function(e) {
+    isDraggingCover = false;
+    const vp = document.getElementById('coverCanvasViewport');
+    if (vp) vp.style.cursor = 'grab';
+  };
+
+  window.saveCoverPhotoFromStudio = function() {
+    const canvas = document.getElementById('coverStudioCanvas');
+    if (!canvas) return;
+
+    const dataURL = canvas.toDataURL('image/jpeg', 0.92);
+
+    const user = getUser();
+    if (user) {
+      user.cover_photo_url = dataURL;
+      setUser(user);
+    }
+
+    localStorage.setItem('collekt_user_cover_photo', dataURL);
+    _applyCoverPhoto(dataURL);
+
+    showToast('✨ Cover photo edited and saved!');
+    closeModal('coverPhotoStudioModal');
+  };
+
+  window.removeCoverPhoto = function() {
+    const user = getUser();
+    if (user) {
+      delete user.cover_photo_url;
+      setUser(user);
+    }
+    localStorage.removeItem('collekt_user_cover_photo');
+    _applyCoverPhoto(null);
+    showToast('Cover photo reset to default gradient.');
+    closeModal('coverPhotoStudioModal');
+  };
+
+  window.getSavedCoverPhoto = function() {
+    const user = getUser();
+    return (user && user.cover_photo_url) || localStorage.getItem('collekt_user_cover_photo') || null;
+  };
+
+  window._applyCoverPhoto = function(url) {
+    const el = document.getElementById('profileCoverWrap') || document.getElementById('coProfileCover');
+    if (el) {
+      if (url) {
+        el.style.backgroundImage = `url("${url}")`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+      } else {
+        el.style.backgroundImage = 'linear-gradient(to right, var(--forest), var(--teal-mid))';
+      }
+    }
+  };
+  window.onDocUploaded = function(fileData) {
+    renderCertifications();
+    showToast('✅ Document uploaded successfully!');
+    renderProfileStrength();
+  };
+
+  // Check if returning from LinkedIn OAuth authorization
+  (function checkLinkedInOAuthCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const pending = localStorage.getItem('collekt_pending_linkedin_link');
+    
+    if (params.get('code') || params.get('linkedin_connected') === 'true' || pending) {
+      const user = getUser();
+      if (user) {
+        const slug = (user.username || user.name || 'member').toLowerCase().replace(/[^a-z0-9]/g, '');
+        user.linkedin_url = user.linkedin_url || `https://www.linkedin.com/in/${slug}`;
+        user.linkedin_linked = true;
+        user.linkedin_verified_at = new Date().toISOString();
+
+        if (typeof setUser === 'function') setUser(user);
+        if (typeof saveRegisteredUser === 'function') saveRegisteredUser(user);
+        localStorage.removeItem('collekt_pending_linkedin_link');
+
+        // Clean query params from address bar smoothly
+        if (window.history && window.history.replaceState) {
+          const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+          window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+        }
+
+        setTimeout(() => {
+          if (typeof showToast === 'function') {
+            showToast('✅ LinkedIn Account Successfully Linked & Verified! 🔗');
+          }
+          if (typeof renderProfileStrength === 'function') renderProfileStrength();
+        }, 500);
+      }
+    }
+  })();
+
+  function deleteCertFile(cat, idx) {
+    removeUploadedFile(cat, idx);
+    renderCertifications();
+    renderProfileStrength();
+    showToast('File removed.');
+  }
+
+  // -- Dynamic Profile Strength (Unified & Aligned) --
+  function renderProfileStrength() {
+    if (typeof renderGlobalProfileStrength === 'function') {
+      renderGlobalProfileStrength('#profileStrengthWidget');
+    }
+  }
+
+
+  function _applyProfile(prof) {
+    // Header (Renders Tier 1 "c" logo or Tier 2 Shield logo automatically based on rating & verification state)
+    const nameEl = document.getElementById('profileName');
+    if (nameEl) {
+      const uName = prof.username ? '@' + prof.username : (prof.name || 'Professional');
+      const badge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(22, prof) : '';
+      nameEl.innerHTML = `<span style="vertical-align:middle;">${escapeHTML(uName)}</span>${badge}`;
+    }
+    const titleEl = document.getElementById('profileTitle');
+    if (titleEl) titleEl.textContent = prof.title || 'Independent Specialist';
+    const locEl = document.querySelector('.profile-location');
+    if (locEl) locEl.innerHTML = '📍 ' + (prof.location || (prof.state ? prof.state + ', ' + (prof.country || 'Nigeria') : 'Nigeria'));
+
+    if (!getUploadedAvatar()) {
+      const inner = document.getElementById('avatarInner');
+      if (inner && !inner.querySelector('img')) {
+        inner.textContent = (prof.username || prof.name || 'P').charAt(0).toUpperCase();
+      }
+    }
+    // Bio
+    const bioEl = document.getElementById('bioText');
+    if (bioEl) {
+      bioEl.textContent = prof.bio || "No bio added yet. Click 'Edit Profile' to introduce yourself, your industry experience, and technical specializations to clients.";
+    }
+
+    // Real-Time Stats Bar Updates (100% Dynamic Platform Activity)
+    const metrics = (typeof getRealTimeUserMetrics === 'function') 
+      ? getRealTimeUserMetrics(prof) 
+      : { projects_completed: prof.projects_completed || 0, total_earned: prof.total_earned || 0, success_rate: 0, rating: 0.0, review_count: 0 };
+
+    const pDoneEl = document.getElementById('statProjectsDone');
+    if (pDoneEl) pDoneEl.textContent = metrics.projects_completed;
+
+    const pEarnedEl = document.getElementById('statTotalEarned');
+    if (pEarnedEl) pEarnedEl.textContent = metrics.total_earned > 0 ? (typeof formatNaira === 'function' ? formatNaira(metrics.total_earned, true) : '₦' + metrics.total_earned.toLocaleString()) : '₦0';
+
+    const pSuccEl = document.getElementById('statSuccessRate');
+    if (pSuccEl) pSuccEl.textContent = metrics.success_rate + '%';
+
+    const pRatingEl = document.getElementById('statRating');
+    if (pRatingEl) pRatingEl.textContent = metrics.rating > 0 ? '★ ' + metrics.rating.toFixed(1) : '★ 0.0';
+
+    const pRatingCountEl = document.getElementById('statRatingCount');
+    if (pRatingCountEl) pRatingCountEl.textContent = `Rating (${metrics.review_count} reviews)`;
+
+    // Render Reviews tab dynamically
+    renderProfileReviews(prof);
+
+    // Skills
+    const wrap = document.getElementById('skillsWrap');
+    if (wrap) {
+      if (prof.skills && prof.skills.length) {
+        wrap.innerHTML = prof.skills.map(s =>
+          `<span class="skill-chip">${s} <span class="remove" onclick="removeSkill(this)">&times;</span></span>`
+        ).join('');
+      } else {
+        wrap.innerHTML = `<span class="empty-msg" style="font-size:14px; color:var(--muted); font-style:italic;">No skills added yet. Add your technical skills below to help companies find you.</span>`;
+      }
+    }
+
+    // Pre-fill edit modal — split existing full name into parts
+    const nameParts = (prof.name || '').trim().split(/\s+/);
+    const firstName  = prof.first_name  || nameParts[0]  || '';
+    const lastName   = prof.last_name   || nameParts[1]  || '';
+    const otherName  = prof.other_name  || (nameParts.length > 2 ? nameParts.slice(2).join(' ') : '') || '';
+    if (document.getElementById('editFirstName'))  document.getElementById('editFirstName').value  = firstName;
+    if (document.getElementById('editLastName'))   document.getElementById('editLastName').value   = lastName;
+    if (document.getElementById('editOtherName'))  document.getElementById('editOtherName').value  = otherName;
+    if (document.getElementById('editUsername')) document.getElementById('editUsername').value = prof.username || '';
+    if (document.getElementById('editTitle')) document.getElementById('editTitle').value = prof.title || '';
+    if (document.getElementById('editSector')) document.getElementById('editSector').value = prof.sector || 'Oil & Gas (Upstream/Midstream)';
+    if (document.getElementById('editCountry')) document.getElementById('editCountry').value = prof.country || 'Nigeria';
+    if (document.getElementById('editState')) document.getElementById('editState').value = prof.state || 'Lagos';
+    if (document.getElementById('editLanguages')) document.getElementById('editLanguages').value = prof.languages || 'English, French';
+    if (document.getElementById('editWorkPref')) document.getElementById('editWorkPref').value = prof.work_preference || 'Hybrid';
+    if (document.getElementById('editAvailability')) document.getElementById('editAvailability').value = prof.availability || 'Available Immediately';
+    if (document.getElementById('editAccreditation')) document.getElementById('editAccreditation').value = prof.accreditation || '';
+    if (document.getElementById('editBio')) document.getElementById('editBio').value = prof.bio || '';
+    if (document.getElementById('editPhone')) document.getElementById('editPhone').value = prof.phone || '';
+    if (document.getElementById('editLinkedIn')) document.getElementById('editLinkedIn').value = prof.linkedin_url || (prof.username ? `https://linkedin.com/in/${prof.username}` : '');
+    if (document.getElementById('editWebsite')) document.getElementById('editWebsite').value = prof.website || '';
+  }
+
+  function renderProfileReviews(user) {
+    const reviewsTab = document.getElementById('tab-reviews');
+    if (!reviewsTab || !user) return;
+
+    const reviews = user.reviews || [];
+    const ratingVal = (user.rating != null && Number(user.rating) > 0) ? Number(user.rating).toFixed(1) : '0.0';
+
+    if (reviews.length > 0) {
+      const revHeaderHtml = `
+        <div class="content-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <div class="section-title-sm" style="margin-bottom:0;">Client Reviews &amp; Testimonials</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:28px; font-weight:900; color:var(--ink);">${ratingVal}</span>
+              <div>
+                <div style="color:var(--amber); font-size:15px; letter-spacing:2px;">★ ${reviews.length} review${reviews.length > 1 ? 's' : ''}</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:16px;">
+      `;
+      const revItemsHtml = reviews.map(r => `
+        <div style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+            <div>
+              <div style="font-size:14px; font-weight:800; color:var(--ink);">${escapeHTML(r.author || r.reviewer_name || 'Client')}</div>
+              <div style="font-size:12px; color:var(--muted);">${escapeHTML(r.role || r.reviewer_company || 'Project Client')}</div>
+            </div>
+            <div style="color:var(--amber); font-weight:900; font-size:14px;">★ ${r.rating || 5}.0</div>
+          </div>
+          <p style="font-size:13px; color:var(--ink); line-height:1.6; margin-bottom:6px;">"${escapeHTML(r.text || r.comment || '')}"</p>
+          <div style="font-size:11px; color:var(--muted);">${r.date || 'Recent'}</div>
+        </div>
+      `).join('');
+
+      reviewsTab.innerHTML = revHeaderHtml + revItemsHtml + '</div></div>';
+    } else {
+      reviewsTab.innerHTML = `
+        <div class="content-section">
+          <div class="section-title-sm">Client Reviews</div>
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 24px; text-align:center; background:var(--paper); border-radius:var(--r); border:1px dashed var(--line);">
+            <div style="font-size:32px; margin-bottom:12px;">⭐</div>
+            <div style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Reviews Yet</div>
+            <p style="font-size:14px; color:var(--muted); max-width:400px; line-height:1.6;">Client ratings and feedback will appear here as contracts are awarded and completed on Collekt.</p>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // -- Skills Management --
+  function addSkill() {
+    const input = document.getElementById('newSkill');
+    if (!input) return;
+    const skillName = input.value.trim();
+    if (!skillName) {
+      showToast('⚠️ Please enter a skill name first', 'warning');
+      return;
+    }
+
+    const wrap = document.getElementById('skillsWrap');
+    if (!wrap) return;
+
+    // Remove empty placeholder message if present
+    const emptyMsg = wrap.querySelector('.empty-msg');
+    if (emptyMsg) emptyMsg.remove();
+
+    // Check for duplicate skill chip
+    const existing = Array.from(wrap.querySelectorAll('.skill-chip')).map(chip => {
+      const clone = chip.cloneNode(true);
+      const rem = clone.querySelector('.remove');
+      if (rem) rem.remove();
+      return clone.textContent.trim().toLowerCase();
+    });
+
+    if (existing.includes(skillName.toLowerCase())) {
+      showToast('⚠️ Skill already added!', 'warning');
+      input.value = '';
+      return;
+    }
+
+    // Append new skill chip
+    const chip = document.createElement('span');
+    chip.className = 'skill-chip';
+    const escaped = typeof escapeHTML === 'function' ? escapeHTML(skillName) : skillName;
+    chip.innerHTML = `${escaped} <span class="remove" onclick="removeSkill(this)">&times;</span>`;
+    wrap.appendChild(chip);
+
+    input.value = '';
+
+    // Save to user object immediately
+    _persistSkillsFromUI();
+    showToast('✨ Skill added to profile!');
+  }
+
+  function removeSkill(removeBtn) {
+    if (!removeBtn) return;
+    const chip = removeBtn.closest('.skill-chip');
+    if (chip) chip.remove();
+
+    const wrap = document.getElementById('skillsWrap');
+    if (wrap && wrap.querySelectorAll('.skill-chip').length === 0) {
+      wrap.innerHTML = `<span class="empty-msg" style="font-size:14px; color:var(--muted); font-style:italic;">No skills added yet. Add your technical skills below to help companies find you.</span>`;
+    }
+
+    _persistSkillsFromUI();
+    showToast('Skill removed.');
+  }
+
+  function _persistSkillsFromUI() {
+    const wrap = document.getElementById('skillsWrap');
+    if (!wrap) return;
+    const skills = Array.from(wrap.querySelectorAll('.skill-chip')).map(chip => {
+      const clone = chip.cloneNode(true);
+      const rem = clone.querySelector('.remove');
+      if (rem) rem.remove();
+      return clone.textContent.trim();
+    }).filter(Boolean);
+
+    const user = getUser();
+    if (user) {
+      user.skills = skills;
+      setUser(user);
+
+      // Sync to Supabase if connected
+      if (window.sb) {
+        try {
+          sb.from('profiles').update({ skills }).eq('id', user.id);
+        } catch (e) {
+          console.warn('Supabase skills sync notice:', e);
+        }
+      }
+    }
+    renderProfileStrength();
+  }
+
+  function openEditModal() {
+    const user = getUser();
+    if (user) {
+      _applyProfile(user);
+    }
+    openModal('editModal');
+
+    // Attach real-time input listeners to update Profile Strength as the user types
+    ['editFirstName', 'editLastName', 'editOtherName', 'editUsername', 'editBio', 'editTitle', 'editSector'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el._psAttached) {
+        el._psAttached = true;
+        el.addEventListener('input', () => {
+          const u = getUser() || {};
+          const bioVal = document.getElementById('editBio') ? document.getElementById('editBio').value.trim() : '';
+          const previewUser = {
+            ...u,
+            bio: bioVal,
+            first_name: document.getElementById('editFirstName') ? document.getElementById('editFirstName').value.trim() : '',
+            last_name: document.getElementById('editLastName') ? document.getElementById('editLastName').value.trim() : '',
+            title: document.getElementById('editTitle') ? document.getElementById('editTitle').value.trim() : ''
+          };
+          if (typeof renderGlobalProfileStrength === 'function') {
+            renderGlobalProfileStrength('#profileStrengthWidget', previewUser);
+          }
+        });
+      }
+    });
+  }
+
+
+  async function saveProfile() {
+    const user = getUser();
+    if (!user) return;
+
+    const first_name    = document.getElementById('editFirstName') ? document.getElementById('editFirstName').value.trim() : '';
+    const last_name     = document.getElementById('editLastName')  ? document.getElementById('editLastName').value.trim()  : '';
+    const other_name    = document.getElementById('editOtherName') ? document.getElementById('editOtherName').value.trim() : '';
+    const username      = document.getElementById('editUsername') ? document.getElementById('editUsername').value.trim().replace(/^@/, '') : '';
+    // Compose full name: First + Other (if any) + Last
+    const name          = [first_name, other_name, last_name].filter(Boolean).join(' ') || username || user.name || 'User';
+    const title         = document.getElementById('editTitle') ? document.getElementById('editTitle').value.trim() : '';
+    const sector        = document.getElementById('editSector') ? document.getElementById('editSector').value : '';
+    const country       = document.getElementById('editCountry') ? document.getElementById('editCountry').value : 'Nigeria';
+    const state         = document.getElementById('editState') ? document.getElementById('editState').value : 'Lagos';
+    const languages     = document.getElementById('editLanguages') ? document.getElementById('editLanguages').value.trim() : '';
+    const work_preference = document.getElementById('editWorkPref') ? document.getElementById('editWorkPref').value : '';
+    const availability  = document.getElementById('editAvailability') ? document.getElementById('editAvailability').value : '';
+    const accreditation = document.getElementById('editAccreditation') ? document.getElementById('editAccreditation').value.trim() : '';
+    const bio           = document.getElementById('editBio') ? document.getElementById('editBio').value.trim() : '';
+    const phone         = document.getElementById('editPhone') ? document.getElementById('editPhone').value.trim() : '';
+    const linkedin_url  = document.getElementById('editLinkedIn') ? document.getElementById('editLinkedIn').value.trim() : '';
+    const website       = document.getElementById('editWebsite') ? document.getElementById('editWebsite').value.trim() : '';
+
+    const location = (state ? state + (country === 'Nigeria' ? ' State, ' : ', ') : '') + country;
+
+    const skills        = Array.from(document.querySelectorAll('#skillsWrap .skill-chip'))
+                          .map(c => c.firstChild.textContent.trim())
+                          .filter(Boolean);
+
+    const btn = document.getElementById('saveProfileBtn');
+    if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+
+    const updatedUser = { 
+      ...user, 
+      role: 'professional',
+      first_name,
+      last_name,
+      other_name,
+      username,
+      name: name || username || user.name || 'User',
+      title, 
+      sector, 
+      country, 
+      state, 
+      languages, 
+      work_preference, 
+      availability, 
+      accreditation, 
+      bio, 
+      location, 
+      phone, 
+      linkedin_url,
+      linkedin_linked: !!linkedin_url,
+      website, 
+      skills 
+    };
+
+    // Explicitly purge any company-specific keys
+    delete updatedUser.company_name;
+    delete updatedUser.rep_first_name;
+    delete updatedUser.rep_last_name;
+    delete updatedUser.rep_other_name;
+    delete updatedUser.contact_person;
+    delete updatedUser.cac;
+
+    localStorage.setItem('collekt_last_role', 'professional');
+    setUser(updatedUser);
+
+    _applyProfile(updatedUser);
+    buildSidebar('profile');
+    buildTopbar();
+    renderProfileStrength();
+
+    if (window.sb && user.id) {
+      const updateData = { 
+        role: 'professional',
+        username, 
+        name: updatedUser.name, 
+        first_name, 
+        last_name, 
+        other_name,
+        title, 
+        sector, 
+        country, 
+        state, 
+        languages, 
+        work_preference, 
+        availability, 
+        accreditation, 
+        bio, 
+        location, 
+        phone, 
+        website, 
+        skills 
+      };
+      try {
+        await sb.from('profiles').update(updateData).eq('id', user.id);
+      } catch (e) {
+        console.warn("Supabase update notice:", e);
+      }
+    }
+
+
+    showToast('✅ Profile saved successfully!');
+    if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+    closeModal('editModal');
+  }
+</script>
+
+
+
+
+<style>
+@keyframes slideUp { from { opacity:0; transform:translate(-50%,-40%); } to { opacity:1; transform:translate(-50%,-50%); } }
+</style>
+
+<!-- Profile Photo Studio & Cropper Modal -->
+<div id="avatarStudioModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:99999; backdrop-filter:blur(6px); transition:opacity .3s ease;" onclick="if(event.target===this)closeAvatarStudio()">
+  <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(520px, calc(100vw - 32px)); background:var(--white); border-radius:24px; box-shadow:0 32px 80px rgba(0,0,0,.4); overflow:hidden; display:flex; flex-direction:column; animation:slideUp .3s ease;">
+    
+    <!-- Modal Header -->
+    <div style="padding:20px 24px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; background:var(--white);">
+      <div style="font-size:18px; font-weight:900; color:var(--ink); display:flex; align-items:center; gap:8px;">
+        <span>📷</span> Edit Profile Photo
+      </div>
+      <button onclick="closeAvatarStudio()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted); width:36px; height:36px; border-radius:50%; display:grid; place-items:center;">✕</button>
+    </div>
+
+    <div style="padding:24px; display:flex; flex-direction:column; align-items:center;">
+
+      <!-- Canvas Cropper Viewport -->
+      <div style="position:relative; width:280px; height:280px; border-radius:50%; overflow:hidden; border:4px solid var(--teal); box-shadow:0 8px 30px rgba(0,0,0,.25); background:#111; cursor:grab; user-select:none;"
+           id="canvasViewport"
+           onmousedown="startAvatarDrag(event)"
+           onmousemove="doAvatarDrag(event)"
+           onmouseup="endAvatarDrag()"
+           onmouseleave="endAvatarDrag()"
+           ontouchstart="startAvatarDrag(event)"
+           ontouchmove="doAvatarDrag(event)"
+           ontouchend="endAvatarDrag()">
+        
+        <canvas id="avatarStudioCanvas" width="280" height="280" style="width:100%; height:100%; display:block;"></canvas>
+        
+        <!-- Drag instructions hint overlay -->
+        <div id="dragHint" style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.65); color:#fff; font-size:11px; font-weight:700; padding:4px 12px; border-radius:99px; pointer-events:none; backdrop-filter:blur(2px);">
+          ✋ Drag photo to adjust position
+        </div>
+      </div>
+
+      <!-- Zoom Slider & Controls -->
+      <div style="width:100%; margin-top:20px; display:flex; flex-direction:column; gap:14px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:13px; font-weight:700; color:var(--muted);">Zoom:</span>
+          <button class="btn btn-sm btn-outline" onclick="changeAvatarZoom(-0.15)" style="padding:4px 10px; font-size:12px; font-weight:700;">🔍 -</button>
+          <input type="range" id="avatarZoomRange" min="1" max="3.5" step="0.05" value="1" style="flex:1; accent-color:var(--teal); cursor:pointer;" oninput="onAvatarZoomInput(this.value)">
+          <button class="btn btn-sm btn-outline" onclick="changeAvatarZoom(0.15)" style="padding:4px 10px; font-size:12px; font-weight:700;">🔍 +</button>
+          <button class="btn btn-sm btn-outline" onclick="rotateAvatarImage()" title="Rotate 90 degrees" style="padding:4px 10px; font-size:12px; font-weight:700;">🔄 90°</button>
+        </div>
+
+        <!-- Filter Presets -->
+        <div>
+          <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Color Filters</div>
+          <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:6px;" id="avatarFilterChips">
+            <button class="filter-chip active" onclick="setAvatarFilter('none', this)">Original</button>
+            <button class="filter-chip" onclick="setAvatarFilter('warm', this)">🌅 Warm</button>
+            <button class="filter-chip" onclick="setAvatarFilter('cool', this)">🧊 Cool Emerald</button>
+            <button class="filter-chip" onclick="setAvatarFilter('bw', this)">📷 B&W Studio</button>
+            <button class="filter-chip" onclick="setAvatarFilter('vintage', this)">📻 Vintage</button>
+            <button class="filter-chip" onclick="setAvatarFilter('contrast', this)">⚡ Crisp</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Action Footer -->
+    <div style="padding:16px 24px; border-top:1px solid var(--line); background:var(--paper); display:flex; justify-content:space-between; align-items:center; gap:12px;">
+      <div style="display:flex; gap:8px;">
+        <button onclick="document.getElementById('studioFileInput').click()" class="btn btn-outline btn-sm" style="font-size:13px; font-weight:700;">
+          📁 Replace Photo
+        </button>
+        <input type="file" id="studioFileInput" accept="image/*" style="display:none;" onchange="loadNewFileIntoStudio(this.files[0])">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button onclick="closeAvatarStudio()" class="btn btn-outline btn-sm" style="font-size:13px;">Cancel</button>
+        <button onclick="saveAvatarFromStudio()" class="btn btn-primary btn-sm" style="font-size:13px; font-weight:800; background:var(--teal);">
+          Save & Apply
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="settings-popup.js"></script>
+<script src="upload-modal.js"></script>
+</body>
+</html>
+
+

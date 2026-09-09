@@ -1,0 +1,492 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<title>Collekt &rarr; Brand Identity Guidelines</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --forest: #0E3B35;
+  --teal: #13756F;
+  --amber: #D4920B;
+  --amber-lt: #FFF3D0;
+  --paper: #F8F5F0;
+  --ink: #0D1F1E;
+  --muted: #6B8280;
+  --line: #E2EAE9;
+  --white: #FFFFFF;
+}
+body {
+  font-family: 'Manrope', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+/* -- PAGE LAYOUT --- */
+.page { max-width: 960px; margin: 0 auto; padding: 60px 24px 120px; }
+
+/* -- COVER --- */
+.brand-cover {
+  background: var(--forest);
+  border-radius: 20px;
+  padding: 80px 60px;
+  margin-bottom: 60px;
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: flex-start;
+}
+.brand-cover::before {
+  content: ''; position: absolute; right: -100px; top: -100px;
+  width: 400px; height: 400px; border-radius: 50%;
+  background: rgba(212,146,11,.08);
+}
+.brand-cover::after {
+  content: ''; position: absolute; left: -60px; bottom: -60px;
+  width: 250px; height: 250px; border-radius: 50%;
+  background: rgba(19,117,111,.12);
+}
+.cover-eyebrow {
+  font-size: 11px; font-weight: 800; color: rgba(255,255,255,.5);
+  text-transform: uppercase; letter-spacing: .15em; margin-bottom: 24px;
+  position: relative; z-index: 1;
+}
+.cover-logo-img {
+  height: 80px; width: auto;
+  object-fit: contain;
+  mix-blend-mode: lighten;
+  filter: brightness(1.4) contrast(1.1);
+  margin-bottom: 32px;
+  position: relative; z-index: 1;
+}
+.cover-logo-fallback {
+  font-family: 'DM Serif Display', serif;
+  font-size: 64px; color: #fff;
+  margin-bottom: 32px;
+  position: relative; z-index: 1;
+}
+.cover-logo-fallback span { color: var(--amber); }
+.cover-title {
+  font-size: 22px; font-weight: 300; color: rgba(255,255,255,.7);
+  position: relative; z-index: 1;
+  letter-spacing: .04em;
+}
+.cover-date {
+  margin-top: 12px; font-size: 13px; color: rgba(255,255,255,.35);
+  position: relative; z-index: 1;
+}
+
+/* -- SECTION --- */
+.section { margin-bottom: 64px; }
+.section-label {
+  font-size: 10px; font-weight: 800; color: var(--teal);
+  text-transform: uppercase; letter-spacing: .15em;
+  padding-bottom: 12px; border-bottom: 1.5px solid var(--teal);
+  margin-bottom: 28px; display: flex; align-items: center; gap: 8px;
+}
+.section-label .num { color: rgba(0,0,0,.2); }
+
+/* -- LOGO DISPLAY --- */
+.logo-display {
+  background: white; border: 1px solid var(--line);
+  border-radius: 16px; padding: 60px;
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 20px;
+}
+.logo-display img { max-width: 420px; width: 100%; height: auto; object-fit: contain; }
+.logo-concept-line {
+  display: flex; justify-content: center; gap: 0;
+  margin-top: 28px;
+}
+.concept-tag {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 700; padding: 0 20px;
+}
+.concept-tag:first-child { color: var(--forest); border-right: 1px solid var(--line); }
+.concept-tag:last-child { color: var(--amber); }
+.concept-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* -- LOGO GRID --- */
+.logo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.logo-tile {
+  border-radius: 14px; padding: 32px 28px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  min-height: 140px; justify-content: center;
+}
+.logo-tile-label { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.logo-tile.light { background: white; border: 1px solid var(--line); }
+.logo-tile.light .logo-tile-label { color: var(--muted); }
+.logo-tile.dark { background: var(--forest); }
+.logo-tile.dark .logo-tile-label { color: rgba(255,255,255,.4); }
+.logo-tile.amber-bg { background: var(--amber); }
+.logo-tile.amber-bg .logo-tile-label { color: rgba(255,255,255,.6); }
+.logo-tile.paper { background: var(--paper); border: 1px solid var(--line); }
+.logo-tile.paper .logo-tile-label { color: var(--muted); }
+.logo-tile img { max-width: 200px; width: 100%; height: 50px; object-fit: contain; }
+.logo-wordmark-text { font-family: 'DM Serif Display', serif; font-size: 36px; letter-spacing: .02em; }
+
+/* -- COLOUR PALETTE --- */
+.palette-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+.swatch { border-radius: 14px; overflow: hidden; }
+.swatch-color { height: 100px; }
+.swatch-info { background: white; padding: 14px 16px; border: 1px solid var(--line); border-top: none; border-radius: 0 0 14px 14px; }
+.swatch-name { font-size: 13px; font-weight: 800; color: var(--ink); margin-bottom: 4px; }
+.swatch-hex { font-size: 11px; font-weight: 700; color: var(--muted); font-family: monospace; }
+.swatch-use { font-size: 10px; color: var(--muted); margin-top: 6px; }
+
+/* -- TYPOGRAPHY --- */
+.type-sample { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.type-row { display: flex; align-items: baseline; gap: 20px; padding: 20px 28px; border-bottom: 1px solid var(--line); }
+.type-row:last-child { border-bottom: none; }
+.type-meta { width: 140px; flex-shrink: 0; }
+.type-weight { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.type-spec { font-size: 10px; color: rgba(0,0,0,.3); margin-top: 3px; font-family: monospace; }
+.type-preview { flex: 1; color: var(--ink); }
+
+/* -- BRAND VALUES --- */
+.values-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.value-card { background: white; border: 1px solid var(--line); border-radius: 14px; padding: 28px; }
+.value-icon { font-size: 32px; margin-bottom: 14px; }
+.value-word { font-size: 22px; font-weight: 900; color: var(--ink); margin-bottom: 6px; }
+.value-line { width: 32px; height: 3px; border-radius: 99px; margin-bottom: 10px; }
+.value-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* -- DONT USE --- */
+.dont-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.dont-tile {
+  border: 1.5px solid #fee2e2; border-radius: 12px;
+  padding: 20px 16px; text-align: center; position: relative;
+  background: #fff5f5;
+}
+.dont-tile::before {
+  content: '?';
+  position: absolute; top: -10px; right: -10px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #ef4444; color: #fff;
+  font-size: 11px; font-weight: 900;
+  display: grid; place-items: center;
+}
+.dont-text { font-size: 20px; font-weight: 900; margin-bottom: 8px; }
+.dont-label { font-size: 10px; color: #ef4444; font-weight: 700; }
+
+/* -- CLEARSPACE --- */
+.clearspace-box {
+  background: white; border: 1px solid var(--line);
+  border-radius: 14px; padding: 48px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.cs-inner {
+  border: 1.5px dashed var(--teal);
+  padding: 32px 48px;
+  border-radius: 8px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.cs-logo { font-family: 'DM Serif Display', serif; font-size: 32px; }
+.cs-logo span { color: var(--amber); }
+.cs-arrows {
+  font-size: 11px; color: var(--teal); font-weight: 700;
+  margin-top: 12px; display: flex; gap: 8px; align-items: center;
+}
+
+/* -- MOCKUP STRIP --- */
+.mockup-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.mockup-card { border-radius: 14px; padding: 24px; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between; }
+.mockup-card.business-card { background: var(--forest); }
+.mockup-card.tshirt { background: var(--ink); }
+.mockup-card.web { background: white; border: 1px solid var(--line); }
+.mockup-logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: #fff; }
+.mockup-logo .amber { color: var(--amber); }
+.mockup-tagline { font-size: 10px; color: rgba(255,255,255,.4); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.mockup-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.web-nav { display: flex; justify-content: space-between; align-items: center; }
+.web-logo { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--ink); }
+.web-logo .amber { color: var(--amber); }
+.web-btn { background: var(--amber); color: white; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 99px; }
+
+/* -- FOOTER --- */
+.brand-footer {
+  text-align: center; padding-top: 60px; border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 12px;
+}
+.brand-footer strong { color: var(--ink); }
+
+@media print {
+  body { background: white; }
+  .page { padding: 20px; }
+}
+</style>
+<link rel="stylesheet" href="style.css?v=23.0">
+<link rel="stylesheet" href="glass.css?v=23.0">
+</head>
+<body>
+<div class="page">
+
+  <!-- COVER -->
+  <div class="brand-cover">
+    <div class="cover-eyebrow">Brand Identity Guidelines &rarr; Confidential</div>
+    <img src="logo-stone-v2-removebg.png" alt="Collekt" class="cover-logo-img"
+         onerror="this.style.display='none'; document.getElementById('coverFallback').style.display='block';" loading="lazy" decoding="async">
+    <div class="cover-logo-fallback" id="coverFallback" style="display:none;">
+      Coll<span>ekt</span>
+    </div>
+    <div class="cover-title">Brand Identity & Design Guidelines</div>
+    <div class="cover-date">Version 1.0 &copy; 2026 &bull; Collekt Technologies Ltd.</div>
+  </div>
+
+  <!-- 01 LOGO -->
+  <div class="section">
+    <div class="section-label"><span class="num">01</span> The Logo</div>
+    <div class="logo-display">
+      <img src="logo-stone-v2-removebg.png" alt="Collekt Logo" onerror="this.outerHTML='<div class=\'logo-wordmark-text\' style=\'color:var(--forest)\' loading="lazy" decoding="async">Coll<span style=\'color:var(--amber)\'>ekt</span></div>'">
+      <div class="logo-concept-line">
+        <div class="concept-tag">
+          <div class="concept-dot" style="background:var(--forest);"></div>
+          COLL &rarr; People & Talent
+        </div>
+        <div class="concept-tag">
+          <div class="concept-dot" style="background:var(--amber);"></div>
+          EKT &rarr; Projects & Industry
+        </div>
+      </div>
+    </div>
+    <p style="font-size:14px; color:var(--muted); line-height:1.7;">
+      The Collekt wordmark encodes the platform's dual purpose directly into its letterforms &rarr; inspired by the VAIO logo's philosophy of letters with dual meaning. The organic flowing <strong style="color:var(--forest);">COLL</strong> represents people, talent and human connection. The angular, precise <strong style="color:var(--amber);">EKT</strong> represents projects, engineering and industry. Together they tell the whole story in one word.
+    </p>
+  </div>
+
+  <!-- 02 LOGO VARIATIONS -->
+  <div class="section">
+    <div class="section-label"><span class="num">02</span> Logo Variations</div>
+    <div class="logo-grid">
+      <div class="logo-tile light">
+        <img src="logo-stone-v2-removebg.png" alt="Colour on white" onerror="this.outerHTML='<div style=\'font-family:serif;font-size:28px;color:var(--forest)\' loading="lazy" decoding="async">Coll<span style=\'color:var(--amber)\'>ekt</span></div>'">
+        <div class="logo-tile-label">Primary &rarr; Colour on White</div>
+      </div>
+      <div class="logo-tile dark">
+        <img src="logo-stone-v2-removebg.png" alt="On dark" style="mix-blend-mode:lighten;filter:brightness(1.3);" onerror="this.outerHTML='<div style=\'font-family:serif;font-size:28px;color:#fff\' loading="lazy" decoding="async">Coll<span style=\'color:var(--amber)\'>ekt</span></div>'">
+        <div class="logo-tile-label">Reversed &rarr; On Forest Green</div>
+      </div>
+
+      <div class="logo-tile paper">
+        <div style="font-family:'DM Serif Display',serif; font-size:28px; color:var(--ink);">Coll<span style="color:var(--amber);">ekt</span></div>
+        <div class="logo-tile-label">Monotone &rarr; Ink on Paper</div>
+      </div>
+      <div class="logo-tile amber-bg">
+        <div style="font-family:'DM Serif Display',serif; font-size:28px; color:white;">COLLEKT</div>
+        <div class="logo-tile-label">Knockout &rarr; White on Amber</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 COLOUR PALETTE -->
+  <div class="section">
+    <div class="section-label"><span class="num">03</span> Colour Palette</div>
+    <div class="palette-grid">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#0E3B35;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Forest Green</div>
+          <div class="swatch-hex">#0E3B35</div>
+          <div class="swatch-use">Primary &rarr; People &rarr; Growth</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#D4920B;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Amber Gold</div>
+          <div class="swatch-hex">#D4920B</div>
+          <div class="swatch-use">Accent &rarr; Industry &rarr; Energy</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#13756F;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Teal</div>
+          <div class="swatch-hex">#13756F</div>
+          <div class="swatch-use">Secondary &rarr; Links &rarr; UI</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#F8F5F0; border:1px solid #e2e8e7;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Paper</div>
+          <div class="swatch-hex">#F8F5F0</div>
+          <div class="swatch-use">Background &rarr; Warmth</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 TYPOGRAPHY -->
+  <div class="section">
+    <div class="section-label"><span class="num">04</span> Typography</div>
+    <div class="type-sample">
+      <div style="padding:16px 28px; background:var(--forest); color:rgba(255,255,255,.5); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;">Manrope &rarr; Primary Typeface</div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-weight">900 Black</div>
+          <div class="type-spec">Headings & Display</div>
+        </div>
+        <div class="type-preview" style="font-size:32px; font-weight:900;">Find. Connect. Deliver.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-weight">700 Bold</div>
+          <div class="type-spec">Subheadings & UI</div>
+        </div>
+        <div class="type-preview" style="font-size:20px; font-weight:700;">Nigeria's Project Marketplace</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-weight">500 Medium</div>
+          <div class="type-spec">Body Text</div>
+        </div>
+        <div class="type-preview" style="font-size:15px; font-weight:500; color:#555;">Collekt connects verified Nigerian professionals with companies posting real project opportunities across oil & gas, EPC, construction and government sectors.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-weight">400 Regular</div>
+          <div class="type-spec">Captions & Labels</div>
+        </div>
+        <div class="type-preview" style="font-size:13px; font-weight:400; color:#888; text-transform:uppercase; letter-spacing:.1em;">PROPOSAL MANAGER &rarr; LAGOS &rarr; ? 4.9</div>
+      </div>
+    </div>
+    <div style="margin-top:16px; padding:20px 28px; background:var(--paper); border:1px solid var(--line); border-radius:12px;">
+      <span style="font-size:13px; font-weight:700; color:var(--muted);">Display typeface: </span>
+      <span style="font-family:'DM Serif Display',serif; font-size:24px; color:var(--ink); font-style:italic;">DM Serif Display &rarr; used for hero headlines</span>
+    </div>
+  </div>
+
+  <!-- 05 BRAND VALUES -->
+  <div class="section">
+    <div class="section-label"><span class="num">05</span> Brand Values</div>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="value-word">Trusted</div>
+        <div class="value-line" style="background:var(--forest);"></div>
+        <div class="value-desc">Every professional is verified. Every payment is protected. Every project is backed by escrow security.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div class="value-word">Professional</div>
+        <div class="value-line" style="background:var(--amber);"></div>
+        <div class="value-desc">We raise the standard for project delivery in Nigeria. Premium tools, premium professionals, premium results.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div class="value-word">Nigerian</div>
+        <div class="value-line" style="background:var(--teal);"></div>
+        <div class="value-desc">Built for Nigeria, by Nigerians. Our currency, our sectors, our cities, our ambition. Pan-Africa is next.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 TAGLINES -->
+  <div class="section">
+    <div class="section-label"><span class="num">06</span> Brand Voice & Taglines</div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div style="background:white; border:1px solid var(--line); border-radius:12px; padding:20px 28px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="font-family:'DM Serif Display',serif; font-size:24px;">Find. Connect. Deliver.</div>
+        <div style="font-size:11px; color:var(--teal); font-weight:800; text-transform:uppercase; letter-spacing:.08em;">Primary Tagline</div>
+      </div>
+      <div style="background:white; border:1px solid var(--line); border-radius:12px; padding:20px 28px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="font-size:18px; font-weight:700; color:var(--muted);">Nigeria's Project Marketplace</div>
+        <div style="font-size:11px; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.08em;">Descriptor</div>
+      </div>
+      <div style="background:white; border:1px solid var(--line); border-radius:12px; padding:20px 28px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="font-size:18px; font-weight:700; color:var(--muted);">Engineered for Nigeria's Project Economy</div>
+        <div style="font-size:11px; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.08em;">Campaign Line</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 DONT USE -->
+  <div class="section">
+    <div class="section-label"><span class="num">07</span> Logo Don'ts</div>
+    <div class="dont-grid">
+      <div class="dont-tile">
+        <div class="dont-text" style="color:#c0c0c0;">COLLEKT</div>
+        <div class="dont-label">Don't use grey</div>
+      </div>
+      <div class="dont-tile">
+        <div class="dont-text" style="color:#e44;">COLLEKT</div>
+        <div class="dont-label">Don't use brand colours</div>
+      </div>
+      <div class="dont-tile">
+        <div class="dont-text" style="transform:skewX(-15deg); color:var(--forest);">COLLEKT</div>
+        <div class="dont-label">Don't skew or distort</div>
+      </div>
+      <div class="dont-tile">
+        <div class="dont-text" style="color:var(--forest); background:var(--amber-lt); padding:4px 8px; border-radius:4px;">COLLEKT</div>
+        <div class="dont-label">Don't add backgrounds</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 08 CLEAR SPACE -->
+  <div class="section">
+    <div class="section-label"><span class="num">08</span> Clear Space & Minimum Size</div>
+    <div class="clearspace-box">
+      <div style="font-size:12px; color:var(--teal); font-weight:700; margin-bottom:16px; text-align:center;">Always maintain clear space equal to the height of the "C" around all sides</div>
+      <div style="padding:32px; border: 1.5px dashed var(--teal); border-radius:8px; display:inline-block;">
+        <div style="font-family:'DM Serif Display',serif; font-size:36px; color:var(--forest);">Coll<span style="color:var(--amber);">ekt</span></div>
+      </div>
+      <div class="cs-arrows">? clear space "x" on all sides ?</div>
+      <div style="margin-top:20px; display:flex; gap:24px;">
+        <div style="text-align:center; font-size:12px; color:var(--muted);">
+          <div style="font-family:'DM Serif Display',serif; font-size:16px; color:var(--forest);">Coll<span style="color:var(--amber);">ekt</span></div>
+          <div style="font-weight:700; margin-top:4px;">Min. Digital: 80px</div>
+        </div>
+        <div style="text-align:center; font-size:12px; color:var(--muted);">
+          <div style="font-family:'DM Serif Display',serif; font-size:14px; color:var(--forest);">Coll<span style="color:var(--amber);">ekt</span></div>
+          <div style="font-weight:700; margin-top:4px;">Min. Print: 20mm</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 09 IN-USE MOCKUPS -->
+  <div class="section">
+    <div class="section-label"><span class="num">09</span> Brand in Use</div>
+    <div class="mockup-strip">
+      <div class="mockup-card business-card">
+        <div>
+          <div class="mockup-logo">Coll<span class="amber">ekt</span></div>
+          <div class="mockup-tagline">Find. Connect. Deliver.</div>
+        </div>
+        <div style="font-size:10px; color:rgba(255,255,255,.4);">Joshua Gbadamosi<br>Senior Proposal Manager</div>
+        <div class="mockup-label" style="margin-top:8px;">Business Card</div>
+      </div>
+      <div class="mockup-card tshirt">
+        <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+          <div style="font-family:'DM Serif Display',serif; font-size:28px; color:#fff; letter-spacing:.05em;">Coll<span style="color:var(--amber);">ekt</span></div>
+        </div>
+        <div class="mockup-label" style="color:rgba(255,255,255,.3);">Branded Apparel</div>
+      </div>
+      <div class="mockup-card web">
+        <div class="web-nav">
+          <div class="web-logo">Coll<span class="amber">ekt</span></div>
+          <div class="web-btn">Get Started</div>
+        </div>
+        <div style="margin-top:20px; height:3px; background:linear-gradient(to right, var(--forest), var(--amber)); border-radius:99px;"></div>
+        <div style="font-size:10px; color:var(--muted); margin-top:8px; font-weight:600;">Website Navigation Bar</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="brand-footer">
+    <div style="font-family:'DM Serif Display',serif; font-size:28px; color:var(--forest); margin-bottom:8px;">Coll<span style="color:var(--amber);">ekt</span></div>
+    <div>&copy; 2026 <strong>Collekt Technologies Ltd.</strong> &bull; All rights reserved.</div>
+    <div style="margin-top:8px; color:#bbb;">Brand Identity v1.0 &rarr; Internal Use Only</div>
+  </div>
+
+</div>
+</body>
+</html>

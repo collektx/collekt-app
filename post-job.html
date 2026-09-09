@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<script>
+  (function() {
+    try {
+      var u = JSON.parse(localStorage.getItem('collekt_user'));
+      if (!u || typeof u !== 'object' || (!u.id && !u.email && !u.role)) {
+        window.location.replace('login.html');
+        return;
+      }
+      if (u.role === 'professional') {
+        window.location.replace('dashboard.html');
+        return;
+      }
+    } catch(e) {
+      window.location.replace('login.html');
+    }
+  })();
+</script>
+<title>Post a Job / Opportunity &mdash; Collekt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=23.0">
+<link rel="stylesheet" href="shared.css?v=23.0">
+<link rel="stylesheet" href="glass.css?v=23.0">
+
+<style>
+  body { background: var(--paper); }
+  .post-header-banner {
+    background: linear-gradient(135deg, #0e2a26 0%, var(--forest) 50%, #1a4a40 100%);
+    border-radius: var(--r-lg);
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    border: 1px solid rgba(212,146,11,.25);
+    position: relative;
+    overflow: hidden;
+  }
+  .post-header-banner::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(212,146,11,.06);
+  }
+  .post-grid-layout {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+  @media (max-width: 992px) {
+    .post-grid-layout { grid-template-columns: 1fr; }
+  }
+  .form-section-card {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(14,59,53,0.05);
+  }
+  html.dark .form-section-card {
+    background: #0f2220;
+    border-color: rgba(255,255,255,0.08);
+  }
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: 4px 10px;
+    border-radius: 99px;
+    background: var(--teal-lt);
+    color: var(--teal);
+    margin-bottom: 12px;
+  }
+  .preview-card {
+    position: sticky;
+    top: 90px;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 24px;
+    box-shadow: 0 8px 30px rgba(14,59,53,0.08);
+  }
+  html.dark .preview-card {
+    background: #0f2220;
+    border-color: rgba(255,255,255,0.08);
+  }
+  .type-radio-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 6px;
+  }
+  @media (max-width: 600px) {
+    .type-radio-group { grid-template-columns: 1fr; }
+  }
+  .type-option-card {
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all .2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .type-option-card:hover {
+    border-color: var(--teal);
+    background: rgba(19,117,111,0.04);
+  }
+  .type-option-card.active {
+    border-color: var(--amber);
+    background: rgba(212,146,11,0.08);
+  }
+</style>
+</head>
+<body>
+
+<div class="app-page">
+  <aside class="app-sidebar" id="appSidebar"></aside>
+  
+  <main class="app-main">
+    <div class="app-topbar" id="appTopbar"></div>
+    
+    <div class="page-inner">
+
+      <!-- Header Banner -->
+      <div class="post-header-banner fade-in">
+        <div>
+          <div style="font-size:11px; font-weight:800; color:var(--amber); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;">Employer Portal</div>
+          <h1 style="font-size:24px; font-weight:900; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+            &#128188; Post a Job / Opportunity
+          </h1>
+          <p style="font-size:14px; color:rgba(255,255,255,.8); max-width:620px;">
+            Publish short-term jobs, EPC tenders, fixed-price project contracts, or specialist consultancies to reach verified Nigerian and international energy experts.
+          </p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <a href="my-jobs.html" class="btn btn-ghost btn-sm" style="min-height:38px; color:#fff; border-color:rgba(255,255,255,0.25); text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+            &#128203; My Jobs &amp; Opportunities
+          </a>
+        </div>
+      </div>
+
+      <!-- Main Layout: Form + Live Card Preview -->
+      <div class="post-grid-layout">
+        
+        <!-- Form Column -->
+        <div>
+          <form id="postJobForm" onsubmit="event.preventDefault(); publishJobListing();">
+            
+            <!-- Section 1: Basic Information -->
+            <div class="form-section-card fade-in">
+              <span class="section-badge">Step 1 &bull; Opportunity Type &amp; Classification</span>
+              <h3 style="font-size:17px; font-weight:900; color:var(--ink); margin-bottom:14px;">Basic Details</h3>
+
+              <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label" style="font-weight:800;">Opportunity / Job Title <span style="color:var(--amber);">*</span></label>
+                <input class="form-input" type="text" id="postTitleInput" placeholder="e.g. Senior Subsea Piping Engineer, 33kV Substation EPC Tender" required oninput="updateLivePreview()">
+              </div>
+
+              <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label" style="font-weight:800;">Opportunity Type</label>
+                <div class="type-radio-group">
+                  <div class="type-option-card active" onclick="selectTypeOption('Short-Term Job', this)">
+                    <span style="font-size:20px;">&#127991;&#65039;</span>
+                    <div>
+                      <div style="font-size:13px; font-weight:800; color:var(--ink);">Short-Term Job</div>
+                      <div style="font-size:11px; color:var(--muted);">Short-Term / Contract Role</div>
+                    </div>
+                  </div>
+                  <div class="type-option-card" onclick="selectTypeOption('Tender / RFP', this)">
+                    <span style="font-size:20px;">&#127959;&#65039;</span>
+                    <div>
+                      <div style="font-size:13px; font-weight:800; color:var(--ink);">Tender / RFP</div>
+                      <div style="font-size:11px; color:var(--muted);">EPC &amp; Competitive Tender</div>
+                    </div>
+                  </div>
+                  <div class="type-option-card" onclick="selectTypeOption('Project Contract', this)">
+                    <span style="font-size:20px;">&#9889;</span>
+                    <div>
+                      <div style="font-size:13px; font-weight:800; color:var(--ink);">Project Contract</div>
+                      <div style="font-size:11px; color:var(--muted);">Fixed-Price Milestones</div>
+                    </div>
+                  </div>
+                  <div class="type-option-card" onclick="selectTypeOption('Consultancy', this)">
+                    <span style="font-size:20px;">&#128161;</span>
+                    <div>
+                      <div style="font-size:13px; font-weight:800; color:var(--ink);">Consultancy</div>
+                      <div style="font-size:11px; color:var(--muted);">Short-Term Advisory</div>
+                    </div>
+                  </div>
+                </div>
+                <input type="hidden" id="postTypeHidden" value="Short-Term Job">
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                <div class="form-group">
+                  <label class="form-label" style="font-weight:800;">Industry / Sector</label>
+                  <select class="form-input form-select" id="postSectorInput" onchange="updateLivePreview()">
+                    <option value="EPC &amp; Engineering">EPC &amp; Engineering</option>
+                    <option value="Oil &amp; Gas (Upstream)">Oil &amp; Gas (Upstream / Exploration)</option>
+                    <option value="Oil &amp; Gas (Midstream)">Oil &amp; Gas (Midstream / Processing)</option>
+                    <option value="Pipeline &amp; HAZOP">Pipeline &amp; HAZOP</option>
+                    <option value="Subsea &amp; Offshore">Subsea &amp; Offshore</option>
+                    <option value="Solar &amp; Renewables">Solar &amp; Renewables</option>
+                    <option value="HSE &amp; Safety Compliance">HSE &amp; Safety Compliance</option>
+                    <option value="Bids &amp; Technical Writing">Bids &amp; Technical Writing</option>
+                    <option value="Legal &amp; NOGICJDA">Legal &amp; NOGICJDA Compliance</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" style="font-weight:800;">Experience Level</label>
+                  <select class="form-input form-select" id="postExpInput" onchange="updateLivePreview()">
+                    <option value="Any Experience Level">Any Experience Level</option>
+                    <option value="Junior (1 - 3 Years)">Junior (1 &ndash; 3 Years)</option>
+                    <option value="Mid-Level (4 - 7 Years)">Mid-Level (4 &ndash; 7 Years)</option>
+                    <option value="Senior Specialist (8 - 14 Years)" selected>Senior Specialist (8 &ndash; 14 Years)</option>
+                    <option value="Lead / Principal (15+ Years)">Lead / Principal (15+ Years)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2: Location & Compensation -->
+            <div class="form-section-card fade-in">
+              <span class="section-badge">Step 2 &bull; Location, Budget &amp; Timeline</span>
+              <h3 style="font-size:17px; font-weight:900; color:var(--ink); margin-bottom:14px;">Location &amp; Compensation</h3>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+                <div class="form-group">
+                  <label class="form-label" style="font-weight:800;">Location &amp; Work Mode</label>
+                  <select class="form-input form-select" id="postLocInput" onchange="updateLivePreview()">
+                    <option value="Lagos State (On-site)">Lagos State (On-site)</option>
+                    <option value="Port Harcourt, Rivers (On-site)">Port Harcourt, Rivers (On-site)</option>
+                    <option value="Warri, Delta (On-site)">Warri, Delta (On-site)</option>
+                    <option value="FCT Abuja (On-site)">FCT Abuja (On-site)</option>
+                    <option value="Akwa Ibom (On-site)">Akwa Ibom (On-site)</option>
+                    <option value="Offshore Platform / Rig">Offshore Platform / Rig</option>
+                    <option value="Hybrid (On-site &amp; Remote)">Hybrid (On-site &amp; Remote)</option>
+                    <option value="100% Remote (Nigeria)">100% Remote (Nigeria)</option>
+                    <option value="100% Remote (Global)">100% Remote (Global)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" style="font-weight:800;">Duration / Contract Length</label>
+                  <input class="form-input" type="text" id="postDurationInput" placeholder="e.g. 1 Month, 3 Months, 6 Months (Short-Term)" oninput="updateLivePreview()">
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+                <div class="form-group">
+                  <label class="form-label" style="font-weight:800;">Budget / Target Compensation (&#8358;)</label>
+                  <input class="form-input" type="number" id="postBudgetInput" placeholder="e.g. 2500000" oninput="updateLivePreview()">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" style="font-weight:800;">Compensation Structure</label>
+                  <select class="form-input form-select" id="postRateTypeInput" onchange="updateLivePreview()">
+                    <option value="Total Contract Budget">Total Contract Budget</option>
+                    <option value="Monthly Salary">Monthly Salary / Retainer</option>
+                    <option value="Daily / Hourly Rate">Daily / Hourly Rate</option>
+                    <option value="Negotiable">Negotiable</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" style="font-weight:800;">Application / Bid Submission Deadline</label>
+                <input class="form-input" type="text" id="postDeadlineInput" placeholder="e.g. 14 Days, 30 Days" oninput="updateLivePreview()">
+              </div>
+            </div>
+
+            <!-- Section 3: Technical Scope & Skills -->
+            <div class="form-section-card fade-in">
+              <span class="section-badge">Step 3 &bull; Requirements &amp; Scope</span>
+              <h3 style="font-size:17px; font-weight:900; color:var(--ink); margin-bottom:14px;">Scope of Work &amp; Skills</h3>
+
+              <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label" style="font-weight:800;">Required Skills &amp; Certifications <span style="font-size:12px; font-weight:600; color:var(--muted);">(Comma separated)</span></label>
+                <input class="form-input" type="text" id="postSkillsInput" placeholder="e.g. AutoCAD, Caesar II, API 570, NOGICJDA, BOSIET" oninput="updateLivePreview()">
+              </div>
+
+              <div class="form-group" style="margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <label class="form-label" style="font-weight:800; margin-bottom:0;">Scope of Work / Job Description <span style="color:var(--amber);">*</span></label>
+                  <button type="button" class="btn btn-outline btn-xs" onclick="generateAiTenderSpec('postTitleInput', 'postDescInput')" style="font-weight:800; font-size:11px; color:var(--teal); border-color:rgba(19,117,111,0.3);">
+                    &#10024; AI Generate Spec
+                  </button>
+                </div>
+                <textarea class="form-input" rows="6" id="postDescInput" placeholder="Describe the responsibilities, technical deliverables, compliance requirements, and execution timeline..." required oninput="updateLivePreview()"></textarea>
+              </div>
+
+              <div style="display:flex; gap:12px; justify-content:flex-end;">
+                <a href="company-dashboard.html" class="btn btn-outline" style="font-weight:700; text-decoration:none; display:inline-flex; align-items:center;">Cancel</a>
+                <button type="submit" class="btn btn-amber" id="submitJobBtn" style="font-weight:900; padding:12px 28px; font-size:14px;">
+                  &#128640; Publish Job / Opportunity Live
+                </button>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Preview Column -->
+        <div>
+          <div class="preview-card fade-in">
+            <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+              <span>Live Marketplace Preview</span>
+              <span style="background:#dcfce7; color:#16a34a; padding:2px 8px; border-radius:99px; font-size:10px; font-weight:900;">PREVIEW</span>
+            </div>
+
+            <div class="tender-card" style="box-shadow:none; border-color:var(--line); padding:20px; background:var(--paper);">
+              <div>
+                <div class="tender-badge-row" style="margin-bottom:10px;">
+                  <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span id="prevTypeTag" style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; padding:3px 8px; border-radius:99px; background:rgba(212,146,11,0.15); color:var(--amber);">Short-Term Job</span>
+                    <span id="prevSectorTag" class="tender-cat-tag">EPC &amp; Engineering</span>
+                  </div>
+                  <span id="prevDeadlineTag" class="tender-deadline">&#9203; 14 Days</span>
+                </div>
+
+                <div class="tender-title" id="prevTitle" style="font-size:16px; color:var(--muted); font-style:italic;">Opportunity Title will appear here as you type</div>
+                
+                <div class="tender-company-line" style="font-size:12px; margin-bottom:10px;">
+                  <span id="prevCompany">Company Account</span>
+                  <span id="prevLocation">&bull; Lagos State</span>
+                </div>
+
+                <div class="tender-scope" id="prevScope" style="font-size:12px; line-height:1.5; color:var(--muted); margin-bottom:12px; font-style:italic;">
+                  Scope of work and deliverables will appear here as you type.
+                </div>
+                
+                <div class="tender-skills" id="prevSkills" style="margin-bottom:14px;">
+                  <span class="tender-skill-chip">Engineering</span>
+                </div>
+              </div>
+
+              <div class="tender-footer" style="padding-top:12px;">
+                <div class="tender-budget">
+                  <span class="tender-budget-lbl" id="prevRateType">Contract Budget</span>
+                  <span class="tender-budget-val" id="prevBudget" style="font-size:17px;">Negotiable</span>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" style="font-weight:800; font-size:12px; pointer-events:none;">
+                  &#128221; Apply / View
+                </button>
+              </div>
+            </div>
+
+            <div style="margin-top:16px; padding:14px; background:rgba(19,117,111,0.06); border-radius:12px; font-size:12px; color:var(--muted); line-height:1.5;">
+              &#128161; <strong>Instant Reach:</strong> As soon as you publish, this opportunity is placed in the Live Marketplace and alerted to matched verified specialists.
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.post-grid-layout -->
+
+    </div><!-- /.page-inner -->
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=35.0"></script>
+<script src="app.js?v=35.0"></script>
+<script src="collekt-ai.js?v=35.0"></script>
+
+<script>
+  let editingJobId = null;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    try { buildSidebar('post'); } catch(e){}
+    try { buildTopbar(); } catch(e){}
+    
+    const user = typeof getUser === 'function' ? getUser() : {};
+    const compName = user?.company_name || user?.name || 'Company Account';
+    const compEl = document.getElementById('prevCompany');
+    if (compEl) {
+      const badge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(14, user) : '';
+      compEl.innerHTML = `🏢 ${escapeHTML(compName)} ${badge}`;
+    }
+
+    // Check if in edit mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    if (editId) {
+      await loadJobForEditing(editId);
+    } else {
+      updateLivePreview();
+    }
+  });
+
+  async function loadJobForEditing(jobId) {
+    editingJobId = jobId;
+    let allJobs = typeof getPostedJobs === 'function' ? getPostedJobs() : [];
+    if (typeof fetchLiveJobsFromSupabase === 'function') {
+      const sbJobs = await fetchLiveJobsFromSupabase();
+      if (sbJobs && sbJobs.length) allJobs = sbJobs;
+    }
+    const job = allJobs.find(j => String(j.id) === String(jobId));
+    if (!job) {
+      if (typeof showToast === 'function') showToast('⚠️ Opportunity not found.', 'warning');
+      return;
+    }
+
+    const titleEl = document.getElementById('postTitleInput');
+    if (titleEl) titleEl.value = job.title || '';
+
+    const hiddenType = document.getElementById('postTypeHidden');
+    if (hiddenType) hiddenType.value = job.type || 'Short-Term Job';
+
+    // Select matching type card
+    document.querySelectorAll('.type-option-card').forEach(el => {
+      const txt = el.textContent.trim().toLowerCase();
+      if (txt.includes((job.type || '').toLowerCase())) {
+        el.classList.add('active');
+      } else {
+        el.classList.remove('active');
+      }
+    });
+
+    if (document.getElementById('postSectorInput')) document.getElementById('postSectorInput').value = job.category || 'EPC & Engineering';
+    if (document.getElementById('postExpInput')) document.getElementById('postExpInput').value = job.experience || 'Any Experience Level';
+    if (document.getElementById('postLocInput')) document.getElementById('postLocInput').value = job.location || 'Nigeria';
+    if (document.getElementById('postBudgetInput')) document.getElementById('postBudgetInput').value = job.budget || '';
+    if (document.getElementById('postRateTypeInput')) document.getElementById('postRateTypeInput').value = job.budget_rate_type || 'Total Contract Budget';
+    if (document.getElementById('postDurationInput')) document.getElementById('postDurationInput').value = job.duration || '';
+    if (document.getElementById('postDeadlineInput')) document.getElementById('postDeadlineInput').value = job.deadline || '';
+    if (document.getElementById('postSkillsInput')) {
+      document.getElementById('postSkillsInput').value = Array.isArray(job.skills) ? job.skills.join(', ') : (job.skills || '');
+    }
+    if (document.getElementById('postDescInput')) document.getElementById('postDescInput').value = job.description || job.scope || '';
+
+    const submitBtn = document.getElementById('submitJobBtn');
+    if (submitBtn) {
+      submitBtn.innerHTML = '💾 Save Changes &amp; Update Live';
+    }
+
+    const headingEl = document.querySelector('.page-header h1');
+    if (headingEl) {
+      headingEl.textContent = 'Edit Job / Opportunity';
+    }
+
+    updateLivePreview();
+  }
+
+  function selectTypeOption(typeVal, element) {
+    document.querySelectorAll('.type-option-card').forEach(el => el.classList.remove('active'));
+    if (element) element.classList.add('active');
+    const hiddenInput = document.getElementById('postTypeHidden');
+    if (hiddenInput) hiddenInput.value = typeVal;
+    updateLivePreview();
+  }
+
+  function updateLivePreview() {
+    const title     = document.getElementById('postTitleInput')?.value.trim();
+    const type      = document.getElementById('postTypeHidden')?.value || 'Short-Term Job';
+    const sector    = document.getElementById('postSectorInput')?.value || 'EPC & Engineering';
+    const loc       = document.getElementById('postLocInput')?.value || 'Lagos State';
+    const budget    = document.getElementById('postBudgetInput')?.value;
+    const rateType  = document.getElementById('postRateTypeInput')?.value || 'Total Contract Budget';
+    const deadline  = document.getElementById('postDeadlineInput')?.value.trim();
+    const skillsStr = document.getElementById('postSkillsInput')?.value.trim() || '';
+    const desc      = document.getElementById('postDescInput')?.value.trim();
+
+    const prevTitleEl = document.getElementById('prevTitle');
+    if (prevTitleEl) {
+      if (title) {
+        prevTitleEl.textContent = title;
+        prevTitleEl.style.color = 'var(--ink)';
+        prevTitleEl.style.fontStyle = 'normal';
+      } else {
+        prevTitleEl.textContent = 'Opportunity Title will appear here as you type';
+        prevTitleEl.style.color = 'var(--muted)';
+        prevTitleEl.style.fontStyle = 'italic';
+      }
+    }
+
+    const prevTypeEl = document.getElementById('prevTypeTag');
+    if (prevTypeEl) prevTypeEl.textContent = type;
+
+    const prevSectorEl = document.getElementById('prevSectorTag');
+    if (prevSectorEl) prevSectorEl.textContent = sector;
+
+    const prevLocEl = document.getElementById('prevLocation');
+    if (prevLocEl) prevLocEl.textContent = '• ' + loc;
+
+    const prevDeadlineEl = document.getElementById('prevDeadlineTag');
+    if (prevDeadlineEl) prevDeadlineEl.innerHTML = deadline ? `&#9203; ${escapeHTML(deadline)}` : '&#9203; Ongoing';
+
+    const prevRateEl = document.getElementById('prevRateType');
+    if (prevRateEl) prevRateEl.textContent = rateType;
+
+    const prevBudgetEl = document.getElementById('prevBudget');
+    if (prevBudgetEl) {
+      if (budget && !isNaN(budget) && Number(budget) > 0) {
+        prevBudgetEl.textContent = (typeof formatNaira === 'function') ? formatNaira(Number(budget), true) : ('₦' + Number(budget).toLocaleString());
+      } else {
+        prevBudgetEl.textContent = 'Negotiable';
+      }
+    }
+
+    const prevScopeEl = document.getElementById('prevScope');
+    if (prevScopeEl) {
+      if (desc) {
+        prevScopeEl.textContent = desc;
+        prevScopeEl.style.color = 'var(--ink)';
+        prevScopeEl.style.fontStyle = 'normal';
+      } else {
+        prevScopeEl.textContent = 'Scope of work and deliverables will appear here as you type.';
+        prevScopeEl.style.color = 'var(--muted)';
+        prevScopeEl.style.fontStyle = 'italic';
+      }
+    }
+
+    const skillsContainer = document.getElementById('prevSkills');
+    const skills = skillsStr ? skillsStr.split(',').map(s => s.trim()).filter(Boolean) : [sector, 'Engineering'];
+    if (skillsContainer) {
+      skillsContainer.innerHTML = skills.slice(0, 4).map(s => `<span class="tender-skill-chip">${escapeHTML(s)}</span>`).join('');
+    }
+  }
+
+  async function publishJobListing() {
+    const title          = document.getElementById('postTitleInput')?.value.trim();
+    const type           = document.getElementById('postTypeHidden')?.value || 'Short-Term Job';
+    const category       = document.getElementById('postSectorInput')?.value || 'EPC & Engineering';
+    const experience     = document.getElementById('postExpInput')?.value || 'Any Experience Level';
+    const location       = document.getElementById('postLocInput')?.value || 'Nigeria';
+    const budget         = parseFloat(document.getElementById('postBudgetInput')?.value) || 0;
+    const budgetRateType = document.getElementById('postRateTypeInput')?.value || 'Total Contract Budget';
+    const duration       = document.getElementById('postDurationInput')?.value.trim() || 'Flexible';
+    const deadline       = document.getElementById('postDeadlineInput')?.value.trim() || 'Ongoing';
+    const skillsStr      = document.getElementById('postSkillsInput')?.value.trim() || '';
+    const skills         = skillsStr ? skillsStr.split(',').map(s => s.trim()).filter(Boolean) : [category, type];
+    const desc           = document.getElementById('postDescInput')?.value.trim();
+
+    if (!title || !desc) {
+      if (typeof showToast === 'function') showToast('⚠️ Please enter title and job description / scope.', 'warning');
+      return;
+    }
+
+    const btn = document.getElementById('submitJobBtn');
+    if (btn) { btn.innerHTML = editingJobId ? 'Saving...' : 'Publishing...'; btn.disabled = true; }
+
+    const user = typeof getUser === 'function' ? getUser() : {};
+    const jobData = {
+      id: editingJobId || ('job_' + Date.now()),
+      title: title,
+      type: type,
+      category: category,
+      experience: experience,
+      location: location,
+      budget: budget,
+      budget_rate_type: budgetRateType,
+      duration: duration,
+      deadline: deadline,
+      skills: skills,
+      description: desc,
+      companyName: user.name || user.company_name || 'Verified Corporate Employer',
+      company_name: user.name || user.company_name || 'Verified Corporate Employer',
+      company_id: user.id || user.email || 'company',
+      company_logo: user.company_logo || '',
+      company_verified: !!(user.identity_verified || user.is_verified || user.verified),
+      status: 'open',
+      posted_at: new Date().toISOString()
+    };
+
+    try {
+      if (editingJobId) {
+        if (typeof updatePostedJob === 'function') updatePostedJob(editingJobId, jobData);
+        if (typeof updateJobInSupabase === 'function') await updateJobInSupabase(editingJobId, jobData);
+        if (typeof showToast === 'function') showToast('🎉 Job / Opportunity updated successfully!');
+      } else {
+        if (typeof savePostedJob === 'function') savePostedJob(jobData);
+        if (typeof publishJobToSupabase === 'function') {
+          await publishJobToSupabase(jobData);
+        }
+        if (typeof showToast === 'function') showToast('🎉 Job / Opportunity published live to the Marketplace!');
+      }
+
+      setTimeout(() => {
+        window.location.href = 'marketplace.html';
+      }, 600);
+    } catch (err) {
+      console.warn("Project sync notice:", err);
+      if (typeof showToast === 'function') showToast('Opportunity saved locally. Redirecting...');
+      setTimeout(() => {
+        window.location.href = 'marketplace.html';
+      }, 800);
+    } finally {
+      if (btn) { btn.innerHTML = '🚀 Publish to Marketplace'; btn.disabled = false; }
+    }
+  }
+</script>
+</body>
+</html>
