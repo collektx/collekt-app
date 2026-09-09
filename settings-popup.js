@@ -609,11 +609,23 @@
     /* Dark mode special handling */
     const darkToggle = document.getElementById('sett-dark-mode');
     if (darkToggle) {
+      darkToggle.checked = document.documentElement.classList.contains('dark');
       darkToggle.addEventListener('change', () => {
         const on = darkToggle.checked;
-        document.documentElement.classList.toggle('dark', on);
-        localStorage.setItem('collekt_theme', on ? 'dark' : 'light');
+        if (typeof window.setTheme === 'function') {
+          window.setTheme(on ? 'dark' : 'light');
+        } else {
+          document.documentElement.classList.toggle('dark', on);
+          localStorage.setItem('collekt_theme', on ? 'dark' : 'light');
+          if (typeof window.updateThemeButton === 'function') window.updateThemeButton();
+        }
         setSetting('dark_mode', on);
+      });
+
+      window.addEventListener('collekt_theme_change', (e) => {
+        if (darkToggle) {
+          darkToggle.checked = e.detail && e.detail.isDark;
+        }
       });
     }
 
@@ -654,6 +666,10 @@
     if (!modalBuilt) {
       buildModal();
       modalBuilt = true;
+    }
+    const darkToggle = document.getElementById('sett-dark-mode');
+    if (darkToggle) {
+      darkToggle.checked = document.documentElement.classList.contains('dark');
     }
     const backdrop = document.getElementById('settingsBackdrop');
     if (backdrop) {

@@ -2718,25 +2718,99 @@ function copyInAppOtpCode(code) {
   }
 }
 
-// -- DARK MODE -----------------------------------------
-function initTheme() {
-  const saved = localStorage.getItem('collekt_theme');
-  if (saved === 'dark') document.documentElement.classList.add('dark');
-  updateThemeButton();
-}
-function toggleTheme() {
-  const isDark = document.documentElement.classList.toggle('dark');
-  localStorage.setItem('collekt_theme', isDark ? 'dark' : 'light');
-  updateThemeButton();
-}
-function updateThemeButton() {
-  const btn = document.getElementById('themeToggle');
-  if (!btn) return;
-  const isDark = document.documentElement.classList.contains('dark');
-  btn.innerHTML = isDark
+// -- UNIVERSAL THEME SYSTEM (LIGHT / DARK) --------------
+function getThemeIconHTML(isDark) {
+  return isDark
     ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
     : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
 }
+
+function updateMetaThemeColor(isDark) {
+  const color = isDark ? '#040e0c' : '#e8f5f2';
+  let meta = document.querySelector('meta[name="theme-color"]:not([media])');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute('content', color);
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('collekt_theme');
+  let isDark = false;
+  if (saved === 'dark') {
+    isDark = true;
+  } else if (saved === 'light') {
+    isDark = false;
+  } else {
+    isDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+  updateMetaThemeColor(isDark);
+  updateThemeButton();
+
+  if (!window._themeMediaListenerAttached && window.matchMedia) {
+    window._themeMediaListenerAttached = true;
+    try {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('collekt_theme')) {
+          setTheme(e.matches ? 'dark' : 'light', false);
+        }
+      });
+    } catch(err) {}
+  }
+}
+
+function setTheme(theme, save = true) {
+  const isDark = theme === 'dark';
+  document.documentElement.classList.toggle('dark', isDark);
+  if (save) {
+    localStorage.setItem('collekt_theme', isDark ? 'dark' : 'light');
+  }
+  updateMetaThemeColor(isDark);
+  updateThemeButton();
+
+  try {
+    window.dispatchEvent(new CustomEvent('collekt_theme_change', { detail: { theme: isDark ? 'dark' : 'light', isDark } }));
+  } catch(e) {}
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.classList.contains('dark');
+  setTheme(isDark ? 'light' : 'dark', true);
+}
+
+function updateThemeButton() {
+  const isDark = document.documentElement.classList.contains('dark');
+  const iconHtml = getThemeIconHTML(isDark);
+
+  document.querySelectorAll('.theme-btn, #themeToggle, #adminThemeToggle, [data-action="theme-toggle"]').forEach(btn => {
+    btn.innerHTML = iconHtml;
+    btn.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+    btn.setAttribute('aria-label', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+  });
+
+  document.querySelectorAll('.drawer-theme-item').forEach(item => {
+    const icon = item.querySelector('.drawer-theme-icon');
+    const text = item.querySelector('.drawer-theme-text');
+    if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+    if (text) text.textContent = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+  });
+
+  const settToggle = document.getElementById('sett-dark-mode');
+  if (settToggle && settToggle.checked !== isDark) {
+    settToggle.checked = isDark;
+  }
+}
+
+// Immediately execute early theme init
+initTheme();
 
 // -- PUBLIC NAV (landing, auth pages) ------------------
 function buildPublicNav() {
@@ -2744,7 +2818,7 @@ function buildPublicNav() {
   if (!actions) return;
   updateThemeButton();
   actions.innerHTML = `
-    <button class="theme-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+    <button class="theme-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">${getThemeIconHTML(document.documentElement.classList.contains('dark'))}</button>
     <a class="btn btn-ghost btn-sm" href="login.html">Log in</a>
     <a class="btn btn-amber btn-sm" href="register.html">Sign up</a>
     <button class="ham" id="ham" aria-label="Open menu" aria-expanded="false">
@@ -3282,10 +3356,32 @@ function initMobileNav() {
   const ham = document.getElementById('ham');
   const drawer = document.getElementById('drawer');
   if (ham && drawer) {
-    ham.addEventListener('click', () => {
-      const open = drawer.classList.toggle('open');
-      ham.setAttribute('aria-expanded', open);
-    });
+    if (!ham._wired) {
+      ham._wired = true;
+      ham.addEventListener('click', () => {
+        const open = drawer.classList.toggle('open');
+        ham.setAttribute('aria-expanded', open);
+      });
+    }
+
+    if (!drawer.querySelector('.drawer-theme-item')) {
+      const isDark = document.documentElement.classList.contains('dark');
+      const toggleItem = document.createElement('div');
+      toggleItem.className = 'drawer-theme-item';
+      toggleItem.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:12px 16px; margin-top:16px; border-radius:14px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.16); cursor:pointer; touch-action:manipulation;';
+      toggleItem.innerHTML = `
+        <span style="display:flex; align-items:center; gap:10px; font-size:13.5px; font-weight:800; color:#fff;">
+          <span class="drawer-theme-icon" style="font-size:18px;">${isDark ? '☀️' : '🌙'}</span>
+          <span class="drawer-theme-text">${isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</span>
+        </span>
+        <button type="button" class="theme-btn" style="width:36px; height:36px; min-height:36px; min-width:36px; padding:0;" title="Toggle theme">${getThemeIconHTML(isDark)}</button>
+      `;
+      toggleItem.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleTheme();
+      });
+      drawer.appendChild(toggleItem);
+    }
   }
 }
 
