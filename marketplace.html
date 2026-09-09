@@ -897,7 +897,7 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     openModal('postTenderModal');
   }
 
-  function submitNewTenderProject() {
+  async function submitNewTenderProject() {
     const user = typeof getUser === 'function' ? getUser() : null;
     if (!user || user.role !== 'company') {
       if (typeof showToast === 'function') {

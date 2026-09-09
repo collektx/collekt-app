@@ -471,8 +471,24 @@
     }
 
 
-    // Render dynamic local data
+    // Render initial local data
     renderDashboardData();
+
+    // Fetch live jobs from Supabase & connect Realtime
+    if (typeof fetchLiveJobsFromSupabase === 'function') {
+      try {
+        await fetchLiveJobsFromSupabase();
+        renderDashboardData();
+      } catch(e) {
+        console.warn('Company live jobs fetch notice:', e);
+      }
+    }
+
+    if (typeof initSupabaseRealtimeProjects === 'function') {
+      initSupabaseRealtimeProjects(() => {
+        renderDashboardData();
+      });
+    }
 
     if (window.location.hash === '#post' || window.location.hash.includes('post')) {
       setTimeout(() => { if (typeof openPostModal === 'function') openPostModal(); }, 100);

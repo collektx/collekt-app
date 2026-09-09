@@ -994,7 +994,7 @@
     const isHDImage = raw.includes('[HD_IMAGE]') || raw.startsWith('📷 Attached Image:');
 
     const parts = raw.split(/\s+/);
-    const dataUrl = parts.find(p => p.startsWith('data:')) || msg.media_url || '';
+    const dataUrl = parts.find(p => p.startsWith('data:') || p.startsWith('http://') || p.startsWith('https://')) || msg.media_url || '';
 
     if (isVoice) {
       const senderInitial = (msg.sender_id || 'U').charAt(0).toUpperCase();
@@ -1439,7 +1439,7 @@
     renderContacts();
   }
 
-  function handleChatFileUpload(input) {
+  async function handleChatFileUpload(input) {
     if (!input || !input.files || input.files.length === 0) return;
     const file = input.files[0];
     if (!activeConvId) {
@@ -1447,27 +1447,69 @@
       return;
     }
 
-    const isImage = file.type.startsWith('image/');
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const dataUrl = e.target.result;
-      const sizeKB = (file.size / 1024).toFixed(1) + ' KB';
-      
-      let msgBody = '';
-      if (isImage) {
-        msgBody = `📷 Attached Image: ${file.name} (HD Quality • ${sizeKB}) [HD_IMAGE] ${dataUrl}`;
-      } else {
-        msgBody = `📎 Attached File: ${file.name} (${sizeKB}) [FILE_ATTACHMENT] ${dataUrl}`;
-      }
+    if (file.size > 50 * 1024 * 1024) {
+      if (typeof showToast === 'function') showToast('Maximum attachment size is 50MB', 'warning');
+      return;
+    }
 
-      if (typeof sendMessage === 'function') {
-        _shouldScrollToBottom = true;
-        sendMessage(activeConvId, msgBody);
-        renderContacts();
-        if (typeof showToast === 'function') showToast(`✅ ${isImage ? 'HD Image' : 'File'} attached & sent!`);
+    const isImage = file.type.startsWith('image/');
+    const sizeKB = (file.size >= 1024 * 1024) ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' : (file.size / 1024).toFixed(1) + ' KB';
+    
+    if (typeof showToast === 'function') showToast(`⏳ Uploading ${file.name}...`, 'info');
+
+    let fileUrl = null;
+
+    // 1. Try uploading to Supabase Storage (media or documents bucket)
+    if (window.sb && window.sb.storage) {
+      try {
+        const bucket = isImage ? 'media' : 'documents';
+        const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const storagePath = `chat_${Date.now()}_${cleanName}`;
+        
+        const { data, error } = await window.sb.storage.from(bucket).upload(storagePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+        if (!error && data) {
+          const { data: pubData } = window.sb.storage.from(bucket).getPublicUrl(storagePath);
+          if (pubData && pubData.publicUrl) {
+            fileUrl = pubData.publicUrl;
+          }
+        }
+      } catch(uploadErr) {
+        console.warn('Supabase storage upload notice:', uploadErr);
       }
-    };
-    reader.readAsDataURL(file);
+    }
+
+    // 2. Fallback to base64 data URL if storage upload failed or offline
+    if (!fileUrl) {
+      try {
+        fileUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      } catch(readErr) {
+        if (typeof showToast === 'function') showToast('⚠️ Could not process file attachment', 'error');
+        return;
+      }
+    }
+
+    let msgBody = '';
+    if (isImage) {
+      msgBody = `📷 Attached Image: ${file.name} (HD Quality • ${sizeKB}) [HD_IMAGE] ${fileUrl}`;
+    } else {
+      msgBody = `📎 Attached File: ${file.name} (${sizeKB}) [FILE_ATTACHMENT] ${fileUrl}`;
+    }
+
+    if (typeof sendMessage === 'function') {
+      _shouldScrollToBottom = true;
+      sendMessage(activeConvId, msgBody, fileUrl);
+      renderContacts();
+      if (typeof showToast === 'function') showToast(`✅ ${isImage ? 'HD Image' : 'File'} attached & sent!`);
+    }
     input.value = '';
   }
 
@@ -2342,18 +2384,7 @@
   window.toggleCallCam = toggleCallCam;
   window.endCall = endCall;
 
-    function handleChatFileUpload(input) {
-    if (!input.files || !input.files[0] || !activeConvId) return;
-    const file = input.files[0];
-    if (file.size > 50 * 1024 * 1024) {
-      showToast('Maximum attachment size is 50MB', 'warning');
-      return;
-    }
-    const fileSize = file.size >= 1024 * 1024 ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' : (file.size / 1024).toFixed(1) + ' KB';
-    sendMessage(activeConvId, `📎 Attached File: ${file.name} (${fileSize})`);
-    input.value = '';
-    renderContacts();
-  }
+
 
   function insertQuickEmoji() {
     const emojis = ['😊', '👍', '💼', '✅', '🚀', '🙌', '🤝', '🎉'];
@@ -2711,10 +2742,20 @@
           saveAllMessages(allMsgs);
 
           const allConvs = getAllConversations();
-          const targetConv = allConvs.find(c => c.id === newMsg.conversation_id);
+          let targetConv = allConvs.find(c => c.id === newMsg.conversation_id);
           if (targetConv) {
             targetConv.last_message = newMsg.body.slice(0, 60);
             targetConv.last_at = newMsg.created_at;
+            saveAllConversations(allConvs);
+          } else {
+            targetConv = {
+              id: newMsg.conversation_id,
+              participants: [newMsg.sender_id, myUuid],
+              created_at: newMsg.created_at,
+              last_message: newMsg.body.slice(0, 60),
+              last_at: newMsg.created_at
+            };
+            allConvs.push(targetConv);
             saveAllConversations(allConvs);
           }
 
@@ -2727,6 +2768,10 @@
 
           updateLiveUnreadMessageBadges();
           renderContacts();
+
+          if (activeConvId === newMsg.conversation_id && targetConv) {
+            try { renderChat(targetConv); } catch(e){}
+          }
         }
       }, (convPayload) => {
         renderContacts();

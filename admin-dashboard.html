@@ -29,6 +29,15 @@
         if (a && a.role === 'admin') return true;
         var u = JSON.parse(localStorage.getItem('collekt_user') || 'null');
         if (u && u.role === 'admin') return true;
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var c = cookies[i].trim();
+          if (c.indexOf('collekt_admin_auth=') === 0) {
+            var cVal = decodeURIComponent(c.substring('collekt_admin_auth='.length));
+            var parsed = JSON.parse(cVal);
+            if (parsed && parsed.role === 'admin') return true;
+          }
+        }
       } catch(e) {}
       return false;
     }
@@ -1049,6 +1058,22 @@
           };
         }
       }
+      if (!authData) {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const c = cookies[i].trim();
+          if (c.startsWith('collekt_admin_auth=')) {
+            try {
+              const cVal = decodeURIComponent(c.substring('collekt_admin_auth='.length));
+              const parsed = JSON.parse(cVal);
+              if (parsed && parsed.role === 'admin') {
+                authData = { user: { id: parsed.id || 'admin_master_1', email: parsed.email || 'admin@collekt.ng' }, profile: parsed };
+                break;
+              }
+            } catch(e){}
+          }
+        }
+      }
     } catch(e) {}
 
     if (!authData && typeof checkAdminSession === 'function') {
@@ -1064,7 +1089,11 @@
 
     const adminProfile = authData.profile || {};
     const nameEl = document.getElementById('adminOperatorName');
-    if (nameEl) nameEl.textContent = adminProfile.name || adminProfile.email || 'Super Administrator';
+    if (nameEl) {
+      const email = adminProfile.email || 'admin@collekt.ng';
+      const name = adminProfile.name || 'Super Administrator';
+      nameEl.textContent = `${name} (${email})`;
+    }
 
     // 2. Safe remote user sync if Supabase is connected
     if (window.sb && typeof sb.from === 'function') {

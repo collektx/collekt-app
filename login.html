@@ -461,27 +461,10 @@
           return;
         }
 
-        // STRICT ROLE MUTUAL EXCLUSION CHECK
+        // Auto-adapt to user's registered role smoothly
         const userRole = profile.role || 'professional';
         if (loginRole && userRole !== loginRole && userRole !== 'admin') {
-          if (window.sb && window.sb.auth) {
-            try { await window.sb.auth.signOut(); } catch(e){}
-          }
-          localStorage.removeItem('collekt_user');
-          if (btn) { btn.innerHTML = 'Log In'; btn.disabled = false; }
-          if (errEl) {
-            const expTitle = loginRole === 'company' ? 'Company' : 'Professional';
-            const actTitle = userRole === 'company' ? 'Company' : 'Professional';
-            errEl.innerHTML = `
-              <div style="background:#fef2f2; border:1.5px solid #ef4444; color:#991b1b; padding:14px 16px; border-radius:12px; font-size:13px; line-height:1.5; text-align:left; margin-bottom:14px; box-shadow:0 4px 12px rgba(239,68,68,0.15);">
-                <div style="font-weight:900; font-size:14px; margin-bottom:4px;">⛔ Access Denied &mdash; Strict Role Mismatch</div>
-                This account is registered as a <strong>${actTitle}</strong>. You cannot log in through the <strong>${expTitle}</strong> portal.<br>
-                <div style="margin-top:8px; font-size:12px; font-weight:700; color:#7f1d1d;">&rarr; Please click the <strong>${actTitle}</strong> tab above to log in.</div>
-              </div>
-            `;
-            errEl.style.display = 'block';
-          }
-          return;
+          console.info(`Auto-routing user to registered ${userRole} workspace.`);
         }
 
         if (typeof setUser === 'function') {
