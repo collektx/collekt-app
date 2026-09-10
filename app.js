@@ -5155,47 +5155,461 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ═════════════════════════════════════════════════════════
-   NIGERIAN DATA PROTECTION ACT (NDPA 2023) & STATUTORY CONSENT
+   COLLEKT MODERN GLASSMORPHIC COOKIE & DATA PRIVACY SUITE
+   Statutory Compliance: Nigeria Data Protection Act (NDPA 2023)
    ═════════════════════════════════════════════════════════ */
-function initNdpaConsentBanner() {
-  if (localStorage.getItem('collekt_ndpa_consent_accepted') === 'true') return;
-  if (document.getElementById('ndpaConsentBanner')) return;
 
-  const banner = document.createElement('div');
-  banner.id = 'ndpaConsentBanner';
-  banner.style.cssText = 'position:fixed; bottom:20px; left:20px; right:20px; max-width:820px; margin:0 auto; z-index:99999; background:rgba(6, 21, 19, 0.94); border:1.5px solid rgba(20, 184, 166, 0.35); border-radius:18px; padding:18px 24px; box-shadow:0 20px 45px rgba(0,0,0,0.5); backdrop-filter:blur(16px); color:#e2efed; font-family:"Manrope",sans-serif; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; animation:fadeSlideUp 0.4s ease;';
-
-  banner.innerHTML = `
-    <div style="flex:1; min-width:280px;">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-        <span style="font-size:18px;">🛡️</span>
-        <strong style="font-size:13.5px; color:#fff; letter-spacing:.02em;">Nigeria Data Protection Act (NDPA 2023) &amp; Cookie Notice</strong>
-      </div>
-      <p style="font-size:12px; color:#94a3b8; line-height:1.55; margin:0;">
-        Collekt uses strictly essential security cookies and processes identity data in full compliance with the laws of the Federal Republic of Nigeria. By continuing to browse, you agree to our <a href="terms.html" style="color:#2dd4bf; font-weight:700; text-decoration:underline;">Terms of Service</a> and <a href="privacy.html" style="color:#2dd4bf; font-weight:700; text-decoration:underline;">Privacy Policy</a>.
-      </p>
-    </div>
-    <div style="display:flex; align-items:center; gap:10px;">
-      <a href="javascript:void(0)" onclick="openLegalQuickView('terms')" style="font-size:12px; color:#cbd5e1; font-weight:700; text-decoration:none; padding:8px 14px; border:1px solid rgba(255,255,255,0.18); border-radius:10px;">Summary</a>
-      <button onclick="acceptNdpaConsent()" class="btn btn-primary btn-sm" style="background:linear-gradient(135deg, #0e3b35, #14b8a6); border:none; padding:9px 18px; font-weight:800; font-size:12.5px; border-radius:10px; color:#fff; cursor:pointer;">
-        Accept &amp; Proceed
-      </button>
-    </div>
+function injectCookieStyles() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById('collekt-cookie-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'collekt-cookie-styles';
+  style.textContent = `
+    @keyframes collektCookieSlideUp {
+      0% { opacity: 0; transform: translateY(40px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes collektCookieFadeOut {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(30px) scale(0.96); }
+    }
+    @keyframes collektToastFade {
+      0% { opacity: 0; transform: translate(-50%, 20px); }
+      15% { opacity: 1; transform: translate(-50%, 0); }
+      85% { opacity: 1; transform: translate(-50%, 0); }
+      100% { opacity: 0; transform: translate(-50%, -10px); }
+    }
+    .collekt-cookie-card {
+      position: fixed;
+      bottom: 24px;
+      left: 20px;
+      right: 20px;
+      max-width: 860px;
+      margin: 0 auto;
+      z-index: 99999;
+      background: rgba(6, 21, 19, 0.90);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1.5px solid rgba(45, 212, 191, 0.32);
+      border-radius: 20px;
+      padding: 20px 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 2px 10px rgba(20, 184, 166, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      color: #f1f5f9;
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+      animation: collektCookieSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .collekt-cookie-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(20, 184, 166, 0.16);
+      border: 1px solid rgba(45, 212, 191, 0.4);
+      color: #2dd4bf;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .collekt-cookie-btn-accept {
+      background: linear-gradient(135deg, #0e3b35 0%, #14b8a6 100%);
+      border: 1px solid rgba(45, 212, 191, 0.5);
+      color: #ffffff !important;
+      padding: 10px 22px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 6px 18px rgba(20, 184, 166, 0.32);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .collekt-cookie-btn-accept:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(20, 184, 166, 0.48);
+      filter: brightness(1.08);
+    }
+    .collekt-cookie-btn-customize {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #e2e8f0 !important;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .collekt-cookie-btn-customize:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.35);
+      color: #ffffff !important;
+      transform: translateY(-1px);
+    }
+    .collekt-cookie-toggle {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .collekt-cookie-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .collekt-cookie-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 99px;
+      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .collekt-cookie-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 2px;
+      bottom: 2px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .collekt-cookie-toggle input:checked + .collekt-cookie-slider {
+      background: linear-gradient(135deg, #0e3b35 0%, #14b8a6 100%);
+      border-color: rgba(45, 212, 191, 0.6);
+      box-shadow: 0 0 12px rgba(20, 184, 166, 0.4);
+    }
+    .collekt-cookie-toggle input:checked + .collekt-cookie-slider:before {
+      transform: translateX(20px);
+    }
+    .collekt-cookie-toggle input:disabled + .collekt-cookie-slider {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .collekt-pref-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .collekt-pref-card:hover {
+      border-color: rgba(45, 212, 191, 0.3);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .collekt-cookie-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100005;
+      background: rgba(6, 21, 19, 0.94);
+      border: 1.5px solid rgba(45, 212, 191, 0.4);
+      border-radius: 99px;
+      padding: 10px 22px;
+      color: #2dd4bf;
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      animation: collektToastFade 2.6s ease forwards;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    @media (max-width: 680px) {
+      .collekt-cookie-card {
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        padding: 16px;
+        border-radius: 16px;
+      }
+      .collekt-cookie-actions {
+        width: 100%;
+        justify-content: stretch;
+      }
+      .collekt-cookie-actions button {
+        flex: 1;
+        justify-content: center;
+      }
+    }
   `;
-
-  document.body.appendChild(banner);
+  document.head.appendChild(style);
 }
 
-function acceptNdpaConsent() {
-  localStorage.setItem('collekt_ndpa_consent_accepted', 'true');
-  localStorage.setItem('collekt_ndpa_consent_timestamp', new Date().toISOString());
-  const banner = document.getElementById('ndpaConsentBanner');
-  if (banner) {
-    banner.style.transition = 'opacity 0.3s, transform 0.3s';
-    banner.style.opacity = '0';
-    banner.style.transform = 'translateY(20px)';
-    setTimeout(() => banner.remove(), 350);
+function initModernCookieBanner() {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
+  const consentSaved = localStorage.getItem('collekt_cookie_preferences_saved') === 'true' || 
+                       localStorage.getItem('collekt_cookie_consent_accepted') === 'true' || 
+                       localStorage.getItem('collekt_ndpa_consent_accepted') === 'true';
+  if (consentSaved) return;
+  if (document.getElementById('collektCookieBanner')) return;
+
+  const renderBanner = () => {
+    if (document.getElementById('collektCookieBanner')) return;
+    const isSaved = localStorage.getItem('collekt_cookie_preferences_saved') === 'true' || 
+                    localStorage.getItem('collekt_cookie_consent_accepted') === 'true' || 
+                    localStorage.getItem('collekt_ndpa_consent_accepted') === 'true';
+    if (isSaved) return;
+
+    injectCookieStyles();
+
+    const banner = document.createElement('div');
+    banner.id = 'collektCookieBanner';
+    banner.className = 'collekt-cookie-card';
+    banner.innerHTML = `
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:280px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+            <span style="font-size:20px; line-height:1;">🍪</span>
+            <strong style="font-size:14.5px; color:#ffffff; letter-spacing:.02em; font-weight:800;">
+              Cookie &amp; Privacy Preferences
+            </strong>
+            <span class="collekt-cookie-badge">NDPA 2023 Compliant</span>
+          </div>
+          <p style="font-size:12.5px; color:#cbd5e1; line-height:1.6; margin:0 0 6px 0;">
+            Collekt uses strictly essential security cookies for authentication and escrow integrity, plus optional cookies for Kolly AI contextual intelligence and platform telemetry under the <strong>Nigeria Data Protection Act (NDPA 2023)</strong>.
+          </p>
+          <div style="font-size:12px; color:#94a3b8;">
+            Learn more in our 
+            <a href="privacy.html" style="color:#2dd4bf; text-decoration:underline; font-weight:700;">Privacy Policy</a> &bull; 
+            <a href="terms.html" style="color:#2dd4bf; text-decoration:underline; font-weight:700;">Terms of Service</a> &bull; 
+            <a href="javascript:void(0)" onclick="openLegalQuickView('privacy')" style="color:#cbd5e1; text-decoration:underline; font-weight:700;">NDPA Summary</a>
+          </div>
+        </div>
+        <div class="collekt-cookie-actions" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:2px;">
+          <button onclick="openCookiePreferencesModal()" class="collekt-cookie-btn-customize" id="btnCookieCustomize">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            Customize
+          </button>
+          <button onclick="acceptAllCookies()" class="collekt-cookie-btn-accept" id="btnCookieAcceptAll">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Accept All
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(banner);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(renderBanner, 400));
+  } else {
+    setTimeout(renderBanner, 400);
   }
+}
+
+function dismissCookieBanner() {
+  const banner = document.getElementById('collektCookieBanner') || document.getElementById('ndpaConsentBanner');
+  if (banner) {
+    banner.style.animation = 'collektCookieFadeOut 0.35s ease forwards';
+    setTimeout(() => {
+      if (banner && banner.parentNode) {
+        banner.parentNode.removeChild(banner);
+      }
+    }, 360);
+  }
+}
+
+function showCookieToast(msg) {
+  const existing = document.getElementById('collektCookieToast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'collektCookieToast';
+  toast.className = 'collekt-cookie-toast';
+  toast.innerHTML = `<span style="font-size:16px;">✓</span> <span>${msg}</span>`;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    if (toast && toast.parentNode) toast.parentNode.removeChild(toast);
+  }, 2700);
+}
+
+function acceptAllCookies() {
+  localStorage.setItem('collekt_cookie_preferences_saved', 'true');
+  localStorage.setItem('collekt_cookie_consent_accepted', 'true');
+  localStorage.setItem('collekt_ndpa_consent_accepted', 'true');
+  localStorage.setItem('collekt_cookies_essential', 'true');
+  localStorage.setItem('collekt_cookies_ai', 'true');
+  localStorage.setItem('collekt_cookies_analytics', 'true');
+  localStorage.setItem('collekt_cookie_consent_timestamp', new Date().toISOString());
+
+  closeCookiePreferencesModal();
+  dismissCookieBanner();
+  showCookieToast('All cookies accepted & preferences saved.');
+}
+
+function openCookiePreferencesModal() {
+  injectCookieStyles();
+  let modal = document.getElementById('collektCookieModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'collektCookieModal';
+    modal.style.cssText = 'display:flex; position:fixed; inset:0; z-index:100002; background:rgba(3, 12, 11, 0.82); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); align-items:center; justify-content:center; padding:20px; animation:collektCookieSlideUp 0.3s ease;';
+    document.body.appendChild(modal);
+  }
+
+  const aiActive = localStorage.getItem('collekt_cookies_ai') !== 'false';
+  const analyticsActive = localStorage.getItem('collekt_cookies_analytics') !== 'false';
+
+  modal.innerHTML = `
+    <div style="max-width:580px; width:100%; max-height:90vh; overflow-y:auto; background:rgba(7, 24, 21, 0.95); backdrop-filter:blur(28px) saturate(200%); -webkit-backdrop-filter:blur(28px) saturate(200%); border:1.5px solid rgba(45, 212, 191, 0.32); border-radius:24px; padding:28px; box-shadow:0 32px 80px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.2); color:#f1f5f9; font-family:'Manrope', -apple-system, BlinkMacSystemFont, sans-serif; position:relative;">
+      
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:44px; height:44px; border-radius:12px; background:rgba(20,184,166,0.18); border:1px solid rgba(45,212,191,0.4); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;">
+            🍪
+          </div>
+          <div>
+            <h3 style="margin:0; font-size:18px; font-weight:800; color:#ffffff;">Cookie &amp; Tracking Preferences</h3>
+            <p style="margin:2px 0 0 0; font-size:12px; color:#94a3b8;">Nigeria Data Protection Act (NDPA 2023) Statutory Consent</p>
+          </div>
+        </div>
+        <button onclick="closeCookiePreferencesModal()" style="background:none; border:none; color:#94a3b8; font-size:26px; cursor:pointer; padding:2px 6px; border-radius:8px; line-height:1; transition:color 0.2s;" title="Close">&times;</button>
+      </div>
+
+      <div style="font-size:12.5px; color:#cbd5e1; line-height:1.6; margin-bottom:18px;">
+        Collekt provides transparent controls over data stored on your device. Essential security cookies are mandatory to safeguard escrow contracts and verify engineering identity.
+      </div>
+
+      <!-- Category 1: Strictly Essential (Locked) -->
+      <div class="collekt-pref-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <strong style="font-size:13.5px; color:#ffffff;">Strictly Essential &amp; Security</strong>
+            <span style="font-size:10.5px; font-weight:800; color:#2dd4bf; background:rgba(20,184,166,0.18); border:1px solid rgba(45,212,191,0.35); padding:2px 8px; border-radius:99px; text-transform:uppercase;">Always Active</span>
+          </div>
+          <label class="collekt-cookie-toggle">
+            <input type="checkbox" checked disabled>
+            <span class="collekt-cookie-slider"></span>
+          </label>
+        </div>
+        <p style="margin:0; font-size:12px; color:#94a3b8; line-height:1.55;">
+          Required for Supabase token auth, cryptographic session security, Paystack escrow verification, and database Row-Level Security (RLS). Cannot be disabled.
+        </p>
+      </div>
+
+      <!-- Category 2: Kolly AI & Memory -->
+      <div class="collekt-pref-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <strong style="font-size:13.5px; color:#ffffff;">Kolly AI &amp; Copilot Memory</strong>
+            <span style="font-size:10.5px; font-weight:700; color:#38bdf8; background:rgba(56,189,248,0.14); border:1px solid rgba(56,189,248,0.3); padding:2px 8px; border-radius:99px; text-transform:uppercase;">Recommended</span>
+          </div>
+          <label class="collekt-cookie-toggle">
+            <input type="checkbox" id="collektCookieToggleAi" ${aiActive ? 'checked' : ''}>
+            <span class="collekt-cookie-slider"></span>
+          </label>
+        </div>
+        <p style="margin:0; font-size:12px; color:#94a3b8; line-height:1.55;">
+          Caches active project RFP parameters, workspace context, and multi-turn prompt history for Google Gemini Pro AI matchmaking and engineering cost estimation.
+        </p>
+      </div>
+
+      <!-- Category 3: Performance & Platform Analytics -->
+      <div class="collekt-pref-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <strong style="font-size:13.5px; color:#ffffff;">Platform Telemetry &amp; Performance</strong>
+            <span style="font-size:10.5px; font-weight:700; color:#a78bfa; background:rgba(167,139,250,0.14); border:1px solid rgba(167,139,250,0.3); padding:2px 8px; border-radius:99px; text-transform:uppercase;">Analytics</span>
+          </div>
+          <label class="collekt-cookie-toggle">
+            <input type="checkbox" id="collektCookieToggleAnalytics" ${analyticsActive ? 'checked' : ''}>
+            <span class="collekt-cookie-slider"></span>
+          </label>
+        </div>
+        <p style="margin:0; font-size:12px; color:#94a3b8; line-height:1.55;">
+          Measures anonymized page load latencies and error diagnostics to optimize upload speeds and network resiliency across Nigerian ISP networks (MTN, Airtel, Glo, Starlink).
+        </p>
+      </div>
+
+      <!-- Footer Actions -->
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:20px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.12); flex-wrap:wrap;">
+        <a href="javascript:void(0)" onclick="rejectOptionalCookies()" style="font-size:12px; color:#94a3b8; text-decoration:underline; font-weight:600;">
+          Reject Non-Essential
+        </a>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <button onclick="saveCustomCookiePreferences()" class="collekt-cookie-btn-customize" style="padding:9px 18px; font-size:12.5px;">
+            Save Preferences
+          </button>
+          <button onclick="acceptAllCookies()" class="collekt-cookie-btn-accept" style="padding:9px 18px; font-size:12.5px;">
+            Accept All
+          </button>
+        </div>
+      </div>
+
+    </div>
+  `;
+  modal.style.display = 'flex';
+}
+
+function closeCookiePreferencesModal() {
+  const modal = document.getElementById('collektCookieModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+function saveCustomCookiePreferences() {
+  const toggleAi = document.getElementById('collektCookieToggleAi');
+  const toggleAnalytics = document.getElementById('collektCookieToggleAnalytics');
+  const aiVal = toggleAi ? toggleAi.checked : true;
+  const analyticsVal = toggleAnalytics ? toggleAnalytics.checked : true;
+
+  localStorage.setItem('collekt_cookie_preferences_saved', 'true');
+  localStorage.setItem('collekt_cookie_consent_accepted', 'true');
+  localStorage.setItem('collekt_ndpa_consent_accepted', 'true');
+  localStorage.setItem('collekt_cookies_essential', 'true');
+  localStorage.setItem('collekt_cookies_ai', String(aiVal));
+  localStorage.setItem('collekt_cookies_analytics', String(analyticsVal));
+  localStorage.setItem('collekt_cookie_consent_timestamp', new Date().toISOString());
+
+  closeCookiePreferencesModal();
+  dismissCookieBanner();
+  showCookieToast('Custom cookie preferences saved.');
+}
+
+function rejectOptionalCookies() {
+  localStorage.setItem('collekt_cookie_preferences_saved', 'true');
+  localStorage.setItem('collekt_cookie_consent_accepted', 'true');
+  localStorage.setItem('collekt_ndpa_consent_accepted', 'true');
+  localStorage.setItem('collekt_cookies_essential', 'true');
+  localStorage.setItem('collekt_cookies_ai', 'false');
+  localStorage.setItem('collekt_cookies_analytics', 'false');
+  localStorage.setItem('collekt_cookie_consent_timestamp', new Date().toISOString());
+
+  closeCookiePreferencesModal();
+  dismissCookieBanner();
+  showCookieToast('Only strictly essential cookies enabled.');
+}
+
+/* Backward compatibility aliases */
+function initNdpaConsentBanner() {
+  initModernCookieBanner();
+}
+function acceptNdpaConsent() {
+  acceptAllCookies();
 }
 
 function openLegalQuickView(type = 'terms') {
@@ -5268,4 +5682,12 @@ function openLegalQuickView(type = 'terms') {
 
 window.openLegalQuickView = openLegalQuickView;
 window.acceptNdpaConsent = acceptNdpaConsent;
+window.acceptAllCookies = acceptAllCookies;
+window.initModernCookieBanner = initModernCookieBanner;
+window.initNdpaConsentBanner = initNdpaConsentBanner;
+window.openCookiePreferencesModal = openCookiePreferencesModal;
+window.closeCookiePreferencesModal = closeCookiePreferencesModal;
+window.saveCustomCookiePreferences = saveCustomCookiePreferences;
+window.rejectOptionalCookies = rejectOptionalCookies;
+
 
