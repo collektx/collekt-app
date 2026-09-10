@@ -4421,6 +4421,7 @@ async function syncContractToSupabase(contractRecord) {
 
 document.addEventListener('DOMContentLoaded', () => {
   try { initKollyAiAssistant(); } catch(e){}
+  try { initNdpaConsentBanner(); } catch(e){}
 });
 
 function initKollyAiAssistant() {
@@ -5152,4 +5153,119 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(e){}
   }
 });
+
+/* ═════════════════════════════════════════════════════════
+   NIGERIAN DATA PROTECTION ACT (NDPA 2023) & STATUTORY CONSENT
+   ═════════════════════════════════════════════════════════ */
+function initNdpaConsentBanner() {
+  if (localStorage.getItem('collekt_ndpa_consent_accepted') === 'true') return;
+  if (document.getElementById('ndpaConsentBanner')) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'ndpaConsentBanner';
+  banner.style.cssText = 'position:fixed; bottom:20px; left:20px; right:20px; max-width:820px; margin:0 auto; z-index:99999; background:rgba(6, 21, 19, 0.94); border:1.5px solid rgba(20, 184, 166, 0.35); border-radius:18px; padding:18px 24px; box-shadow:0 20px 45px rgba(0,0,0,0.5); backdrop-filter:blur(16px); color:#e2efed; font-family:"Manrope",sans-serif; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; animation:fadeSlideUp 0.4s ease;';
+
+  banner.innerHTML = `
+    <div style="flex:1; min-width:280px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+        <span style="font-size:18px;">🛡️</span>
+        <strong style="font-size:13.5px; color:#fff; letter-spacing:.02em;">Nigeria Data Protection Act (NDPA 2023) &amp; Cookie Notice</strong>
+      </div>
+      <p style="font-size:12px; color:#94a3b8; line-height:1.55; margin:0;">
+        Collekt uses strictly essential security cookies and processes identity data in full compliance with the laws of the Federal Republic of Nigeria. By continuing to browse, you agree to our <a href="terms.html" style="color:#2dd4bf; font-weight:700; text-decoration:underline;">Terms of Service</a> and <a href="privacy.html" style="color:#2dd4bf; font-weight:700; text-decoration:underline;">Privacy Policy</a>.
+      </p>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <a href="javascript:void(0)" onclick="openLegalQuickView('terms')" style="font-size:12px; color:#cbd5e1; font-weight:700; text-decoration:none; padding:8px 14px; border:1px solid rgba(255,255,255,0.18); border-radius:10px;">Summary</a>
+      <button onclick="acceptNdpaConsent()" class="btn btn-primary btn-sm" style="background:linear-gradient(135deg, #0e3b35, #14b8a6); border:none; padding:9px 18px; font-weight:800; font-size:12.5px; border-radius:10px; color:#fff; cursor:pointer;">
+        Accept &amp; Proceed
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(banner);
+}
+
+function acceptNdpaConsent() {
+  localStorage.setItem('collekt_ndpa_consent_accepted', 'true');
+  localStorage.setItem('collekt_ndpa_consent_timestamp', new Date().toISOString());
+  const banner = document.getElementById('ndpaConsentBanner');
+  if (banner) {
+    banner.style.transition = 'opacity 0.3s, transform 0.3s';
+    banner.style.opacity = '0';
+    banner.style.transform = 'translateY(20px)';
+    setTimeout(() => banner.remove(), 350);
+  }
+}
+
+function openLegalQuickView(type = 'terms') {
+  let modal = document.getElementById('legalQuickViewModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'legalQuickViewModal';
+    modal.className = 'modal-overlay';
+    modal.style.cssText = 'display:flex; position:fixed; inset:0; z-index:100000; background:rgba(4,14,13,0.85); backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:20px;';
+    document.body.appendChild(modal);
+  }
+
+  const isTerms = (type === 'terms');
+  const title = isTerms ? 'Terms of Service Summary' : 'Privacy & NDPA 2023 Summary';
+  const tag = isTerms ? '⚖️ Nigerian Legal Framework' : '🛡️ Data Protection Notice';
+
+  const bodyContent = isTerms ? `
+    <div style="font-size:13px; line-height:1.7; color:var(--ink);">
+      <div style="background:rgba(20,184,166,0.1); border-left:3px solid var(--teal); padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:12.5px;">
+        <strong>Jurisdiction:</strong> Federal Republic of Nigeria &bull; CAMA 2020 &bull; Arbitration and Mediation Act 2023
+      </div>
+      <ul style="padding-left:18px; margin:0 0 16px 0;">
+        <li><strong>Intermediary Safe Harbor:</strong> Collekt Technologies Ltd is a technology venue and marketplace intermediary, not an employer, general contractor, or engineering firm.</li>
+        <li><strong>Milestone Escrow:</strong> Client funds are deposited via Paystack into protected escrow and released upon milestone review.</li>
+        <li><strong>Platform Fees:</strong> Standard $15/mo Pro, $50/mo Company, and 10% platform commission on completed project disbursements.</li>
+        <li><strong>Licensure Warranty:</strong> Engineers warrant valid COREN registration; companies warrant valid CAC incorporation under CAMA 2020.</li>
+        <li><strong>HSE Disclaimer:</strong> Collekt exercises no physical control over hazardous job sites; clients and contractors bear worksite safety duties.</li>
+        <li><strong>Limitation of Liability:</strong> Total liability is capped at platform commissions earned (max NGN 50,000).</li>
+        <li><strong>Dispute Resolution:</strong> Mandatory 3-tier resolution concluding in binding arbitration in Lagos State.</li>
+      </ul>
+      <div style="text-align:center; margin-top:16px;">
+        <a href="terms.html" target="_blank" class="btn btn-outline btn-sm" style="font-size:12px; font-weight:800; text-decoration:none;">Read Full Terms of Service (30KB) &rarr;</a>
+      </div>
+    </div>
+  ` : `
+    <div style="font-size:13px; line-height:1.7; color:var(--ink);">
+      <div style="background:rgba(20,184,166,0.1); border-left:3px solid var(--teal); padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:12.5px;">
+        <strong>Supervising Authority:</strong> Nigeria Data Protection Commission (NDPC) &bull; NDPA 2023
+      </div>
+      <ul style="padding-left:18px; margin:0 0 16px 0;">
+        <li><strong>Lawful Bases:</strong> We process data strictly under Consent, Contractual Necessity, and Nigerian Legal Obligations.</li>
+        <li><strong>Sensitive Verification Data:</strong> NIN, CAC certificates, and Director credentials submitted for Shield Verification are encrypted with AES-256 and checked against official databases (NIMC, CAC, FIRS).</li>
+        <li><strong>No Selling of Data:</strong> Your project bids, drawings, and contact details are never sold to external data brokers.</li>
+        <li><strong>Security &amp; RLS:</strong> PostgreSQL Row-Level Security ensures only authorized counterparties access your project files.</li>
+        <li><strong>Your Statutory Rights:</strong> You have the right to access, correct, export, or delete your personal data under the NDPA.</li>
+      </ul>
+      <div style="text-align:center; margin-top:16px;">
+        <a href="privacy.html" target="_blank" class="btn btn-outline btn-sm" style="font-size:12px; font-weight:800; text-decoration:none;">Read Full Privacy Policy &rarr;</a>
+      </div>
+    </div>
+  `;
+
+  modal.innerHTML = `
+    <div class="modal-card" style="max-width:540px; width:100%; border-radius:24px; padding:28px; background:var(--white); position:relative; font-family:'Manrope',sans-serif; max-height:90vh; overflow-y:auto;">
+      <button class="modal-close" onclick="document.getElementById('legalQuickViewModal').style.display='none'">&times;</button>
+      <div style="display:inline-block; font-size:11px; font-weight:800; color:var(--teal); background:rgba(20,184,166,0.12); padding:3px 10px; border-radius:99px; margin-bottom:8px; text-transform:uppercase;">
+        ${tag}
+      </div>
+      <div style="font-size:20px; font-weight:900; color:var(--ink); margin-bottom:16px;">${title}</div>
+      ${bodyContent}
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--line); display:flex; justify-content:flex-end;">
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('legalQuickViewModal').style.display='none'" style="font-weight:800; min-height:36px; padding:0 20px;">
+          I Understand
+        </button>
+      </div>
+    </div>
+  `;
+  modal.style.display = 'flex';
+}
+
+window.openLegalQuickView = openLegalQuickView;
+window.acceptNdpaConsent = acceptNdpaConsent;
 

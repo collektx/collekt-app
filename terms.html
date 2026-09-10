@@ -7,31 +7,45 @@
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="shortcut icon" href="favicon.ico">
-<title>Terms of Service &mdash; Collekt</title>
-<meta name="description" content="Terms of Service for Collekt Technologies Ltd. Learn about platform rules, escrow commitments, and user agreements.">
+<title>Terms of Service &mdash; Collekt Technologies Ltd</title>
+<meta name="description" content="Official Terms of Service for Collekt Technologies Ltd. Governing platform use, escrow commitments, Nigerian legal compliance, limitation of liability, and dispute resolution.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=23.0">
-<link rel="stylesheet" href="shared.css?v=23.0">
-<link rel="stylesheet" href="glass.css?v=23.0">
+<link rel="stylesheet" href="style.css?v=35.0">
+<link rel="stylesheet" href="shared.css?v=35.0">
+<link rel="stylesheet" href="glass.css?v=35.0">
 
 <style>
+  :root {
+    --law-paper: #051412;
+    --law-card: rgba(14, 59, 53, 0.28);
+    --law-line: rgba(255, 255, 255, 0.09);
+    --law-ink: #e2efed;
+    --law-muted: #94a3b8;
+    --law-accent: #14b8a6;
+    --law-gold: #f59e0b;
+  }
   body {
-    background: var(--paper, #061513);
-    color: var(--ink, #e2efed);
+    background: var(--paper, var(--law-paper));
+    color: var(--ink, var(--law-ink));
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    line-height: 1.7;
+    line-height: 1.8;
     margin: 0;
     padding: 0;
+    -webkit-font-smoothing: antialiased;
   }
   .policy-header {
-    background: linear-gradient(160deg, #040f0e 0%, #0a201d 50%, #071512 100%);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    padding: 24px 24px;
+    background: linear-gradient(160deg, #030c0b 0%, #0a201d 50%, #061513 100%);
+    border-bottom: 1px solid var(--law-line);
+    padding: 20px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
   }
   .header-nav {
-    max-width: 960px;
+    max-width: 1040px;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -52,20 +66,20 @@
     object-fit: contain;
   }
   .policy-container {
-    max-width: 900px;
+    max-width: 1040px;
     margin: 0 auto;
-    padding: 48px 24px 80px;
+    padding: 40px 24px 100px;
   }
   .policy-card {
-    background: rgba(14, 59, 53, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
-    padding: 42px 40px;
-    backdrop-filter: blur(16px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+    background: var(--law-card);
+    border: 1px solid var(--law-line);
+    border-radius: 24px;
+    padding: 48px 44px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
   }
-  @media (max-width: 640px) {
-    .policy-card { padding: 28px 20px; }
+  @media (max-width: 680px) {
+    .policy-card { padding: 28px 18px; border-radius: 16px; }
   }
   .badge-tag {
     display: inline-flex;
@@ -73,60 +87,132 @@
     gap: 6px;
     padding: 6px 14px;
     border-radius: 99px;
-    background: rgba(212,146,11,0.25);
+    background: rgba(212,146,11,0.22);
     border: 1px solid rgba(212,146,11,0.45);
-    color: #f59e0b;
-    font-size: 12px;
+    color: #fbbf24;
+    font-size: 11.5px;
     font-weight: 800;
-    margin-bottom: 18px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
   }
   h1 {
     font-size: 34px;
     font-weight: 900;
     color: #fff;
     margin: 0 0 10px 0;
+    letter-spacing: -0.02em;
     line-height: 1.25;
   }
   .last-updated {
     font-size: 13px;
-    color: #94a3b8;
-    margin-bottom: 36px;
+    color: var(--law-muted);
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--law-line);
   }
-  h2 {
-    font-size: 20px;
+  .statutory-notice-box {
+    background: rgba(19, 117, 111, 0.15);
+    border-left: 4px solid var(--law-accent);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin: 24px 0 36px 0;
+    font-size: 13.5px;
+    color: #ccfbf1;
+    line-height: 1.65;
+  }
+  .toc-box {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid var(--law-line);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 40px;
+  }
+  .toc-title {
+    font-size: 14px;
     font-weight: 800;
     color: #fff;
-    margin-top: 36px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
     margin-bottom: 14px;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 8px 20px;
+  }
+  .toc-link {
+    font-size: 13px;
+    color: #93c5fd;
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .toc-link:hover {
+    color: #67e8f9;
+    text-decoration: underline;
+  }
+  h2 {
+    font-size: 21px;
+    font-weight: 900;
+    color: #fff;
+    margin-top: 44px;
+    margin-bottom: 16px;
     padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid var(--law-line);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h3 {
+    font-size: 16px;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin-top: 24px;
+    margin-bottom: 10px;
   }
   p, li {
     font-size: 14.5px;
     color: #cbd5e1;
-    line-height: 1.75;
+    line-height: 1.8;
   }
-  ul {
-    padding-left: 22px;
-    margin: 12px 0;
+  ul, ol {
+    padding-left: 24px;
+    margin: 14px 0;
   }
   li {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
-  a {
-    color: #38bdf8;
-    text-decoration: underline;
+  strong {
+    color: #fff;
   }
-  a:hover {
-    color: #7dd3fc;
+  .callout-shield {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 13.5px;
+    color: #fde68a;
   }
   .footer-meta {
-    margin-top: 48px;
-    padding-top: 24px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-    font-size: 12.5px;
-    color: #64748b;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--law-line);
+    font-size: 13px;
+    color: var(--law-muted);
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  .footer-meta a {
+    color: var(--law-accent);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .footer-meta a:hover {
+    text-decoration: underline;
   }
 </style>
 </head>
@@ -138,51 +224,255 @@
       <img src="logo-stone.png" alt="Collekt Logo" onerror="this.src='logo-stone.jpg'">
       <span>Collekt</span>
     </a>
-    <div>
-      <a href="index.html" style="color:#fff; font-size:13px; font-weight:700; text-decoration:none; margin-right:16px;">&larr; Back to Home</a>
-      <a href="login.html" style="font-size:12.5px; padding:6px 14px; border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; text-decoration:none;">Log In</a>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <a href="index.html" style="color:#fff; font-size:13px; font-weight:700; text-decoration:none;">&larr; Back to Home</a>
+      <a href="login.html" class="btn btn-outline btn-sm" style="color:#fff; border-color:rgba(255,255,255,0.25); text-decoration:none;">Log In / Register</a>
     </div>
   </div>
 </header>
 
 <main class="policy-container">
   <div class="policy-card">
-    <div class="badge-tag">📋 User Agreement</div>
+    <div class="badge-tag">&#9878;&#65039; Legal Contract &bull; Federal Republic of Nigeria</div>
     <h1>Terms of Service</h1>
-    <div class="last-updated">Last Updated: September 8, 2026 &bull; Effective Immediately</div>
+    <div class="last-updated">
+      <strong>Effective Date:</strong> September 10, 2026 &bull; <strong>Governing Jurisdiction:</strong> Federal Republic of Nigeria &bull; <strong>Version:</strong> 2026.1
+    </div>
 
-    <p>These Terms of Service ("Terms") govern your access to and use of the <strong>Collekt</strong> platform (<a href="https://collektng.xyz">https://collektng.xyz</a>), operated by <strong>Collekt Technologies Ltd</strong> ("we", "our", or "us").</p>
+    <div class="statutory-notice-box">
+      <strong>IMPORTANT STATUTORY NOTICE:</strong><br>
+      Please read these Terms of Service carefully before accessing or using Collekt (<a href="https://collektng.xyz" style="color:#2dd4bf; text-decoration:underline;">https://collektng.xyz</a>). By registering an account, logging in via email, OTP, or Google OAuth, posting tenders, bidding on projects, or transferring funds into escrow, you confirm that you have read, understood, and agreed to be legally bound by these Terms and our <a href="privacy.html" style="color:#2dd4bf; text-decoration:underline;">Privacy Policy</a> pursuant to the <strong>Evidence Act 2011 (Section 84)</strong> and the <strong>Nigeria Data Protection Act (NDPA) 2023</strong>. If you do not agree, you must immediately cease all use of the platform.
+    </div>
 
-    <h2>1. Acceptance of Terms</h2>
-    <p>By registering, logging in via email or Google OAuth, or using the Collekt platform, you agree to be bound by these Terms and our Privacy Policy. If you do not agree to these Terms, do not use the platform.</p>
+    <!-- Table of Contents -->
+    <div class="toc-box">
+      <div class="toc-title">Summary Table of Contents</div>
+      <div class="toc-grid">
+        <a class="toc-link" href="#sec-1">1. Parties &amp; Definitions</a>
+        <a class="toc-link" href="#sec-2">2. Eligibility &amp; Corporate Capacity</a>
+        <a class="toc-link" href="#sec-3">3. Marketplace Intermediary Safe Harbor</a>
+        <a class="toc-link" href="#sec-4">4. Licensure (COREN &amp; NOGICD)</a>
+        <a class="toc-link" href="#sec-5">5. Identity &amp; Shield Verification</a>
+        <a class="toc-link" href="#sec-6">6. Tenders, Projects &amp; Bidding</a>
+        <a class="toc-link" href="#sec-7">7. Escrow, Fees &amp; Payments</a>
+        <a class="toc-link" href="#sec-8">8. Kolly AI Safe Harbor &amp; Disclaimers</a>
+        <a class="toc-link" href="#sec-9">9. Health, Safety &amp; Environment (HSE)</a>
+        <a class="toc-link" href="#sec-10">10. Strict Limitation of Liability</a>
+        <a class="toc-link" href="#sec-11">11. User Indemnification</a>
+        <a class="toc-link" href="#sec-12">12. Intellectual Property &amp; Deliverables</a>
+        <a class="toc-link" href="#sec-13">13. Prohibited Conduct (Cybercrimes Act)</a>
+        <a class="toc-link" href="#sec-14">14. Account Sanctions &amp; Termination</a>
+        <a class="toc-link" href="#sec-15">15. Dispute Resolution &amp; Arbitration</a>
+        <a class="toc-link" href="#sec-16">16. Governing Law &amp; General Provisions</a>
+      </div>
+    </div>
 
-    <h2>2. Eligibility &amp; Accounts</h2>
+    <!-- Section 1 -->
+    <h2 id="sec-1">1. Parties &amp; Definitions</h2>
+    <p>These Terms of Service ("<strong>Terms</strong>" or "<strong>Agreement</strong>") constitute a legally binding electronic agreement entered into by and between:</p>
     <ul>
-      <li>You must be at least 18 years old or legally registered as an enterprise in Nigeria to create an account.</li>
-      <li>You agree to provide accurate, current, and complete corporate or professional identification information.</li>
-      <li>You are responsible for maintaining the security of your account credentials.</li>
+      <li><strong>Collekt Technologies Ltd</strong> ("<strong>Collekt</strong>", "<strong>we</strong>", "<strong>us</strong>", or "<strong>our</strong>"), an incorporated technology marketplace operator registered in the Federal Republic of Nigeria; and</li>
+      <li><strong>You</strong> ("<strong>User</strong>", "<strong>you</strong>", or "<strong>your</strong>"), whether acting individually as a specialized engineering professional ("<strong>Professional</strong>") or on behalf of a corporate enterprise, energy operator, or engineering contractor ("<strong>Corporate Client</strong>").</li>
+    </ul>
+    <p><strong>Defined Terms:</strong></p>
+    <ul>
+      <li>"<strong>Platform</strong>": The digital website, applications, APIs, serverless gateways, and mobile interfaces hosted at collektng.xyz, collekt.xyz, and affiliated subdomains.</li>
+      <li>"<strong>Project / Tender / RFP</strong>": Any scope of work, technical engagement, consulting contract, or EPC procurement posted on the Platform.</li>
+      <li>"<strong>Escrow Account</strong>": The secured custody arrangement powered by Paystack Payments Limited and licensed Nigerian commercial/settlement banking partners (including Wema Bank, Sterling Bank, and Nova Bank) wherein project funds are safeguarded until verified milestone sign-off.</li>
+      <li>"<strong>Kolly AI</strong>": The proprietary generative AI mascot, matching copilot, and tender drafting engine operating on the Platform, powered by large language models including Google Gemini.</li>
+      <li>"<strong>Shield Verification</strong>": The verification trust credential awarded to accounts whose corporate credentials (CAC, TIN) or professional identity (NIN, COREN registration) have undergone validation.</li>
     </ul>
 
-    <h2>3. Marketplace &amp; Escrow Payments</h2>
+    <!-- Section 2 -->
+    <h2 id="sec-2">2. Eligibility &amp; Corporate Capacity</h2>
+    <p>By registering or using the Platform, you represent and warrant that:</p>
+    <ol>
+      <li><strong>Individual Capacity:</strong> You are at least eighteen (18) years of age, mentally competent, and fully capable of entering into legally enforceable contracts under Nigerian law.</li>
+      <li><strong>Corporate Capacity:</strong> If registering on behalf of a corporate entity, you are a duly registered business under the <strong>Companies and Allied Matters Act (CAMA) 2020</strong>, and you hold legitimate legal authority to bind that entity to financial, legal, and operational commitments.</li>
+      <li><strong>Sanctions &amp; Disqualifications:</strong> You are not listed on any Nigerian economic sanctions list (including the Nigerian Financial Intelligence Unit &ndash; NFIU list), EFCC debarment lists, or international anti-money laundering (AML/CFT) blacklists.</li>
+    </ol>
+
+    <!-- Section 3 -->
+    <h2 id="sec-3">3. Marketplace Intermediary Safe Harbor</h2>
+    <div class="callout-shield">
+      <strong>CRITICAL CLARIFICATION OF LEGAL STATUS:</strong><br>
+      Collekt Technologies Ltd operates strictly as a neutral technology marketplace, software venue, and escrow intermediary. Collekt is NOT an engineering contractor, EPC firm, joint venture partner, general contractor, direct employer, employment agency, or insurer.
+    </div>
+    <p>Users expressly acknowledge and agree to the following operational boundaries:</p>
     <ul>
-      <li><strong>Tenders and Proposals:</strong> Collekt facilitates project bidding and matching between engineering specialists and corporate enterprises.</li>
-      <li><strong>Milestone Escrow:</strong> Client funds are deposited securely into escrow via Paystack and released upon milestone completion approval.</li>
-      <li><strong>Platform Fees:</strong> Collekt retains a standard service fee on completed contract disbursements as outlined in the project agreement.</li>
+      <li><strong>Independent Contracting Status:</strong> Professionals are independent freelance contractors. No employment, agency, joint venture, or partnership relationship is created between Collekt and any Professional or Client by virtue of using the Platform.</li>
+      <li><strong>Direct Contractual Relationship:</strong> When a Corporate Client awards a tender or milestone engagement to a Professional, the contractual engagement for technical services is executed directly between the Corporate Client and the Professional. Collekt is not a party to the underlying project contract.</li>
+      <li><strong>No Quality Guarantee by Intermediary:</strong> While Collekt implements Shield Verification, background audits, and AI matching, Collekt does not personally supervise field execution, verify structural engineering math, inspect physical worksites, or guarantee the perfection of deliverables.</li>
+      <li><strong>Tax Responsibilities:</strong> Each User is exclusively responsible for declaring and remitting their statutory taxes, including Withholding Tax (WHT), Value Added Tax (VAT), Pay-As-You-Earn (PAYE), and Company Income Tax (CIT) to the Federal Inland Revenue Service (FIRS) and respective State Internal Revenue Services (SIRS).</li>
     </ul>
 
-    <h2>4. Prohibited Conduct</h2>
-    <p>Users may not submit false credentials, fraudulent verification numbers (CAC, TIN, NIN), post unauthorized opportunities, or attempt to circumvent platform security.</p>
+    <!-- Section 4 -->
+    <h2 id="sec-4">4. Professional Licensure &amp; Regulatory Compliance (COREN &amp; NOGICD)</h2>
+    <p>Given Collekt's specialized focus on oil &amp; gas, energy, infrastructure, and engineering:</p>
+    <ul>
+      <li><strong>COREN Act Adherence:</strong> Pursuant to the <strong>Engineers (Registration, etc.) Act (Amended 2018)</strong>, any Professional offering certified engineering designs, structural approvals, HAZOP verifications, or sign-offs must hold active licensure with the Council for the Regulation of Engineering in Nigeria (COREN). You warrant that any COREN, NSE, or NUPRC registration details provided on your profile are authentic, current, and valid.</li>
+      <li><strong>Nigerian Oil &amp; Gas Industry Content Development (NOGICD) Act 2010:</strong> Corporate Clients and Professionals engaging in upstream, midstream, or downstream petroleum tenders warrant adherence to the local content requirements established under the NOGICD Act 2010.</li>
+      <li><strong>Misrepresentation of Licensure:</strong> Uploading falsified engineering stamps, revoked licenses, or fraudulent corporate incorporation credentials constitutes criminal misrepresentation and fraud, resulting in immediate account freezing and referral to the Nigerian Police Force and EFCC.</li>
+    </ul>
 
-    <h2>5. Governing Law</h2>
-    <p>These Terms shall be governed by and construed in accordance with the laws of the Federal Republic of Nigeria.</p>
+    <!-- Section 5 -->
+    <h2 id="sec-5">5. Identity, CAC &amp; Shield Verification</h2>
+    <p>Collekt maintains the highest standard of corporate and identity integrity across Nigeria:</p>
+    <ul>
+      <li><strong>Submission of Sensitive KYC Records:</strong> In accordance with the <strong>Nigeria Data Protection Act (NDPA) 2023</strong>, when you submit your National Identification Number (NIN), Tax Identification Number (TIN), CAC Registration Certificate, or Director identification, you provide explicit, informed consent for Collekt Technologies Ltd and its certified verification partners to confirm these records against official databases (NIMC, CAC, FIRS, and NIBSS).</li>
+      <li><strong>Shield Verification Marks:</strong> The Shield Verification Badge (&#128737;&#65039;) signifies that administrative identity matching has occurred. It is not an absolute warranty of character, performance, or financial solvency.</li>
+      <li><strong>Credential Security:</strong> You are solely responsible for maintaining the confidentiality of your credentials, OTPs, and API tokens. You must immediately notify <a href="mailto:collektng@gmail.com" style="color:#2dd4bf;">collektng@gmail.com</a> if you suspect unauthorized access.</li>
+    </ul>
 
-    <h2>6. Contact</h2>
-    <p>For legal inquiries, contact Collekt Technologies Ltd at <a href="mailto:collektng@gmail.com">collektng@gmail.com</a>.</p>
+    <!-- Section 6 -->
+    <h2 id="sec-6">6. Project Postings, Tenders &amp; Bidding Standards</h2>
+    <ol>
+      <li><strong>Accurate Project Scopes:</strong> Corporate Clients agree that all posted tenders, RFPs, and short-term engineering opportunities represent bona fide commercial requirements with allocated budgets. Posting fake tenders or speculative listings to harvest market intelligence is strictly prohibited.</li>
+      <li><strong>Professional Bidding:</strong> Specialists agree that technical proposals, cover letters, and fee schedules submitted represent genuine commitments to execute work within the proposed timelines.</li>
+      <li><strong>Non-Circumvention Rule:</strong> For any relationship initiated on Collekt, Users agree not to take payments, negotiate contracts, or conduct project disbursements off-platform for a minimum period of twenty-four (24) months from initial contact, unless an explicit buy-out fee is authorized in writing by Collekt Technologies Ltd.</li>
+    </ol>
+
+    <!-- Section 7 -->
+    <h2 id="sec-7">7. Escrow Payments, Milestone Approvals &amp; Platform Fees</h2>
+    <p>Collekt provides guaranteed milestone escrow protection to ensure fair execution for both parties:</p>
+    <ul>
+      <li><strong>Milestone Funding:</strong> Prior to work initiation, Corporate Clients deposit the agreed milestone funds into escrow via Paystack rails or dedicated virtual NUBAN settlement accounts. Funds remain in escrow custody until work is reviewed.</li>
+      <li><strong>Milestone Sign-Off:</strong> Once the Professional completes deliverables, the Corporate Client has seven (7) business days to review and either approve release or request technical revisions based on the agreed project scope. Failure to respond within fourteen (14) days without raising a formal dispute authorizes Collekt to release escrowed milestone funds to the Professional.</li>
+      <li><strong>Platform Fee Schedule (PRD Standard):</strong>
+        <ul>
+          <li><strong>Professional Plus Membership:</strong> $15 (or NGN equivalent) per month.</li>
+          <li><strong>Company Enterprise Membership:</strong> $50 (or NGN equivalent) per month.</li>
+          <li><strong>Platform Commission:</strong> Collekt deducts a 10% platform service commission on completed contract disbursements to maintain marketplace security, escrow custody, and AI matching infrastructure.</li>
+        </ul>
+      </li>
+      <li><strong>Chargebacks &amp; Payment Disputes:</strong> Attempting fraudulent bank reversals or unauthorized chargebacks on funded escrow milestones constitutes a material breach of this Agreement and may lead to debt recovery actions, credit bureau reporting, and legal proceedings under the <strong>Dishonoured Cheques (Offences) Act</strong> and relevant commercial statutes.</li>
+    </ul>
+
+    <!-- Section 8 -->
+    <h2 id="sec-8">8. Kolly AI Mascot &amp; Generative Intelligence Safe Harbor</h2>
+    <div class="callout-shield">
+      <strong>AI ADVISORY SAFE HARBOR:</strong><br>
+      Kolly AI (infused with Google Gemini) provides automated candidate matching, RFP scope drafting, proposal pitch generation, and conversational guidance. All AI outputs are informational tools and do NOT substitute for human professional engineering calculations or legal advice.
+    </div>
+    <p>Regarding all AI-assisted features on Collekt:</p>
+    <ul>
+      <li><strong>No Engineering Warranty:</strong> AI-generated scopes, tender specs, or deliverables drafted by Kolly AI are preliminary starting templates. The Corporate Client and Professional bear absolute responsibility for reviewing, modifying, and ensuring all engineering formulas, P&amp;ID schematics, and safety specifications comply with applicable statutory codes.</li>
+      <li><strong>Algorithmic Compatibility Scores:</strong> Compatibility percentages (e.g. 96% Match) are generated via heuristic keyword analysis, skill matching, and profile factors. Collekt does not guarantee that a high AI match score guarantees project success.</li>
+      <li><strong>AI Input Privacy:</strong> Collekt does not sell your private engineering schematics or confidential project bids to third parties for external model training without your explicit consent.</li>
+    </ul>
+
+    <!-- Section 9 -->
+    <h2 id="sec-9">9. Workplace Health, Safety &amp; Environment (HSE) Disclaimers</h2>
+    <p>Industrial, oilfield, and construction projects carry inherent physical hazards:</p>
+    <ul>
+      <li><strong>Zero Operational Control:</strong> Collekt exercises no physical control, direction, or oversight over job sites, fabrication yards, offshore rigs, pipelines, subsea vessels, or manufacturing facilities.</li>
+      <li><strong>HSE Compliance:</strong> Corporate Clients must provide safe working conditions compliant with Nigerian Factories Act, NUPRC HSE directives, and Federal Ministry of Labour standards. Professionals must hold valid safety certifications (e.g. BOSIET, HUET, OSP) for hazardous deployments.</li>
+      <li><strong>Disclaimer of Physical Injury:</strong> Collekt disclaims all liability for physical injuries, fatalities, occupational diseases, rig blowouts, hydrocarbon explosions, marine spills, or environmental contamination occurring during project execution. Users must maintain adequate commercial general liability and workers' compensation insurance policies.</li>
+    </ul>
+
+    <!-- Section 10 -->
+    <h2 id="sec-10">10. Strict Limitation of Liability</h2>
+    <p><strong>TO THE MAXIMUM EXTENT PERMITTED BY THE LAWS OF THE FEDERAL REPUBLIC OF NIGERIA:</strong></p>
+    <ol>
+      <li>IN NO EVENT SHALL COLLEKT TECHNOLOGIES LTD, ITS DIRECTORS, SHAREHOLDERS, EMPLOYEES, AGENTS, OR AFFILIATES BE LIABLE FOR ANY INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, PUNITIVE, OR EXEMPLARY DAMAGES WHATSOEVER, INCLUDING LOSS OF PROFITS, LOSS OF REVENUE, LOSS OF DATA, LOSS OF COMMERCIAL REPUTATION, WORK STOPPAGE, OR EQUIPMENT DAMAGE.</li>
+      <li>COLLEKT'S MAXIMUM AGGREGATE LIABILITY ARISING OUT OF OR IN CONNECTION WITH THESE TERMS, THE PLATFORM, OR ANY TRANSACTION CONDUCTED HEREIN SHALL BE STRICTLY LIMITED TO THE LESSER OF:
+        <ul>
+          <li>THE TOTAL PLATFORM SERVICE COMMISSION ACTUALLY RECEIVED BY COLLEKT FROM YOUR COMPLETED ENGAGEMENTS IN THE SIX (6) MONTHS PRECEDING THE CLAIM; OR</li>
+          <li>FIFTY THOUSAND NIGERIAN NAIRA (NGN 50,000.00) OR ITS US DOLLAR EQUIVALENT.</li>
+        </ul>
+      </li>
+    </ol>
+
+    <!-- Section 11 -->
+    <h2 id="sec-11">11. User Indemnification</h2>
+    <p>You agree to defend, indemnify, and hold harmless Collekt Technologies Ltd, its officers, directors, employees, subsidiaries, and agents from and against all claims, liabilities, damages, judgments, losses, costs, and legal expenses (including reasonable attorneys' fees) arising out of or related to:</p>
+    <ul>
+      <li>Your breach of any provision of these Terms or our Privacy Policy;</li>
+      <li>Any deliverables, engineering designs, or consulting services provided by you;</li>
+      <li>Your violation of any third-party intellectual property, privacy, or statutory rights;</li>
+      <li>Your failure to declare or remit required taxes to Nigerian revenue authorities;</li>
+      <li>Any fraud, intentional misconduct, or gross negligence committed by you or your agents.</li>
+    </ul>
+
+    <!-- Section 12 -->
+    <h2 id="sec-12">12. Intellectual Property Rights</h2>
+    <ul>
+      <li><strong>Collekt Platform IP:</strong> The Collekt trademark, brand logo, software code, UI design, mascot (Kolly 🦖), glassmorphism components, and matching algorithms are the exclusive intellectual property of Collekt Technologies Ltd and protected under Nigerian and international copyright treaties.</li>
+      <li><strong>Project Deliverables:</strong> Upon full and final release of milestone escrow payment to the Professional, all agreed intellectual property, CAD drawings, engineering reports, and custom project deliverables vest in the Corporate Client, subject to any pre-existing proprietary tools retained by the Professional.</li>
+      <li><strong>License to Host Content:</strong> You grant Collekt a non-exclusive, royalty-free, worldwide license to host, display, and process your uploaded portfolio items, certifications, and project descriptions for the purpose of operating the marketplace and facilitating matches.</li>
+    </ul>
+
+    <!-- Section 13 -->
+    <h2 id="sec-13">13. Prohibited Conduct &amp; Cybercrimes Compliance</h2>
+    <p>Pursuant to the <strong>Cybercrimes (Prohibition, Prevention, etc.) Act 2015</strong> and its 2024 Amendments, Users shall NOT:</p>
+    <ul>
+      <li>Use stolen identity documents, fictitious CAC company registrations, or forged NIN credentials;</li>
+      <li>Attempt to decompile, reverse-engineer, inject SQL injections, or breach Platform security;</li>
+      <li>Deploy unauthorized scrapers, bots, or data harvesting scripts;</li>
+      <li>Solicit off-platform wire transfers or engage in money laundering schemes;</li>
+      <li>Publish defamatory, fraudulent, obscene, or legally actionable statements in project reviews or public discussions.</li>
+    </ul>
+
+    <!-- Section 14 -->
+    <h2 id="sec-14">14. Account Sanctions, Suspension &amp; Termination</h2>
+    <p>Collekt reserves the absolute right, without liability or prior notice where emergency intervention is required, to:</p>
+    <ul>
+      <li>Immediately freeze escrow balances pending investigation of suspected fraud;</li>
+      <li>Revoke Shield Verification credentials where documentation fails ongoing audit;</li>
+      <li>Suspend or terminate accounts engaged in off-platform fee circumvention or abusive behavior;</li>
+      <li>Cooperate fully with Nigerian law enforcement authorities, including providing digital logs and transaction evidence pursuant to a lawful court order or subpoena.</li>
+    </ul>
+
+    <!-- Section 15 -->
+    <h2 id="sec-15">15. Dispute Resolution &amp; Binding Arbitration</h2>
+    <p>To provide a swift, professional, and cost-effective forum for resolving disputes, all controversies between Users, or between any User and Collekt, shall be resolved through this mandatory three-tier framework:</p>
+    <ol>
+      <li><strong>Tier 1: Informal Good-Faith Negotiation:</strong> The aggrieved party shall deliver written notice to the other party and Collekt (<a href="mailto:collektng@gmail.com" style="color:#2dd4bf;">collektng@gmail.com</a>). The parties shall engage in good-faith amicable negotiation for a minimum of fourteen (14) calendar days.</li>
+      <li><strong>Tier 2: Collekt Escrow Mediation:</strong> If negotiation fails, Collekt shall review submitted project briefs, chat logs, and deliverables, providing a non-binding mediator's proposal within ten (10) business days.</li>
+      <li><strong>Tier 3: Final Binding Arbitration:</strong> If the dispute remains unresolved, it shall be referred to and finally determined by binding commercial arbitration in accordance with the <strong>Arbitration and Mediation Act 2023</strong> of the Federal Republic of Nigeria:
+        <ul>
+          <li><strong>Seat &amp; Venue:</strong> Lagos State, Nigeria.</li>
+          <li><strong>Tribunal:</strong> A single arbitrator agreed upon by the parties (or appointed by the Lagos Court of Arbitration in default of agreement).</li>
+          <li><strong>Language:</strong> English.</li>
+          <li><strong>Finality:</strong> The arbitral award shall be final, conclusive, and enforceable in any court of competent jurisdiction in Nigeria. Neither party may institute judicial proceedings without first exhausting this arbitration requirement.</li>
+        </ul>
+      </li>
+    </ol>
+
+    <!-- Section 16 -->
+    <h2 id="sec-16">16. Governing Law &amp; General Provisions</h2>
+    <ul>
+      <li><strong>Governing Law:</strong> These Terms shall be governed by, interpreted, and construed in accordance with the laws of the <strong>Federal Republic of Nigeria</strong>.</li>
+      <li><strong>Severability:</strong> If any provision of these Terms is found to be invalid or unenforceable by an arbitral tribunal or court of competent jurisdiction, the remaining provisions shall remain in full force and effect.</li>
+      <li><strong>Entire Agreement:</strong> These Terms, alongside the Privacy Policy and any executed project milestone agreement, constitute the complete agreement between you and Collekt Technologies Ltd regarding platform access.</li>
+      <li><strong>Amendments:</strong> We may update these Terms from time to time. When updates occur, the "Last Updated" timestamp will be revised, and continued use of the platform after revision constitutes acceptance of the modified Terms.</li>
+    </ul>
+
+    <!-- Section 17 -->
+    <h2>17. Contact &amp; Legal Notices</h2>
+    <p>All legal inquiries, notices, and communications should be directed to:</p>
+    <div style="background:rgba(0,0,0,0.3); border:1px solid var(--law-line); border-radius:14px; padding:20px; font-size:14px; line-height:1.7;">
+      <strong>Collekt Technologies Ltd</strong><br>
+      Legal &amp; Regulatory Compliance Directorate<br>
+      Lagos &bull; Abuja &bull; Port Harcourt, Nigeria<br>
+      <strong>Email:</strong> <a href="mailto:collektng@gmail.com" style="color:#2dd4bf; text-decoration:underline;">collektng@gmail.com</a><br>
+      <strong>Website:</strong> <a href="https://collektng.xyz" style="color:#2dd4bf; text-decoration:underline;">https://collektng.xyz</a>
+    </div>
 
     <div class="footer-meta">
-      &copy; 2026 Collekt Technologies Ltd. All rights reserved. &bull; <a href="privacy.html">Privacy Policy</a>
+      <div>&copy; 2026 Collekt Technologies Ltd. All rights reserved across the Federal Republic of Nigeria &amp; globally.</div>
+      <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center;">
+        <a href="terms.html">Terms of Service</a>
+        &bull;
+        <a href="privacy.html">Privacy Policy (NDPA 2023)</a>
+        &bull;
+        <a href="index.html">Collekt Home</a>
+        &bull;
+        <a href="marketplace.html">Marketplace</a>
+      </div>
     </div>
-  </div>
+
+  </div><!-- /.policy-card -->
 </main>
 
 </body>

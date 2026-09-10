@@ -432,6 +432,10 @@
         </div>
         <div class="upload-status-text" id="uploadStatusText"></div>
       </div>
+      <div style="margin-top:14px; padding:10px 12px; background:rgba(20,184,166,0.08); border:1px solid rgba(20,184,166,0.25); border-radius:10px; font-size:11px; color:var(--teal, #14b8a6); line-height:1.4; display:flex; align-items:center; gap:8px;">
+        <span>🛡️</span>
+        <span><strong>NDPA 2023 Statutory Protection:</strong> Your uploaded documents are encrypted with AES-256 and processed solely for lawful platform verification and project matching.</span>
+      </div>
     `;
   }
 
