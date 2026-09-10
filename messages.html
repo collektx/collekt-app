@@ -870,7 +870,40 @@
 
     if (convs.length === 0) {
       const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
-      const others = allUsers.filter(u => u && me && (!me.id || u.id !== me.id) && (!me.email || u.email !== me.email));
+      const seen = new Set();
+      const others = [];
+
+      allUsers.forEach(u => {
+        if (!u || !me) return;
+        if (me.id && u.id === me.id) return;
+        if (me.email && u.email && u.email.toLowerCase() === me.email.toLowerCase()) return;
+
+        const emailKey = (u.email || '').toLowerCase().trim();
+        const idKey = (u.id || '').toLowerCase().trim();
+        const key = emailKey || idKey;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+
+        // Guarantee single normalized Collekt Technologies Ltd company account
+        const isCollektCo = emailKey === 'collektng@gmail.com' || idKey === '0f9ae84c-c5dd-4067-8ded-82638a6e9e01' || 
+                            (u.name && (u.name.toLowerCase() === 'collekng' || u.name.toLowerCase() === 'collektng'));
+        if (isCollektCo) {
+          if (seen.has('collekt_company_canonical')) return;
+          seen.add('collekt_company_canonical');
+          others.push({
+            ...u,
+            id: '0f9ae84c-c5dd-4067-8ded-82638a6e9e01',
+            email: 'collektng@gmail.com',
+            name: 'Collekt Technologies Ltd',
+            company_name: 'Collekt Technologies Ltd',
+            full_name: 'Collekt Technologies Ltd',
+            role: 'company'
+          });
+          return;
+        }
+
+        others.push(u);
+      });
 
       list.innerHTML = `
         <div style="padding:20px 14px; text-align:center;">
@@ -881,7 +914,7 @@
           <div style="display:flex; flex-direction:column; gap:8px; text-align:left; margin-bottom:14px;">
             ${others.map(u => {
               const bg = typeof colorForId === 'function' ? colorForId(u.id || u.email) : '#0e3b35';
-              const name = u.name || u.company_name || u.email;
+              const name = (u.role === 'company' ? (u.company_name || u.full_name || u.name) : (u.name || u.full_name || u.company_name)) || u.email;
               const roleTag = u.role === 'company' ? '🏢 Enterprise' : '👷 Professional';
               return `
                 <div onclick="startConversationWith('${u.id || u.email}')" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--white); cursor:pointer; transition:all .15s;" onmouseover="this.style.borderColor='var(--teal)'; this.style.background='var(--paper)'" onmouseout="this.style.borderColor='var(--line)'; this.style.background='var(--white)'">

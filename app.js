@@ -702,27 +702,51 @@ function syncRealUsersToDirectory(realProfiles) {
   try {
     const raw = JSON.parse(localStorage.getItem('collekt_all_users') || '[]');
     const map = new Map();
+
+    const getCanonicalKey = (u) => {
+      if (!u) return '';
+      const email = String(u.email || '').toLowerCase().trim();
+      if (email) return email;
+      return String(u.id || '').toLowerCase().trim();
+    };
+
     raw.forEach(u => {
-      if (u && (u.id || u.email)) {
-        const key = String(u.id || u.email).toLowerCase().trim();
-        map.set(key, u);
+      if (!u) return;
+      const key = getCanonicalKey(u);
+      if (!key) return;
+      const n = String(u.name || u.company_name || '').toLowerCase().trim();
+      // Purge any orphan/typo Collekng duplicate accounts
+      if ((n === 'collekng' || n === 'collektng') && key !== 'collektng@gmail.com' && key !== '0f9ae84c-c5dd-4067-8ded-82638a6e9e01') {
+        return;
       }
+      map.set(key, u);
     });
 
     realProfiles.forEach(rp => {
-      if (!rp || (!rp.id && !rp.email)) return;
-      const key = String(rp.id || rp.email).toLowerCase().trim();
-      const existing = map.get(key) || {};
-      const isDave = String(rp.email || '').toLowerCase() === 'ojeoweredave@gmail.com';
+      if (!rp) return;
+      const key = getCanonicalKey(rp);
+      if (!key) return;
+      const idKey = rp.id ? String(rp.id).toLowerCase().trim() : '';
+      const existing = map.get(key) || (idKey ? map.get(idKey) : null) || {};
+
+      const isDave = key === 'ojeoweredave@gmail.com';
+      const isCollektCo = key === 'collektng@gmail.com' || idKey === '0f9ae84c-c5dd-4067-8ded-82638a6e9e01' ||
+                          String(rp.name || '').toLowerCase().includes('collekt') ||
+                          String(rp.company_name || '').toLowerCase().includes('collekt');
+
       const merged = {
         ...existing,
         ...rp,
-        id: isDave ? 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' : (rp.id || existing.id),
-        email: rp.email || existing.email,
-        name: rp.name || rp.company_name || rp.full_name || existing.name,
-        role: rp.role || existing.role || 'professional'
+        id: isDave ? 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' : (isCollektCo ? '0f9ae84c-c5dd-4067-8ded-82638a6e9e01' : (rp.id || existing.id)),
+        email: isCollektCo ? 'collektng@gmail.com' : (rp.email || existing.email),
+        name: isCollektCo ? 'Collekt Technologies Ltd' : (rp.company_name || rp.full_name || rp.name || existing.name),
+        company_name: isCollektCo ? 'Collekt Technologies Ltd' : (rp.company_name || existing.company_name),
+        role: isCollektCo ? 'company' : (rp.role || existing.role || 'professional'),
+        is_verified: isCollektCo ? true : (rp.is_verified === true || existing.is_verified === true)
       };
-      map.set(key, merged);
+
+      if (idKey && idKey !== key) map.delete(idKey);
+      map.set(isCollektCo ? 'collektng@gmail.com' : key, merged);
     });
 
     const updated = Array.from(map.values());
@@ -759,6 +783,11 @@ function getAllRegisteredUsers() {
       const username = String(u.username || '').toLowerCase().trim();
       const email = String(u.email || '').toLowerCase().trim();
       const id = String(u.id || '').toLowerCase().trim();
+
+      // Purge duplicate/typo Collekng accounts without valid canonical ID/email
+      if ((n === 'collekng' || n === 'collektng') && email !== 'collektng@gmail.com' && id !== '0f9ae84c-c5dd-4067-8ded-82638a6e9e01') {
+        return false;
+      }
 
       const isFake = fakeTokens.some(token => 
         id === token || n.includes(token) || username.includes(token) || (email && email.includes(token))
@@ -816,23 +845,35 @@ function getAllRegisteredUsers() {
       raw.unshift(daveProfile);
     }
 
-    // 4. Guarantee Collekt Technologies Ltd (Company account)
-    const hasCompany = raw.some(u => u && u.email && u.email.toLowerCase() === 'collektng@gmail.com');
-    if (!hasCompany) {
-      raw.push({
-        id: '0f9ae84c-c5dd-4067-8ded-82638a6e9e01',
-        name: 'Collekt Technologies Ltd',
-        company_name: 'Collekt Technologies Ltd',
-        email: 'collektng@gmail.com',
-        role: 'company',
-        title: 'Energy & EPC Enterprise',
-        location: 'Lagos, Nigeria',
-        about: 'Leading digital energy and infrastructure procurement enterprise powering West African tenders and talent matching.',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none'
-      });
-    }
+    // 4. Guarantee SINGLE canonical Collekt Technologies Ltd (Company account)
+    const companyProfile = {
+      id: '0f9ae84c-c5dd-4067-8ded-82638a6e9e01',
+      name: 'Collekt Technologies Ltd',
+      company_name: 'Collekt Technologies Ltd',
+      full_name: 'Collekt Technologies Ltd',
+      email: 'collektng@gmail.com',
+      role: 'company',
+      title: 'Energy & EPC Enterprise',
+      location: 'Lagos, Nigeria',
+      about: 'Leading digital energy and infrastructure procurement enterprise powering West African tenders and talent matching.',
+      verified: true,
+      is_verified: true,
+      verification_status: 'verified'
+    };
+
+    // Remove any duplicates of Collekt company account
+    raw = raw.filter(u => {
+      if (!u) return false;
+      const em = String(u.email || '').toLowerCase().trim();
+      const id = String(u.id || '').toLowerCase().trim();
+      const n = String(u.name || u.company_name || '').toLowerCase().trim();
+      if (em === 'collektng@gmail.com' || id === '0f9ae84c-c5dd-4067-8ded-82638a6e9e01' || n === 'collekng' || n === 'collektng') {
+        return false;
+      }
+      return true;
+    });
+    // Add exactly one canonical Collekt Technologies Ltd
+    raw.push(companyProfile);
 
     // 5. Guarantee Chen Pao (Professional account)
     const hasChen = raw.some(u => u && u.email && u.email.toLowerCase() === 'chenpao51@gmail.com');
@@ -866,7 +907,23 @@ function getAllRegisteredUsers() {
       });
     }
 
-    // 7. Ensure every account has a real functional NUBAN wallet
+    // 7. Strict deduplication by unique lowercase email and unique ID
+    const seenEmails = new Set();
+    const seenIds = new Set();
+    const uniqueUsers = [];
+    raw.forEach(u => {
+      if (!u) return;
+      const em = (u.email || '').toLowerCase().trim();
+      const uid = (u.id || '').toLowerCase().trim();
+      if (em && seenEmails.has(em)) return;
+      if (uid && seenIds.has(uid)) return;
+      if (em) seenEmails.add(em);
+      if (uid) seenIds.add(uid);
+      uniqueUsers.push(u);
+    });
+    raw = uniqueUsers;
+
+    // 8. Ensure every account has a real functional NUBAN wallet
     const partner = 'NOVA Bank (Nova Commercial Bank)';
     raw.forEach(u => {
       if (!u.wallet) u.wallet = { balance: 0, escrow_balance: 0 };
@@ -2790,7 +2847,8 @@ function updateThemeButton() {
   const isDark = document.documentElement.classList.contains('dark');
   const iconHtml = getThemeIconHTML(isDark);
 
-  document.querySelectorAll('.theme-btn, #themeToggle, #adminThemeToggle, [data-action="theme-toggle"]').forEach(btn => {
+  document.querySelectorAll('#themeToggle, #adminThemeToggle, .theme-toggle-btn, [data-action="theme-toggle"]').forEach(btn => {
+    if (btn.id === 'sidebarToggle' || btn.classList.contains('sidebar-toggle-btn')) return;
     btn.innerHTML = iconHtml;
     btn.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
     btn.setAttribute('aria-label', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
@@ -3268,7 +3326,7 @@ function buildTopbar() {
 
   tb.innerHTML = `
     <div style="display:flex; align-items:center; gap:12px; flex:1;">
-      <button class="theme-btn" id="sidebarToggle" title="Toggle sidebar" onclick="toggleMobileSidebar(event)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="topbar-icon-btn sidebar-toggle-btn" id="sidebarToggle" title="Toggle Navigation Menu" aria-label="Toggle Navigation Menu" onclick="toggleMobileSidebar(event)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
       <div class="topbar-search-wrap" style="flex:1; max-width:480px;">
         <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
         <input class="topbar-search" type="text" placeholder="${isCompany ? 'Search professionals, skills...' : 'Search projects, companies, skills...'}">

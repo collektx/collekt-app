@@ -312,7 +312,7 @@ html.dark .btn-outline:hover {
   border-color: var(--teal-mid) !important;
 }
 
-.notif-btn, .theme-btn {
+.notif-btn, .theme-btn, .sidebar-toggle-btn, .topbar-icon-btn, #sidebarToggle {
   background: rgba(255,255,255,0.82) !important;
   backdrop-filter: blur(14px) saturate(170%) !important;
   -webkit-backdrop-filter: blur(14px) saturate(170%) !important;
@@ -321,19 +321,19 @@ html.dark .btn-outline:hover {
   box-shadow: 0 2px 8px rgba(14,59,53,0.06), inset 0 1px 0 rgba(255,255,255,0.95) !important;
   transition: all 0.22s cubic-bezier(0.16,1,0.3,1) !important;
 }
-.notif-btn:hover, .theme-btn:hover {
+.notif-btn:hover, .theme-btn:hover, .sidebar-toggle-btn:hover, .topbar-icon-btn:hover, #sidebarToggle:hover {
   background: #FFFFFF !important;
   border-color: var(--teal) !important;
   box-shadow: 0 6px 20px rgba(14,59,53,0.16), inset 0 1px 0 #fff !important;
   transform: scale(1.05) !important;
 }
-html.dark .notif-btn, html.dark .theme-btn {
+html.dark .notif-btn, html.dark .theme-btn, html.dark .sidebar-toggle-btn, html.dark .topbar-icon-btn, html.dark #sidebarToggle {
   background: rgba(255,255,255,0.08) !important;
   border-color: rgba(255,255,255,0.16) !important;
   color: #2DD4BF !important;
   box-shadow: 0 2px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15) !important;
 }
-html.dark .notif-btn:hover, html.dark .theme-btn:hover {
+html.dark .notif-btn:hover, html.dark .theme-btn:hover, html.dark .sidebar-toggle-btn:hover, html.dark .topbar-icon-btn:hover, html.dark #sidebarToggle:hover {
   background: rgba(255,255,255,0.16) !important;
   border-color: var(--teal-mid) !important;
   box-shadow: 0 6px 24px rgba(45,212,191,0.22), inset 0 1px 0 rgba(255,255,255,0.3) !important;

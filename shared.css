@@ -273,8 +273,8 @@ html.dark .shield-badge svg text {
 .profile-menu-item.danger { color: var(--red); }
 .profile-menu-item.danger:hover { background: #fdf2f2; }
 
-/* Theme toggle */
-.theme-btn {
+/* Topbar icon buttons & Theme toggle */
+.theme-btn, .sidebar-toggle-btn, .topbar-icon-btn, #sidebarToggle {
   width: 40px;
   height: 40px;
   min-width: 40px;
@@ -289,10 +289,16 @@ html.dark .shield-badge svg text {
   cursor: pointer;
   transition: all .2s cubic-bezier(0.16,1,0.3,1);
   padding: 0;
+  color: var(--teal);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
-.theme-btn:hover { background: var(--amber-lt); border-color: var(--amber); transform: scale(1.05); }
+.theme-btn:hover, .sidebar-toggle-btn:hover, .topbar-icon-btn:hover, #sidebarToggle:hover { 
+  background: var(--amber-lt); 
+  border-color: var(--teal); 
+  color: var(--teal-dark, #0e3b35);
+  transform: scale(1.05); 
+}
 
 /* Drawer theme item for mobile navigation */
 .drawer-theme-item {
