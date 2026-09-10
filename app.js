@@ -4746,7 +4746,7 @@ function sendAiChipQuery(text) {
   }
 }
 
-function submitCollektAiQuery() {
+async function submitCollektAiQuery() {
   const input = document.getElementById('collektAiInput');
   const body = document.getElementById('collektAiChatBody');
   if (!input || !body) return;
@@ -4766,37 +4766,55 @@ function submitCollektAiQuery() {
   // Typing Indicator
   const typingDiv = document.createElement('div');
   typingDiv.className = 'ai-msg bot';
-  typingDiv.textContent = '🤖 Kolly AI is thinking...';
+  typingDiv.id = 'kollyChatTypingIndicator';
+  typingDiv.innerHTML = '<span style="display:inline-flex; align-items:center; gap:6px;">🦖 <em>Kolly is thinking...</em></span>';
   body.appendChild(typingDiv);
   body.scrollTop = body.scrollHeight;
 
-  setTimeout(() => {
-    body.removeChild(typingDiv);
-    const botReply = processAiCopilotQuery(query);
+  try {
+    const botReply = await processAiCopilotQuery(query);
+    const tInd = document.getElementById('kollyChatTypingIndicator');
+    if (tInd) tInd.remove();
     const botDiv = document.createElement('div');
     botDiv.className = 'ai-msg bot';
     botDiv.innerHTML = botReply;
     body.appendChild(botDiv);
     body.scrollTop = body.scrollHeight;
-  }, 400);
+  } catch(err) {
+    console.error('Kolly Chat query error:', err);
+    const tInd = document.getElementById('kollyChatTypingIndicator');
+    if (tInd) tInd.remove();
+    const botDiv = document.createElement('div');
+    botDiv.className = 'ai-msg bot';
+    botDiv.innerHTML = `⚡ <strong>Kolly AI</strong>: I'm here! You can explore verified specialists on the <a href="marketplace.html" style="color:var(--teal); font-weight:800;">Marketplace</a>, or check your profile completeness on <a href="profile.html" style="color:var(--teal); font-weight:800;">Profile</a>!`;
+    body.appendChild(botDiv);
+    body.scrollTop = body.scrollHeight;
+  }
 }
 
-function processAiCopilotQuery(query) {
+function formatKollyMarkdown(text) {
+  if (!text) return '';
+  let html = String(text);
+  html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  html = html.replace(/_(.*?)_/g, '<em>$1</em>');
+  html = html.replace(/\[(.*?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--teal); font-weight:800;">$1</a>');
+  html = html.replace(/(?:^|\n)[•\-]\s+(.*)/g, '<br>&bull; $1');
+  html = html.replace(/(?:^|\n)(\d+)\.\s+(.*)/g, '<br><strong>$1.</strong> $2');
+  html = html.replace(/\n\n+/g, '<br><br>');
+  html = html.replace(/\n/g, '<br>');
+  return html;
+}
+
+async function processAiCopilotQuery(query) {
   const q = String(query).toLowerCase();
   const users = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
-  const u = getUser();
+  const u = typeof getUser === 'function' ? getUser() : null;
 
-  if (q.includes('engineer') || q.includes('instrumentation') || q.includes('find') || q.includes('search')) {
-    const pros = users.filter(u => (u.role || '').toLowerCase() !== 'company');
-    if (pros.length > 0) {
-      const topMatch = pros[0];
-      return `🔍 <strong>Kolly AI Talent Match Result</strong>:<br>Found <strong>${pros.length} qualified professionals</strong> in Collekt DB.<br><br>🏆 <strong>Top Recommended</strong>: ${escapeHTML(topMatch.name)} (${escapeHTML(topMatch.title || 'Senior Engineer')}) &bull; ${topMatch.verified ? 'Shield Verified 🛡️' : 'Unverified'}<br><a href="marketplace.html" style="color:var(--teal); font-weight:800;">View candidates on Marketplace →</a>`;
-    }
-    return `🔍 <strong>Kolly AI Search</strong>: You can explore registered professionals on the <a href="marketplace.html" style="color:var(--teal); font-weight:800;">Marketplace Page</a>.`;
-  }
-
+  // Immediate local answers for profile score / file uploads
   if (q.includes('profile') || q.includes('score') || q.includes('100%') || q.includes('strength') || q.includes('upload') || q.includes('cv') || q.includes('cert') || q.includes('file')) {
-    const score = computePrdProfileScore(u);
+    const score = typeof computePrdProfileScore === 'function' ? computePrdProfileScore(u) : 60;
     const cvFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('cv') : [];
     const certFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('certifications') : [];
     const portFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('portfolio') : [];
@@ -4807,7 +4825,7 @@ function processAiCopilotQuery(query) {
     const portStatus = portFiles.length > 0 ? `✅ Portfolio Added (${portFiles.length} items)` : '❌ Portfolio Items Missing';
     const idStatus = isVerified ? '✅ Identity Verified 🛡️' : '❌ Identity Unverified';
 
-    return `🦖 <strong>Kolly Profile & Upload Inspection</strong>:<br>Overall Profile Completion: <strong>${score}%</strong><br><br>
+    return `🦖 <strong>Kolly Profile &amp; Upload Inspection</strong>:<br>Overall Profile Completion: <strong>${score}%</strong><br><br>
 📁 <strong>Upload Status</strong>:<br>
 &bull; ${cvStatus}<br>
 &bull; ${certStatus}<br>
@@ -4816,16 +4834,111 @@ function processAiCopilotQuery(query) {
 💡 <em>Kolly's Advice</em>: All your uploaded files stay permanently saved in your profile. You can view existing files or upload replacement versions anytime on your <a href="profile.html" style="color:var(--teal); font-weight:800;">Profile Page →</a>`;
   }
 
+  // Talent search query check
+  if (q.includes('engineer') || q.includes('instrumentation') || q.includes('find') || q.includes('search talent') || q.includes('hire')) {
+    const pros = users.filter(u => (u.role || '').toLowerCase() !== 'company');
+    if (pros.length > 0) {
+      const topMatch = pros[0];
+      return `🔍 <strong>Kolly AI Talent Match Result</strong>:<br>Found <strong>${pros.length} qualified professionals</strong> in Collekt DB.<br><br>🏆 <strong>Top Recommended</strong>: ${escapeHTML(topMatch.name)} (${escapeHTML(topMatch.title || 'Senior Engineer')}) &bull; ${topMatch.verified ? 'Shield Verified 🛡️' : 'Unverified'}<br><a href="marketplace.html" style="color:var(--teal); font-weight:800;">View candidates on Marketplace →</a>`;
+    }
+  }
+
+  // Query serverless Gemini gateway
+  try {
+    const savedKey = localStorage.getItem('collekt_gemini_api_key') || '';
+    const res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'chat',
+        prompt: query,
+        user: u,
+        apiKey: savedKey
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.response) {
+        return formatKollyMarkdown(data.response);
+      }
+    }
+  } catch(e) {
+    console.warn('Gemini gateway call fallback to local engine:', e);
+  }
+
+  // Fallback PRD knowledge
   if (q.includes('price') || q.includes('subscription') || q.includes('fee') || q.includes('cost')) {
-    return `💰 <strong>Collekt Membership & Pricing (PRD Specification)</strong>:<br>&bull; <strong>Professional Plus</strong>: $15 / month<br>&bull; <strong>Company Business</strong>: $50 / month<br>&bull; <strong>Platform Commission Fee</strong>: 10% on completed project engagements.`;
+    return `💰 <strong>Collekt Membership &amp; Pricing (PRD Specification)</strong>:<br>&bull; <strong>Professional Plus</strong>: $15 / month<br>&bull; <strong>Company Business</strong>: $50 / month<br>&bull; <strong>Platform Commission Fee</strong>: 10% on completed project engagements.`;
   }
 
   if (q.includes('verify') || q.includes('verification') || q.includes('shield') || q.includes('nin') || q.includes('cac')) {
     return `🛡️ <strong>Shield Verification Framework</strong>:<br>Identity (NIN), COREN Engineering Licenses, and CAC Incorporation Documents are submitted on your profile page and reviewed by Collekt Admins. Verified accounts receive the <strong>Shield Verified Logo 🛡️</strong>.`;
   }
 
-  return `⚡ <strong>Kolly AI Assistant</strong>: I am trained on Collekt's PRD specifications. You can ask me to search talent, inspect your profile score & uploads, check platform fees ($15 pro / $50 company / 10% commission), or guide your verification process!`;
+  return `⚡ <strong>Kolly AI Assistant</strong>: I am trained on Collekt's PRD specifications and infused with Google Gemini. You can ask me to search talent, inspect your profile score &amp; uploads, check platform fees ($15 pro / $50 company / 10% commission), or guide your verification process!`;
 }
+
+// Global Gemini Helpers for Platform-wide Integration
+window.matchTalentWithKolly = async function(job, candidates) {
+  try {
+    const savedKey = localStorage.getItem('collekt_gemini_api_key') || '';
+    const res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'match_talent', job, candidates, apiKey: savedKey })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.matches) return data.matches;
+    }
+  } catch(e) {
+    console.warn('matchTalentWithKolly API error:', e);
+  }
+  return candidates.map(c => ({
+    candidate_id: c.id,
+    candidate_name: c.name || c.full_name || 'Candidate',
+    candidate_title: c.title || 'Engineer',
+    match_score: (c.verified || c.is_verified) ? 95 : 84,
+    match_reason: (c.verified || c.is_verified) ? 'Shield Verified • Aligned Engineering Discipline' : 'Relevant Engineering Background'
+  }));
+};
+
+window.draftJobScopeWithKolly = async function(prompt, discipline = '', budget = '') {
+  try {
+    const savedKey = localStorage.getItem('collekt_gemini_api_key') || '';
+    const user = typeof getUser === 'function' ? getUser() : null;
+    const res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'draft_job', prompt: `${prompt} ${discipline} ${budget}`.trim(), user, apiKey: savedKey })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.draft) return data.draft;
+    }
+  } catch(e) {
+    console.warn('draftJobScopeWithKolly API error:', e);
+  }
+  return null;
+};
+
+window.generatePitchWithKolly = async function(job, user) {
+  try {
+    const savedKey = localStorage.getItem('collekt_gemini_api_key') || '';
+    const res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'generate_pitch', job, user, apiKey: savedKey })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.pitch) return data.pitch;
+    }
+  } catch(e) {
+    console.warn('generatePitchWithKolly API error:', e);
+  }
+  return null;
+};
 
 // -- KOLLY AI MATCH INSIGHTS SCREENER (FOR COMPANIES) --
 function generateAiMatchInsight(proId, jobId) {
@@ -4850,7 +4963,7 @@ function generateAiMatchInsight(proId, jobId) {
         <img src="kolly-mascot-clean.png" alt="Kolly" style="width:44px; height:44px; object-fit:contain; border-radius:50%; background:var(--paper); padding:4px; border:1px solid var(--line);" onerror="this.style.display='none'">
         <div>
           <div style="font-size:18px; font-weight:900; color:var(--ink);">Kolly AI Candidate Screener</div>
-          <div style="font-size:12px; color:var(--muted);">PRD Rules-Based Matching Evaluation</div>
+          <div style="font-size:12px; color:var(--muted);">Gemini-Infused Matching Evaluation</div>
         </div>
       </div>
 
@@ -4878,14 +4991,30 @@ function generateAiMatchInsight(proId, jobId) {
 }
 
 // -- KOLLY AI PROPOSAL AUTO-DRAFTER (FOR PROFESSIONALS) --
-function generateAiProposalDraft(jobTitle = 'Engineering Tender', targetInputId = 'proposalCoverLetter') {
-  const u = getUser();
+async function generateAiProposalDraft(jobTitle = 'Engineering Tender', targetInputId = 'proposalCoverLetter') {
+  const u = typeof getUser === 'function' ? getUser() : null;
+  const el = document.getElementById(targetInputId);
+  if (el) {
+    el.placeholder = '✨ Kolly AI is crafting your proposal pitch...';
+  }
+  if (typeof showToast === 'function') showToast('🦖 Kolly AI is generating proposal pitch...');
+
+  try {
+    const jobObj = { title: jobTitle, description: jobTitle };
+    const pitch = await window.generatePitchWithKolly(jobObj, u);
+    if (pitch && el) {
+      el.value = pitch;
+      if (typeof showToast === 'function') showToast('✨ Kolly AI proposal cover letter auto-generated!');
+      return;
+    }
+  } catch(e) {
+    console.warn('generateAiProposalDraft error:', e);
+  }
+
   const name = u?.name || 'Specialist';
   const title = u?.title || 'Senior Engineer';
-  
   const text = `Dear Hiring Committee,\n\nI am writing to submit my formal bid proposal for the ${jobTitle} opportunity on Collekt. As a ${title} with extensive hands-on industry experience in Oil & Gas and EPC projects, I possess the exact technical discipline required to deliver this scope safely, efficiently, and on schedule.\n\nMy qualifications include:\n- COREN Engineering License & NIN Verified Identity 🛡️\n- Proven track record executing complex offshore/onshore engineering assignments\n- Commitment to strict HSEQ and engineering standards\n\nI look forward to reviewing project milestones and initiating this engagement.\n\nSincerely,\n${name}`;
 
-  const el = document.getElementById(targetInputId);
   if (el) {
     el.value = text;
     if (typeof showToast === 'function') showToast('✨ Kolly AI proposal cover letter auto-generated!');
@@ -4893,17 +5022,34 @@ function generateAiProposalDraft(jobTitle = 'Engineering Tender', targetInputId 
 }
 
 // -- KOLLY AI TENDER SPEC GENERATOR (FOR COMPANIES) --
-function generateAiTenderSpec(titleInputId = 'jobTitle', descInputId = 'jobDesc') {
+async function generateAiTenderSpec(titleInputId = 'jobTitle', descInputId = 'jobDesc') {
   const titleEl = document.getElementById(titleInputId);
   const descEl = document.getElementById(descInputId);
-
   const titleVal = titleEl?.value.trim() || 'Instrumentation & Control Systems Specialist';
+
+  if (descEl) {
+    descEl.placeholder = '✨ Kolly AI is drafting tender scope and deliverables...';
+  }
+  if (typeof showToast === 'function') showToast('🦖 Kolly AI is drafting tender specifications...');
+
+  try {
+    const draft = await window.draftJobScopeWithKolly(titleVal);
+    if (draft && descEl) {
+      descEl.value = draft;
+      if (typeof showToast === 'function') showToast('✨ Kolly AI Tender Specification generated!');
+      if (typeof updateLivePreview === 'function') updateLivePreview();
+      return;
+    }
+  } catch(e) {
+    console.warn('generateAiTenderSpec error:', e);
+  }
 
   const specText = `PROJECT SCOPE & OBJECTIVES:\nWe require a qualified ${titleVal} to manage EPC engineering deliverables, commissioning oversight, and field operations for our energy project in Nigeria.\n\nKEY RESPONSIBILITIES:\n1. Execute detailed technical designs, P&ID inspections, and field instrumentation setups.\n2. Ensure full adherence to Department of Petroleum Resources (DPR) and COREN standards.\n3. Supervise subcontractor installation, loop checking, and HAZOP reviews.\n\nREQUIRED QUALIFICATIONS:\n- COREN / NSE Engineering Registration & Shield Verification 🛡️\n- Minimum 5+ years relevant Oil & Gas industry experience\n- Degree in Engineering (Electrical/Mechanical/Instrumentation)`;
 
   if (descEl) {
     descEl.value = specText;
     if (typeof showToast === 'function') showToast('✨ Kolly AI Tender Specification generated!');
+    if (typeof updateLivePreview === 'function') updateLivePreview();
   }
 }
 

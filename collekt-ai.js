@@ -112,9 +112,31 @@ async function queryGeminiAI(prompt, systemInstruction = '') {
           return data.candidates[0].content.parts[0].text;
         }
       } catch (err) {
-        console.warn('Gemini API endpoint notice:', err);
+        console.warn('Direct Gemini API endpoint notice:', err);
       }
     }
+  }
+
+  // Call the unified serverless Gemini Gateway (/api/gemini)
+  try {
+    const res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'chat',
+        prompt: prompt,
+        user: user,
+        apiKey: apiKey
+      })
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.response) {
+        return json.response;
+      }
+    }
+  } catch (gwErr) {
+    console.warn('Serverless Gemini gateway notice:', gwErr);
   }
 
   // High-Capacity Intelligent Collekt Dynamic AI Engine

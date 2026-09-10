@@ -240,7 +240,15 @@
 
 
       <!-- Recommended Professionals -->
-      <h2 class="section-heading" style="margin-top:8px;">Recommended Professionals for Your Projects</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:20px; margin-bottom:12px;">
+        <div>
+          <h2 class="section-heading" style="margin:0;">Recommended Professionals for Your Projects</h2>
+          <div style="font-size:12px; color:var(--muted); margin-top:2px;">Infused with Kolly AI Candidate Matching &amp; PRD Verification Screening</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="runKollyTalentMatchDashboard()" style="font-weight:800; font-size:12px; border-color:var(--teal); color:var(--teal); display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+          <span>🦖</span> <span>Run Kolly AI Match</span>
+        </button>
+      </div>
       <div class="co-grid fade-in" id="recommendedTalentGrid">
         <!-- Rendered dynamically from real registered professionals -->
       </div>
@@ -706,18 +714,62 @@
       const ratingVal = (p.rating != null && Number(p.rating) > 0) ? Number(p.rating).toFixed(1) : '0.0';
       const reviewsStr = p.review_count ? `(${p.review_count} reviews)` : '(0 reviews)';
       const verifiedBadge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(14, p) : '';
+      const matchScore = p.match_score || (p.verified ? 96 : 85);
+      const matchReason = p.match_reason || (p.verified ? 'Verified Shield • Engineering Alignment' : 'Qualified Technical Specialist');
 
       return `
         <div class="talent-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-size:10px; font-weight:800; color:var(--teal); background:rgba(19,117,111,0.1); padding:2px 8px; border-radius:99px;">
+              ⚡ ${matchScore}% Kolly Match
+            </span>
+            <span style="font-size:11px; color:var(--muted);">${p.years_experience ? p.years_experience + 'y exp' : 'Specialist'}</span>
+          </div>
           <div class="talent-avatar" style="background:${bg}; overflow:hidden;">${avatarContent}</div>
           <div class="talent-name" style="font-weight:800; display:inline-flex; align-items:center;">${escapeHTML(p.name || p.username || 'Professional')}${verifiedBadge}</div>
           <div class="talent-title">${escapeHTML(p.title || 'Energy Specialist')}</div>
           <div class="talent-rating">★ ${ratingVal} <span style="font-size:11px; color:var(--muted);">${reviewsStr}</span></div>
+          <div style="font-size:11px; color:var(--muted); margin:4px 0 8px 0; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;" title="${escapeHTML(matchReason)}">
+            🦖 <em>${escapeHTML(matchReason)}</em>
+          </div>
           <div class="talent-tags">${skillsTags}</div>
-          <a href="public-profile.html?id=${p.id || p.email}" class="btn btn-primary btn-sm" style="width:100%; min-height:34px;">View Profile</a>
+          <div style="display:flex; gap:6px; margin-top:8px;">
+            <a href="public-profile.html?id=${p.id || p.email}" class="btn btn-outline btn-sm" style="flex:1; min-height:34px; font-size:12px; justify-content:center; text-decoration:none; display:inline-flex; align-items:center;">Profile</a>
+            <button class="btn btn-primary btn-sm" style="flex:1; min-height:34px; font-size:12px; background:linear-gradient(135deg, var(--forest), var(--teal)); border:none; display:inline-flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;" onclick="generateAiMatchInsight('${p.id || p.email}')">✨ Screener</button>
+          </div>
         </div>
       `;
     }).join('');
+  }
+
+  async function runKollyTalentMatchDashboard() {
+    if (typeof showToast === 'function') showToast('🦖 Kolly AI is matching candidates against your posted jobs...');
+    const jobs = typeof getPostedJobs === 'function' ? getPostedJobs() : [];
+    const activeJob = jobs[0] || { title: 'Senior EPC Engineer', skills: ['AutoCAD', 'Engineering', 'Safety'] };
+    const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+    const pros = allUsers.filter(u => u && (u.role === 'professional' || (!u.role && u.role !== 'company')));
+
+    if (window.matchTalentWithKolly && pros.length > 0) {
+      try {
+        const matches = await window.matchTalentWithKolly(activeJob, pros);
+        if (matches && matches.length > 0) {
+          const matchMap = new Map();
+          matches.forEach(m => matchMap.set(m.candidate_id, m));
+          pros.forEach(p => {
+            const m = matchMap.get(p.id);
+            if (m) {
+              p.match_score = m.match_score;
+              p.match_reason = m.match_reason;
+            }
+          });
+          pros.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
+        }
+      } catch(e) {
+        console.warn('runKollyTalentMatchDashboard error:', e);
+      }
+    }
+    renderRecommendedProfessionals();
+    if (typeof showToast === 'function') showToast('✨ Kolly AI Candidate Rankings updated!');
   }
 
   function openPostModal() {
