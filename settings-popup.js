@@ -537,9 +537,9 @@
                 <div class="settings-row-label">Review Website &amp; Performance</div>
                 <div class="settings-row-desc">Share feedback on website speed, proposal workflows, or escrow payouts</div>
               </div>
-              <a href="index.html#testimonials" class="sett-btn sett-btn-outline" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; font-weight:800;" onclick="closeSettingsModal()">
-                <span>✍️</span> Rate Platform
-              </a>
+              <button type="button" class="sett-btn sett-btn-outline" style="display:inline-flex; align-items:center; gap:6px; font-weight:800; cursor:pointer;" onclick="openWebsiteReviewModal()">
+                <span>✍️</span> Drop Review
+              </button>
             </div>
           </div>
 
@@ -704,6 +704,239 @@
     const trigger = document.getElementById('openSettings');
     if (trigger) trigger.addEventListener('click', openSettingsModal);
   });
+
+
+  /* -- WEBSITE REVIEW MODAL FOR LOGGED-IN USERS -------------------- */
+  let reviewModalBuilt = false;
+  let currentReviewRating = 5;
+  let currentPerfRating = 5;
+
+  function buildReviewModal() {
+    if (document.getElementById('websiteReviewModal')) return;
+
+    const modalHtml = `
+    <div class="settings-backdrop" id="websiteReviewModal" style="display:none; z-index:99999;">
+      <div class="settings-panel" style="max-width:540px;">
+        <div class="settings-header">
+          <div class="settings-title">
+            <span>⭐</span> Review Website &amp; Performance
+          </div>
+          <button class="settings-close" onclick="closeWebsiteReviewModal()" aria-label="Close review dialog">&times;</button>
+        </div>
+        <div class="settings-body" style="padding-top:20px;">
+          <p style="font-size:13px; color:#556965; margin-bottom:18px; line-height:1.5;">
+            Share verified feedback on platform speed, project bidding, escrow milestone payouts, or client communication.
+          </p>
+
+          <!-- Overall Star Rating -->
+          <div style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:800; color:#111918; display:block; margin-bottom:6px;">Overall Platform Rating</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div id="settingsStarPicker" style="display:flex; gap:6px; font-size:26px; cursor:pointer; color:#f59e0b; user-select:none;">
+                <span onclick="setWebsiteRating(1)" onmouseover="hoverWebsiteRating(1)" onmouseout="resetWebsiteHoverRating()">★</span>
+                <span onclick="setWebsiteRating(2)" onmouseover="hoverWebsiteRating(2)" onmouseout="resetWebsiteHoverRating()">★</span>
+                <span onclick="setWebsiteRating(3)" onmouseover="hoverWebsiteRating(3)" onmouseout="resetWebsiteHoverRating()">★</span>
+                <span onclick="setWebsiteRating(4)" onmouseover="hoverWebsiteRating(4)" onmouseout="resetWebsiteHoverRating()">★</span>
+                <span onclick="setWebsiteRating(5)" onmouseover="hoverWebsiteRating(5)" onmouseout="resetWebsiteHoverRating()">★</span>
+              </div>
+              <span id="settingsRatingScoreText" style="font-size:14px; font-weight:800; color:#111918;">5.0 / 5.0</span>
+            </div>
+          </div>
+
+          <!-- Speed & Performance Rating -->
+          <div style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:800; color:#111918; display:block; margin-bottom:6px;">⚡ Website Speed &amp; UI Responsiveness</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div id="settingsPerfPicker" style="display:flex; gap:6px; font-size:22px; cursor:pointer; color:#d4920b; user-select:none;">
+                <span onclick="setWebsitePerfRating(1)" onmouseover="hoverWebsitePerfRating(1)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
+                <span onclick="setWebsitePerfRating(2)" onmouseover="hoverWebsitePerfRating(2)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
+                <span onclick="setWebsitePerfRating(3)" onmouseover="hoverWebsitePerfRating(3)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
+                <span onclick="setWebsitePerfRating(4)" onmouseover="hoverWebsitePerfRating(4)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
+                <span onclick="setWebsitePerfRating(5)" onmouseover="hoverWebsitePerfRating(5)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
+              </div>
+              <span id="settingsPerfScoreText" style="font-size:13px; font-weight:700; color:#556965;">Ultra Fast (5.0)</span>
+            </div>
+          </div>
+
+          <!-- Feedback Category -->
+          <div style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:800; color:#111918; display:block; margin-bottom:6px;">Category</label>
+            <select class="sett-select" id="settingsReviewCategory" style="width:100%;">
+              <option value="performance">⚡ Platform Speed &amp; Performance</option>
+              <option value="pro">💼 Professional Freelancer Experience</option>
+              <option value="company">🏢 Company &amp; Hiring Experience</option>
+              <option value="escrow">🛡️ Escrow Payouts &amp; Security</option>
+            </select>
+          </div>
+
+          <!-- Headline -->
+          <div style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:800; color:#111918; display:block; margin-bottom:6px;">Review Headline</label>
+            <input type="text" class="sett-input" id="settingsReviewTitle" placeholder="e.g. Fast milestone payouts and very clean interface" style="width:100%;">
+          </div>
+
+          <!-- Comments -->
+          <div style="margin-bottom:20px;">
+            <label style="font-size:12px; font-weight:800; color:#111918; display:block; margin-bottom:6px;">Detailed Feedback</label>
+            <textarea class="sett-input" id="settingsReviewQuote" rows="4" placeholder="Tell the community how Collekt is working for your business or freelance projects..." style="width:100%; height:90px; resize:vertical;"></textarea>
+          </div>
+
+          <!-- Actions -->
+          <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button type="button" class="sett-btn sett-btn-outline" onclick="closeWebsiteReviewModal()">Cancel</button>
+            <button type="button" class="sett-btn sett-btn-primary" onclick="submitWebsiteReview()">Submit Platform Review</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    `;
+
+    const div = document.createElement('div');
+    div.innerHTML = modalHtml;
+    document.body.appendChild(div.firstElementChild);
+    reviewModalBuilt = true;
+  }
+
+  function openWebsiteReviewModal() {
+    closeSettingsModal();
+    if (!reviewModalBuilt) buildReviewModal();
+    const modal = document.getElementById('websiteReviewModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => modal.classList.add('open'));
+    });
+    setWebsiteRating(5);
+    setWebsitePerfRating(5);
+  }
+
+  function closeWebsiteReviewModal() {
+    const modal = document.getElementById('websiteReviewModal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    setTimeout(() => { modal.style.display = 'none'; }, 350);
+  }
+
+  function setWebsiteRating(n) {
+    currentReviewRating = n;
+    const spans = document.querySelectorAll('#settingsStarPicker span');
+    spans.forEach((s, idx) => {
+      s.style.opacity = (idx < n) ? '1' : '0.25';
+      s.style.color = '#f59e0b';
+    });
+    const textEl = document.getElementById('settingsRatingScoreText');
+    if (textEl) textEl.textContent = n.toFixed(1) + ' / 5.0';
+  }
+
+  function hoverWebsiteRating(n) {
+    const spans = document.querySelectorAll('#settingsStarPicker span');
+    spans.forEach((s, idx) => {
+      s.style.opacity = (idx < n) ? '1' : '0.25';
+    });
+  }
+
+  function resetWebsiteHoverRating() {
+    setWebsiteRating(currentReviewRating);
+  }
+
+  function setWebsitePerfRating(n) {
+    currentPerfRating = n;
+    const spans = document.querySelectorAll('#settingsPerfPicker span');
+    spans.forEach((s, idx) => {
+      s.style.opacity = (idx < n) ? '1' : '0.25';
+    });
+    const textEl = document.getElementById('settingsPerfScoreText');
+    if (textEl) {
+      const labels = ['Needs Improvement', 'Fair Speed', 'Good Performance', 'Very Fast', 'Ultra Fast (5.0)'];
+      textEl.textContent = labels[n - 1] || (n.toFixed(1) + ' / 5.0');
+    }
+  }
+
+  function hoverWebsitePerfRating(n) {
+    const spans = document.querySelectorAll('#settingsPerfPicker span');
+    spans.forEach((s, idx) => {
+      s.style.opacity = (idx < n) ? '1' : '0.25';
+    });
+  }
+
+  function resetWebsitePerfHoverRating() {
+    setWebsitePerfRating(currentPerfRating);
+  }
+
+  function submitWebsiteReview() {
+    const title = document.getElementById('settingsReviewTitle')?.value.trim();
+    const quote = document.getElementById('settingsReviewQuote')?.value.trim();
+    const cat = document.getElementById('settingsReviewCategory')?.value || 'performance';
+    const catName = document.getElementById('settingsReviewCategory')?.selectedOptions[0]?.textContent || '⚡ Performance';
+
+    if (!quote || quote.length < 5) {
+      if (typeof showToast === 'function') {
+        showToast('⚠️ Please write a brief review feedback before submitting', 'warning');
+      } else {
+        alert('Please write a brief review feedback before submitting.');
+      }
+      return;
+    }
+
+    let user = {};
+    try {
+      if (typeof getUser === 'function') user = getUser() || {};
+      else user = JSON.parse(localStorage.getItem('collekt_user') || '{}');
+    } catch(e) {}
+
+    const isCompany = user.role === 'company' || (window.location.pathname && window.location.pathname.includes('company'));
+    const authorName = user.name || user.full_name || (user.first_name ? (user.first_name + ' ' + (user.last_name || '')).trim() : null) || user.username || 'Collekt Member';
+    const authorRole = isCompany ? (user.company_name || 'Enterprise Partner') : (user.title || 'Specialist Professional');
+
+    const newReview = {
+      id: 'rev_' + Date.now(),
+      name: authorName,
+      role: authorRole,
+      category: cat,
+      categoryName: catName,
+      rating: currentReviewRating || 5,
+      perfRating: currentPerfRating || 5,
+      title: title || 'Verified Platform Feedback',
+      quote: quote,
+      date: 'Just now',
+      verified: true,
+      initial: authorName.charAt(0).toUpperCase(),
+      bg: '#0E3B35',
+      helpfulCount: 0
+    };
+
+    // Save to localStorage
+    let allReviews = [];
+    try {
+      allReviews = JSON.parse(localStorage.getItem('collekt_community_reviews') || '[]');
+    } catch(e) {}
+    allReviews.unshift(newReview);
+    try {
+      localStorage.setItem('collekt_community_reviews', JSON.stringify(allReviews));
+    } catch(e) {}
+
+    closeWebsiteReviewModal();
+
+    if (typeof showToast === 'function') {
+      showToast('⭐ Thank you for your review! Your feedback is now live.', 'success');
+    } else {
+      alert('⭐ Thank you for your review! Your feedback is now live.');
+    }
+
+    if (typeof renderCommunityReviews === 'function') {
+      renderCommunityReviews();
+    }
+  }
+
+  window.openWebsiteReviewModal = openWebsiteReviewModal;
+  window.closeWebsiteReviewModal = closeWebsiteReviewModal;
+  window.setWebsiteRating = setWebsiteRating;
+  window.hoverWebsiteRating = hoverWebsiteRating;
+  window.resetWebsiteHoverRating = resetWebsiteHoverRating;
+  window.setWebsitePerfRating = setWebsitePerfRating;
+  window.hoverWebsitePerfRating = hoverWebsitePerfRating;
+  window.resetWebsitePerfHoverRating = resetWebsitePerfHoverRating;
+  window.submitWebsiteReview = submitWebsiteReview;
 
   /* -- EXPORT PUBLIC API ------------------------------- */
   window.openSettingsModal = openSettingsModal;

@@ -434,7 +434,7 @@ async function checkOAuthCallback() {
 document.addEventListener('DOMContentLoaded', checkOAuthCallback);
 
 
-// -- LINK LINKEDIN ACCOUNT TO USER PROFILE VIA REAL OAUTH REDIRECT --
+// -- LINK LINKEDIN ACCOUNT TO USER PROFILE DIRECTLY --
 async function linkLinkedInAccount(inputUrl) {
   const user = getUser();
   if (!user) {
@@ -442,50 +442,63 @@ async function linkLinkedInAccount(inputUrl) {
     return false;
   }
 
-  // 1. If explicit URL was entered into field, link it directly
-  if (inputUrl && (inputUrl.includes('linkedin.com') || inputUrl.length > 8)) {
-    let finalUrl = String(inputUrl).trim();
-    if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
-      finalUrl = 'https://' + finalUrl;
-    }
-    user.linkedin_url = finalUrl;
-    user.linkedin_linked = true;
-    user.linkedin_verified_at = new Date().toISOString();
+  const rawUrl = (inputUrl && typeof inputUrl === 'string') ? inputUrl.trim() : '';
 
-    if (typeof setUser === 'function') setUser(user);
-    if (typeof saveRegisteredUser === 'function') saveRegisteredUser(user);
-    if (window.sb) {
-      try { sb.from('profiles').update({ linkedin_url: finalUrl, linkedin_linked: true }).eq('id', user.id); } catch(e){}
+  // If no URL or username passed, direct the user via the interactive LinkedIn Linking modal
+  if (!rawUrl || rawUrl.length < 3) {
+    if (typeof openLinkedInModal === 'function') {
+      openLinkedInModal();
+      return true;
+    } else {
+      // Direct prompt fallback
+      const directInput = prompt('Enter your LinkedIn Profile URL or Username\n(e.g. https://linkedin.com/in/yourname or yourname):', user.linkedin_url || '');
+      if (directInput) {
+        return linkLinkedInAccount(directInput);
+      }
+      return false;
     }
-    if (typeof showToast === 'function') showToast('🔗 LinkedIn profile URL linked!');
-    if (typeof renderProfileStrength === 'function') renderProfileStrength();
-    return true;
   }
 
-  // 2. Real LinkedIn OAuth Authorization Redirect
-  const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
-  const scope = encodeURIComponent('openid profile email');
-  const state = 'collekt_linkedin_auth_' + Date.now();
-  
-  // Save pending auth flag in localStorage
-  localStorage.setItem('collekt_pending_linkedin_link', JSON.stringify({
-    userId: user.id,
-    timestamp: Date.now()
-  }));
+  // Normalize URL format
+  let finalUrl = rawUrl;
+  if (!finalUrl.includes('linkedin.com')) {
+    const cleanUsername = finalUrl.replace(/^@/, '').replace(/[^a-zA-Z0-9_-]/g, '');
+    finalUrl = 'https://www.linkedin.com/in/' + cleanUsername;
+  } else if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
+    finalUrl = 'https://' + finalUrl;
+  }
 
-  // Direct official LinkedIn Authorization URL
-  const clientId = '77collektapp2026';
+  user.linkedin_url = finalUrl;
+  user.linkedin_linked = true;
+  user.linkedin_verified_at = new Date().toISOString();
 
-  const linkedinOAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
+  if (typeof setUser === 'function') setUser(user);
+  if (typeof saveRegisteredUser === 'function') saveRegisteredUser(user);
+
+  // Sync to Supabase cloud profile if available
+  if (window.sb && user.id) {
+    try {
+      sb.from('profiles').update({ linkedin_url: finalUrl, linkedin_linked: true }).eq('id', user.id);
+    } catch(e) {}
+  }
+
+  // Update input fields on page if present
+  const editField = document.getElementById('editLinkedIn');
+  if (editField) editField.value = finalUrl;
+
+  const connectBtn = document.getElementById('btnConnectLinkedIn');
+  if (connectBtn) {
+    connectBtn.innerHTML = '<span>✓</span> Linked';
+    connectBtn.style.background = '#16a34a';
+  }
 
   if (typeof showToast === 'function') {
-    showToast('🌐 Redirecting to LinkedIn for secure account authorization...', 'info');
+    showToast('✅ LinkedIn profile linked successfully! 🔗');
+  } else {
+    alert('✅ LinkedIn profile linked successfully!');
   }
 
-  setTimeout(() => {
-    window.location.href = linkedinOAuthUrl;
-  }, 400);
-
+  if (typeof renderProfileStrength === 'function') renderProfileStrength();
   return true;
 }
 

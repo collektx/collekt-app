@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=42.0">
-<link rel="stylesheet" href="shared.css?v=42.0">
-<link rel="stylesheet" href="glass.css?v=42.0">
+<link rel="stylesheet" href="style.css?v=43.0">
+<link rel="stylesheet" href="shared.css?v=43.0">
+<link rel="stylesheet" href="glass.css?v=43.0">
 
 <style>
   body { background: var(--paper); }
@@ -610,7 +610,7 @@
       <div class="form-group">
         <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
           <span>LinkedIn Profile URL</span>
-          <button type="button" onclick="linkLinkedInAccount(document.getElementById('editLinkedIn').value)" style="background:#0077b5; color:#fff; border:none; padding:2px 8px; border-radius:6px; font-size:10.5px; font-weight:800; cursor:pointer;">🔗 Connect</button>
+          <button type="button" id="btnConnectLinkedIn" onclick="linkLinkedInAccount(document.getElementById('editLinkedIn')?.value)" style="background:#0077b5; color:#fff; border:none; padding:3px 10px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all .2s;"><span>🔗</span> Connect</button>
         </label>
         <input class="form-input" type="url" id="editLinkedIn" placeholder="https://linkedin.com/in/username">
       </div>
@@ -1023,7 +1023,7 @@
       <!-- Color Filters -->
       <div>
         <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px;">Banner Color Filters</div>
-        <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;" id="coverFilterChips">
+        <div style="display:flex; flex-wrap:wrap; gap:6px; padding-bottom:2px;" id="coverFilterChips">
           <button class="filter-chip active" onclick="setCoverFilter('none', this)" style="padding:3px 10px; font-size:11px;">Original</button>
           <button class="filter-chip" onclick="setCoverFilter('warm', this)" style="padding:3px 10px; font-size:11px;">🌅 Warm Sunset</button>
           <button class="filter-chip" onclick="setCoverFilter('cool', this)" style="padding:3px 10px; font-size:11px;">🧊 Cool Emerald</button>
@@ -1066,9 +1066,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=42.0"></script>
-<script src="app.js?v=42.0"></script>
-<script src="collekt-ai.js?v=42.0"></script>
+<script src="supabase.js?v=43.0"></script>
+<script src="app.js?v=43.0"></script>
+<script src="collekt-ai.js?v=43.0"></script>
 <script>
   requireAuth();
 
@@ -1490,7 +1490,7 @@
 
     ctx.clearRect(0, 0, w, h);
 
-    // Apply Filter
+    // Apply Filter responsively to both context and canvas element (for Safari/iOS & older WebKit)
     let filterStr = 'none';
     if (studioFilter === 'warm') filterStr = 'sepia(0.25) contrast(1.1) saturate(1.2) brightness(1.02)';
     else if (studioFilter === 'cool') filterStr = 'hue-rotate(15deg) contrast(1.08) saturate(1.1)';
@@ -1498,7 +1498,8 @@
     else if (studioFilter === 'vintage') filterStr = 'sepia(0.55) contrast(0.95) brightness(0.95)';
     else if (studioFilter === 'contrast') filterStr = 'contrast(1.3) saturate(1.15) brightness(1.02)';
     
-    ctx.filter = filterStr;
+    try { ctx.filter = filterStr; } catch(e) {}
+    canvas.style.filter = filterStr;
 
     ctx.save();
     ctx.translate(w / 2 + studioPanX, h / 2 + studioPanY);
@@ -2130,7 +2131,9 @@
 
   window.loadCoverImageIntoCanvas = function(src) {
     coverStudioImg = new Image();
-    coverStudioImg.crossOrigin = 'anonymous';
+    if (src && src.startsWith('http')) {
+      coverStudioImg.crossOrigin = 'anonymous';
+    }
     coverStudioImg.onload = function() {
       coverStudioZoom = 1;
       coverStudioRotation = 0;
@@ -2139,6 +2142,10 @@
       const range = document.getElementById('coverZoomRange');
       if (range) range.value = 1;
       drawCoverStudioCanvas();
+    };
+    coverStudioImg.onerror = function() {
+      console.warn('Cover image load error, falling back to gradient.');
+      coverStudioImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%230E3B35"/><stop offset="100%" stop-color="%2313756F"/></linearGradient></defs><rect width="100%" height="100%" fill="url(%23g)"/></svg>';
     };
     coverStudioImg.src = src;
   };
@@ -2159,7 +2166,8 @@
     else if (coverStudioFilter === 'vintage') filterStr = 'sepia(0.55) contrast(0.95) brightness(0.95)';
     else if (coverStudioFilter === 'contrast') filterStr = 'contrast(1.3) saturate(1.15) brightness(1.02)';
     
-    ctx.filter = filterStr;
+    try { ctx.filter = filterStr; } catch(e) {}
+    canvas.style.filter = filterStr;
 
     ctx.save();
     ctx.translate(w / 2 + coverStudioPanX, h / 2 + coverStudioPanY);
@@ -2263,16 +2271,31 @@
     const canvas = document.getElementById('coverStudioCanvas');
     if (!canvas) return;
 
-    const dataURL = canvas.toDataURL('image/jpeg', 0.92);
-
-    const user = getUser();
-    if (user) {
-      user.cover_photo_url = dataURL;
-      setUser(user);
+    let dataURL = null;
+    try {
+      dataURL = canvas.toDataURL('image/jpeg', 0.92);
+    } catch (err) {
+      console.warn('Canvas toDataURL SecurityError (CORS tainted), falling back to image src:', err);
+      dataURL = coverStudioImg ? coverStudioImg.src : null;
     }
+
+    if (!dataURL) {
+      showToast('⚠️ Could not save cover image. Please choose another image.', 'warning');
+      return;
+    }
+
+    const user = getUser() || {};
+    user.cover_photo_url = dataURL;
+    if (typeof setUser === 'function') setUser(user);
 
     localStorage.setItem('collekt_user_cover_photo', dataURL);
     _applyCoverPhoto(dataURL);
+
+    if (window.sb && user.id) {
+      try {
+        sb.from('profiles').update({ cover_photo_url: dataURL }).eq('id', user.id);
+      } catch(e) {}
+    }
 
     showToast('✨ Cover photo edited and saved!');
     closeModal('coverPhotoStudioModal');
@@ -2295,18 +2318,23 @@
     return (user && user.cover_photo_url) || localStorage.getItem('collekt_user_cover_photo') || null;
   };
 
-  window._applyCoverPhoto = function(url) {
+  function getSavedCoverPhoto() {
+    const user = (typeof getUser === 'function') ? getUser() : null;
+    return (user && user.cover_photo_url) || localStorage.getItem('collekt_user_cover_photo') || null;
+  }
+  window.getSavedCoverPhoto = getSavedCoverPhoto;
+
+  function _applyCoverPhoto(url) {
     const el = document.getElementById('profileCoverWrap') || document.getElementById('coProfileCover');
     if (el) {
       if (url) {
-        el.style.backgroundImage = `url("${url}")`;
-        el.style.backgroundSize = 'cover';
-        el.style.backgroundPosition = 'center';
+        el.style.background = `url("${url}") center/cover no-repeat`;
       } else {
-        el.style.backgroundImage = 'linear-gradient(to right, var(--forest), var(--teal-mid))';
+        el.style.background = 'linear-gradient(to right, var(--forest), var(--teal-mid))';
       }
     }
-  };
+  }
+  window._applyCoverPhoto = _applyCoverPhoto;
   window.onDocUploaded = function(fileData) {
     renderCertifications();
     showToast('✅ Document uploaded successfully!');
@@ -2345,6 +2373,28 @@
       }
     }
   })();
+
+
+  window.openLinkedInModal = function() {
+    const modal = document.getElementById('linkLinkedInModal');
+    if (!modal) return;
+    const user = (typeof getUser === 'function') ? getUser() : null;
+    const input = document.getElementById('modalLinkedInInput');
+    if (input) {
+      input.value = (user && user.linkedin_url) || document.getElementById('editLinkedIn')?.value || '';
+    }
+    modal.style.display = 'flex';
+  };
+
+  window.confirmLinkLinkedInFromModal = function() {
+    const val = document.getElementById('modalLinkedInInput')?.value.trim();
+    if (!val) {
+      showToast('⚠️ Please enter your LinkedIn profile link or username', 'warning');
+      return;
+    }
+    closeModal('linkLinkedInModal');
+    linkLinkedInAccount(val);
+  };
 
   function deleteCertFile(cat, idx) {
     removeUploadedFile(cat, idx);
@@ -2441,6 +2491,11 @@
     if (document.getElementById('editBio')) document.getElementById('editBio').value = prof.bio || '';
     if (document.getElementById('editPhone')) document.getElementById('editPhone').value = prof.phone || '';
     if (document.getElementById('editLinkedIn')) document.getElementById('editLinkedIn').value = prof.linkedin_url || (prof.username ? `https://linkedin.com/in/${prof.username}` : '');
+    const lBtn = document.getElementById('btnConnectLinkedIn');
+    if (lBtn && (prof.linkedin_url || prof.linkedin_linked)) {
+      lBtn.innerHTML = '<span>✓</span> Linked';
+      lBtn.style.background = '#16a34a';
+    }
     if (document.getElementById('editWebsite')) document.getElementById('editWebsite').value = prof.website || '';
   }
 
@@ -2742,7 +2797,7 @@
     <div style="padding:24px; display:flex; flex-direction:column; align-items:center;">
 
       <!-- Canvas Cropper Viewport -->
-      <div style="position:relative; width:280px; height:280px; border-radius:50%; overflow:hidden; border:4px solid var(--teal); box-shadow:0 8px 30px rgba(0,0,0,.25); background:#111; cursor:grab; user-select:none;"
+      <div style="position:relative; width:min(280px, calc(100vw - 80px)); height:min(280px, calc(100vw - 80px)); aspect-ratio:1/1; border-radius:50%; overflow:hidden; border:4px solid var(--teal); box-shadow:0 8px 30px rgba(0,0,0,.25); background:#111; cursor:grab; user-select:none;"
            id="canvasViewport"
            onmousedown="startAvatarDrag(event)"
            onmousemove="doAvatarDrag(event)"
@@ -2773,7 +2828,7 @@
         <!-- Filter Presets -->
         <div>
           <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Color Filters</div>
-          <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:6px;" id="avatarFilterChips">
+          <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding-bottom:6px;" id="avatarFilterChips">
             <button class="filter-chip active" onclick="setAvatarFilter('none', this)">Original</button>
             <button class="filter-chip" onclick="setAvatarFilter('warm', this)">🌅 Warm</button>
             <button class="filter-chip" onclick="setAvatarFilter('cool', this)">🧊 Cool Emerald</button>
@@ -2802,6 +2857,49 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+
+<!-- ════ LINK LINKEDIN MODAL ════ -->
+<div id="linkLinkedInModal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(4,14,13,0.78); z-index:99999; backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:16px;">
+  <div class="modal-card" style="position:relative; max-width:480px; width:100%; border-radius:24px; padding:28px 24px; background:var(--white); border:1px solid var(--line); box-shadow:0 32px 80px rgba(0,0,0,0.4);">
+    <button class="modal-close" onclick="closeModal('linkLinkedInModal')" style="position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%; border:none; background:rgba(0,0,0,0.06); cursor:pointer; font-size:18px; display:grid; place-items:center;">&times;</button>
+    
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+      <div style="width:42px; height:42px; border-radius:12px; background:#0077b5; color:#fff; display:grid; place-items:center; font-size:22px; font-weight:900;">
+        in
+      </div>
+      <div>
+        <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Link LinkedIn Account</h3>
+        <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">Verify your identity &amp; showcase your credentials</div>
+      </div>
+    </div>
+
+    <p style="font-size:13px; color:var(--muted); line-height:1.55; margin-bottom:16px;">
+      Connect your LinkedIn account to increase your profile completion score and display verified credentials to hiring clients.
+    </p>
+
+    <div style="background:rgba(0,119,181,0.07); border:1px solid rgba(0,119,181,0.2); border-radius:12px; padding:12px 14px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <div style="font-size:12px; font-weight:700; color:#0077b5;">
+        Need your profile link?
+      </div>
+      <a href="https://www.linkedin.com/in/" target="_blank" rel="noopener noreferrer" class="btn btn-xs" style="background:#0077b5; color:#fff; font-weight:800; font-size:11px; padding:6px 12px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
+        <span>↗️</span> Open LinkedIn
+      </a>
+    </div>
+
+    <div class="form-group" style="margin-bottom:20px;">
+      <label class="form-label" style="font-weight:800; font-size:12px; margin-bottom:6px; display:block;">Your LinkedIn Profile URL or Username</label>
+      <input class="form-input" type="text" id="modalLinkedInInput" placeholder="e.g. https://linkedin.com/in/adebayo or adebayo" style="font-size:13px;">
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:10px;">
+      <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('linkLinkedInModal')">Cancel</button>
+      <button type="button" class="btn btn-primary btn-sm" onclick="confirmLinkLinkedInFromModal()" style="background:#0077b5; font-weight:800; padding:8px 20px;">
+        🔗 Link Account
+      </button>
+    </div>
   </div>
 </div>
 
