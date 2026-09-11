@@ -2843,6 +2843,39 @@ function toggleTheme() {
   setTheme(isDark ? 'light' : 'dark', true);
 }
 
+function ensureSidebarToggleIcon() {
+  const toggleBtn = document.getElementById('sidebarToggle');
+  if (!toggleBtn) return;
+  toggleBtn.classList.remove('theme-btn');
+  if (!toggleBtn.classList.contains('sidebar-toggle-btn')) toggleBtn.classList.add('sidebar-toggle-btn');
+  if (!toggleBtn.classList.contains('topbar-icon-btn')) toggleBtn.classList.add('topbar-icon-btn');
+  toggleBtn.setAttribute('title', 'Toggle Navigation Menu');
+  toggleBtn.setAttribute('aria-label', 'Toggle Navigation Menu');
+  
+  // Guarantee the 3-line hamburger menu SVG
+  const lines = toggleBtn.querySelectorAll('line');
+  if (lines.length !== 3 || toggleBtn.querySelector('path') || toggleBtn.querySelector('circle')) {
+    toggleBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+  }
+}
+window.ensureSidebarToggleIcon = ensureSidebarToggleIcon;
+
+function observeSidebarToggle() {
+  const toggleBtn = document.getElementById('sidebarToggle');
+  if (!toggleBtn || toggleBtn._observed) return;
+  toggleBtn._observed = true;
+  ensureSidebarToggleIcon();
+  try {
+    const observer = new MutationObserver(() => {
+      if (toggleBtn.querySelector('path') || toggleBtn.querySelector('circle') || toggleBtn.querySelectorAll('line').length !== 3) {
+        ensureSidebarToggleIcon();
+      }
+    });
+    observer.observe(toggleBtn, { childList: true });
+  } catch(e) {}
+}
+window.observeSidebarToggle = observeSidebarToggle;
+
 function updateThemeButton() {
   const isDark = document.documentElement.classList.contains('dark');
   const iconHtml = getThemeIconHTML(isDark);
@@ -2865,6 +2898,8 @@ function updateThemeButton() {
   if (settToggle && settToggle.checked !== isDark) {
     settToggle.checked = isDark;
   }
+
+  ensureSidebarToggleIcon();
 }
 
 // Immediately execute early theme init
@@ -3379,6 +3414,8 @@ function buildTopbar() {
   `;
 
   updateThemeButton();
+  ensureSidebarToggleIcon();
+  observeSidebarToggle();
 
   document.getElementById('notifBtn')?.addEventListener('click', e => {
     e.stopPropagation();
@@ -3788,6 +3825,8 @@ document.addEventListener('DOMContentLoaded', () => {
   buildTopbar();
   initMobileNav();
   initModals();
+  ensureSidebarToggleIcon();
+  observeSidebarToggle();
 });
 
 /* ═ WATERMARKED DOCUMENT VIEWER & SAVER SYSTEM ═ */

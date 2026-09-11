@@ -5,21 +5,21 @@
 
 /* ── DARK MODE TOKENS & TYPOGRAPHY ───────────────── */
 html.dark {
-  --ink: #FFFFFF;
+  --ink: #F1F5F9;
   --forest: #2DD4BF;
   --teal: #14B8A6;
   --teal-mid: #2DD4BF;
-  --teal-lt: rgba(45, 212, 191, 0.18);
+  --teal-lt: rgba(45, 212, 191, 0.12);
   --amber: #F59E0B;
-  --amber-lt: rgba(245, 158, 11, 0.18);
-  --slate: #E2E8F0;
-  --muted: #94A3B8;
-  --line: rgba(255, 255, 255, 0.12);
-  --paper: #091a18;
-  --white: #0E2421;
+  --amber-lt: rgba(245, 158, 11, 0.14);
+  --slate: #94A3B8;
+  --muted: #64748B;
+  --line: rgba(255, 255, 255, 0.07);
+  --paper: #081614;
+  --white: #0c1d1a;
 }
 
-html.dark body { background: #071210; color: #F1F5F9; }
+html.dark body { background: #071311; color: #E2E8F0; }
 
 /* Global typography in dark mode */
 html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6,
@@ -50,38 +50,38 @@ html.dark .am-label, html.dark .table-head th {
 }
 
 /* Card, container, and surface dark styling */
-html.dark .card, html.dark .form-card { background: #0f2220; border-color: rgba(255,255,255,.09); color: #E2E8F0; }
-html.dark .app-sidebar { background: #071210; border-color: rgba(255,255,255,.07); }
-html.dark .sidebar-nav-item { color: rgba(255,255,255,.75); }
-html.dark .sidebar-nav-item:hover, html.dark .sidebar-nav-item.active { background: rgba(255,255,255,.08); color: #fff; }
-html.dark .app-topbar { background: #0f2220; border-color: rgba(255,255,255,.07); }
-html.dark .topbar-search { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); color: #fff; }
-html.dark .topbar-search::placeholder { color: rgba(255,255,255,.45); }
-html.dark .stat-card { background: #0f2220; border-color: rgba(255,255,255,.09); }
-html.dark .tx-row { border-color: rgba(255,255,255,.06); }
-html.dark .tx-row:hover { background: rgba(255,255,255,.04); }
-html.dark .table-head th { background: #132820; border-color: rgba(255,255,255,.06); color: #94A3B8; }
-html.dark .msg-sidebar { background: #0f2220; border-color: rgba(255,255,255,.07); }
-html.dark .msg-item { border-color: rgba(255,255,255,.06); }
-html.dark .msg-item:hover { background: rgba(255,255,255,.04); }
-html.dark .msg-item.active { background: rgba(19,117,111,.2); border-left-color: var(--teal-mid); }
-html.dark .chat-area { background: #071210; }
-html.dark .bubble.received { background: #0f2220; border-color: rgba(255,255,255,.08); color: #F1F5F9; }
-html.dark .chat-input-bar { background: #0f2220; border-color: rgba(255,255,255,.07); }
-html.dark .chat-input-bar input { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); color: #fff; }
-html.dark .gig-card { background: #0f2220; border-color: rgba(255,255,255,.09); }
-html.dark .form-input, html.dark select.form-input, html.dark textarea.form-input { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); color: #FFFFFF !important; }
-html.dark .form-input:focus, html.dark select.form-input:focus, html.dark textarea.form-input:focus { background: rgba(255,255,255,.09); border-color: var(--teal-mid); }
-html.dark .form-select, html.dark select { background-color: #0f2220; color: #FFFFFF !important; }
-html.dark option, html.dark optgroup { background-color: #0d211f; color: #F1F5F9; }
-html.dark .modal-card { background: #0f2220; border-color: rgba(255,255,255,.1); color: #F1F5F9; }
-html.dark .notif-panel, html.dark .profile-menu { background: #0f2220; border-color: rgba(255,255,255,.1); }
-html.dark .notif-item:hover, html.dark .profile-menu-item:hover { background: rgba(255,255,255,.05); }
-html.dark .pill-btn { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.1); color: #CBD5E1; }
+html.dark .card, html.dark .form-card { background: #0c1d1a; border-color: rgba(255,255,255,.06); color: #E2E8F0; }
+html.dark .app-sidebar { background: #071311; border-color: rgba(255,255,255,.06); }
+html.dark .sidebar-nav-item { color: rgba(255,255,255,.70); }
+html.dark .sidebar-nav-item:hover, html.dark .sidebar-nav-item.active { background: rgba(255,255,255,.06); color: #fff; }
+html.dark .app-topbar { background: #0c1d1a; border-color: rgba(255,255,255,.06); }
+html.dark .topbar-search { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.09); color: #fff; }
+html.dark .topbar-search::placeholder { color: rgba(255,255,255,.40); }
+html.dark .stat-card { background: #0c1d1a; border-color: rgba(255,255,255,.06); }
+html.dark .tx-row { border-color: rgba(255,255,255,.05); }
+html.dark .tx-row:hover { background: rgba(255,255,255,.03); }
+html.dark .table-head th { background: #0e2420; border-color: rgba(255,255,255,.06); color: #94A3B8; }
+html.dark .msg-sidebar { background: #0c1d1a; border-color: rgba(255,255,255,.06); }
+html.dark .msg-item { border-color: rgba(255,255,255,.05); }
+html.dark .msg-item:hover { background: rgba(255,255,255,.03); }
+html.dark .msg-item.active { background: rgba(19,117,111,.15); border-left-color: var(--teal-mid); }
+html.dark .chat-area { background: #071311; }
+html.dark .bubble.received { background: #0c1d1a; border-color: rgba(255,255,255,.06); color: #F1F5F9; }
+html.dark .chat-input-bar { background: #0c1d1a; border-color: rgba(255,255,255,.06); }
+html.dark .chat-input-bar input { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.09); color: #fff; }
+html.dark .gig-card { background: #0c1d1a; border-color: rgba(255,255,255,.06); }
+html.dark .form-input, html.dark select.form-input, html.dark textarea.form-input { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.09); color: #FFFFFF !important; }
+html.dark .form-input:focus, html.dark select.form-input:focus, html.dark textarea.form-input:focus { background: rgba(255,255,255,.08); border-color: var(--teal-mid); }
+html.dark .form-select, html.dark select { background-color: #0c1d1a; color: #FFFFFF !important; }
+html.dark option, html.dark optgroup { background-color: #0a1816; color: #F1F5F9; }
+html.dark .modal-card { background: #0c1d1a; border-color: rgba(255,255,255,.07); color: #F1F5F9; }
+html.dark .notif-panel, html.dark .profile-menu { background: #0c1d1a; border-color: rgba(255,255,255,.07); }
+html.dark .notif-item:hover, html.dark .profile-menu-item:hover { background: rgba(255,255,255,.04); }
+html.dark .pill-btn { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.08); color: #CBD5E1; }
 html.dark .pill-btn.active { background: var(--teal); border-color: var(--teal); color: #fff; }
-html.dark .project-row { background: #0f2220; border-color: rgba(255,255,255,.07); color: #F1F5F9; }
-html.dark .content-card, html.dark .upload-modal-card, html.dark .settings-card { background: #0f2220; border-color: rgba(255,255,255,.09); color: #F1F5F9; }
-html.dark .card-header, html.dark .notif-head, html.dark .profile-menu-header { border-color: rgba(255,255,255,.09); }
+html.dark .project-row { background: #0c1d1a; border-color: rgba(255,255,255,.06); color: #F1F5F9; }
+html.dark .content-card, html.dark .upload-modal-card, html.dark .settings-card { background: #0c1d1a; border-color: rgba(255,255,255,.06); color: #F1F5F9; }
+html.dark .card-header, html.dark .notif-head, html.dark .profile-menu-header { border-color: rgba(255,255,255,.06); }
 html.dark .pm-name, html.dark .notif-head h4, html.dark .card-header h3 { color: #FFFFFF; }
 html.dark .notif-item-text, html.dark .profile-menu-item { color: #E2E8F0; }
 html.dark .notif-item-text strong { color: #fff; }
@@ -1062,6 +1062,17 @@ html.dark .mobile-bottom-nav {
     border: 1px solid var(--line);
     cursor: pointer;
     touch-action: manipulation;
+  }
+  #sidebarToggle svg {
+    display: block;
+    width: 22px;
+    height: 22px;
+  }
+  #sidebarToggle svg line {
+    stroke: var(--teal) !important;
+  }
+  html.dark #sidebarToggle svg line {
+    stroke: #2DD4BF !important;
   }
 
   .app-sidebar {

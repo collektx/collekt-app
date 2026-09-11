@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=23.0">
-<link rel="stylesheet" href="shared.css?v=23.0">
-<link rel="stylesheet" href="glass.css?v=23.0">
+<link rel="stylesheet" href="style.css?v=38.0">
+<link rel="stylesheet" href="shared.css?v=38.0">
+<link rel="stylesheet" href="glass.css?v=38.0">
 
 <style>
   body { background: var(--paper); }
@@ -612,9 +612,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=28.0"></script>
-<script src="app.js?v=28.0"></script>
-<script src="collekt-ai.js?v=28.0"></script>
+<script src="supabase.js?v=38.0"></script>
+<script src="app.js?v=38.0"></script>
+<script src="collekt-ai.js?v=38.0"></script>
 <script src="settings-popup.js"></script>
 <script>
   let isHideBalance = false;
@@ -1865,6 +1865,8 @@
   document.addEventListener('DOMContentLoaded', async () => {
     buildSidebar('wallet');
     buildTopbar();
+    if (typeof ensureSidebarToggleIcon === 'function') ensureSidebarToggleIcon();
+    if (typeof observeSidebarToggle === 'function') observeSidebarToggle();
 
     const skel = document.getElementById('walletSkeleton');
     const content = document.getElementById('walletContentWrap');
@@ -1878,6 +1880,8 @@
 
     buildSidebar('wallet');
     buildTopbar();
+    if (typeof ensureSidebarToggleIcon === 'function') ensureSidebarToggleIcon();
+    if (typeof observeSidebarToggle === 'function') observeSidebarToggle();
 
     // Adjust title & tab labels based on role
     const pageTitle = document.getElementById('walletPageTitle');
@@ -1901,8 +1905,32 @@
     setTimeout(() => {
       if (skel) skel.classList.remove('loading');
       if (content) content.classList.remove('loading');
+      if (typeof ensureSidebarToggleIcon === 'function') ensureSidebarToggleIcon();
     }, 200);
   });
+</script>
+<script>
+  (function() {
+    function enforceHamburgerMenu() {
+      var b = document.getElementById('sidebarToggle');
+      if (b) {
+        b.classList.remove('theme-btn');
+        if (!b.classList.contains('sidebar-toggle-btn')) b.classList.add('sidebar-toggle-btn');
+        if (!b.classList.contains('topbar-icon-btn')) b.classList.add('topbar-icon-btn');
+        b.setAttribute('title', 'Toggle Navigation Menu');
+        b.setAttribute('aria-label', 'Toggle Navigation Menu');
+        var lines = b.querySelectorAll('line');
+        if (lines.length !== 3 || b.querySelector('path') || b.querySelector('circle')) {
+          b.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+        }
+      }
+    }
+    enforceHamburgerMenu();
+    window.addEventListener('load', enforceHamburgerMenu);
+    setTimeout(enforceHamburgerMenu, 50);
+    setTimeout(enforceHamburgerMenu, 250);
+    setTimeout(enforceHamburgerMenu, 800);
+  })();
 </script>
 </body>
 </html>
