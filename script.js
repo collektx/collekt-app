@@ -1,4 +1,4 @@
-?// -- Persona switcher ----------------------------------------------
+// -- Persona switcher ----------------------------------------------
 const personas = {
   company:     { label:"For companies",            text:"Use Collekt to discover tender opportunities, identify verified specialists and assemble a delivery team before the bid window closes." },
   consultant:  { label:"For consultants",          text:"Use Collekt to showcase your expertise, receive relevant opportunity alerts and connect with companies that need specialist support." },
