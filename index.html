@@ -22,6 +22,63 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="shortcut icon" href="favicon.ico">
 <title>Collekt &mdash; Nigeria's Project Marketplace for Professionals &amp; Companies</title>
+
+<link rel="canonical" href="https://collektng.xyz/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<!-- Google Search Console Verification Meta Tag: replace content when registering in Search Console -->
+<meta name="google-site-verification" content="collekt_gsc_trust_verification_token">
+
+<!-- Google Organization & Structured Data (Schema.org) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://collektng.xyz/#organization",
+      "name": "Collekt",
+      "legalName": "Collekt Technologies Ltd",
+      "url": "https://collektng.xyz",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://collektng.xyz/logo-stone-v2.jpg"
+      },
+      "description": "Nigeria's verified project marketplace connecting engineers, bid specialists, and EPC contractors with companies in the energy and construction sectors.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Lagos",
+        "addressCountry": "NG"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "email": "support@collekt.ng",
+        "availableLanguage": ["en"]
+      },
+      "sameAs": [
+        "https://www.trustpilot.com/review/collektng.xyz",
+        "https://www.linkedin.com/company/collekt",
+        "https://twitter.com/collekt_ng"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://collektng.xyz/#website",
+      "url": "https://collektng.xyz",
+      "name": "Collekt",
+      "publisher": {
+        "@id": "https://collektng.xyz/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://collektng.xyz/marketplace.html?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+}
+</script>
+
 <meta name="description" content="Collekt connects Nigeria's top engineers, bid specialists and EPC professionals with companies posting oil &amp; gas tenders, construction projects and procurement opportunities.">
 <meta property="og:title" content="Collekt &mdash; Nigeria's Project Marketplace">
 <meta property="og:description" content="Connect with verified engineers, bid specialists and EPC contractors across Nigeria's energy and construction sectors.">
@@ -31,9 +88,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=43.0">
-<link rel="stylesheet" href="shared.css?v=43.0">
-<link rel="stylesheet" href="glass.css?v=43.0">
+<link rel="stylesheet" href="style.css?v=44.0">
+<link rel="stylesheet" href="shared.css?v=44.0">
+<link rel="stylesheet" href="glass.css?v=44.0">
 <style>
 /* -- GLOBAL OVERRIDES ------------------------------- */
 html.dark body { background: #050e0d; }
@@ -1219,6 +1276,18 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
         <a href="javascript:void(0)" onclick="openCookiePreferencesModal()">Cookie Preferences</a>
         <a href="javascript:void(0)" onclick="alert('Contact Us: Reach out to support@collekt.ng')">Contact Us</a>
       </div>
+      <div class="footer-col">
+        <h4>Trust &amp; Reviews</h4>
+        <a href="https://www.trustpilot.com/review/collektng.xyz" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; gap:6px;">
+          <span style="color:#00b67a; font-weight:900;">★</span> Trustpilot Reviews
+        </a>
+        <a href="https://transparencyreport.google.com/safe-browsing/search?url=collektng.xyz" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; gap:6px;">
+          <span>🛡️</span> Google Safe Browsing
+        </a>
+        <a href="terms.html#compliance" style="display:flex; align-items:center; gap:6px;">
+          <span>🇳🇬</span> NDPA 2023 Compliant
+        </a>
+      </div>
     </div>
     <div class="footer-bottom">
       <span>&copy; 2026 Collekt Technologies Ltd. All rights reserved.</span>
@@ -1228,8 +1297,8 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=43.0"></script>
-<script src="app.js?v=43.0"></script>
+<script src="supabase.js?v=44.0"></script>
+<script src="app.js?v=44.0"></script>
 <script>
   // Phone tab switcher & Mascot handler
   let currentPhoneRole = 'professional';

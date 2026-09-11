@@ -1,0 +1,30 @@
+# Collekt Robots.txt - Search Engine Crawling Guidelines
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /marketplace.html
+Allow: /register.html
+Allow: /login.html
+Allow: /post-job.html
+Allow: /privacy.html
+Allow: /terms.html
+Allow: /brand-identity.html
+Allow: /upgrade.html
+Allow: /public-profile.html
+
+# Disallow private user dashboards, admin portals, and internal callbacks
+Disallow: /admin*
+Disallow: /admin-dashboard.html
+Disallow: /admin-login.html
+Disallow: /admin-portal.html
+Disallow: /auth-callback.html
+Disallow: /dashboard.html
+Disallow: /company-dashboard.html
+Disallow: /messages.html
+Disallow: /proposals.html
+Disallow: /wallet.html
+Disallow: /my-jobs.html
+Disallow: /.netlify/
+
+# XML Sitemap for Google, Bing & Search Engines
+Sitemap: https://collektng.xyz/sitemap.xml
