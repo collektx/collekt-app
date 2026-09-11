@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=40.1">
-<link rel="stylesheet" href="shared.css?v=40.1">
-<link rel="stylesheet" href="glass.css?v=40.1">
+<link rel="stylesheet" href="style.css?v=41.0">
+<link rel="stylesheet" href="shared.css?v=41.0">
+<link rel="stylesheet" href="glass.css?v=41.0">
 
 <style>
   body { background: var(--paper); }
@@ -94,7 +94,32 @@
   .slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; }
   input:checked + .slider { background: var(--teal); }
   input:checked + .slider::before { transform: translateX(20px); }
+  /* Certificate & Degree Card Responsive Layout */
+  .cert-card-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; background: var(--paper); border-radius: var(--r); border: 1px solid var(--line); transition: border-color .2s; }
+  .cert-card-row:hover { border-color: var(--teal); }
+  .cert-card-main { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+  .cert-card-icon { font-size: 24px; flex-shrink: 0; }
+  .cert-card-text { min-width: 0; flex: 1; }
+  .cert-card-title { font-size: 14px; font-weight: 800; color: var(--ink); word-break: break-word; line-height: 1.4; }
+  .cert-card-sub { font-size: 12px; color: var(--muted); margin-top: 3px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; line-height: 1.4; }
+  .cert-attachment-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; background: var(--teal-lt); color: var(--teal); font-size: 11px; font-weight: 800; }
+  .cert-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .cert-btn-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 4px 6px; transition: color .2s; }
+  .cert-btn-del:hover { color: #dc2626; }
+
   @media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } .profile-stats-bar { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) {
+    .profile-grid { grid-template-columns: 1fr; }
+    .profile-stats-bar { grid-template-columns: repeat(2, 1fr); padding: 12px 16px; }
+    .profile-cover-wrap { height: 140px; }
+    .profile-avatar-wrapper { left: 16px; bottom: -28px; width: 84px; height: 84px; }
+    .profile-info-bar { padding: 40px 16px 20px; }
+    .profile-tabs-bar { padding: 0 12px; }
+    .profile-tab { padding: 12px 14px; font-size: 13px; }
+    .content-section { padding: 18px 14px; }
+    .cert-card-row { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; }
+    .cert-card-actions { width: 100% !important; justify-content: flex-end !important; padding-top: 8px !important; border-top: 1px dashed var(--line) !important; }
+  }
 </style>
 </head>
 <body>
@@ -764,9 +789,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=40.1"></script>
-<script src="app.js?v=40.1"></script>
-<script src="collekt-ai.js?v=40.1"></script>
+<script src="supabase.js?v=41.0"></script>
+<script src="app.js?v=41.0"></script>
+<script src="collekt-ai.js?v=41.0"></script>
 <script>
   requireAuth();
 
@@ -1522,10 +1547,10 @@
     const cvFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('cv') : [];
     if (!cvFiles || cvFiles.length === 0) {
       container.innerHTML = `
-        <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--paper); border:2px dashed var(--line); border-radius:var(--r); gap:12px;">
-          <div style="display:flex; align-items:center; gap:12px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--paper); border:2px dashed var(--line); border-radius:var(--r); gap:12px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
             <div style="font-size:28px; flex-shrink:0;">📄</div>
-            <div>
+            <div style="min-width:0; flex:1;">
               <div style="font-size:14px; font-weight:800; color:var(--ink);">No CV Uploaded Yet</div>
               <div style="font-size:12px; color:var(--muted); margin-top:2px;">Upload your CV / Resume to boost your profile strength and rank higher for client proposals.</div>
             </div>
@@ -1542,12 +1567,12 @@
     const dateStr = latestCv.timestamp ? new Date(latestCv.timestamp).toLocaleDateString() : 'Recently';
 
     container.innerHTML = `
-      <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:var(--paper); border:1px solid var(--teal); border-radius:var(--r); transition:all 0.2s;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:var(--paper); border:1.5px solid var(--teal); border-radius:var(--r); transition:all 0.2s; flex-wrap:wrap; gap:12px;">
         <div style="display:flex; align-items:center; gap:14px; min-width:0; flex:1;">
           <div style="font-size:30px; flex-shrink:0;">${typeof getFileTypeIcon === 'function' ? getFileTypeIcon(latestCv.type, latestCv.name) : '📄'}</div>
           <div style="min-width:0; flex:1;">
-            <div style="font-size:14px; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHTML(latestCv.name)}">${escapeHTML(latestCv.name)}</div>
-            <div style="font-size:12px; color:var(--muted); margin-top:2px; display:flex; align-items:center; gap:8px;">
+            <div style="font-size:14px; font-weight:800; color:var(--ink); word-break:break-word; line-height:1.4;" title="${escapeHTML(latestCv.name)}">${escapeHTML(latestCv.name)}</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px; display:flex; flex-wrap:wrap; align-items:center; gap:6px;">
               <span>${sizeStr}</span> &bull; 
               <span style="color:var(--teal); font-weight:800;">✅ Active Resume</span> &bull; 
               <span>Uploaded ${dateStr}</span>
@@ -1562,66 +1587,160 @@
     `;
   }
 
-  // -- Certifications & Documents rendering --
+  // Trigger file attachment directly onto an existing qualification
+  window.triggerDegreeFileUpload = function(index) {
+    let input = document.getElementById('degreeTempFileInput');
+    if (!input) {
+      input = document.createElement('input');
+      input.type = 'file';
+      input.id = 'degreeTempFileInput';
+      input.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png,.webp';
+      input.style.display = 'none';
+      document.body.appendChild(input);
+    }
+    input.onchange = function() {
+      const file = input.files?.[0];
+      if (!file) return;
+      if (file.size > 50 * 1024 * 1024) {
+        showToast('⚠️ File is too large (max 50MB)', 'warning');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const quals = JSON.parse(localStorage.getItem('collekt_custom_quals') || '[]');
+        if (quals[index]) {
+          quals[index].fileName = file.name;
+          quals[index].size = file.size;
+          quals[index].type = file.type || 'application/pdf';
+          quals[index].dataURL = e.target.result;
+          quals[index].timestamp = Date.now();
+          localStorage.setItem('collekt_custom_quals', JSON.stringify(quals));
+          renderCertifications();
+          renderProfileStrength();
+          showToast(`✅ Certificate attached to ${quals[index].name}!`);
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  };
+
+  // -- Certifications & Qualifications rendering --
   function renderCertifications() {
     renderCvCard();
     const container = document.getElementById('certsUploaded');
     if (!container) return;
 
+    // Clean any legacy synthetic files first
+    if (typeof scrubSyntheticUploads === 'function') {
+      try { scrubSyntheticUploads(); } catch(e){}
+    }
+
     const customQuals = JSON.parse(localStorage.getItem('collekt_custom_quals') || '[]');
-    const cvFiles = getUploadedFiles('cv');
-    const certFiles = getUploadedFiles('certifications');
-    const docFiles = [...getUploadedFiles('document'), ...getUploadedFiles('documents')];
+    const certFiles = (typeof getUploadedFiles === 'function' ? getUploadedFiles('certifications') : [])
+      .filter(f => f && (f.dataURL || f.fileUrl || (f.size && f.size !== 250000)));
+    const docFiles = [
+      ...(typeof getUploadedFiles === 'function' ? getUploadedFiles('document') : []),
+      ...(typeof getUploadedFiles === 'function' ? getUploadedFiles('documents') : [])
+    ].filter(f => f && (f.dataURL || f.fileUrl || (f.size && f.size !== 250000)));
 
     let html = '';
+    window.uploadedDocsRegistry = [];
 
-    // Custom qualifications & uploaded files
-    const allFiles = [
-      ...cvFiles.map((f,i) => ({...f, cat: 'cv', label: 'CV / Resume', idx: i})),
-      ...certFiles.map((f,i) => ({...f, cat: 'certifications', label: 'Certification File', idx: i})),
-      ...docFiles.map((f,i) => ({...f, cat: 'document', label: 'Document', idx: i}))
-    ];
-
-    window.uploadedDocsRegistry = [...customQuals, ...allFiles];
-
+    // 1. Render Degrees & Academic Qualifications
     if (customQuals.length > 0) {
       customQuals.forEach((q, i) => {
+        const hasAttachedFile = !!(q.fileName && (q.dataURL || q.fileUrl || (q.size && q.size > 0)));
+        const regIdx = window.uploadedDocsRegistry.length;
+        window.uploadedDocsRegistry.push(q);
+
         html += `
-          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--paper);border-radius:var(--r);border:1px solid var(--line);transition:all .2s;" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--line)'">
-            <div style="font-size:24px;flex-shrink:0;">🎓</div>
-            <div style="flex:1;min-width:0;cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${i}])">
-              <div style="font-size:13px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${q.name}</div>
-              <div style="font-size:11px;color:var(--muted);">${q.issuer} &bull; ${q.category} &bull; ${q.year}</div>
+          <div class="cert-card-row">
+            <div class="cert-card-main">
+              <div class="cert-card-icon">🎓</div>
+              <div class="cert-card-text">
+                <div class="cert-card-title">${escapeHTML(q.name)}</div>
+                <div class="cert-card-sub">
+                  <span>${escapeHTML(q.issuer || 'Academic Institution')}</span> &bull; 
+                  <span>${escapeHTML(q.category || 'Academic Degree')}</span> &bull; 
+                  <span>${escapeHTML(String(q.year || ''))}</span>
+                  ${hasAttachedFile ? `<span class="cert-attachment-pill">📎 ${escapeHTML(q.fileName)} (${typeof formatFileSize === 'function' ? formatFileSize(q.size) : Math.round(q.size/1024) + ' KB'})</span>` : ''}
+                </div>
+              </div>
             </div>
-            <button onclick="openDocumentViewer(window.uploadedDocsRegistry[${i}])" style="padding:4px 10px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--teal); font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="Preview & Download with Watermark">👁️ Preview</button>
-            <button onclick="deleteCustomQual(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px;transition:.2s;" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='var(--muted)'" title="Remove">✕</button>
+            <div class="cert-card-actions">
+              ${hasAttachedFile
+                ? `<button class="btn btn-outline btn-sm" style="padding:5px 12px; border-color:var(--teal); color:var(--teal); font-size:12px; font-weight:800; border-radius:6px; cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${regIdx}])" title="Preview Attached Certificate">👁️ Preview</button>`
+                : `<button class="btn btn-outline btn-sm" style="padding:5px 12px; border-color:var(--teal); color:var(--teal); font-size:12px; font-weight:800; border-radius:6px; cursor:pointer;" onclick="triggerDegreeFileUpload(${i})" title="Upload your authentic degree or certificate file">📎 Attach Certificate</button>`}
+              <button class="cert-btn-del" onclick="deleteCustomQual(${i})" title="Remove Qualification">✕</button>
+            </div>
           </div>
         `;
       });
     }
 
-    allFiles.forEach((f, idx) => {
-      const globalIdx = customQuals.length + idx;
-      const isCv = f.cat === 'cv';
-      html += `
-        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:${isCv ? '#f0fdf4' : 'var(--paper)'};border-radius:var(--r);border:1.5px solid ${isCv ? '#16a34a' : 'var(--line)'};transition:all .2s;" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='${isCv ? '#16a34a' : 'var(--line)'}'">
-          <div style="font-size:26px;flex-shrink:0;">${isCv ? '📄' : getFileTypeIcon(f.type, f.name)}</div>
-          <div style="flex:1;min-width:0;cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${globalIdx}])">
-            <div style="font-size:14px;font-weight:800;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:8px;">
-              <span>${formatFileSize(f.size)}</span> &bull; 
-              <span style="color:${isCv ? '#15803d' : 'var(--teal)'}; font-weight:800;">${isCv ? '✅ Active Resume (CV)' : f.label}</span> &bull; 
-              <span>Uploaded ${new Date(f.timestamp).toLocaleDateString()}</span>
+    // 2. Render Authentic Uploaded Certificate Files (No synthetic PDFs!)
+    if (certFiles.length > 0) {
+      certFiles.forEach((f, idx) => {
+        // Prevent showing duplicate if file already attached to custom qualification
+        const alreadyInQual = customQuals.some(q => q.fileName === f.name && q.size === f.size);
+        if (alreadyInQual) return;
+
+        const regIdx = window.uploadedDocsRegistry.length;
+        window.uploadedDocsRegistry.push(f);
+
+        html += `
+          <div class="cert-card-row">
+            <div class="cert-card-main">
+              <div class="cert-card-icon">${typeof getFileTypeIcon === 'function' ? getFileTypeIcon(f.type, f.name) : '🏅'}</div>
+              <div class="cert-card-text">
+                <div class="cert-card-title">${escapeHTML(f.name)}</div>
+                <div class="cert-card-sub">
+                  <span>${typeof formatFileSize === 'function' ? formatFileSize(f.size) : Math.round(f.size/1024) + ' KB'}</span> &bull; 
+                  <span style="color:var(--teal); font-weight:800;">🏅 Uploaded Certificate</span> &bull; 
+                  <span>${f.timestamp ? new Date(f.timestamp).toLocaleDateString() : 'Recently'}</span>
+                </div>
+              </div>
+            </div>
+            <div class="cert-card-actions">
+              <button class="btn btn-outline btn-sm" style="padding:5px 12px; border-color:var(--teal); color:var(--teal); font-size:12px; font-weight:800; border-radius:6px; cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${regIdx}])" title="Preview Certificate">👁️ Preview</button>
+              <button class="cert-btn-del" onclick="deleteCertFile('certifications', ${idx})" title="Remove File">✕</button>
             </div>
           </div>
-          <button onclick="openDocumentViewer(window.uploadedDocsRegistry[${globalIdx}])" style="padding:6px 14px; border:1px solid ${isCv ? '#16a34a' : 'var(--line)'}; border-radius:8px; background:var(--white); color:var(--teal); font-size:12px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:6px;" title="Preview & Download with Watermark">👁️ Preview</button>
-          <button onclick="deleteCertFile('${f.cat}', ${f.idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px;transition:.2s;" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='var(--muted)'" title="Remove">✕</button>
-        </div>
-      `;
-    });
+        `;
+      });
+    }
 
-    if (customQuals.length === 0 && allFiles.length === 0) {
-      container.innerHTML = `<div style="font-size:13px; color:var(--muted); font-style:italic; padding:16px; text-align:center; background:var(--paper); border-radius:var(--r);">No academic degrees, certifications or CVs added yet. Click one of the buttons below to add credentials.</div>`;
+    // 3. Render Other Uploaded Documents
+    if (docFiles.length > 0) {
+      docFiles.forEach((f, idx) => {
+        const regIdx = window.uploadedDocsRegistry.length;
+        window.uploadedDocsRegistry.push(f);
+
+        html += `
+          <div class="cert-card-row">
+            <div class="cert-card-main">
+              <div class="cert-card-icon">${typeof getFileTypeIcon === 'function' ? getFileTypeIcon(f.type, f.name) : '📄'}</div>
+              <div class="cert-card-text">
+                <div class="cert-card-title">${escapeHTML(f.name)}</div>
+                <div class="cert-card-sub">
+                  <span>${typeof formatFileSize === 'function' ? formatFileSize(f.size) : Math.round(f.size/1024) + ' KB'}</span> &bull; 
+                  <span>Document</span> &bull; 
+                  <span>${f.timestamp ? new Date(f.timestamp).toLocaleDateString() : 'Recently'}</span>
+                </div>
+              </div>
+            </div>
+            <div class="cert-card-actions">
+              <button class="btn btn-outline btn-sm" style="padding:5px 12px; border-color:var(--teal); color:var(--teal); font-size:12px; font-weight:800; border-radius:6px; cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${regIdx}])" title="Preview Document">👁️ Preview</button>
+              <button class="cert-btn-del" onclick="deleteCertFile('document', ${idx})" title="Remove File">✕</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    if (customQuals.length === 0 && certFiles.length === 0 && docFiles.length === 0) {
+      container.innerHTML = `<div style="font-size:13px; color:var(--muted); font-style:italic; padding:20px; text-align:center; background:var(--paper); border-radius:var(--r); border:1px dashed var(--line);">No academic degrees, certifications or documents added yet. Use the buttons below to add a degree or upload your certificates.</div>`;
       return;
     }
 

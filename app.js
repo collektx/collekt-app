@@ -3677,6 +3677,7 @@ function buildLiquidGlassNav(activePageKey) {
 
 // Auto-run buildSidebar on DOMContentLoaded if element exists and is empty
 document.addEventListener('DOMContentLoaded', () => {
+  try { scrubSyntheticUploads(); } catch(e){}
   const sidebar = document.getElementById('appSidebar');
   if (sidebar && (!sidebar.children || sidebar.children.length === 0)) {
     buildSidebar();
@@ -3685,6 +3686,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   initMobileNav();
 });
+try { scrubSyntheticUploads(); } catch(e){}
 
 // -- TOP BAR -------------------------------------------
 function buildTopbar() {
@@ -3991,55 +3993,74 @@ function saveUploadedFile(category, fileData) {
   return all[category];
 }
 
+function scrubSyntheticUploads() {
+  try {
+    const key = _uploadsKey();
+    const all = _getAllUploads();
+    let changed = false;
+    ['certifications', 'portfolio', 'cv', 'documents'].forEach(cat => {
+      if (Array.isArray(all[cat])) {
+        const originalLen = all[cat].length;
+        // Keep ONLY real files (with valid dataURL, publicUrl, fileUrl, or genuine non-synthetic size)
+        all[cat] = all[cat].filter(f => f && (f.dataURL || f.fileUrl || f.publicUrl || (f.size && f.size !== 250000 && f.size !== 350000 && f.size !== 450000)));
+        if (all[cat].length !== originalLen) changed = true;
+      }
+    });
+    if (changed) {
+      _saveAllUploads(all);
+    }
+
+    // Clean up collekt_custom_quals if any entry was tagged with fake 250000 size
+    const quals = JSON.parse(localStorage.getItem('collekt_custom_quals') || '[]');
+    let qualsChanged = false;
+    quals.forEach(q => {
+      if (q.size === 250000 && !q.dataURL && !q.fileUrl) {
+        q.size = 0;
+        q.fileName = null;
+        qualsChanged = true;
+      }
+    });
+    if (qualsChanged) {
+      localStorage.setItem('collekt_custom_quals', JSON.stringify(quals));
+    }
+  } catch(e) {
+    console.warn('Uploads scrub notice:', e);
+  }
+}
+
 function getUploadedFiles(category, passedUser) {
   const all = _getAllUploads();
   let files = all[category] || [];
   
-  // Backup lookups across all categories for user session & localStorage persistence
+  // Strictly filter out any legacy synthetic dummy entries
+  if (Array.isArray(files)) {
+    files = files.filter(f => f && (f.dataURL || f.fileUrl || f.publicUrl || (f.size && f.size !== 250000 && f.size !== 350000 && f.size !== 450000)));
+  } else {
+    files = [];
+  }
+  
+  // Backup lookups ONLY for genuine CV with authentic data
   let u = passedUser || null;
   if (!u) {
     try { u = JSON.parse(localStorage.getItem('collekt_user')); } catch(e){}
   }
-  if (files.length === 0 && u) {
-    if (category === 'cv') {
-      let cvObj = null;
-      try { cvObj = JSON.parse(localStorage.getItem('collekt_user_cv')); } catch(e){}
-      if (cvObj && cvObj.name) {
-        files = [cvObj];
-      } else if (u.cv_name || u.cv || u.cv_url) {
-        files = [{
-          name: u.cv_name || 'Uploaded_CV.pdf',
-          size: u.cv_size || 450000,
-          type: 'application/pdf',
-          dataURL: u.cv_data || (typeof u.cv === 'string' && u.cv.startsWith('data:') ? u.cv : null),
-          timestamp: new Date().toISOString()
-        }];
-      }
-    } else if (category === 'certifications') {
-      let customCerts = [];
-      try { customCerts = JSON.parse(localStorage.getItem('collekt_custom_quals') || '[]'); } catch(e){}
-      const certs = (u.certifications && u.certifications.length) ? u.certifications : customCerts;
-      if (certs.length > 0) {
-        files = certs.map(c => ({
-          name: typeof c === 'string' ? c : (c.name || c.title || 'Engineering_Certification.pdf'),
-          size: 250000,
-          type: 'application/pdf',
-          timestamp: new Date().toISOString()
-        }));
-      }
-    } else if (category === 'portfolio') {
-      const items = (u.projects && u.projects.length) ? u.projects : (u.portfolio || []);
-      if (items.length > 0) {
-        files = items.map(p => ({
-          name: typeof p === 'string' ? p : (p.name || p.title || 'Project_Portfolio_Doc.pdf'),
-          size: 350000,
-          type: 'application/pdf',
-          timestamp: new Date().toISOString()
-        }));
-      }
+  if (files.length === 0 && u && category === 'cv') {
+    let cvObj = null;
+    try { cvObj = JSON.parse(localStorage.getItem('collekt_user_cv')); } catch(e){}
+    if (cvObj && cvObj.name && (cvObj.dataURL || cvObj.fileUrl || (cvObj.size && cvObj.size !== 450000))) {
+      files = [cvObj];
+    } else if (u.cv_data || (typeof u.cv === 'string' && u.cv.startsWith('data:'))) {
+      files = [{
+        name: u.cv_name || 'Uploaded_CV.pdf',
+        size: u.cv_size || 0,
+        type: 'application/pdf',
+        dataURL: u.cv_data || u.cv,
+        timestamp: new Date().toISOString()
+      }];
     }
   }
 
+  // Never synthesize fake files for certifications, portfolio, or documents!
   return files;
 }
 
