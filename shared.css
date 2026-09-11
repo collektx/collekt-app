@@ -873,6 +873,55 @@ html.dark .whistory-filter-input { background: rgba(255,255,255,.05); border-col
   border-color: var(--teal);
 }
 
+.ai-skills-bar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 12px;
+  background: rgba(14, 59, 53, 0.05);
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.ai-skills-bar::-webkit-scrollbar {
+  display: none;
+}
+.ai-skill-pill {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 99px;
+  background: var(--white);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  color: var(--teal);
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.ai-skill-pill:hover {
+  background: var(--teal);
+  color: #fff;
+  border-color: var(--teal);
+  transform: translateY(-1px);
+}
+html.dark .ai-skills-bar {
+  background: rgba(0, 0, 0, 0.25);
+}
+html.dark .ai-skill-pill {
+  background: #0c1d1a;
+  border-color: rgba(45, 212, 191, 0.25);
+  color: #2DD4BF;
+}
+html.dark .ai-skill-pill:hover {
+  background: #0e3b35;
+  color: #fff;
+}
+
+
 /* ═════════════════════════════════════════════════════════
    PREMIUM UI/UX ENHANCEMENTS & DESIGN TOKENS
    ═════════════════════════════════════════════════════════ */

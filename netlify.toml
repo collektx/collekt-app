@@ -59,6 +59,17 @@
     Cache-Control = "public, max-age=0, must-revalidate"
 
 
+# Gemini AI Copilot Serverless Functions
+[[redirects]]
+  from = "/api/gemini"
+  to = "/.netlify/functions/ai-copilot"
+  status = 200
+
+[[redirects]]
+  from = "/api/ai-copilot"
+  to = "/.netlify/functions/ai-copilot"
+  status = 200
+
 # Paystack API Serverless Functions
 [[redirects]]
   from = "/api/paystack/*"
