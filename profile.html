@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=41.0">
-<link rel="stylesheet" href="shared.css?v=41.0">
-<link rel="stylesheet" href="glass.css?v=41.0">
+<link rel="stylesheet" href="style.css?v=42.0">
+<link rel="stylesheet" href="shared.css?v=42.0">
+<link rel="stylesheet" href="glass.css?v=42.0">
 
 <style>
   body { background: var(--paper); }
@@ -658,7 +658,219 @@
 
     <div class="form-group">
       <label class="form-label">Awarding Institution / Certification Body</label>
-      <input class="form-input" type="text" id="qualIssuer" placeholder="e.g. University of Lagos or PMI">
+      
+      <select class="form-input" id="qualIssuer" onchange="handleIssuerChange(this)">
+        <option value="">Select Awarding Institution</option>
+        
+        <optgroup label="🏛️ Federal Universities (Nigeria)">
+          <option value="University of Lagos (UNILAG)">University of Lagos (UNILAG)</option>
+          <option value="University of Ibadan (UI)">University of Ibadan (UI)</option>
+          <option value="Obafemi Awolowo University (OAU), Ile-Ife">Obafemi Awolowo University (OAU), Ile-Ife</option>
+          <option value="Ahmadu Bello University (ABU), Zaria">Ahmadu Bello University (ABU), Zaria</option>
+          <option value="University of Nigeria, Nsukka (UNN)">University of Nigeria, Nsukka (UNN)</option>
+          <option value="University of Benin (UNIBEN)">University of Benin (UNIBEN)</option>
+          <option value="University of Ilorin (UNILORIN)">University of Ilorin (UNILORIN)</option>
+          <option value="University of Port Harcourt (UNIPORT)">University of Port Harcourt (UNIPORT)</option>
+          <option value="Federal University of Technology, Akure (FUTA)">Federal University of Technology, Akure (FUTA)</option>
+          <option value="Federal University of Technology, Minna (FUTMINNA)">Federal University of Technology, Minna (FUTMINNA)</option>
+          <option value="Federal University of Technology, Owerri (FUTO)">Federal University of Technology, Owerri (FUTO)</option>
+          <option value="Bayero University, Kano (BUK)">Bayero University, Kano (BUK)</option>
+          <option value="University of Abuja (UNIABUJA)">University of Abuja (UNIABUJA)</option>
+          <option value="University of Calabar (UNICAL)">University of Calabar (UNICAL)</option>
+          <option value="University of Jos (UNIJOS)">University of Jos (UNIJOS)</option>
+          <option value="University of Uyo (UNIUYO)">University of Uyo (UNIUYO)</option>
+          <option value="Federal University of Agriculture, Abeokuta (FUNAAB)">Federal University of Agriculture, Abeokuta (FUNAAB)</option>
+          <option value="Federal University of Petroleum Resources, Effurun (FUPRE)">Federal University of Petroleum Resources, Effurun (FUPRE)</option>
+          <option value="Abubakar Tafawa Balewa University (ATBU), Bauchi">Abubakar Tafawa Balewa University (ATBU), Bauchi</option>
+          <option value="Modibbo Adama University, Yola (MAU)">Modibbo Adama University, Yola (MAU)</option>
+          <option value="Michael Okpara University of Agriculture, Umudike (MOUAU)">Michael Okpara University of Agriculture, Umudike (MOUAU)</option>
+          <option value="Nnamdi Azikiwe University, Awka (UNIZIK)">Nnamdi Azikiwe University, Awka (UNIZIK)</option>
+          <option value="Usmanu Danfodiyo University, Sokoto (UDUS)">Usmanu Danfodiyo University, Sokoto (UDUS)</option>
+          <option value="Federal University, Oye-Ekiti (FUOYE)">Federal University, Oye-Ekiti (FUOYE)</option>
+          <option value="Federal University, Lokoja (FULOKOJA)">Federal University, Lokoja (FULOKOJA)</option>
+          <option value="Federal University, Lafia (FULAFIA)">Federal University, Lafia (FULAFIA)</option>
+          <option value="Federal University, Dutse (FUD)">Federal University, Dutse (FUD)</option>
+          <option value="Federal University, Dutsin-Ma (FUDMA)">Federal University, Dutsin-Ma (FUDMA)</option>
+          <option value="Federal University, Kashere (FUKASHERE)">Federal University, Kashere (FUKASHERE)</option>
+          <option value="Federal University, Wukari (FUWUKARI)">Federal University, Wukari (FUWUKARI)</option>
+          <option value="Federal University, Birnin Kebbi (FUBK)">Federal University, Birnin Kebbi (FUBK)</option>
+          <option value="Federal University, Gusau (FUGUS)">Federal University, Gusau (FUGUS)</option>
+          <option value="Federal University, Gashua (FUGASHUA)">Federal University, Gashua (FUGASHUA)</option>
+          <option value="Federal University of Health Sciences, Otukpo (FUHSO)">Federal University of Health Sciences, Otukpo (FUHSO)</option>
+          <option value="Federal University of Agriculture, Zuru (FUAZ)">Federal University of Agriculture, Zuru (FUAZ)</option>
+          <option value="Nigeria Maritime University, Okerenkoko (NMU)">Nigeria Maritime University, Okerenkoko (NMU)</option>
+          <option value="Air Force Institute of Technology (AFIT), Kaduna">Air Force Institute of Technology (AFIT), Kaduna</option>
+          <option value="Nigerian Defence Academy (NDA), Kaduna">Nigerian Defence Academy (NDA), Kaduna</option>
+          <option value="Nigerian Police Academy, Wudil (POLAC)">Nigerian Police Academy, Wudil (POLAC)</option>
+          <option value="National Open University of Nigeria (NOUN)">National Open University of Nigeria (NOUN)</option>
+        </optgroup>
+
+        <optgroup label="🏢 State Universities (Nigeria)">
+          <option value="Lagos State University (LASU), Ojo">Lagos State University (LASU), Ojo</option>
+          <option value="Lagos State University of Science and Technology (LASUSTECH)">Lagos State University of Science and Technology (LASUSTECH)</option>
+          <option value="Lagos State University of Education (LASUED)">Lagos State University of Education (LASUED)</option>
+          <option value="Rivers State University (RSU), Port Harcourt">Rivers State University (RSU), Port Harcourt</option>
+          <option value="Olabisi Onabanjo University (OOU), Ago-Iwoye">Olabisi Onabanjo University (OOU), Ago-Iwoye</option>
+          <option value="Delta State University (DELSU), Abraka">Delta State University (DELSU), Abraka</option>
+          <option value="Delta State University of Science and Technology, Ozoro">Delta State University of Science and Technology, Ozoro</option>
+          <option value="Dennis Osadebay University, Asaba">Dennis Osadebay University, Asaba</option>
+          <option value="University of Delta, Agbor">University of Delta, Agbor</option>
+          <option value="Adekunle Ajasin University, Akungba-Akoko (AAUA)">Adekunle Ajasin University, Akungba-Akoko (AAUA)</option>
+          <option value="Olusegun Agagu University of Science and Technology (OAUSTECH), Okitipupa">Olusegun Agagu University of Science and Technology (OAUSTECH), Okitipupa</option>
+          <option value="Osun State University (UNIOSUN), Osogbo">Osun State University (UNIOSUN), Osogbo</option>
+          <option value="Ekiti State University (EKSU), Ado-Ekiti">Ekiti State University (EKSU), Ado-Ekiti</option>
+          <option value="Bamidele Olumilua University of Education, Science and Technology, Ikere-Ekiti (BOUESTI)">Bamidele Olumilua University of Education, Science and Technology, Ikere-Ekiti (BOUESTI)</option>
+          <option value="Ambrose Alli University (AAU), Ekpoma">Ambrose Alli University (AAU), Ekpoma</option>
+          <option value="Edo State University, Uzairue">Edo State University, Uzairue</option>
+          <option value="Ladoke Akintola University of Technology (LAUTECH), Ogbomoso">Ladoke Akintola University of Technology (LAUTECH), Ogbomoso</option>
+          <option value="Emmanuel Alayande University of Education, Oyo">Emmanuel Alayande University of Education, Oyo</option>
+          <option value="Ignatius Ajuru University of Education (IAUE), Port Harcourt">Ignatius Ajuru University of Education (IAUE), Port Harcourt</option>
+          <option value="Chukwuemeka Odumegwu Ojukwu University (COOU), Uli">Chukwuemeka Odumegwu Ojukwu University (COOU), Uli</option>
+          <option value="Abia State University (ABSU), Uturu">Abia State University (ABSU), Uturu</option>
+          <option value="Ebonyi State University (EBSU), Abakaliki">Ebonyi State University (EBSU), Abakaliki</option>
+          <option value="Enugu State University of Science and Technology (ESUT)">Enugu State University of Science and Technology (ESUT)</option>
+          <option value="State University of Medical and Applied Sciences (SUMAS), Igbo-Eno">State University of Medical and Applied Sciences (SUMAS), Igbo-Eno</option>
+          <option value="Imo State University (IMSU), Owerri">Imo State University (IMSU), Owerri</option>
+          <option value="Kingsley Ozumba Mbadiwe University, Ogboko (KOMU)">Kingsley Ozumba Mbadiwe University, Ogboko (KOMU)</option>
+          <option value="Benue State University (BSU), Makurdi">Benue State University (BSU), Makurdi</option>
+          <option value="Kaduna State University (KASU)">Kaduna State University (KASU)</option>
+          <option value="Aliko Dangote University of Science and Technology (KUST), Wudil">Aliko Dangote University of Science and Technology (KUST), Wudil</option>
+          <option value="Yusuf Maitama Sule University, Kano (NWU)">Yusuf Maitama Sule University, Kano (NWU)</option>
+          <option value="Kwara State University (KWASU), Malete">Kwara State University (KWASU), Malete</option>
+          <option value="Nasarawa State University, Keffi (NSUK)">Nasarawa State University, Keffi (NSUK)</option>
+          <option value="Niger Delta University (NDU), Wilberforce Island">Niger Delta University (NDU), Wilberforce Island</option>
+          <option value="Bayelsa Medical University (BMU), Yenagoa">Bayelsa Medical University (BMU), Yenagoa</option>
+          <option value="Plateau State University, Bokkos (PLASU)">Plateau State University, Bokkos (PLASU)</option>
+          <option value="Taraba State University, Jalingo (TSU)">Taraba State University, Jalingo (TSU)</option>
+          <option value="Umaru Musa Yar'adua University, Katsina (UMYU)">Umaru Musa Yar'adua University, Katsina (UMYU)</option>
+          <option value="Sa'adu Zungur University (Bauchi State University, Gadau)">Sa'adu Zungur University (Bauchi State University, Gadau)</option>
+          <option value="Ibrahim Badamasi Babangida University (IBBU), Lapai">Ibrahim Badamasi Babangida University (IBBU), Lapai</option>
+          <option value="Gombe State University, Tudun Wada (GSU)">Gombe State University, Tudun Wada (GSU)</option>
+          <option value="Kebbi State University of Science and Technology, Aliero (KSUSTA)">Kebbi State University of Science and Technology, Aliero (KSUSTA)</option>
+          <option value="Sokoto State University (SSU)">Sokoto State University (SSU)</option>
+          <option value="Yobe State University, Damaturu (YSU)">Yobe State University, Damaturu (YSU)</option>
+          <option value="Prince Abubakar Audu University, Anyigba (Kogi State University)">Prince Abubakar Audu University, Anyigba (Kogi State University)</option>
+          <option value="Confluence University of Science and Technology, Osara (CUSTECH)">Confluence University of Science and Technology, Osara (CUSTECH)</option>
+          <option value="Adamawa State University, Mubi (ADSU)">Adamawa State University, Mubi (ADSU)</option>
+          <option value="Borno State University, Maiduguri (BOSU)">Borno State University, Maiduguri (BOSU)</option>
+        </optgroup>
+
+        <optgroup label="🎓 Private Universities (Nigeria)">
+          <option value="Covenant University, Ota">Covenant University, Ota</option>
+          <option value="Babcock University, Ilishan-Remo">Babcock University, Ilishan-Remo</option>
+          <option value="Afe Babalola University (ABUAD), Ado-Ekiti">Afe Babalola University (ABUAD), Ado-Ekiti</option>
+          <option value="Pan-Atlantic University (PAU), Lagos">Pan-Atlantic University (PAU), Lagos</option>
+          <option value="Nile University of Nigeria, Abuja">Nile University of Nigeria, Abuja</option>
+          <option value="Landmark University, Omu-Aran">Landmark University, Omu-Aran</option>
+          <option value="Bowen University, Iwo">Bowen University, Iwo</option>
+          <option value="Baze University, Abuja">Baze University, Abuja</option>
+          <option value="American University of Nigeria (AUN), Yola">American University of Nigeria (AUN), Yola</option>
+          <option value="Lead City University, Ibadan">Lead City University, Ibadan</option>
+          <option value="Redeemer's University, Ede (RUN)">Redeemer's University, Ede (RUN)</option>
+          <option value="Caleb University, Imota Lagos">Caleb University, Imota Lagos</option>
+          <option value="Bells University of Technology, Ota">Bells University of Technology, Ota</option>
+          <option value="Crawford University, Igbesa">Crawford University, Igbesa</option>
+          <option value="Ajayi Crowther University, Oyo">Ajayi Crowther University, Oyo</option>
+          <option value="Adeleke University, Ede">Adeleke University, Ede</option>
+          <option value="Bingham University, Karu">Bingham University, Karu</option>
+          <option value="Al-Hikmah University, Ilorin">Al-Hikmah University, Ilorin</option>
+          <option value="Elizade University, Ilara-Mokin">Elizade University, Ilara-Mokin</option>
+          <option value="Mountain Top University, Makogi Oba">Mountain Top University, Makogi Oba</option>
+          <option value="Godfrey Okoye University, Enugu">Godfrey Okoye University, Enugu</option>
+          <option value="Madonna University, Elele">Madonna University, Elele</option>
+          <option value="Veritas University, Abuja">Veritas University, Abuja</option>
+          <option value="Wigwe University, Isiokpo">Wigwe University, Isiokpo</option>
+          <option value="Achievers University, Owo">Achievers University, Owo</option>
+          <option value="Anchor University, Ayobo Lagos">Anchor University, Ayobo Lagos</option>
+          <option value="Augustine University, Ilara Epe">Augustine University, Ilara Epe</option>
+          <option value="Chrisland University, Abeokuta">Chrisland University, Abeokuta</option>
+          <option value="Crescent University, Abeokuta">Crescent University, Abeokuta</option>
+          <option value="Dominican University, Ibadan">Dominican University, Ibadan</option>
+          <option value="Edwin Clark University, Kiagbodo">Edwin Clark University, Kiagbodo</option>
+          <option value="Hallmark University, Ijebu-Itele">Hallmark University, Ijebu-Itele</option>
+          <option value="Igbinedion University, Okada">Igbinedion University, Okada</option>
+          <option value="Joseph Ayo Babalola University (JABU), Ikeji-Arakeji">Joseph Ayo Babalola University (JABU), Ikeji-Arakeji</option>
+          <option value="Koladaisi University, Ibadan">Koladaisi University, Ibadan</option>
+          <option value="McPherson University, Seriki Sotayo">McPherson University, Seriki Sotayo</option>
+          <option value="Novena University, Ogume">Novena University, Ogume</option>
+          <option value="Paul University, Awka">Paul University, Awka</option>
+          <option value="Precious Cornerstone University, Ibadan">Precious Cornerstone University, Ibadan</option>
+          <option value="Renaissance University, Ugbawka">Renaissance University, Ugbawka</option>
+          <option value="Rhema University, Aba">Rhema University, Aba</option>
+          <option value="Salem University, Lokoja">Salem University, Lokoja</option>
+          <option value="Summit University, Offa">Summit University, Offa</option>
+          <option value="Topfaith University, Mkpatak">Topfaith University, Mkpatak</option>
+          <option value="Trinity University, Yaba Lagos">Trinity University, Yaba Lagos</option>
+          <option value="Wellspring University, Benin City">Wellspring University, Benin City</option>
+          <option value="Western Delta University, Oghara">Western Delta University, Oghara</option>
+        </optgroup>
+
+        <optgroup label="⚙️ Polytechnics & Colleges of Technology (Nigeria)">
+          <option value="Yaba College of Technology (YABATECH), Lagos">Yaba College of Technology (YABATECH), Lagos</option>
+          <option value="The Polytechnic, Ibadan">The Polytechnic, Ibadan</option>
+          <option value="Federal Polytechnic, Ilaro">Federal Polytechnic, Ilaro</option>
+          <option value="Federal Polytechnic, Nekede, Owerri">Federal Polytechnic, Nekede, Owerri</option>
+          <option value="Kaduna Polytechnic (KADPOLY)">Kaduna Polytechnic (KADPOLY)</option>
+          <option value="Auchi Polytechnic, Auchi">Auchi Polytechnic, Auchi</option>
+          <option value="Federal Polytechnic, Offa">Federal Polytechnic, Offa</option>
+          <option value="Federal Polytechnic, Ede">Federal Polytechnic, Ede</option>
+          <option value="Federal Polytechnic, Bida">Federal Polytechnic, Bida</option>
+          <option value="Federal Polytechnic, Oko">Federal Polytechnic, Oko</option>
+          <option value="Federal Polytechnic, Ado-Ekiti">Federal Polytechnic, Ado-Ekiti</option>
+          <option value="Federal Polytechnic, Bauchi">Federal Polytechnic, Bauchi</option>
+          <option value="Federal Polytechnic, Damaturu">Federal Polytechnic, Damaturu</option>
+          <option value="Federal Polytechnic, Idah">Federal Polytechnic, Idah</option>
+          <option value="Federal Polytechnic, Kaura Namoda">Federal Polytechnic, Kaura Namoda</option>
+          <option value="Federal Polytechnic, Mubi">Federal Polytechnic, Mubi</option>
+          <option value="Federal Polytechnic, Nasarawa">Federal Polytechnic, Nasarawa</option>
+          <option value="Federal Polytechnic, Ukana">Federal Polytechnic, Ukana</option>
+          <option value="Federal Polytechnic, Ekowe">Federal Polytechnic, Ekowe</option>
+          <option value="Federal Polytechnic, Ile-Oluji">Federal Polytechnic, Ile-Oluji</option>
+          <option value="Petroleum Training Institute (PTI), Effurun">Petroleum Training Institute (PTI), Effurun</option>
+          <option value="Moshood Abiola Polytechnic (MAPOLY), Abeokuta">Moshood Abiola Polytechnic (MAPOLY), Abeokuta</option>
+          <option value="Rufus Giwa Polytechnic, Owo">Rufus Giwa Polytechnic, Owo</option>
+          <option value="Kwara State Polytechnic, Ilorin">Kwara State Polytechnic, Ilorin</option>
+          <option value="Institute of Management and Technology (IMT), Enugu">Institute of Management and Technology (IMT), Enugu</option>
+          <option value="Kano State Polytechnic">Kano State Polytechnic</option>
+          <option value="Delta State Polytechnic, Otefe-Oghara">Delta State Polytechnic, Otefe-Oghara</option>
+          <option value="Delta State Polytechnic, Ogwashi-Uku">Delta State Polytechnic, Ogwashi-Uku</option>
+          <option value="Abraham Adesanya Polytechnic, Ijebu-Igbo">Abraham Adesanya Polytechnic, Ijebu-Igbo</option>
+          <option value="Gateway ICT Polytechnic, Saapade">Gateway ICT Polytechnic, Saapade</option>
+          <option value="D.S. Adegbenro ICT Polytechnic, Itori">D.S. Adegbenro ICT Polytechnic, Itori</option>
+          <option value="Kenule Beeson Saro-Wiwa Polytechnic, Bori">Kenule Beeson Saro-Wiwa Polytechnic, Bori</option>
+          <option value="Federal College of Fisheries and Marine Technology, Lagos">Federal College of Fisheries and Marine Technology, Lagos</option>
+          <option value="Nigerian College of Aviation Technology (NCAT), Zaria">Nigerian College of Aviation Technology (NCAT), Zaria</option>
+          <option value="Maritime Academy of Nigeria (MAN), Oron">Maritime Academy of Nigeria (MAN), Oron</option>
+        </optgroup>
+
+        <optgroup label="🎖️ Professional Bodies & Certification Institutes">
+          <option value="Council for the Regulation of Engineering in Nigeria (COREN)">Council for the Regulation of Engineering in Nigeria (COREN)</option>
+          <option value="Nigerian Society of Engineers (NSE)">Nigerian Society of Engineers (NSE)</option>
+          <option value="Institute of Chartered Accountants of Nigeria (ICAN)">Institute of Chartered Accountants of Nigeria (ICAN)</option>
+          <option value="Association of National Accountants of Nigeria (ANAN)">Association of National Accountants of Nigeria (ANAN)</option>
+          <option value="Project Management Institute (PMI Nigeria Chapter)">Project Management Institute (PMI Nigeria Chapter)</option>
+          <option value="Chartered Institute of Personnel Management of Nigeria (CIPM)">Chartered Institute of Personnel Management of Nigeria (CIPM)</option>
+          <option value="Nigerian Institute of Management (NIM Chartered)">Nigerian Institute of Management (NIM Chartered)</option>
+          <option value="Chartered Institute of Bankers of Nigeria (CIBN)">Chartered Institute of Bankers of Nigeria (CIBN)</option>
+          <option value="Nigerian Bar Association (NBA / Nigerian Law School)">Nigerian Bar Association (NBA / Nigerian Law School)</option>
+          <option value="Institute of Safety Professionals of Nigeria (ISPON)">Institute of Safety Professionals of Nigeria (ISPON)</option>
+          <option value="Nigerian Institute of Quantity Surveyors (NIQS)">Nigerian Institute of Quantity Surveyors (NIQS)</option>
+          <option value="Nigerian Institute of Architects (NIA / ARCON)">Nigerian Institute of Architects (NIA / ARCON)</option>
+          <option value="Nigerian Institute of Estate Surveyors and Valuers (NIESV)">Nigerian Institute of Estate Surveyors and Valuers (NIESV)</option>
+          <option value="Chartered Institute of Procurement and Supply (CIPS Nigeria)">Chartered Institute of Procurement and Supply (CIPS Nigeria)</option>
+          <option value="National Institute of Marketing of Nigeria (NIMN)">National Institute of Marketing of Nigeria (NIMN)</option>
+          <option value="Chartered Institute of Stockbrokers (CIS)">Chartered Institute of Stockbrokers (CIS)</option>
+          <option value="Computer Professionals Registration Council of Nigeria (CPN)">Computer Professionals Registration Council of Nigeria (CPN)</option>
+          <option value="Health, Safety and Environment (HSE / NEBOSH / IOSH)">Health, Safety and Environment (HSE / NEBOSH / IOSH)</option>
+        </optgroup>
+
+        <optgroup label="🌍 Other / International Bodies">
+          <option value="OTHER_CUSTOM">Other Institution / Foreign Body (Specify Below)</option>
+        </optgroup>
+      </select>
+      <div id="qualIssuerCustomWrap" style="display:none; margin-top:8px;">
+        <input class="form-input" type="text" id="qualIssuerCustom" placeholder="Type institution or certification body name">
+      </div>
     </div>
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
@@ -673,7 +885,72 @@
       </div>
       <div class="form-group">
         <label class="form-label">Year Obtained</label>
-        <input class="form-input" type="text" id="qualYear" placeholder="e.g. 2022">
+        <select class="form-input" id="qualYear">
+          <option value="">Select Year</option>
+          <option value="2027">2027 (Expected)</option>
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+          <option value="2020">2020</option>
+          <option value="2019">2019</option>
+          <option value="2018">2018</option>
+          <option value="2017">2017</option>
+          <option value="2016">2016</option>
+          <option value="2015">2015</option>
+          <option value="2014">2014</option>
+          <option value="2013">2013</option>
+          <option value="2012">2012</option>
+          <option value="2011">2011</option>
+          <option value="2010">2010</option>
+          <option value="2009">2009</option>
+          <option value="2008">2008</option>
+          <option value="2007">2007</option>
+          <option value="2006">2006</option>
+          <option value="2005">2005</option>
+          <option value="2004">2004</option>
+          <option value="2003">2003</option>
+          <option value="2002">2002</option>
+          <option value="2001">2001</option>
+          <option value="2000">2000</option>
+          <option value="1999">1999</option>
+          <option value="1998">1998</option>
+          <option value="1997">1997</option>
+          <option value="1996">1996</option>
+          <option value="1995">1995</option>
+          <option value="1994">1994</option>
+          <option value="1993">1993</option>
+          <option value="1992">1992</option>
+          <option value="1991">1991</option>
+          <option value="1990">1990</option>
+          <option value="1989">1989</option>
+          <option value="1988">1988</option>
+          <option value="1987">1987</option>
+          <option value="1986">1986</option>
+          <option value="1985">1985</option>
+          <option value="1984">1984</option>
+          <option value="1983">1983</option>
+          <option value="1982">1982</option>
+          <option value="1981">1981</option>
+          <option value="1980">1980</option>
+          <option value="1979">1979</option>
+          <option value="1978">1978</option>
+          <option value="1977">1977</option>
+          <option value="1976">1976</option>
+          <option value="1975">1975</option>
+          <option value="1974">1974</option>
+          <option value="1973">1973</option>
+          <option value="1972">1972</option>
+          <option value="1971">1971</option>
+          <option value="1970">1970</option>
+          <option value="1969">1969</option>
+          <option value="1968">1968</option>
+          <option value="1967">1967</option>
+          <option value="1966">1966</option>
+          <option value="1965">1965</option>
+        </select>
       </div>
     </div>
 
@@ -789,9 +1066,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=41.0"></script>
-<script src="app.js?v=41.0"></script>
-<script src="collekt-ai.js?v=41.0"></script>
+<script src="supabase.js?v=42.0"></script>
+<script src="app.js?v=42.0"></script>
+<script src="collekt-ai.js?v=42.0"></script>
 <script>
   requireAuth();
 
@@ -1474,14 +1751,37 @@
     }
   }
 
+  window.handleIssuerChange = function(sel) {
+    const wrap = document.getElementById('qualIssuerCustomWrap');
+    if (!wrap) return;
+    if (sel.value === 'OTHER_CUSTOM') {
+      wrap.style.display = 'block';
+      document.getElementById('qualIssuerCustom')?.focus();
+    } else {
+      wrap.style.display = 'none';
+    }
+  };
+
   function saveQualification() {
     const title = document.getElementById('qualName')?.value.trim();
-    const issuer = document.getElementById('qualIssuer')?.value.trim();
+    const issuerSelect = document.getElementById('qualIssuer');
+    let issuer = issuerSelect ? issuerSelect.value.trim() : '';
+    if (issuer === 'OTHER_CUSTOM') {
+      issuer = document.getElementById('qualIssuerCustom')?.value.trim() || '';
+    }
     const category = document.getElementById('qualCategory')?.value;
     const year = document.getElementById('qualYear')?.value.trim();
 
     if (!title) {
       showToast('⚠️ Please enter a qualification title', 'warning');
+      return;
+    }
+    if (!issuer) {
+      showToast('⚠️ Please select or specify an awarding institution', 'warning');
+      return;
+    }
+    if (!year) {
+      showToast('⚠️ Please select the year obtained', 'warning');
       return;
     }
 
@@ -1527,6 +1827,8 @@
     closeModal('addQualModal');
     if (document.getElementById('qualName')) document.getElementById('qualName').value = '';
     if (document.getElementById('qualIssuer')) document.getElementById('qualIssuer').value = '';
+    if (document.getElementById('qualIssuerCustom')) document.getElementById('qualIssuerCustom').value = '';
+    if (document.getElementById('qualIssuerCustomWrap')) document.getElementById('qualIssuerCustomWrap').style.display = 'none';
     if (document.getElementById('qualYear')) document.getElementById('qualYear').value = '';
   }
 
