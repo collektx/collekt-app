@@ -2455,6 +2455,355 @@ function triggerProfileStrengthAction(action) {
   }
 }
 
+/* ═════════════════════════════════════════════════════════
+   COLLEKT SKILLS & COMPETENCIES LIBRARY ENGINE
+   ═════════════════════════════════════════════════════════ */
+window.COLLEKT_SKILLS_LIBRARY = [
+  {
+    category: 'Soft Skills & Leadership',
+    icon: '🧠',
+    skills: [
+      'Critical Thinking & Problem Solving',
+      'Commercial Negotiation & Deal Structuring',
+      'Dispute Resolution & Mediation',
+      'Cross-Functional Team Leadership',
+      'Stakeholder & Client Relationship Management',
+      'Strategic Project Planning & Milestone Tracking',
+      'Risk Management & Crisis Decision-Making',
+      'Technical Communication & Report Writing',
+      'Time Management & Delivery Focus',
+      'Financial Acumen & Budget Optimization',
+      'Cross-Cultural Collaboration & Team Building',
+      'Adaptability & High-Pressure Resilience'
+    ]
+  },
+  {
+    category: 'Oil, Gas & Offshore',
+    icon: '🛢️',
+    skills: [
+      'Pipeline Integrity & Maintenance',
+      'HAZOP & Process Safety Management',
+      'Subsea & Marine Operations',
+      'NDT Inspection (Non-Destructive Testing)',
+      'Corrosion Control & Cathodic Protection',
+      'Instrumentation & Industrial Process Control',
+      'Wellhead Maintenance & Drilling Support',
+      'Pressure Vessel & Storage Tank Inspection'
+    ]
+  },
+  {
+    category: 'Renewable Energy & Power',
+    icon: '☀️',
+    skills: [
+      'Commercial Solar PV Design & Installation',
+      'Mini-Grid & Microgrid Architecture',
+      'Battery Energy Storage Systems (BESS)',
+      'High Voltage (HV) Substation Engineering',
+      'Power Distribution & SCADA Automation',
+      'Energy Auditing & Power Quality Analysis',
+      'Industrial Generator & Turbine Overhaul'
+    ]
+  },
+  {
+    category: 'Civil, Structural & EPC',
+    icon: '🏗️',
+    skills: [
+      'Structural Steel Fabrication & Certified Welding',
+      'Mechanical Piping & Flow Systems (ASME / API)',
+      'EPC Project Management (PMP / Prince2)',
+      'Civil Site Preparation & Structural Foundations',
+      'QA/QC Inspection & ISO 9001 Auditing',
+      'Heavy Machinery Rigging & Crane Operations',
+      'HVAC & Industrial Thermal Systems'
+    ]
+  },
+  {
+    category: 'Commercial & Compliance',
+    icon: '💼',
+    skills: [
+      'Technical Procurement & Vendor Sourcing',
+      'BOQ (Bill of Quantities) & Cost Estimation',
+      'Tender Bidding & Proposal Writing',
+      'NOGICD / NCDMB Nigerian Content Compliance',
+      'NUPRC & Environmental Impact Assessment (EIA)',
+      'Escrow Contract & Milestone Administration',
+      'Supply Chain Logistics & Waybill Coordination'
+    ]
+  },
+  {
+    category: 'Automation, Digital & Safety',
+    icon: '💻',
+    skills: [
+      'PLC Programming & Industrial Automation',
+      'CAD Drafting & 3D Plant Modeling',
+      'Drone Aerial Surveying & GIS Mapping',
+      'Fiber Optic & Industrial Telecom Systems',
+      'HSE Management (Health, Safety & Environment Level 3)'
+    ]
+  }
+];
+
+function getActiveUserSkillsList() {
+  const wrap = document.getElementById('skillsWrap');
+  if (wrap) {
+    return Array.from(wrap.querySelectorAll('.skill-chip')).map(chip => {
+      const clone = chip.cloneNode(true);
+      const rem = clone.querySelector('.remove');
+      if (rem) rem.remove();
+      return clone.textContent.trim().toLowerCase();
+    }).filter(Boolean);
+  }
+  const input = document.getElementById('editCapabilities');
+  if (input) {
+    return input.value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  }
+  const u = typeof getUser === 'function' ? getUser() : null;
+  if (u && Array.isArray(u.skills)) {
+    return u.skills.map(s => String(s).trim().toLowerCase()).filter(Boolean);
+  }
+  return [];
+}
+
+window.openSkillPickerModal = function(options = {}) {
+  const targetWrapId = options.targetWrapId || (document.getElementById('skillsWrap') ? 'skillsWrap' : 'editCapabilities');
+  const mode = options.mode || (document.getElementById('skillsWrap') ? 'chips' : 'comma_input');
+
+  let modal = document.getElementById('skillPickerModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'skillPickerModal';
+    modal.className = 'modal-overlay';
+    modal.style.zIndex = '999999';
+    modal.innerHTML = `
+      <div class="modal-card" style="max-width:680px; width:100%; border-radius:24px; padding:24px 28px; background:var(--white); box-shadow:0 30px 90px rgba(0,0,0,0.35); font-family:'Manrope',sans-serif; position:relative;">
+        <button class="modal-close" onclick="closeModal('skillPickerModal')" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:24px; color:var(--muted); cursor:pointer;">&times;</button>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+          <span style="font-size:24px;">📋</span>
+          <div>
+            <h3 style="margin:0; font-size:18px; font-weight:900; color:var(--ink);">Collekt Professional Skills Library</h3>
+            <p style="margin:2px 0 0; font-size:12px; color:var(--muted);">Select your technical disciplines, certifications, and leadership soft skills.</p>
+          </div>
+        </div>
+
+        <div style="margin:16px 0 10px;">
+          <input type="text" class="form-input" id="skillSearchInput" placeholder="🔍 Search skills (e.g. Negotiation, Solar, Pipeline, Critical Thinking)..." style="width:100%; font-size:13px; font-weight:700; padding:10px 16px; border-radius:99px;" oninput="filterSkillsLibrary(this.value)">
+        </div>
+
+        <div class="skill-lib-cat-bar" id="skillLibCatBar"></div>
+
+        <div class="skill-lib-grid" id="skillLibGrid" style="margin:12px 0 18px;"></div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:14px;">
+          <span style="font-size:12px; font-weight:800; color:var(--teal);" id="skillSelectedCount">0 skills selected</span>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-outline btn-sm" onclick="clearSelectedSkillsFromPicker()">Clear All</button>
+            <button class="btn btn-primary btn-sm" style="background:var(--teal); font-weight:800; min-width:90px;" onclick="closeModal('skillPickerModal')">Done</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  modal._options = { targetWrapId, mode };
+
+  renderSkillPickerCategories();
+  renderSkillPickerPills('All');
+  updateSkillSelectedCounter();
+  openModal('skillPickerModal');
+
+  setTimeout(() => {
+    const input = document.getElementById('skillSearchInput');
+    if (input) { input.value = ''; input.focus(); }
+  }, 100);
+};
+
+window.renderSkillPickerCategories = function() {
+  const catBar = document.getElementById('skillLibCatBar');
+  if (!catBar) return;
+  const categories = ['All', ...window.COLLEKT_SKILLS_LIBRARY.map(c => c.category)];
+  catBar.innerHTML = categories.map((cat, idx) => {
+    const icon = cat === 'All' ? '✨' : (window.COLLEKT_SKILLS_LIBRARY.find(c => c.category === cat)?.icon || '🔹');
+    return `<button class="skill-lib-cat-btn ${idx === 0 ? 'active' : ''}" onclick="selectSkillCategory('${escapeHTML(cat)}', this)">${icon} ${escapeHTML(cat)}</button>`;
+  }).join('');
+};
+
+window.selectSkillCategory = function(cat, btn) {
+  document.querySelectorAll('.skill-lib-cat-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const search = document.getElementById('skillSearchInput');
+  if (search) search.value = '';
+  renderSkillPickerPills(cat);
+};
+
+window.filterSkillsLibrary = function(query) {
+  const q = String(query).trim().toLowerCase();
+  const activeBtn = document.querySelector('.skill-lib-cat-btn.active');
+  const activeCat = activeBtn ? activeBtn.textContent.replace(/^[^\s]+\s*/, '').trim() : 'All';
+  renderSkillPickerPills(activeCat, q);
+};
+
+window.renderSkillPickerPills = function(category = 'All', filterQuery = '') {
+  const grid = document.getElementById('skillLibGrid');
+  if (!grid) return;
+
+  const activeSkills = getActiveUserSkillsList();
+  let list = [];
+
+  if (category === 'All') {
+    window.COLLEKT_SKILLS_LIBRARY.forEach(c => {
+      c.skills.forEach(s => list.push({ name: s, cat: c.category, icon: c.icon }));
+    });
+  } else {
+    const group = window.COLLEKT_SKILLS_LIBRARY.find(c => c.category === category);
+    if (group) {
+      group.skills.forEach(s => list.push({ name: s, cat: group.category, icon: group.icon }));
+    }
+  }
+
+  if (filterQuery) {
+    list = list.filter(item => item.name.toLowerCase().includes(filterQuery.toLowerCase()) || item.cat.toLowerCase().includes(filterQuery.toLowerCase()));
+  }
+
+  if (list.length === 0) {
+    grid.innerHTML = `<div style="padding:24px; text-align:center; width:100%; color:var(--muted); font-size:13px;">No skills matching "<strong>${escapeHTML(filterQuery)}</strong>" found. You can still type custom skills directly in the box!</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(item => {
+    const isSelected = activeSkills.includes(item.name.toLowerCase());
+    return `<span class="skill-lib-pill ${isSelected ? 'selected' : ''}" data-skill="${escapeHTML(item.name)}" onclick="toggleSkillFromLibrary('${escapeHTML(item.name).replace(/'/g, "\\'")}', this)">
+      <span class="pill-indicator">${isSelected ? '✓' : '+'}</span> ${escapeHTML(item.name)}
+    </span>`;
+  }).join('');
+};
+
+window.toggleSkillFromLibrary = function(skillName, pillEl) {
+  const modal = document.getElementById('skillPickerModal');
+  const opts = modal?._options || {};
+  const isChipsMode = opts.mode === 'chips' || !!document.getElementById('skillsWrap');
+
+  if (isChipsMode) {
+    const wrap = document.getElementById('skillsWrap');
+    if (!wrap) return;
+
+    let existingChip = null;
+    wrap.querySelectorAll('.skill-chip').forEach(chip => {
+      const clone = chip.cloneNode(true);
+      const rem = clone.querySelector('.remove');
+      if (rem) rem.remove();
+      if (clone.textContent.trim().toLowerCase() === skillName.toLowerCase()) {
+        existingChip = chip;
+      }
+    });
+
+    if (existingChip) {
+      existingChip.remove();
+      if (wrap.querySelectorAll('.skill-chip').length === 0) {
+        wrap.innerHTML = `<span class="empty-msg" style="font-size:14px; color:var(--muted); font-style:italic;">No skills added yet. Add your technical skills below to help companies find you.</span>`;
+      }
+      if (pillEl) {
+        pillEl.classList.remove('selected');
+        const ind = pillEl.querySelector('.pill-indicator');
+        if (ind) ind.textContent = '+';
+      }
+      if (typeof _persistSkillsFromUI === 'function') _persistSkillsFromUI();
+    } else {
+      const emptyMsg = wrap.querySelector('.empty-msg');
+      if (emptyMsg) emptyMsg.remove();
+
+      const chip = document.createElement('span');
+      chip.className = 'skill-chip';
+      const escaped = typeof escapeHTML === 'function' ? escapeHTML(skillName) : skillName;
+      chip.innerHTML = `${escaped} <span class="remove" onclick="removeSkill(this)">&times;</span>`;
+      wrap.appendChild(chip);
+
+      if (pillEl) {
+        pillEl.classList.add('selected');
+        const ind = pillEl.querySelector('.pill-indicator');
+        if (ind) ind.textContent = '✓';
+      }
+      if (typeof _persistSkillsFromUI === 'function') _persistSkillsFromUI();
+    }
+  } else {
+    const input = document.getElementById('editCapabilities');
+    if (!input) return;
+    let current = input.value.split(',').map(s => s.trim()).filter(Boolean);
+    const lower = current.map(s => s.toLowerCase());
+    const idx = lower.indexOf(skillName.toLowerCase());
+
+    if (idx >= 0) {
+      current.splice(idx, 1);
+      if (pillEl) {
+        pillEl.classList.remove('selected');
+        const ind = pillEl.querySelector('.pill-indicator');
+        if (ind) ind.textContent = '+';
+      }
+    } else {
+      current.push(skillName);
+      if (pillEl) {
+        pillEl.classList.add('selected');
+        const ind = pillEl.querySelector('.pill-indicator');
+        if (ind) ind.textContent = '✓';
+      }
+    }
+    input.value = current.join(', ');
+  }
+
+  updateSkillSelectedCounter();
+  if (typeof renderProfileStrength === 'function') renderProfileStrength();
+};
+
+window.clearSelectedSkillsFromPicker = function() {
+  const wrap = document.getElementById('skillsWrap');
+  if (wrap) {
+    wrap.innerHTML = `<span class="empty-msg" style="font-size:14px; color:var(--muted); font-style:italic;">No skills added yet. Add your technical skills below to help companies find you.</span>`;
+    if (typeof _persistSkillsFromUI === 'function') _persistSkillsFromUI();
+  }
+  const input = document.getElementById('editCapabilities');
+  if (input) {
+    input.value = '';
+  }
+  document.querySelectorAll('.skill-lib-pill').forEach(p => {
+    p.classList.remove('selected');
+    const ind = p.querySelector('.pill-indicator');
+    if (ind) ind.textContent = '+';
+  });
+  updateSkillSelectedCounter();
+  if (typeof renderProfileStrength === 'function') renderProfileStrength();
+  if (typeof showToast === 'function') showToast('Skills cleared.');
+};
+
+window.updateSkillSelectedCounter = function() {
+  const counter = document.getElementById('skillSelectedCount');
+  if (!counter) return;
+  const active = getActiveUserSkillsList();
+  counter.textContent = `${active.length} skill${active.length === 1 ? '' : 's'} selected`;
+};
+
+window.quickAddSkill = function(skillName) {
+  const wrap = document.getElementById('skillsWrap');
+  if (wrap) {
+    const existing = getActiveUserSkillsList();
+    if (existing.includes(skillName.toLowerCase())) {
+      if (typeof showToast === 'function') showToast(`ℹ️ "${skillName}" is already on your profile.`, 'info');
+      return;
+    }
+    const emptyMsg = wrap.querySelector('.empty-msg');
+    if (emptyMsg) emptyMsg.remove();
+
+    const chip = document.createElement('span');
+    chip.className = 'skill-chip';
+    const escaped = typeof escapeHTML === 'function' ? escapeHTML(skillName) : skillName;
+    chip.innerHTML = `${escaped} <span class="remove" onclick="removeSkill(this)">&times;</span>`;
+    wrap.appendChild(chip);
+
+    if (typeof _persistSkillsFromUI === 'function') _persistSkillsFromUI();
+    if (typeof renderProfileStrength === 'function') renderProfileStrength();
+    if (typeof showToast === 'function') showToast(`✨ Added "${skillName}"!`);
+  }
+};
+
 // -------------------------------------------------------------------------
 // -- COLLEKT PREMIUM MEMBERSHIP SYSTEM ($15/Mo Pro, $50/Mo Company) --
 // -------------------------------------------------------------------------
