@@ -146,8 +146,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=45.0"></script>
-  <script src="app.js?v=45.0"></script>
+  <script src="supabase.js?v=46.0"></script>
+  <script src="app.js?v=46.0"></script>
   <script>
     (async function initCallback() {
       const hash = window.location.hash || '';
@@ -172,6 +172,17 @@
           try {
             const { data: { session } } = await window.sb.auth.getSession();
             if (session && session.user) {
+              const isLinkingLinkedIn = params.get('link_identity') === 'linkedin' || 
+                                        localStorage.getItem('collekt_pending_linkedin_link') || 
+                                        sessionStorage.getItem('collekt_linking_linkedin_target');
+
+              if (isLinkingLinkedIn) {
+                document.getElementById('statusTitle').textContent = 'LinkedIn Account Connected!';
+                document.getElementById('statusDesc').textContent = 'Verifying real LinkedIn credentials and returning to your profile...';
+                await handleOAuthSessionRouting(session);
+                return;
+              }
+
               document.getElementById('statusTitle').textContent = 'Success!';
               document.getElementById('statusDesc').textContent = 'Loading your dashboard...';
               await handleOAuthSessionRouting(session);

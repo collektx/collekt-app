@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=45.0">
-<link rel="stylesheet" href="shared.css?v=45.0">
-<link rel="stylesheet" href="glass.css?v=45.0">
+<link rel="stylesheet" href="style.css?v=46.0">
+<link rel="stylesheet" href="shared.css?v=46.0">
+<link rel="stylesheet" href="glass.css?v=46.0">
 
 <style>
   body { background: var(--paper); }
@@ -167,6 +167,7 @@
             <div class="profile-title" id="profileTitle">Senior Proposal Manager</div>
             <div class="profile-location">&#x1F4CD; Lagos, Nigeria</div>
             <div class="avail-badge"><span class="avail-dot"></span> Available for hire</div>
+            <div id="profileLinkedInBadgeWrap" style="margin-top:6px;"></div>
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
             <button class="btn btn-outline btn-sm" onclick="openEditModal()">&#x270F;&#xFE0F; Edit Profile</button>
@@ -610,7 +611,7 @@
       <div class="form-group">
         <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
           <span>LinkedIn Profile URL</span>
-          <button type="button" id="btnConnectLinkedIn" onclick="linkLinkedInAccount(document.getElementById('editLinkedIn')?.value)" style="background:#0077b5; color:#fff; border:none; padding:3px 10px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all .2s;"><span>🔗</span> Connect</button>
+          <button type="button" id="btnConnectLinkedIn" onclick="connectRealLinkedInAccount()" style="background:#0077b5; color:#fff; border:none; padding:4px 12px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all .2s;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.6 1.6 0 0 0-1.6 1.6 1.6 1.6 0 0 0 1.6 1.6 1.6 1.6 0 0 0 1.6-1.6 1.6 1.6 0 0 0-1.6-1.6Z"/></svg><span>Connect Real Account</span></button>
         </label>
         <input class="form-input" type="url" id="editLinkedIn" placeholder="https://linkedin.com/in/username">
       </div>
@@ -1066,9 +1067,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=45.0"></script>
-<script src="app.js?v=45.0"></script>
-<script src="collekt-ai.js?v=45.0"></script>
+<script src="supabase.js?v=46.0"></script>
+<script src="app.js?v=46.0"></script>
+<script src="collekt-ai.js?v=46.0"></script>
 <script>
   requireAuth();
 
@@ -2344,33 +2345,28 @@
   // Check if returning from LinkedIn OAuth authorization
   (function checkLinkedInOAuthCallback() {
     const params = new URLSearchParams(window.location.search);
-    const pending = localStorage.getItem('collekt_pending_linkedin_link');
-    
-    if (params.get('code') || params.get('linkedin_connected') === 'true' || pending) {
+    if (params.get('linkedin_connected') === 'true') {
       const user = getUser();
       if (user) {
-        const slug = (user.username || user.name || 'member').toLowerCase().replace(/[^a-z0-9]/g, '');
-        user.linkedin_url = user.linkedin_url || `https://www.linkedin.com/in/${slug}`;
         user.linkedin_linked = true;
-        user.linkedin_verified_at = new Date().toISOString();
-
+        user.linkedin_verified_at = user.linkedin_verified_at || new Date().toISOString();
         if (typeof setUser === 'function') setUser(user);
         if (typeof saveRegisteredUser === 'function') saveRegisteredUser(user);
-        localStorage.removeItem('collekt_pending_linkedin_link');
-
-        // Clean query params from address bar smoothly
-        if (window.history && window.history.replaceState) {
-          const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-          window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
-        }
-
-        setTimeout(() => {
-          if (typeof showToast === 'function') {
-            showToast('✅ LinkedIn Account Successfully Linked & Verified! 🔗');
-          }
-          if (typeof renderProfileStrength === 'function') renderProfileStrength();
-        }, 500);
       }
+      
+      // Clean query params from address bar smoothly
+      if (window.history && window.history.replaceState) {
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+      }
+
+      setTimeout(() => {
+        if (typeof showToast === 'function') {
+          showToast('✅ Real LinkedIn Account Successfully Linked & Verified! 🔗');
+        }
+        if (typeof renderProfileStrength === 'function') renderProfileStrength();
+        if (typeof _applyProfile === 'function' && user) _applyProfile(user);
+      }, 500);
     }
   })();
 
@@ -2379,10 +2375,32 @@
     const modal = document.getElementById('linkLinkedInModal');
     if (!modal) return;
     const user = (typeof getUser === 'function') ? getUser() : null;
-    const input = document.getElementById('modalLinkedInInput');
-    if (input) {
-      input.value = (user && user.linkedin_url) || document.getElementById('editLinkedIn')?.value || '';
+    const isLinked = user && user.linkedin_linked && user.linkedin_url;
+
+    const connectedBox = document.getElementById('linkedInConnectedBox');
+    const notConnectedBox = document.getElementById('linkedInNotConnectedBox');
+
+    if (isLinked) {
+      if (connectedBox) connectedBox.style.display = 'block';
+      if (notConnectedBox) notConnectedBox.style.display = 'none';
+      const nameEl = document.getElementById('linkedInAccountName');
+      const urlEl = document.getElementById('linkedInAccountUrl');
+      const viewBtn = document.getElementById('linkedInViewProfileBtn');
+      if (nameEl) nameEl.textContent = user.linkedin_name ? ('Verified Name: ' + user.linkedin_name) : 'Real LinkedIn Account';
+      if (urlEl) urlEl.textContent = user.linkedin_url;
+      if (viewBtn) {
+        viewBtn.href = user.linkedin_url;
+        viewBtn.style.display = 'inline-flex';
+      }
+    } else {
+      if (connectedBox) connectedBox.style.display = 'none';
+      if (notConnectedBox) notConnectedBox.style.display = 'block';
+      const input = document.getElementById('modalLinkedInInput');
+      if (input) {
+        input.value = (user && user.linkedin_url) || document.getElementById('editLinkedIn')?.value || '';
+      }
     }
+
     modal.style.display = 'flex';
   };
 
@@ -2423,6 +2441,16 @@
     if (titleEl) titleEl.textContent = prof.title || 'Independent Specialist';
     const locEl = document.querySelector('.profile-location');
     if (locEl) locEl.innerHTML = '📍 ' + (prof.location || (prof.state ? prof.state + ', ' + (prof.country || 'Nigeria') : 'Nigeria'));
+
+    const lBadgeWrap = document.getElementById('profileLinkedInBadgeWrap');
+    if (lBadgeWrap) {
+      if (prof.linkedin_url) {
+        const lUrl = prof.linkedin_url.startsWith('http') ? prof.linkedin_url : 'https://' + prof.linkedin_url;
+        lBadgeWrap.innerHTML = `<a href="${escapeHTML(lUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; background:rgba(0,119,181,0.08); border:1px solid rgba(0,119,181,0.25); color:#0077b5; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:800; text-decoration:none;"><span style="display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; background:#0077b5; color:#fff; border-radius:3px; font-size:10px; font-weight:900;">in</span><span>Verified LinkedIn</span> <span style="font-size:13px;">↗</span></a>`;
+      } else {
+        lBadgeWrap.innerHTML = '';
+      }
+    }
 
     if (!getUploadedAvatar()) {
       const inner = document.getElementById('avatarInner');
@@ -2490,11 +2518,20 @@
     if (document.getElementById('editAccreditation')) document.getElementById('editAccreditation').value = prof.accreditation || '';
     if (document.getElementById('editBio')) document.getElementById('editBio').value = prof.bio || '';
     if (document.getElementById('editPhone')) document.getElementById('editPhone').value = prof.phone || '';
-    if (document.getElementById('editLinkedIn')) document.getElementById('editLinkedIn').value = prof.linkedin_url || (prof.username ? `https://linkedin.com/in/${prof.username}` : '');
+    if (document.getElementById('editLinkedIn')) {
+      document.getElementById('editLinkedIn').value = prof.linkedin_url || '';
+    }
     const lBtn = document.getElementById('btnConnectLinkedIn');
-    if (lBtn && (prof.linkedin_url || prof.linkedin_linked)) {
-      lBtn.innerHTML = '<span>✓</span> Linked';
-      lBtn.style.background = '#16a34a';
+    if (lBtn) {
+      if (prof.linkedin_linked && prof.linkedin_url) {
+        lBtn.innerHTML = '<span style="color:#fff;">✓</span> Real LinkedIn Connected';
+        lBtn.style.background = '#16a34a';
+        lBtn.onclick = function() { openLinkedInModal(); };
+      } else {
+        lBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="#fff" style="margin-right:4px;"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.6 1.6 0 0 0-1.6 1.6 1.6 1.6 0 0 0 1.6 1.6 1.6 1.6 0 0 0 1.6-1.6 1.6 1.6 0 0 0-1.6-1.6Z"/></svg><span>Connect Real Account</span>';
+        lBtn.style.background = '#0077b5';
+        lBtn.onclick = function() { connectRealLinkedInAccount(); };
+      }
     }
     if (document.getElementById('editWebsite')) document.getElementById('editWebsite').value = prof.website || '';
   }
@@ -2861,48 +2898,73 @@
 </div>
 
 
-<!-- ════ LINK LINKEDIN MODAL ════ -->
+<!-- ════ LINK REAL LINKEDIN MODAL ════ -->
 <div id="linkLinkedInModal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(4,14,13,0.78); z-index:99999; backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:16px;">
-  <div class="modal-card" style="position:relative; max-width:480px; width:100%; border-radius:24px; padding:28px 24px; background:var(--white); border:1px solid var(--line); box-shadow:0 32px 80px rgba(0,0,0,0.4);">
+  <div class="modal-card" style="position:relative; max-width:500px; width:100%; border-radius:24px; padding:28px 24px; background:var(--white); border:1px solid var(--line); box-shadow:0 32px 80px rgba(0,0,0,0.4);">
     <button class="modal-close" onclick="closeModal('linkLinkedInModal')" style="position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%; border:none; background:rgba(0,0,0,0.06); cursor:pointer; font-size:18px; display:grid; place-items:center;">&times;</button>
     
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-      <div style="width:42px; height:42px; border-radius:12px; background:#0077b5; color:#fff; display:grid; place-items:center; font-size:22px; font-weight:900;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+      <div style="width:44px; height:44px; border-radius:12px; background:#0077b5; color:#fff; display:grid; place-items:center; font-size:22px; font-weight:900; flex-shrink:0;">
         in
       </div>
       <div>
-        <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Link LinkedIn Account</h3>
-        <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">Verify your identity &amp; showcase your credentials</div>
+        <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Link Real LinkedIn Account</h3>
+        <div style="font-size:12px; color:var(--muted); margin-top:2px;">Official OAuth identity verification &amp; credential display</div>
       </div>
     </div>
 
-    <p style="font-size:13px; color:var(--muted); line-height:1.55; margin-bottom:16px;">
-      Connect your LinkedIn account to increase your profile completion score and display verified credentials to hiring clients.
-    </p>
-
-    <div style="background:rgba(0,119,181,0.07); border:1px solid rgba(0,119,181,0.2); border-radius:12px; padding:12px 14px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
-      <div style="font-size:12px; font-weight:700; color:#0077b5;">
-        Need your profile link?
+    <!-- Active Connected State Banner (Shown if already linked) -->
+    <div id="linkedInConnectedBox" style="display:none; background:rgba(22,163,74,0.08); border:1.5px solid rgba(22,163,74,0.3); border-radius:14px; padding:16px; margin-bottom:18px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:8px; color:#15803d; font-size:13px; font-weight:800;">
+          <span>✅</span> Real LinkedIn Account Linked
+        </div>
+        <span style="font-size:11px; background:#15803d; color:#fff; font-weight:800; padding:2px 8px; border-radius:99px;">Verified</span>
       </div>
-      <a href="https://www.linkedin.com/in/" target="_blank" rel="noopener noreferrer" class="btn btn-xs" style="background:#0077b5; color:#fff; font-weight:800; font-size:11px; padding:6px 12px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
-        <span>↗️</span> Open LinkedIn
-      </a>
+      <div style="font-size:12.5px; font-weight:800; color:var(--ink); margin-bottom:4px;" id="linkedInAccountName"></div>
+      <div style="font-size:12px; color:var(--muted); word-break:break-all; margin-bottom:14px;" id="linkedInAccountUrl"></div>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <a id="linkedInViewProfileBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="color:#0077b5; border-color:#0077b5; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:5px;">
+          <span>↗</span> View Profile
+        </a>
+        <button type="button" class="btn btn-sm" onclick="disconnectLinkedInAccount()" style="background:rgba(220,38,38,0.1); color:#dc2626; border:1px solid rgba(220,38,38,0.3); font-weight:800;">
+          Disconnect
+        </button>
+      </div>
     </div>
 
-    <div class="form-group" style="margin-bottom:20px;">
-      <label class="form-label" style="font-weight:800; font-size:12px; margin-bottom:6px; display:block;">Your LinkedIn Profile URL or Username</label>
-      <input class="form-input" type="text" id="modalLinkedInInput" placeholder="e.g. https://linkedin.com/in/adebayo or adebayo" style="font-size:13px;">
-    </div>
+    <!-- Not Connected Flow -->
+    <div id="linkedInNotConnectedBox">
+      <p style="font-size:13px; color:var(--muted); line-height:1.55; margin-bottom:18px;">
+        Click below to authorize with your real LinkedIn account. Collekt connects directly to LinkedIn's official OAuth server to verify your identity and credentials.
+      </p>
 
-    <div style="display:flex; justify-content:flex-end; gap:10px;">
-      <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('linkLinkedInModal')">Cancel</button>
-      <button type="button" class="btn btn-primary btn-sm" onclick="confirmLinkLinkedInFromModal()" style="background:#0077b5; font-weight:800; padding:8px 20px;">
-        🔗 Link Account
+      <!-- Primary Action: Real OAuth Connect -->
+      <button type="button" onclick="connectRealLinkedInAccount()" class="btn" style="background:#0077b5; color:#fff; border:none; width:100%; padding:13px; border-radius:12px; font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; box-shadow:0 6px 20px rgba(0,119,181,0.25); transition:transform .15s ease;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.6 1.6 0 0 0-1.6 1.6 1.6 1.6 0 0 0 1.6 1.6 1.6 1.6 0 0 0 1.6-1.6 1.6 1.6 0 0 0-1.6-1.6Z"/></svg>
+        <span>Connect Real LinkedIn Account</span>
       </button>
+
+      <div style="display:flex; align-items:center; gap:12px; margin:20px 0 16px;">
+        <div style="flex:1; height:1px; background:var(--line);"></div>
+        <span style="font-size:11.5px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.04em;">or link public profile link</span>
+        <div style="flex:1; height:1px; background:var(--line);"></div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:18px;">
+        <label class="form-label" style="font-weight:800; font-size:12px; margin-bottom:6px; display:block;">Your LinkedIn Profile URL</label>
+        <input class="form-input" type="url" id="modalLinkedInInput" placeholder="https://www.linkedin.com/in/yourname" style="font-size:13px;">
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('linkLinkedInModal')">Cancel</button>
+        <button type="button" class="btn btn-sm" onclick="confirmLinkLinkedInFromModal()" style="background:var(--forest); color:#fff; font-weight:800; padding:8px 18px;">
+          Save Link
+        </button>
+      </div>
     </div>
   </div>
 </div>
-
 <script src="settings-popup.js"></script>
 <script src="upload-modal.js"></script>
 </body>

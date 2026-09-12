@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=45.0">
-<link rel="stylesheet" href="shared.css?v=45.0">
-<link rel="stylesheet" href="glass.css?v=45.0">
+<link rel="stylesheet" href="style.css?v=46.0">
+<link rel="stylesheet" href="shared.css?v=46.0">
+<link rel="stylesheet" href="glass.css?v=46.0">
 <style>
 /* ═ PAGE ═ */
 body { background: var(--paper); }
@@ -633,8 +633,8 @@ body { background: var(--paper); }
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=45.0"></script>
-<script src="app.js?v=45.0"></script>
+<script src="supabase.js?v=46.0"></script>
+<script src="app.js?v=46.0"></script>
 <script>
   /* ═ TAB SWITCHER ═ */
   function switchPubTab(tab, el) {
@@ -889,6 +889,17 @@ body { background: var(--paper); }
     // Location
     var locEl = document.querySelector(".profile-loc");
     if (locEl) locEl.textContent = "📍 " + (prof.location || (prof.state ? prof.state + ', Nigeria' : "Lagos, Nigeria"));
+
+    var existingLBadge = document.getElementById("publicLinkedInBadge");
+    if (existingLBadge) existingLBadge.remove();
+    if (prof.linkedin_url) {
+      var lBadge = document.createElement("div");
+      lBadge.id = "publicLinkedInBadge";
+      lBadge.style.marginTop = "8px";
+      var lUrl = prof.linkedin_url.startsWith('http') ? prof.linkedin_url : 'https://' + prof.linkedin_url;
+      lBadge.innerHTML = `<a href="${escapeHTML(lUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; background:rgba(0,119,181,0.08); border:1px solid rgba(0,119,181,0.25); color:#0077b5; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:800; text-decoration:none;"><span style="display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; background:#0077b5; color:#fff; border-radius:3px; font-size:10px; font-weight:900;">in</span><span>Verified LinkedIn</span> <span style="font-size:13px;">↗</span></a>`;
+      if (locEl && locEl.parentNode) locEl.parentNode.appendChild(lBadge);
+    }
 
     // Rate / Budget
     var rateLabelEl = document.querySelector(".hire-rate-label");

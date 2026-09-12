@@ -489,6 +489,48 @@ async function handleOAuthSessionRouting(session) {
     return;
   }
   
+  // Check if returning from a LinkedIn account connection flow
+  const isLinkingLinkedIn = (new URLSearchParams(window.location.search)).get('link_identity') === 'linkedin' ||
+                            localStorage.getItem('collekt_pending_linkedin_link') ||
+                            sessionStorage.getItem('collekt_linking_linkedin_target');
+
+  if (isLinkingLinkedIn && user) {
+    // Extract real LinkedIn metadata if available from session
+    try {
+      const linkedIdentity = session.user.identities?.find(i => i.provider === 'linkedin_oidc' || i.provider === 'linkedin');
+      const idData = linkedIdentity?.identity_data || session.user.user_metadata || {};
+      const realName = idData.name || idData.full_name || '';
+      const realAvatar = idData.picture || idData.avatar_url || '';
+      const realSub = linkedIdentity?.id || idData.sub || '';
+
+      user.linkedin_linked = true;
+      user.linkedin_verified_at = new Date().toISOString();
+      if (realName) user.linkedin_name = realName;
+      if (realSub) user.linkedin_sub = realSub;
+      if (realAvatar && !user.avatar_uploaded) user.oauth_avatar = realAvatar;
+      if (!user.linkedin_url && realName) {
+        const slug = realName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        user.linkedin_url = 'https://www.linkedin.com/in/' + slug;
+      }
+      if (typeof setUser === 'function') setUser(user);
+      if (typeof saveRegisteredUser === 'function') saveRegisteredUser(user);
+      if (window.sb && user.id) {
+        await sb.from('profiles').update({
+          linkedin_url: user.linkedin_url,
+          linkedin_linked: true,
+          updated_at: new Date().toISOString()
+        }).eq('id', user.id);
+      }
+    } catch(e) {
+      console.warn('LinkedIn linking processing error:', e);
+    }
+    localStorage.removeItem('collekt_pending_linkedin_link');
+    localStorage.removeItem('collekt_linking_linkedin_user_id');
+    sessionStorage.removeItem('collekt_linking_linkedin_target');
+    window.location.replace('profile.html?linkedin_connected=true');
+    return;
+  }
+
   const finalRole = (user && user.role) || pendingRole || localStorage.getItem('collekt_last_role') || 'professional';
   const targetDashboard = finalRole === 'company' ? 'company-dashboard.html' : 'dashboard.html';
 

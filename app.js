@@ -434,7 +434,123 @@ async function checkOAuthCallback() {
 document.addEventListener('DOMContentLoaded', checkOAuthCallback);
 
 
-// -- LINK LINKEDIN ACCOUNT TO USER PROFILE DIRECTLY --
+// -- REAL LINKEDIN OAUTH & ACCOUNT LINKING ENGINE --
+async function connectRealLinkedInAccount() {
+  const user = (typeof getUser === 'function') ? getUser() : null;
+  if (!user) {
+    if (typeof showToast === 'function') showToast('⚠️ Please log in before connecting LinkedIn', 'warning');
+    else alert('Please log in before connecting LinkedIn');
+    return false;
+  }
+
+  // Record pending linking state in storage
+  localStorage.setItem('collekt_linking_linkedin_user_id', user.id || user.email || 'active_user');
+  localStorage.setItem('collekt_linking_linkedin_time', Date.now().toString());
+  localStorage.setItem('collekt_pending_linkedin_link', 'true');
+  localStorage.setItem('collekt_last_role', user.role || 'professional');
+  sessionStorage.setItem('collekt_linking_linkedin_target', 'profile.html');
+
+  const redirectUri = window.location.origin + '/auth-callback.html?link_identity=linkedin';
+
+  if (typeof showToast === 'function') {
+    showToast('🔗 Redirecting to LinkedIn for secure authorization...', 'info');
+  }
+
+  if (window.sb && window.sb.auth) {
+    try {
+      // 1. If user has active Supabase session, try linkIdentity
+      const { data: sessionData } = await window.sb.auth.getSession();
+      if (sessionData && sessionData.session) {
+        const { data, error } = await window.sb.auth.linkIdentity({
+          provider: 'linkedin_oidc',
+          options: {
+            redirectTo: redirectUri
+          }
+        });
+        if (!error && data && data.url) {
+          window.location.href = data.url;
+          return true;
+        }
+        if (error) {
+          console.warn('linkIdentity notice, falling back to signInWithOAuth:', error.message);
+        }
+      }
+
+      // 2. Direct signInWithOAuth flow
+      const { data, error } = await window.sb.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: redirectUri
+        }
+      });
+
+      if (error) {
+        console.error('LinkedIn authorization error:', error);
+        if (typeof showToast === 'function') showToast('⚠️ LinkedIn authorization notice: ' + error.message, 'error');
+        else alert('LinkedIn authorization notice: ' + error.message);
+        return false;
+      }
+
+      if (data && data.url) {
+        window.location.href = data.url;
+        return true;
+      }
+    } catch (err) {
+      console.error('connectRealLinkedInAccount exception:', err);
+      if (typeof showToast === 'function') showToast('⚠️ Could not connect to LinkedIn. Please try again.', 'error');
+      return false;
+    }
+  } else {
+    alert('Authentication client loading. Please refresh the page and try again.');
+    return false;
+  }
+}
+
+async function disconnectLinkedInAccount() {
+  const user = (typeof getUser === 'function') ? getUser() : null;
+  if (!user) return;
+
+  if (!confirm('Are you sure you want to disconnect your LinkedIn account? Your verified LinkedIn badge will be removed.')) {
+    return;
+  }
+
+  user.linkedin_linked = false;
+  user.linkedin_url = '';
+  delete user.linkedin_verified_at;
+  delete user.linkedin_name;
+  delete user.linkedin_sub;
+
+  if (typeof setUser === 'function') setUser(user);
+  if (typeof saveRegisteredUser === 'function') saveRegisteredUser(user);
+
+  if (window.sb && user.id) {
+    try {
+      await sb.from('profiles').update({
+        linkedin_url: null,
+        linkedin_linked: false,
+        updated_at: new Date().toISOString()
+      }).eq('id', user.id);
+    } catch(e) {}
+  }
+
+  const editField = document.getElementById('editLinkedIn');
+  if (editField) editField.value = '';
+
+  const connectBtn = document.getElementById('btnConnectLinkedIn');
+  if (connectBtn) {
+    connectBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="#fff" style="margin-right:4px;"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.6 1.6 0 0 0-1.6 1.6 1.6 1.6 0 0 0 1.6 1.6 1.6 1.6 0 0 0 1.6-1.6 1.6 1.6 0 0 0-1.6-1.6Z"/></svg><span>Connect Real Account</span>';
+    connectBtn.style.background = '#0077b5';
+  }
+
+  if (typeof closeModal === 'function') closeModal('linkLinkedInModal');
+  if (typeof renderProfileStrength === 'function') renderProfileStrength();
+  if (typeof _applyProfile === 'function') _applyProfile(user);
+
+  if (typeof showToast === 'function') {
+    showToast('LinkedIn account disconnected.', 'info');
+  }
+}
+
 async function linkLinkedInAccount(inputUrl) {
   const user = getUser();
   if (!user) {
@@ -444,19 +560,9 @@ async function linkLinkedInAccount(inputUrl) {
 
   const rawUrl = (inputUrl && typeof inputUrl === 'string') ? inputUrl.trim() : '';
 
-  // If no URL or username passed, direct the user via the interactive LinkedIn Linking modal
+  // If no URL passed, launch the real LinkedIn connection flow
   if (!rawUrl || rawUrl.length < 3) {
-    if (typeof openLinkedInModal === 'function') {
-      openLinkedInModal();
-      return true;
-    } else {
-      // Direct prompt fallback
-      const directInput = prompt('Enter your LinkedIn Profile URL or Username\n(e.g. https://linkedin.com/in/yourname or yourname):', user.linkedin_url || '');
-      if (directInput) {
-        return linkLinkedInAccount(directInput);
-      }
-      return false;
-    }
+    return connectRealLinkedInAccount();
   }
 
   // Normalize URL format
@@ -475,14 +581,12 @@ async function linkLinkedInAccount(inputUrl) {
   if (typeof setUser === 'function') setUser(user);
   if (typeof saveRegisteredUser === 'function') saveRegisteredUser(user);
 
-  // Sync to Supabase cloud profile if available
   if (window.sb && user.id) {
     try {
       sb.from('profiles').update({ linkedin_url: finalUrl, linkedin_linked: true }).eq('id', user.id);
     } catch(e) {}
   }
 
-  // Update input fields on page if present
   const editField = document.getElementById('editLinkedIn');
   if (editField) editField.value = finalUrl;
 
@@ -493,14 +597,19 @@ async function linkLinkedInAccount(inputUrl) {
   }
 
   if (typeof showToast === 'function') {
-    showToast('✅ LinkedIn profile linked successfully! 🔗');
+    showToast('✅ LinkedIn profile saved! 🔗');
   } else {
-    alert('✅ LinkedIn profile linked successfully!');
+    alert('✅ LinkedIn profile saved!');
   }
 
   if (typeof renderProfileStrength === 'function') renderProfileStrength();
+  if (typeof _applyProfile === 'function') _applyProfile(user);
   return true;
 }
+
+window.connectRealLinkedInAccount = connectRealLinkedInAccount;
+window.disconnectLinkedInAccount = disconnectLinkedInAccount;
+window.linkLinkedInAccount = linkLinkedInAccount;
 
 // -- REAL SUPABASE & MASTER ADMIN AUTHENTICATION ENGINE --
 async function checkAdminSession() {
