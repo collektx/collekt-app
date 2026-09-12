@@ -214,6 +214,68 @@
     box-shadow: 0 6px 20px rgba(192,57,43,.14);
   }
 
+  
+  /* -- Inputs & Textareas --------- */
+  .sett-input {
+    font-family: Manrope, system-ui, sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #111918;
+    background: rgba(244, 248, 247, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(19, 117, 111, 0.18);
+    border-radius: 12px;
+    padding: 10px 14px;
+    box-sizing: border-box;
+    transition: all 0.22s cubic-bezier(.22,.61,.36,1);
+  }
+  .sett-input:focus {
+    border-color: #13756F;
+    outline: none;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 3px rgba(19, 117, 111, 0.15);
+  }
+  .sett-btn-primary {
+    background: linear-gradient(135deg, #13756F, #0E5A55);
+    color: #FFFFFF !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 14px rgba(19, 117, 111, 0.28);
+  }
+  .sett-btn-primary:hover {
+    background: linear-gradient(135deg, #0E5A55, #083D39);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(19, 117, 111, 0.38);
+  }
+  .sett-field-label {
+    font-family: Manrope, system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    color: #111918;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .sett-desc-text {
+    font-family: Manrope, system-ui, sans-serif;
+    font-size: 13px;
+    color: #556965;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .sett-review-row {
+    transition: all 0.2s cubic-bezier(.22,.61,.36,1);
+  }
+  .sett-review-row:hover {
+    background: rgba(19, 117, 111, 0.08);
+  }
+  .sett-trustpilot-title {
+    color: #005c3e;
+  }
+  .review-user-card {
+    background: rgba(19, 117, 111, 0.08);
+    border: 1px solid rgba(19, 117, 111, 0.18);
+  }
+
   /* ══════════════════════════════════════════════════════════
      DARK MODE — iOS Liquid Dark Glass
      ══════════════════════════════════════════════════════════ */
@@ -285,6 +347,57 @@
     background: rgba(192, 57, 43, 0.25);
     border-color: #ef4444;
   }
+  
+  html.dark .sett-input {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #FFFFFF;
+  }
+  html.dark .sett-input:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+  }
+  html.dark .sett-input::placeholder {
+    color: #94A3B8;
+  }
+  html.dark .sett-btn-primary {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #FFFFFF !important;
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  }
+  html.dark .sett-btn-primary:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    box-shadow: 0 6px 22px rgba(16, 185, 129, 0.4);
+  }
+  html.dark .sett-field-label {
+    color: #F1F5F9;
+  }
+  html.dark .sett-desc-text {
+    color: #94A3B8;
+  }
+  html.dark .sett-review-row:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  html.dark .sett-trustpilot-title {
+    color: #10b981;
+  }
+  html.dark .sett-trustpilot-card {
+    background: rgba(0, 182, 122, 0.12) !important;
+    border-color: rgba(0, 182, 122, 0.35) !important;
+  }
+  html.dark .review-user-card {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+  html.dark #settingsRatingScoreText {
+    color: #F1F5F9 !important;
+  }
+  html.dark #settingsPerfScoreText {
+    color: #94A3B8 !important;
+  }
+
   html.dark .sett-checkbox {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.16);
@@ -532,12 +645,14 @@
           <!-- 6. PLATFORM REVIEWS & FEEDBACK -->
           <div class="settings-section">
             <div class="settings-section-title">Platform Feedback &amp; Performance</div>
-            <div class="settings-row" style="align-items:center;">
+            <div class="settings-row sett-review-row" style="align-items:center; cursor:pointer; padding:12px 14px; border-radius:14px;" onclick="openWebsiteReviewModal()">
               <div class="settings-row-info">
-                <div class="settings-row-label">Review Website &amp; Performance</div>
+                <div class="settings-row-label" style="display:flex; align-items:center; gap:6px;">
+                  Review Website &amp; Performance <span style="font-size:11px; padding:2px 8px; border-radius:10px; background:rgba(245,158,11,0.15); color:#d97706; font-weight:800;">⭐ Feedback</span>
+                </div>
                 <div class="settings-row-desc">Share feedback on website speed, proposal workflows, or escrow payouts</div>
               </div>
-              <button type="button" class="sett-btn sett-btn-outline" style="display:inline-flex; align-items:center; gap:6px; font-weight:800; cursor:pointer;" onclick="openWebsiteReviewModal()">
+              <button type="button" class="sett-btn sett-btn-outline" style="display:inline-flex; align-items:center; gap:6px; font-weight:800; cursor:pointer;" onclick="event.stopPropagation(); openWebsiteReviewModal();">
                 <span>✍️</span> Drop Review
               </button>
             </div>
@@ -711,27 +826,83 @@
   let currentReviewRating = 5;
   let currentPerfRating = 5;
 
+  function updateReviewModalUser() {
+    const userBox = document.getElementById('reviewUserIdentity');
+    if (!userBox) return;
+
+    let user = null;
+    try {
+      if (typeof getUser === 'function') user = getUser();
+      else {
+        const raw = localStorage.getItem('collekt_user');
+        if (raw) user = JSON.parse(raw);
+      }
+    } catch(e) {}
+
+    const isLoggedIn = user && (user.id || user.email || user.name || user.full_name);
+    if (!isLoggedIn) {
+      userBox.innerHTML = `
+        <div class="review-user-card" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 14px; border-radius:14px; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px; height:36px; border-radius:50%; background:rgba(19,117,111,0.2); color:#13756F; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;">👤</div>
+            <div>
+              <div class="sett-field-label" style="margin-bottom:0; font-size:13px;">Community Feedback</div>
+              <div class="sett-desc-text" style="margin-bottom:0; font-size:11.5px;">Not logged in &bull; Submit as guest or <a href="login.html" style="color:#13756F; font-weight:700; text-decoration:underline;">sign in</a></div>
+            </div>
+          </div>
+          <a href="login.html" class="sett-btn sett-btn-outline" style="font-size:11px; padding:4px 10px; text-decoration:none;">Log In</a>
+        </div>
+      `;
+      return;
+    }
+
+    const isCompany = user.role === 'company' || (window.location.pathname && window.location.pathname.includes('company'));
+    const authorName = user.name || user.full_name || (user.first_name ? (user.first_name + ' ' + (user.last_name || '')).trim() : null) || user.username || 'Collekt Member';
+    const authorRole = isCompany ? (user.company_name || 'Enterprise Client') : (user.title || 'Verified Professional');
+    const avatarUrl = user.avatar || user.avatar_url || user.profile_picture;
+    const initial = (authorName.charAt(0) || 'U').toUpperCase();
+
+    userBox.innerHTML = `
+      <div class="review-user-card" style="display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:14px; margin-bottom:16px;">
+        <div style="width:42px; height:42px; border-radius:50%; background:#0E3B35; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; overflow:hidden; flex-shrink:0; border:2px solid rgba(16,185,129,0.3);">
+          ${avatarUrl ? `<img src="${avatarUrl}" alt="${authorName}" style="width:100%; height:100%; object-fit:cover;">` : initial}
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div class="sett-field-label" style="display:flex; align-items:center; gap:6px; margin-bottom:2px; font-size:13.5px;">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${authorName}</span>
+            <span style="font-size:10.5px; padding:2px 8px; border-radius:8px; background:rgba(16,185,129,0.15); color:#10b981; font-weight:800; white-space:nowrap; border:1px solid rgba(16,185,129,0.3);">✓ Verified Member</span>
+          </div>
+          <div class="sett-desc-text" style="margin-bottom:0; font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${authorRole}</div>
+        </div>
+      </div>
+    `;
+  }
+
   function buildReviewModal() {
     if (document.getElementById('websiteReviewModal')) return;
 
     const modalHtml = `
-    <div class="settings-backdrop" id="websiteReviewModal" style="display:none; z-index:99999;">
+    <div class="settings-backdrop" id="websiteReviewModal" style="display:none; z-index:99999;" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
       <div class="settings-panel" style="max-width:540px;">
         <div class="settings-header">
-          <div class="settings-title">
+          <div class="settings-title" id="reviewModalTitle">
             <span>⭐</span> Review Website &amp; Performance
           </div>
-          <button class="settings-close" onclick="closeWebsiteReviewModal()" aria-label="Close review dialog">&times;</button>
+          <button class="settings-close" id="websiteReviewCloseBtn" onclick="closeWebsiteReviewModal()" aria-label="Close review dialog">&times;</button>
         </div>
-        <div class="settings-body" style="padding-top:20px;">
-          <p style="font-size:13px; color:#556965; margin-bottom:18px; line-height:1.5;">
-            Share verified feedback on platform speed, project bidding, escrow milestone payouts, or client communication.
+        <div class="settings-body" style="padding-top:18px;">
+
+          <!-- Logged-in User Identity -->
+          <div id="reviewUserIdentity"></div>
+
+          <p class="sett-desc-text">
+            Share authentic feedback on platform speed, project bidding, escrow milestone payouts, or client communication.
           </p>
 
           <!-- Overall Star Rating -->
           <div style="margin-bottom:16px;">
-            <label style="font-size:12px; font-weight:800; color:#111918; display:block; margin-bottom:6px;">Overall Platform Rating</label>
-            <div style="display:flex; align-items:center; gap:10px;">
+            <label class="sett-field-label">Overall Platform Rating</label>
+            <div style="display:flex; align-items:center; gap:12px;">
               <div id="settingsStarPicker" style="display:flex; gap:6px; font-size:26px; cursor:pointer; color:#f59e0b; user-select:none;">
                 <span onclick="setWebsiteRating(1)" onmouseover="hoverWebsiteRating(1)" onmouseout="resetWebsiteHoverRating()">★</span>
                 <span onclick="setWebsiteRating(2)" onmouseover="hoverWebsiteRating(2)" onmouseout="resetWebsiteHoverRating()">★</span>
@@ -739,14 +910,14 @@
                 <span onclick="setWebsiteRating(4)" onmouseover="hoverWebsiteRating(4)" onmouseout="resetWebsiteHoverRating()">★</span>
                 <span onclick="setWebsiteRating(5)" onmouseover="hoverWebsiteRating(5)" onmouseout="resetWebsiteHoverRating()">★</span>
               </div>
-              <span id="settingsRatingScoreText" style="font-size:14px; font-weight:800; color:#111918;">5.0 / 5.0</span>
+              <span id="settingsRatingScoreText" class="sett-field-label" style="font-size:14px; font-weight:800; margin-bottom:0;">5.0 / 5.0</span>
             </div>
           </div>
 
           <!-- Speed & Performance Rating -->
           <div style="margin-bottom:16px;">
-            <label style="font-size:12px; font-weight:800; color:#111918; display:block; margin-bottom:6px;">⚡ Website Speed &amp; UI Responsiveness</label>
-            <div style="display:flex; align-items:center; gap:10px;">
+            <label class="sett-field-label">⚡ Website Speed &amp; UI Responsiveness</label>
+            <div style="display:flex; align-items:center; gap:12px;">
               <div id="settingsPerfPicker" style="display:flex; gap:6px; font-size:22px; cursor:pointer; color:#d4920b; user-select:none;">
                 <span onclick="setWebsitePerfRating(1)" onmouseover="hoverWebsitePerfRating(1)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
                 <span onclick="setWebsitePerfRating(2)" onmouseover="hoverWebsitePerfRating(2)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
@@ -754,31 +925,46 @@
                 <span onclick="setWebsitePerfRating(4)" onmouseover="hoverWebsitePerfRating(4)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
                 <span onclick="setWebsitePerfRating(5)" onmouseover="hoverWebsitePerfRating(5)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
               </div>
-              <span id="settingsPerfScoreText" style="font-size:13px; font-weight:700; color:#556965;">Ultra Fast (5.0)</span>
+              <span id="settingsPerfScoreText" class="sett-desc-text" style="font-size:13px; font-weight:700; margin-bottom:0;">Ultra Fast (5.0)</span>
             </div>
           </div>
 
           <!-- Feedback Category -->
           <div style="margin-bottom:16px;">
-            <label style="font-size:12px; font-weight:800; color:#111918; display:block; margin-bottom:6px;">Category</label>
-            <select class="sett-select" id="settingsReviewCategory" style="width:100%;">
+            <label class="sett-field-label">Feedback Category</label>
+            <select class="sett-select" id="settingsReviewCategory" style="width:100%; max-width:100%;">
               <option value="performance">⚡ Platform Speed &amp; Performance</option>
               <option value="pro">💼 Professional Freelancer Experience</option>
               <option value="company">🏢 Company &amp; Hiring Experience</option>
-              <option value="escrow">🛡️ Escrow Payouts &amp; Security</option>
+              <option value="escrow">🛡️ Escrow Payouts &amp; Milestone Security</option>
+              <option value="ui">✨ UI / UX &amp; Mobile Responsiveness</option>
             </select>
           </div>
 
           <!-- Headline -->
           <div style="margin-bottom:16px;">
-            <label style="font-size:12px; font-weight:800; color:#111918; display:block; margin-bottom:6px;">Review Headline</label>
+            <label class="sett-field-label">Review Headline</label>
             <input type="text" class="sett-input" id="settingsReviewTitle" placeholder="e.g. Fast milestone payouts and very clean interface" style="width:100%;">
           </div>
 
           <!-- Comments -->
-          <div style="margin-bottom:20px;">
-            <label style="font-size:12px; font-weight:800; color:#111918; display:block; margin-bottom:6px;">Detailed Feedback</label>
+          <div style="margin-bottom:18px;">
+            <label class="sett-field-label">Detailed Feedback</label>
             <textarea class="sett-input" id="settingsReviewQuote" rows="4" placeholder="Tell the community how Collekt is working for your business or freelance projects..." style="width:100%; height:90px; resize:vertical;"></textarea>
+          </div>
+
+          <!-- Trustpilot Promotion Callout -->
+          <div class="sett-trustpilot-card" style="margin-bottom:20px; padding:12px 14px; border-radius:14px; background:rgba(0,182,122,0.08); border:1px solid rgba(0,182,122,0.25); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:20px;">⭐</span>
+              <div>
+                <div class="sett-trustpilot-title" style="font-size:12.5px; font-weight:800;">Rate us on Trustpilot too!</div>
+                <div class="sett-desc-text" style="font-size:11px; margin-bottom:0;">Help build global verified trust for Nigerian specialists</div>
+              </div>
+            </div>
+            <a href="https://www.trustpilot.com/evaluate/collektng.xyz" target="_blank" rel="noopener noreferrer" class="sett-btn sett-btn-outline" style="font-size:11.5px; padding:6px 12px; text-decoration:none; display:inline-flex; align-items:center; gap:4px; border-color:rgba(0,182,122,0.4); font-weight:800;">
+              Trustpilot ↗
+            </a>
           </div>
 
           <!-- Actions -->
@@ -793,18 +979,44 @@
 
     const div = document.createElement('div');
     div.innerHTML = modalHtml;
-    document.body.appendChild(div.firstElementChild);
+    const modalEl = div.firstElementChild;
+    document.body.appendChild(modalEl);
+
+    // Close on backdrop click
+    modalEl.addEventListener('click', (e) => {
+      if (e.target === modalEl) closeWebsiteReviewModal();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalEl.classList.contains('open')) {
+        closeWebsiteReviewModal();
+      }
+    });
+
     reviewModalBuilt = true;
   }
 
   function openWebsiteReviewModal() {
-    closeSettingsModal();
+    // Immediately hide settings backdrop to prevent transition collision & backdrop freezing
+    const settingsBackdrop = document.getElementById('settingsBackdrop');
+    if (settingsBackdrop) {
+      settingsBackdrop.classList.remove('open');
+      settingsBackdrop.style.display = 'none';
+    }
+
     if (!reviewModalBuilt) buildReviewModal();
+    updateReviewModalUser();
+
     const modal = document.getElementById('websiteReviewModal');
     if (!modal) return;
     modal.style.display = 'flex';
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => modal.classList.add('open'));
+      requestAnimationFrame(() => {
+        modal.classList.add('open');
+        const titleInput = document.getElementById('settingsReviewTitle');
+        if (titleInput) titleInput.focus();
+      });
     });
     setWebsiteRating(5);
     setWebsitePerfRating(5);
@@ -872,7 +1084,7 @@
     if (!quote || quote.length < 5) {
       if (typeof showToast === 'function') {
         showToast('⚠️ Please write a brief review feedback before submitting', 'warning');
-      } else {
+      } else if (typeof alert === 'function') {
         alert('Please write a brief review feedback before submitting.');
       }
       return;
@@ -900,7 +1112,7 @@
       quote: quote,
       date: 'Just now',
       verified: true,
-      initial: authorName.charAt(0).toUpperCase(),
+      initial: (authorName.charAt(0) || 'U').toUpperCase(),
       bg: '#0E3B35',
       helpfulCount: 0
     };
@@ -915,12 +1127,29 @@
       localStorage.setItem('collekt_community_reviews', JSON.stringify(allReviews));
     } catch(e) {}
 
+    // If Supabase client is present, also persist
+    try {
+      if (window.sb && typeof window.sb.from === 'function') {
+        window.sb.from('community_reviews').insert([{
+          user_id: user.id || null,
+          author_name: authorName,
+          author_role: authorRole,
+          category: cat,
+          rating: currentReviewRating,
+          speed_rating: currentPerfRating,
+          title: title || 'Verified Platform Feedback',
+          quote: quote,
+          created_at: new Date().toISOString()
+        }]).then(()=>{}).catch(()=>{});
+      }
+    } catch(e) {}
+
     closeWebsiteReviewModal();
 
     if (typeof showToast === 'function') {
-      showToast('⭐ Thank you for your review! Your feedback is now live.', 'success');
-    } else {
-      alert('⭐ Thank you for your review! Your feedback is now live.');
+      showToast('⭐ Thank you for your review! Your feedback is now live on Collekt.', 'success');
+    } else if (typeof alert === 'function') {
+      alert('⭐ Thank you for your review! Your feedback is now live on Collekt.');
     }
 
     if (typeof renderCommunityReviews === 'function') {
@@ -937,6 +1166,7 @@
   window.hoverWebsitePerfRating = hoverWebsitePerfRating;
   window.resetWebsitePerfHoverRating = resetWebsitePerfHoverRating;
   window.submitWebsiteReview = submitWebsiteReview;
+  window.updateReviewModalUser = updateReviewModalUser;
 
   /* -- EXPORT PUBLIC API ------------------------------- */
   window.openSettingsModal = openSettingsModal;
