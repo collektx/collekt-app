@@ -1,3 +1,7 @@
+# Domain migration: redirect old .xyz domain to primary .com domain
+https://collektng.xyz/* https://collektng.com/:splat 301!
+https://www.collektng.xyz/* https://collektng.com/:splat 301!
+
 /signup /register.html 301
 /register /register.html 200
 /login /login.html 200

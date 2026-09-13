@@ -30,7 +30,7 @@ exports.handler = async (event) => {
     'http://localhost:3000',
     'http://127.0.0.1:5500'
   ];
-  const allowOrigin = allowedOrigins.includes(origin) ? origin : 'https://collektng.xyz';
+  const allowOrigin = allowedOrigins.includes(origin) ? origin : 'https://collektng.com';
 
   const headers = {
     'Access-Control-Allow-Origin': allowOrigin,

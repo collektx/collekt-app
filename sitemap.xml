@@ -6,7 +6,7 @@
 
   <!-- Homepage -->
   <url>
-    <loc>https://collektng.xyz/</loc>
+    <loc>https://collektng.com/</loc>
     <lastmod>2026-09-11</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -14,7 +14,7 @@
 
   <!-- Marketplace / Tenders -->
   <url>
-    <loc>https://collektng.xyz/marketplace.html</loc>
+    <loc>https://collektng.com/marketplace.html</loc>
     <lastmod>2026-09-11</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -22,7 +22,7 @@
 
   <!-- Registration -->
   <url>
-    <loc>https://collektng.xyz/register.html</loc>
+    <loc>https://collektng.com/register.html</loc>
     <lastmod>2026-09-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -30,7 +30,7 @@
 
   <!-- Login -->
   <url>
-    <loc>https://collektng.xyz/login.html</loc>
+    <loc>https://collektng.com/login.html</loc>
     <lastmod>2026-09-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -38,7 +38,7 @@
 
   <!-- Post a Job / Tender -->
   <url>
-    <loc>https://collektng.xyz/post-job.html</loc>
+    <loc>https://collektng.com/post-job.html</loc>
     <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -46,7 +46,7 @@
 
   <!-- Premium Upgrade -->
   <url>
-    <loc>https://collektng.xyz/upgrade.html</loc>
+    <loc>https://collektng.com/upgrade.html</loc>
     <lastmod>2026-09-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -54,7 +54,7 @@
 
   <!-- Public Profile Directory -->
   <url>
-    <loc>https://collektng.xyz/public-profile.html</loc>
+    <loc>https://collektng.com/public-profile.html</loc>
     <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -62,7 +62,7 @@
 
   <!-- Privacy Policy (NDPR & NDPA 2023) -->
   <url>
-    <loc>https://collektng.xyz/privacy.html</loc>
+    <loc>https://collektng.com/privacy.html</loc>
     <lastmod>2026-09-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -70,7 +70,7 @@
 
   <!-- Terms of Service -->
   <url>
-    <loc>https://collektng.xyz/terms.html</loc>
+    <loc>https://collektng.com/terms.html</loc>
     <lastmod>2026-09-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -78,7 +78,7 @@
 
   <!-- Brand Identity -->
   <url>
-    <loc>https://collektng.xyz/brand-identity.html</loc>
+    <loc>https://collektng.com/brand-identity.html</loc>
     <lastmod>2026-09-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

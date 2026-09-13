@@ -27,4 +27,4 @@ Disallow: /my-jobs.html
 Disallow: /.netlify/
 
 # XML Sitemap for Google, Bing & Search Engines
-Sitemap: https://collektng.xyz/sitemap.xml
+Sitemap: https://collektng.com/sitemap.xml

@@ -962,7 +962,7 @@
                 <div class="sett-desc-text" style="font-size:11px; margin-bottom:0;">Help build global verified trust for Nigerian specialists</div>
               </div>
             </div>
-            <a href="https://www.trustpilot.com/evaluate/collektng.xyz" target="_blank" rel="noopener noreferrer" class="sett-btn sett-btn-outline" style="font-size:11.5px; padding:6px 12px; text-decoration:none; display:inline-flex; align-items:center; gap:4px; border-color:rgba(0,182,122,0.4); font-weight:800;">
+            <a href="https://www.trustpilot.com/evaluate/collektng.com" target="_blank" rel="noopener noreferrer" class="sett-btn sett-btn-outline" style="font-size:11.5px; padding:6px 12px; text-decoration:none; display:inline-flex; align-items:center; gap:4px; border-color:rgba(0,182,122,0.4); font-weight:800;">
               Trustpilot ↗
             </a>
           </div>

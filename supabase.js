@@ -1452,7 +1452,7 @@ async function generateAndSaveFinalPDF({
         </div>
         <div style="border-top:1px solid #DDE8E6; padding-top:16px; display:flex; justify-content:space-between; font-size:10px; color:#94a3b8;">
           <div>Certified Collekt Platform Document &bull; Verification Hash: ${Math.random().toString(36).substring(2, 10).toUpperCase()}</div>
-          <div>collektng.xyz</div>
+          <div>collektng.com</div>
         </div>
       `;
       document.body.appendChild(targetElement);

@@ -7,7 +7,7 @@
 ---
 
 ## ? Live Deployments
-- **Production URL**: [https://collektng.xyz](https://collektng.xyz)
+- **Production URL**: [https://collektng.com](https://collektng.com)
 - **GitHub Repository**: [https://github.com/collektx/collekt-app](https://github.com/collektx/collekt-app)
 
 ---
