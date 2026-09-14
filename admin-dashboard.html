@@ -1098,7 +1098,7 @@
     // 2. Safe remote user sync if Supabase is connected
     if (window.sb && typeof sb.from === 'function') {
       try {
-        const resetEmails = ['chenpao51@gmail.com', 'smileykori@gmail.com', 'bethelvwire@gmail.com', 'collektng@collekt.xyz'];
+        const resetEmails = ['chenpao51@gmail.com', 'smileykori@gmail.com', 'bethelvwire@gmail.com', 'collektng@gmail.com', 'admin@collektng.com'];
         const { data: remoteProfiles, error } = await sb.from('profiles').select('*');
         if (!error && remoteProfiles && remoteProfiles.length > 0) {
           remoteProfiles.forEach(p => {
