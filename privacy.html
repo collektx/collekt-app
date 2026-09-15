@@ -12,9 +12,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=48.0">
-<link rel="stylesheet" href="shared.css?v=48.0">
-<link rel="stylesheet" href="glass.css?v=48.0">
+<link rel="stylesheet" href="style.css?v=49.0">
+<link rel="stylesheet" href="shared.css?v=49.0">
+<link rel="stylesheet" href="glass.css?v=49.0">
 
 <style>
   :root {
@@ -324,7 +324,12 @@
     </ul>
 
     <h2 id="p-sec-11">11. Cookies &amp; Local Storage</h2>
-    <p>Collekt uses necessary session cookies and local storage to keep you securely signed in, preserve your dark/light theme preference, and manage active messaging threads. You can manage cookie preferences in your browser settings at any time.</p>
+    <p>Collekt uses strictly essential session cookies and local storage to keep you securely signed in, preserve your dark/light theme preference, and manage active messaging threads. You can manage or reject non-essential cookies at any time under the Nigeria Data Protection Act (NDPA 2023).</p>
+    <div style="margin:12px 0 16px 0;">
+      <button onclick="openCookiePreferencesModal()" style="background:rgba(20,184,166,0.16); border:1px solid rgba(45,212,191,0.4); color:#2dd4bf; padding:8px 18px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer; font-family:'Manrope',sans-serif; transition:all 0.2s;">
+        🍪 Manage Cookie &amp; Privacy Preferences
+      </button>
+    </div>
 
     <h2 id="p-sec-12">12. Data Protection Officer (DPO) Contact</h2>
     <p>To exercise your privacy rights or request data deletion, contact our Data Protection Officer:</p>
@@ -342,6 +347,8 @@
         &bull;
         <a href="privacy.html">Privacy Policy</a>
         &bull;
+        <a href="javascript:void(0)" onclick="openCookiePreferencesModal()">Cookie Preferences</a>
+        &bull;
         <a href="index.html">Collekt Home</a>
         &bull;
         <a href="marketplace.html">Marketplace</a>
@@ -351,5 +358,6 @@
   </div><!-- /.policy-card -->
 </main>
 
+<script src="app.js?v=49.0"></script>
 </body>
 </html>

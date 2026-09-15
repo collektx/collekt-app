@@ -5942,6 +5942,28 @@ function injectCookieStyles() {
       color: #ffffff !important;
       transform: translateY(-1px);
     }
+    .collekt-cookie-btn-reject {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #cbd5e1 !important;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .collekt-cookie-btn-reject:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #fca5a5 !important;
+      transform: translateY(-1px);
+    }
     .collekt-cookie-toggle {
       position: relative;
       display: inline-block;
@@ -6084,12 +6106,16 @@ function initModernCookieBanner() {
           </div>
         </div>
         <div class="collekt-cookie-actions" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:2px;">
+          <button onclick="rejectNonEssentialCookies()" class="collekt-cookie-btn-reject" id="btnCookieReject">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Reject Non-Essential
+          </button>
           <button onclick="openCookiePreferencesModal()" class="collekt-cookie-btn-customize" id="btnCookieCustomize">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             Customize
           </button>
           <button onclick="acceptAllCookies()" class="collekt-cookie-btn-accept" id="btnCookieAcceptAll">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
             Accept All
           </button>
         </div>
@@ -6231,14 +6257,15 @@ function openCookiePreferencesModal() {
 
       <!-- Footer Actions -->
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:20px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.12); flex-wrap:wrap;">
-        <a href="javascript:void(0)" onclick="rejectOptionalCookies()" style="font-size:12px; color:#94a3b8; text-decoration:underline; font-weight:600;">
+        <button onclick="rejectNonEssentialCookies()" class="collekt-cookie-btn-reject" style="padding:9px 16px; font-size:12.5px;" id="modalBtnCookieReject">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           Reject Non-Essential
-        </a>
+        </button>
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-          <button onclick="saveCustomCookiePreferences()" class="collekt-cookie-btn-customize" style="padding:9px 18px; font-size:12.5px;">
+          <button onclick="saveCustomCookiePreferences()" class="collekt-cookie-btn-customize" style="padding:9px 18px; font-size:12.5px;" id="modalBtnSavePref">
             Save Preferences
           </button>
-          <button onclick="acceptAllCookies()" class="collekt-cookie-btn-accept" style="padding:9px 18px; font-size:12.5px;">
+          <button onclick="acceptAllCookies()" class="collekt-cookie-btn-accept" style="padding:9px 18px; font-size:12.5px;" id="modalBtnAcceptAll">
             Accept All
           </button>
         </div>
@@ -6275,9 +6302,9 @@ function saveCustomCookiePreferences() {
   showCookieToast('Custom cookie preferences saved.');
 }
 
-function rejectOptionalCookies() {
+function rejectNonEssentialCookies() {
   localStorage.setItem('collekt_cookie_preferences_saved', 'true');
-  localStorage.setItem('collekt_cookie_consent_accepted', 'true');
+  localStorage.setItem('collekt_cookie_consent_accepted', 'false');
   localStorage.setItem('collekt_ndpa_consent_accepted', 'true');
   localStorage.setItem('collekt_cookies_essential', 'true');
   localStorage.setItem('collekt_cookies_ai', 'false');
@@ -6286,7 +6313,11 @@ function rejectOptionalCookies() {
 
   closeCookiePreferencesModal();
   dismissCookieBanner();
-  showCookieToast('Only strictly essential cookies enabled.');
+  showCookieToast('Non-essential cookies rejected. Essential security cookies active.');
+}
+
+function rejectOptionalCookies() {
+  rejectNonEssentialCookies();
 }
 
 /* Backward compatibility aliases */
@@ -6368,11 +6399,13 @@ function openLegalQuickView(type = 'terms') {
 window.openLegalQuickView = openLegalQuickView;
 window.acceptNdpaConsent = acceptNdpaConsent;
 window.acceptAllCookies = acceptAllCookies;
+window.rejectNonEssentialCookies = rejectNonEssentialCookies;
+window.rejectOptionalCookies = rejectOptionalCookies;
 window.initModernCookieBanner = initModernCookieBanner;
 window.initNdpaConsentBanner = initNdpaConsentBanner;
 window.openCookiePreferencesModal = openCookiePreferencesModal;
 window.closeCookiePreferencesModal = closeCookiePreferencesModal;
 window.saveCustomCookiePreferences = saveCustomCookiePreferences;
-window.rejectOptionalCookies = rejectOptionalCookies;
+
 
 
