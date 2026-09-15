@@ -42,20 +42,92 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=50.0">
-<link rel="stylesheet" href="shared.css?v=50.0">
-<link rel="stylesheet" href="glass.css?v=50.0">
+<link rel="stylesheet" href="style.css?v=51.0">
+<link rel="stylesheet" href="shared.css?v=51.0">
+<link rel="stylesheet" href="glass.css?v=51.0">
 
 <style>
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
   body { background: var(--paper); }
-  .co-welcome { background: linear-gradient(135deg, #0e2a26 0%, var(--forest) 50%, #1a4a40 100%); border-radius: var(--r-lg); padding: 28px 32px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; border: 1px solid rgba(212,146,11,.25); position:relative; overflow:hidden; }
+  .app-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+  .app-main {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .page-inner {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .co-welcome {
+    background: linear-gradient(135deg, #0e2a26 0%, var(--forest) 50%, #1a4a40 100%);
+    border-radius: var(--r-lg);
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    border: 1px solid rgba(212,146,11,.25);
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
   .co-welcome::after { content:''; position:absolute; right:-40px; top:-40px; width:200px; height:200px; border-radius:50%; background:rgba(212,146,11,.06); }
   .co-welcome h1 { font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 6px; }
   .co-welcome p { font-size: 14px; color: rgba(255,255,255,.75); }
-  .post-card { background: linear-gradient(135deg, #fff8ec, #fff); border: 2px dashed var(--amber); border-radius: var(--r-lg); padding: 28px; text-align: center; cursor: pointer; transition: all .2s; margin-bottom: 24px; }
+  .co-welcome-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  
+  .post-card { background: linear-gradient(135deg, #fff8ec, #fff); border: 2px dashed var(--amber); border-radius: var(--r-lg); padding: 28px; text-align: center; cursor: pointer; transition: all .2s; margin-bottom: 24px; width: 100%; max-width: 100%; box-sizing: border-box; }
   .post-card:hover { background: var(--amber-lt); border-style: solid; transform: translateY(-2px); }
   html.dark .post-card { background: rgba(212,146,11,.08); border-color: rgba(212,146,11,.4); }
   html.dark .post-card:hover { background: rgba(212,146,11,.15); }
+  
+  .dash-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 24px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .dash-grid > div {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .content-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .content-card .card-body {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
   .applicant-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
   html.dark .applicant-row { border-color: rgba(255,255,255,.07); }
   .applicant-row:last-child { border-bottom: none; }
@@ -69,8 +141,12 @@
   .pill-review { background: var(--amber-lt); color: var(--amber); }
   .pill-awarded { background: var(--teal-lt); color: var(--teal); }
   .pill-closed { background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
-  .co-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 28px; }
-  .talent-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; text-align: center; transition: all .2s; }
+  
+  .stats-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 28px; width: 100%; max-width: 100%; min-width: 0; }
+  .stat-card { min-width: 0; box-sizing: border-box; word-break: break-word; overflow: hidden; }
+
+  .co-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 28px; width: 100%; max-width: 100%; min-width: 0; }
+  .talent-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; text-align: center; transition: all .2s; min-width: 0; max-width: 100%; box-sizing: border-box; overflow: hidden; }
   html.dark .talent-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
   .talent-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); }
   .talent-avatar { width: 60px; height: 60px; border-radius: 50%; color: #fff; font-size: 22px; font-weight: 900; display: grid; place-items: center; margin: 0 auto 12px; }
@@ -79,12 +155,64 @@
   .talent-title { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
   .talent-rating { font-size: 12px; color: var(--amber); font-weight: 700; margin-bottom: 12px; }
   .talent-tags { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
-  @media (max-width: 900px) { .co-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 600px) { .co-grid { grid-template-columns: 1fr; } }
+  
   .doc-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); transition: all .2s; }
   .doc-item:hover { border-color: var(--teal); transform: translateY(-1px); }
   html.dark .doc-item { background: rgba(255,255,255,.02); border-color: rgba(255,255,255,.08); }
   html.dark .doc-item:hover { border-color: var(--teal); }
+
+  @media (max-width: 992px) {
+    .dash-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 20px !important; }
+    .stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; margin-bottom: 24px !important; }
+    .co-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 14px !important; }
+  }
+  @media (max-width: 768px) {
+    .page-inner { padding: 16px 12px 90px !important; }
+    .co-welcome {
+      padding: 20px 16px !important;
+      border-radius: 16px !important;
+      margin-bottom: 20px !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 16px !important;
+    }
+    .co-welcome h1 { font-size: 19px !important; line-height: 1.3 !important; }
+    .co-welcome p { font-size: 13px !important; }
+    .co-welcome-actions {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 8px !important;
+      width: 100% !important;
+    }
+    .co-welcome-actions .btn {
+      width: 100% !important;
+      min-height: 42px !important;
+      justify-content: center !important;
+      font-size: 13px !important;
+    }
+    .stats-row { grid-template-columns: 1fr 1fr !important; gap: 10px !important; margin-bottom: 20px !important; }
+    .stat-card { padding: 14px 12px !important; border-radius: 14px !important; }
+    .stat-icon { font-size: 22px !important; margin-bottom: 6px !important; }
+    .stat-value { font-size: 18px !important; line-height: 1.2 !important; word-break: break-word !important; }
+    .stat-label { font-size: 11px !important; line-height: 1.35 !important; }
+    .post-card { padding: 20px 16px !important; border-radius: 16px !important; margin-bottom: 20px !important; }
+    .co-grid { grid-template-columns: 1fr !important; gap: 14px !important; }
+    .talent-card { padding: 16px 14px !important; border-radius: 16px !important; min-width: 0 !important; box-sizing: border-box !important; }
+    .card-header { padding: 14px 16px !important; flex-wrap: wrap !important; gap: 8px !important; }
+    .card-header h3 { font-size: 15px !important; }
+    .project-row { padding: 12px 14px !important; flex-wrap: wrap !important; gap: 10px !important; }
+  }
+  @media (max-width: 480px) {
+    .stats-row { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+    .stat-card { padding: 12px 10px !important; }
+    .stat-value { font-size: 16.5px !important; }
+    .page-inner { padding: 12px 8px 84px !important; }
+    .modal-card div[style*="grid-template-columns:1fr 1fr"],
+    .modal-card div[style*="grid-template-columns: 1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+      gap: 8px !important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -101,7 +229,7 @@
           <h1 style="font-size:22px; font-weight:900; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">Welcome, <span id="companyWelcomeName">Company Account</span><span id="coWelcomeBadge"></span> &#x1F44F;</h1>
           <p style="font-size:14px; color:rgba(255,255,255,.7);">Find verified talent, post jobs or opportunities and manage contracts &mdash; all in one place.</p>
         </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="co-welcome-actions">
           <a href="marketplace.html" class="btn btn-ghost btn-sm" style="min-height:40px;">&#x1F50D; Browse Talent</a>
           <a href="wallet.html" class="btn btn-outline btn-sm" style="min-height:40px; color:#fff; border-color:rgba(255,255,255,0.3); font-weight:800; display:inline-flex; align-items:center; gap:6px;">💸 Pay Professionals</a>
           <a href="post-job.html" class="btn btn-amber" style="min-height:40px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center;">+ Post Job / Opportunity</a>
@@ -390,9 +518,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=50.0"></script>
-<script src="app.js?v=50.0"></script>
-<script src="collekt-ai.js?v=50.0"></script>
+<script src="supabase.js?v=51.0"></script>
+<script src="app.js?v=51.0"></script>
+<script src="collekt-ai.js?v=51.0"></script>
 <script>
   requireCompany();
   
@@ -985,7 +1113,7 @@
     overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
   });
 </script>
-<script src="settings-popup.js?v=50.0"></script>
+<script src="settings-popup.js?v=51.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>
