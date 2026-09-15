@@ -5866,97 +5866,95 @@ function injectCookieStyles() {
     }
     .collekt-cookie-card {
       position: fixed;
-      bottom: 24px;
+      bottom: 20px;
       left: 20px;
-      right: 20px;
-      max-width: 860px;
-      margin: 0 auto;
+      width: 350px;
+      max-width: calc(100vw - 36px);
       z-index: 99999;
-      background: rgba(6, 21, 19, 0.90);
-      backdrop-filter: blur(28px) saturate(190%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      background: rgba(6, 21, 19, 0.94);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
       border: 1.5px solid rgba(45, 212, 191, 0.32);
-      border-radius: 20px;
-      padding: 20px 24px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 2px 10px rgba(20, 184, 166, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      border-radius: 18px;
+      padding: 16px 18px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 2px 10px rgba(20, 184, 166, 0.18);
       color: #f1f5f9;
       font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
-      animation: collektCookieSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      transition: opacity 0.35s ease, transform 0.35s ease;
+      animation: collektCookieSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
     .collekt-cookie-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       background: rgba(20, 184, 166, 0.16);
-      border: 1px solid rgba(45, 212, 191, 0.4);
+      border: 1px solid rgba(45, 212, 191, 0.35);
       color: #2dd4bf;
-      padding: 3px 10px;
+      padding: 2px 7px;
       border-radius: 99px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
       text-transform: uppercase;
     }
     .collekt-cookie-btn-accept {
       background: linear-gradient(135deg, #0e3b35 0%, #14b8a6 100%);
       border: 1px solid rgba(45, 212, 191, 0.5);
       color: #ffffff !important;
-      padding: 10px 22px;
-      border-radius: 12px;
+      padding: 8px 14px;
+      border-radius: 10px;
       font-weight: 800;
-      font-size: 13px;
+      font-size: 12.5px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      gap: 5px;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 6px 18px rgba(20, 184, 166, 0.32);
+      box-shadow: 0 4px 14px rgba(20, 184, 166, 0.3);
       text-decoration: none;
       white-space: nowrap;
+      flex: 1;
     }
     .collekt-cookie-btn-accept:hover {
       transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(20, 184, 166, 0.48);
+      box-shadow: 0 6px 18px rgba(20, 184, 166, 0.45);
       filter: brightness(1.08);
     }
     .collekt-cookie-btn-customize {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      color: #e2e8f0 !important;
-      padding: 10px 20px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 13px;
+      background: none;
+      border: none;
+      color: #94a3b8 !important;
+      font-size: 11.5px;
+      font-weight: 600;
       cursor: pointer;
+      padding: 3px 0;
+      text-decoration: underline;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      text-decoration: none;
-      white-space: nowrap;
+      gap: 4px;
+      transition: color 0.2s;
     }
     .collekt-cookie-btn-customize:hover {
-      background: rgba(255, 255, 255, 0.16);
-      border-color: rgba(255, 255, 255, 0.35);
-      color: #ffffff !important;
-      transform: translateY(-1px);
+      color: #2dd4bf !important;
     }
     .collekt-cookie-btn-reject {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.22);
       color: #cbd5e1 !important;
-      padding: 10px 18px;
-      border-radius: 12px;
+      padding: 8px 14px;
+      border-radius: 10px;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 12.5px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      gap: 5px;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       text-decoration: none;
       white-space: nowrap;
+      flex: 1;
     }
     .collekt-cookie-btn-reject:hover {
       background: rgba(239, 68, 68, 0.15);
@@ -6044,21 +6042,15 @@ function injectCookieStyles() {
       align-items: center;
       gap: 8px;
     }
-    @media (max-width: 680px) {
+    @media (max-width: 480px) {
       .collekt-cookie-card {
         bottom: 12px;
         left: 12px;
         right: 12px;
-        padding: 16px;
+        width: auto;
+        max-width: calc(100vw - 24px);
+        padding: 14px 16px;
         border-radius: 16px;
-      }
-      .collekt-cookie-actions {
-        width: 100%;
-        justify-content: stretch;
-      }
-      .collekt-cookie-actions button {
-        flex: 1;
-        justify-content: center;
       }
     }
   `;
@@ -6086,39 +6078,39 @@ function initModernCookieBanner() {
     banner.id = 'collektCookieBanner';
     banner.className = 'collekt-cookie-card';
     banner.innerHTML = `
-      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-        <div style="flex:1; min-width:280px;">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
-            <span style="font-size:20px; line-height:1;">🍪</span>
-            <strong style="font-size:14.5px; color:#ffffff; letter-spacing:.02em; font-weight:800;">
-              Cookie &amp; Privacy Preferences
-            </strong>
-            <span class="collekt-cookie-badge">NDPA 2023 Compliant</span>
-          </div>
-          <p style="font-size:12.5px; color:#cbd5e1; line-height:1.6; margin:0 0 6px 0;">
-            Collekt uses strictly essential security cookies for authentication and escrow integrity, plus optional cookies for Kolly AI contextual intelligence and platform telemetry under the <strong>Nigeria Data Protection Act (NDPA 2023)</strong>.
-          </p>
-          <div style="font-size:12px; color:#94a3b8;">
-            Learn more in our 
-            <a href="privacy.html" style="color:#2dd4bf; text-decoration:underline; font-weight:700;">Privacy Policy</a> &bull; 
-            <a href="terms.html" style="color:#2dd4bf; text-decoration:underline; font-weight:700;">Terms of Service</a> &bull; 
-            <a href="javascript:void(0)" onclick="openLegalQuickView('privacy')" style="color:#cbd5e1; text-decoration:underline; font-weight:700;">NDPA Summary</a>
-          </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:7px;">
+          <span style="font-size:17px; line-height:1;">🍪</span>
+          <strong style="font-size:13.5px; color:#ffffff; font-weight:800; letter-spacing:.01em;">
+            Cookie &amp; Privacy
+          </strong>
         </div>
-        <div class="collekt-cookie-actions" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:2px;">
-          <button onclick="rejectNonEssentialCookies()" class="collekt-cookie-btn-reject" id="btnCookieReject">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Reject Non-Essential
-          </button>
-          <button onclick="openCookiePreferencesModal()" class="collekt-cookie-btn-customize" id="btnCookieCustomize">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            Customize
-          </button>
-          <button onclick="acceptAllCookies()" class="collekt-cookie-btn-accept" id="btnCookieAcceptAll">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            Accept All
-          </button>
-        </div>
+        <span class="collekt-cookie-badge">NDPA 2023</span>
+      </div>
+
+      <p style="font-size:12px; color:#cbd5e1; line-height:1.5; margin:0 0 12px 0;">
+        We use essential cookies for security &amp; escrow, and optional cookies to power AI assistance.
+        <a href="privacy.html" style="color:#2dd4bf; text-decoration:underline; font-weight:600; margin-left:3px;">Privacy Policy</a>
+      </p>
+
+      <div class="collekt-cookie-actions" style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+        <button onclick="rejectNonEssentialCookies()" class="collekt-cookie-btn-reject" id="btnCookieReject">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Reject
+        </button>
+        <button onclick="acceptAllCookies()" class="collekt-cookie-btn-accept" id="btnCookieAcceptAll">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Accept All
+        </button>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; font-size:11.5px; padding-top:2px;">
+        <button onclick="openCookiePreferencesModal()" class="collekt-cookie-btn-customize" id="btnCookieCustomize">
+          ⚙️ Customize Preferences
+        </button>
+        <a href="javascript:void(0)" onclick="openLegalQuickView('privacy')" style="color:#64748b; font-size:11px; text-decoration:underline; font-weight:600;">
+          NDPA Summary
+        </a>
       </div>
     `;
     document.body.appendChild(banner);
