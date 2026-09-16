@@ -347,10 +347,20 @@ async function syncUser() {
         profile.email = session.user.email;
         profile.avatar_letter = (profile.name || profile.company_name || 'U').charAt(0).toUpperCase();
 
-        if (wallet) {
-          profile.wallet_balance = Number(wallet.available_balance || 0);
-          profile.escrow_balance = Number(wallet.escrow_balance || 0);
-        }
+        const realAvail = wallet ? Number(wallet.available_balance || 0) : 0;
+        const realEscrow = wallet ? Number(wallet.escrow_balance || 0) : 0;
+
+        profile.wallet_balance = realAvail;
+        profile.escrow_balance = realEscrow;
+
+        const existingWallet = (localUser && localUser.wallet) || {};
+        profile.wallet = {
+          ...existingWallet,
+          balance: realAvail,
+          available_balance: realAvail,
+          escrow_balance: realEscrow,
+          currency: (wallet && wallet.currency) || 'NGN'
+        };
 
         const finalRole = profile.role || localUser.role || localStorage.getItem('collekt_last_role') || 'professional';
         const finalProfile = { ...localUser, ...profile, role: finalRole };

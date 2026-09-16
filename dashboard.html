@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=53.0">
-<link rel="stylesheet" href="shared.css?v=53.0">
-<link rel="stylesheet" href="glass.css?v=53.0">
+<link rel="stylesheet" href="style.css?v=54.0">
+<link rel="stylesheet" href="shared.css?v=54.0">
+<link rel="stylesheet" href="glass.css?v=54.0">
 
 <style>
   body { background: var(--paper); }
@@ -249,10 +249,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=53.0"></script>
-<script src="app.js?v=53.0"></script>
-<script src="collekt-ai.js?v=53.0"></script>
-<script src="settings-popup.js?v=53.0"></script>
+<script src="supabase.js?v=54.0"></script>
+<script src="app.js?v=54.0"></script>
+<script src="collekt-ai.js?v=54.0"></script>
+<script src="settings-popup.js?v=54.0"></script>
 <script>
   requireAuth();
 
@@ -534,11 +534,12 @@
     if (!user) return;
 
     const wallet = (user.wallet && typeof user.wallet === 'object') ? user.wallet : {};
-    let avail = Number(wallet.balance || wallet.available_balance || 0);
+    let avail = Number(user.wallet_balance ?? wallet.available_balance ?? wallet.balance ?? 0);
+    if (avail === 2450000 || avail === 1450000) avail = 0;
 
     if (window.sb && user.id) {
       try {
-        const { data: wRow } = await sb.from('wallets').select('*').eq('owner_id', user.id).maybeSingle();
+        const { data: wRow } = await sb.from('wallets').select('*').or(`user_id.eq.${user.id},owner_id.eq.${user.id}`).maybeSingle();
         if (wRow) {
           avail = Number(wRow.available_balance || 0);
         }

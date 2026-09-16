@@ -53,12 +53,12 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
         total_earned: 0,
         success_rate: 100,
         wallet: {
-          balance: 2450000,
+          balance: 0,
           escrow_balance: 0,
-          bank_name: 'NOVA Bank (Nova Commercial Bank)',
-          account_number: '9800452109',
-          account_name: 'COLLEKT / DAVE OLADAPO OJEOWERE',
-          bank_assigned: true
+          bank_name: '',
+          account_number: '',
+          account_name: '',
+          bank_assigned: false
         }
       };
       dir.unshift(dave);
@@ -69,7 +69,17 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
       dave.verified = true;
       dave.is_verified = true;
       dave.verification_status = 'verified';
+      if (dave.wallet && (dave.wallet.balance === 2450000 || dave.wallet.balance === 1450000)) {
+        dave.wallet.balance = 0;
+      }
       localStorage.setItem('collekt_all_users', JSON.stringify(dir));
+    }
+
+    // 3. Sanitize current user if stale mock balance exists
+    let curr = JSON.parse(localStorage.getItem('collekt_user') || 'null');
+    if (curr && curr.wallet && (curr.wallet.balance === 2450000 || curr.wallet.balance === 1450000)) {
+      curr.wallet.balance = Number(curr.wallet_balance || 0);
+      localStorage.setItem('collekt_user', JSON.stringify(curr));
     }
   } catch(e) {}
 })();
@@ -1730,15 +1740,18 @@ async function createLivePaystackDVA(targetUser, secretKey, preferredBankSlug) {
 function getOrCreateUserWallet(user) {
   if (!user) return null;
   let wallet = user.wallet || {};
-  if (wallet.balance === undefined) {
+  if (wallet.balance === undefined || wallet.balance === 2450000 || wallet.balance === 1450000) {
+    const authBal = (user.wallet_balance !== undefined && user.wallet_balance !== 2450000 && user.wallet_balance !== 1450000) ? Number(user.wallet_balance) : 0;
     wallet = {
-      bank_assigned: false,
-      bank_name: '',
-      account_number: '',
-      account_name: '',
-      balance: 0,
-      escrow_balance: 0,
-      hide_balance: false,
+      ...wallet,
+      bank_assigned: !!wallet.account_number,
+      bank_name: wallet.bank_name || '',
+      account_number: wallet.account_number || '',
+      account_name: wallet.account_name || '',
+      balance: authBal,
+      available_balance: authBal,
+      escrow_balance: Number(user.escrow_balance || wallet.escrow_balance || 0),
+      hide_balance: !!wallet.hide_balance,
     };
     user.wallet = wallet;
     setUser(user);

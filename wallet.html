@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=53.0">
-<link rel="stylesheet" href="shared.css?v=53.0">
-<link rel="stylesheet" href="glass.css?v=53.0">
+<link rel="stylesheet" href="style.css?v=54.0">
+<link rel="stylesheet" href="shared.css?v=54.0">
+<link rel="stylesheet" href="glass.css?v=54.0">
 
 <style>
   body { background: var(--paper); }
@@ -635,10 +635,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=53.0"></script>
-<script src="app.js?v=53.0"></script>
-<script src="collekt-ai.js?v=53.0"></script>
-<script src="settings-popup.js?v=53.0"></script>
+<script src="supabase.js?v=54.0"></script>
+<script src="app.js?v=54.0"></script>
+<script src="collekt-ai.js?v=54.0"></script>
+<script src="settings-popup.js?v=54.0"></script>
 <script>
   let isHideBalance = false;
   let rawBalance = 0;
@@ -2125,8 +2125,23 @@
     // Provision wallet credentials for user
     const wallet = getOrCreateUserWallet(user);
     if (wallet) {
-      rawBalance = (wallet.balance !== undefined && wallet.balance !== null) ? Number(wallet.balance) : 0;
-      rawEscrow = (wallet.escrow_balance !== undefined && wallet.escrow_balance !== null) ? Number(wallet.escrow_balance) : 0;
+      let authBal = (user.wallet_balance !== undefined && user.wallet_balance !== null)
+        ? Number(user.wallet_balance)
+        : (wallet.available_balance !== undefined ? Number(wallet.available_balance) : Number(wallet.balance || 0));
+      
+      if (authBal === 2450000 || authBal === 1450000) {
+        authBal = 0;
+        wallet.balance = 0;
+        wallet.available_balance = 0;
+        user.wallet_balance = 0;
+        if (typeof setUser === 'function') setUser(user);
+      }
+      
+      rawBalance = authBal;
+      rawEscrow = (user.escrow_balance !== undefined && user.escrow_balance !== null)
+        ? Number(user.escrow_balance)
+        : Number(wallet.escrow_balance || 0);
+
       renderVirtualBankDetails(wallet);
     }
 
