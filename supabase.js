@@ -1517,5 +1517,127 @@ async function generateAndSaveFinalPDF({
   }
 }
 
+/* -----------------------------------------------------
+   FINANCIAL WALLET, DEDICATED VIRTUAL ACCOUNTS & PAYMENTS
+------------------------------------------------------*/
+
+/**
+ * 1. Initialize Server-Side Wallet Funding Checkout
+ */
+async function initializeWalletFunding({ amount, email, payment_method = 'card', user_id, owner_id, owner_type = 'user' }) {
+  try {
+    const res = await fetch('/.netlify/functions/paystack-initialize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount,
+        email,
+        payment_method,
+        user_id,
+        owner_id: owner_id || user_id,
+        owner_type
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Payment initialization failed');
+    }
+    return { success: true, data };
+  } catch (err) {
+    console.error('initializeWalletFunding error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * 2. Verify Payment Transaction Server-Side
+ */
+async function verifyWalletPayment(reference) {
+  try {
+    const res = await fetch(`/.netlify/functions/paystack-verify?reference=${encodeURIComponent(reference)}`);
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Payment verification failed');
+    }
+    return { success: true, data };
+  } catch (err) {
+    console.error('verifyWalletPayment error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * 3. Fetch or Provision Dedicated Virtual Account (DVA)
+ */
+async function fetchDedicatedVirtualAccount(ownerId) {
+  try {
+    const res = await fetch(`/.netlify/functions/paystack-dva?owner_id=${encodeURIComponent(ownerId)}`);
+    if (res.status === 404) {
+      return { success: false, not_found: true };
+    }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch virtual account');
+    return { success: true, data: data.virtual_account };
+  } catch (err) {
+    console.error('fetchDedicatedVirtualAccount error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+async function provisionDedicatedVirtualAccount(params) {
+  try {
+    const res = await fetch('/.netlify/functions/paystack-dva', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to provision virtual account');
+    return { success: true, data: data.virtual_account };
+  } catch (err) {
+    console.error('provisionDedicatedVirtualAccount error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * 4. Fetch Double-Entry Wallet Ledger & History
+ */
+async function fetchWalletLedger(ownerId) {
+  if (!window.sb || !ownerId) return { data: [], error: null };
+  try {
+    const { data, error } = await sb
+      .from('wallet_ledger')
+      .select('*')
+      .eq('owner_id', ownerId)
+      .order('created_at', { ascending: false });
+
+    return { data: data || [], error };
+  } catch (err) {
+    console.error('fetchWalletLedger error:', err);
+    return { data: [], error: err };
+  }
+}
+
+/**
+ * 5. Fetch Company Members & Roles
+ */
+async function fetchCompanyMembers(companyId) {
+  if (!window.sb || !companyId) return { data: [], error: null };
+  try {
+    const { data, error } = await sb
+      .from('company_members')
+      .select('*')
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: true });
+
+    return { data: data || [], error };
+  } catch (err) {
+    console.error('fetchCompanyMembers error:', err);
+    return { data: [], error: err };
+  }
+}
+
+
 
 

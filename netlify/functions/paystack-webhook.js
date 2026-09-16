@@ -2,8 +2,8 @@ const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY // Elevated privileges to mutate wallets & ledgers securely
+  process.env.SUPABASE_URL || 'https://ozzwvzxugfaveggeznfa.supabase.co',
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 exports.handler = async (event) => {
@@ -12,118 +12,215 @@ exports.handler = async (event) => {
   }
 
   try {
-    // 1. Verify Paystack HMAC-SHA512 Signature
-    const signature = event.headers['x-paystack-signature'];
-    const hash = crypto
-      .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
-      .update(event.body)
-      .digest('hex');
+    // 1. Verify Paystack HMAC-SHA512 Webhook Signature
+    const secretKey = process.env.PAYSTACK_SECRET_KEY || '';
+    const webhookSecret = process.env.PAYSTACK_WEBHOOK_SECRET || secretKey;
+    const signature = event.headers['x-paystack-signature'] || event.headers['X-Paystack-Signature'];
 
-    if (hash !== signature) {
+    if (!signature || !webhookSecret) {
+      console.error('Webhook rejected: Missing signature or secret key');
       return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized signature' }) };
     }
 
-    const payload = JSON.parse(event.body);
+    const hash = crypto
+      .createHmac('sha512', webhookSecret)
+      .update(event.body || '')
+      .digest('hex');
 
-    if (payload.event === 'charge.success') {
-      const data = payload.data;
+    if (hash !== signature) {
+      console.error('Webhook signature mismatch');
+      return { statusCode: 401, body: JSON.stringify({ error: 'Invalid HMAC signature' }) };
+    }
+
+    const payload = JSON.parse(event.body || '{}');
+    const eventType = payload.event;
+    const data = payload.data || {};
+
+    console.log(`Received authoritative Paystack webhook event: ${eventType}`);
+
+    // 2. Handle CHARGE.SUCCESS (Card, OPay, and Dedicated Virtual Account Direct Transfers)
+    if (eventType === 'charge.success') {
       const amountInNaira = data.amount / 100;
       const reference = data.reference;
+      const channel = data.channel || 'card';
 
-      // 2. IDEMPOTENCY CHECK — must happen before any wallet mutation.
-      // If this reference was already processed, acknowledge and exit.
-      const { data: existingTxn } = await supabase
-        .from('wallet_transactions')
-        .select('id')
-        .eq('reference', reference)
-        .maybeSingle();
+      // Identify user/owner: prioritize metadata.owner_id / metadata.user_id, then dedicated account match, then customer email
+      let ownerId = data.metadata?.owner_id || data.metadata?.user_id;
 
-      if (existingTxn) {
-        return { statusCode: 200, body: JSON.stringify({ received: true, duplicate: true }) };
+      if (!ownerId && data.dedicated_account) {
+        // Incoming transfer to Dedicated Virtual Account
+        const { data: dvaMatch } = await supabase
+          .from('virtual_accounts')
+          .select('owner_id')
+          .eq('account_number', data.dedicated_account.account_number)
+          .maybeSingle();
+
+        if (dvaMatch) ownerId = dvaMatch.owner_id;
       }
 
-      // 3. Identify user — prefer metadata.user_id (set at checkout init)
-      // over email lookup, which breaks silently on email mismatches.
-      let userId = data.metadata?.user_id;
-
-      if (!userId) {
+      if (!ownerId && data.customer?.email) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('id')
-          .eq('email', data.customer.email)
-          .single();
+          .eq('email', data.customer.email.trim().toLowerCase())
+          .maybeSingle();
 
-        if (!profile) {
-          // Log this somewhere you'll actually see it — a payment was taken
-          // but couldn't be matched to any user.
-          console.error(`Webhook: no profile found for reference ${reference}, email ${data.customer.email}`);
-          return { statusCode: 200, body: JSON.stringify({ received: true, warning: 'no matching profile' }) };
+        if (profile) ownerId = profile.id;
+      }
+
+      if (!ownerId) {
+        console.error(`Webhook Warning: No matching owner found for reference ${reference}, customer ${data.customer?.email}`);
+        return { statusCode: 200, body: JSON.stringify({ received: true, warning: 'no matching owner profile' }) };
+      }
+
+      // Normalize ownerId to UUID format for database compatibility
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ownerId);
+      if (!isUUID) {
+        const hash = crypto.createHash('md5').update(String(ownerId)).digest('hex');
+        ownerId = `${hash.substring(0,8)}-${hash.substring(8,12)}-4${hash.substring(13,16)}-a${hash.substring(17,20)}-${hash.substring(20,32)}`;
+      }
+
+      // Execute Atomic Credit & Ledger Logging via Stored Procedure
+      const { data: rpcResult, error: rpcError } = await supabase.rpc('credit_wallet_atomic', {
+        p_owner_id: ownerId,
+        p_amount: amountInNaira,
+        p_reference: reference,
+        p_entry_type: 'credit',
+        p_description: `Wallet Funding via ${channel.toUpperCase()}`,
+        p_metadata: {
+          gateway_transaction_id: String(data.id || ''),
+          channel: channel,
+          paid_at: data.paid_at,
+          customer_email: data.customer?.email,
+          fees: data.fees ? data.fees / 100 : 0
         }
-        userId = profile.id;
-      }
-
-      // 4. Fetch current wallet state
-      const { data: wallet, error: walletFetchError } = await supabase
-        .from('wallets')
-        .select('available_balance, total_deposited')
-        .eq('user_id', userId)
-        .single();
-
-      if (walletFetchError || !wallet) {
-        console.error(`Webhook: no wallet found for user ${userId}, reference ${reference}`);
-        return { statusCode: 200, body: JSON.stringify({ received: true, warning: 'no wallet found' }) };
-      }
-
-      const balanceBefore = Number(wallet.available_balance || 0);
-      const balanceAfter = balanceBefore + amountInNaira;
-
-      // 5. Insert the ledger row FIRST. The UNIQUE constraint on `reference`
-      // acts as a safety net: if two requests race past the idempotency
-      // check above at the same instant, only one insert can succeed.
-      const { error: insertError } = await supabase.from('wallet_transactions').insert({
-        user_id: userId,
-        type: 'DEPOSIT',
-        amount: amountInNaira,
-        balance_before: balanceBefore,
-        balance_after: balanceAfter,
-        status: 'SUCCESS',
-        reference: reference,
-        provider: 'PAYSTACK',
-        provider_reference: String(data.id),
-        metadata: { channel: data.channel, paid_at: data.paid_at }
       });
 
-      if (insertError) {
-        // Most likely a race on the unique `reference` constraint —
-        // meaning another request already recorded this payment.
-        // Do NOT update the wallet balance in that case.
-        console.error(`Webhook: ledger insert failed for reference ${reference}:`, insertError.message);
-        return { statusCode: 200, body: JSON.stringify({ received: true, warning: 'ledger insert failed, likely duplicate' }) };
+      if (rpcError) {
+        console.error(`Webhook RPC failure for reference ${reference}:`, rpcError.message);
+        return { statusCode: 500, body: JSON.stringify({ error: 'Atomic credit failed, will retry' }) };
       }
 
-      // 6. Only now, after the ledger row is safely recorded, update the wallet.
-      const { error: walletUpdateError } = await supabase
-        .from('wallets')
-        .update({
-          available_balance: balanceAfter,
-          total_deposited: Number(wallet.total_deposited || 0) + amountInNaira,
+      // Upsert transaction row in transactions table
+      await supabase
+        .from('transactions')
+        .upsert({
+          owner_id: ownerId,
+          user_id: ownerId,
+          reference: reference,
+          gateway: 'paystack',
+          transaction_type: 'wallet_funding',
+          payment_method: channel,
+          amount: amountInNaira,
+          currency: data.currency || 'NGN',
+          status: 'successful',
+          gateway_transaction_id: String(data.id || ''),
+          gateway_reference: data.reference,
+          gateway_response: data,
+          paid_at: data.paid_at || new Date().toISOString(),
           updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId);
+        }, { onConflict: 'reference' });
 
-      if (walletUpdateError) {
-        // This is now a real inconsistency: ledger says paid, balance didn't update.
-        // Needs alerting/reconciliation — flag loudly.
-        console.error(`CRITICAL: wallet update failed after ledger insert for reference ${reference}:`, walletUpdateError.message);
-        return { statusCode: 500, body: JSON.stringify({ error: 'wallet update failed, will retry' }) };
-      }
+      return { statusCode: 200, body: JSON.stringify({ received: true, credited: true }) };
     }
 
-    return { statusCode: 200, body: JSON.stringify({ received: true }) };
+    // 3. Handle DEDICATED_ACCOUNT.ASSIGN.SUCCESS
+    if (eventType === 'dedicated_account.assign.success') {
+      const dva = data.dedicated_account;
+      const customer = data.customer;
+
+      if (dva && customer?.email) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', customer.email.trim().toLowerCase())
+          .maybeSingle();
+
+        if (profile) {
+          await supabase.from('virtual_accounts').upsert({
+            owner_id: profile.id,
+            user_id: profile.id,
+            provider: 'paystack',
+            provider_customer_id: customer.customer_code,
+            provider_account_id: String(dva.id || ''),
+            account_number: dva.account_number,
+            account_name: dva.account_name,
+            bank_name: dva.bank?.name || 'Wema Bank',
+            bank_code: dva.bank?.slug || '035',
+            status: 'active',
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'account_number' });
+
+          await supabase.from('wallets').update({
+            paystack_dva_account: dva.account_number,
+            paystack_dva_bank: dva.bank?.name || 'Wema Bank',
+            paystack_dva_name: dva.account_name,
+            paystack_customer_code: customer.customer_code,
+            updated_at: new Date().toISOString()
+          }).or(`owner_id.eq.${profile.id},user_id.eq.${profile.id}`);
+        }
+      }
+
+      return { statusCode: 200, body: JSON.stringify({ received: true }) };
+    }
+
+    // 4. Handle TRANSFER.SUCCESS (Withdrawals Disbursed)
+    if (eventType === 'transfer.success') {
+      const reference = data.reference;
+      if (reference) {
+        await supabase
+          .from('transactions')
+          .update({
+            status: 'successful',
+            gateway_response: data,
+            updated_at: new Date().toISOString()
+          })
+          .eq('reference', reference);
+      }
+      return { statusCode: 200, body: JSON.stringify({ received: true }) };
+    }
+
+    // 5. Handle TRANSFER.FAILED / TRANSFER.REVERSED (Automatic Wallet Refund)
+    if (eventType === 'transfer.failed' || eventType === 'transfer.reversed') {
+      const reference = data.reference;
+      const amountInNaira = data.amount / 100;
+
+      const { data: txn } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('reference', reference)
+        .maybeSingle();
+
+      if (txn && txn.status !== 'reversed' && txn.status !== 'refunded') {
+        const ownerId = txn.owner_id || txn.user_id;
+
+        // Refund wallet balance atomically
+        await supabase.rpc('credit_wallet_atomic', {
+          p_owner_id: ownerId,
+          p_amount: amountInNaira,
+          p_reference: `REFUND-${reference}`,
+          p_entry_type: 'refund',
+          p_description: `Withdrawal Reversal: ${data.reason || 'Transfer failed at recipient bank'}`,
+          p_metadata: { original_reference: reference, failure_reason: data.reason }
+        });
+
+        await supabase
+          .from('transactions')
+          .update({
+            status: eventType === 'transfer.reversed' ? 'reversed' : 'failed',
+            gateway_response: data,
+            updated_at: new Date().toISOString()
+          })
+          .eq('reference', reference);
+      }
+
+      return { statusCode: 200, body: JSON.stringify({ received: true, refunded: true }) };
+    }
+
+    return { statusCode: 200, body: JSON.stringify({ received: true, unhandled_event: eventType }) };
 
   } catch (err) {
     console.error('Webhook handler error:', err);
-    // Returning 500 tells Paystack to retry — safe now that idempotency is in place.
-    return { statusCode: 500, body: JSON.stringify({ error: 'internal error' }) };
+    return { statusCode: 500, body: JSON.stringify({ error: 'Internal webhook error' }) };
   }
 };

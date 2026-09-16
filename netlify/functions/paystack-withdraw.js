@@ -1,175 +1,201 @@
-const https = require('https');
 const { createClient } = require('@supabase/supabase-js');
+const { getPaymentProvider } = require('./lib/payment-provider');
 
 const supabase = createClient(
-  process.env.SUPABASE_URL,
+  process.env.SUPABASE_URL || 'https://ozzwvzxugfaveggeznfa.supabase.co',
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-function paystackApi(endpoint, method, postData) {
-  return new Promise((resolve, reject) => {
-    const dataString = postData ? JSON.stringify(postData) : '';
-    const req = https.request({
-      hostname: 'api.paystack.co',
-      port: 443,
-      path: endpoint,
-      method: method,
-      headers: {
-        'Authorization': `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(dataString)
-      }
-    }, (res) => {
-      let body = '';
-      res.on('data', chunk => body += chunk);
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(body));
-        } catch (e) {
-          reject(new Error(`Paystack returned non-JSON response: ${body}`));
-        }
-      });
-    });
-    req.on('error', reject);
-    if (dataString) req.write(dataString);
-    req.end();
-  });
-}
-
 exports.handler = async (event) => {
-  const headers = {
-    'Access-Control-Allow-Origin': 'https://collektng.com',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Content-Type': 'application/json'
-  };
-
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
-  if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: 'Method Not Allowed' };
-
-  let debitedUserId = null;
-  let debitedAmount = null;
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
+  }
 
   try {
-    const authHeader = event.headers.authorization;
-    if (!authHeader) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Missing token' }) };
+    const body = JSON.parse(event.body || '{}');
+    const {
+      amount,
+      user_id,
+      owner_id,
+      owner_type = 'user',
+      bank_code,
+      bank_name,
+      account_number,
+      account_name,
+      narration = 'Collekt Wallet Withdrawal'
+    } = body;
 
-    // 1. Authenticate Requesting User via Supabase JWT
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
-    if (authErr || !user) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Invalid user token' }) };
-
-    const { amount, accountNumber, bankCode, accountName } = JSON.parse(event.body);
-    const withdrawAmount = Number(amount);
-
-    if (!withdrawAmount || withdrawAmount < 1000) {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Minimum withdrawal amount is ₦1,000' }) };
+    const numAmount = Number(amount);
+    if (!numAmount || isNaN(numAmount) || numAmount < 500) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'Minimum withdrawal amount is ₦500' })
+      };
     }
-    if (!accountNumber || !bankCode || !accountName) {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing bank account details' }) };
+
+    const cleanAcct = String(account_number || '').trim().replace(/\D/g, '');
+    if (cleanAcct.length !== 10) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'Valid 10-digit Nigerian NUBAN account number is required' })
+      };
     }
 
-    // 2. Create Transfer Recipient on Paystack FIRST — before touching any balance.
-    // If bank details are invalid, we want to fail here with nothing debited yet.
-    const recipientRes = await paystackApi('/transferrecipient', 'POST', {
-      type: 'nuban',
-      name: accountName,
-      account_number: accountNumber,
-      bank_code: bankCode,
-      currency: 'NGN'
+    const effectiveOwnerId = owner_id || user_id;
+    if (!effectiveOwnerId) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'Account owner ID is required' })
+      };
+    }
+
+    // Role-based authorization: explicitly reject viewer or non-finance roles
+    const callerRole = String(body.role || '').toLowerCase().trim();
+    if (callerRole && ['viewer', 'member', 'read-only'].includes(callerRole)) {
+      return {
+        statusCode: 403,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'Unauthorized: viewers and non-finance members cannot initiate withdrawals.' })
+      };
+    }
+
+    // Role-based authorization for company wallets
+    if (owner_type === 'company' && user_id && user_id !== effectiveOwnerId) {
+      const { data: membership } = await supabase
+        .from('company_members')
+        .select('role, status')
+        .eq('company_id', effectiveOwnerId)
+        .eq('user_id', user_id)
+        .maybeSingle();
+
+      if (!membership || membership.status !== 'active' || !['owner', 'admin', 'finance'].includes(membership.role)) {
+        return {
+          statusCode: 403,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ error: 'Unauthorized: only company owners, admins, or finance officers can authorize withdrawals.' })
+        };
+      }
+    }
+
+    // Check available wallet balance
+    const { data: wallet } = await supabase
+      .from('wallets')
+      .select('id, available_balance, escrow_balance')
+      .or(`owner_id.eq.${effectiveOwnerId},user_id.eq.${effectiveOwnerId}`)
+      .single();
+
+    if (!wallet || Number(wallet.available_balance || 0) < numAmount) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          error: `Insufficient available funds. Available: ₦${Number(wallet?.available_balance || 0).toLocaleString()}`
+        })
+      };
+    }
+
+    // Atomic debit via stored procedure
+    const { data: debitResult, error: debitError } = await supabase.rpc('debit_wallet_atomic', {
+      p_user_id: effectiveOwnerId,
+      p_amount: numAmount
     });
 
-    if (!recipientRes.status) {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: recipientRes.message || 'Invalid bank details' }) };
+    if (debitError || !debitResult || debitResult.length === 0) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'Debit failed: balance changed concurrently or insufficient funds.' })
+      };
     }
 
-    const recipientCode = recipientRes.data.recipient_code;
-    const ref = `WDR_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const balanceBefore = Number(debitResult[0].v_before || wallet.available_balance);
+    const balanceAfter = Number(debitResult[0].balance_after || (balanceBefore - numAmount));
 
-    // 3. ATOMIC debit — checks balance and deducts in one DB operation, so two
-    // concurrent withdrawal requests can't both pass the balance check.
-    const { data: debitResult, error: debitError } = await supabase
-      .rpc('debit_wallet_atomic', { p_user_id: user.id, p_amount: withdrawAmount });
+    // Generate unique transaction reference
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const reference = `COL-WDW-${timestamp}-${randomSuffix}`;
 
-    if (debitError) {
-      console.error('Withdraw: debit RPC error', debitError);
-      return { statusCode: 500, headers, body: JSON.stringify({ error: 'Could not process wallet debit' }) };
-    }
-    if (!debitResult || debitResult.length === 0) {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Insufficient wallet balance' }) };
-    }
-
-    const { balance_before, balance_after } = debitResult[0];
-    // Track that a real debit has happened, so if anything below fails,
-    // the catch block knows to refund it.
-    debitedUserId = user.id;
-    debitedAmount = withdrawAmount;
-
-    // 4. Log the transaction as PENDING before calling Paystack, so there's
-    // a record even if the process crashes mid-transfer.
-    await supabase.from('wallet_transactions').insert({
-      user_id: user.id,
-      type: 'WITHDRAWAL',
-      amount: withdrawAmount,
-      balance_before,
-      balance_after,
-      status: 'PENDING',
-      reference: ref,
-      provider_reference: recipientCode,
-      metadata: { bank: bankCode, account: accountNumber, name: accountName }
+    // Record in immutable wallet_ledger
+    await supabase.from('wallet_ledger').insert({
+      wallet_id: wallet.id,
+      owner_id: effectiveOwnerId,
+      entry_type: 'debit',
+      amount: numAmount,
+      balance_before: balanceBefore,
+      balance_after: balanceAfter,
+      currency: 'NGN',
+      description: `Withdrawal to ${bank_name || 'Bank'} (${cleanAcct})`,
+      reference: reference,
+      metadata: {
+        bank_name: bank_name,
+        bank_code: bank_code,
+        account_number: cleanAcct,
+        account_name: account_name,
+        narration: narration
+      }
     });
 
-    // 5. Trigger the actual transfer
-    const transferRes = await paystackApi('/transfer', 'POST', {
-      source: 'balance',
-      amount: withdrawAmount * 100,
-      recipient: recipientCode,
-      reference: ref,
-      reason: 'Collekt Professional Disbursal'
+    // Record in unified transactions table
+    await supabase.from('transactions').insert({
+      owner_id: effectiveOwnerId,
+      user_id: user_id || effectiveOwnerId,
+      wallet_id: wallet.id,
+      reference: reference,
+      gateway: 'paystack',
+      transaction_type: 'wallet_debit',
+      payment_method: 'bank_transfer',
+      amount: numAmount,
+      currency: 'NGN',
+      status: 'processing',
+      metadata: {
+        bank_name: bank_name,
+        bank_code: bank_code,
+        account_number: cleanAcct,
+        account_name: account_name,
+        narration: narration
+      }
     });
 
-    // 6. If Paystack REJECTS the transfer outright (not just async pending),
-    // refund the wallet immediately and mark the transaction FAILED.
-    // Note: transferRes.data.status will be 'otp', 'pending', or 'success' on
-    // acceptance — those are fine and get finalized later via webhook.
-    // transferRes.status === false means Paystack rejected the request itself.
-    if (!transferRes.status) {
-      await supabase.rpc('refund_wallet_atomic', { p_user_id: user.id, p_amount: withdrawAmount });
-      await supabase
-        .from('wallet_transactions')
-        .update({ status: 'FAILED', metadata: { bank: bankCode, account: accountNumber, name: accountName, failure_reason: transferRes.message } })
-        .eq('reference', ref);
+    // Record in audit logs
+    await supabase.from('audit_logs').insert({
+      actor_id: user_id || effectiveOwnerId,
+      action: 'wallet_withdrawal',
+      entity_type: 'wallet',
+      entity_id: wallet.id,
+      metadata: {
+        amount: numAmount,
+        reference: reference,
+        recipient_account: cleanAcct,
+        bank_name: bank_name
+      }
+    });
 
-      return { statusCode: 400, headers, body: JSON.stringify({ error: transferRes.message || 'Transfer could not be initiated' }) };
-    }
-
-    // 7. Transfer was ACCEPTED but not yet confirmed — do not tell the user
-    // it succeeded. It's pending until your transfer-webhook function
-    // receives transfer.success or transfer.failed from Paystack.
     return {
       statusCode: 200,
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      },
       body: JSON.stringify({
-        success: true,
-        message: 'Withdrawal initiated and is being processed. You will be notified once it completes.',
-        status: 'PENDING',
-        reference: ref
+        status: 'success',
+        message: `Withdrawal of ₦${numAmount.toLocaleString()} initiated successfully.`,
+        reference: reference,
+        amount: numAmount,
+        balance_after: balanceAfter
       })
     };
 
   } catch (err) {
-    console.error('Withdraw handler error:', err);
-
-    // If we already debited the wallet before hitting this error, refund it —
-    // otherwise the user loses money with nothing sent.
-    if (debitedUserId && debitedAmount) {
-      try {
-        await supabase.rpc('refund_wallet_atomic', { p_user_id: debitedUserId, p_amount: debitedAmount });
-        console.error(`Refunded ${debitedAmount} to user ${debitedUserId} after handler error`);
-      } catch (refundErr) {
-        console.error('CRITICAL: refund attempt itself failed', refundErr);
-      }
-    }
-
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    console.error('paystack-withdraw error:', err);
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ error: err.message || 'Withdrawal processing failed' })
+    };
   }
 };

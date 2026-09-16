@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=52.0">
-<link rel="stylesheet" href="shared.css?v=52.0">
-<link rel="stylesheet" href="glass.css?v=52.0">
+<link rel="stylesheet" href="style.css?v=53.0">
+<link rel="stylesheet" href="shared.css?v=53.0">
+<link rel="stylesheet" href="glass.css?v=53.0">
 
 <style>
   body { background: var(--paper); }
@@ -284,65 +284,88 @@
 <!-- MODALS SUITE -->
 <!-- ========================================================= -->
 
-<!-- 1. FUND WALLET MODAL (EXCLUSIVE NOVA COMMERCIAL BANK DIRECT SETTLEMENT) -->
+<!-- 1. FUND WALLET MODAL (MULTI-CHANNEL: CARD, OPAY & DEDICATED VIRTUAL ACCOUNT) -->
 <div class="modal-overlay" id="fundModal">
-  <div class="modal-card" style="position:relative; width:min(520px, 100vw); background:var(--white); border-radius:24px; padding:28px;">
+  <div class="modal-card" style="position:relative; width:min(540px, 100vw); background:var(--white); border-radius:24px; padding:28px;">
     <button class="modal-close" onclick="closeModal('fundModal')">&times;</button>
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-      <span style="font-size:24px;">🏛️</span>
-      <div class="modal-title" style="font-size:20px; font-weight:900; color:var(--ink); margin:0;">Deposit &amp; Fund Wallet</div>
+      <span style="font-size:24px;">💳</span>
+      <div class="modal-title" style="font-size:20px; font-weight:900; color:var(--ink); margin:0;">Fund Your Wallet</div>
     </div>
-    <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">Direct settlement via <strong>NOVA Commercial Bank</strong> — Collekt's exclusive banking partner.</p>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">Instant wallet crediting via Paystack secure checkout or your Dedicated Virtual Account.</p>
 
-    <!-- User's Linked NOVA Bank Account Display Card / Link Prompt -->
-    <div id="fundModalBankCardContainer" style="margin-bottom:18px;">
-      <!-- Populated dynamically by openFundModal() -->
+    <!-- Payment Method Selector Tabs -->
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:18px; background:var(--paper); padding:4px; border-radius:14px; border:1px solid var(--line);">
+      <button type="button" class="fund-method-pill active" id="methodBtnCard" onclick="selectFundMethod('card')" style="padding:8px 6px; font-size:12px; font-weight:800; border-radius:10px; border:none; background:var(--white); color:var(--ink); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.06); transition:all .2s;">
+        💳 Card
+      </button>
+      <button type="button" class="fund-method-pill" id="methodBtnOpay" onclick="selectFundMethod('opay')" style="padding:8px 6px; font-size:12px; font-weight:800; border-radius:10px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
+        🟢 OPay
+      </button>
+      <button type="button" class="fund-method-pill" id="methodBtnTransfer" onclick="selectFundMethod('bank_transfer')" style="padding:8px 6px; font-size:12px; font-weight:800; border-radius:10px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
+        🏛️ Transfer
+      </button>
     </div>
 
-    <!-- Step 2: Confirmation & Submission Form -->
-    <div style="border:1px solid var(--line); border-radius:18px; padding:18px; background:var(--white);">
-      <div style="font-size:13.5px; font-weight:900; color:var(--ink); margin-bottom:12px; display:flex; align-items:center; gap:6px;">
-        <span>📝</span> Submit Transfer Confirmation
-      </div>
-      
-      <div class="form-group" style="margin-bottom:12px;">
-        <label class="form-label" style="font-size:12px; font-weight:800;">Amount Transferred (NGN)</label>
-        <input class="form-input" type="number" id="novaDepositAmount" placeholder="e.g. 50000" min="100" value="50000" oninput="updateFundPreview(this.value)" style="font-size:17px; font-weight:900; color:var(--forest);">
+    <!-- VIEW A: Card / OPay Checkout Form -->
+    <div id="fundFormCheckoutSection">
+      <div class="form-group" style="margin-bottom:14px;">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Funding Amount (NGN)</label>
+        <input class="form-input" type="number" id="fundDepositAmount" placeholder="e.g. 50000" min="100" value="50000" oninput="updateFundPreview(this.value)" style="font-size:18px; font-weight:900; color:var(--forest);">
         
         <div style="font-size:12px; color:var(--teal); font-weight:800; margin-top:4px;" id="fundAmountFormattedPreview">
           Formatted: ₦50,000.00
         </div>
 
         <div class="amount-chips-wrap">
-          <button type="button" class="amount-chip" onclick="setNovaDepositAmount(5000)">₦5,000</button>
-          <button type="button" class="amount-chip" onclick="setNovaDepositAmount(20000)">₦20,000</button>
-          <button type="button" class="amount-chip" onclick="setNovaDepositAmount(50000)">₦50,000</button>
-          <button type="button" class="amount-chip" onclick="setNovaDepositAmount(100000)">₦100,000</button>
-          <button type="button" class="amount-chip" onclick="setNovaDepositAmount(250000)">₦250,000</button>
-          <button type="button" class="amount-chip" onclick="setNovaDepositAmount(500000)">₦500,000</button>
+          <button type="button" class="amount-chip" onclick="setFundAmount(5000)">₦5,000</button>
+          <button type="button" class="amount-chip" onclick="setFundAmount(20000)">₦20,000</button>
+          <button type="button" class="amount-chip" onclick="setFundAmount(50000)">₦50,000</button>
+          <button type="button" class="amount-chip" onclick="setFundAmount(100000)">₦100,000</button>
+          <button type="button" class="amount-chip" onclick="setFundAmount(250000)">₦250,000</button>
+          <button type="button" class="amount-chip" onclick="setFundAmount(500000)">₦500,000</button>
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-        <div class="form-group">
-          <label class="form-label" style="font-size:11.5px; font-weight:800;">Sender NOVA NUBAN</label>
-          <input class="form-input" type="tel" id="novaSenderAcctNo" maxlength="10" placeholder="e.g. 0123456789" style="font-family:monospace; font-weight:800;">
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+          <span style="color:var(--muted);">Selected Payment Rail:</span>
+          <strong id="selectedRailLabel" style="color:var(--forest);">Debit/Credit Card (Visa, Mastercard, Verve)</strong>
         </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:11.5px; font-weight:800;">Sender Account Name</label>
-          <input class="form-input" type="text" id="novaSenderAcctName" placeholder="Account Name" style="font-weight:700;">
+        <div style="display:flex; justify-content:space-between; font-size:12.5px;">
+          <span style="color:var(--muted);">Gateway Security:</span>
+          <span style="color:#16a34a; font-weight:800; font-size:11.5px;">🔒 256-Bit Encrypted Paystack Checkout</span>
         </div>
       </div>
 
-      <div class="form-group" style="margin-bottom:16px;">
-        <label class="form-label" style="font-size:11.5px; font-weight:800;">Transfer Narration / Reference Used</label>
-        <input class="form-input" type="text" id="novaDepositReference" placeholder="e.g. COL-8492" style="font-family:monospace; font-weight:800; text-transform:uppercase;">
-      </div>
-
-      <button type="button" class="btn btn-primary" id="btnSubmitNovaDeposit" onclick="submitNovaDepositForm()" style="width:100%; min-height:46px; font-weight:900; background:var(--teal); border:none; box-shadow:0 6px 18px rgba(14,59,53,0.25);">
-        🚀 I Have Transferred the Funds &rarr;
+      <button type="button" class="btn btn-primary" id="btnSubmitOnlineFund" onclick="executeOnlineFunding()" style="width:100%; min-height:48px; font-weight:900; background:var(--teal); border:none; box-shadow:0 6px 18px rgba(19,117,111,0.25);">
+        <span id="btnFundSubmitText">🔒 Proceed to Secure Payment &rarr;</span>
       </button>
     </div>
+
+    <!-- VIEW B: Dedicated Virtual Account (Bank Transfer) Section -->
+    <div id="fundFormTransferSection" style="display:none;">
+      <div id="fundModalDvaCardContainer" style="margin-bottom:16px;">
+        <!-- Populated dynamically with user's Dedicated Virtual Account -->
+      </div>
+
+      <div style="background:rgba(20,184,166,0.06); border:1px solid rgba(20,184,166,0.2); border-radius:14px; padding:14px; margin-bottom:16px;">
+        <div style="font-size:12px; font-weight:800; color:var(--teal); margin-bottom:4px;">⚡ Instant Bank Transfer Crediting</div>
+        <div style="font-size:11.5px; color:var(--muted); line-height:1.45;">
+          Transfers to this dedicated NUBAN are automatically credited to your Collekt wallet within seconds. No manual receipt upload required.
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="btn btn-primary" onclick="copyDvaAccountModal()" style="flex:1; background:var(--teal); font-weight:800;">
+          📋 Copy Account Number
+        </button>
+        <button type="button" class="btn btn-outline" onclick="shareDvaDetails()" style="flex:1; font-weight:800;">
+          📤 Share Details
+        </button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -612,10 +635,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=52.0"></script>
-<script src="app.js?v=52.0"></script>
-<script src="collekt-ai.js?v=52.0"></script>
-<script src="settings-popup.js?v=52.0"></script>
+<script src="supabase.js?v=53.0"></script>
+<script src="app.js?v=53.0"></script>
+<script src="collekt-ai.js?v=53.0"></script>
+<script src="settings-popup.js?v=53.0"></script>
 <script>
   let isHideBalance = false;
   let rawBalance = 0;
@@ -885,80 +908,214 @@
     }
   };
 
-  // ── DEPOSIT / FUND WALLET ENGINE (NOVA DIRECT SETTLEMENT) ───
+  // ── MULTI-CHANNEL PAYMENT METHOD CONTROLS ────────────────
+  let selectedFundMethod = 'card';
+  let activeDvaAccount = null;
+
+  window.selectFundMethod = function(method) {
+    selectedFundMethod = method;
+    document.querySelectorAll('.fund-method-pill').forEach(b => {
+      b.classList.remove('active');
+      b.style.background = 'transparent';
+      b.style.color = 'var(--muted)';
+    });
+
+    const activeBtn = method === 'card' ? document.getElementById('methodBtnCard') :
+                      method === 'opay' ? document.getElementById('methodBtnOpay') :
+                      document.getElementById('methodBtnTransfer');
+
+    if (activeBtn) {
+      activeBtn.classList.add('active');
+      activeBtn.style.background = 'var(--white)';
+      activeBtn.style.color = 'var(--ink)';
+      activeBtn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)';
+    }
+
+    const checkoutSection = document.getElementById('fundFormCheckoutSection');
+    const transferSection = document.getElementById('fundFormTransferSection');
+    const railLabel = document.getElementById('selectedRailLabel');
+    const submitBtnText = document.getElementById('btnFundSubmitText');
+
+    if (method === 'bank_transfer') {
+      if (checkoutSection) checkoutSection.style.display = 'none';
+      if (transferSection) transferSection.style.display = 'block';
+      loadAndRenderFundModalDva();
+    } else {
+      if (checkoutSection) checkoutSection.style.display = 'block';
+      if (transferSection) transferSection.style.display = 'none';
+
+      if (railLabel) {
+        railLabel.textContent = method === 'opay' ? 
+          'OPay Instant Payment Channel' : 
+          'Debit/Credit Card (Visa, Mastercard, Verve)';
+      }
+      if (submitBtnText) {
+        submitBtnText.textContent = method === 'opay' ?
+          '🟢 Proceed to OPay Checkout →' :
+          '🔒 Proceed to Secure Payment →';
+      }
+    }
+  };
+
   window.openFundModal = function() {
     const user = getUser() || {};
-    renderFundModalBankCard(user);
-
-    const isLinked = typeof isUserNovaLinked === 'function' ? isUserNovaLinked(user) : Boolean(user.wallet?.nova_linked && user.wallet?.nova_account_number && String(user.wallet.nova_account_number).trim().length === 10);
-    const senderAcctEl = document.getElementById('novaSenderAcctNo');
-    const senderNameEl = document.getElementById('novaSenderAcctName');
-    const refEl = document.getElementById('novaDepositReference');
-
-    if (isLinked) {
-      if (senderAcctEl) senderAcctEl.value = user.wallet.nova_account_number;
-      if (senderNameEl) senderNameEl.value = (user.wallet?.nova_account_name || user.name || '').replace('COLLEKT / ', '');
-    } else {
-      if (senderAcctEl) senderAcctEl.value = '';
-      if (senderNameEl) senderNameEl.value = (user.name || '').replace('COLLEKT / ', '');
-    }
-
-    if (refEl) {
-      const code = 'COL-' + (user.id ? String(user.id).slice(-4).toUpperCase() : Math.floor(1000 + Math.random() * 9000));
-      refEl.value = code;
-    }
-
-    updateFundPreview(document.getElementById('novaDepositAmount')?.value || 50000);
+    selectFundMethod('card');
+    updateFundPreview(document.getElementById('fundDepositAmount')?.value || 50000);
     openModal('fundModal');
   };
 
-  window.submitNovaDepositForm = function() {
+  window.executeOnlineFunding = async function() {
     const user = getUser() || {};
-    const isLinked = typeof isUserNovaLinked === 'function' ? isUserNovaLinked(user) : Boolean(user.wallet?.nova_linked && user.wallet?.nova_account_number);
-    if (!isLinked) {
-      showToast('⚠️ Please link your NOVA Bank account first before submitting a deposit notice.', 'warning');
-      openLinkNovaModal('fund');
+    const amt = Number(document.getElementById('fundDepositAmount')?.value);
+    const btn = document.getElementById('btnSubmitOnlineFund');
+
+    if (!amt || isNaN(amt) || amt < 100) {
+      showToast('⚠️ Minimum funding amount is ₦100.', 'warning');
       return;
     }
 
-    const amt = Number(document.getElementById('novaDepositAmount')?.value);
-    const senderAcct = document.getElementById('novaSenderAcctNo')?.value.trim();
-    const senderName = document.getElementById('novaSenderAcctName')?.value.trim();
-    const ref = document.getElementById('novaDepositReference')?.value.trim();
-    const btn = document.getElementById('btnSubmitNovaDeposit');
-
-    if (!amt || amt < 100) {
-      showToast('⚠️ Minimum deposit amount is ₦100.', 'warning');
-      return;
-    }
+    const email = user.email || localStorage.getItem('collekt_last_user_email') || 'member@collekt.ng';
+    const ownerId = user.id || user.owner_id;
+    const ownerType = user.role === 'company' ? 'company' : (user.role === 'professional' ? 'professional' : 'user');
 
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner-icon"></span> Submitting Verification Notice...';
+      btn.innerHTML = '<span class="spinner-icon"></span> Connecting to Paystack Secure Checkout...';
     }
 
-    const res = submitNovaDepositRequest({
+    const res = await initializeWalletFunding({
       amount: amt,
-      reference: ref || ('NOVA-' + Date.now().toString().slice(-6)),
-      senderAccountNo: senderAcct,
-      senderAccountName: senderName,
-      notes: 'Direct settlement to Collekt via verified NOVA Bank account'
+      email: email,
+      payment_method: selectedFundMethod,
+      user_id: user.id,
+      owner_id: ownerId,
+      owner_type: ownerType
     });
 
-    setTimeout(() => {
+    if (res && res.success && res.data?.authorization_url) {
+      showToast('🔒 Redirecting to Paystack secure checkout...');
+      window.location.href = res.data.authorization_url;
+    } else {
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = '🚀 I Have Transferred the Funds &rarr;';
+        btn.innerHTML = '<span>🔒 Proceed to Secure Payment &rarr;</span>';
       }
-      closeModal('fundModal');
+      showToast('⚠️ ' + (res?.error || 'Could not initialize payment session. Please check your connection.'), 'error');
+    }
+  };
 
-      if (res && res.success) {
-        showToast(`🎉 Transfer notice for ₦${amt.toLocaleString()} submitted! Collekt Finance will credit your wallet upon verification.`);
-        renderTransactions();
-      } else {
-        showToast('⚠️ ' + (res?.message || 'Could not submit deposit request.'), 'error');
+  // ── DEDICATED VIRTUAL ACCOUNT RENDERING & LOGIC ───────────
+  async function loadAndRenderFundModalDva() {
+    const container = document.getElementById('fundModalDvaCardContainer');
+    if (!container) return;
+
+    const user = getUser() || {};
+    const ownerId = user.id || user.owner_id;
+    const displayName = user.company_name || user.name || 'COLLEKT MEMBER';
+
+    container.innerHTML = `
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:20px; text-align:center;">
+        <div class="loader-spinner" style="width:28px; height:28px; border-width:3px; margin:0 auto 10px;"></div>
+        <div style="font-size:12px; color:var(--muted); font-weight:700;">Loading your Dedicated Virtual Account...</div>
+      </div>
+    `;
+
+    let dva = null;
+    const res = await fetchDedicatedVirtualAccount(ownerId);
+    if (res && res.success && res.data) {
+      dva = res.data;
+      activeDvaAccount = dva;
+    } else {
+      // Auto-provision if eligible
+      const provRes = await provisionDedicatedVirtualAccount({
+        owner_id: ownerId,
+        user_id: user.id,
+        owner_type: user.role === 'company' ? 'company' : 'professional',
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        company_name: user.company_name
+      });
+      if (provRes && provRes.success && provRes.data) {
+        dva = provRes.data;
+        activeDvaAccount = dva;
       }
-    }, 600);
+    }
+
+    if (dva && dva.account_number) {
+      const acctNo = escapeHTML(String(dva.account_number).trim());
+      const acctName = escapeHTML(dva.account_name || `COLLEKT / ${displayName.toUpperCase()}`);
+      const bankName = escapeHTML(dva.bank_name || 'Wema Bank');
+
+      container.innerHTML = `
+        <div style="background:linear-gradient(135deg, #090d0c 0%, #101716 50%, #0e3b35 100%); border-radius:18px; padding:20px; color:#fff; position:relative; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.12);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; position:relative; z-index:2;">
+            <div>
+              <div style="font-size:10px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.7);">Your Dedicated Virtual Account</div>
+              <div style="font-size:14px; font-weight:900; color:#fff; display:flex; align-items:center; gap:6px; margin-top:2px;">
+                <span>🏛️ ${bankName}</span>
+              </div>
+            </div>
+            <span style="font-size:10px; background:rgba(20,184,166,0.2); border:1px solid rgba(20,184,166,0.4); color:#5eead4; padding:3px 9px; border-radius:99px; font-weight:800;">
+              ✓ Auto-Credited
+            </span>
+          </div>
+
+          <div style="margin-bottom:14px; position:relative; z-index:2;">
+            <div style="font-size:9.5px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; margin-bottom:2px;">NUBAN Account Number</div>
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span id="fundModalAccount" style="font-family:monospace; font-size:24px; font-weight:900; letter-spacing:0.08em; color:#fff;">${acctNo}</span>
+              <button type="button" onclick="copyToClipboard('${acctNo}', 'Account Number copied!')" style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); color:#fff; padding:6px 14px; border-radius:8px; font-size:11.5px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:4px;">
+                📋 Copy
+              </button>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1); position:relative; z-index:2;">
+            <div>
+              <div style="font-size:9.5px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase;">Account Name</div>
+              <div style="font-size:12px; font-weight:800; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${acctName}</div>
+            </div>
+            <div>
+              <div style="font-size:9.5px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase;">Currency</div>
+              <div style="font-size:12px; font-weight:800; color:#5eead4;">NGN (Nigerian Naira)</div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div style="background:var(--paper); border:1.5px dashed var(--line); border-radius:18px; padding:22px; text-align:center;">
+          <div style="font-size:26px; margin-bottom:6px;">🏛️</div>
+          <div style="font-size:14.5px; font-weight:900; color:var(--ink); margin-bottom:4px;">Dedicated Virtual Account</div>
+          <p style="font-size:12px; color:var(--muted); margin:0 0 14px;">Generate an instant, dedicated Nigerian NUBAN account to receive automatic wallet deposits from any bank app.</p>
+          <button type="button" class="btn btn-primary btn-sm" onclick="loadAndRenderFundModalDva()" style="background:var(--teal); font-weight:900; padding:10px 22px; border-radius:10px;">
+            ⚡ Generate Virtual Account Now
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  window.copyDvaAccountModal = function() {
+    const acctEl = document.getElementById('fundModalAccount') || document.getElementById('virtualAccountNo');
+    const text = acctEl ? acctEl.textContent.trim() : '';
+    if (text) {
+      copyToClipboard(text, 'Dedicated Virtual Account Number copied!');
+    }
+  };
+
+  window.shareDvaDetails = function() {
+    const user = getUser() || {};
+    const acctEl = document.getElementById('fundModalAccount') || document.getElementById('virtualAccountNo');
+    const acctNo = acctEl ? acctEl.textContent.trim() : '';
+    const shareText = `Pay into my Collekt Virtual Account:\nBank: Wema Bank / Titan Bank\nAccount No: ${acctNo}\nAccount Name: COLLEKT / ${(user.company_name || user.name || 'MEMBER').toUpperCase()}`;
+
+    if (navigator.share) {
+      navigator.share({ title: 'Collekt Virtual Account Details', text: shareText }).catch(() => {});
+    } else {
+      copyToClipboard(shareText, 'Account details copied to clipboard for sharing!');
+    }
   };
 
   // ── WITHDRAWAL ENGINE (LOCKED TO NOVA COMMERCIAL BANK) ─────
@@ -1408,9 +1565,41 @@
     renderTransactions(current);
   }
 
-  function initTransactions() {
+  async function initTransactions() {
+    const user = getUser() || {};
+    const ownerId = user.id || user.owner_id;
+
+    // First render cached transactions immediately for zero-delay UX
     mockTransactions = getSavedTransactions();
     renderTransactions(mockTransactions);
+
+    // Fetch live ledger records from Supabase
+    if (ownerId && typeof fetchWalletLedger === 'function') {
+      const { data: ledgerData, error } = await fetchWalletLedger(ownerId);
+      if (!error && Array.isArray(ledgerData) && ledgerData.length > 0) {
+        const liveTxs = ledgerData.map(row => {
+          const isCredit = row.entry_type === 'credit' || row.entry_type === 'refund' || row.entry_type === 'escrow_release';
+          const isEscrow = row.entry_type === 'escrow_hold';
+          return {
+            id: row.id,
+            title: row.description || (isCredit ? 'Wallet Credit' : 'Wallet Debit'),
+            desc: `Ref: ${row.reference || 'N/A'} • ${row.entry_type.toUpperCase()}`,
+            date: new Date(row.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+            fullDate: new Date(row.created_at).toISOString().slice(0, 10),
+            type: isCredit ? 'credit' : 'debit',
+            category: isEscrow ? 'escrow' : (row.entry_type === 'refund' ? 'funding' : (isCredit ? 'funding' : 'withdrawal')),
+            amount: Number(row.amount || 0),
+            balanceBefore: Number(row.balance_before || 0),
+            balanceAfter: Number(row.balance_after || 0),
+            status: 'Successful'
+          };
+        });
+
+        mockTransactions = liveTxs;
+        localStorage.setItem(_txKey(), JSON.stringify(liveTxs));
+        renderTransactions(liveTxs);
+      }
+    }
   }
 
   function renderTransactions(list) {
@@ -1538,49 +1727,69 @@
     showToast('📊 Statement report downloaded successfully!');
   };
 
-  function renderVirtualBankDetails(wallet) {
+  async function renderVirtualBankDetails(wallet) {
     const cardEl = document.getElementById('shuttlersBankCard');
     if (!cardEl) return;
     
     const user = getUser() || {};
-    const displayName = typeof getDisplayName === 'function' ? getDisplayName(user) : (user?.name || 'MEMBER');
-    const isNovaLinked = typeof isUserNovaLinked === 'function' ? isUserNovaLinked(user) : Boolean(user.wallet?.nova_linked && user.wallet?.nova_account_number && String(user.wallet.nova_account_number).trim().length === 10);
+    const ownerId = user.id || user.owner_id;
+    const displayName = user.company_name || user.name || 'MEMBER';
 
-    if (isNovaLinked) {
-      const acctNo = escapeHTML(String(user.wallet.nova_account_number).trim());
-      const acctName = escapeHTML((user.wallet.nova_account_name || displayName).toUpperCase().replace('COLLEKT / ', ''));
+    // 1. Fetch DVA from database or active state
+    let dva = activeDvaAccount;
+    if (!dva) {
+      const dvaRes = await fetchDedicatedVirtualAccount(ownerId);
+      if (dvaRes && dvaRes.success && dvaRes.data) {
+        dva = dvaRes.data;
+        activeDvaAccount = dva;
+      } else if (wallet && wallet.paystack_dva_account) {
+        dva = {
+          account_number: wallet.paystack_dva_account,
+          account_name: wallet.paystack_dva_name || `COLLEKT / ${displayName.toUpperCase()}`,
+          bank_name: wallet.paystack_dva_bank || 'Wema Bank',
+          currency: 'NGN',
+          status: 'active'
+        };
+        activeDvaAccount = dva;
+      }
+    }
+
+    if (dva && dva.account_number) {
+      const acctNo = escapeHTML(String(dva.account_number).trim());
+      const acctName = escapeHTML((dva.account_name || `COLLEKT / ${displayName}`).toUpperCase());
+      const bankName = escapeHTML(dva.bank_name || 'Wema Bank');
 
       cardEl.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
           <div>
-            <div class="sbank-label" style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;">Exclusive Banking Partner</div>
+            <div class="sbank-label" style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;">Dedicated Virtual Account</div>
             <div class="sbank-val" style="font-weight:900; color:var(--teal); display:flex; align-items:center; gap:6px; font-size:14px; margin-top:2px;">
-              <span>🏛️ NOVA Commercial Bank</span>
-              <span style="font-size:10px; background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:99px; font-weight:800;">LINKED ACCOUNT</span>
+              <span>🏛️ ${bankName}</span>
+              <span style="font-size:10px; background:rgba(20,184,166,0.15); color:var(--teal); padding:2px 8px; border-radius:99px; font-weight:800;">ACTIVE NUBAN</span>
             </div>
           </div>
-          <button class="btn btn-outline btn-xs" onclick="openLinkNovaModal('overview')" style="font-size:11px; font-weight:800; padding:4px 10px; border-radius:8px; border-color:var(--teal); color:var(--teal);">
-            ✏️ Edit Account
+          <button class="btn btn-outline btn-xs" onclick="shareDvaDetails()" style="font-size:11px; font-weight:800; padding:4px 10px; border-radius:8px; border-color:var(--teal); color:var(--teal);">
+            📤 Share Details
           </button>
         </div>
 
         <div class="sbank-field" style="margin-bottom:10px;">
-          <div class="sbank-label">Your 10-Digit NOVA NUBAN</div>
+          <div class="sbank-label">Your Dedicated NUBAN Account Number</div>
           <div class="sbank-val" style="display:flex; align-items:center; justify-content:space-between; background:var(--paper); padding:8px 12px; border-radius:10px; border:1px solid var(--line);">
-            <span id="virtualAccountNo" style="letter-spacing:.05em; font-family:monospace; font-size:18px; font-weight:900; color:var(--ink);">${acctNo}</span>
-            <button class="sbank-copy-btn" onclick="copyToClipboard('${acctNo}', 'Account Number copied!')" title="Copy account number">
+            <span id="virtualAccountNo" style="letter-spacing:.05em; font-family:monospace; font-size:19px; font-weight:900; color:var(--ink);">${acctNo}</span>
+            <button class="sbank-copy-btn" onclick="copyToClipboard('${acctNo}', 'Dedicated Virtual Account Number copied!')" title="Copy account number">
               <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             </button>
           </div>
         </div>
 
         <div class="sbank-field" style="margin-bottom:8px;">
-          <div class="sbank-label">Official Account Holder Name</div>
+          <div class="sbank-label">Official Account Name</div>
           <div class="sbank-val" id="virtualAccountName" style="font-size:13px; font-weight:800; color:var(--forest);">${acctName}</div>
         </div>
 
-        <div class="sbank-notice" style="margin-top:10px; font-size:11.5px; background:rgba(19,117,111,0.06); color:var(--teal); padding:8px 12px; border-radius:10px; border:1px solid rgba(19,117,111,0.18);">
-          🔒 All milestone payouts and withdrawals from Collekt will be disbursed directly into this NOVA Bank account.
+        <div class="sbank-notice" style="margin-top:10px; font-size:11.5px; background:rgba(20,184,166,0.06); color:var(--teal); padding:8px 12px; border-radius:10px; border:1px solid rgba(20,184,166,0.18);">
+          ⚡ Instant Automatic Settlement: Any bank transfer sent to this NUBAN credits your Collekt wallet automatically within seconds.
         </div>
       `;
     } else {
@@ -1588,30 +1797,54 @@
         <div style="padding:4px 0;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
             <div>
-              <div class="sbank-label" style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;">Banking Partner</div>
+              <div class="sbank-label" style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;">Dedicated Virtual Account</div>
               <div class="sbank-val" style="font-weight:900; color:var(--teal); font-size:14px; margin-top:2px;">
-                🏛️ NOVA Commercial Bank
+                🏛️ Paystack NUBAN Rail
               </div>
             </div>
-            <span style="font-size:10px; background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:99px; font-weight:800;">NOT LINKED YET</span>
+            <span style="font-size:10px; background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:99px; font-weight:800;">READY TO GENERATE</span>
           </div>
 
           <div style="background:var(--paper); border:1.5px dashed var(--line); border-radius:14px; padding:18px; text-align:center; margin-bottom:12px;">
             <div style="font-size:26px; margin-bottom:6px;">🏛️</div>
-            <div style="font-size:14px; font-weight:900; color:var(--ink); margin-bottom:4px;">Link Your NOVA Bank Account</div>
-            <p style="font-size:12px; color:var(--muted); margin:0 0 14px; line-height:1.5;">Connect your 10-digit NOVA Bank account to receive direct milestone settlements and project payouts.</p>
-            <button class="btn btn-primary btn-sm" onclick="openLinkNovaModal('overview')" style="background:var(--teal); font-weight:900; font-size:12.5px; border:none; padding:10px 22px; border-radius:10px; box-shadow:0 4px 14px rgba(19,117,111,0.25); cursor:pointer;">
-              🔗 Link NOVA Bank Account &rarr;
+            <div style="font-size:14px; font-weight:900; color:var(--ink); margin-bottom:4px;">Generate Your Dedicated Virtual Account</div>
+            <p style="font-size:12px; color:var(--muted); margin:0 0 14px; line-height:1.5;">Get a unique 10-digit Nigerian NUBAN account number assigned to your account for direct, instant bank transfers.</p>
+            <button class="btn btn-primary btn-sm" onclick="generateOverviewDva()" style="background:var(--teal); font-weight:900; font-size:12.5px; border:none; padding:10px 22px; border-radius:10px; box-shadow:0 4px 14px rgba(19,117,111,0.25); cursor:pointer;">
+              ⚡ Generate Dedicated Virtual Account &rarr;
             </button>
           </div>
 
-          <div class="sbank-notice" style="font-size:11px; background:rgba(19,117,111,0.06); color:var(--teal); padding:8px 12px; border-radius:10px; border:1px solid rgba(19,117,111,0.18);">
-            💡 Enter your 10-digit NUBAN. All earnings on Collekt are settled directly to this account.
+          <div class="sbank-notice" style="font-size:11px; background:rgba(20,184,166,0.06); color:var(--teal); padding:8px 12px; border-radius:10px; border:1px solid rgba(20,184,166,0.18);">
+            💡 Assigned through authorized payment infrastructure. Zero manual receipt submissions required.
           </div>
         </div>
       `;
     }
   }
+
+  window.generateOverviewDva = async function() {
+    const user = getUser() || {};
+    const ownerId = user.id || user.owner_id;
+    showToast('⚡ Provisioning your Dedicated Virtual Account...');
+
+    const res = await provisionDedicatedVirtualAccount({
+      owner_id: ownerId,
+      user_id: user.id,
+      owner_type: user.role === 'company' ? 'company' : (user.role === 'professional' ? 'professional' : 'user'),
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      company_name: user.company_name
+    });
+
+    if (res && res.success && res.data) {
+      activeDvaAccount = res.data;
+      showToast('🎉 Dedicated Virtual Account generated successfully!');
+      renderVirtualBankDetails(user.wallet);
+    } else {
+      showToast('⚠️ ' + (res?.error || 'Could not generate virtual account. Please check your connection.'), 'error');
+    }
+  };
 
   // ── TRANSACTION PIN MANAGEMENT & SECURITY ─────────────────
   window._pinCreatedCallback = null;

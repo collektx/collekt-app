@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=52.0">
-<link rel="stylesheet" href="shared.css?v=52.0">
-<link rel="stylesheet" href="glass.css?v=52.0">
+<link rel="stylesheet" href="style.css?v=53.0">
+<link rel="stylesheet" href="shared.css?v=53.0">
+<link rel="stylesheet" href="glass.css?v=53.0">
 
 <style>
   html, body {
@@ -263,6 +263,61 @@
       <div class="dash-grid">
         <div>
 
+          <!-- Company Financial & Dedicated Virtual Account Hub -->
+          <div class="content-card fade-in" style="margin-bottom:24px; background: linear-gradient(135deg, rgba(14, 42, 38, 0.95), rgba(16, 23, 22, 0.98)); border: 1px solid rgba(20, 184, 166, 0.25); border-radius: var(--r-lg); padding: 22px; color: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.25);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:18px;">
+              <div>
+                <div style="font-size:11px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.08em; display:flex; align-items:center; gap:6px;">
+                  <span>💳</span> Company Financial Hub &bull; Multi-User Wallet
+                </div>
+                <div style="font-size:18px; font-weight:900; margin-top:4px; color:#fff; display:flex; align-items:center; gap:8px;">
+                  <span>Collekt Business Account</span>
+                  <span id="coUserRoleBadge" style="background:rgba(20,184,166,0.15); color:var(--teal); border:1px solid rgba(20,184,166,0.3); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Owner</span>
+                </div>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <a href="wallet.html" class="btn btn-amber btn-sm" style="font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                  <span>+</span> Fund Wallet
+                </a>
+                <a href="wallet.html" class="btn btn-outline btn-sm" style="color:#fff; border-color:rgba(255,255,255,0.25); font-weight:800; text-decoration:none;">
+                  Manage Ledger &rarr;
+                </a>
+              </div>
+            </div>
+
+            <!-- Balances and DVA Grid -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:16px;">
+              <!-- Available Balance -->
+              <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:14px 16px;">
+                <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Available Balance</div>
+                <div style="font-size:22px; font-weight:900; color:#fff;" id="coAvailableBal">₦0.00</div>
+                <div style="font-size:11px; color:var(--teal); font-weight:700; margin-top:4px;">Ready for contracts &amp; payouts</div>
+              </div>
+
+              <!-- Escrow Balance -->
+              <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:14px 16px;">
+                <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Locked in Escrow 🔒</div>
+                <div style="font-size:22px; font-weight:900; color:var(--amber);" id="coEscrowBal">₦0.00</div>
+                <div style="font-size:11px; color:rgba(255,255,255,0.6); font-weight:600; margin-top:4px;">Active milestone guarantees</div>
+              </div>
+
+              <!-- Dedicated Virtual Account (DVA) -->
+              <div style="background:rgba(20,184,166,0.08); border:1px solid rgba(20,184,166,0.25); border-radius:14px; padding:14px 16px; position:relative;">
+                <div style="font-size:11px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+                  <span>Dedicated Virtual NUBAN</span>
+                  <span id="coDvaBankName" style="font-weight:900; color:#fff; font-size:10px; background:rgba(255,255,255,0.15); padding:1px 6px; border-radius:4px;">Wema Bank</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                  <span style="font-size:18px; font-weight:900; font-family:monospace; color:#fff; letter-spacing:1px;" id="coDvaAcctNum">9800123456</span>
+                  <button class="btn btn-ghost btn-xs" onclick="copyCoDVA()" title="Copy Account Number" style="padding:2px 8px; color:var(--teal); border:1px solid rgba(20,184,166,0.4); border-radius:6px; font-size:11px; font-weight:800; background:rgba(0,0,0,0.2);">
+                    📋 Copy
+                  </button>
+                </div>
+                <div style="font-size:11px; color:rgba(255,255,255,0.7); font-weight:600; margin-top:4px;" id="coDvaAcctName">COLLEKT / COMPANY</div>
+              </div>
+            </div>
+          </div>
+
           <!-- Post a Job / Opportunity Quick Card -->
           <div class="post-card fade-in" id="postQuickCard" onclick="window.location.href='post-job.html'" style="cursor:pointer;">
             <div style="font-size:36px; margin-bottom:10px;">💼</div>
@@ -288,13 +343,34 @@
           </div>
 
           <!-- Active Contracts & Escrow -->
-          <div class="content-card fade-in">
+          <div class="content-card fade-in" style="margin-bottom:24px;">
             <div class="card-header">
               <h3>Active Contracts & Escrow</h3>
               <a href="wallet.html" style="font-size:13px; color:var(--teal); font-weight:700;">View Payments &rarr;</a>
             </div>
             <div class="card-body" id="activeContractsContainer">
               <!-- rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Company Team & Access Control (RBAC) -->
+          <div class="content-card fade-in" style="margin-bottom:24px;">
+            <div class="card-header">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:18px;">👥</span>
+                <div>
+                  <h3 style="margin-bottom:2px;">Company Team &amp; Access Roles</h3>
+                  <div style="font-size:11px; color:var(--muted);">Manage authorized members and financial approval permissions</div>
+                </div>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="openInviteTeamModal()" style="font-weight:800;">
+                + Add Member
+              </button>
+            </div>
+            <div class="card-body" style="padding:16px 20px;">
+              <div id="companyTeamList" style="display:flex; flex-direction:column; gap:10px;">
+                <!-- Dynamically populated -->
+              </div>
             </div>
           </div>
 
@@ -518,9 +594,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=52.0"></script>
-<script src="app.js?v=52.0"></script>
-<script src="collekt-ai.js?v=52.0"></script>
+<script src="supabase.js?v=53.0"></script>
+<script src="app.js?v=53.0"></script>
+<script src="collekt-ai.js?v=53.0"></script>
 <script>
   requireCompany();
   
@@ -1109,11 +1185,279 @@
     showToast('✅ Payment release initiated. The professional will be notified.');
   }
 
+  /* -----------------------------------------------------
+     COMPANY FINANCIAL HUB & DVA MANAGEMENT
+  ------------------------------------------------------*/
+  async function loadCompanyWalletAndDVA() {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user) return;
+
+    // 1. Available & Escrow Balances
+    const wallet = (user.wallet && typeof user.wallet === 'object') ? user.wallet : {};
+    let avail = Number(wallet.balance || wallet.available_balance || 0);
+    let escrow = Number(wallet.escrow_balance || wallet.escrow || 0);
+
+    // If Supabase is connected, query live wallet
+    if (window.sb && user.id) {
+      try {
+        const { data: wRow } = await sb.from('wallets').select('*').eq('owner_id', user.id).maybeSingle();
+        if (wRow) {
+          avail = Number(wRow.available_balance || 0);
+          escrow = Number(wRow.escrow_balance || 0);
+        }
+      } catch(e){}
+    }
+
+    const availEl = document.getElementById('coAvailableBal');
+    if (availEl) availEl.textContent = (typeof formatNaira === 'function') ? formatNaira(avail, true) : '₦' + avail.toLocaleString();
+
+    const escrowEl = document.getElementById('coEscrowBal');
+    if (escrowEl) escrowEl.textContent = (typeof formatNaira === 'function') ? formatNaira(escrow, true) : '₦' + escrow.toLocaleString();
+
+    // 2. Dedicated Virtual Account
+    let dvaAcct = wallet.account_number || user.dva_account || '';
+    let dvaBank = wallet.bank_name || user.dva_bank || 'Wema Bank';
+    let dvaName = wallet.account_name || user.dva_name || `COLLEKT / ${user.name || 'COMPANY'}`;
+
+    if (!dvaAcct && typeof fetchDedicatedVirtualAccount === 'function' && user.id) {
+      try {
+        const res = await fetchDedicatedVirtualAccount(user.id);
+        if (res && res.success && res.data) {
+          dvaAcct = res.data.account_number;
+          dvaBank = res.data.bank_name;
+          dvaName = res.data.account_name;
+        }
+      } catch(e){}
+    }
+
+    if (!dvaAcct) {
+      // Deterministic account for test mode
+      const seed = Math.abs(String(user.id || user.email || '999').split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0));
+      dvaAcct = '9800' + String(seed).slice(-6).padStart(6, '0');
+    }
+
+    const dvaAcctEl = document.getElementById('coDvaAcctNum');
+    if (dvaAcctEl) dvaAcctEl.textContent = dvaAcct;
+
+    const dvaBankEl = document.getElementById('coDvaBankName');
+    if (dvaBankEl) dvaBankEl.textContent = dvaBank;
+
+    const dvaNameEl = document.getElementById('coDvaAcctName');
+    if (dvaNameEl) dvaNameEl.textContent = dvaName;
+  }
+
+  function copyCoDVA() {
+    const acctEl = document.getElementById('coDvaAcctNum');
+    const text = acctEl ? acctEl.textContent.trim() : '';
+    if (!text) return;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      if (typeof showToast === 'function') showToast('📋 Virtual Account Number copied!');
+    } else {
+      if (typeof copyToClipboard === 'function') copyToClipboard(text, 'Account number copied!');
+    }
+  }
+
+  /* -----------------------------------------------------
+     COMPANY TEAM & RBAC MANAGEMENT
+  ------------------------------------------------------*/
+  async function loadCompanyTeamMembers() {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user) return;
+
+    const container = document.getElementById('companyTeamList');
+    if (!container) return;
+
+    let members = [];
+    try {
+      members = JSON.parse(localStorage.getItem('collekt_company_team_' + (user.id || user.email)) || '[]');
+    } catch(e){}
+
+    if (members.length === 0) {
+      members = [
+        {
+          id: 'mem_owner',
+          name: user.name || 'Primary Owner',
+          email: user.email || 'owner@company.com',
+          role: 'owner',
+          status: 'active'
+        },
+        {
+          id: 'mem_finance',
+          name: 'Finance & Treasury Officer',
+          email: 'finance@' + (user.email ? user.email.split('@')[1] : 'company.com'),
+          role: 'finance',
+          status: 'active'
+        }
+      ];
+      localStorage.setItem('collekt_company_team_' + (user.id || user.email), JSON.stringify(members));
+    }
+
+    const roleBadges = {
+      owner: '<span style="background:rgba(212,146,11,0.15); color:var(--amber); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Owner 👑</span>',
+      admin: '<span style="background:rgba(20,184,166,0.15); color:var(--teal); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Admin ⚡</span>',
+      finance: '<span style="background:rgba(34,197,94,0.15); color:#16a34a; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Finance 💳</span>',
+      member: '<span style="background:rgba(59,130,246,0.15); color:#2563eb; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Member 👤</span>',
+      viewer: '<span style="background:rgba(107,114,128,0.15); color:var(--muted); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Viewer 👁️</span>'
+    };
+
+    container.innerHTML = members.map(m => `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--paper); border:1px solid var(--line); border-radius:12px; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--forest); color:#fff; font-weight:900; display:grid; place-items:center; font-size:14px;">
+            ${(m.name || 'U').charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style="font-size:13px; font-weight:800; color:var(--ink);">${typeof escapeHTML === 'function' ? escapeHTML(m.name) : m.name}</div>
+            <div style="font-size:11px; color:var(--muted);">${typeof escapeHTML === 'function' ? escapeHTML(m.email) : m.email}</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          ${roleBadges[m.role] || roleBadges.member}
+          ${m.role !== 'owner' ? `
+            <button class="btn btn-ghost btn-xs" onclick="removeCompanyMember('${m.id}')" title="Remove member" style="color:#ef4444; font-size:11px; padding:2px 6px;">
+              ✕
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openInviteTeamModal() {
+    const modal = document.getElementById('inviteTeamModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('open');
+    }
+  }
+
+  function closeInviteTeamModal() {
+    const modal = document.getElementById('inviteTeamModal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('open');
+    }
+  }
+
+  function saveCompanyMember() {
+    const name = document.getElementById('teamMemberName')?.value.trim();
+    const email = document.getElementById('teamMemberEmail')?.value.trim();
+    const role = document.getElementById('teamMemberRole')?.value || 'member';
+
+    if (!name || !email) {
+      if (typeof showToast === 'function') showToast('⚠️ Please enter member name and email', 'warning');
+      return;
+    }
+
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user) return;
+
+    let members = [];
+    try {
+      members = JSON.parse(localStorage.getItem('collekt_company_team_' + (user.id || user.email)) || '[]');
+    } catch(e){}
+
+    members.push({
+      id: 'mem_' + Date.now(),
+      name,
+      email,
+      role,
+      status: 'active',
+      added_at: new Date().toISOString()
+    });
+
+    localStorage.setItem('collekt_company_team_' + (user.id || user.email), JSON.stringify(members));
+
+    // Also persist to Supabase company_members if available
+    if (window.sb && user.id) {
+      sb.from('company_members').insert({
+        company_id: user.id,
+        user_id: user.id,
+        role: role,
+        status: 'active'
+      }).then(()=>{}).catch(()=>{});
+    }
+
+    closeInviteTeamModal();
+    if (typeof showToast === 'function') showToast(`🎉 ${name} added to company team as ${role.toUpperCase()}!`);
+    loadCompanyTeamMembers();
+
+    // Reset fields
+    if (document.getElementById('teamMemberName')) document.getElementById('teamMemberName').value = '';
+    if (document.getElementById('teamMemberEmail')) document.getElementById('teamMemberEmail').value = '';
+  }
+
+  function removeCompanyMember(memberId) {
+    if (!confirm('Are you sure you want to remove this member from your company team?')) return;
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user) return;
+
+    let members = [];
+    try {
+      members = JSON.parse(localStorage.getItem('collekt_company_team_' + (user.id || user.email)) || '[]');
+    } catch(e){}
+
+    members = members.filter(m => m.id !== memberId);
+    localStorage.setItem('collekt_company_team_' + (user.id || user.email), JSON.stringify(members));
+
+    if (typeof showToast === 'function') showToast('Member removed from team.');
+    loadCompanyTeamMembers();
+  }
+
+  // Hook into initial dashboard render
+  const origRenderDashboardData = window.renderDashboardData;
+  window.renderDashboardData = function() {
+    if (typeof origRenderDashboardData === 'function') origRenderDashboardData();
+    loadCompanyWalletAndDVA();
+    loadCompanyTeamMembers();
+  };
+
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
   });
 </script>
-<script src="settings-popup.js?v=52.0"></script>
+
+<!-- Invite Team Member Modal -->
+<div class="modal-overlay" id="inviteTeamModal" style="display:none; position:fixed; inset:0; z-index:9990; background:rgba(4,14,13,0.8); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px;">
+  <div class="modal-card" style="position:relative; max-width:480px; width:100%; border-radius:24px; padding:28px; background:var(--white); border:1px solid var(--line); box-shadow:0 30px 80px rgba(0,0,0,0.4);">
+    <button class="modal-close" onclick="closeInviteTeamModal()" style="position:absolute; right:20px; top:20px; font-size:24px; border:none; background:none; cursor:pointer; color:var(--muted);">&times;</button>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+      <div style="width:44px; height:44px; border-radius:14px; background:rgba(20,184,166,0.15); color:var(--teal); display:grid; place-items:center; font-size:22px;">👥</div>
+      <div>
+        <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:2px;">Add Company Team Member</h3>
+        <div style="font-size:12px; color:var(--muted);">Assign role-based access permissions for wallet and tenders</div>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:14px;">
+      <label class="form-label" style="font-weight:800; font-size:12px;">Full Name</label>
+      <input type="text" id="teamMemberName" class="form-input" placeholder="e.g. Boma Alabo" style="font-size:13px;">
+    </div>
+
+    <div class="form-group" style="margin-bottom:14px;">
+      <label class="form-label" style="font-weight:800; font-size:12px;">Email Address</label>
+      <input type="email" id="teamMemberEmail" class="form-input" placeholder="e.g. boma@company.com" style="font-size:13px;">
+    </div>
+
+    <div class="form-group" style="margin-bottom:20px;">
+      <label class="form-label" style="font-weight:800; font-size:12px;">Access Role &amp; Financial Permissions</label>
+      <select id="teamMemberRole" class="form-input form-select" style="font-size:13px;">
+        <option value="admin">Admin — Full project &amp; team management</option>
+        <option value="finance" selected>Finance — Wallet funding, payment releases &amp; escrow</option>
+        <option value="member">Member — Post opportunities &amp; review proposals</option>
+        <option value="viewer">Viewer — Read-only access to company tenders</option>
+      </select>
+    </div>
+
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn btn-outline btn-sm" onclick="closeInviteTeamModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveCompanyMember()" style="font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f);">+ Add Member</button>
+    </div>
+  </div>
+</div>
+
+<script src="settings-popup.js?v=53.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>

@@ -50,9 +50,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=52.0">
-<link rel="stylesheet" href="shared.css?v=52.0">
-<link rel="stylesheet" href="glass.css?v=52.0">
+<link rel="stylesheet" href="style.css?v=53.0">
+<link rel="stylesheet" href="shared.css?v=53.0">
+<link rel="stylesheet" href="glass.css?v=53.0">
 
 <style>
   html, body {
@@ -579,18 +579,28 @@
         <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
             <div>
-              <h3 style="font-size:18px; font-weight:900; color:var(--ink);">Live Transaction Ledger</h3>
-              <p style="font-size:12px; color:var(--muted); margin-top:2px;">Real-time audit log of wallet deposits, payouts, and 10% platform commission fee calculations.</p>
+              <h3 style="font-size:18px; font-weight:900; color:var(--ink);">Live Financial Ledger &amp; Transactions</h3>
+              <p style="font-size:12px; color:var(--muted); margin-top:2px;">Real-time double-entry audit log of wallet funding, DVA bank transfers, card &amp; OPay checkouts, and escrow disbursements.</p>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="exportAdminTransactionsCSV()" style="font-weight:800; background:linear-gradient(135deg, #0e3b35, #13756f);">
-              📥 Export Financial Report (CSV)
-            </button>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <input type="text" id="adminTxSearch" class="form-input" placeholder="Search reference or user..." style="font-size:12px; width:200px;" oninput="renderAdminTxLedger()">
+              <select id="adminTxTypeFilter" class="form-input" style="font-size:12px; width:130px;" onchange="renderAdminTxLedger()">
+                <option value="all">All Types</option>
+                <option value="credit">Credits (Deposits)</option>
+                <option value="debit">Debits (Withdrawals)</option>
+                <option value="escrow_hold">Escrow Holds</option>
+                <option value="escrow_release">Escrow Releases</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="exportAdminTransactionsCSV()" style="font-weight:800; background:linear-gradient(135deg, #0e3b35, #13756f);">
+                📥 Export Report (CSV)
+              </button>
+            </div>
           </div>
 
           <div class="table-responsive" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
-            <table class="data-table" style="min-width:700px;">
+            <table class="data-table" style="min-width:780px;">
               <thead class="table-head">
-                <tr><th>Tx Reference</th><th>Description</th><th>Type</th><th>Amount</th><th>Date</th></tr>
+                <tr><th>Tx Reference</th><th>Account / Owner</th><th>Description</th><th>Type</th><th>Gateway / Rail</th><th>Amount</th><th>Date</th></tr>
               </thead>
               <tbody id="adminTxLedgerBody">
                 <!-- Live JS populated -->
@@ -1035,8 +1045,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=52.0"></script>
-<script src="app.js?v=52.0"></script>
+<script src="supabase.js?v=53.0"></script>
+<script src="app.js?v=53.0"></script>
 <script>
   async function initAdminDashboard() {
     // 1. Verify Master Admin or live Supabase session
@@ -2606,18 +2616,55 @@
     }).join('');
   }
 
-  function renderAdminTxLedger() {
+  async function renderAdminTxLedger() {
     const tbody = document.getElementById('adminTxLedgerBody');
     if (!tbody) return;
 
-    const txs = typeof getSavedTransactions === 'function' ? getSavedTransactions() : [];
+    let txs = typeof getSavedTransactions === 'function' ? getSavedTransactions() : [];
 
-    if (txs.length === 0) {
+    // Query Supabase transactions & ledger if connected
+    if (window.sb) {
+      try {
+        const { data: dbTxs, error } = await sb.from('transactions').select('*').order('created_at', { ascending: false }).limit(100);
+        if (!error && dbTxs && dbTxs.length > 0) {
+          const formattedDbTxs = dbTxs.map(t => ({
+            id: t.reference || t.id,
+            user_id: t.owner_id || t.user_id,
+            title: t.metadata?.description || `${(t.transaction_type || 'Funding').toUpperCase()} via ${(t.payment_method || 'Paystack').toUpperCase()}`,
+            type: (t.transaction_type === 'deposit' || t.transaction_type === 'funding') ? 'credit' : (t.transaction_type === 'withdrawal' ? 'debit' : (t.transaction_type || 'credit')),
+            method: t.payment_method || 'card',
+            gateway: t.gateway || 'paystack',
+            amount: Number(t.amount || 0),
+            status: t.status || 'successful',
+            date: t.created_at ? new Date(t.created_at).toLocaleDateString() : 'Recent'
+          }));
+          // Merge deduplicating by id
+          const ids = new Set(formattedDbTxs.map(x => x.id));
+          txs = [...formattedDbTxs, ...txs.filter(x => !ids.has(x.id))];
+        }
+      } catch(e){}
+    }
+
+    const search = (document.getElementById('adminTxSearch')?.value || '').toLowerCase().trim();
+    const typeFilter = document.getElementById('adminTxTypeFilter')?.value || 'all';
+
+    let filtered = txs.filter(t => {
+      if (typeFilter !== 'all' && t.type !== typeFilter) return false;
+      if (search) {
+        const ref = String(t.id || '').toLowerCase();
+        const desc = String(t.title || t.note || '').toLowerCase();
+        const user = String(t.user_id || t.user || '').toLowerCase();
+        if (!ref.includes(search) && !desc.includes(search) && !user.includes(search)) return false;
+      }
+      return true;
+    });
+
+    if (filtered.length === 0) {
       tbody.innerHTML = `
-        <tr><td colspan="5">
+        <tr><td colspan="7">
           <div class="empty-live-state">
             <div style="font-size:24px; margin-bottom:6px;">💸</div>
-            <div style="font-weight:800; color:var(--ink);">No Wallet Transactions Recorded Yet</div>
+            <div style="font-weight:800; color:var(--ink);">No Matching Wallet Transactions Found</div>
             <p style="font-size:11px; margin-top:2px;">Platform wallet deposits, payouts, and transfers will log here in real-time.</p>
           </div>
         </td></tr>
@@ -2625,15 +2672,28 @@
       return;
     }
 
-    tbody.innerHTML = txs.map(t => `
-      <tr class="tx-row">
-        <td style="font-family:monospace; font-weight:800;">${escapeHTML(t.id || 'TX-LOG')}</td>
-        <td style="font-weight:800; color:var(--ink);">${escapeHTML(t.title || t.note || 'Wallet Transfer')}</td>
-        <td><span style="font-weight:700;">${escapeHTML(t.type || 'Transfer')}</span></td>
-        <td style="font-weight:900; color:${t.type==='credit'?'var(--teal)':'var(--forest)'};">NGN ${Number(t.amount || 0).toLocaleString()}</td>
-        <td>${escapeHTML(t.date || 'Recent')}</td>
-      </tr>
-    `).join('');
+    const typeBadges = {
+      credit: '<span style="background:rgba(20,184,166,0.15); color:var(--teal); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Credit 🟢</span>',
+      debit: '<span style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Debit 🔴</span>',
+      escrow_hold: '<span style="background:rgba(212,146,11,0.15); color:var(--amber); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Escrow Hold 🔒</span>',
+      escrow_release: '<span style="background:rgba(34,197,94,0.15); color:#16a34a; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Released 💸</span>'
+    };
+
+    tbody.innerHTML = filtered.map(t => {
+      const isCredit = t.type === 'credit' || t.type === 'deposit';
+      const rail = (t.method === 'opay') ? 'Paystack OPay' : (t.method === 'bank_transfer' ? 'Virtual NUBAN' : (t.method === 'card' ? 'Paystack Card' : (t.gateway || 'Paystack')));
+      return `
+        <tr class="tx-row">
+          <td style="font-family:monospace; font-weight:800; font-size:12px; color:var(--ink);">${escapeHTML(t.id || 'TX-LOG')}</td>
+          <td style="font-size:12px; font-weight:700; color:var(--muted);">${escapeHTML(String(t.user_id || 'Platform User').substring(0, 16))}</td>
+          <td style="font-weight:800; color:var(--ink);">${escapeHTML(t.title || t.note || 'Wallet Funding')}</td>
+          <td>${typeBadges[t.type] || typeBadges.credit}</td>
+          <td><span style="font-size:11px; font-weight:700; color:var(--forest);">${escapeHTML(rail)}</span></td>
+          <td style="font-weight:900; color:${isCredit ? 'var(--teal)' : '#ef4444'};">${isCredit ? '+' : '-'} ₦${Number(t.amount || 0).toLocaleString()}</td>
+          <td style="font-size:12px; color:var(--muted);">${escapeHTML(t.date || 'Recent')}</td>
+        </tr>
+      `;
+    }).join('');
   }
 
   function exportAdminTransactionsCSV() {

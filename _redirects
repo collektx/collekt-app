@@ -18,3 +18,6 @@ https://www.collektng.xyz/* https://collektng.com/:splat 301!
 /admin-dashboard /admin-dashboard.html 200
 /privacy /privacy.html 200
 /terms /terms.html 200
+/payment/result /payment-result.html 200
+/payment-result /payment-result.html 200
+

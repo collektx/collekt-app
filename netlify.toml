@@ -70,15 +70,55 @@
   to = "/.netlify/functions/ai-copilot"
   status = 200
 
-# Paystack API Serverless Functions
+# Payment & Paystack API Serverless Functions
 [[redirects]]
-  from = "/api/paystack/*"
-  to = "/.netlify/functions/paystack/:splat"
+  from = "/api/payments/initialize"
+  to = "/.netlify/functions/paystack-initialize"
   status = 200
 
 [[redirects]]
-  from = "/api/paystack"
-  to = "/.netlify/functions/paystack"
+  from = "/api/payments/verify"
+  to = "/.netlify/functions/paystack-verify"
+  status = 200
+
+[[redirects]]
+  from = "/api/payments/dva"
+  to = "/.netlify/functions/paystack-dva"
+  status = 200
+
+[[redirects]]
+  from = "/api/payments/paystack/webhook"
+  to = "/.netlify/functions/paystack-webhook"
+  status = 200
+
+[[redirects]]
+  from = "/api/payments/withdraw"
+  to = "/.netlify/functions/paystack-withdraw"
+  status = 200
+
+[[redirects]]
+  from = "/api/payments/reconcile"
+  to = "/.netlify/functions/wallet-reconcile"
+  status = 200
+
+[[redirects]]
+  from = "/api/paystack/webhook"
+  to = "/.netlify/functions/paystack-webhook"
+  status = 200
+
+[[redirects]]
+  from = "/api/paystack/withdraw"
+  to = "/.netlify/functions/paystack-withdraw"
+  status = 200
+
+[[redirects]]
+  from = "/payment/result"
+  to = "/payment-result.html"
+  status = 200
+
+[[redirects]]
+  from = "/payment-result"
+  to = "/payment-result.html"
   status = 200
 
 # Clean URLs & Page Redirects

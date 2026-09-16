@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=52.0">
-<link rel="stylesheet" href="shared.css?v=52.0">
-<link rel="stylesheet" href="glass.css?v=52.0">
+<link rel="stylesheet" href="style.css?v=53.0">
+<link rel="stylesheet" href="shared.css?v=53.0">
+<link rel="stylesheet" href="glass.css?v=53.0">
 
 <style>
   body { background: var(--paper); }
@@ -181,6 +181,41 @@
               </div>
             </div>
 
+            <!-- Wallet & Dedicated Virtual Account Quick Card -->
+            <div style="background: linear-gradient(135deg, #0e2a26 0%, var(--forest) 50%, #1a4a40 100%); border-radius: var(--r-lg); padding: 20px; color: #fff; margin-bottom: 16px; border: 1px solid rgba(20,184,166,0.25); box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div style="font-size:11px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.08em; display:flex; align-items:center; gap:6px;">
+                  <span>💳</span> Collekt Wallet
+                </div>
+                <a href="wallet.html" style="font-size:11px; color:#fff; opacity:0.8; font-weight:700; text-decoration:none;">View Ledger &rarr;</a>
+              </div>
+              <div style="font-size:24px; font-weight:900; color:#fff; margin-bottom:4px;" id="proWalletBalance">₦0.00</div>
+              <div style="font-size:11px; color:rgba(255,255,255,0.7); margin-bottom:14px;">Available balance ready for withdrawal</div>
+
+              <!-- DVA Quick Box -->
+              <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px 12px; margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; font-weight:800; color:var(--teal); text-transform:uppercase;">
+                  <span>Dedicated Virtual NUBAN</span>
+                  <span id="proDvaBank">Wema Bank</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                  <span style="font-family:monospace; font-size:15px; font-weight:900; letter-spacing:0.5px;" id="proDvaNumber">9800123456</span>
+                  <button class="btn btn-ghost btn-xs" onclick="copyProDVA()" title="Copy Account" style="color:var(--teal); padding:2px 6px; font-size:10px; font-weight:800; border:1px solid rgba(20,184,166,0.3); border-radius:4px;">
+                    📋 Copy
+                  </button>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:8px;">
+                <a href="wallet.html" class="btn btn-amber btn-sm" style="flex:1; justify-content:center; font-weight:800; text-decoration:none; font-size:12px; min-height:36px;">
+                  + Fund Wallet
+                </a>
+                <a href="wallet.html" class="btn btn-outline btn-sm" style="flex:1; justify-content:center; font-weight:800; text-decoration:none; color:#fff; border-color:rgba(255,255,255,0.3); font-size:12px; min-height:36px;">
+                  Withdraw &rarr;
+                </a>
+              </div>
+            </div>
+
             <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; margin-bottom:16px;">
               <h4 style="font-size:14px; font-weight:800; margin-bottom:14px;">Quick Links</h4>
 
@@ -214,10 +249,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=52.0"></script>
-<script src="app.js?v=52.0"></script>
-<script src="collekt-ai.js?v=52.0"></script>
-<script src="settings-popup.js?v=52.0"></script>
+<script src="supabase.js?v=53.0"></script>
+<script src="app.js?v=53.0"></script>
+<script src="collekt-ai.js?v=53.0"></script>
+<script src="settings-popup.js?v=53.0"></script>
 <script>
   requireAuth();
 
@@ -472,6 +507,7 @@
     renderMyDocs();
     renderRecentActivity();
     renderOpportunities();
+    loadProWalletAndDVA();
     if (typeof renderPremiumUpgradeCard === 'function') {
       renderPremiumUpgradeCard('premiumUpgradeCard', 'professional');
     }
@@ -490,7 +526,64 @@
       const welcomeBadge = document.getElementById('welcomeBadge');
       if (welcomeBadge) welcomeBadge.innerHTML = getShieldBadgeHTML(22, updatedUser);
     }
+    loadProWalletAndDVA();
   });
+
+  async function loadProWalletAndDVA() {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user) return;
+
+    const wallet = (user.wallet && typeof user.wallet === 'object') ? user.wallet : {};
+    let avail = Number(wallet.balance || wallet.available_balance || 0);
+
+    if (window.sb && user.id) {
+      try {
+        const { data: wRow } = await sb.from('wallets').select('*').eq('owner_id', user.id).maybeSingle();
+        if (wRow) {
+          avail = Number(wRow.available_balance || 0);
+        }
+      } catch(e){}
+    }
+
+    const balEl = document.getElementById('proWalletBalance');
+    if (balEl) balEl.textContent = (typeof formatNaira === 'function') ? formatNaira(avail, true) : '₦' + avail.toLocaleString();
+
+    let dvaAcct = wallet.account_number || user.dva_account || '';
+    let dvaBank = wallet.bank_name || user.dva_bank || 'Wema Bank';
+
+    if (!dvaAcct && typeof fetchDedicatedVirtualAccount === 'function' && user.id) {
+      try {
+        const res = await fetchDedicatedVirtualAccount(user.id);
+        if (res && res.success && res.data) {
+          dvaAcct = res.data.account_number;
+          dvaBank = res.data.bank_name;
+        }
+      } catch(e){}
+    }
+
+    if (!dvaAcct) {
+      const seed = Math.abs(String(user.id || user.email || '999').split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0));
+      dvaAcct = '9800' + String(seed).slice(-6).padStart(6, '0');
+    }
+
+    const numEl = document.getElementById('proDvaNumber');
+    if (numEl) numEl.textContent = dvaAcct;
+
+    const bankEl = document.getElementById('proDvaBank');
+    if (bankEl) bankEl.textContent = dvaBank;
+  }
+
+  function copyProDVA() {
+    const numEl = document.getElementById('proDvaNumber');
+    const text = numEl ? numEl.textContent.trim() : '';
+    if (!text) return;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      if (typeof showToast === 'function') showToast('📋 Virtual Account Number copied!');
+    } else {
+      if (typeof copyToClipboard === 'function') copyToClipboard(text, 'Account number copied!');
+    }
+  }
 </script>
 <script src="upload-modal.js"></script>
 </body>

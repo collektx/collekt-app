@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#e8f5f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#090d0c" media="(prefers-color-scheme: dark)">
+<script>
+  (function() {
+    try {
+      var t = localStorage.getItem('collekt_theme');
+      if (t === 'dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    } catch(e) {}
+  })();
+</script>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<title>Payment Status &mdash; Collekt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=53.0">
+<link rel="stylesheet" href="shared.css?v=53.0">
+<link rel="stylesheet" href="glass.css?v=53.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js?v=53.0"></script>
+
+<style>
+  body {
+    background: var(--paper);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+  .result-card {
+    width: 100%;
+    max-width: 520px;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    padding: 36px 28px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-icon-wrap {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin-bottom: 20px;
+  }
+  .state-successful .result-icon-wrap {
+    background: rgba(20, 184, 166, 0.15);
+    border: 2px solid var(--teal);
+    color: var(--teal);
+  }
+  .state-pending .result-icon-wrap {
+    background: rgba(245, 158, 11, 0.15);
+    border: 2px solid #f59e0b;
+    color: #f59e0b;
+  }
+  .state-failed .result-icon-wrap {
+    background: rgba(239, 68, 68, 0.15);
+    border: 2px solid #ef4444;
+    color: #ef4444;
+  }
+  .state-abandoned .result-icon-wrap {
+    background: rgba(148, 163, 184, 0.15);
+    border: 2px solid #94a3b8;
+    color: #94a3b8;
+  }
+  .result-title {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .result-desc {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .result-details-box {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 24px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13.5px;
+  }
+  .result-label {
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .result-value {
+    color: var(--ink);
+    font-weight: 800;
+    font-family: inherit;
+  }
+  .result-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .result-actions button, .result-actions a {
+    flex: 1;
+    min-width: 140px;
+  }
+  .loader-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--line);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="result-card" id="resultCard">
+  <!-- Loading State -->
+  <div id="stateLoading">
+    <div class="loader-spinner"></div>
+    <h2 class="result-title">Verifying Payment...</h2>
+    <p class="result-desc">Connecting to payment gateway to securely confirm your transaction.</p>
+  </div>
+
+  <!-- Dynamic Result Content (Rendered via JS) -->
+  <div id="stateContent" style="display:none;"></div>
+</div>
+
+<script>
+  (async function() {
+    const params = new URLSearchParams(window.location.search);
+    const reference = params.get('reference') || params.get('trxref');
+    const stateLoading = document.getElementById('stateLoading');
+    const stateContent = document.getElementById('stateContent');
+
+    if (!reference) {
+      stateLoading.style.display = 'none';
+      stateContent.style.display = 'block';
+      stateContent.innerHTML = `
+        <div class="result-icon-wrap" style="background:rgba(239,68,68,0.12); border:2px solid #ef4444; color:#ef4444;">✕</div>
+        <h2 class="result-title">Missing Reference</h2>
+        <p class="result-desc">No transaction reference was provided in the payment callback.</p>
+        <div class="result-actions">
+          <a href="wallet.html" class="btn btn-primary" style="background:var(--teal); font-weight:800;">Go to Wallet &rarr;</a>
+          <a href="dashboard.html" class="btn btn-outline" style="font-weight:800;">Dashboard</a>
+        </div>
+      `;
+      return;
+    }
+
+    try {
+      // Query serverless verification endpoint
+      const res = await fetch(`/.netlify/functions/paystack-verify?reference=${encodeURIComponent(reference)}`);
+      const data = await res.json();
+
+      stateLoading.style.display = 'none';
+      stateContent.style.display = 'block';
+
+      const card = document.getElementById('resultCard');
+      const status = data.status || (data.verified ? 'successful' : 'failed');
+      const formattedAmount = '₦' + Number(data.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const dateStr = data.paid_at ? new Date(data.paid_at).toLocaleString() : new Date().toLocaleString();
+
+      if (status === 'successful') {
+        card.classList.add('state-successful');
+        stateContent.innerHTML = `
+          <div class="result-icon-wrap">✓</div>
+          <h2 class="result-title">Payment Successful!</h2>
+          <p class="result-desc">Your payment has been verified and your Collekt wallet has been credited.</p>
+          
+          <div class="result-details-box">
+            <div class="result-row">
+              <span class="result-label">Amount Funded</span>
+              <span class="result-value" style="color:var(--teal); font-size:16px; font-weight:900;">${formattedAmount}</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Payment Method</span>
+              <span class="result-value" style="text-transform:capitalize;">${data.payment_method || 'Card'}</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Reference</span>
+              <span class="result-value" style="font-family:monospace; font-size:12px;">${escapeHTML(reference)}</span>
+            </div>
+            ${data.gateway_transaction_id ? `
+            <div class="result-row">
+              <span class="result-label">Transaction ID</span>
+              <span class="result-value" style="font-family:monospace; font-size:12px;">${escapeHTML(String(data.gateway_transaction_id))}</span>
+            </div>` : ''}
+            <div class="result-row">
+              <span class="result-label">Date &amp; Time</span>
+              <span class="result-value">${dateStr}</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Status</span>
+              <span class="result-value" style="color:var(--teal);">✓ Confirmed</span>
+            </div>
+          </div>
+
+          <div class="result-actions">
+            <a href="wallet.html" class="btn btn-primary" style="background:var(--teal); font-weight:900; box-shadow:0 6px 18px rgba(19,117,111,0.25);">
+              View Wallet &rarr;
+            </a>
+            <a href="dashboard.html" class="btn btn-outline" style="font-weight:800;">
+              Dashboard
+            </a>
+          </div>
+        `;
+      } else if (status === 'pending') {
+        card.classList.add('state-pending');
+        stateContent.innerHTML = `
+          <div class="result-icon-wrap">⏳</div>
+          <h2 class="result-title">Payment Pending</h2>
+          <p class="result-desc">Payment received or initiated but confirmation is still pending. Your wallet will update automatically once verified.</p>
+          
+          <div class="result-details-box">
+            <div class="result-row">
+              <span class="result-label">Amount</span>
+              <span class="result-value">${formattedAmount}</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Reference</span>
+              <span class="result-value" style="font-family:monospace; font-size:12px;">${escapeHTML(reference)}</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Status</span>
+              <span class="result-value" style="color:#f59e0b;">⏳ Processing</span>
+            </div>
+          </div>
+
+          <div class="result-actions">
+            <button onclick="window.location.reload()" class="btn btn-primary" style="background:#f59e0b; font-weight:800;">Check Again</button>
+            <a href="wallet.html" class="btn btn-outline" style="font-weight:800;">Go to Wallet</a>
+          </div>
+        `;
+      } else if (status === 'abandoned') {
+        card.classList.add('state-abandoned');
+        stateContent.innerHTML = `
+          <div class="result-icon-wrap">⚠️</div>
+          <h2 class="result-title">Payment Cancelled</h2>
+          <p class="result-desc">The payment session was abandoned or cancelled. Your wallet was not charged.</p>
+          
+          <div class="result-details-box">
+            <div class="result-row">
+              <span class="result-label">Reference</span>
+              <span class="result-value" style="font-family:monospace; font-size:12px;">${escapeHTML(reference)}</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Status</span>
+              <span class="result-value" style="color:var(--muted);">Cancelled</span>
+            </div>
+          </div>
+
+          <div class="result-actions">
+            <a href="wallet.html" class="btn btn-primary" style="background:var(--teal); font-weight:800;">Try Again</a>
+            <a href="dashboard.html" class="btn btn-outline" style="font-weight:800;">Dashboard</a>
+          </div>
+        `;
+      } else {
+        card.classList.add('state-failed');
+        stateContent.innerHTML = `
+          <div class="result-icon-wrap">✕</div>
+          <h2 class="result-title">Payment Failed</h2>
+          <p class="result-desc">${escapeHTML(data.message || 'The payment was declined or could not be completed. Your wallet was not charged.')}</p>
+          
+          <div class="result-details-box">
+            <div class="result-row">
+              <span class="result-label">Reference</span>
+              <span class="result-value" style="font-family:monospace; font-size:12px;">${escapeHTML(reference)}</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Status</span>
+              <span class="result-value" style="color:#ef4444;">Failed</span>
+            </div>
+          </div>
+
+          <div class="result-actions">
+            <a href="wallet.html" class="btn btn-primary" style="background:var(--teal); font-weight:800;">Retry Payment</a>
+            <a href="dashboard.html" class="btn btn-outline" style="font-weight:800;">Dashboard</a>
+          </div>
+        `;
+      }
+
+    } catch (err) {
+      stateLoading.style.display = 'none';
+      stateContent.style.display = 'block';
+      stateContent.innerHTML = `
+        <div class="result-icon-wrap" style="background:rgba(239,68,68,0.12); border:2px solid #ef4444; color:#ef4444;">✕</div>
+        <h2 class="result-title">Verification Error</h2>
+        <p class="result-desc">Unable to reach payment verification service. If your account was debited, your wallet will be credited automatically via webhook.</p>
+        <div class="result-actions">
+          <a href="wallet.html" class="btn btn-primary" style="background:var(--teal); font-weight:800;">Go to Wallet &rarr;</a>
+          <button onclick="window.location.reload()" class="btn btn-outline" style="font-weight:800;">Retry</button>
+        </div>
+      `;
+    }
+  })();
+
+  function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+</script>
+
+</body>
+</html>
