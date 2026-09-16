@@ -26,18 +26,19 @@
 }
 
 html.dark {
-  --forest:   #2DD4BF;
+  --forest:   #0E3B35;
+  --forest-mid:#144e45;
   --teal:     #14B8A6;
   --teal-mid: #2DD4BF;
-  --teal-lt:  rgba(45, 212, 191, 0.20);
+  --teal-lt:  rgba(45, 212, 191, 0.12);
   --amber:    #F59E0B;
-  --amber-lt: rgba(245, 158, 11, 0.20);
-  --ink:      #FFFFFF;
-  --slate:    #E2E8F0;
-  --muted:    #94A3B8;
-  --line:     rgba(255, 255, 255, 0.12);
-  --paper:    #091a18;
-  --white:    #0E2421;
+  --amber-lt: rgba(245, 158, 11, 0.14);
+  --ink:      #F8FAFC;
+  --slate:    #CBD5E1;
+  --muted:    #849694;
+  --line:     rgba(255, 255, 255, 0.075);
+  --paper:    #090d0c;
+  --white:    #101716;
 }
 
 

@@ -9,7 +9,7 @@ html, body {
 }
 
 body { background: linear-gradient(135deg, #e4f4f1 0%, #edf8f5 35%, #e8f5f2 65%, #e2f2ef 100%) !important; }
-html.dark body { background: #071311 !important; }
+html.dark body { background: #090d0c !important; }
 
 /* 0.1 SLEEK GLASS SCROLLBARS */
 ::-webkit-scrollbar {
@@ -49,6 +49,17 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 }
 .nav-bar.solid { background: rgba(6,18,16,0.88) !important; }
 
+html.dark .nav-bar {
+  background: rgba(9, 13, 12, 0.82) !important;
+  backdrop-filter: blur(24px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(130%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45) !important;
+}
+html.dark .nav-bar.solid {
+  background: rgba(9, 13, 12, 0.95) !important;
+}
+
 /* 2. APP TOPBAR */
 .app-topbar {
   background: rgba(255,255,255,0.82) !important;
@@ -59,10 +70,10 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 html.dark .app-topbar {
-  background: rgba(9, 22, 19, 0.94) !important;
+  background: rgba(13, 19, 18, 0.94) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
 
@@ -111,13 +122,13 @@ html.dark .modal-card,
 html.dark .settings-panel,
 html.dark .upload-modal-card,
 html.dark .settings-card {
-  background: rgba(10, 24, 21, 0.95) !important;
+  background: rgba(14, 20, 19, 0.96) !important;
   backdrop-filter: blur(24px) !important;
   -webkit-backdrop-filter: blur(24px) !important;
   border-radius: 28px !important;
-  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.60),
+    0 24px 64px rgba(0, 0, 0, 0.65),
     0 8px 24px rgba(0, 0, 0, 0.35) !important;
 }
 
@@ -130,7 +141,7 @@ html.dark .settings-card {
   border: 1px solid rgba(19,117,111,0.16) !important;
   box-shadow: 0 20px 60px rgba(14,59,53,0.20), inset 0 1px 0 rgba(255,255,255,0.80) !important;
 }
-html.dark .notif-panel, html.dark .profile-menu { background: rgba(10,24,21,0.95) !important; border: 1px solid rgba(255,255,255,0.07) !important; box-shadow: 0 16px 40px rgba(0,0,0,0.50) !important; }
+html.dark .notif-panel, html.dark .profile-menu { background: rgba(16,23,22,0.96) !important; border: 1px solid rgba(255,255,255,0.08) !important; box-shadow: 0 16px 40px rgba(0,0,0,0.50) !important; }
 .notif-item:hover { background: rgba(19,117,111,0.06) !important; }
 .profile-menu-item:hover { background: rgba(19,117,111,0.06) !important; }
 
@@ -151,16 +162,16 @@ html.dark .notif-panel, html.dark .profile-menu { background: rgba(10,24,21,0.95
   transform: translateY(-4px) !important;
 }
 html.dark .stat-card {
-  background: rgba(12,28,25,0.90) !important;
+  background: rgba(16, 23, 22, 0.92) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.30) !important;
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
 html.dark .stat-card:hover {
-  background: rgba(16,36,32,0.96) !important;
-  border-color: rgba(45,212,191,0.22) !important;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.45) !important;
+  background: rgba(22, 32, 30, 0.96) !important;
+  border-color: rgba(45, 212, 191, 0.22) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.50) !important;
   transform: translateY(-3px) !important;
 }
 
@@ -174,11 +185,11 @@ html.dark .stat-card:hover {
   border-radius: var(--r-lg) !important;
 }
 html.dark .content-card, html.dark .card {
-  background: rgba(12,28,25,0.90) !important;
+  background: rgba(16, 23, 22, 0.92) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.30) !important;
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
 
 /* 9. WALLET CARDS */
@@ -190,11 +201,11 @@ html.dark .content-card, html.dark .card {
   box-shadow: 0 10px 38px rgba(14,59,53,0.09), inset 0 1.5px 0 rgba(255,255,255,0.95) !important;
 }
 html.dark .shuttlers-balance-card, html.dark .shuttlers-bank-card, html.dark .wallet-history-section {
-  background: rgba(12,28,25,0.90) !important;
+  background: rgba(16, 23, 22, 0.92) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.32) !important;
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35) !important;
 }
 
 /* 10. GIG CARDS */
@@ -213,16 +224,16 @@ html.dark .shuttlers-balance-card, html.dark .shuttlers-bank-card, html.dark .wa
   transform: translateY(-5px) !important;
 }
 html.dark .gig-card {
-  background: rgba(12,28,25,0.90) !important;
+  background: rgba(16, 23, 22, 0.92) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.30) !important;
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
 html.dark .gig-card:hover {
-  background: rgba(16,36,32,0.96) !important;
-  border-color: rgba(45,212,191,0.22) !important;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.45) !important;
+  background: rgba(22, 32, 30, 0.96) !important;
+  border-color: rgba(45, 212, 191, 0.22) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.50) !important;
   transform: translateY(-3px) !important;
 }
 
@@ -241,15 +252,15 @@ html.dark .gig-card:hover {
   box-shadow: 0 10px 32px rgba(14,59,53,0.12) !important;
 }
 html.dark .project-row {
-  background: rgba(12,28,25,0.90) !important;
+  background: rgba(16, 23, 22, 0.92) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.075) !important;
 }
 html.dark .project-row:hover {
-  background: rgba(16,36,32,0.96) !important;
-  border-color: rgba(45,212,191,0.22) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
+  background: rgba(22, 32, 30, 0.96) !important;
+  border-color: rgba(45, 212, 191, 0.22) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
 }
 
 /* 12. LANDING ELEMENTS */
@@ -398,18 +409,19 @@ html.dark .sbal-badge { background: rgba(255,255,255,0.06) !important; border-co
 
 /* ── CSS Token Overrides on Root ── */
 html.dark {
-  --ink: #F1F5F9 !important;
-  --forest: #2DD4BF !important;
+  --ink: #F8FAFC !important;
+  --forest: #0E3B35 !important;
+  --forest-mid: #144e45 !important;
   --teal: #14B8A6 !important;
   --teal-mid: #2DD4BF !important;
   --teal-lt: rgba(45, 212, 191, 0.12) !important;
   --amber: #F59E0B !important;
   --amber-lt: rgba(245, 158, 11, 0.14) !important;
-  --slate: #94A3B8 !important;
-  --muted: #64748B !important;
-  --line: rgba(255, 255, 255, 0.07) !important;
-  --paper: #081614 !important;
-  --white: #0c1d1a !important;
+  --slate: #CBD5E1 !important;
+  --muted: #849694 !important;
+  --line: rgba(255, 255, 255, 0.075) !important;
+  --paper: #090d0c !important;
+  --white: #101716 !important;
 }
 
 /* ── Base Text & Headings ── */
@@ -642,9 +654,9 @@ html.dark [style*="background:var(--white)"]:not(.btn):not(.badge):not(.status-b
 html.dark [style*="background: var(--white)"]:not(.btn):not(.badge):not(.status-badge),
 html.dark [style*="background:var(--paper)"]:not(.btn):not(.badge):not(.status-badge),
 html.dark [style*="background: var(--paper)"]:not(.btn):not(.badge):not(.status-badge) {
-  background: rgba(12, 29, 26, 0.90) !important;
-  color: #E2E8F0 !important;
-  border-color: rgba(255, 255, 255, 0.06) !important;
+  background: rgba(16, 23, 22, 0.92) !important;
+  color: #CBD5E1 !important;
+  border-color: rgba(255, 255, 255, 0.075) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -671,13 +683,13 @@ html.dark [style*="background: var(--paper)"]:not(.btn):not(.badge):not(.status-
 html.dark .settings-panel,
 html.dark .modal-card,
 html.dark .upload-modal-card {
-  background: rgba(10, 24, 21, 0.95) !important;
+  background: rgba(14, 20, 19, 0.96) !important;
   backdrop-filter: blur(24px) !important;
   -webkit-backdrop-filter: blur(24px) !important;
   border-radius: 28px !important;
-  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.60),
+    0 24px 64px rgba(0, 0, 0, 0.65),
     0 8px 24px rgba(0, 0, 0, 0.35) !important;
 }
 
@@ -772,7 +784,7 @@ html.dark .modal-close:hover {
   transform: scale(1.08) !important;
 }
 
-/* â”€â”€ Mobile-First Responsive Overrides (Glass Layer) â”€â”€ */
+/* ── Mobile-First Responsive Overrides (Glass Layer) ── */
 @media (max-width: 639px) {
   .modal-overlay,
   .settings-backdrop {
@@ -785,8 +797,10 @@ html.dark .modal-close:hover {
   .settings-panel,
   .upload-modal-card,
   .settings-card {
-    width: 100vw !important;
-    max-width: 100vw !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
     max-height: 90vh !important;
     max-height: 90dvh !important;
     border-radius: 24px 24px 0 0 !important;
@@ -860,8 +874,8 @@ html.dark .modal-close:hover {
 }
 
 html.dark .liquid-glass-nav {
-  background: rgba(8, 22, 19, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(11, 16, 15, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 
     0 20px 48px rgba(0, 0, 0, 0.60),
     0 4px 14px rgba(0, 0, 0, 0.35);
