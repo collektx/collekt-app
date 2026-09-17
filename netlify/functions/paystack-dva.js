@@ -9,17 +9,17 @@ exports.handler = async (event) => {
     let owner_id, user_id, owner_type, email, first_name, last_name, phone, company_name, name, displayName;
 
     if (method === 'GET') {
-      owner_id = event.queryStringParameters?.owner_id || event.queryStringParameters?.user_id;
+      owner_id = event.queryStringParameters?.owner_id || event.queryStringParameters?.user_id || event.queryStringParameters?.userId || event.queryStringParameters?.ownerId;
     } else if (method === 'POST') {
       body = JSON.parse(event.body || '{}');
-      owner_id = body.owner_id || body.user_id;
-      user_id = body.user_id || owner_id;
-      owner_type = body.owner_type || 'professional';
+      owner_id = body.owner_id || body.user_id || body.ownerId || body.userId;
+      user_id = body.user_id || body.userId || owner_id;
+      owner_type = body.owner_type || body.ownerType || 'professional';
       email = body.email;
-      first_name = body.first_name;
-      last_name = body.last_name;
+      first_name = body.first_name || body.firstName;
+      last_name = body.last_name || body.lastName;
       phone = body.phone;
-      company_name = body.company_name;
+      company_name = body.company_name || body.companyName;
       name = body.name;
       displayName = body.displayName;
     } else {

@@ -17,8 +17,11 @@ exports.handler = async (event) => {
       email,
       payment_method = 'card',
       user_id,
+      userId,
       owner_id,
+      ownerId,
       owner_type = 'user',
+      ownerType,
       callback_url
     } = body;
 
@@ -40,7 +43,10 @@ exports.handler = async (event) => {
       };
     }
 
-    let effectiveOwnerId = owner_id || user_id;
+    let effectiveOwnerId = owner_id || ownerId || user_id || userId;
+    const effectiveOwnerType = owner_type || ownerType || 'user';
+    const effectiveUserId = user_id || userId || effectiveOwnerId;
+
     if (!effectiveOwnerId && cleanEmail) {
       const { data: prof } = await supabase.from('profiles').select('id').eq('email', cleanEmail).maybeSingle();
       if (prof) effectiveOwnerId = prof.id;
@@ -57,12 +63,12 @@ exports.handler = async (event) => {
     }
 
     // Role-based permission check for company wallets
-    if (owner_type === 'company' && user_id && user_id !== effectiveOwnerId) {
+    if (effectiveOwnerType === 'company' && effectiveUserId && effectiveUserId !== effectiveOwnerId) {
       const { data: membership } = await supabase
         .from('company_members')
         .select('role, status')
         .eq('company_id', effectiveOwnerId)
-        .eq('user_id', user_id)
+        .eq('user_id', effectiveUserId)
         .maybeSingle();
 
       if (!membership || membership.status !== 'active' || !['owner', 'admin', 'finance'].includes(membership.role)) {
@@ -75,19 +81,31 @@ exports.handler = async (event) => {
     }
 
     // Find or verify wallet exists
-    let { data: wallet } = await supabase
+    let wallet = null;
+    const { data: ownerWallet } = await supabase
       .from('wallets')
       .select('id, available_balance')
-      .or(`owner_id.eq.${effectiveOwnerId},user_id.eq.${effectiveOwnerId}`)
+      .eq('owner_id', effectiveOwnerId)
       .maybeSingle();
+
+    if (ownerWallet) {
+      wallet = ownerWallet;
+    } else {
+      const { data: userWallet } = await supabase
+        .from('wallets')
+        .select('id, available_balance')
+        .eq('user_id', effectiveOwnerId)
+        .maybeSingle();
+      wallet = userWallet;
+    }
 
     if (!wallet) {
       const { data: newWallet } = await supabase
         .from('wallets')
         .insert({
           owner_id: effectiveOwnerId,
-          user_id: user_id || effectiveOwnerId,
-          owner_type: owner_type,
+          user_id: effectiveUserId,
+          owner_type: effectiveOwnerType,
           currency: 'NGN',
           available_balance: 0.00,
           balance: 0.00
