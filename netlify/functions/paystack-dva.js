@@ -1,10 +1,5 @@
-const { createClient } = require('@supabase/supabase-js');
+const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL || 'https://ozzwvzxugfaveggeznfa.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 exports.handler = async (event) => {
   const method = event.httpMethod;

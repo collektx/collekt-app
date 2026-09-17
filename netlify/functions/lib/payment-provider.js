@@ -268,10 +268,158 @@ class PaystackProvider extends PaymentProvider {
   }
 }
 
+class OpayProvider extends PaymentProvider {
+  constructor(merchantId, publicKey, secretKey) {
+    super();
+    this.merchantId = merchantId || process.env.OPAY_MERCHANT_ID || '';
+    this.publicKey = publicKey || process.env.OPAY_PUBLIC_KEY || '';
+    this.secretKey = secretKey || process.env.OPAY_SECRET_KEY || '';
+    this.environment = process.env.OPAY_ENVIRONMENT || (this.publicKey.startsWith('OPAYPUB') ? 'live' : 'test');
+    this.baseUrl = this.environment === 'live' 
+      ? 'https://liveapi.opaycheckout.com/api/v1/international'
+      : 'https://testapi.opaycheckout.com/api/v1/international';
+  }
+
+  _request(method, endpoint, data = null) {
+    return new Promise((resolve, reject) => {
+      const url = new URL(this.baseUrl + endpoint);
+      const postData = data ? JSON.stringify(data) : '';
+
+      const options = {
+        hostname: url.hostname,
+        port: 443,
+        path: url.pathname + url.search,
+        method: method,
+        headers: {
+          'Authorization': `Bearer ${this.publicKey || this.secretKey}`,
+          'MerchantId': this.merchantId,
+          'Content-Type': 'application/json',
+          'User-Agent': 'Collekt-Fintech/1.0'
+        }
+      };
+
+      if (data && (method === 'POST' || method === 'PUT')) {
+        options.headers['Content-Length'] = Buffer.byteLength(postData);
+      }
+
+      const req = https.request(options, (res) => {
+        let responseBody = '';
+        res.on('data', chunk => responseBody += chunk);
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(responseBody);
+            resolve({ statusCode: res.statusCode, body: parsed });
+          } catch (e) {
+            resolve({ statusCode: res.statusCode, body: { code: '500', message: responseBody } });
+          }
+        });
+      });
+
+      req.on('error', (err) => reject(err));
+      req.setTimeout(15000, () => {
+        req.destroy(new Error('OPay request timed out'));
+      });
+
+      if (postData) req.write(postData);
+      req.end();
+    });
+  }
+
+  verifyWebhookSignature(signatureOrHeaders, rawBody) {
+    const signature = (typeof signatureOrHeaders === 'string')
+      ? signatureOrHeaders
+      : (signatureOrHeaders?.['sha512'] || signatureOrHeaders?.['x-opay-signature'] || signatureOrHeaders?.['X-Opay-Signature'] || '');
+    if (!signature || !this.secretKey) return false;
+
+    const hash = crypto
+      .createHmac('sha512', this.secretKey)
+      .update(rawBody || '')
+      .digest('hex');
+
+    return hash === signature;
+  }
+
+  async initializePayment({ amount, email, reference, callback_url, return_url, metadata = {} }) {
+    if (!amount || amount <= 0) throw new Error('Invalid payment amount');
+    const amountInKobo = Math.round(Number(amount) * 100);
+
+    const payload = {
+      country: 'NG',
+      reference: reference,
+      amount: String(amountInKobo),
+      currency: 'NGN',
+      returnUrl: return_url || callback_url,
+      callbackUrl: callback_url,
+      userEmail: email?.trim().toLowerCase() || 'customer@collekt.ng',
+      payMethod: 'opayWallet',
+      product: {
+        name: 'Collekt Wallet Deposit',
+        description: 'Funding Collekt Multi-User Financial Wallet'
+      },
+      metadata: metadata
+    };
+
+    const res = await this._request('POST', '/cashier/create', payload);
+    if (!res.body || (res.body.code !== '00000' && res.body.code !== '0')) {
+      if (this.environment === 'test' || !this.publicKey) {
+        return {
+          authorization_url: `https://checkout.opayweb.com/simulate/${reference}?amount=${amountInKobo}`,
+          access_code: `opay_sim_${reference}`,
+          reference: reference
+        };
+      }
+      throw new Error(res.body?.message || 'Failed to initialize OPay transaction');
+    }
+
+    return {
+      authorization_url: res.body.data.cashierUrl || res.body.data.authorization_url,
+      access_code: res.body.data.orderNo || res.body.data.reference,
+      reference: reference
+    };
+  }
+
+  async verifyPayment(reference) {
+    if (!reference) throw new Error('Transaction reference is required');
+    const res = await this._request('POST', '/cashier/status', {
+      country: 'NG',
+      reference: reference
+    });
+
+    if (!res.body || (res.body.code !== '00000' && res.body.code !== '0')) {
+      return {
+        verified: false,
+        status: 'failed',
+        message: res.body?.message || 'OPay status inquiry failed',
+        data: null
+      };
+    }
+
+    const data = res.body.data;
+    const isSuccess = data.status === 'SUCCESS' || data.status === 'success';
+    const amountInNaira = Number(data.amount) / 100;
+
+    return {
+      verified: isSuccess,
+      status: isSuccess ? 'successful' : (data.status === 'INITIAL' ? 'pending' : 'failed'),
+      amount: amountInNaira,
+      currency: data.currency || 'NGN',
+      channel: 'opay',
+      reference: reference,
+      gateway_transaction_id: String(data.orderNo || reference),
+      paid_at: data.paidAt || new Date().toISOString(),
+      raw: data
+    };
+  }
+}
+
 // Factory export
 function getPaymentProvider(providerName = 'paystack') {
-  if (providerName.toLowerCase() === 'paystack') {
+  const norm = String(providerName || '').toLowerCase();
+  if (norm === 'paystack') {
     return new PaystackProvider();
+  }
+  if (norm === 'opay') {
+    return new OpayProvider();
   }
   throw new Error(`Unsupported payment provider: ${providerName}`);
 }
@@ -279,5 +427,6 @@ function getPaymentProvider(providerName = 'paystack') {
 module.exports = {
   PaymentProvider,
   PaystackProvider,
+  OpayProvider,
   getPaymentProvider
 };

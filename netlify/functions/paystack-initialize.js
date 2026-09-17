@@ -1,10 +1,5 @@
-const { createClient } = require('@supabase/supabase-js');
+const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL || 'https://ozzwvzxugfaveggeznfa.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -127,7 +122,7 @@ exports.handler = async (event) => {
         user_id: effectiveOwnerId,
         wallet_id: wallet?.id,
         reference: reference,
-        gateway: 'paystack',
+        gateway: (body.gateway || (payment_method === 'opay' && process.env.OPAY_PUBLIC_KEY ? 'opay' : 'paystack')),
         transaction_type: 'wallet_funding',
         payment_method: payment_method,
         amount: numAmount,
@@ -149,8 +144,9 @@ exports.handler = async (event) => {
       };
     }
 
-    // Initialize Paystack checkout session
-    const provider = getPaymentProvider('paystack');
+    // Initialize checkout session via chosen provider (Paystack / OPay)
+    const selectedGateway = body.gateway || (payment_method === 'opay' && process.env.OPAY_PUBLIC_KEY ? 'opay' : 'paystack');
+    const provider = getPaymentProvider(selectedGateway);
     const returnUrl = callback_url || `${event.headers?.origin || event.headers?.Origin || 'https://collektng.com'}/payment-result.html`;
 
     const initResult = await provider.initializePayment({
@@ -158,13 +154,15 @@ exports.handler = async (event) => {
       email: cleanEmail,
       reference: reference,
       callback_url: returnUrl,
+      return_url: returnUrl,
       channels: channels,
       metadata: {
         user_id: user_id || effectiveOwnerId,
         owner_id: effectiveOwnerId,
         owner_type: owner_type,
         wallet_id: wallet?.id,
-        payment_method: payment_method
+        payment_method: payment_method,
+        gateway: selectedGateway
       }
     });
 

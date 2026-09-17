@@ -1,10 +1,5 @@
 const crypto = require('crypto');
-const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL || 'https://ozzwvzxugfaveggeznfa.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const { supabase } = require('./lib/supabase-client');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
