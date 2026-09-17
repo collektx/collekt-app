@@ -5,12 +5,13 @@ exports.handler = async (event) => {
   const method = event.httpMethod;
 
   try {
-    let owner_id, user_id, owner_type, email, first_name, last_name, phone, company_name;
+    let body = {};
+    let owner_id, user_id, owner_type, email, first_name, last_name, phone, company_name, name, displayName;
 
     if (method === 'GET') {
       owner_id = event.queryStringParameters?.owner_id || event.queryStringParameters?.user_id;
     } else if (method === 'POST') {
-      const body = JSON.parse(event.body || '{}');
+      body = JSON.parse(event.body || '{}');
       owner_id = body.owner_id || body.user_id;
       user_id = body.user_id || owner_id;
       owner_type = body.owner_type || 'professional';
@@ -19,6 +20,8 @@ exports.handler = async (event) => {
       last_name = body.last_name;
       phone = body.phone;
       company_name = body.company_name;
+      name = body.name;
+      displayName = body.displayName;
     } else {
       return {
         statusCode: 405,
@@ -52,6 +55,17 @@ exports.handler = async (event) => {
       .maybeSingle();
 
     if (existingDva) {
+      let finalName = existingDva.account_name || '';
+      if (!finalName || finalName.includes('COLLEKT MEMBER') || finalName.includes('COLLEKT / MEMBER') || finalName.trim() === 'COLLEKT /' || finalName.trim() === 'COLLEKT') {
+        // Fetch profile to get real name and auto-repair database row
+        const { data: prof } = await supabase.from('profiles').select('name, company_name, first_name, other_name, last_name, email').eq('id', effectiveOwnerId).maybeSingle();
+        let repairName = prof?.company_name || prof?.name || [prof?.first_name, prof?.other_name, prof?.last_name].filter(Boolean).join(' ');
+        if (!repairName && prof?.email) repairName = prof.email.split('@')[0].replace(/[._-]/g, ' ');
+        if (!repairName) repairName = 'ACCOUNT HOLDER';
+        finalName = `COLLEKT / ${repairName.toUpperCase()}`;
+        await supabase.from('virtual_accounts').update({ account_name: finalName }).eq('id', existingDva.id);
+      }
+
       return {
         statusCode: 200,
         headers: {
@@ -63,7 +77,7 @@ exports.handler = async (event) => {
           status: 'success',
           virtual_account: {
             account_number: existingDva.account_number,
-            account_name: existingDva.account_name,
+            account_name: finalName,
             bank_name: existingDva.bank_name,
             bank_code: existingDva.bank_code,
             currency: existingDva.currency || 'NGN',
@@ -91,10 +105,21 @@ exports.handler = async (event) => {
       .maybeSingle();
 
     const customerEmail = (email || profile?.email || '').trim().toLowerCase();
-    const customerFirstName = first_name || profile?.first_name || (profile?.name ? profile.name.split(' ')[0] : 'Collekt');
-    const customerLastName = last_name || profile?.last_name || (profile?.name ? profile.name.split(' ').slice(1).join(' ') : 'Member');
+    
+    // Resolve authentic personal or company name (Never fallback to generic 'Collekt Member')
+    let rawFullName = (body.name || body.displayName || company_name || profile?.company_name || profile?.name || '').trim();
+    if (!rawFullName || rawFullName.toLowerCase() === 'collekt member' || rawFullName.toLowerCase() === 'user' || rawFullName.toLowerCase() === 'guest') {
+      rawFullName = [profile?.first_name || first_name, profile?.other_name, profile?.last_name || last_name].filter(Boolean).join(' ').trim();
+    }
+    if (!rawFullName && customerEmail) {
+      rawFullName = customerEmail.split('@')[0].replace(/[._-]/g, ' ');
+    }
+    if (!rawFullName) rawFullName = 'Account Holder';
+
+    const customerFirstName = first_name || profile?.first_name || rawFullName.split(' ')[0] || 'Member';
+    const customerLastName = last_name || profile?.last_name || rawFullName.split(' ').slice(1).join(' ') || 'Account';
     const customerPhone = phone || profile?.phone || '';
-    const preferredName = company_name || profile?.company_name || profile?.name || `${customerFirstName} ${customerLastName}`;
+    const preferredName = (company_name || profile?.company_name || rawFullName).toUpperCase();
 
     if (!customerEmail) {
       return {
@@ -116,13 +141,17 @@ exports.handler = async (event) => {
         phone: customerPhone,
         preferred_bank: 'wema-bank'
       });
+      // Ensure returned DVA has the platform prefix + full user name
+      if (!dvaResult.account_name || dvaResult.account_name.includes('COLLEKT MEMBER')) {
+        dvaResult.account_name = `COLLEKT / ${preferredName}`;
+      }
     } catch (apiErr) {
       console.warn('Paystack DVA generation notice:', apiErr.message);
       // Fallback/Simulated DVA generation for test environments or pending Paystack Go-Live
       const simulatedAccountNo = '0' + Math.floor(100000000 + Math.random() * 900000000);
       dvaResult = {
         account_number: simulatedAccountNo,
-        account_name: `COLLEKT / ${preferredName.toUpperCase()}`,
+        account_name: `COLLEKT / ${preferredName}`,
         bank_name: 'Wema Bank',
         bank_code: '035',
         currency: 'NGN',

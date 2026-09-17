@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=54.0">
-<link rel="stylesheet" href="shared.css?v=54.0">
-<link rel="stylesheet" href="glass.css?v=54.0">
+<link rel="stylesheet" href="style.css?v=55.0">
+<link rel="stylesheet" href="shared.css?v=55.0">
+<link rel="stylesheet" href="glass.css?v=55.0">
 
 <style>
   html, body {
@@ -594,9 +594,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=54.0"></script>
-<script src="app.js?v=54.0"></script>
-<script src="collekt-ai.js?v=54.0"></script>
+<script src="supabase.js?v=55.0"></script>
+<script src="app.js?v=55.0"></script>
+<script src="collekt-ai.js?v=55.0"></script>
 <script>
   requireCompany();
   
@@ -1218,7 +1218,12 @@
     // 2. Dedicated Virtual Account
     let dvaAcct = wallet.account_number || user.dva_account || '';
     let dvaBank = wallet.bank_name || user.dva_bank || 'Wema Bank';
-    let dvaName = wallet.account_name || user.dva_name || `COLLEKT / ${user.name || 'COMPANY'}`;
+    let realCoName = user.company_name || user.name || (typeof getDisplayName === 'function' ? getDisplayName(user) : 'COMPANY');
+    let dvaName = wallet.account_name || user.dva_name || `COLLEKT / ${realCoName.toUpperCase()}`;
+
+    if (dvaName.includes('COLLEKT MEMBER') || dvaName.includes('COLLEKT / MEMBER') || dvaName.trim() === 'COLLEKT /' || dvaName.trim() === 'COLLEKT') {
+      dvaName = `COLLEKT / ${realCoName.toUpperCase()}`;
+    }
 
     if (!dvaAcct && typeof fetchDedicatedVirtualAccount === 'function' && user.id) {
       try {
@@ -1226,7 +1231,7 @@
         if (res && res.success && res.data) {
           dvaAcct = res.data.account_number;
           dvaBank = res.data.bank_name;
-          dvaName = res.data.account_name;
+          dvaName = res.data.account_name || `COLLEKT / ${realCoName.toUpperCase()}`;
         }
       } catch(e){}
     }
@@ -1458,7 +1463,7 @@
   </div>
 </div>
 
-<script src="settings-popup.js?v=54.0"></script>
+<script src="settings-popup.js?v=55.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>

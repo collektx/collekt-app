@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=54.0">
-<link rel="stylesheet" href="shared.css?v=54.0">
-<link rel="stylesheet" href="glass.css?v=54.0">
+<link rel="stylesheet" href="style.css?v=55.0">
+<link rel="stylesheet" href="shared.css?v=55.0">
+<link rel="stylesheet" href="glass.css?v=55.0">
 
 <style>
   body { background: var(--paper); }
@@ -635,10 +635,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=54.0"></script>
-<script src="app.js?v=54.0"></script>
-<script src="collekt-ai.js?v=54.0"></script>
-<script src="settings-popup.js?v=54.0"></script>
+<script src="supabase.js?v=55.0"></script>
+<script src="app.js?v=55.0"></script>
+<script src="collekt-ai.js?v=55.0"></script>
+<script src="settings-popup.js?v=55.0"></script>
 <script>
   let isHideBalance = false;
   let rawBalance = 0;
@@ -1011,7 +1011,15 @@
 
     const user = getUser() || {};
     const ownerId = user.id || user.owner_id;
-    const displayName = user.company_name || user.name || 'COLLEKT MEMBER';
+    
+    // Resolve authentic personal or company name
+    let displayName = '';
+    if (typeof getDisplayName === 'function') {
+      displayName = getDisplayName(user);
+    }
+    if (!displayName || displayName === 'Collekt Member' || displayName === 'User' || displayName === 'Guest') {
+      displayName = user.company_name || user.name || [user.first_name, user.other_name, user.last_name].filter(Boolean).join(' ') || (user.email ? user.email.split('@')[0] : 'Account Holder');
+    }
 
     container.innerHTML = `
       <div style="background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:20px; text-align:center;">
@@ -1026,14 +1034,16 @@
       dva = res.data;
       activeDvaAccount = dva;
     } else {
-      // Auto-provision if eligible
+      // Auto-provision if eligible with full authentic name
       const provRes = await provisionDedicatedVirtualAccount({
         owner_id: ownerId,
         user_id: user.id,
         owner_type: user.role === 'company' ? 'company' : 'professional',
         email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
+        name: displayName,
+        displayName: displayName,
+        first_name: user.first_name || (user.name ? user.name.split(' ')[0] : ''),
+        last_name: user.last_name || (user.name ? user.name.split(' ').slice(1).join(' ') : ''),
         company_name: user.company_name
       });
       if (provRes && provRes.success && provRes.data) {
@@ -1044,7 +1054,13 @@
 
     if (dva && dva.account_number) {
       const acctNo = escapeHTML(String(dva.account_number).trim());
-      const acctName = escapeHTML(dva.account_name || `COLLEKT / ${displayName.toUpperCase()}`);
+      
+      // Enforce: Always display "COLLEKT / <FULL_USER_NAME_OR_COMPANY>"
+      let rawAcctName = dva.account_name || '';
+      if (!rawAcctName || rawAcctName.includes('COLLEKT MEMBER') || rawAcctName.includes('COLLEKT / MEMBER') || rawAcctName.trim() === 'COLLEKT /' || rawAcctName.trim() === 'COLLEKT') {
+        rawAcctName = `COLLEKT / ${displayName.toUpperCase()}`;
+      }
+      const acctName = escapeHTML(rawAcctName);
       const bankName = escapeHTML(dva.bank_name || 'Wema Bank');
 
       container.innerHTML = `
@@ -1727,13 +1743,93 @@
     showToast('📊 Statement report downloaded successfully!');
   };
 
+  window.shareDvaDetails = function() {
+    const user = getUser() || {};
+    let displayName = '';
+    if (typeof getDisplayName === 'function') {
+      displayName = getDisplayName(user);
+    }
+    if (!displayName || displayName === 'Collekt Member' || displayName === 'User' || displayName === 'Guest') {
+      displayName = user.company_name || user.name || [user.first_name, user.other_name, user.last_name].filter(Boolean).join(' ') || 'ACCOUNT HOLDER';
+    }
+    const acctEl = document.getElementById('virtualAccountNo') || document.getElementById('fundModalAccount');
+    const acctNo = acctEl ? acctEl.textContent.trim() : '';
+    const bankEl = document.querySelector('.sbank-val span') || document.getElementById('proDvaBank');
+    const bankName = bankEl ? bankEl.textContent.replace('🏛️', '').trim() : 'Wema Bank';
+    const shareText = `Pay into my Collekt Virtual Account:\nBank: ${bankName}\nAccount No: ${acctNo}\nAccount Name: COLLEKT / ${displayName.toUpperCase()}`;
+
+    if (navigator.share) {
+      navigator.share({ title: 'Collekt Virtual Account Details', text: shareText }).catch(() => {});
+    } else {
+      copyToClipboard(shareText, 'Account details copied to clipboard for sharing!');
+    }
+  };
+
+  // ── WITHDRAWAL ENGINE (LOCKED TO NOVA COMMERCIAL BANK) ─────
+  window.openWithdrawModal = function() {
+    updateBalanceUI();
+    const user = getUser() || {};
+    const isLinked = typeof isUserNovaLinked === 'function' ? isUserNovaLinked(user) : Boolean(user.wallet?.nova_linked && user.wallet?.nova_account_number && String(user.wallet.nova_account_number).trim().length === 10);
+    const novaAcct = isLinked ? String(user.wallet.nova_account_number).trim() : '';
+    const novaName = isLinked ? (user.wallet.nova_account_name || user.name || '').toUpperCase().replace('COLLEKT / ', '') : '';
+
+    const noticeEl = document.getElementById('withdrawModalNoticeContainer');
+    const formBodyEl = document.getElementById('withdrawModalFormBody');
+    const footerEl = document.getElementById('withdrawModalFooter');
+
+    if (!isLinked) {
+      if (noticeEl) {
+        noticeEl.style.display = 'block';
+        noticeEl.innerHTML = `
+          <div style="background:rgba(212,146,11,0.1); border:1.5px solid rgba(212,146,11,0.3); border-radius:14px; padding:18px; text-align:center;">
+            <div style="font-size:28px; margin-bottom:8px;">🔒</div>
+            <h4 style="font-size:16px; font-weight:900; color:var(--ink); margin-bottom:6px;">Link Commercial Bank Account</h4>
+            <p style="font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:16px;">
+              To protect milestone escrows and comply with CBN/AML regulations, withdrawals can only be disbursed directly into your registered settlement account.
+            </p>
+            <button type="button" class="btn btn-primary" onclick="closeWithdrawModal(); openNovaLinkModal();" style="font-weight:800; width:100%; justify-content:center;">
+              🏛️ Link Settlement Bank Account &rarr;
+            </button>
+          </div>
+        `;
+      }
+      if (formBodyEl) formBodyEl.style.display = 'none';
+      if (footerEl) footerEl.style.display = 'none';
+    } else {
+      if (noticeEl) noticeEl.style.display = 'none';
+      if (formBodyEl) formBodyEl.style.display = 'block';
+      if (footerEl) footerEl.style.display = 'flex';
+
+      const acctInput = document.getElementById('withdrawAccount');
+      const bankInput = document.getElementById('withdrawBank');
+      const nameInput = document.getElementById('withdrawAccountName');
+      const hiddenBank = document.getElementById('withdrawBankNameHidden');
+
+      if (acctInput) acctInput.value = novaAcct;
+      if (bankInput) bankInput.value = 'NOVA Commercial Bank';
+      if (nameInput) nameInput.value = novaName;
+      if (hiddenBank) hiddenBank.value = 'NOVA Commercial Bank';
+    }
+
+    const modal = document.getElementById('withdrawModal');
+    if (modal) modal.classList.add('active');
+  };
+
   async function renderVirtualBankDetails(wallet) {
     const cardEl = document.getElementById('shuttlersBankCard');
     if (!cardEl) return;
     
     const user = getUser() || {};
     const ownerId = user.id || user.owner_id;
-    const displayName = user.company_name || user.name || 'MEMBER';
+    
+    // Resolve authentic personal or company name
+    let displayName = '';
+    if (typeof getDisplayName === 'function') {
+      displayName = getDisplayName(user);
+    }
+    if (!displayName || displayName === 'Collekt Member' || displayName === 'User' || displayName === 'Guest') {
+      displayName = user.company_name || user.name || [user.first_name, user.other_name, user.last_name].filter(Boolean).join(' ') || (user.email ? user.email.split('@')[0] : 'ACCOUNT HOLDER');
+    }
 
     // 1. Fetch DVA from database or active state
     let dva = activeDvaAccount;
@@ -1751,12 +1847,35 @@
           status: 'active'
         };
         activeDvaAccount = dva;
+      } else {
+        // Auto-provision with full authentic name
+        const provRes = await provisionDedicatedVirtualAccount({
+          owner_id: ownerId,
+          user_id: user.id,
+          owner_type: user.role === 'company' ? 'company' : 'professional',
+          email: user.email,
+          name: displayName,
+          displayName: displayName,
+          first_name: user.first_name || (user.name ? user.name.split(' ')[0] : ''),
+          last_name: user.last_name || (user.name ? user.name.split(' ').slice(1).join(' ') : ''),
+          company_name: user.company_name
+        });
+        if (provRes && provRes.success && provRes.data) {
+          dva = provRes.data;
+          activeDvaAccount = dva;
+        }
       }
     }
 
     if (dva && dva.account_number) {
       const acctNo = escapeHTML(String(dva.account_number).trim());
-      const acctName = escapeHTML((dva.account_name || `COLLEKT / ${displayName}`).toUpperCase());
+      
+      // Enforce: Always display "COLLEKT / <FULL_USER_NAME_OR_COMPANY>"
+      let rawAcctName = dva.account_name || '';
+      if (!rawAcctName || rawAcctName.includes('COLLEKT MEMBER') || rawAcctName.includes('COLLEKT / MEMBER') || rawAcctName.trim() === 'COLLEKT /' || rawAcctName.trim() === 'COLLEKT') {
+        rawAcctName = `COLLEKT / ${displayName.toUpperCase()}`;
+      }
+      const acctName = escapeHTML(rawAcctName.toUpperCase());
       const bankName = escapeHTML(dva.bank_name || 'Wema Bank');
 
       cardEl.innerHTML = `
