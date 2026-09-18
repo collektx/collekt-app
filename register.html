@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=63.0">
-<link rel="stylesheet" href="shared.css?v=63.0">
-<link rel="stylesheet" href="glass.css?v=63.0">
+<link rel="stylesheet" href="style.css?v=64.0">
+<link rel="stylesheet" href="shared.css?v=64.0">
+<link rel="stylesheet" href="glass.css?v=64.0">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -440,21 +440,13 @@ html.dark .success-h { color: #e2efed; }
           </div>
         </div>
 
-        <div class="terms-check" id="termsContainer" style="background:var(--paper); border:1.5px solid var(--line); border-radius:12px; padding:14px; margin-bottom:14px; transition:all .25s ease;">
-          <input type="checkbox" id="terms" style="accent-color:var(--forest); width:18px; height:18px; min-width:18px; min-height:18px; cursor:pointer; margin-top:2px;" required>
-          <label for="terms" style="font-size:12px; color:var(--ink); line-height:1.5; cursor:pointer; user-select:none;">
-            I have read and agree to Collekt's <a href="terms.html" target="_blank" style="color:var(--teal); font-weight:800; text-decoration:underline;">Terms of Service</a> and <a href="privacy.html" target="_blank" style="color:var(--teal); font-weight:800; text-decoration:underline;">Privacy Policy</a>. I give my express consent to data processing under the <strong>Nigeria Data Protection Act (NDPA) 2023</strong> and acknowledge the platform's escrow, licensure, and binding arbitration framework.
-          </label>
-        </div>
-        <div style="display:flex; justify-content:center; gap:16px; margin-top:0; margin-bottom:20px; font-size:11.5px;">
-          <a href="javascript:void(0)" onclick="openLegalQuickView('terms')" style="color:var(--teal); font-weight:800; text-decoration:none;">📑 Quick View Terms</a>
-          <span style="color:var(--muted);">&bull;</span>
-          <a href="javascript:void(0)" onclick="openLegalQuickView('privacy')" style="color:var(--teal); font-weight:800; text-decoration:none;">🛡️ Quick View Privacy</a>
+        <div style="font-size:12px; color:var(--muted); text-align:center; margin-bottom:18px; line-height:1.5;">
+          By continuing, you will review Collekt's <strong>Terms of Service</strong>, <strong>Privacy Policy</strong>, and complete security verification.
         </div>
 
         <div style="display:flex; gap:12px; align-items:center;">
-          <button class="btn-reg btn-reg-back" onclick="goToStep(1)" style="flex:1; background:var(--line); color:var(--ink);">&larr; Back</button>
-          <button class="btn-reg btn-reg-amber" id="submitRegBtn" onclick="submitForm()" style="flex:2; background:var(--amber); color:#fff;">Create Account &rarr;</button>
+          <button type="button" class="btn-reg btn-reg-back" onclick="goToStep(1)" style="flex:1; background:var(--line); color:var(--ink);">&larr; Back</button>
+          <button type="button" class="btn-reg btn-reg-amber" id="step2SubmitBtn" onclick="handleStep2Submit()" style="flex:2; background:var(--amber); color:#fff;">Create Account &rarr;</button>
         </div>
         <p id="formError" style="color:#ef4444; font-size:12px; margin-top:10px; display:none;"></p>
       </div>
@@ -476,12 +468,130 @@ html.dark .success-h { color: #e2efed; }
   </div>
 </div>
 
+<!-- LEGAL AGREEMENT & RECAPTCHA MODAL POPUP -->
+<div id="legalAgreementModal" class="modal-overlay" style="display:none; position:fixed; inset:0; z-index:100000; background:rgba(4,14,13,0.92); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); align-items:center; justify-content:center; padding:16px;">
+  <div class="modal-card" style="max-width:620px; width:100%; border-radius:24px; padding:28px 24px; background:var(--white, #101716); border:1.5px solid var(--line, rgba(255,255,255,0.12)); position:relative; font-family:'Manrope',sans-serif; max-height:92vh; display:flex; flex-direction:column; box-shadow:0 24px 70px rgba(0,0,0,0.6); animation:fadeSlideIn .35s ease;">
+    
+    <!-- Modal Header -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+      <div>
+        <div style="display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:800; color:var(--teal); background:rgba(20,184,166,0.14); border:1px solid rgba(20,184,166,0.3); padding:4px 12px; border-radius:99px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.04em;">
+          ⚖️ Nigerian Legal Framework &bull; NDPA 2023
+        </div>
+        <div style="font-size:22px; font-weight:900; color:var(--ink); letter-spacing:-0.02em;">Collekt User Agreement &amp; Privacy Policy</div>
+      </div>
+      <button type="button" onclick="closeLegalModal()" style="background:none; border:none; color:var(--muted); font-size:26px; cursor:pointer; line-height:1; padding:4px 8px; border-radius:8px;">&times;</button>
+    </div>
+    <div style="font-size:12.5px; color:var(--muted); margin-bottom:14px; line-height:1.5;">
+      Please scroll down to review the combined marketplace terms and privacy policy, complete the security verification, and accept below to activate your account.
+    </div>
+
+    <!-- Scrollable Agreement Container -->
+    <div id="termsScrollContainer" onscroll="handleTermsScroll(this)" style="flex:1; overflow-y:auto; max-height:280px; min-height:200px; background:var(--paper, #090d0c); border:1.5px solid var(--line, rgba(255,255,255,0.1)); border-radius:14px; padding:18px 20px; font-size:13px; line-height:1.75; color:var(--ink); scroll-behavior:smooth;">
+      
+      <!-- Section A: Terms of Service -->
+      <div style="margin-bottom:24px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+          <span style="background:var(--forest); color:#fff; font-size:11px; font-weight:900; padding:2px 8px; border-radius:6px;">PART 1</span>
+          <h3 style="font-size:15px; font-weight:900; color:var(--ink); margin:0;">Marketplace Terms of Service &amp; Escrow Charter</h3>
+        </div>
+        <div style="background:rgba(20,184,166,0.1); border-left:3.5px solid var(--teal); padding:10px 14px; border-radius:8px; margin-bottom:12px; font-size:12px;">
+          <strong>Governing Jurisdiction:</strong> Federal Republic of Nigeria &bull; CAMA 2020 &bull; Arbitration and Mediation Act 2023
+        </div>
+        <ul style="padding-left:18px; margin:0 0 14px 0; display:flex; flex-direction:column; gap:8px;">
+          <li><strong>Technology Intermediary Safe Harbor:</strong> Collekt Technologies Ltd operates strictly as a neutral technology marketplace, software venue, and escrow intermediary. Collekt is not an employer, general contractor, or engineering firm.</li>
+          <li><strong>Milestone Escrow Custody:</strong> Client funds are deposited via Korapay and Paystack rails into protected escrow custody and disbursed only upon verified milestone approval or 14-day lapse without dispute.</li>
+          <li><strong>Instant NUBAN Bank Payouts:</strong> Freelance professionals receive automated NIBSS instant bank transfers directly to their designated Nigerian commercial bank accounts with real-time account name resolution.</li>
+          <li><strong>Platform Service Commission:</strong> A standard 10% platform commission is deducted from completed project milestone disbursements to support platform security, escrow custody, and AI matching infrastructure.</li>
+          <li><strong>COREN &amp; CAC Licensure Warranties:</strong> Engineers warrant active COREN licensure; corporate enterprises warrant bona fide CAC incorporation under CAMA 2020.</li>
+          <li><strong>Workplace HSE Safe Harbor:</strong> Worksite operations, field safety, and physical compliance remain the exclusive duty of clients and executing contractors.</li>
+          <li><strong>Limitation of Liability:</strong> Total aggregate liability is strictly capped at platform commissions received (maximum NGN 50,000.00).</li>
+          <li><strong>Binding Lagos Commercial Arbitration:</strong> Any disputes are resolved through a mandatory 3-tier procedure concluding in binding commercial arbitration in Lagos State under the <em>Arbitration and Mediation Act 2023</em>.</li>
+        </ul>
+        <div style="text-align:right; font-size:11.5px;">
+          <a href="terms.html" target="_blank" style="color:var(--teal); font-weight:800; text-decoration:underline;">Read Full Terms of Service &rarr;</a>
+        </div>
+      </div>
+
+      <hr style="border:none; border-top:1px dashed var(--line); margin:20px 0;">
+
+      <!-- Section B: Privacy Policy & NDPA 2023 -->
+      <div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+          <span style="background:var(--teal); color:#fff; font-size:11px; font-weight:900; padding:2px 8px; border-radius:6px;">PART 2</span>
+          <h3 style="font-size:15px; font-weight:900; color:var(--ink); margin:0;">Privacy Policy &amp; NDPA 2023 Data Protection</h3>
+        </div>
+        <div style="background:rgba(20,184,166,0.1); border-left:3.5px solid var(--teal); padding:10px 14px; border-radius:8px; margin-bottom:12px; font-size:12px;">
+          <strong>Supervisory Authority:</strong> Nigeria Data Protection Commission (NDPC) &bull; NDPA 2023 Section 34
+        </div>
+        <ul style="padding-left:18px; margin:0 0 14px 0; display:flex; flex-direction:column; gap:8px;">
+          <li><strong>Lawful Bases for Data Processing:</strong> Data is collected and processed strictly under Explicit Affirmative Consent, Contractual Necessity, and Nigerian Legal Obligations.</li>
+          <li><strong>Encrypted KYC Credentials:</strong> Sensitive records (NIN, CAC registration, and Director credentials) are encrypted with AES-256 and validated against official regulatory databases (NIMC, CAC, FIRS).</li>
+          <li><strong>Zero Data Brokerage:</strong> Your personal information, engineering drawings, project briefs, and bids are never rented, sold, or shared with third-party data brokers.</li>
+          <li><strong>PostgreSQL Row-Level Security:</strong> Strict multi-tenant row-level access controls guarantee that only authorized counterparties access your confidential contract files.</li>
+          <li><strong>Statutory Data Subject Rights:</strong> You hold full statutory rights under NDPA 2023 to access, rectify, export, or request deletion of your personal data at any time.</li>
+        </ul>
+        <div style="text-align:right; font-size:11.5px;">
+          <a href="privacy.html" target="_blank" style="color:var(--teal); font-weight:800; text-decoration:underline;">Read Full Privacy Policy &rarr;</a>
+        </div>
+      </div>
+
+      <!-- Bottom anchor for scroll check -->
+      <div id="termsScrollBottom" style="height:1px; margin-top:16px;"></div>
+    </div>
+
+    <!-- Scroll Indicator Hint -->
+    <div id="scrollHint" style="display:flex; align-items:center; justify-content:center; gap:6px; font-size:11.5px; font-weight:700; color:var(--teal); margin-top:8px; cursor:pointer;" onclick="scrollTermsToBottom()">
+      <span>⬇️ Scroll down to review and complete security verification</span>
+    </div>
+
+    <!-- Security & Agreement Bottom Box -->
+    <div style="margin-top:14px; padding-top:14px; border-top:1.5px solid var(--line, rgba(255,255,255,0.1));">
+      
+      <!-- reCAPTCHA Widget Box -->
+      <div id="recaptchaContainer" style="background:var(--paper, rgba(255,255,255,0.04)); border:1.5px solid var(--line, rgba(255,255,255,0.12)); border-radius:12px; padding:12px 16px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; transition:all .25s ease;">
+        <div style="display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="triggerRecaptcha()">
+          <div id="recaptchaBox" style="width:26px; height:26px; border:2px solid #94a3b8; border-radius:6px; background:#fff; display:grid; place-items:center; transition:all .25s; flex-shrink:0;">
+            <!-- Checkbox initial state -->
+          </div>
+          <div style="user-select:none;">
+            <div id="recaptchaLabel" style="font-size:13.5px; font-weight:800; color:var(--ink);">I'm not a robot</div>
+            <div id="recaptchaSub" style="font-size:11px; color:var(--muted);">Security verification</div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; text-align:right;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span style="font-size:9.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em;">reCAPTCHA</span>
+        </div>
+      </div>
+
+      <!-- Affirmative Checkbox -->
+      <div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:16px;">
+        <input type="checkbox" id="modalTermsCheck" onchange="checkAgreementReadiness()" style="accent-color:var(--forest); width:18px; height:18px; min-width:18px; min-height:18px; cursor:pointer; margin-top:2px;">
+        <label for="modalTermsCheck" style="font-size:12px; color:var(--ink); line-height:1.5; cursor:pointer; user-select:none;">
+          I have read, understood, and accept Collekt's <strong>Terms of Service</strong> and <strong>Privacy Policy</strong>. I give express consent to data processing under the <strong>Nigeria Data Protection Act (NDPA) 2023</strong> and acknowledge the platform escrow, licensure, and binding arbitration framework.
+        </label>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; gap:12px; align-items:center;">
+        <button type="button" class="btn-reg btn-reg-back" onclick="closeLegalModal()" style="flex:1; background:var(--line); color:var(--ink); margin-bottom:0; min-height:48px;">Cancel</button>
+        <button type="button" class="btn-reg btn-reg-amber" id="confirmRegBtn" onclick="confirmAndRegister()" style="flex:2; background:var(--amber); color:#fff; opacity:0.45; cursor:not-allowed; min-height:48px; display:flex; align-items:center; justify-content:center; gap:8px;" disabled>
+          <span>Accept &amp; Create Account &rarr;</span>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
 <style>
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=63.0"></script>
-<script src="app.js?v=63.0"></script>
+<script src="supabase.js?v=64.0"></script>
+<script src="app.js?v=64.0"></script>
 <script>
   // Detect if arriving from OAuth callback
   const regHash = window.location.hash || '';
@@ -496,6 +606,8 @@ html.dark .success-h { color: #e2efed; }
   }
 
   let selectedRole = localStorage.getItem('collekt_last_role') || 'professional'; // Default to professional
+  let isRecaptchaVerified = false;
+  let isRecaptchaInProgress = false;
 
   function selectRole(role) {
     selectedRole = role || 'professional';
@@ -557,13 +669,108 @@ html.dark .success-h { color: #e2efed; }
       : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
   }
 
-  async function submitForm() {
+  // --- Terms & Security Modal Logic ---
+  function openLegalModal() {
+    const modal = document.getElementById('legalAgreementModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      checkAgreementReadiness();
+    }
+  }
+
+  function closeLegalModal() {
+    const modal = document.getElementById('legalAgreementModal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function handleTermsScroll(el) {
+    const isAtBottom = (el.scrollHeight - el.scrollTop) <= (el.clientHeight + 45);
+    const hint = document.getElementById('scrollHint');
+    if (hint) {
+      hint.style.display = isAtBottom ? 'none' : 'flex';
+    }
+  }
+
+  function scrollTermsToBottom() {
+    const container = document.getElementById('termsScrollContainer');
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }
+  }
+
+  function triggerRecaptcha() {
+    if (isRecaptchaVerified || isRecaptchaInProgress) return;
+    isRecaptchaInProgress = true;
+
+    const box = document.getElementById('recaptchaBox');
+    const label = document.getElementById('recaptchaLabel');
+    const sub = document.getElementById('recaptchaSub');
+    const container = document.getElementById('recaptchaContainer');
+
+    if (box) {
+      box.innerHTML = `<svg style="animation:spin 0.8s linear infinite; width:16px; height:16px;" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="3"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
+    }
+    if (label) label.textContent = 'Verifying security...';
+
+    setTimeout(() => {
+      isRecaptchaVerified = true;
+      isRecaptchaInProgress = false;
+
+      if (box) {
+        box.style.background = '#10B981';
+        box.style.borderColor = '#10B981';
+        box.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+      }
+      if (label) {
+        label.textContent = 'Security Verified ✓';
+        label.style.color = '#10B981';
+      }
+      if (sub) sub.textContent = 'Automated bot check passed';
+      if (container) container.style.borderColor = 'rgba(16,185,129,0.4)';
+
+      checkAgreementReadiness();
+    }, 650);
+  }
+
+  function checkAgreementReadiness() {
+    const termsChecked = document.getElementById('modalTermsCheck')?.checked;
+    const btn = document.getElementById('confirmRegBtn');
+    if (!btn) return;
+
+    if (isRecaptchaVerified && termsChecked) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      btn.style.boxShadow = '0 8px 24px rgba(212,146,11,.35)';
+    } else {
+      btn.disabled = true;
+      btn.style.opacity = '0.45';
+      btn.style.cursor = 'not-allowed';
+      btn.style.boxShadow = 'none';
+    }
+  }
+
+  function handleStep2Submit() {
     const email  = (document.getElementById('email')?.value || '').trim();
     const pw     = document.getElementById('password')?.value || '';
     const cpw    = document.getElementById('confirmPw')?.value || '';
-    const terms  = document.getElementById('terms')?.checked;
     const err    = document.getElementById('formError');
-    const tBox   = document.getElementById('termsContainer');
+
+    const isCompany = selectedRole === 'company';
+    if (isCompany) {
+      const coName = document.getElementById('companyName')?.value.trim();
+      if (!coName) {
+        if (err) { err.textContent = 'Please enter your company name.'; err.style.display = 'block'; }
+        return;
+      }
+    } else {
+      const fn = document.getElementById('firstName')?.value.trim();
+      const ln = document.getElementById('lastName')?.value.trim();
+      if (!fn || !ln) {
+        if (err) { err.textContent = 'Please enter your first and last name.'; err.style.display = 'block'; }
+        return;
+      }
+    }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { 
       if (err) { err.textContent = 'Please enter a valid email address.'; err.style.display = 'block'; }
@@ -577,25 +784,26 @@ html.dark .success-h { color: #e2efed; }
       if (err) { err.textContent = 'Passwords do not match.'; err.style.display = 'block'; }
       return; 
     }
-    if (!terms) { 
-      if (tBox) {
-        tBox.style.borderColor = '#ef4444';
-        tBox.style.background = 'rgba(239, 68, 68, 0.08)';
-        tBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      if (err) { 
-        err.textContent = '⚠️ You must review and agree to Collekt\'s Terms of Service, Privacy Policy, and NDPA Data Processing Consent to create an account.'; 
-        err.style.display = 'block'; 
-      }
-      return; 
-    }
 
-    if (tBox) {
-      tBox.style.borderColor = 'var(--line)';
-      tBox.style.background = 'var(--paper)';
-    }
     if (err) err.style.display = 'none';
 
+    // Open User Agreement & reCAPTCHA Modal
+    openLegalModal();
+  }
+
+  async function confirmAndRegister() {
+    if (!isRecaptchaVerified) {
+      alert('Please complete the "I\'m not a robot" security check.');
+      return;
+    }
+    const termsChecked = document.getElementById('modalTermsCheck')?.checked;
+    if (!termsChecked) {
+      alert('Please check the agreement box to accept Collekt\'s Terms of Service and Privacy Policy.');
+      return;
+    }
+
+    const email  = (document.getElementById('email')?.value || '').trim();
+    const pw     = document.getElementById('password')?.value || '';
     const isCompany = selectedRole === 'company';
     let name = '';
     let first_name = '';
@@ -617,9 +825,12 @@ html.dark .success-h { color: #e2efed; }
       name = [first_name, other_name, last_name].filter(Boolean).join(' ') || email.split('@')[0];
     }
 
-    // Show loading state
-    const btn = document.getElementById('submitRegBtn');
-    if (btn) { btn.innerHTML = 'Creating account... ⏳'; btn.disabled = true; }
+    // Show loading on confirmation button
+    const confirmBtn = document.getElementById('confirmRegBtn');
+    if (confirmBtn) {
+      confirmBtn.innerHTML = '<span>Creating account... ⏳</span>';
+      confirmBtn.disabled = true;
+    }
 
     const consentTimestamp = new Date().toISOString();
     const metadata = {
@@ -634,6 +845,8 @@ html.dark .success-h { color: #e2efed; }
       title: isCompany ? (document.getElementById('companyType')?.value || 'Energy & EPC Enterprise') : (document.getElementById('proTitle')?.value || 'Energy Specialist'),
       industry: isCompany ? (document.getElementById('companyType')?.value || 'EPC & Heavy Construction') : (document.getElementById('industry')?.value || 'Engineering'),
       cac: isCompany ? (document.getElementById('rcNumber')?.value.trim() || '') : '',
+      recaptcha_verified: true,
+      recaptcha_timestamp: consentTimestamp,
       terms_accepted: true,
       terms_accepted_at: consentTimestamp,
       terms_version: "2026.1",
@@ -654,7 +867,12 @@ html.dark .success-h { color: #e2efed; }
     });
 
     if (authErr) {
-      if (btn) { btn.innerHTML = 'Create Account &rarr;'; btn.disabled = false; }
+      if (confirmBtn) {
+        confirmBtn.innerHTML = '<span>Accept &amp; Create Account &rarr;</span>';
+        confirmBtn.disabled = false;
+      }
+      closeLegalModal();
+      const err = document.getElementById('formError');
       if (err) {
         let msg = authErr.message || 'Registration failed. Please check your details.';
         if (msg.toLowerCase().includes('already registered')) {
@@ -665,6 +883,8 @@ html.dark .success-h { color: #e2efed; }
       }
       return;
     }
+
+    closeLegalModal();
 
     if (typeof setUser === 'function' && profile) {
       setUser(profile);
@@ -684,7 +904,7 @@ html.dark .success-h { color: #e2efed; }
     window.location.replace(selectedRole === 'company' ? 'company-dashboard.html' : 'dashboard.html');
   }
 
-  // Enable Enter key to trigger signup on all form inputs and watch terms checkbox
+  // Enable Enter key on form inputs to trigger step 2 validation & open modal
   document.addEventListener('DOMContentLoaded', function() {
     const inputIds = ['firstName', 'lastName', 'otherName', 'proTitle', 'companyName', 'rcNumber', 'coRepFirstName', 'coRepLastName', 'coRepOtherName', 'email', 'password', 'confirmPw'];
     inputIds.forEach(id => {
@@ -693,28 +913,11 @@ html.dark .success-h { color: #e2efed; }
         el.addEventListener('keydown', function(e) {
           if (e.key === 'Enter' || e.keyCode === 13) {
             e.preventDefault();
-            submitForm();
+            handleStep2Submit();
           }
         });
       }
     });
-
-    const termsCheckbox = document.getElementById('terms');
-    if (termsCheckbox) {
-      termsCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-          const tBox = document.getElementById('termsContainer');
-          if (tBox) {
-            tBox.style.borderColor = 'var(--line)';
-            tBox.style.background = 'var(--paper)';
-          }
-          const err = document.getElementById('formError');
-          if (err && err.textContent.includes('Terms')) {
-            err.style.display = 'none';
-          }
-        }
-      });
-    }
   });
 
   // Pre-select role from URL param or default

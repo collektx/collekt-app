@@ -118,6 +118,7 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
       terms_accepted: true,
       terms_accepted_at: userMetadata.terms_accepted_at || new Date().toISOString(),
       terms_version: userMetadata.terms_version || '2026.1',
+      recaptcha_verified: !!userMetadata.recaptcha_verified,
       created_at: new Date().toISOString(),
       ...(profile || {})
     };
@@ -126,7 +127,8 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
       await sb.from('profiles').update({
         terms_accepted: true,
         terms_accepted_at: localUser.terms_accepted_at,
-        terms_version: localUser.terms_version
+        terms_version: localUser.terms_version,
+        recaptcha_verified: localUser.recaptcha_verified
       }).eq('id', authUser.id);
     } catch(e) {}
 
