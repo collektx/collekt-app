@@ -131,27 +131,31 @@ exports.handler = async (event) => {
     }
 
     // Create pending transaction in Supabase
+    const txPayload = {
+      id: reference,
+      type: 'credit',
+      owner_id: effectiveOwnerId,
+      user_id: effectiveOwnerId,
+      reference: reference,
+      gateway: (body.gateway || (payment_method === 'opay' && process.env.OPAY_PUBLIC_KEY ? 'opay' : 'paystack')),
+      transaction_type: 'wallet_funding',
+      payment_method: payment_method,
+      amount: numAmount,
+      currency: 'NGN',
+      status: 'pending',
+      metadata: {
+        owner_type: effectiveOwnerType,
+        email: cleanEmail,
+        channels: channels
+      }
+    };
+    if (wallet?.id) {
+      txPayload.wallet_id = wallet.id;
+    }
+
     const { error: txError } = await supabase
       .from('transactions')
-      .insert({
-        id: reference,
-        type: 'credit',
-        owner_id: effectiveOwnerId,
-        user_id: effectiveOwnerId,
-        wallet_id: wallet?.id,
-        reference: reference,
-        gateway: (body.gateway || (payment_method === 'opay' && process.env.OPAY_PUBLIC_KEY ? 'opay' : 'paystack')),
-        transaction_type: 'wallet_funding',
-        payment_method: payment_method,
-        amount: numAmount,
-        currency: 'NGN',
-        status: 'pending',
-        metadata: {
-          owner_type: owner_type,
-          email: cleanEmail,
-          channels: channels
-        }
-      });
+      .insert(txPayload);
 
     if (txError) {
       console.error('Failed to create pending transaction:', txError);
