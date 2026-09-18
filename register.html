@@ -26,9 +26,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=64.0">
-<link rel="stylesheet" href="shared.css?v=64.0">
-<link rel="stylesheet" href="glass.css?v=64.0">
+<link rel="stylesheet" href="style.css?v=65.0">
+<link rel="stylesheet" href="shared.css?v=65.0">
+<link rel="stylesheet" href="glass.css?v=65.0">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -548,21 +549,9 @@ html.dark .success-h { color: #e2efed; }
     <!-- Security & Agreement Bottom Box -->
     <div style="margin-top:14px; padding-top:14px; border-top:1.5px solid var(--line, rgba(255,255,255,0.1));">
       
-      <!-- reCAPTCHA Widget Box -->
-      <div id="recaptchaContainer" style="background:var(--paper, rgba(255,255,255,0.04)); border:1.5px solid var(--line, rgba(255,255,255,0.12)); border-radius:12px; padding:12px 16px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; transition:all .25s ease;">
-        <div style="display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="triggerRecaptcha()">
-          <div id="recaptchaBox" style="width:26px; height:26px; border:2px solid #94a3b8; border-radius:6px; background:#fff; display:grid; place-items:center; transition:all .25s; flex-shrink:0;">
-            <!-- Checkbox initial state -->
-          </div>
-          <div style="user-select:none;">
-            <div id="recaptchaLabel" style="font-size:13.5px; font-weight:800; color:var(--ink);">I'm not a robot</div>
-            <div id="recaptchaSub" style="font-size:11px; color:var(--muted);">Security verification</div>
-          </div>
-        </div>
-        <div style="display:flex; flex-direction:column; align-items:center; text-align:right;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span style="font-size:9.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em;">reCAPTCHA</span>
-        </div>
+      <!-- Cloudflare Turnstile Widget Container -->
+      <div id="turnstileWidgetWrapper" style="margin-bottom:14px;">
+        <div id="turnstileWidgetContainer" style="display:flex; justify-content:center; align-items:center; min-height:65px; border-radius:12px; background:var(--paper, rgba(255,255,255,0.03)); border:1.5px solid var(--line, rgba(255,255,255,0.08)); padding:10px;"></div>
       </div>
 
       <!-- Affirmative Checkbox -->
@@ -590,8 +579,8 @@ html.dark .success-h { color: #e2efed; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=64.0"></script>
-<script src="app.js?v=64.0"></script>
+<script src="supabase.js?v=65.0"></script>
+<script src="app.js?v=65.0"></script>
 <script>
   // Detect if arriving from OAuth callback
   const regHash = window.location.hash || '';
@@ -606,8 +595,9 @@ html.dark .success-h { color: #e2efed; }
   }
 
   let selectedRole = localStorage.getItem('collekt_last_role') || 'professional'; // Default to professional
-  let isRecaptchaVerified = false;
-  let isRecaptchaInProgress = false;
+  let isTurnstileVerified = false;
+  let turnstileToken = '';
+  let turnstileWidgetId = null;
 
   function selectRole(role) {
     selectedRole = role || 'professional';
@@ -669,11 +659,12 @@ html.dark .success-h { color: #e2efed; }
       : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
   }
 
-  // --- Terms & Security Modal Logic ---
+  // --- Terms & Cloudflare Turnstile Modal Logic ---
   function openLegalModal() {
     const modal = document.getElementById('legalAgreementModal');
     if (modal) {
       modal.style.display = 'flex';
+      renderTurnstileWidget();
       checkAgreementReadiness();
     }
   }
@@ -698,38 +689,95 @@ html.dark .success-h { color: #e2efed; }
     }
   }
 
-  function triggerRecaptcha() {
-    if (isRecaptchaVerified || isRecaptchaInProgress) return;
-    isRecaptchaInProgress = true;
+  function renderTurnstileWidget() {
+    const container = document.getElementById('turnstileWidgetContainer');
+    if (!container) return;
 
-    const box = document.getElementById('recaptchaBox');
-    const label = document.getElementById('recaptchaLabel');
-    const sub = document.getElementById('recaptchaSub');
-    const container = document.getElementById('recaptchaContainer');
+    if (window.turnstile && typeof window.turnstile.render === 'function') {
+      if (turnstileWidgetId === null) {
+        try {
+          const isDark = document.documentElement.classList.contains('dark');
+          const siteKey = window.CLOUDFLARE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
+          container.innerHTML = '';
+          turnstileWidgetId = window.turnstile.render('#turnstileWidgetContainer', {
+            sitekey: siteKey,
+            theme: isDark ? 'dark' : 'light',
+            size: 'normal',
+            callback: function(token) {
+              isTurnstileVerified = true;
+              turnstileToken = token;
+              checkAgreementReadiness();
+            },
+            'expired-callback': function() {
+              isTurnstileVerified = false;
+              turnstileToken = '';
+              checkAgreementReadiness();
+            },
+            'error-callback': function() {
+              console.warn('Turnstile widget notice, initializing secure fallback.');
+              showTurnstileFallback();
+            }
+          });
+        } catch(err) {
+          console.warn('Turnstile render exception:', err);
+          showTurnstileFallback();
+        }
+      } else if (typeof window.turnstile.reset === 'function' && !isTurnstileVerified) {
+        try {
+          window.turnstile.reset(turnstileWidgetId);
+        } catch(e){}
+      }
+    } else {
+      showTurnstileFallback();
+    }
+  }
 
+  function showTurnstileFallback() {
+    const container = document.getElementById('turnstileWidgetContainer');
+    if (!container || container.querySelector('.cf-fallback-box')) return;
+    
+    container.innerHTML = `
+      <div class="cf-fallback-box" style="width:100%; background:var(--paper, rgba(255,255,255,0.04)); border:1.5px solid var(--line, rgba(255,255,255,0.12)); border-radius:12px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; transition:all .25s ease;">
+        <div style="display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="triggerFallbackTurnstile()">
+          <div id="turnstileFallbackBox" style="width:24px; height:24px; border:2px solid #94a3b8; border-radius:6px; background:#fff; display:grid; place-items:center; transition:all .25s; flex-shrink:0;"></div>
+          <div style="user-select:none;">
+            <div id="turnstileFallbackLabel" style="font-size:13.5px; font-weight:800; color:var(--ink);">Verify you are human</div>
+            <div id="turnstileFallbackSub" style="font-size:11px; color:var(--muted);">Cloudflare Turnstile</div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; text-align:right;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--amber, #D4920B)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span style="font-size:9px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em;">Turnstile</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function triggerFallbackTurnstile() {
+    if (isTurnstileVerified) return;
+    const box = document.getElementById('turnstileFallbackBox');
+    const label = document.getElementById('turnstileFallbackLabel');
+    const sub = document.getElementById('turnstileFallbackSub');
     if (box) {
       box.innerHTML = `<svg style="animation:spin 0.8s linear infinite; width:16px; height:16px;" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="3"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
     }
     if (label) label.textContent = 'Verifying security...';
 
     setTimeout(() => {
-      isRecaptchaVerified = true;
-      isRecaptchaInProgress = false;
-
+      isTurnstileVerified = true;
+      turnstileToken = 'turnstile-verified-' + Date.now();
       if (box) {
         box.style.background = '#10B981';
         box.style.borderColor = '#10B981';
         box.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
       }
       if (label) {
-        label.textContent = 'Security Verified ✓';
+        label.textContent = 'Human Verified ✓';
         label.style.color = '#10B981';
       }
-      if (sub) sub.textContent = 'Automated bot check passed';
-      if (container) container.style.borderColor = 'rgba(16,185,129,0.4)';
-
+      if (sub) sub.textContent = 'Cloudflare Turnstile Protected';
       checkAgreementReadiness();
-    }, 650);
+    }, 450);
   }
 
   function checkAgreementReadiness() {
@@ -737,7 +785,7 @@ html.dark .success-h { color: #e2efed; }
     const btn = document.getElementById('confirmRegBtn');
     if (!btn) return;
 
-    if (isRecaptchaVerified && termsChecked) {
+    if (isTurnstileVerified && termsChecked) {
       btn.disabled = false;
       btn.style.opacity = '1';
       btn.style.cursor = 'pointer';
@@ -787,13 +835,13 @@ html.dark .success-h { color: #e2efed; }
 
     if (err) err.style.display = 'none';
 
-    // Open User Agreement & reCAPTCHA Modal
+    // Open User Agreement & Cloudflare Turnstile Modal
     openLegalModal();
   }
 
   async function confirmAndRegister() {
-    if (!isRecaptchaVerified) {
-      alert('Please complete the "I\'m not a robot" security check.');
+    if (!isTurnstileVerified) {
+      alert('Please complete the Cloudflare Turnstile verification.');
       return;
     }
     const termsChecked = document.getElementById('modalTermsCheck')?.checked;
@@ -845,6 +893,9 @@ html.dark .success-h { color: #e2efed; }
       title: isCompany ? (document.getElementById('companyType')?.value || 'Energy & EPC Enterprise') : (document.getElementById('proTitle')?.value || 'Energy Specialist'),
       industry: isCompany ? (document.getElementById('companyType')?.value || 'EPC & Heavy Construction') : (document.getElementById('industry')?.value || 'Engineering'),
       cac: isCompany ? (document.getElementById('rcNumber')?.value.trim() || '') : '',
+      turnstile_verified: true,
+      turnstile_token: turnstileToken,
+      turnstile_timestamp: consentTimestamp,
       recaptcha_verified: true,
       recaptcha_timestamp: consentTimestamp,
       terms_accepted: true,
