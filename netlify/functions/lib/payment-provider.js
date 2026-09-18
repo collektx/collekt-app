@@ -134,7 +134,13 @@ class PaystackProvider extends PaymentProvider {
       }
     };
 
-    const res = await this._request('POST', '/transaction/initialize', payload);
+    let res = await this._request('POST', '/transaction/initialize', payload);
+    if (!res.body || !res.body.status) {
+      if (payload.channels && res.body?.message && /channel/i.test(res.body.message)) {
+        delete payload.channels;
+        res = await this._request('POST', '/transaction/initialize', payload);
+      }
+    }
     if (!res.body || !res.body.status) {
       if (this.environment === 'test' || !this.secretKey.startsWith('sk_live_')) {
         return {
