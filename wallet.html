@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=59.0">
-<link rel="stylesheet" href="shared.css?v=59.0">
-<link rel="stylesheet" href="glass.css?v=59.0">
+<link rel="stylesheet" href="style.css?v=60.0">
+<link rel="stylesheet" href="shared.css?v=60.0">
+<link rel="stylesheet" href="glass.css?v=60.0">
 
 <style>
   body { background: var(--paper); }
@@ -356,7 +356,7 @@
   </div>
 </div>
 
-<!-- 2. WITHDRAW MODAL (LOCKED TO NOVA COMMERCIAL BANK) -->
+<!-- 2. WITHDRAW MODAL (SUPPORT ALL NIGERIAN COMMERCIAL & DIGITAL BANKS) -->
 <div class="modal-overlay" id="withdrawModal">
   <div class="modal-card" style="position:relative; width:min(520px, 100vw); background:var(--white); border-radius:24px; padding:28px;">
     <button class="modal-close" onclick="closeModal('withdrawModal')">&times;</button>
@@ -364,21 +364,79 @@
       <span style="font-size:24px;">🏛️</span>
       <div class="modal-title" style="font-size:20px; font-weight:900; color:var(--ink); margin:0;">Withdraw Funds</div>
     </div>
-    <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">Instant zero-fee intrabank disbursal directly to your linked <strong>NOVA Bank</strong> account.</p>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">Direct instant payout to any verified Nigerian Bank or Digital Neobank account.</p>
     
     <div style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px 16px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
       <span style="font-size:12px; font-weight:700; color:var(--muted);">Available Balance:</span>
       <strong style="color:var(--teal); font-size:16px; font-weight:900;" id="modalAvailableBalance">₦0.00</strong>
     </div>
 
-    <!-- Destination Account Display Card / Unlinked Prompt Card -->
-    <div id="withdrawModalNoticeContainer" style="margin-bottom:18px;"></div>
+    <!-- Quick Saved Account / Destination Notice Banner -->
+    <div id="withdrawModalNoticeContainer" style="margin-bottom:16px;"></div>
 
     <div id="withdrawModalFormBody">
+      <!-- Destination Bank Selection with Categorized Banks -->
+      <div class="form-group" style="margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <label class="form-label" style="font-size:12px; font-weight:800; margin:0;">Select Destination Bank</label>
+          <span style="font-size:11px; color:var(--teal); font-weight:700;">280+ NIBSS Supported</span>
+        </div>
+        <select class="form-input form-select" id="withdrawBankSelect" onchange="onWithdrawBankChanged()" style="font-weight:800; font-size:13.5px; background:var(--white); color:var(--ink); cursor:pointer;">
+          <option value="" disabled selected>-- Choose Destination Bank / Wallet --</option>
+          <optgroup label="⭐ Popular Commercial Banks" id="optgroupCommercial">
+            <option value="044" data-name="Access Bank">Access Bank</option>
+            <option value="058" data-name="Guaranty Trust Bank (GTBank)">Guaranty Trust Bank (GTBank)</option>
+            <option value="057" data-name="Zenith Bank">Zenith Bank</option>
+            <option value="011" data-name="First Bank of Nigeria">First Bank of Nigeria</option>
+            <option value="033" data-name="United Bank for Africa (UBA)">United Bank for Africa (UBA)</option>
+            <option value="214" data-name="FCMB">FCMB</option>
+            <option value="035" data-name="Wema Bank">Wema Bank</option>
+            <option value="221" data-name="Stanbic IBTC Bank">Stanbic IBTC Bank</option>
+            <option value="232" data-name="Sterling Bank">Sterling Bank</option>
+            <option value="070" data-name="Fidelity Bank">Fidelity Bank</option>
+            <option value="032" data-name="Union Bank of Nigeria">Union Bank of Nigeria</option>
+            <option value="076" data-name="Polaris Bank">Polaris Bank</option>
+            <option value="082" data-name="Keystone Bank">Keystone Bank</option>
+            <option value="101" data-name="Providus Bank">Providus Bank</option>
+            <option value="561" data-name="NOVA Bank">NOVA Bank (Nova Commercial Bank)</option>
+            <option value="301" data-name="Jaiz Bank">Jaiz Bank</option>
+            <option value="302" data-name="TAJ Bank">TAJ Bank</option>
+            <option value="303" data-name="Lotus Bank">Lotus Bank</option>
+            <option value="102" data-name="Titan Trust Bank">Titan Trust Bank</option>
+          </optgroup>
+          <optgroup label="⚡ Digital Neobanks & Wallets" id="optgroupDigital">
+            <option value="305" data-name="OPay (Paycom)">OPay (Paycom)</option>
+            <option value="100033" data-name="PalmPay">PalmPay</option>
+            <option value="090405" data-name="Moniepoint Microfinance Bank">Moniepoint Microfinance Bank</option>
+            <option value="50211" data-name="Kuda Bank">Kuda Bank</option>
+            <option value="090551" data-name="FairMoney MFB">FairMoney MFB</option>
+            <option value="940" data-name="Carbon (One Finance)">Carbon (One Finance)</option>
+            <option value="566" data-name="VFD Microfinance Bank">VFD Microfinance Bank</option>
+            <option value="50322" data-name="Dot Microfinance Bank">Dot Microfinance Bank</option>
+            <option value="125" data-name="Rubies MFB">Rubies MFB</option>
+          </optgroup>
+          <optgroup label="🏛️ Other Microfinance & Regional Banks" id="optgroupOthers">
+            <!-- Loaded dynamically from /api/banks -->
+          </optgroup>
+        </select>
+      </div>
+
+      <!-- 10-Digit NUBAN Account Number Input -->
+      <div class="form-group" style="margin-bottom:14px;">
+        <label class="form-label" style="font-size:12px; font-weight:800; margin-bottom:4px;">Destination 10-Digit NUBAN Account Number</label>
+        <input class="form-input" type="tel" id="withdrawAccountNo" placeholder="e.g. 0123456789" maxlength="10" inputmode="numeric" autocomplete="off" oninput="onWithdrawAccountInput()" style="font-size:17px; font-weight:900; letter-spacing:.05em; font-family:monospace;">
+      </div>
+
+      <!-- Live Verified Account Name Display -->
+      <div id="verifiedAccountBox" style="display:none; background:#dcfce7; border:1px solid #16a34a; border-radius:12px; padding:12px; margin-bottom:16px;">
+        <div style="font-size:11px; font-weight:800; color:#15803d; text-transform:uppercase;" id="verifiedAccountStatusLabel">✓ Verified Recipient Account Name</div>
+        <div style="font-size:14px; font-weight:900; color:#14532d; margin-top:2px;" id="verifiedAccountNameText">VERIFIED ACCOUNT HOLDER</div>
+      </div>
+
       <!-- Amount Input -->
       <div class="form-group" style="margin-bottom:14px;">
         <label class="form-label" style="font-size:12px; font-weight:800;">Withdrawal Amount (NGN)</label>
-        <input class="form-input" type="number" id="withdrawAmount" placeholder="e.g. 50000" min="1000" inputmode="numeric" oninput="updateWithdrawPreview(this.value)" style="font-size:18px; font-weight:900; color:var(--forest);">
+        <input class="form-input" type="number" id="withdrawAmount" placeholder="e.g. 50000" min="500" inputmode="numeric" oninput="updateWithdrawPreview(this.value)" style="font-size:18px; font-weight:900; color:var(--forest);">
         
         <div style="font-size:12px; color:var(--teal); font-weight:800; margin-top:4px;" id="withdrawAmountFormattedPreview">
           Formatted: ₦0.00
@@ -394,39 +452,15 @@
         </div>
       </div>
 
-      <!-- Destination Bank: Locked strictly to NOVA Bank -->
-      <div class="form-group" style="margin-bottom:14px;">
-        <label class="form-label" style="font-size:12px; font-weight:800;">Destination Bank Partner</label>
-        <select class="form-input form-select" id="withdrawBankSelect" disabled style="font-weight:800; font-size:13.5px; background:var(--paper); color:var(--forest); cursor:not-allowed;">
-          <option value="NOVA Bank (Nova Commercial Bank)" selected>🏛️ NOVA Bank (Nova Commercial Bank) — Official Partner</option>
-        </select>
-        <div style="font-size:11px; color:var(--teal); font-weight:800; margin-top:4px;">✓ Exclusive partner: Zero-fee instant intrabank settlement</div>
-      </div>
-
-      <!-- 10-Digit NUBAN Account Number Input -->
-      <div class="form-group" style="margin-bottom:14px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <label class="form-label" style="font-size:12px; font-weight:800; margin:0;">Destination 10-Digit NOVA NUBAN</label>
-          <button type="button" onclick="openLinkNovaModal('withdraw')" style="background:none; border:none; color:var(--teal); font-size:11.5px; font-weight:800; cursor:pointer; text-decoration:underline;">Change NOVA Account</button>
-        </div>
-        <input class="form-input" type="tel" id="withdrawAccountNo" placeholder="e.g. 0123456789" maxlength="10" inputmode="numeric" autocomplete="off" oninput="onWithdrawAccountInput()" style="font-size:16px; font-weight:800; letter-spacing:.05em; font-family:monospace;">
-      </div>
-
-      <!-- Verified Account Name Display -->
-      <div id="verifiedAccountBox" style="background:#dcfce7; border:1px solid #16a34a; border-radius:12px; padding:12px; margin-bottom:16px;">
-        <div style="font-size:11px; font-weight:800; color:#15803d; text-transform:uppercase;">Verified Recipient Account Name</div>
-        <div style="font-size:14px; font-weight:900; color:#14532d; margin-top:2px;" id="verifiedAccountNameText">VERIFIED ACCOUNT HOLDER</div>
-      </div>
-
       <div class="form-group" style="margin-bottom:20px;">
         <label class="form-label" style="font-size:12px; font-weight:800;">Withdrawal Narration (Optional)</label>
-        <input class="form-input" type="text" id="withdrawNarration" placeholder="e.g. Collekt Milestone Payout">
+        <input class="form-input" type="text" id="withdrawNarration" placeholder="e.g. Collekt Earnings Payout">
       </div>
 
       <div style="display:flex; gap:12px; justify-content:flex-end;">
         <button class="btn btn-outline" style="flex:1;" onclick="closeModal('withdrawModal')">Cancel</button>
         <button class="btn btn-primary" id="btnConfirmWithdraw" style="flex:1; background:var(--teal); font-weight:900;" onclick="promptConfirmWithdrawal()">
-          Proceed &rarr;
+          Proceed to Confirm &rarr;
         </button>
       </div>
     </div>
@@ -622,10 +656,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=59.0"></script>
-<script src="app.js?v=59.0"></script>
-<script src="collekt-ai.js?v=59.0"></script>
-<script src="settings-popup.js?v=59.0"></script>
+<script src="supabase.js?v=60.0"></script>
+<script src="app.js?v=60.0"></script>
+<script src="collekt-ai.js?v=60.0"></script>
+<script src="settings-popup.js?v=60.0"></script>
 <script>
   let isHideBalance = false;
   let rawBalance = 0;
@@ -1222,113 +1256,221 @@
     }
   };
 
-  // ── WITHDRAWAL ENGINE (LOCKED TO NOVA COMMERCIAL BANK) ─────
+  // ── UNIVERSAL NIGERIAN BANK WITHDRAWAL ENGINE ─────
+  let allBanksList = [];
+  let isBanksLoaded = false;
+  let resolveAccountTimer = null;
+  let verifiedWithdrawalRecipient = null;
+
+  async function initBankList() {
+    if (isBanksLoaded && allBanksList.length > 0) return;
+    try {
+      const res = typeof fetchNigerianBanks === 'function' ? await fetchNigerianBanks() : { data: [] };
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        allBanksList = res.data;
+        isBanksLoaded = true;
+
+        const comGroup = document.getElementById('optgroupCommercial');
+        const digGroup = document.getElementById('optgroupDigital');
+        const othGroup = document.getElementById('optgroupOthers');
+
+        const comBanks = allBanksList.filter(b => b.category === 'commercial');
+        const digBanks = allBanksList.filter(b => b.category === 'digital');
+        const othBanks = allBanksList.filter(b => b.category === 'mfb');
+
+        if (comGroup && comBanks.length > 0) {
+          comGroup.innerHTML = comBanks.map(b => `<option value="${escapeHTML(b.code)}" data-name="${escapeHTML(b.name)}">${escapeHTML(b.name)}</option>`).join('');
+        }
+        if (digGroup && digBanks.length > 0) {
+          digGroup.innerHTML = digBanks.map(b => `<option value="${escapeHTML(b.code)}" data-name="${escapeHTML(b.name)}">${escapeHTML(b.name)}</option>`).join('');
+        }
+        if (othGroup && othBanks.length > 0) {
+          othGroup.innerHTML = othBanks.map(b => `<option value="${escapeHTML(b.code)}" data-name="${escapeHTML(b.name)}">${escapeHTML(b.name)}</option>`).join('');
+        }
+      }
+    } catch (e) {
+      console.warn('Bank list load error:', e);
+    }
+  }
+
   window.openWithdrawModal = function() {
     updateBalanceUI();
-    const user = getUser() || {};
-    const isLinked = typeof isUserNovaLinked === 'function' ? isUserNovaLinked(user) : Boolean(user.wallet?.nova_linked && user.wallet?.nova_account_number && String(user.wallet.nova_account_number).trim().length === 10);
-    const novaAcct = isLinked ? String(user.wallet.nova_account_number).trim() : '';
-    const novaName = isLinked ? (user.wallet.nova_account_name || user.name || '').toUpperCase().replace('COLLEKT / ', '') : '';
+    initBankList();
 
+    const user = getUser() || {};
     const noticeEl = document.getElementById('withdrawModalNoticeContainer');
     const formBodyEl = document.getElementById('withdrawModalFormBody');
     const acctInput = document.getElementById('withdrawAccountNo');
     const bankSelect = document.getElementById('withdrawBankSelect');
+    const box = document.getElementById('verifiedAccountBox');
 
-    if (bankSelect) bankSelect.value = 'NOVA Bank (Nova Commercial Bank)';
+    verifiedWithdrawalRecipient = null;
+    if (box) box.style.display = 'none';
 
-    if (isLinked) {
+    // If user has a saved/linked account, prefill and show quick badge
+    const savedAcct = user.wallet?.payout_account_number || user.wallet?.nova_account_number || '';
+    const savedBankCode = user.wallet?.payout_bank_code || user.wallet?.nova_bank_code || (user.wallet?.nova_linked ? '561' : '');
+    const savedBankName = user.wallet?.payout_bank_name || user.wallet?.nova_bank_name || (user.wallet?.nova_linked ? 'NOVA Bank' : '');
+    const savedName = (user.wallet?.payout_account_name || user.wallet?.nova_account_name || user.name || '').toUpperCase().replace('COLLEKT / ', '');
+
+    if (savedAcct && savedAcct.length === 10) {
       if (noticeEl) {
         noticeEl.innerHTML = `
-          <div style="background:linear-gradient(135deg, #0e3b35 0%, #134e4a 100%); border-radius:16px; padding:16px 18px; color:#fff; position:relative; overflow:hidden; box-shadow:0 6px 18px rgba(14,59,53,0.18);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <div style="font-size:11px; font-weight:800; color:#86efac; text-transform:uppercase; letter-spacing:0.04em;">Destination NOVA Bank Account</div>
-              <button type="button" onclick="openLinkNovaModal('withdraw')" style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); color:#fff; font-size:11px; font-weight:800; padding:4px 10px; border-radius:6px; cursor:pointer;">✏️ Change Account</button>
+          <div style="background:linear-gradient(135deg, #0e3b35 0%, #134e4a 100%); border-radius:16px; padding:14px 16px; color:#fff; position:relative; overflow:hidden; box-shadow:0 6px 18px rgba(14,59,53,0.18);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <div style="font-size:10.5px; font-weight:800; color:#86efac; text-transform:uppercase; letter-spacing:0.04em;">⚡ Saved Primary Payout Destination</div>
+              <span style="font-size:10px; background:rgba(34,197,94,0.25); color:#86efac; padding:2px 8px; border-radius:99px; font-weight:800;">✓ Verified</span>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:flex-end;">
               <div>
-                <div style="font-family:monospace; font-size:20px; font-weight:900; letter-spacing:0.06em; color:#fff;">${novaAcct}</div>
-                <div style="font-size:12.5px; font-weight:700; color:rgba(255,255,255,0.85); margin-top:2px;">${escapeHTML(novaName)}</div>
+                <div style="font-family:monospace; font-size:18px; font-weight:900; letter-spacing:0.06em; color:#fff;">${escapeHTML(savedAcct)}</div>
+                <div style="font-size:12px; font-weight:700; color:rgba(255,255,255,0.85); margin-top:2px;">${escapeHTML(savedName)} • ${escapeHTML(savedBankName || 'Bank')}</div>
               </div>
-              <div style="text-align:right;">
-                <span style="font-size:10.5px; background:rgba(34,197,94,0.25); color:#86efac; padding:3px 8px; border-radius:99px; font-weight:800;">✓ Verified Recipient</span>
-              </div>
+              <button type="button" onclick="useSavedPayoutAccount('${escapeHTML(savedBankCode)}', '${escapeHTML(savedAcct)}', '${escapeHTML(savedName)}', '${escapeHTML(savedBankName)}')" style="background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3); color:#fff; font-size:11px; font-weight:800; padding:5px 12px; border-radius:8px; cursor:pointer;">
+                Quick Autofill
+              </button>
             </div>
           </div>
         `;
       }
-      if (formBodyEl) formBodyEl.style.display = 'block';
-      if (acctInput) {
-        acctInput.value = novaAcct;
-        onWithdrawAccountInput();
-      }
     } else {
-      if (noticeEl) {
-        noticeEl.innerHTML = `
-          <div style="background:#fffbeb; border:2px dashed #f59e0b; border-radius:16px; padding:22px 18px; text-align:center;">
-            <div style="font-size:28px; margin-bottom:6px;">⚠️</div>
-            <div style="font-size:16px; font-weight:900; color:#78350f; margin-bottom:6px;">No NOVA Bank Account Linked</div>
-            <p style="font-size:12.5px; color:#92400e; margin:0 auto 16px; max-width:360px; line-height:1.45;">
-              You have not linked your NOVA Bank account. You must connect your 10-digit NOVA Bank account before you can withdraw your funds.
-            </p>
-            <button type="button" class="btn btn-primary" onclick="openLinkNovaModal('withdraw')" style="background:var(--teal); font-weight:900; font-size:13px; border:none; padding:11px 24px; border-radius:12px; color:#fff; cursor:pointer; box-shadow:0 4px 12px rgba(19,117,111,0.25);">
-              🔗 Link NOVA Bank Account to Withdraw &rarr;
-            </button>
-          </div>
-        `;
-      }
-      if (formBodyEl) formBodyEl.style.display = 'none';
-      if (acctInput) acctInput.value = '';
-      const box = document.getElementById('verifiedAccountBox');
-      if (box) box.style.display = 'none';
+      if (noticeEl) noticeEl.innerHTML = '';
     }
 
+    if (formBodyEl) formBodyEl.style.display = 'block';
     openModal('withdrawModal');
   };
 
-  window.onWithdrawAccountInput = function() {
-    const acctNo = document.getElementById('withdrawAccountNo')?.value.trim();
-    const box = document.getElementById('verifiedAccountBox');
-    const nameText = document.getElementById('verifiedAccountNameText');
-
-    if (acctNo && acctNo.length === 10) {
-      const user = getUser() || {};
-      const resolvedName = (user.wallet?.nova_account_name || user.name || 'REGISTERED NOVA ACCOUNT HOLDER').toUpperCase().replace('COLLEKT / ', '');
-      if (nameText) nameText.textContent = `✓ ${resolvedName}`;
-      if (box) box.style.display = 'block';
-    } else {
-      if (box) box.style.display = 'none';
+  window.useSavedPayoutAccount = function(bankCode, acctNo, acctName, bankName) {
+    const bankSelect = document.getElementById('withdrawBankSelect');
+    const acctInput = document.getElementById('withdrawAccountNo');
+    if (bankSelect && bankCode) {
+      bankSelect.value = bankCode;
     }
+    if (acctInput && acctNo) {
+      acctInput.value = acctNo;
+    }
+    onWithdrawAccountInput();
   };
 
   window.onWithdrawBankChanged = function() {
     onWithdrawAccountInput();
   };
 
-  window.promptConfirmWithdrawal = function() {
+  window.onWithdrawAccountInput = function() {
+    if (resolveAccountTimer) clearTimeout(resolveAccountTimer);
+
+    const bankSelect = document.getElementById('withdrawBankSelect');
+    const acctInput = document.getElementById('withdrawAccountNo');
+    const box = document.getElementById('verifiedAccountBox');
+    const nameText = document.getElementById('verifiedAccountNameText');
+    const statusLabel = document.getElementById('verifiedAccountStatusLabel');
+
+    const acctNo = (acctInput?.value || '').trim().replace(/\D/g, '');
+    const bankCode = (bankSelect?.value || '').trim();
+    const selectedOption = bankSelect?.options[bankSelect.selectedIndex];
+    const bankName = selectedOption?.getAttribute('data-name') || selectedOption?.text || '';
+
+    if (!acctNo || acctNo.length < 10 || !bankCode) {
+      if (box) box.style.display = 'none';
+      verifiedWithdrawalRecipient = null;
+      return;
+    }
+
+    // Show loading state
+    if (box) {
+      box.style.display = 'block';
+      box.style.background = '#fef3c7';
+      box.style.borderColor = '#f59e0b';
+    }
+    if (statusLabel) {
+      statusLabel.style.color = '#b45309';
+      statusLabel.textContent = '⏳ Querying NIBSS Database...';
+    }
+    if (nameText) {
+      nameText.style.color = '#78350f';
+      nameText.textContent = 'Resolving Account Holder Name...';
+    }
+
+    resolveAccountTimer = setTimeout(async () => {
+      try {
+        const res = typeof resolveBankAccount === 'function'
+          ? await resolveBankAccount({ account_number: acctNo, bank_code: bankCode })
+          : { success: false, error: 'Resolution service unavailable' };
+
+        if (res.success && res.account_name) {
+          verifiedWithdrawalRecipient = {
+            account_number: acctNo,
+            bank_code: bankCode,
+            bank_name: bankName,
+            account_name: res.account_name
+          };
+
+          if (box) {
+            box.style.background = '#dcfce7';
+            box.style.borderColor = '#16a34a';
+          }
+          if (statusLabel) {
+            statusLabel.style.color = '#15803d';
+            statusLabel.textContent = '✓ Verified Recipient Account';
+          }
+          if (nameText) {
+            nameText.style.color = '#14532d';
+            nameText.textContent = res.account_name;
+          }
+        } else {
+          verifiedWithdrawalRecipient = null;
+          if (box) {
+            box.style.background = '#fee2e2';
+            box.style.borderColor = '#ef4444';
+          }
+          if (statusLabel) {
+            statusLabel.style.color = '#b91c1c';
+            statusLabel.textContent = '❌ Account Verification Failed';
+          }
+          if (nameText) {
+            nameText.style.color = '#7f1d1d';
+            nameText.textContent = res.error || 'Could not verify account name. Check account number and bank.';
+          }
+        }
+      } catch (err) {
+        verifiedWithdrawalRecipient = null;
+        if (box) {
+          box.style.background = '#fee2e2';
+          box.style.borderColor = '#ef4444';
+        }
+        if (statusLabel) {
+          statusLabel.style.color = '#b91c1c';
+          statusLabel.textContent = '❌ Verification Error';
+        }
+        if (nameText) {
+          nameText.style.color = '#7f1d1d';
+          nameText.textContent = 'Network error while resolving account details.';
+        }
+      }
+    }, 350);
+  };
+
+  window.promptConfirmWithdrawal = async function() {
     const user = getUser() || {};
-    if (typeof isUserNovaLinked === 'function' ? !isUserNovaLinked(user) : !(user.wallet?.nova_linked && user.wallet?.nova_account_number)) {
-      showToast('⚠️ Please link your NOVA Bank account before withdrawing.', 'warning');
-      closeModal('withdrawModal');
-      openLinkNovaModal('withdraw');
-      return;
-    }
-
     const amount = Number(document.getElementById('withdrawAmount')?.value);
-    const bank = document.getElementById('withdrawBankSelect')?.value;
-    const acctNo = document.getElementById('withdrawAccountNo')?.value.trim();
-    const narration = document.getElementById('withdrawNarration')?.value.trim() || 'Collekt Project Payout';
+    const bankSelect = document.getElementById('withdrawBankSelect');
+    const bankCode = bankSelect?.value?.trim();
+    const selectedOption = bankSelect?.options[bankSelect?.selectedIndex];
+    const bankName = selectedOption?.getAttribute('data-name') || selectedOption?.text || 'Selected Bank';
+    const acctNo = (document.getElementById('withdrawAccountNo')?.value || '').trim().replace(/\D/g, '');
+    const narration = document.getElementById('withdrawNarration')?.value.trim() || 'Collekt Earnings Withdrawal';
 
-    if (!amount || amount < 1000) {
-      showToast('&#9888;&#65039; Minimum withdrawal amount is ₦1,000', 'warning');
+    if (!amount || amount < 500) {
+      showToast('⚠️ Minimum withdrawal amount is ₦500', 'warning');
       return;
     }
-    if (!bank) {
-      showToast('&#9888;&#65039; Please select destination bank / MFB', 'warning');
+    if (!bankCode) {
+      showToast('⚠️ Please select destination bank / neobank', 'warning');
       return;
     }
     if (!acctNo || acctNo.length !== 10) {
-      showToast('&#9888;&#65039; Please enter a valid 10-digit NUBAN account number', 'warning');
+      showToast('⚠️ Please enter a valid 10-digit NUBAN account number', 'warning');
       return;
     }
     if (amount > rawBalance) {
@@ -1345,11 +1487,34 @@
       return;
     }
 
+    // If recipient not yet resolved, do an instant resolution check
+    let resolvedName = verifiedWithdrawalRecipient?.account_name;
+    if (!resolvedName) {
+      showToast('⏳ Verifying account details with NIBSS...', 'info');
+      const res = typeof resolveBankAccount === 'function' 
+        ? await resolveBankAccount({ account_number: acctNo, bank_code: bankCode })
+        : { success: false };
+      if (res.success && res.account_name) {
+        resolvedName = res.account_name;
+        verifiedWithdrawalRecipient = {
+          account_number: acctNo,
+          bank_code: bankCode,
+          bank_name: bankName,
+          account_name: resolvedName
+        };
+      } else {
+        showToast('❌ Could not verify destination bank account details. Please check your account number and selected bank.', 'error');
+        return;
+      }
+    }
+
     pendingFinancialAction = {
       type: 'withdrawal',
       amount: amount,
-      bank: bank,
-      accountNo: acctNo,
+      bank_code: bankCode,
+      bank_name: bankName,
+      account_number: acctNo,
+      account_name: resolvedName,
       narration: narration
     };
 
@@ -1360,15 +1525,16 @@
     const boxEl = document.getElementById('confirmActionSummaryBox');
 
     if (titleEl) titleEl.textContent = 'Confirm Bank Withdrawal';
-    if (iconEl) iconEl.textContent = '&#127974;';
-    if (subEl) subEl.textContent = 'Direct intrabank transfer to your verified NOVA Bank account.';
+    if (iconEl) iconEl.textContent = '🏛️';
+    if (subEl) subEl.textContent = `Direct transfer to ${escapeHTML(bankName)} (${acctNo})`;
 
     if (boxEl) {
       boxEl.innerHTML = `
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Amount to Withdraw:</span> <strong style="color:var(--forest); font-size:15px;">₦${amount.toLocaleString()}</strong></div>
-        <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Destination Bank:</span> <strong>${escapeHTML(bank)}</strong></div>
+        <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Destination Bank:</span> <strong>${escapeHTML(bankName)}</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Account Number:</span> <strong style="font-family:monospace;">${acctNo}</strong></div>
-        <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Processing Fee:</span> <strong style="color:#16a34a;">₦0.00 (Free)</strong></div>
+        <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Account Name:</span> <strong style="color:var(--forest);">${escapeHTML(resolvedName)}</strong></div>
+        <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Transfer Fee:</span> <strong style="color:#16a34a;">₦0.00 (Zero Fee)</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:14px; border-top:1px solid var(--line); padding-top:6px;"><span style="font-weight:800;">Net Payout:</span> <strong style="color:var(--forest); font-size:16px;">₦${amount.toLocaleString()}</strong></div>
       `;
     }
@@ -1527,7 +1693,7 @@
   };
 
   // ── FINAL AUTHORIZATION & EXECUTION ────────────────────────────
-  window.executeConfirmedFinancialAction = function() {
+  window.executeConfirmedFinancialAction = async function() {
     if (!pendingFinancialAction) return;
 
     const btn = document.getElementById('btnExecuteFinalAction');
@@ -1557,39 +1723,74 @@
     // Disable button to prevent race conditions
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner-icon"></span> Authorizing Transaction...';
+      btn.innerHTML = '<span class="spinner-icon"></span> Processing Payout...';
     }
 
-    setTimeout(() => {
+    try {
       if (pendingFinancialAction.type === 'withdrawal') {
         const amt = pendingFinancialAction.amount;
-        const bank = pendingFinancialAction.bank;
-        const acct = pendingFinancialAction.accountNo;
+        const bankName = pendingFinancialAction.bank_name;
+        const bankCode = pendingFinancialAction.bank_code;
+        const acct = pendingFinancialAction.account_number;
+        const acctName = pendingFinancialAction.account_name;
+        const narr = pendingFinancialAction.narration;
+
+        const res = typeof withdrawWalletFunds === 'function'
+          ? await withdrawWalletFunds({
+              amount: amt,
+              bank_code: bankCode,
+              bank_name: bankName,
+              account_number: acct,
+              account_name: acctName,
+              narration: narr,
+              user_id: user.id,
+              owner_id: user.id || user.owner_id
+            })
+          : { success: false, error: 'Withdrawal client function not found' };
+
+        if (!res.success) {
+          showToast(`❌ Withdrawal failed: ${res.error || 'Could not process payout.'}`, 'error');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = 'Confirm & Authorize';
+          }
+          return;
+        }
 
         const balanceBefore = rawBalance;
-        rawBalance -= amt;
+        rawBalance = res.balance_after !== undefined ? Number(res.balance_after) : Math.max(0, rawBalance - amt);
         updateBalanceUI();
 
-        const user = getUser();
         if (user && user.wallet) {
           user.wallet.balance = rawBalance;
+          user.wallet.available_balance = rawBalance;
+          user.wallet.payout_account_number = acct;
+          user.wallet.payout_bank_code = bankCode;
+          user.wallet.payout_bank_name = bankName;
+          user.wallet.payout_account_name = acctName;
           setUser(user);
         }
 
         saveTransaction({
-          id: 'TX-WDR-' + Date.now(),
-          title: `Withdrawal to ${bank}`,
-          desc: `Account: ${acct}`,
+          id: res.reference || ('TX-WDR-' + Date.now()),
+          title: `Withdrawal to ${bankName}`,
+          desc: `Account: ${acct} (${acctName}) • Ref: ${res.reference || 'N/A'}`,
           date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
           fullDate: new Date().toISOString().slice(0,10),
           type: 'debit',
           category: 'withdrawal',
           amount: amt,
           balanceBefore: balanceBefore,
+          balanceAfter: rawBalance,
           status: 'Successful'
         });
 
-        showToast(`&#127881; ₦${amt.toLocaleString()} withdrawal to ${bank} (${acct}) authorized and queued for bank settlement!`);
+        // Refresh live transactions
+        if (typeof initTransactions === 'function') {
+          setTimeout(initTransactions, 500);
+        }
+
+        showToast(`🎉 ₦${amt.toLocaleString()} withdrawal to ${bankName} (${acct}) successfully authorized and queued for bank settlement!`);
 
       } else if (pendingFinancialAction.type === 'escrow_release') {
         const amt = pendingFinancialAction.amount;
@@ -1617,7 +1818,7 @@
           status: 'Successful'
         });
 
-        showToast(`&#127881; ₦${amt.toLocaleString()} Escrow Released to ${contractor}! Deliverable marked Approved.`);
+        showToast(`🎉 ₦${amt.toLocaleString()} Escrow Released to ${contractor}! Deliverable marked Approved.`);
         renderEscrowMilestones();
       }
 
@@ -1628,7 +1829,15 @@
       if (pinInput) pinInput.value = '';
       closeModal('confirmFinancialActionModal');
       pendingFinancialAction = null;
-    }, 900);
+
+    } catch (err) {
+      console.error('executeConfirmedFinancialAction error:', err);
+      showToast(`❌ An error occurred: ${err.message || 'Execution error'}`, 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = 'Confirm & Authorize';
+      }
+    }
   };
 
   // ── TRANSACTIONS STORAGE & RENDERING ────────────────────────
@@ -1851,56 +2060,6 @@
     } else {
       copyToClipboard(shareText, 'Account details copied to clipboard for sharing!');
     }
-  };
-
-  // ── WITHDRAWAL ENGINE (LOCKED TO NOVA COMMERCIAL BANK) ─────
-  window.openWithdrawModal = function() {
-    updateBalanceUI();
-    const user = getUser() || {};
-    const isLinked = typeof isUserNovaLinked === 'function' ? isUserNovaLinked(user) : Boolean(user.wallet?.nova_linked && user.wallet?.nova_account_number && String(user.wallet.nova_account_number).trim().length === 10);
-    const novaAcct = isLinked ? String(user.wallet.nova_account_number).trim() : '';
-    const novaName = isLinked ? (user.wallet.nova_account_name || user.name || '').toUpperCase().replace('COLLEKT / ', '') : '';
-
-    const noticeEl = document.getElementById('withdrawModalNoticeContainer');
-    const formBodyEl = document.getElementById('withdrawModalFormBody');
-    const footerEl = document.getElementById('withdrawModalFooter');
-
-    if (!isLinked) {
-      if (noticeEl) {
-        noticeEl.style.display = 'block';
-        noticeEl.innerHTML = `
-          <div style="background:rgba(212,146,11,0.1); border:1.5px solid rgba(212,146,11,0.3); border-radius:14px; padding:18px; text-align:center;">
-            <div style="font-size:28px; margin-bottom:8px;">🔒</div>
-            <h4 style="font-size:16px; font-weight:900; color:var(--ink); margin-bottom:6px;">Link Commercial Bank Account</h4>
-            <p style="font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:16px;">
-              To protect milestone escrows and comply with CBN/AML regulations, withdrawals can only be disbursed directly into your registered settlement account.
-            </p>
-            <button type="button" class="btn btn-primary" onclick="closeWithdrawModal(); openNovaLinkModal();" style="font-weight:800; width:100%; justify-content:center;">
-              🏛️ Link Settlement Bank Account &rarr;
-            </button>
-          </div>
-        `;
-      }
-      if (formBodyEl) formBodyEl.style.display = 'none';
-      if (footerEl) footerEl.style.display = 'none';
-    } else {
-      if (noticeEl) noticeEl.style.display = 'none';
-      if (formBodyEl) formBodyEl.style.display = 'block';
-      if (footerEl) footerEl.style.display = 'flex';
-
-      const acctInput = document.getElementById('withdrawAccount');
-      const bankInput = document.getElementById('withdrawBank');
-      const nameInput = document.getElementById('withdrawAccountName');
-      const hiddenBank = document.getElementById('withdrawBankNameHidden');
-
-      if (acctInput) acctInput.value = novaAcct;
-      if (bankInput) bankInput.value = 'NOVA Commercial Bank';
-      if (nameInput) nameInput.value = novaName;
-      if (hiddenBank) hiddenBank.value = 'NOVA Commercial Bank';
-    }
-
-    const modal = document.getElementById('withdrawModal');
-    if (modal) modal.classList.add('active');
   };
 
   async function renderVirtualBankDetails(wallet) {

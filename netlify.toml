@@ -102,6 +102,26 @@
   status = 200
 
 [[redirects]]
+  from = "/api/bank/resolve"
+  to = "/.netlify/functions/bank-resolve"
+  status = 200
+
+[[redirects]]
+  from = "/api/payments/bank-resolve"
+  to = "/.netlify/functions/bank-resolve"
+  status = 200
+
+[[redirects]]
+  from = "/api/banks"
+  to = "/.netlify/functions/banks"
+  status = 200
+
+[[redirects]]
+  from = "/api/payments/banks"
+  to = "/.netlify/functions/banks"
+  status = 200
+
+[[redirects]]
   from = "/api/payments/reconcile"
   to = "/.netlify/functions/wallet-reconcile"
   status = 200

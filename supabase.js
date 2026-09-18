@@ -1659,6 +1659,137 @@ async function fetchCompanyMembers(companyId) {
   }
 }
 
+/**
+ * 6. Fetch Comprehensive Nigerian Bank List
+ */
+let _cachedBanksClient = null;
+async function fetchNigerianBanks() {
+  if (_cachedBanksClient && _cachedBanksClient.length > 0) {
+    return { success: true, data: _cachedBanksClient };
+  }
+  try {
+    const res = await fetch('/.netlify/functions/banks');
+    if (!res.ok) throw new Error('Failed to load bank list');
+    const data = await res.json();
+    if (data.status === 'success' && Array.isArray(data.data)) {
+      _cachedBanksClient = data.data;
+      return { success: true, data: data.data };
+    }
+    throw new Error(data.error || 'Invalid bank response');
+  } catch (err) {
+    console.warn('fetchNigerianBanks fallback note:', err);
+    const fallback = [
+      { name: 'Access Bank', code: '044', category: 'commercial' },
+      { name: 'Guaranty Trust Bank (GTBank)', code: '058', category: 'commercial' },
+      { name: 'Zenith Bank', code: '057', category: 'commercial' },
+      { name: 'First Bank of Nigeria', code: '011', category: 'commercial' },
+      { name: 'United Bank for Africa (UBA)', code: '033', category: 'commercial' },
+      { name: 'OPay (Paycom)', code: '305', category: 'digital' },
+      { name: 'PalmPay', code: '100033', category: 'digital' },
+      { name: 'Moniepoint Microfinance Bank', code: '090405', category: 'digital' },
+      { name: 'Kuda Bank', code: '50211', category: 'digital' },
+      { name: 'FCMB', code: '214', category: 'commercial' },
+      { name: 'Wema Bank', code: '035', category: 'commercial' },
+      { name: 'Stanbic IBTC Bank', code: '221', category: 'commercial' },
+      { name: 'Sterling Bank', code: '232', category: 'commercial' },
+      { name: 'Fidelity Bank', code: '070', category: 'commercial' },
+      { name: 'Union Bank of Nigeria', code: '032', category: 'commercial' },
+      { name: 'Polaris Bank', code: '076', category: 'commercial' },
+      { name: 'Keystone Bank', code: '082', category: 'commercial' },
+      { name: 'Providus Bank', code: '101', category: 'commercial' },
+      { name: 'NOVA Bank (Nova Commercial Bank)', code: '561', category: 'commercial' },
+      { name: 'FairMoney MFB', code: '090551', category: 'digital' },
+      { name: 'Carbon (One Finance)', code: '940', category: 'digital' },
+      { name: 'VFD Microfinance Bank', code: '566', category: 'digital' },
+      { name: 'Dot Microfinance Bank', code: '50322', category: 'digital' },
+      { name: 'Jaiz Bank', code: '301', category: 'commercial' },
+      { name: 'TAJ Bank', code: '302', category: 'commercial' },
+      { name: 'Lotus Bank', code: '303', category: 'commercial' },
+      { name: 'Titan Trust Bank', code: '102', category: 'commercial' }
+    ];
+    return { success: true, data: fallback };
+  }
+}
+
+/**
+ * 7. Resolve Bank Account via NIBSS (Korapay / Paystack)
+ */
+async function resolveBankAccount({ account_number, bank_code }) {
+  try {
+    const cleanAcct = String(account_number || '').trim().replace(/\D/g, '');
+    const cleanBank = String(bank_code || '').trim();
+    if (!cleanAcct || cleanAcct.length !== 10) {
+      return { success: false, error: 'Valid 10-digit NUBAN required' };
+    }
+    if (!cleanBank) {
+      return { success: false, error: 'Please select a bank' };
+    }
+
+    const res = await fetch(`/.netlify/functions/bank-resolve?account_number=${encodeURIComponent(cleanAcct)}&bank_code=${encodeURIComponent(cleanBank)}`);
+    const data = await res.json();
+    if (!res.ok || data.status !== 'success') {
+      return {
+        success: false,
+        error: data.error || 'Could not verify account name with NIBSS. Please check account details.'
+      };
+    }
+
+    return {
+      success: true,
+      account_name: data.data.account_name,
+      account_number: data.data.account_number,
+      bank_code: data.data.bank_code,
+      provider: data.data.provider
+    };
+  } catch (err) {
+    console.error('resolveBankAccount error:', err);
+    return { success: false, error: err.message || 'Account resolution network error' };
+  }
+}
+
+/**
+ * 8. Execute Double-Entry Wallet Withdrawal
+ */
+async function withdrawWalletFunds(params) {
+  try {
+    const user = typeof getUser === 'function' ? getUser() : JSON.parse(localStorage.getItem('collekt_user') || '{}');
+    const payload = {
+      amount: Number(params.amount),
+      bank_code: String(params.bank_code || '').trim(),
+      bank_name: String(params.bank_name || '').trim(),
+      account_number: String(params.account_number || '').trim(),
+      account_name: String(params.account_name || '').trim(),
+      narration: params.narration || 'Collekt Wallet Withdrawal',
+      user_id: params.user_id || user.id,
+      owner_id: params.owner_id || user.id || user.owner_id,
+      owner_type: params.owner_type || (user.role === 'company' ? 'company' : 'user'),
+      role: params.role || user.role || 'professional'
+    };
+
+    const res = await fetch('/.netlify/functions/paystack-withdraw', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      return { success: false, error: data.error || 'Withdrawal processing failed' };
+    }
+
+    return {
+      success: true,
+      data: data,
+      message: data.message,
+      reference: data.reference,
+      balance_after: data.balance_after
+    };
+  } catch (err) {
+    console.error('withdrawWalletFunds error:', err);
+    return { success: false, error: err.message || 'Withdrawal network error' };
+  }
+}
+
 
 
 
