@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=66.0">
-<link rel="stylesheet" href="shared.css?v=66.0">
-<link rel="stylesheet" href="glass.css?v=66.0">
+<link rel="stylesheet" href="style.css?v=70.0">
+<link rel="stylesheet" href="shared.css?v=70.0">
+<link rel="stylesheet" href="glass.css?v=70.0">
 <style>
 /* ═ LIVE MARKETPLACE STYLES ═ */
 html, body {
@@ -378,7 +378,7 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     <!-- Proposal Form Box -->
     <div style="border-top:1px solid var(--line); padding-top:20px; margin-top:20px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <div style="font-size:16px; font-weight:900; color:var(--ink);">Submit Bidding Proposal</div>
+        <div style="font-size:16px; font-weight:900; color:var(--ink);">Collekt This Opportunity</div>
         <button class="btn btn-outline btn-sm" onclick="triggerAIPropForTender()" style="color:var(--teal); border-color:var(--teal); font-weight:800; font-size:12px;">
           ✨ AI Pitch Writer
         </button>
@@ -386,7 +386,7 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
 
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
         <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label" style="font-size:12px; font-weight:700;">Proposed Bid Amount (₦)</label>
+          <label class="form-label" style="font-size:12px; font-weight:700;">Proposed Amount (₦)</label>
           <input class="form-input" type="number" id="propBidAmount" placeholder="e.g. 1500000">
         </div>
         <div class="form-group" style="margin-bottom:0;">
@@ -400,8 +400,8 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
         <textarea class="form-input" id="propPitchText" rows="4" placeholder="Detail your domain experience, HSE compliance, and execution plan..."></textarea>
       </div>
 
-      <button class="btn btn-primary" onclick="submitTenderProposalClick()" style="width:100%; min-height:46px; font-weight:800; background:linear-gradient(135deg,#0E3B35,#13756F); border:none; box-shadow:0 8px 24px rgba(14,59,53,0.25);">
-        📝 Submit Proposal &amp; Place Bid
+      <button class="btn btn-primary" onclick="submitTenderProposalClick()" style="width:100%; min-height:46px; font-weight:800; font-size:15px; letter-spacing:0.3px; background:linear-gradient(135deg,#0E3B35,#13756F); border:none; box-shadow:0 8px 24px rgba(14,59,53,0.25); cursor:pointer;">
+        ⚡ Collekt
       </button>
     </div>
   </div>
@@ -526,10 +526,10 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=66.0"></script>
-<script src="app.js?v=66.0"></script>
-<script src="collekt-ai.js?v=66.0"></script>
-<script src="settings-popup.js?v=66.0"></script>
+<script src="supabase.js?v=70.0"></script>
+<script src="app.js?v=70.0"></script>
+<script src="collekt-ai.js?v=70.0"></script>
+<script src="settings-popup.js?v=70.0"></script>
 <script>
   /* ═════════════════════════════════════════════════════════
      LIVE MARKETPLACE ENGINE v3.0
@@ -693,8 +693,8 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
               <span class="tender-budget-lbl">${escapeHTML(rateTypeLabel)}</span>
               <span class="tender-budget-val">${budgetFormatted}</span>
             </div>
-            <button class="btn btn-primary btn-sm" style="font-weight:800; min-height:36px; padding:0 18px;" onclick="openTenderDetailModal('${j.id}')">
-              📝 Apply / View
+            <button class="btn btn-primary btn-sm" style="font-weight:800; min-height:36px; padding:0 18px; cursor:pointer;" onclick="openTenderDetailModal('${j.id}')">
+              ⚡ Collekt
             </button>
           </div>
         </div>
@@ -882,7 +882,7 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     }
 
     closeModal('tenderDetailModal');
-    if (typeof showToast === 'function') showToast('🎉 Application & Proposal submitted successfully!');
+    if (typeof showToast === 'function') showToast('🎉 Successfully Collekted! Proposal sent to client.');
   }
 
   /* ═ POST JOB / TENDER MODAL ACTIONS ═ */
