@@ -15,7 +15,7 @@ exports.handler = async (event) => {
     const {
       amount,
       email,
-      payment_method = 'card',
+      payment_method = 'korapay',
       user_id,
       userId,
       owner_id,
@@ -120,20 +120,16 @@ exports.handler = async (event) => {
     const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
     const reference = `COL-FUND-${timestamp}-${randomSuffix}`;
 
-    // Determine channels based on method
-    let channels = ['card', 'bank_transfer'];
-    if (payment_method === 'opay') {
-      channels = ['opay', 'card'];
-    } else if (payment_method === 'korapay') {
-      channels = ['card', 'bank_transfer', 'pay_with_bank'];
-    } else if (payment_method === 'card') {
+    // Determine channels for Korapay Multi-Rail Checkout
+    let channels = ['card', 'bank_transfer', 'pay_with_bank'];
+    if (payment_method === 'card') {
       channels = ['card'];
     } else if (payment_method === 'bank_transfer') {
       channels = ['bank_transfer'];
     }
 
-    // Determine gateway
-    const selectedGateway = body.gateway || (payment_method === 'korapay' ? 'korapay' : (payment_method === 'opay' && process.env.OPAY_PUBLIC_KEY ? 'opay' : 'paystack'));
+    // Determine gateway - Korapay is the platform primary payment engine
+    const selectedGateway = body.gateway === 'opay' && process.env.OPAY_PUBLIC_KEY ? 'opay' : 'korapay';
 
     // Create pending transaction in Supabase
     const txPayload = {
@@ -171,7 +167,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // Initialize checkout session via chosen provider (Paystack / Korapay / OPay)
+    // Initialize checkout session via chosen provider (Korapay primary)
     const provider = getPaymentProvider(selectedGateway);
     const returnUrl = callback_url || `${event.headers?.origin || event.headers?.Origin || 'https://collektng.com'}/payment-result.html`;
     const customerFullName = body.name || body.displayName || body.customer_name || body.company_name || '';
