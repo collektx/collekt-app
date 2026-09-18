@@ -422,7 +422,7 @@ class KorapayProvider extends PaymentProvider {
   constructor(publicKey, secretKey, webhookSecret, encryptionKey) {
     super();
     this.gateway = 'korapay';
-    this.publicKey = publicKey || process.env.KORAPAY_PUBLIC_KEY || '';
+    this.publicKey = publicKey || process.env.KORAPAY_PUBLIC_KEY || 'pk_live_GDgZcYhPzLZBHh1rr6godHWmHuA5qfNaxdioYM1m';
     this.secretKey = secretKey || process.env.KORAPAY_SECRET_KEY || '';
     this.webhookSecret = webhookSecret || process.env.KORAPAY_WEBHOOK_SECRET || this.secretKey;
     this.encryptionKey = encryptionKey || process.env.KORAPAY_ENCRYPTION_KEY || '';
