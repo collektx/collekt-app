@@ -507,9 +507,32 @@ class KorapayProvider extends PaymentProvider {
     return hash.toLowerCase() === signature.toLowerCase();
   }
 
-  async initializePayment({ amount, email, reference, callback_url, return_url, channels = ['card', 'bank_transfer', 'pay_with_bank'], metadata = {} }) {
+  async initializePayment({ amount, email, reference, callback_url, return_url, channels, metadata = {} }) {
     if (!amount || amount <= 0) throw new Error('Invalid payment amount');
     const numAmount = Number(amount);
+
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    let cleanCustomerName = String(metadata?.customer_name || metadata?.name || cleanEmail.split('@')[0] || 'Collekt User').replace(/[^a-zA-Z0-9\s]/g, ' ').trim();
+    if (!cleanCustomerName || cleanCustomerName.length < 2) {
+      cleanCustomerName = 'Collekt User';
+    }
+
+    // Sanitize metadata: Korapay strict validation only accepts <= 5 non-empty string/number/boolean keys
+    const cleanMetadata = {};
+    if (metadata && typeof metadata === 'object') {
+      const priorityKeys = ['owner_id', 'user_id', 'owner_type', 'wallet_id', 'payment_method'];
+      for (const key of priorityKeys) {
+        if (Object.keys(cleanMetadata).length >= 5) break;
+        const val = metadata[key];
+        if (val === null || val === undefined) continue;
+        if (typeof val === 'string') {
+          const trimmed = val.trim();
+          if (trimmed.length > 0) cleanMetadata[key] = trimmed;
+        } else if (typeof val === 'number' || typeof val === 'boolean') {
+          cleanMetadata[key] = String(val);
+        }
+      }
+    }
 
     const payload = {
       amount: numAmount,
@@ -517,15 +540,43 @@ class KorapayProvider extends PaymentProvider {
       reference: reference,
       narration: 'Collekt Wallet Deposit',
       redirect_url: return_url || callback_url,
-      channels: channels,
       customer: {
-        name: metadata.customer_name || email.split('@')[0],
-        email: email.trim().toLowerCase()
-      },
-      metadata: metadata
+        name: cleanCustomerName,
+        email: cleanEmail
+      }
     };
 
-    const res = await this._request('POST', '/charges/initialize', payload);
+    if (channels && Array.isArray(channels) && channels.length > 0) {
+      const validChannels = channels.filter(c => ['card', 'bank_transfer', 'pay_with_bank'].includes(c));
+      if (validChannels.length > 0) {
+        payload.channels = validChannels;
+      }
+    }
+
+    if (Object.keys(cleanMetadata).length > 0) {
+      payload.metadata = cleanMetadata;
+    }
+
+    let res = await this._request('POST', '/charges/initialize', payload);
+
+    // If channel-specific error occurs (e.g. channel not enabled for NGN), retry without channels filter
+    if (!res.body || !res.body.status) {
+      if (payload.channels && res.body?.message && /not enabled/i.test(res.body.message)) {
+        console.warn('Korapay channel not enabled, retrying without channels filter:', res.body.message);
+        delete payload.channels;
+        res = await this._request('POST', '/charges/initialize', payload);
+      }
+    }
+
+    // If metadata validation fails, retry with stripped metadata
+    if (!res.body || !res.body.status) {
+      if (payload.metadata && res.body?.message && /validation_error|invalid/i.test(res.body?.message || res.body?.error || '')) {
+        console.warn('Korapay metadata validation error, retrying without metadata:', res.body.message);
+        delete payload.metadata;
+        res = await this._request('POST', '/charges/initialize', payload);
+      }
+    }
+
     if (!res.body || !res.body.status) {
       if (this.environment === 'test' || !this.secretKey.startsWith('sk_live_')) {
         return {

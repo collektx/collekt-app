@@ -174,6 +174,7 @@ exports.handler = async (event) => {
     // Initialize checkout session via chosen provider (Paystack / Korapay / OPay)
     const provider = getPaymentProvider(selectedGateway);
     const returnUrl = callback_url || `${event.headers?.origin || event.headers?.Origin || 'https://collektng.com'}/payment-result.html`;
+    const customerFullName = body.name || body.displayName || body.customer_name || body.company_name || '';
 
     const initResult = await provider.initializePayment({
       amount: numAmount,
@@ -185,10 +186,11 @@ exports.handler = async (event) => {
       metadata: {
         user_id: user_id || effectiveOwnerId,
         owner_id: effectiveOwnerId,
-        owner_type: owner_type,
-        wallet_id: wallet?.id,
+        owner_type: effectiveOwnerType,
+        wallet_id: wallet?.id || '',
         payment_method: payment_method,
-        gateway: selectedGateway
+        gateway: selectedGateway,
+        customer_name: customerFullName
       }
     });
 

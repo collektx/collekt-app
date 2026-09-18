@@ -1534,9 +1534,10 @@ async function generateAndSaveFinalPDF({
 /**
  * 1. Initialize Server-Side Wallet Funding Checkout
  */
-async function initializeWalletFunding({ amount, email, payment_method = 'card', user_id, owner_id, owner_type = 'user', gateway }) {
+async function initializeWalletFunding({ amount, email, payment_method = 'card', user_id, owner_id, owner_type = 'user', gateway, name, customer_name, displayName }) {
   try {
     const selectedGateway = gateway || (payment_method === 'korapay' ? 'korapay' : (payment_method === 'opay' ? 'opay' : 'paystack'));
+    const resolvedName = name || customer_name || displayName || '';
     const res = await fetch('/.netlify/functions/paystack-initialize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1547,7 +1548,10 @@ async function initializeWalletFunding({ amount, email, payment_method = 'card',
         gateway: selectedGateway,
         user_id,
         owner_id: owner_id || user_id,
-        owner_type
+        owner_type,
+        name: resolvedName,
+        customer_name: resolvedName,
+        displayName: resolvedName
       })
     });
     const data = await res.json();
