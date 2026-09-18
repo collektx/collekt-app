@@ -131,7 +131,7 @@ exports.handler = async (event) => {
 
     // 3. Provision Dedicated Virtual Account via Paystack
     const provider = getPaymentProvider('paystack');
-    let dvaResult;
+    let dvaResult = null;
 
     try {
       dvaResult = await provider.createVirtualAccount({
@@ -142,26 +142,41 @@ exports.handler = async (event) => {
         preferred_bank: 'wema-bank'
       });
       // Ensure returned DVA has the platform prefix + full user name
-      if (!dvaResult.account_name || dvaResult.account_name.includes('COLLEKT MEMBER')) {
+      if (dvaResult && (!dvaResult.account_name || dvaResult.account_name.includes('COLLEKT MEMBER'))) {
         dvaResult.account_name = `COLLEKT / ${preferredName}`;
       }
     } catch (apiErr) {
-      console.warn('Paystack DVA generation notice:', apiErr.message);
-      // Fallback/Simulated DVA generation for test environments or pending Paystack Go-Live
-      const simulatedAccountNo = '0' + Math.floor(100000000 + Math.random() * 900000000);
-      dvaResult = {
-        account_number: simulatedAccountNo,
-        account_name: `COLLEKT / ${preferredName}`,
-        bank_name: 'Wema Bank',
-        bank_code: '035',
-        currency: 'NGN',
-        provider_customer_id: 'CUST_' + Date.now(),
-        provider_account_id: 'DVA_' + Date.now(),
-        status: 'active'
+      console.warn('Paystack DVA generation note:', apiErr.message);
+      // If Dedicated NUBAN is pending activation on Paystack merchant account, return instant checkout mode
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        },
+        body: JSON.stringify({
+          status: 'instant_checkout_ready',
+          requires_instant_checkout: true,
+          message: apiErr.message || 'Instant Bank Transfer available via live Paystack checkout',
+          provider: 'paystack'
+        })
       };
     }
 
-    // 4. Save to virtual_accounts table in Supabase
+    if (!dvaResult || !dvaResult.account_number) {
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          status: 'instant_checkout_ready',
+          requires_instant_checkout: true,
+          message: 'Instant Bank Transfer available via live checkout'
+        })
+      };
+    }
+
+    // 4. Save authentic account to virtual_accounts table in Supabase
     const { data: savedDva, error: saveError } = await supabase
       .from('virtual_accounts')
       .insert({
@@ -198,7 +213,7 @@ exports.handler = async (event) => {
         paystack_customer_code: dvaResult.provider_customer_id,
         updated_at: new Date().toISOString()
       })
-      .or(`owner_id.eq.${effectiveOwnerId},user_id.eq.${effectiveOwnerId}`);
+      .eq('owner_id', effectiveOwnerId);
 
     return {
       statusCode: 200,

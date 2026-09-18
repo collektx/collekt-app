@@ -1603,7 +1603,12 @@ async function provisionDedicatedVirtualAccount(params) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to provision virtual account');
-    return { success: true, data: data.virtual_account };
+    return {
+      success: true,
+      data: data.virtual_account || null,
+      status: data.status,
+      requires_instant_checkout: Boolean(data.requires_instant_checkout)
+    };
   } catch (err) {
     console.error('provisionDedicatedVirtualAccount error:', err);
     return { success: false, error: err.message };

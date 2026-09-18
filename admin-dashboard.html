@@ -50,9 +50,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=55.0">
-<link rel="stylesheet" href="shared.css?v=55.0">
-<link rel="stylesheet" href="glass.css?v=55.0">
+<link rel="stylesheet" href="style.css?v=56.0">
+<link rel="stylesheet" href="shared.css?v=56.0">
+<link rel="stylesheet" href="glass.css?v=56.0">
 
 <style>
   html, body {
@@ -1045,8 +1045,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=55.0"></script>
-<script src="app.js?v=55.0"></script>
+<script src="supabase.js?v=56.0"></script>
+<script src="app.js?v=56.0"></script>
 <script>
   async function initAdminDashboard() {
     // 1. Verify Master Admin or live Supabase session
@@ -1314,12 +1314,6 @@
         if (!u.wallet) u.wallet = { balance: 0, escrow_balance: 0 };
         u.wallet.bank_assigned = true;
         u.wallet.bank_name = partner;
-        const seed = String(u.id || u.email || '123456789');
-        let hash = 0;
-        for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash) + seed.charCodeAt(i);
-        const numSuffix = String(Math.abs(hash)).padStart(6, '0').slice(-6);
-        const prefix = partner.includes('NOVA') ? '9800' : partner.includes('Wema') ? '9600' : partner.includes('Titan') ? '9010' : partner.includes('Sterling') ? '7800' : '0290';
-        u.wallet.account_number = prefix + numSuffix;
         updatedCount++;
       });
       if (typeof saveDirectoryUsers === 'function') {
@@ -1332,12 +1326,6 @@
         if (!currentUser.wallet) currentUser.wallet = { balance: 0, escrow_balance: 0 };
         currentUser.wallet.bank_assigned = true;
         currentUser.wallet.bank_name = partner;
-        const seed = String(currentUser.id || currentUser.email || '123456789');
-        let hash = 0;
-        for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash) + seed.charCodeAt(i);
-        const numSuffix = String(Math.abs(hash)).padStart(6, '0').slice(-6);
-        const prefix = partner.includes('NOVA') ? '9800' : partner.includes('Wema') ? '9600' : partner.includes('Titan') ? '9010' : partner.includes('Sterling') ? '7800' : '0290';
-        currentUser.wallet.account_number = prefix + numSuffix;
         if (typeof setUser === 'function') setUser(currentUser);
       }
 
@@ -1820,7 +1808,7 @@
           </td>
           <td><span style="font-weight:800; text-transform:capitalize;">${escapeHTML(u.role || 'Professional')}</span></td>
           <td>${statusBadge}</td>
-          <td style="font-family:monospace; font-weight:800; color:var(--teal);">${(u.wallet && u.wallet.account_number && u.wallet.account_number !== "0123456789") ? u.wallet.account_number : ("9800" + String(Math.abs(String(u.id || u.email || "999").split("").reduce((a,b)=>((a<<5)-a)+b.charCodeAt(0),0))).slice(-6).padStart(6, "0"))}</td>
+          <td style="font-family:monospace; font-weight:800; color:var(--teal);">${(u.wallet && u.wallet.account_number && u.wallet.account_number !== "0123456789" && !String(u.wallet.account_number).startsWith("9800")) ? u.wallet.account_number : '<span style="font-size:11px; font-family:sans-serif; color:var(--muted);">Live Transfer Rail</span>'}</td>
           <td style="white-space:nowrap;">
             <button class="btn btn-outline btn-xs" style="font-weight:800;" onclick="openAdminEditUserModal('${uIdentifier}')" title="Edit Profile & Status">✏️ Edit</button>
             <button class="btn btn-outline btn-xs" style="font-weight:800;" onclick="inspectProCredentials('${uIdentifier}')" title="Inspect Uploaded Documents">👁️ Docs</button>

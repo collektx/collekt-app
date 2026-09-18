@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=55.0">
-<link rel="stylesheet" href="shared.css?v=55.0">
-<link rel="stylesheet" href="glass.css?v=55.0">
+<link rel="stylesheet" href="style.css?v=56.0">
+<link rel="stylesheet" href="shared.css?v=56.0">
+<link rel="stylesheet" href="glass.css?v=56.0">
 
 <style>
   body { background: var(--paper); }
@@ -345,24 +345,8 @@
 
     <!-- VIEW B: Dedicated Virtual Account (Bank Transfer) Section -->
     <div id="fundFormTransferSection" style="display:none;">
-      <div id="fundModalDvaCardContainer" style="margin-bottom:16px;">
-        <!-- Populated dynamically with user's Dedicated Virtual Account -->
-      </div>
-
-      <div style="background:rgba(20,184,166,0.06); border:1px solid rgba(20,184,166,0.2); border-radius:14px; padding:14px; margin-bottom:16px;">
-        <div style="font-size:12px; font-weight:800; color:var(--teal); margin-bottom:4px;">⚡ Instant Bank Transfer Crediting</div>
-        <div style="font-size:11.5px; color:var(--muted); line-height:1.45;">
-          Transfers to this dedicated NUBAN are automatically credited to your Collekt wallet within seconds. No manual receipt upload required.
-        </div>
-      </div>
-
-      <div style="display:flex; gap:10px;">
-        <button type="button" class="btn btn-primary" onclick="copyDvaAccountModal()" style="flex:1; background:var(--teal); font-weight:800;">
-          📋 Copy Account Number
-        </button>
-        <button type="button" class="btn btn-outline" onclick="shareDvaDetails()" style="flex:1; font-weight:800;">
-          📤 Share Details
-        </button>
+      <div id="fundModalDvaCardContainer" style="margin-bottom:6px;">
+        <!-- Populated dynamically with user's Dedicated Virtual Account or Live Dynamic Bank Transfer -->
       </div>
     </div>
 
@@ -635,10 +619,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=55.0"></script>
-<script src="app.js?v=55.0"></script>
-<script src="collekt-ai.js?v=55.0"></script>
-<script src="settings-popup.js?v=55.0"></script>
+<script src="supabase.js?v=56.0"></script>
+<script src="app.js?v=56.0"></script>
+<script src="collekt-ai.js?v=56.0"></script>
+<script src="settings-popup.js?v=56.0"></script>
 <script>
   let isHideBalance = false;
   let rawBalance = 0;
@@ -1004,6 +988,63 @@
     }
   };
 
+  // Real-time Preview Formatting for Transfer Deposit Input
+  window.updateTransferFundPreview = function(val) {
+    const preview = document.getElementById('transferFundAmountFormattedPreview');
+    const num = parseFloat(val) || 0;
+    if (preview) {
+      preview.textContent = 'Formatted: ₦' + num.toLocaleString('en-NG', { minimumFractionDigits: 2 });
+    }
+  };
+
+  window.setTransferFundAmount = function(amt) {
+    const inp = document.getElementById('transferDepositAmount');
+    if (inp) {
+      inp.value = amt;
+      updateTransferFundPreview(amt);
+    }
+  };
+
+  window.executeTransferFunding = async function() {
+    const user = getUser() || {};
+    const amt = Number(document.getElementById('transferDepositAmount')?.value || document.getElementById('fundDepositAmount')?.value);
+    const btn = document.getElementById('btnSubmitTransferFund');
+
+    if (!amt || isNaN(amt) || amt < 100) {
+      showToast('⚠️ Minimum funding amount is ₦100.', 'warning');
+      return;
+    }
+
+    const email = user.email || localStorage.getItem('collekt_last_user_email') || 'member@collekt.ng';
+    const ownerId = user.id || user.owner_id;
+    const ownerType = user.role === 'company' ? 'company' : (user.role === 'professional' ? 'professional' : 'user');
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-icon"></span> Initializing Live Bank Transfer Rail...';
+    }
+
+    const res = await initializeWalletFunding({
+      amount: amt,
+      email: email,
+      payment_method: 'bank_transfer',
+      user_id: user.id,
+      owner_id: ownerId,
+      owner_type: ownerType
+    });
+
+    if (res && res.success && res.data?.authorization_url) {
+      showToast('🔒 Redirecting to Paystack Bank Transfer checkout...');
+      window.location.href = res.data.authorization_url;
+    } else {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🏛️ Generate Live Bank Transfer Account &rarr;</span>';
+      }
+      showToast('⚠️ ' + (res?.error || 'Could not initialize payment session. Please check your connection.'), 'error');
+    }
+  };
+
   // ── DEDICATED VIRTUAL ACCOUNT RENDERING & LOGIC ───────────
   async function loadAndRenderFundModalDva() {
     const container = document.getElementById('fundModalDvaCardContainer');
@@ -1024,7 +1065,7 @@
     container.innerHTML = `
       <div style="background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:20px; text-align:center;">
         <div class="loader-spinner" style="width:28px; height:28px; border-width:3px; margin:0 auto 10px;"></div>
-        <div style="font-size:12px; color:var(--muted); font-weight:700;">Loading your Dedicated Virtual Account...</div>
+        <div style="font-size:12px; color:var(--muted); font-weight:700;">Connecting to Bank Transfer Rails...</div>
       </div>
     `;
 
@@ -1033,23 +1074,6 @@
     if (res && res.success && res.data) {
       dva = res.data;
       activeDvaAccount = dva;
-    } else {
-      // Auto-provision if eligible with full authentic name
-      const provRes = await provisionDedicatedVirtualAccount({
-        owner_id: ownerId,
-        user_id: user.id,
-        owner_type: user.role === 'company' ? 'company' : 'professional',
-        email: user.email,
-        name: displayName,
-        displayName: displayName,
-        first_name: user.first_name || (user.name ? user.name.split(' ')[0] : ''),
-        last_name: user.last_name || (user.name ? user.name.split(' ').slice(1).join(' ') : ''),
-        company_name: user.company_name
-      });
-      if (provRes && provRes.success && provRes.data) {
-        dva = provRes.data;
-        activeDvaAccount = dva;
-      }
     }
 
     if (dva && dva.account_number) {
@@ -1064,7 +1088,7 @@
       const bankName = escapeHTML(dva.bank_name || 'Wema Bank');
 
       container.innerHTML = `
-        <div style="background:linear-gradient(135deg, #090d0c 0%, #101716 50%, #0e3b35 100%); border-radius:18px; padding:20px; color:#fff; position:relative; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.12);">
+        <div style="background:linear-gradient(135deg, #090d0c 0%, #101716 50%, #0e3b35 100%); border-radius:18px; padding:20px; color:#fff; position:relative; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.12); margin-bottom:14px;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; position:relative; z-index:2;">
             <div>
               <div style="font-size:10px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.7);">Your Dedicated Virtual Account</div>
@@ -1098,15 +1122,55 @@
             </div>
           </div>
         </div>
+
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn btn-primary" onclick="copyDvaAccountModal()" style="flex:1; background:var(--teal); font-weight:800;">
+            📋 Copy Account Number
+          </button>
+          <button type="button" class="btn btn-outline" onclick="shareDvaDetails()" style="flex:1; font-weight:800;">
+            📤 Share Details
+          </button>
+        </div>
       `;
     } else {
       container.innerHTML = `
-        <div style="background:var(--paper); border:1.5px dashed var(--line); border-radius:18px; padding:22px; text-align:center;">
-          <div style="font-size:26px; margin-bottom:6px;">🏛️</div>
-          <div style="font-size:14.5px; font-weight:900; color:var(--ink); margin-bottom:4px;">Dedicated Virtual Account</div>
-          <p style="font-size:12px; color:var(--muted); margin:0 0 14px;">Generate an instant, dedicated Nigerian NUBAN account to receive automatic wallet deposits from any bank app.</p>
-          <button type="button" class="btn btn-primary btn-sm" onclick="loadAndRenderFundModalDva()" style="background:var(--teal); font-weight:900; padding:10px 22px; border-radius:10px;">
-            ⚡ Generate Virtual Account Now
+        <div style="background:linear-gradient(135deg, #090d0c 0%, #101716 50%, #0e3b35 100%); border-radius:18px; padding:22px; color:#fff; position:relative; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.12);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+            <div>
+              <div style="font-size:10px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.7);">Live Bank Transfer Deposit</div>
+              <div style="font-size:15px; font-weight:900; color:#fff; display:flex; align-items:center; gap:6px; margin-top:2px;">
+                <span>🏛️ Wema / Titan Live Rail</span>
+              </div>
+            </div>
+            <span style="font-size:10px; background:rgba(20,184,166,0.2); border:1px solid rgba(20,184,166,0.4); color:#5eead4; padding:3px 9px; border-radius:99px; font-weight:800;">
+              ⚡ Real-time NIBSS Credit
+            </span>
+          </div>
+
+          <p style="font-size:12px; color:rgba(255,255,255,0.8); line-height:1.5; margin:0 0 16px;">
+            Paystack will generate an authentic, live, NIBSS-active Wema / Titan Bank account on demand. Transfer from any Nigerian banking app (OPay, GTBank, Zenith, Access, Kuda, PalmPay) for instant automated wallet crediting.
+          </p>
+
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label" style="font-size:11.5px; font-weight:800; color:rgba(255,255,255,0.85);">Enter Deposit Amount (NGN)</label>
+            <input class="form-input" type="number" id="transferDepositAmount" placeholder="e.g. 50000" min="100" value="50000" oninput="updateTransferFundPreview(this.value)" style="font-size:18px; font-weight:900; color:#fff; background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.2);">
+            
+            <div style="font-size:12px; color:#5eead4; font-weight:800; margin-top:4px;" id="transferFundAmountFormattedPreview">
+              Formatted: ₦50,000.00
+            </div>
+
+            <div class="amount-chips-wrap" style="margin-top:8px;">
+              <button type="button" class="amount-chip" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;" onclick="setTransferFundAmount(5000)">₦5,000</button>
+              <button type="button" class="amount-chip" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;" onclick="setTransferFundAmount(20000)">₦20,000</button>
+              <button type="button" class="amount-chip" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;" onclick="setTransferFundAmount(50000)">₦50,000</button>
+              <button type="button" class="amount-chip" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;" onclick="setTransferFundAmount(100000)">₦100,000</button>
+              <button type="button" class="amount-chip" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;" onclick="setTransferFundAmount(250000)">₦250,000</button>
+              <button type="button" class="amount-chip" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;" onclick="setTransferFundAmount(500000)">₦500,000</button>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary" id="btnSubmitTransferFund" onclick="executeTransferFunding()" style="width:100%; min-height:48px; font-weight:900; background:var(--teal); border:none; box-shadow:0 6px 18px rgba(19,117,111,0.25); cursor:pointer;">
+            <span>🏛️ Generate Live Bank Transfer Account &rarr;</span>
           </button>
         </div>
       `;
@@ -1916,25 +1980,25 @@
         <div style="padding:4px 0;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
             <div>
-              <div class="sbank-label" style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;">Dedicated Virtual Account</div>
+              <div class="sbank-label" style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;">Direct Bank Transfer Rail</div>
               <div class="sbank-val" style="font-weight:900; color:var(--teal); font-size:14px; margin-top:2px;">
-                🏛️ Paystack NUBAN Rail
+                🏛️ Paystack Wema / Titan Rail
               </div>
             </div>
-            <span style="font-size:10px; background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:99px; font-weight:800;">READY TO GENERATE</span>
+            <span style="font-size:10px; background:rgba(20,184,166,0.15); color:var(--teal); padding:2px 8px; border-radius:99px; font-weight:800;">LIVE ACTIVE RAIL</span>
           </div>
 
           <div style="background:var(--paper); border:1.5px dashed var(--line); border-radius:14px; padding:18px; text-align:center; margin-bottom:12px;">
             <div style="font-size:26px; margin-bottom:6px;">🏛️</div>
-            <div style="font-size:14px; font-weight:900; color:var(--ink); margin-bottom:4px;">Generate Your Dedicated Virtual Account</div>
-            <p style="font-size:12px; color:var(--muted); margin:0 0 14px; line-height:1.5;">Get a unique 10-digit Nigerian NUBAN account number assigned to your account for direct, instant bank transfers.</p>
-            <button class="btn btn-primary btn-sm" onclick="generateOverviewDva()" style="background:var(--teal); font-weight:900; font-size:12.5px; border:none; padding:10px 22px; border-radius:10px; box-shadow:0 4px 14px rgba(19,117,111,0.25); cursor:pointer;">
-              ⚡ Generate Dedicated Virtual Account &rarr;
+            <div style="font-size:14px; font-weight:900; color:var(--ink); margin-bottom:4px;">Deposit via Live Bank Transfer</div>
+            <p style="font-size:12px; color:var(--muted); margin:0 0 14px; line-height:1.5;">Fund your wallet directly from any Nigerian banking app (OPay, GTBank, Zenith, Access, Kuda, PalmPay) with instant automated crediting.</p>
+            <button class="btn btn-primary btn-sm" onclick="openFundModal(); selectFundMethod('bank_transfer');" style="background:var(--teal); font-weight:900; font-size:12.5px; border:none; padding:10px 22px; border-radius:10px; box-shadow:0 4px 14px rgba(19,117,111,0.25); cursor:pointer;">
+              ⚡ Deposit via Bank Transfer &rarr;
             </button>
           </div>
 
           <div class="sbank-notice" style="font-size:11px; background:rgba(20,184,166,0.06); color:var(--teal); padding:8px 12px; border-radius:10px; border:1px solid rgba(20,184,166,0.18);">
-            💡 Assigned through authorized payment infrastructure. Zero manual receipt submissions required.
+            💡 Automated NIBSS settlement. Credits your Collekt wallet within seconds.
           </div>
         </div>
       `;
@@ -1944,24 +2008,27 @@
   window.generateOverviewDva = async function() {
     const user = getUser() || {};
     const ownerId = user.id || user.owner_id;
-    showToast('⚡ Provisioning your Dedicated Virtual Account...');
+    showToast('⚡ Connecting to Paystack Bank Transfer Rail...');
 
     const res = await provisionDedicatedVirtualAccount({
       owner_id: ownerId,
       user_id: user.id,
       owner_type: user.role === 'company' ? 'company' : (user.role === 'professional' ? 'professional' : 'user'),
       email: user.email,
+      name: (typeof getDisplayName === 'function' ? getDisplayName(user) : user.name),
       first_name: user.first_name,
       last_name: user.last_name,
       company_name: user.company_name
     });
 
-    if (res && res.success && res.data) {
+    if (res && res.success && res.data && res.data.account_number) {
       activeDvaAccount = res.data;
       showToast('🎉 Dedicated Virtual Account generated successfully!');
       renderVirtualBankDetails(user.wallet);
     } else {
-      showToast('⚠️ ' + (res?.error || 'Could not generate virtual account. Please check your connection.'), 'error');
+      showToast('🏛️ Opening Live Bank Transfer generator...');
+      openFundModal();
+      selectFundMethod('bank_transfer');
     }
   };
 
@@ -2267,6 +2334,21 @@
     initTransactions();
     updateBalanceUI();
     renderWalletPinSettings();
+
+    // Check query params for instant actions
+    const urlParams = new URLSearchParams(window.location.search);
+    const actionParam = urlParams.get('action');
+    const fundParam = urlParams.get('fund');
+    const tabParam = urlParams.get('tab');
+    if (tabParam) switchWalletTab(tabParam);
+    if (actionParam === 'fund' || fundParam) {
+      openFundModal();
+      if (actionParam === 'transfer' || fundParam === 'transfer' || urlParams.get('method') === 'bank_transfer') {
+        selectFundMethod('bank_transfer');
+      }
+    } else if (actionParam === 'withdraw') {
+      openWithdrawModal();
+    }
 
     // Reveal Content smoothly (No CLS)
     setTimeout(() => {
