@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=66.0">
-<link rel="stylesheet" href="shared.css?v=66.0">
-<link rel="stylesheet" href="glass.css?v=66.0">
+<link rel="stylesheet" href="style.css?v=70.0">
+<link rel="stylesheet" href="shared.css?v=70.0">
+<link rel="stylesheet" href="glass.css?v=70.0">
 
 <style>
   html, body {
@@ -285,8 +285,8 @@
               </div>
             </div>
 
-            <!-- Balances and DVA Grid -->
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:16px;">
+            <!-- Balances Grid -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-bottom:16px;">
               <!-- Available Balance -->
               <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:14px 16px;">
                 <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Available Balance</div>
@@ -299,21 +299,6 @@
                 <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Locked in Escrow 🔒</div>
                 <div style="font-size:22px; font-weight:900; color:var(--amber);" id="coEscrowBal">₦0.00</div>
                 <div style="font-size:11px; color:rgba(255,255,255,0.6); font-weight:600; margin-top:4px;">Active milestone guarantees</div>
-              </div>
-
-              <!-- Dedicated Virtual Account (DVA) -->
-              <div style="background:rgba(20,184,166,0.08); border:1px solid rgba(20,184,166,0.25); border-radius:14px; padding:14px 16px; position:relative;">
-                <div style="font-size:11px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
-                  <span>Direct Bank Transfer Rail</span>
-                  <span id="coDvaBankName" style="font-weight:900; color:#fff; font-size:10px; background:rgba(255,255,255,0.15); padding:1px 6px; border-radius:4px;">Paystack Rail</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-                  <span style="font-size:16px; font-weight:900; font-family:monospace; color:#fff; letter-spacing:0.5px;" id="coDvaAcctNum">Live Transfer Rail</span>
-                  <button class="btn btn-ghost btn-xs" id="coDvaBtn" onclick="copyCoDVA()" title="Direct Bank Deposit" style="padding:2px 8px; color:var(--teal); border:1px solid rgba(20,184,166,0.4); border-radius:6px; font-size:11px; font-weight:800; background:rgba(0,0,0,0.2);">
-                    ⚡ Fund
-                  </button>
-                </div>
-                <div style="font-size:11px; color:rgba(255,255,255,0.7); font-weight:600; margin-top:4px;" id="coDvaAcctName">COLLEKT / COMPANY</div>
               </div>
             </div>
           </div>
@@ -594,9 +579,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=66.0"></script>
-<script src="app.js?v=66.0"></script>
-<script src="collekt-ai.js?v=66.0"></script>
+<script src="supabase.js?v=70.0"></script>
+<script src="app.js?v=70.0"></script>
+<script src="collekt-ai.js?v=70.0"></script>
 <script>
   requireCompany();
   
@@ -1214,59 +1199,6 @@
 
     const escrowEl = document.getElementById('coEscrowBal');
     if (escrowEl) escrowEl.textContent = (typeof formatNaira === 'function') ? formatNaira(escrow, true) : '₦' + escrow.toLocaleString();
-
-    // 2. Dedicated Virtual Account
-    let dvaAcct = wallet.account_number || user.dva_account || '';
-    let dvaBank = wallet.bank_name || user.dva_bank || 'Wema Bank';
-    let realCoName = user.company_name || user.name || (typeof getDisplayName === 'function' ? getDisplayName(user) : 'COMPANY');
-    let dvaName = wallet.account_name || user.dva_name || `COLLEKT / ${realCoName.toUpperCase()}`;
-
-    if (dvaName.includes('COLLEKT MEMBER') || dvaName.includes('COLLEKT / MEMBER') || dvaName.trim() === 'COLLEKT /' || dvaName.trim() === 'COLLEKT') {
-      dvaName = `COLLEKT / ${realCoName.toUpperCase()}`;
-    }
-
-    if (!dvaAcct && typeof fetchDedicatedVirtualAccount === 'function' && user.id) {
-      try {
-        const res = await fetchDedicatedVirtualAccount(user.id);
-        if (res && res.success && res.data && res.data.account_number) {
-          dvaAcct = res.data.account_number;
-          dvaBank = res.data.bank_name || 'Wema Bank';
-          dvaName = res.data.account_name || `COLLEKT / ${realCoName.toUpperCase()}`;
-        }
-      } catch(e){}
-    }
-
-    const dvaAcctEl = document.getElementById('coDvaAcctNum');
-    const dvaBankEl = document.getElementById('coDvaBankName');
-    const dvaNameEl = document.getElementById('coDvaAcctName');
-    const dvaBtnEl = document.getElementById('coDvaBtn');
-
-    if (dvaAcct) {
-      if (dvaAcctEl) dvaAcctEl.textContent = dvaAcct;
-      if (dvaBankEl) dvaBankEl.textContent = dvaBank;
-      if (dvaNameEl) dvaNameEl.textContent = dvaName;
-      if (dvaBtnEl) dvaBtnEl.innerHTML = '📋 Copy';
-    } else {
-      if (dvaAcctEl) dvaAcctEl.textContent = 'Live Bank Transfer';
-      if (dvaBankEl) dvaBankEl.textContent = 'Korapay Direct Rail';
-      if (dvaNameEl) dvaNameEl.textContent = `COLLEKT / ${realCoName.toUpperCase()}`;
-      if (dvaBtnEl) dvaBtnEl.innerHTML = '⚡ Fund';
-    }
-  }
-
-  function copyCoDVA() {
-    const acctEl = document.getElementById('coDvaAcctNum');
-    const text = acctEl ? acctEl.textContent.trim() : '';
-    if (!text || text === 'Live Bank Transfer' || text === 'Live Transfer Rail') {
-      window.location.href = 'wallet.html?action=fund&method=bank_transfer';
-      return;
-    }
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      if (typeof showToast === 'function') showToast('📋 Virtual Account Number copied!');
-    } else {
-      if (typeof copyToClipboard === 'function') copyToClipboard(text, 'Account number copied!');
-    }
   }
 
   /* -----------------------------------------------------
@@ -1468,8 +1400,7 @@
   </div>
 </div>
 
-<script src="settings-popup.js?v=66.0"></script>
+<script src="settings-popup.js?v=70.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>
-
