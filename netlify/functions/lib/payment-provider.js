@@ -670,6 +670,45 @@ class KorapayProvider extends PaymentProvider {
     }
     return res.body.data;
   }
+
+  /**
+   * 7. Live Bank Account Disbursement (Direct NIP/NIBSS Transfer)
+   */
+  async disburseToBankAccount({ amount, bank_code, account_number, narration, reference, customer_name, customer_email }) {
+    if (!amount || Number(amount) <= 0) throw new Error('Invalid disbursement amount');
+    const cleanAcct = String(account_number || '').trim().replace(/\D/g, '');
+    if (cleanAcct.length !== 10) throw new Error('Valid 10-digit NUBAN required');
+    const cleanBank = String(bank_code || '').trim();
+    if (!cleanBank) throw new Error('Destination bank code required');
+
+    const cleanRef = reference || `COL-WDW-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+    const payload = {
+      reference: cleanRef,
+      destination: {
+        type: 'bank_account',
+        amount: Number(amount),
+        currency: 'NGN',
+        narration: narration || 'Collekt Wallet Withdrawal',
+        bank_account: {
+          bank: cleanBank,
+          account: cleanAcct
+        },
+        customer: {
+          name: customer_name || 'Collekt User',
+          email: customer_email || 'member@collektng.com'
+        }
+      }
+    };
+
+    const res = await this._request('POST', '/transactions/disburse', payload);
+    return {
+      statusCode: res.statusCode,
+      body: res.body,
+      reference: cleanRef,
+      success: !!(res.body && res.body.status === true)
+    };
+  }
 }
 
 // Factory export

@@ -174,6 +174,71 @@ exports.handler = async (event) => {
         }, { onConflict: 'id' });
     }
 
+    // ─────────────────────────────────────────────────────────
+    // EVENT TYPE B: Korapay Bank Transfer / Disbursement Status
+    // ─────────────────────────────────────────────────────────
+    if (eventType.startsWith('transfer.') || eventType.startsWith('disbursement.') || eventType.includes('payout')) {
+      const isTransferSuccess = status === 'success' || status === 'successful' || eventType.endsWith('.success');
+      const isTransferFailed = status === 'failed' || status === 'reversed' || eventType.endsWith('.failed') || eventType.endsWith('.reversed');
+
+      if (isTransferSuccess && reference) {
+        console.log(`Korapay Webhook: Transfer ${reference} confirmed successful.`);
+        await supabase
+          .from('transactions')
+          .update({
+            status: 'successful',
+            paid_at: data.paid_at || new Date().toISOString(),
+            metadata: {
+              gateway: 'korapay',
+              transfer_status: 'successful',
+              fee: data.fee || 0,
+              gateway_response: data
+            }
+          })
+          .eq('reference', reference);
+      } else if (isTransferFailed && reference) {
+        console.warn(`Korapay Webhook: Transfer ${reference} failed/reversed. Processing auto-refund...`);
+        
+        // 1. Fetch original withdrawal transaction
+        const { data: origTx } = await supabase
+          .from('transactions')
+          .select('owner_id, user_id, amount, status')
+          .eq('reference', reference)
+          .maybeSingle();
+
+        if (origTx && origTx.status !== 'failed') {
+          const refundOwnerId = origTx.owner_id || origTx.user_id;
+          const refundAmt = Number(origTx.amount || data.amount || 0);
+
+          // 2. Mark transaction as failed
+          await supabase
+            .from('transactions')
+            .update({
+              status: 'failed',
+              metadata: {
+                gateway: 'korapay',
+                transfer_status: 'failed',
+                failure_reason: data.reason || data.message || 'Bank transfer rejected',
+                gateway_response: data
+              }
+            })
+            .eq('reference', reference);
+
+          // 3. Auto-refund user wallet
+          if (refundOwnerId && refundAmt > 0) {
+            await supabase.rpc('credit_wallet_atomic', {
+              p_owner_id: refundOwnerId,
+              p_amount: refundAmt,
+              p_reference: `REF-${reference}`,
+              p_entry_type: 'credit',
+              p_description: `Reversal refund: Failed bank withdrawal (${reference})`,
+              p_metadata: { gateway: 'korapay', failed_reference: reference }
+            });
+          }
+        }
+      }
+    }
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },

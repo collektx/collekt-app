@@ -114,7 +114,47 @@ exports.handler = async (event) => {
     const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
     const reference = `COL-WDW-${timestamp}-${randomSuffix}`;
 
-    // Record in immutable wallet_ledger
+    // 4. Fetch user email for Korapay disbursement customer metadata
+    let userEmail = 'member@collektng.com';
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', effectiveOwnerId)
+      .maybeSingle();
+
+    if (userProfile && userProfile.email) {
+      userEmail = userProfile.email;
+    }
+
+    // 5. Execute Live Automated Disbursement via Korapay API
+    let disburseResult = null;
+    let transferStatus = 'queued_for_payout';
+    let gatewayNotice = '';
+
+    try {
+      const koraProvider = getPaymentProvider('korapay');
+      disburseResult = await koraProvider.disburseToBankAccount({
+        amount: numAmount,
+        bank_code: bank_code,
+        account_number: cleanAcct,
+        narration: narration || `Collekt Payout ${reference}`,
+        reference: reference,
+        customer_name: account_name || userProfile?.full_name || 'Collekt User',
+        customer_email: userEmail
+      });
+
+      if (disburseResult && disburseResult.success) {
+        transferStatus = 'processing';
+        gatewayNotice = disburseResult.body?.message || 'Transfer dispatched to NIBSS network';
+      } else {
+        gatewayNotice = disburseResult?.body?.message || 'Disbursement queued for settlement';
+      }
+    } catch (disburseErr) {
+      console.warn('Korapay disburse auto-dispatch notice:', disburseErr.message);
+      gatewayNotice = disburseErr.message;
+    }
+
+    // 6. Record in immutable wallet_ledger
     await supabase.from('wallet_ledger').insert({
       wallet_id: wallet.id,
       owner_id: effectiveOwnerId,
@@ -126,48 +166,62 @@ exports.handler = async (event) => {
       description: `Withdrawal to ${bank_name || 'Bank'} (${cleanAcct})`,
       reference: reference,
       metadata: {
+        gateway: 'korapay',
         bank_name: bank_name,
         bank_code: bank_code,
         account_number: cleanAcct,
         account_name: account_name,
-        narration: narration
+        narration: narration,
+        transfer_status: transferStatus,
+        gateway_notice: gatewayNotice
       }
     });
 
-    // Record in unified transactions table
+    // 7. Record in unified transactions table
     await supabase.from('transactions').insert({
       owner_id: effectiveOwnerId,
       user_id: user_id || effectiveOwnerId,
       wallet_id: wallet.id,
       reference: reference,
-      gateway: 'paystack',
+      gateway: 'korapay',
+      gateway_reference: disburseResult?.body?.data?.reference || reference,
       transaction_type: 'wallet_debit',
       payment_method: 'bank_transfer',
       amount: numAmount,
       currency: 'NGN',
-      status: 'processing',
+      status: transferStatus,
       metadata: {
         bank_name: bank_name,
         bank_code: bank_code,
         account_number: cleanAcct,
         account_name: account_name,
-        narration: narration
+        narration: narration,
+        transfer_status: transferStatus,
+        gateway_notice: gatewayNotice,
+        gateway_response: disburseResult?.body || null
       }
     });
 
-    // Record in audit logs
+    // 8. Record in audit logs
     await supabase.from('audit_logs').insert({
       actor_id: user_id || effectiveOwnerId,
       action: 'wallet_withdrawal',
       entity_type: 'wallet',
       entity_id: wallet.id,
       metadata: {
+        gateway: 'korapay',
         amount: numAmount,
         reference: reference,
         recipient_account: cleanAcct,
-        bank_name: bank_name
+        bank_name: bank_name,
+        transfer_status: transferStatus,
+        gateway_notice: gatewayNotice
       }
     });
+
+    const successMsg = transferStatus === 'processing'
+      ? `Withdrawal of ₦${numAmount.toLocaleString()} dispatched successfully via Korapay.`
+      : `Withdrawal of ₦${numAmount.toLocaleString()} authorized successfully and queued for bank settlement.`;
 
     return {
       statusCode: 200,
@@ -178,10 +232,13 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         status: 'success',
-        message: `Withdrawal of ₦${numAmount.toLocaleString()} initiated successfully.`,
+        message: successMsg,
         reference: reference,
         amount: numAmount,
-        balance_after: balanceAfter
+        balance_after: balanceAfter,
+        gateway: 'korapay',
+        transfer_status: transferStatus,
+        notice: gatewayNotice
       })
     };
 
