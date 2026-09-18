@@ -23,7 +23,7 @@ exports.handler = async (event) => {
       .eq('reference', reference)
       .maybeSingle();
 
-    const gateway = tx?.gateway || (reference.startsWith('KORA') ? 'korapay' : (reference.startsWith('OPAY') ? 'opay' : 'paystack'));
+    const gateway = tx?.gateway || (reference.startsWith('OPAY') ? 'opay' : 'korapay');
     const provider = getPaymentProvider(gateway);
     const verification = await provider.verifyPayment(reference);
 
@@ -56,7 +56,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // Payment is verified as SUCCESS on Paystack!
+    // Payment is verified as SUCCESS on Korapay/Gateway!
     const ownerId = tx?.owner_id || tx?.user_id || verification.metadata?.owner_id || verification.metadata?.user_id;
 
     if (!ownerId) {
@@ -71,7 +71,7 @@ exports.handler = async (event) => {
         p_amount: verification.amount,
         p_reference: reference,
         p_entry_type: 'credit',
-        p_description: `Wallet Funding via ${verification.channel ? verification.channel.toUpperCase() : 'Paystack'}`,
+        p_description: `Wallet Funding via ${verification.channel ? verification.channel.toUpperCase() : 'Korapay Checkout'}`,
         p_metadata: {
           gateway_transaction_id: verification.gateway_transaction_id,
           channel: verification.channel,

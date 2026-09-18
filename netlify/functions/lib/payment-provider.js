@@ -1,6 +1,6 @@
 /**
  * Payment Provider Abstraction Layer for Collekt
- * Supports modular payment gateways (Paystack primary, extensible to Flutterwave, etc.)
+ * Supports modular payment gateways (Korapay primary, extensible to OPay, etc.)
  */
 
 const crypto = require('crypto');
@@ -711,19 +711,19 @@ class KorapayProvider extends PaymentProvider {
   }
 }
 
-// Factory export
-function getPaymentProvider(providerName = 'paystack') {
-  const norm = String(providerName || '').toLowerCase();
+// Factory export - defaults to Korapay as platform-wide primary payment engine
+function getPaymentProvider(providerName = 'korapay') {
+  const norm = String(providerName || 'korapay').toLowerCase();
+  if (norm === 'korapay' || norm === 'kora') {
+    return new KorapayProvider();
+  }
   if (norm === 'paystack') {
     return new PaystackProvider();
   }
   if (norm === 'opay') {
     return new OpayProvider();
   }
-  if (norm === 'korapay' || norm === 'kora') {
-    return new KorapayProvider();
-  }
-  throw new Error(`Unsupported payment provider: ${providerName}`);
+  return new KorapayProvider();
 }
 
 module.exports = {
