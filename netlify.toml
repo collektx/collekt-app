@@ -92,6 +92,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/payments/korapay/webhook"
+  to = "/.netlify/functions/korapay-webhook"
+  status = 200
+
+[[redirects]]
   from = "/api/payments/withdraw"
   to = "/.netlify/functions/paystack-withdraw"
   status = 200
@@ -104,6 +109,11 @@
 [[redirects]]
   from = "/api/paystack/webhook"
   to = "/.netlify/functions/paystack-webhook"
+  status = 200
+
+[[redirects]]
+  from = "/api/korapay/webhook"
+  to = "/.netlify/functions/korapay-webhook"
   status = 200
 
 [[redirects]]

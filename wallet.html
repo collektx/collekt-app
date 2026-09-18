@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=56.0">
-<link rel="stylesheet" href="shared.css?v=56.0">
-<link rel="stylesheet" href="glass.css?v=56.0">
+<link rel="stylesheet" href="style.css?v=57.0">
+<link rel="stylesheet" href="shared.css?v=57.0">
+<link rel="stylesheet" href="glass.css?v=57.0">
 
 <style>
   body { background: var(--paper); }
@@ -295,14 +295,17 @@
     <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">Instant wallet crediting via Paystack secure checkout or your Dedicated Virtual Account.</p>
 
     <!-- Payment Method Selector Tabs -->
-    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:18px; background:var(--paper); padding:4px; border-radius:14px; border:1px solid var(--line);">
-      <button type="button" class="fund-method-pill active" id="methodBtnCard" onclick="selectFundMethod('card')" style="padding:8px 6px; font-size:12px; font-weight:800; border-radius:10px; border:none; background:var(--white); color:var(--ink); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.06); transition:all .2s;">
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:18px; background:var(--paper); padding:4px; border-radius:14px; border:1px solid var(--line);">
+      <button type="button" class="fund-method-pill active" id="methodBtnCard" onclick="selectFundMethod('card')" style="padding:8px 4px; font-size:11.5px; font-weight:800; border-radius:10px; border:none; background:var(--white); color:var(--ink); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.06); transition:all .2s;">
         💳 Card
       </button>
-      <button type="button" class="fund-method-pill" id="methodBtnOpay" onclick="selectFundMethod('opay')" style="padding:8px 6px; font-size:12px; font-weight:800; border-radius:10px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
+      <button type="button" class="fund-method-pill" id="methodBtnKorapay" onclick="selectFundMethod('korapay')" style="padding:8px 4px; font-size:11.5px; font-weight:800; border-radius:10px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
+        🟣 Korapay
+      </button>
+      <button type="button" class="fund-method-pill" id="methodBtnOpay" onclick="selectFundMethod('opay')" style="padding:8px 4px; font-size:11.5px; font-weight:800; border-radius:10px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
         🟢 OPay
       </button>
-      <button type="button" class="fund-method-pill" id="methodBtnTransfer" onclick="selectFundMethod('bank_transfer')" style="padding:8px 6px; font-size:12px; font-weight:800; border-radius:10px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
+      <button type="button" class="fund-method-pill" id="methodBtnTransfer" onclick="selectFundMethod('bank_transfer')" style="padding:8px 4px; font-size:11.5px; font-weight:800; border-radius:10px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
         🏛️ Transfer
       </button>
     </div>
@@ -619,10 +622,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=56.0"></script>
-<script src="app.js?v=56.0"></script>
-<script src="collekt-ai.js?v=56.0"></script>
-<script src="settings-popup.js?v=56.0"></script>
+<script src="supabase.js?v=57.0"></script>
+<script src="app.js?v=57.0"></script>
+<script src="collekt-ai.js?v=57.0"></script>
+<script src="settings-popup.js?v=57.0"></script>
 <script>
   let isHideBalance = false;
   let rawBalance = 0;
@@ -905,6 +908,7 @@
     });
 
     const activeBtn = method === 'card' ? document.getElementById('methodBtnCard') :
+                      method === 'korapay' ? document.getElementById('methodBtnKorapay') :
                       method === 'opay' ? document.getElementById('methodBtnOpay') :
                       document.getElementById('methodBtnTransfer');
 
@@ -929,12 +933,16 @@
       if (transferSection) transferSection.style.display = 'none';
 
       if (railLabel) {
-        railLabel.textContent = method === 'opay' ? 
+        railLabel.textContent = method === 'korapay' ?
+          'Korapay Multi-Rail Checkout (Card, Bank Transfer, Pay with Bank)' :
+          method === 'opay' ? 
           'OPay Instant Payment Channel' : 
           'Debit/Credit Card (Visa, Mastercard, Verve)';
       }
       if (submitBtnText) {
-        submitBtnText.textContent = method === 'opay' ?
+        submitBtnText.textContent = method === 'korapay' ?
+          '🟣 Proceed to Korapay Checkout →' :
+          method === 'opay' ?
           '🟢 Proceed to OPay Checkout →' :
           '🔒 Proceed to Secure Payment →';
       }
@@ -961,28 +969,31 @@
     const email = user.email || localStorage.getItem('collekt_last_user_email') || 'member@collekt.ng';
     const ownerId = user.id || user.owner_id;
     const ownerType = user.role === 'company' ? 'company' : (user.role === 'professional' ? 'professional' : 'user');
+    const gatewayName = selectedFundMethod === 'korapay' ? 'Korapay' : (selectedFundMethod === 'opay' ? 'OPay' : 'Paystack');
 
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner-icon"></span> Connecting to Paystack Secure Checkout...';
+      btn.innerHTML = `<span class="spinner-icon"></span> Connecting to ${gatewayName} Secure Checkout...`;
     }
 
     const res = await initializeWalletFunding({
       amount: amt,
       email: email,
       payment_method: selectedFundMethod,
+      gateway: selectedFundMethod === 'korapay' ? 'korapay' : (selectedFundMethod === 'opay' ? 'opay' : 'paystack'),
       user_id: user.id,
       owner_id: ownerId,
       owner_type: ownerType
     });
 
-    if (res && res.success && res.data?.authorization_url) {
-      showToast('🔒 Redirecting to Paystack secure checkout...');
-      window.location.href = res.data.authorization_url;
+    const checkoutUrl = res?.data?.authorization_url || res?.data?.checkout_url;
+    if (res && res.success && checkoutUrl) {
+      showToast(`🔒 Redirecting to ${gatewayName} secure checkout...`);
+      window.location.href = checkoutUrl;
     } else {
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = '<span>🔒 Proceed to Secure Payment &rarr;</span>';
+        btn.innerHTML = `<span>${selectedFundMethod === 'korapay' ? '🟣 Proceed to Korapay Checkout' : selectedFundMethod === 'opay' ? '🟢 Proceed to OPay Checkout' : '🔒 Proceed to Secure Payment'} &rarr;</span>`;
       }
       showToast('⚠️ ' + (res?.error || 'Could not initialize payment session. Please check your connection.'), 'error');
     }

@@ -16,15 +16,16 @@ exports.handler = async (event) => {
   }
 
   try {
-    const provider = getPaymentProvider('paystack');
-    const verification = await provider.verifyPayment(reference);
-
-    // Fetch existing transaction from Supabase
+    // Fetch existing transaction from Supabase first to determine gateway
     const { data: tx } = await supabase
       .from('transactions')
       .select('*')
       .eq('reference', reference)
       .maybeSingle();
+
+    const gateway = tx?.gateway || (reference.startsWith('KORA') ? 'korapay' : (reference.startsWith('OPAY') ? 'opay' : 'paystack'));
+    const provider = getPaymentProvider(gateway);
+    const verification = await provider.verifyPayment(reference);
 
     if (!verification.verified) {
       // Update transaction status if failed or abandoned

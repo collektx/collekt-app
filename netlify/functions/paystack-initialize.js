@@ -124,11 +124,16 @@ exports.handler = async (event) => {
     let channels = ['card', 'bank_transfer'];
     if (payment_method === 'opay') {
       channels = ['opay', 'card'];
+    } else if (payment_method === 'korapay') {
+      channels = ['card', 'bank_transfer', 'pay_with_bank'];
     } else if (payment_method === 'card') {
       channels = ['card'];
     } else if (payment_method === 'bank_transfer') {
       channels = ['bank_transfer'];
     }
+
+    // Determine gateway
+    const selectedGateway = body.gateway || (payment_method === 'korapay' ? 'korapay' : (payment_method === 'opay' && process.env.OPAY_PUBLIC_KEY ? 'opay' : 'paystack'));
 
     // Create pending transaction in Supabase
     const txPayload = {
@@ -137,7 +142,7 @@ exports.handler = async (event) => {
       owner_id: effectiveOwnerId,
       user_id: effectiveOwnerId,
       reference: reference,
-      gateway: (body.gateway || (payment_method === 'opay' && process.env.OPAY_PUBLIC_KEY ? 'opay' : 'paystack')),
+      gateway: selectedGateway,
       transaction_type: 'wallet_funding',
       payment_method: payment_method,
       amount: numAmount,
@@ -166,8 +171,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // Initialize checkout session via chosen provider (Paystack / OPay)
-    const selectedGateway = body.gateway || (payment_method === 'opay' && process.env.OPAY_PUBLIC_KEY ? 'opay' : 'paystack');
+    // Initialize checkout session via chosen provider (Paystack / Korapay / OPay)
     const provider = getPaymentProvider(selectedGateway);
     const returnUrl = callback_url || `${event.headers?.origin || event.headers?.Origin || 'https://collektng.com'}/payment-result.html`;
 
