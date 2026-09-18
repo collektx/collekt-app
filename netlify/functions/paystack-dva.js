@@ -129,25 +129,46 @@ exports.handler = async (event) => {
       };
     }
 
-    // 3. Provision Dedicated Virtual Account via Paystack
-    const provider = getPaymentProvider('paystack');
+    // 3. Provision Dedicated Virtual Account (Korapay primary, Paystack fallback)
     let dvaResult = null;
+    let usedProvider = 'korapay';
+    const koraAccountRef = `kora_dva_${effectiveOwnerId.replace(/-/g, '').substring(0, 12)}_${Date.now()}`;
+    const formattedAcctName = `COLLEKT / ${preferredName}`;
 
     try {
-      dvaResult = await provider.createVirtualAccount({
-        first_name: customerFirstName,
-        last_name: customerLastName,
-        email: customerEmail,
-        phone: customerPhone,
-        preferred_bank: 'wema-bank'
+      const koraProvider = getPaymentProvider('korapay');
+      dvaResult = await koraProvider.createVirtualAccount({
+        account_name: formattedAcctName,
+        account_reference: koraAccountRef,
+        bank_code: '000',
+        permanent: true,
+        customer: {
+          name: preferredName,
+          email: customerEmail
+        }
       });
-      // Ensure returned DVA has the platform prefix + full user name
-      if (dvaResult && (!dvaResult.account_name || dvaResult.account_name.includes('COLLEKT MEMBER'))) {
-        dvaResult.account_name = `COLLEKT / ${preferredName}`;
+      usedProvider = 'korapay';
+    } catch (koraErr) {
+      console.warn('Korapay DVA creation note:', koraErr.message);
+      try {
+        const paystackProvider = getPaymentProvider('paystack');
+        dvaResult = await paystackProvider.createVirtualAccount({
+          first_name: customerFirstName,
+          last_name: customerLastName,
+          email: customerEmail,
+          phone: customerPhone,
+          preferred_bank: 'wema-bank'
+        });
+        usedProvider = 'paystack';
+        if (dvaResult && (!dvaResult.account_name || dvaResult.account_name.includes('COLLEKT MEMBER'))) {
+          dvaResult.account_name = formattedAcctName;
+        }
+      } catch (paystackErr) {
+        console.warn('Paystack DVA creation note:', paystackErr.message);
       }
-    } catch (apiErr) {
-      console.warn('Paystack DVA generation note:', apiErr.message);
-      // If Dedicated NUBAN is pending activation on Paystack merchant account, return instant checkout mode
+    }
+
+    if (!dvaResult || !dvaResult.account_number) {
       return {
         statusCode: 200,
         headers: {
@@ -158,20 +179,8 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           status: 'instant_checkout_ready',
           requires_instant_checkout: true,
-          message: apiErr.message || 'Instant Bank Transfer available via live Paystack checkout',
-          provider: 'paystack'
-        })
-      };
-    }
-
-    if (!dvaResult || !dvaResult.account_number) {
-      return {
-        statusCode: 200,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({
-          status: 'instant_checkout_ready',
-          requires_instant_checkout: true,
-          message: 'Instant Bank Transfer available via live checkout'
+          message: 'Direct Bank Transfer available via live Korapay rails',
+          provider: 'korapay'
         })
       };
     }
@@ -182,18 +191,19 @@ exports.handler = async (event) => {
       .insert({
         owner_id: effectiveOwnerId,
         user_id: effectiveOwnerId,
-        provider: 'paystack',
-        provider_customer_id: dvaResult.provider_customer_id,
-        provider_account_id: dvaResult.provider_account_id,
+        provider: usedProvider,
+        provider_customer_id: dvaResult.provider_customer_id || customerEmail,
+        provider_account_id: dvaResult.account_reference || dvaResult.provider_account_id || koraAccountRef,
         account_number: dvaResult.account_number,
-        account_name: dvaResult.account_name,
-        bank_name: dvaResult.bank_name,
-        bank_code: dvaResult.bank_code,
+        account_name: dvaResult.account_name || formattedAcctName,
+        bank_name: dvaResult.bank_name || 'Wema Bank / Sterling Bank',
+        bank_code: dvaResult.bank_code || '000',
         currency: dvaResult.currency || 'NGN',
         status: dvaResult.status || 'active',
         metadata: {
           provisioned_at: new Date().toISOString(),
-          customer_email: customerEmail
+          customer_email: customerEmail,
+          provider: usedProvider
         }
       })
       .select()
@@ -209,8 +219,8 @@ exports.handler = async (event) => {
       .update({
         paystack_dva_account: dvaResult.account_number,
         paystack_dva_bank: dvaResult.bank_name,
-        paystack_dva_name: dvaResult.account_name,
-        paystack_customer_code: dvaResult.provider_customer_id,
+        paystack_dva_name: dvaResult.account_name || formattedAcctName,
+        paystack_customer_code: dvaResult.provider_customer_id || customerEmail,
         updated_at: new Date().toISOString()
       })
       .eq('owner_id', effectiveOwnerId);
@@ -226,11 +236,12 @@ exports.handler = async (event) => {
         status: 'success',
         virtual_account: {
           account_number: dvaResult.account_number,
-          account_name: dvaResult.account_name,
+          account_name: dvaResult.account_name || formattedAcctName,
           bank_name: dvaResult.bank_name,
           bank_code: dvaResult.bank_code,
           currency: dvaResult.currency || 'NGN',
-          status: dvaResult.status || 'active'
+          status: dvaResult.status || 'active',
+          provider: usedProvider
         }
       })
     };

@@ -47,7 +47,24 @@ exports.handler = async (event) => {
       const amountInNaira = Number(data.amount_paid || data.amount || payload.amount || 0);
       let ownerId = data.metadata?.owner_id || data.metadata?.user_id;
 
-      // Check customer email if owner_id not in metadata
+      // 1. Check virtual_accounts table by account_number or account_reference (for DVA deposits)
+      const virtualAcctNo = data.virtual_bank_account?.account_number || data.account_number;
+      const acctRef = data.account_reference || data.virtual_bank_account?.account_reference;
+
+      if (!ownerId && (virtualAcctNo || acctRef)) {
+        let query = supabase.from('virtual_accounts').select('owner_id, user_id');
+        if (virtualAcctNo) {
+          query = query.eq('account_number', String(virtualAcctNo).trim());
+        } else if (acctRef) {
+          query = query.eq('provider_account_id', String(acctRef).trim());
+        }
+        const { data: dvaMatch } = await query.maybeSingle();
+        if (dvaMatch) {
+          ownerId = dvaMatch.owner_id || dvaMatch.user_id;
+        }
+      }
+
+      // 2. Check customer email if owner_id not in metadata or DVA
       if (!ownerId && (data.customer?.email || payload.customer?.email)) {
         const customerEmail = (data.customer?.email || payload.customer?.email).trim().toLowerCase();
         const { data: profile } = await supabase
@@ -59,7 +76,7 @@ exports.handler = async (event) => {
         if (profile) ownerId = profile.id;
       }
 
-      // Check existing pending transaction in Supabase
+      // 3. Check existing pending transaction in Supabase
       if (!ownerId && reference) {
         const { data: existingTx } = await supabase
           .from('transactions')
