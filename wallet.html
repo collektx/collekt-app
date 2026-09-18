@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=60.0">
-<link rel="stylesheet" href="shared.css?v=60.0">
-<link rel="stylesheet" href="glass.css?v=60.0">
+<link rel="stylesheet" href="style.css?v=61.0">
+<link rel="stylesheet" href="shared.css?v=61.0">
+<link rel="stylesheet" href="glass.css?v=61.0">
 
 <style>
   body { background: var(--paper); }
@@ -48,6 +48,27 @@
   .wallet-skeleton-wrap { display: none; }
   .wallet-skeleton-wrap.loading { display: block; }
   .wallet-content-wrap.loading { display: none; }
+
+  /* Compact Sleek Modals */
+  .modal-card {
+    border-radius: 20px !important;
+    box-sizing: border-box;
+  }
+  .modal-card .form-input,
+  .modal-card .form-select,
+  .modal-card select {
+    border-radius: 12px !important;
+  }
+  .modal-card .btn {
+    border-radius: 12px !important;
+  }
+  .modal-card .amount-chip {
+    border-radius: 99px !important;
+    min-height: 30px !important;
+    padding: 4px 10px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+  }
 </style>
 </head>
 <body>
@@ -286,62 +307,62 @@
 
 <!-- 1. FUND WALLET MODAL (MULTI-CHANNEL: CARD, OPAY & DEDICATED VIRTUAL ACCOUNT) -->
 <div class="modal-overlay" id="fundModal">
-  <div class="modal-card" style="position:relative; width:min(540px, 100vw); background:var(--white); border-radius:24px; padding:28px;">
-    <button class="modal-close" onclick="closeModal('fundModal')">&times;</button>
+  <div class="modal-card" style="position:relative; width:min(440px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
+    <button class="modal-close" onclick="closeModal('fundModal')" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-      <span style="font-size:24px;">💳</span>
-      <div class="modal-title" style="font-size:20px; font-weight:900; color:var(--ink); margin:0;">Fund Your Wallet</div>
+      <span style="font-size:20px;">💳</span>
+      <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Fund Your Wallet</div>
     </div>
-    <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">Instant wallet crediting via Paystack secure checkout or your Dedicated Virtual Account.</p>
+    <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">Instant wallet crediting via Paystack secure checkout or your Dedicated Virtual Account.</p>
 
     <!-- Payment Method Selector Tabs -->
-    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:18px; background:var(--paper); padding:4px; border-radius:14px; border:1px solid var(--line);">
-      <button type="button" class="fund-method-pill active" id="methodBtnCard" onclick="selectFundMethod('card')" style="padding:8px 4px; font-size:11.5px; font-weight:800; border-radius:10px; border:none; background:var(--white); color:var(--ink); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.06); transition:all .2s;">
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:4px; margin-bottom:14px; background:var(--paper); padding:4px; border-radius:12px; border:1px solid var(--line);">
+      <button type="button" class="fund-method-pill active" id="methodBtnCard" onclick="selectFundMethod('card')" style="padding:6px 2px; font-size:11px; font-weight:800; border-radius:9px; border:none; background:var(--white); color:var(--ink); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.06); transition:all .2s;">
         💳 Card
       </button>
-      <button type="button" class="fund-method-pill" id="methodBtnKorapay" onclick="selectFundMethod('korapay')" style="padding:8px 4px; font-size:11.5px; font-weight:800; border-radius:10px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
+      <button type="button" class="fund-method-pill" id="methodBtnKorapay" onclick="selectFundMethod('korapay')" style="padding:6px 2px; font-size:11px; font-weight:800; border-radius:9px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
         🟣 Korapay
       </button>
-      <button type="button" class="fund-method-pill" id="methodBtnOpay" onclick="selectFundMethod('opay')" style="padding:8px 4px; font-size:11.5px; font-weight:800; border-radius:10px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
+      <button type="button" class="fund-method-pill" id="methodBtnOpay" onclick="selectFundMethod('opay')" style="padding:6px 2px; font-size:11px; font-weight:800; border-radius:9px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
         🟢 OPay
       </button>
-      <button type="button" class="fund-method-pill" id="methodBtnTransfer" onclick="selectFundMethod('bank_transfer')" style="padding:8px 4px; font-size:11.5px; font-weight:800; border-radius:10px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
+      <button type="button" class="fund-method-pill" id="methodBtnTransfer" onclick="selectFundMethod('bank_transfer')" style="padding:6px 2px; font-size:11px; font-weight:800; border-radius:9px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s;">
         🏛️ Transfer
       </button>
     </div>
 
     <!-- VIEW A: Card / OPay Checkout Form -->
     <div id="fundFormCheckoutSection">
-      <div class="form-group" style="margin-bottom:14px;">
-        <label class="form-label" style="font-size:12px; font-weight:800;">Funding Amount (NGN)</label>
-        <input class="form-input" type="number" id="fundDepositAmount" placeholder="e.g. 50000" min="100" value="50000" oninput="updateFundPreview(this.value)" style="font-size:18px; font-weight:900; color:var(--forest);">
+      <div class="form-group" style="margin-bottom:12px;">
+        <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Funding Amount (NGN)</label>
+        <input class="form-input" type="number" id="fundDepositAmount" placeholder="e.g. 50000" min="100" value="50000" oninput="updateFundPreview(this.value)" style="border-radius:12px; font-size:16px; font-weight:900; color:var(--forest); min-height:42px; padding:8px 12px;">
         
-        <div style="font-size:12px; color:var(--teal); font-weight:800; margin-top:4px;" id="fundAmountFormattedPreview">
+        <div style="font-size:11.5px; color:var(--teal); font-weight:800; margin-top:3px; margin-bottom:4px;" id="fundAmountFormattedPreview">
           Formatted: ₦50,000.00
         </div>
 
-        <div class="amount-chips-wrap">
-          <button type="button" class="amount-chip" onclick="setFundAmount(5000)">₦5,000</button>
-          <button type="button" class="amount-chip" onclick="setFundAmount(20000)">₦20,000</button>
-          <button type="button" class="amount-chip" onclick="setFundAmount(50000)">₦50,000</button>
-          <button type="button" class="amount-chip" onclick="setFundAmount(100000)">₦100,000</button>
-          <button type="button" class="amount-chip" onclick="setFundAmount(250000)">₦250,000</button>
-          <button type="button" class="amount-chip" onclick="setFundAmount(500000)">₦500,000</button>
+        <div class="amount-chips-wrap" style="margin-top:6px; gap:6px;">
+          <button type="button" class="amount-chip" onclick="setFundAmount(5000)" style="border-radius:99px; min-height:30px; padding:4px 10px; font-size:11px; font-weight:800;">₦5,000</button>
+          <button type="button" class="amount-chip" onclick="setFundAmount(20000)" style="border-radius:99px; min-height:30px; padding:4px 10px; font-size:11px; font-weight:800;">₦20,000</button>
+          <button type="button" class="amount-chip" onclick="setFundAmount(50000)" style="border-radius:99px; min-height:30px; padding:4px 10px; font-size:11px; font-weight:800;">₦50,000</button>
+          <button type="button" class="amount-chip" onclick="setFundAmount(100000)" style="border-radius:99px; min-height:30px; padding:4px 10px; font-size:11px; font-weight:800;">₦100,000</button>
+          <button type="button" class="amount-chip" onclick="setFundAmount(250000)" style="border-radius:99px; min-height:30px; padding:4px 10px; font-size:11px; font-weight:800;">₦250,000</button>
+          <button type="button" class="amount-chip" onclick="setFundAmount(500000)" style="border-radius:99px; min-height:30px; padding:4px 10px; font-size:11px; font-weight:800;">₦500,000</button>
         </div>
       </div>
 
-      <div style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:18px;">
-        <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
-          <span style="color:var(--muted);">Selected Payment Rail:</span>
-          <strong id="selectedRailLabel" style="color:var(--forest);">Debit/Credit Card (Visa, Mastercard, Verve)</strong>
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+          <span style="color:var(--muted);">Selected Rail:</span>
+          <strong id="selectedRailLabel" style="color:var(--forest);">Debit/Credit Card</strong>
         </div>
-        <div style="display:flex; justify-content:space-between; font-size:12.5px;">
+        <div style="display:flex; justify-content:space-between; font-size:12px;">
           <span style="color:var(--muted);">Gateway Security:</span>
-          <span style="color:#16a34a; font-weight:800; font-size:11.5px;">🔒 256-Bit Encrypted Paystack Checkout</span>
+          <span style="color:#16a34a; font-weight:800; font-size:11px;">🔒 256-Bit Encrypted Checkout</span>
         </div>
       </div>
 
-      <button type="button" class="btn btn-primary" id="btnSubmitOnlineFund" onclick="executeOnlineFunding()" style="width:100%; min-height:48px; font-weight:900; background:var(--teal); border:none; box-shadow:0 6px 18px rgba(19,117,111,0.25);">
+      <button type="button" class="btn btn-primary" id="btnSubmitOnlineFund" onclick="executeOnlineFunding()" style="width:100%; min-height:42px; border-radius:12px; font-size:13.5px; font-weight:900; background:var(--teal); border:none; box-shadow:0 6px 18px rgba(19,117,111,0.25);">
         <span id="btnFundSubmitText">🔒 Proceed to Secure Payment &rarr;</span>
       </button>
     </div>
@@ -358,30 +379,30 @@
 
 <!-- 2. WITHDRAW MODAL (SUPPORT ALL NIGERIAN COMMERCIAL & DIGITAL BANKS) -->
 <div class="modal-overlay" id="withdrawModal">
-  <div class="modal-card" style="position:relative; width:min(520px, 100vw); background:var(--white); border-radius:24px; padding:28px;">
-    <button class="modal-close" onclick="closeModal('withdrawModal')">&times;</button>
+  <div class="modal-card" style="position:relative; width:min(440px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
+    <button class="modal-close" onclick="closeModal('withdrawModal')" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-      <span style="font-size:24px;">🏛️</span>
-      <div class="modal-title" style="font-size:20px; font-weight:900; color:var(--ink); margin:0;">Withdraw Funds</div>
+      <span style="font-size:20px;">🏛️</span>
+      <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Withdraw Funds</div>
     </div>
-    <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">Direct instant payout to any verified Nigerian Bank or Digital Neobank account.</p>
+    <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">Direct instant payout to any verified Nigerian Bank or Digital Neobank account.</p>
     
-    <div style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px 16px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
-      <span style="font-size:12px; font-weight:700; color:var(--muted);">Available Balance:</span>
-      <strong style="color:var(--teal); font-size:16px; font-weight:900;" id="modalAvailableBalance">₦0.00</strong>
+    <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:9px 14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-size:11.5px; font-weight:700; color:var(--muted);">Available Balance:</span>
+      <strong style="color:var(--teal); font-size:15px; font-weight:900;" id="modalAvailableBalance">₦0.00</strong>
     </div>
 
     <!-- Quick Saved Account / Destination Notice Banner -->
-    <div id="withdrawModalNoticeContainer" style="margin-bottom:16px;"></div>
+    <div id="withdrawModalNoticeContainer" style="margin-bottom:12px;"></div>
 
     <div id="withdrawModalFormBody">
       <!-- Destination Bank Selection with Categorized Banks -->
-      <div class="form-group" style="margin-bottom:14px;">
+      <div class="form-group" style="margin-bottom:11px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <label class="form-label" style="font-size:12px; font-weight:800; margin:0;">Select Destination Bank</label>
-          <span style="font-size:11px; color:var(--teal); font-weight:700;">280+ NIBSS Supported</span>
+          <label class="form-label" style="font-size:11.5px; font-weight:800; margin:0;">Select Destination Bank</label>
+          <span style="font-size:10.5px; color:var(--teal); font-weight:700;">280+ NIBSS Supported</span>
         </div>
-        <select class="form-input form-select" id="withdrawBankSelect" onchange="onWithdrawBankChanged()" style="font-weight:800; font-size:13.5px; background:var(--white); color:var(--ink); cursor:pointer;">
+        <select class="form-input form-select" id="withdrawBankSelect" onchange="onWithdrawBankChanged()" style="border-radius:12px; font-weight:800; font-size:13px; min-height:42px; padding:8px 12px; background:var(--white); color:var(--ink); cursor:pointer;">
           <option value="" disabled selected>-- Choose Destination Bank / Wallet --</option>
           <optgroup label="⭐ Popular Commercial Banks" id="optgroupCommercial">
             <option value="044" data-name="Access Bank">Access Bank</option>
@@ -422,44 +443,44 @@
       </div>
 
       <!-- 10-Digit NUBAN Account Number Input -->
-      <div class="form-group" style="margin-bottom:14px;">
-        <label class="form-label" style="font-size:12px; font-weight:800; margin-bottom:4px;">Destination 10-Digit NUBAN Account Number</label>
-        <input class="form-input" type="tel" id="withdrawAccountNo" placeholder="e.g. 0123456789" maxlength="10" inputmode="numeric" autocomplete="off" oninput="onWithdrawAccountInput()" style="font-size:17px; font-weight:900; letter-spacing:.05em; font-family:monospace;">
+      <div class="form-group" style="margin-bottom:11px;">
+        <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Destination 10-Digit NUBAN Account Number</label>
+        <input class="form-input" type="tel" id="withdrawAccountNo" placeholder="e.g. 0123456789" maxlength="10" inputmode="numeric" autocomplete="off" oninput="onWithdrawAccountInput()" style="border-radius:12px; font-size:15px; font-weight:900; letter-spacing:.05em; font-family:monospace; min-height:42px; padding:8px 12px;">
       </div>
 
       <!-- Live Verified Account Name Display -->
-      <div id="verifiedAccountBox" style="display:none; background:#dcfce7; border:1px solid #16a34a; border-radius:12px; padding:12px; margin-bottom:16px;">
-        <div style="font-size:11px; font-weight:800; color:#15803d; text-transform:uppercase;" id="verifiedAccountStatusLabel">✓ Verified Recipient Account Name</div>
-        <div style="font-size:14px; font-weight:900; color:#14532d; margin-top:2px;" id="verifiedAccountNameText">VERIFIED ACCOUNT HOLDER</div>
+      <div id="verifiedAccountBox" style="display:none; background:#dcfce7; border:1px solid #16a34a; border-radius:12px; padding:10px 12px; margin-bottom:11px;">
+        <div style="font-size:10.5px; font-weight:800; color:#15803d; text-transform:uppercase;" id="verifiedAccountStatusLabel">✓ Verified Recipient Account Name</div>
+        <div style="font-size:13px; font-weight:900; color:#14532d; margin-top:2px;" id="verifiedAccountNameText">VERIFIED ACCOUNT HOLDER</div>
       </div>
 
       <!-- Amount Input -->
-      <div class="form-group" style="margin-bottom:14px;">
-        <label class="form-label" style="font-size:12px; font-weight:800;">Withdrawal Amount (NGN)</label>
-        <input class="form-input" type="number" id="withdrawAmount" placeholder="e.g. 50000" min="500" inputmode="numeric" oninput="updateWithdrawPreview(this.value)" style="font-size:18px; font-weight:900; color:var(--forest);">
+      <div class="form-group" style="margin-bottom:11px;">
+        <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Withdrawal Amount (NGN)</label>
+        <input class="form-input" type="number" id="withdrawAmount" placeholder="e.g. 50000" min="500" inputmode="numeric" oninput="updateWithdrawPreview(this.value)" style="border-radius:12px; font-size:16px; font-weight:900; color:var(--forest); min-height:42px; padding:8px 12px;">
         
-        <div style="font-size:12px; color:var(--teal); font-weight:800; margin-top:4px;" id="withdrawAmountFormattedPreview">
+        <div style="font-size:11.5px; color:var(--teal); font-weight:800; margin-top:3px; margin-bottom:4px;" id="withdrawAmountFormattedPreview">
           Formatted: ₦0.00
         </div>
 
-        <div class="amount-chips-wrap">
-          <button type="button" class="amount-chip" onclick="setWithdrawAmount(5000)">₦5,000</button>
-          <button type="button" class="amount-chip" onclick="setWithdrawAmount(20000)">₦20,000</button>
-          <button type="button" class="amount-chip" onclick="setWithdrawAmount(50000)">₦50,000</button>
-          <button type="button" class="amount-chip" onclick="setWithdrawAmount(100000)">₦100,000</button>
-          <button type="button" class="amount-chip" onclick="setWithdrawAmount(250000)">₦250,000</button>
-          <button type="button" class="amount-chip" onclick="setWithdrawMax()">Withdraw Max</button>
+        <div class="amount-chips-wrap" style="margin-top:6px; gap:6px;">
+          <button type="button" class="amount-chip" onclick="setWithdrawAmount(5000)" style="border-radius:99px; min-height:30px; padding:4px 10px; font-size:11px; font-weight:800;">₦5,000</button>
+          <button type="button" class="amount-chip" onclick="setWithdrawAmount(20000)" style="border-radius:99px; min-height:30px; padding:4px 10px; font-size:11px; font-weight:800;">₦20,000</button>
+          <button type="button" class="amount-chip" onclick="setWithdrawAmount(50000)" style="border-radius:99px; min-height:30px; padding:4px 10px; font-size:11px; font-weight:800;">₦50,000</button>
+          <button type="button" class="amount-chip" onclick="setWithdrawAmount(100000)" style="border-radius:99px; min-height:30px; padding:4px 10px; font-size:11px; font-weight:800;">₦100,000</button>
+          <button type="button" class="amount-chip" onclick="setWithdrawAmount(250000)" style="border-radius:99px; min-height:30px; padding:4px 10px; font-size:11px; font-weight:800;">₦250,000</button>
+          <button type="button" class="amount-chip" onclick="setWithdrawMax()" style="border-radius:99px; min-height:30px; padding:4px 10px; font-size:11px; font-weight:800;">Withdraw Max</button>
         </div>
       </div>
 
-      <div class="form-group" style="margin-bottom:20px;">
-        <label class="form-label" style="font-size:12px; font-weight:800;">Withdrawal Narration (Optional)</label>
-        <input class="form-input" type="text" id="withdrawNarration" placeholder="e.g. Collekt Earnings Payout">
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Withdrawal Narration (Optional)</label>
+        <input class="form-input" type="text" id="withdrawNarration" placeholder="e.g. Collekt Earnings Payout" style="border-radius:12px; font-size:13px; min-height:40px; padding:8px 12px;">
       </div>
 
-      <div style="display:flex; gap:12px; justify-content:flex-end;">
-        <button class="btn btn-outline" style="flex:1;" onclick="closeModal('withdrawModal')">Cancel</button>
-        <button class="btn btn-primary" id="btnConfirmWithdraw" style="flex:1; background:var(--teal); font-weight:900;" onclick="promptConfirmWithdrawal()">
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button class="btn btn-outline" style="flex:1; border-radius:12px; height:42px; font-size:13px; font-weight:800;" onclick="closeModal('withdrawModal')">Cancel</button>
+        <button class="btn btn-primary" id="btnConfirmWithdraw" style="flex:1; border-radius:12px; height:42px; font-size:13px; background:var(--teal); font-weight:900;" onclick="promptConfirmWithdrawal()">
           Proceed to Confirm &rarr;
         </button>
       </div>
@@ -469,62 +490,62 @@
 
 <!-- 3. LINK / EDIT PERSONAL NOVA BANK ACCOUNT MODAL -->
 <div class="modal-overlay" id="linkNovaModal">
-  <div class="modal-card" style="position:relative; width:min(480px, 100vw); background:var(--white); border-radius:24px; padding:28px;">
-    <button class="modal-close" onclick="cancelLinkNovaModal()">&times;</button>
-    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-      <span style="font-size:24px;">🏛️</span>
-      <div class="modal-title" style="font-size:20px; font-weight:900; color:var(--ink); margin:0;">Link Your NOVA Bank Account</div>
+  <div class="modal-card" style="position:relative; width:min(440px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
+    <button class="modal-close" onclick="cancelLinkNovaModal()" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+      <span style="font-size:20px;">🏛️</span>
+      <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Link Your NOVA Bank Account</div>
     </div>
-    <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">Enter your <strong>10-Digit NOVA Commercial Bank</strong> account details. All earnings, milestone releases, and withdrawals on Collekt will be transferred directly to this account.</p>
+    <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">Enter your <strong>10-Digit NOVA Commercial Bank</strong> account details. All earnings and payouts will be transferred directly to this account.</p>
 
-    <div class="form-group" style="margin-bottom:14px;">
-      <label class="form-label" style="font-size:12px; font-weight:800;">Banking Institution</label>
-      <input class="form-input" type="text" value="NOVA Bank (Nova Commercial Bank)" disabled style="background:var(--paper); font-weight:800; color:var(--forest); cursor:not-allowed;">
-    </div>
-
-    <div class="form-group" style="margin-bottom:14px;">
-      <label class="form-label" style="font-size:12px; font-weight:800;">Your 10-Digit NOVA NUBAN</label>
-      <input class="form-input" type="tel" id="linkNovaAccountNo" maxlength="10" placeholder="e.g. 0123456789" inputmode="numeric" style="font-size:17px; font-weight:900; font-family:monospace; letter-spacing:.05em;">
-      <div style="font-size:11px; color:var(--muted); margin-top:4px;">Must be a valid 10-digit Nigerian NUBAN account number at NOVA Bank.</div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Banking Institution</label>
+      <input class="form-input" type="text" value="NOVA Bank (Nova Commercial Bank)" disabled style="border-radius:12px; background:var(--paper); font-weight:800; color:var(--forest); cursor:not-allowed; min-height:42px; padding:8px 12px; font-size:13px;">
     </div>
 
-    <div class="form-group" style="margin-bottom:20px;">
-      <label class="form-label" style="font-size:12px; font-weight:800;">Account Holder Name (As registered at NOVA Bank)</label>
-      <input class="form-input" type="text" id="linkNovaAccountName" placeholder="e.g. DAVE OLADAPO OJEOWERE" style="text-transform:uppercase; font-weight:800;">
+    <div class="form-group" style="margin-bottom:12px;">
+      <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Your 10-Digit NOVA NUBAN</label>
+      <input class="form-input" type="tel" id="linkNovaAccountNo" maxlength="10" placeholder="e.g. 0123456789" inputmode="numeric" style="border-radius:12px; font-size:15px; font-weight:900; font-family:monospace; letter-spacing:.05em; min-height:42px; padding:8px 12px;">
+      <div style="font-size:10.5px; color:var(--muted); margin-top:3px;">Must be a valid 10-digit Nigerian NUBAN at NOVA Bank.</div>
     </div>
 
-    <div style="display:flex; gap:12px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="cancelLinkNovaModal()">Cancel</button>
-      <button class="btn btn-primary" style="flex:1; background:var(--teal); font-weight:900;" onclick="submitLinkNovaForm()">💾 Save NOVA Bank Account</button>
+    <div class="form-group" style="margin-bottom:16px;">
+      <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Account Holder Name</label>
+      <input class="form-input" type="text" id="linkNovaAccountName" placeholder="e.g. DAVE OLADAPO OJEOWERE" style="border-radius:12px; text-transform:uppercase; font-weight:800; font-size:13px; min-height:42px; padding:8px 12px;">
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-outline" style="flex:1; border-radius:12px; height:42px; font-size:13px; font-weight:800;" onclick="cancelLinkNovaModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1; border-radius:12px; height:42px; font-size:13px; background:var(--teal); font-weight:900;" onclick="submitLinkNovaForm()">💾 Save Account</button>
     </div>
   </div>
 </div>
 
-<!-- 3. IRREVERSIBLE FINANCIAL ACTION CONFIRMATION BOTTOM-SHEET / MODAL -->
+<!-- 4. IRREVERSIBLE FINANCIAL ACTION CONFIRMATION MODAL -->
 <div class="modal-overlay" id="confirmFinancialActionModal" style="z-index:100000;">
-  <div class="modal-card" style="position:relative; width:min(480px, 100vw); background:var(--white); border-radius:24px; padding:28px;">
-    <button class="modal-close" onclick="closeModal('confirmFinancialActionModal')">&times;</button>
+  <div class="modal-card" style="position:relative; width:min(420px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+    <button class="modal-close" onclick="closeModal('confirmFinancialActionModal')" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
     
-    <div style="text-align:center; margin-bottom:16px;">
-      <div style="font-size:40px; margin-bottom:6px;" id="confirmActionIcon">&#9888;&#65039;</div>
-      <h3 style="font-size:20px; font-weight:900; color:var(--ink);" id="confirmActionTitle">Confirm Action</h3>
-      <p style="font-size:13px; color:var(--muted); margin-top:4px;" id="confirmActionSubtitle">Please review the financial details below before proceeding.</p>
+    <div style="text-align:center; margin-bottom:14px;">
+      <div style="font-size:32px; margin-bottom:4px;" id="confirmActionIcon">&#9888;&#65039;</div>
+      <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin:0;" id="confirmActionTitle">Confirm Action</h3>
+      <p style="font-size:12px; color:var(--muted); margin-top:3px; margin-bottom:0;" id="confirmActionSubtitle">Please review the financial details below before proceeding.</p>
     </div>
 
     <!-- Summary Details Box -->
-    <div style="background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:20px; display:flex; flex-direction:column; gap:8px;" id="confirmActionSummaryBox">
+    <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; flex-direction:column; gap:6px;" id="confirmActionSummaryBox">
       <!-- Populated dynamically -->
     </div>
 
     <!-- PIN Confirmation Input if Required -->
-    <div class="form-group" style="margin-bottom:20px;" id="confirmPinGroup">
-      <label class="form-label" style="text-align:center; font-size:12px; font-weight:800;">Enter 4-Digit Transaction PIN</label>
-      <input class="form-input" type="password" id="confirmActionPinInput" maxlength="4" placeholder="&bull; &bull; &bull; &bull;" inputmode="numeric" style="letter-spacing:0.35em; font-weight:900; text-align:center; width:180px; margin:0 auto; font-size:22px;">
+    <div class="form-group" style="margin-bottom:16px;" id="confirmPinGroup">
+      <label class="form-label" style="text-align:center; font-size:11.5px; font-weight:800; margin-bottom:4px;">Enter 4-Digit Transaction PIN</label>
+      <input class="form-input" type="password" id="confirmActionPinInput" maxlength="4" placeholder="&bull; &bull; &bull; &bull;" inputmode="numeric" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; width:170px; margin:0 auto; font-size:20px; min-height:42px;">
     </div>
 
-    <div style="display:flex; gap:12px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="closeModal('confirmFinancialActionModal')">Cancel</button>
-      <button class="btn btn-primary" id="btnExecuteFinalAction" style="flex:1; background:var(--teal); font-weight:900;" onclick="executeConfirmedFinancialAction()">
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-outline" style="flex:1; border-radius:12px; height:42px; font-size:13px; font-weight:800;" onclick="closeModal('confirmFinancialActionModal')">Cancel</button>
+      <button class="btn btn-primary" id="btnExecuteFinalAction" style="flex:1; border-radius:12px; height:42px; font-size:13px; background:var(--teal); font-weight:900;" onclick="executeConfirmedFinancialAction()">
         Confirm &amp; Authorize
       </button>
     </div>
@@ -537,36 +558,36 @@
 
 <!-- 1. CREATE TRANSACTION PIN MODAL -->
 <div class="modal-overlay" id="createPinModal">
-  <div class="modal-card" style="position:relative; width:min(460px, calc(100vw - 32px)); background:var(--white); border-radius:24px; padding:28px;">
-    <button class="modal-close" onclick="closeModal('createPinModal')">&times;</button>
-    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-      <span style="font-size:24px;">🔒</span>
-      <div class="modal-title" style="font-size:20px; font-weight:900; color:var(--ink); margin:0;">Create Transaction PIN</div>
+  <div class="modal-card" style="position:relative; width:min(420px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
+    <button class="modal-close" onclick="closeModal('createPinModal')" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+      <span style="font-size:20px;">🔒</span>
+      <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Create Transaction PIN</div>
     </div>
-    <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">
+    <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">
       Set a 4-digit security PIN. This PIN protects your earnings and is required to authorize withdrawals and milestone payouts.
     </p>
 
-    <div class="form-group" style="margin-bottom:14px;">
+    <div class="form-group" style="margin-bottom:12px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-        <label class="form-label" style="font-size:12px; font-weight:800; margin:0;">Choose 4-Digit PIN</label>
+        <label class="form-label" style="font-size:11.5px; font-weight:800; margin:0;">Choose 4-Digit PIN</label>
         <button type="button" onclick="togglePinVisibility('newCreatePin', this)" style="background:none; border:none; color:var(--teal); font-size:11px; font-weight:800; cursor:pointer;">👁️ Show PIN</button>
       </div>
-      <input class="form-input" type="password" id="newCreatePin" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="letter-spacing:0.35em; font-weight:900; text-align:center; font-size:22px;">
-      <div style="font-size:11px; color:var(--muted); margin-top:4px;">Enter exactly 4 numeric digits (0-9).</div>
+      <input class="form-input" type="password" id="newCreatePin" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; font-size:20px; min-height:42px;">
+      <div style="font-size:10.5px; color:var(--muted); margin-top:3px;">Enter exactly 4 numeric digits (0-9).</div>
     </div>
 
-    <div class="form-group" style="margin-bottom:22px;">
+    <div class="form-group" style="margin-bottom:16px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-        <label class="form-label" style="font-size:12px; font-weight:800; margin:0;">Confirm 4-Digit PIN</label>
+        <label class="form-label" style="font-size:11.5px; font-weight:800; margin:0;">Confirm 4-Digit PIN</label>
         <button type="button" onclick="togglePinVisibility('confirmCreatePin', this)" style="background:none; border:none; color:var(--teal); font-size:11px; font-weight:800; cursor:pointer;">👁️ Show PIN</button>
       </div>
-      <input class="form-input" type="password" id="confirmCreatePin" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="letter-spacing:0.35em; font-weight:900; text-align:center; font-size:22px;">
+      <input class="form-input" type="password" id="confirmCreatePin" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; font-size:20px; min-height:42px;">
     </div>
 
-    <div style="display:flex; gap:12px;">
-      <button type="button" class="btn btn-outline" style="flex:1;" onclick="closeModal('createPinModal')">Cancel</button>
-      <button type="button" class="btn btn-primary" id="btnSubmitCreatePin" style="flex:1; background:var(--teal); font-weight:900;" onclick="executeCreatePin()">
+    <div style="display:flex; gap:10px;">
+      <button type="button" class="btn btn-outline" style="flex:1; border-radius:12px; height:42px; font-size:13px; font-weight:800;" onclick="closeModal('createPinModal')">Cancel</button>
+      <button type="button" class="btn btn-primary" id="btnSubmitCreatePin" style="flex:1; border-radius:12px; height:42px; font-size:13px; background:var(--teal); font-weight:900;" onclick="executeCreatePin()">
         🔒 Set &amp; Activate PIN
       </button>
     </div>
@@ -575,80 +596,80 @@
 
 <!-- 2. CHANGE TRANSACTION PIN MODAL -->
 <div class="modal-overlay" id="changePinModal">
-  <div class="modal-card" style="position:relative; width:min(460px, calc(100vw - 32px)); background:var(--white); border-radius:24px; padding:28px;">
-    <button class="modal-close" onclick="closeModal('changePinModal')">&times;</button>
-    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-      <span style="font-size:24px;">🔄</span>
-      <div class="modal-title" style="font-size:20px; font-weight:900; color:var(--ink); margin:0;">Change Transaction PIN</div>
+  <div class="modal-card" style="position:relative; width:min(420px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
+    <button class="modal-close" onclick="closeModal('changePinModal')" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+      <span style="font-size:20px;">🔄</span>
+      <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Change Transaction PIN</div>
     </div>
-    <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">Update your 4-digit PIN for withdrawals and escrow authorizations.</p>
+    <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">Update your 4-digit PIN for withdrawals and escrow authorizations.</p>
     
-    <div class="form-group" style="margin-bottom:14px;">
+    <div class="form-group" style="margin-bottom:12px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-        <label class="form-label" style="font-size:12px; font-weight:800; margin:0;">Current 4-Digit PIN</label>
+        <label class="form-label" style="font-size:11.5px; font-weight:800; margin:0;">Current 4-Digit PIN</label>
         <button type="button" onclick="closeModal('changePinModal'); openForgotPinModal();" style="background:none; border:none; font-size:11px; color:#ea580c; font-weight:800; text-decoration:underline; cursor:pointer;">Forgot current PIN?</button>
       </div>
-      <input class="form-input" type="password" id="changePinCurrent" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="letter-spacing:0.35em; font-weight:900; text-align:center; font-size:20px;">
+      <input class="form-input" type="password" id="changePinCurrent" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; font-size:18px; min-height:42px;">
     </div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
       <div class="form-group" style="margin:0;">
-        <label class="form-label" style="font-size:12px; font-weight:800;">New 4-Digit PIN</label>
-        <input class="form-input" type="password" id="changePinNew" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="letter-spacing:0.35em; font-weight:900; text-align:center; font-size:20px;">
+        <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">New 4-Digit PIN</label>
+        <input class="form-input" type="password" id="changePinNew" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; font-size:18px; min-height:42px;">
       </div>
       <div class="form-group" style="margin:0;">
-        <label class="form-label" style="font-size:12px; font-weight:800;">Confirm New PIN</label>
-        <input class="form-input" type="password" id="changePinConfirm" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="letter-spacing:0.35em; font-weight:900; text-align:center; font-size:20px;">
+        <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Confirm New PIN</label>
+        <input class="form-input" type="password" id="changePinConfirm" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; font-size:18px; min-height:42px;">
       </div>
     </div>
-    <div style="display:flex; gap:12px;">
-      <button type="button" class="btn btn-outline" style="flex:1;" onclick="closeModal('changePinModal')">Cancel</button>
-      <button type="button" class="btn btn-primary" id="btnSubmitChangePin" style="flex:1; background:var(--teal); font-weight:900;" onclick="executeChangePin()">Update PIN</button>
+    <div style="display:flex; gap:10px;">
+      <button type="button" class="btn btn-outline" style="flex:1; border-radius:12px; height:42px; font-size:13px; font-weight:800;" onclick="closeModal('changePinModal')">Cancel</button>
+      <button type="button" class="btn btn-primary" id="btnSubmitChangePin" style="flex:1; border-radius:12px; height:42px; font-size:13px; background:var(--teal); font-weight:900;" onclick="executeChangePin()">Update PIN</button>
     </div>
   </div>
 </div>
 
 <!-- 3. FORGOT / RESET TRANSACTION PIN MODAL -->
 <div class="modal-overlay" id="forgotPinModal">
-  <div class="modal-card" style="position:relative; width:min(460px, calc(100vw - 32px)); background:var(--white); border-radius:24px; padding:28px;">
-    <button class="modal-close" onclick="closeModal('forgotPinModal')">&times;</button>
-    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-      <span style="font-size:24px;">🔑</span>
-      <div class="modal-title" style="font-size:20px; font-weight:900; color:var(--ink); margin:0;">Reset Transaction PIN</div>
+  <div class="modal-card" style="position:relative; width:min(420px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
+    <button class="modal-close" onclick="closeModal('forgotPinModal')" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+      <span style="font-size:20px;">🔑</span>
+      <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Reset Transaction PIN</div>
     </div>
-    <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">
+    <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">
       Verify your account identity to securely reset and choose a new 4-digit Transaction PIN.
     </p>
 
     <!-- Identity Verification Box -->
-    <div style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:16px;">
-      <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;">Account Email</div>
-      <div style="font-size:14px; font-weight:900; color:var(--ink); margin-top:2px;" id="resetPinAccountEmail">member@collekt.com</div>
+    <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin-bottom:12px;">
+      <div style="font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase;">Account Email</div>
+      <div style="font-size:13px; font-weight:900; color:var(--ink); margin-top:2px;" id="resetPinAccountEmail">member@collekt.com</div>
     </div>
 
-    <div class="form-group" style="margin-bottom:16px;">
-      <label class="form-label" style="font-size:12px; font-weight:800;">Enter Account Password (or OTP)</label>
-      <input class="form-input" type="password" id="resetPinAuthInput" placeholder="Enter your login password to authorize" style="font-size:14px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-        <span style="font-size:11px; color:var(--muted);">Security authorization check</span>
-        <button type="button" onclick="sendPinResetOtp()" style="background:none; border:none; font-size:11px; color:var(--teal); font-weight:800; text-decoration:underline; cursor:pointer;">Use Instant OTP Code instead</button>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Enter Account Password (or OTP)</label>
+      <input class="form-input" type="password" id="resetPinAuthInput" placeholder="Enter your login password" style="border-radius:12px; font-size:13px; min-height:42px; padding:8px 12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:3px;">
+        <span style="font-size:10.5px; color:var(--muted);">Security authorization check</span>
+        <button type="button" onclick="sendPinResetOtp()" style="background:none; border:none; font-size:10.5px; color:var(--teal); font-weight:800; text-decoration:underline; cursor:pointer;">Use Instant OTP Code instead</button>
       </div>
     </div>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
       <div class="form-group" style="margin:0;">
-        <label class="form-label" style="font-size:12px; font-weight:800;">New 4-Digit PIN</label>
-        <input class="form-input" type="password" id="resetPinNew" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="letter-spacing:0.35em; font-weight:900; text-align:center; font-size:20px;">
+        <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">New 4-Digit PIN</label>
+        <input class="form-input" type="password" id="resetPinNew" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; font-size:18px; min-height:42px;">
       </div>
       <div class="form-group" style="margin:0;">
-        <label class="form-label" style="font-size:12px; font-weight:800;">Confirm New PIN</label>
-        <input class="form-input" type="password" id="resetPinConfirm" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="letter-spacing:0.35em; font-weight:900; text-align:center; font-size:20px;">
+        <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Confirm New PIN</label>
+        <input class="form-input" type="password" id="resetPinConfirm" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; font-size:18px; min-height:42px;">
       </div>
     </div>
 
-    <div style="display:flex; gap:12px;">
-      <button type="button" class="btn btn-outline" style="flex:1;" onclick="closeModal('forgotPinModal')">Cancel</button>
-      <button type="button" class="btn btn-primary" id="btnSubmitResetPin" style="flex:1; background:#ea580c; border:none; font-weight:900; color:#fff;" onclick="executeResetPin()">
-        🔑 Reset &amp; Activate PIN
+    <div style="display:flex; gap:10px;">
+      <button type="button" class="btn btn-outline" style="flex:1; border-radius:12px; height:42px; font-size:13px; font-weight:800;" onclick="closeModal('forgotPinModal')">Cancel</button>
+      <button type="button" class="btn btn-primary" id="btnSubmitResetPin" style="flex:1; border-radius:12px; height:42px; font-size:13px; background:#ea580c; border:none; font-weight:900; color:#fff;" onclick="executeResetPin()">
+        🔑 Reset PIN
       </button>
     </div>
   </div>
@@ -656,10 +677,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=60.0"></script>
-<script src="app.js?v=60.0"></script>
-<script src="collekt-ai.js?v=60.0"></script>
-<script src="settings-popup.js?v=60.0"></script>
+<script src="supabase.js?v=61.0"></script>
+<script src="app.js?v=61.0"></script>
+<script src="collekt-ai.js?v=61.0"></script>
+<script src="settings-popup.js?v=61.0"></script>
 <script>
   let isHideBalance = false;
   let rawBalance = 0;
