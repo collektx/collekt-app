@@ -6339,75 +6339,107 @@ function openLegalQuickView(type = 'terms') {
     modal = document.createElement('div');
     modal.id = 'legalQuickViewModal';
     modal.className = 'modal-overlay';
-    modal.style.cssText = 'display:flex; position:fixed; inset:0; z-index:100000; background:rgba(4,14,13,0.85); backdrop-filter:blur(10px); align-items:center; justify-content:center; padding:20px;';
+    modal.style.cssText = 'display:flex; position:fixed; inset:0; z-index:100000; background:rgba(4,14,13,0.88); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); align-items:center; justify-content:center; padding:20px;';
     document.body.appendChild(modal);
   }
 
   const isTerms = (type === 'terms');
-  const title = isTerms ? 'Terms of Service Summary' : 'Privacy & NDPA 2023 Summary';
-  const tag = isTerms ? '⚖️ Nigerian Legal Framework' : '🛡️ Data Protection Notice';
+  const title = isTerms ? 'Collekt Terms of Service & Escrow Charter' : 'Privacy Policy & NDPA 2023 Data Notice';
+  const tag = isTerms ? '⚖️ Nigerian Legal Framework &bull; CAMA 2020' : '🛡️ NDPA 2023 Data Protection Notice';
 
   const bodyContent = isTerms ? `
-    <div style="font-size:13px; line-height:1.7; color:var(--ink);">
-      <div style="background:rgba(20,184,166,0.1); border-left:3px solid var(--teal); padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:12.5px;">
-        <strong>Jurisdiction:</strong> Federal Republic of Nigeria &bull; CAMA 2020 &bull; Arbitration and Mediation Act 2023
+    <div style="font-size:13px; line-height:1.75; color:var(--ink);">
+      <div style="background:rgba(20,184,166,0.12); border-left:3.5px solid var(--teal); padding:12px 14px; border-radius:10px; margin-bottom:16px; font-size:12.5px;">
+        <strong>Governing Jurisdiction:</strong> Federal Republic of Nigeria &bull; CAMA 2020 &bull; Arbitration and Mediation Act 2023
       </div>
-      <ul style="padding-left:18px; margin:0 0 16px 0;">
-        <li><strong>Intermediary Safe Harbor:</strong> Collekt Technologies Ltd is a technology venue and marketplace intermediary, not an employer, general contractor, or engineering firm.</li>
-        <li><strong>Milestone Escrow:</strong> Client funds are deposited via Paystack into protected escrow and released upon milestone review.</li>
-        <li><strong>Platform Fees:</strong> Standard $15/mo Pro, $50/mo Company, and 10% platform commission on completed project disbursements.</li>
-        <li><strong>Licensure Warranty:</strong> Engineers warrant valid COREN registration; companies warrant valid CAC incorporation under CAMA 2020.</li>
-        <li><strong>HSE Disclaimer:</strong> Collekt exercises no physical control over hazardous job sites; clients and contractors bear worksite safety duties.</li>
-        <li><strong>Limitation of Liability:</strong> Total liability is capped at platform commissions earned (max NGN 50,000).</li>
-        <li><strong>Dispute Resolution:</strong> Mandatory 3-tier resolution concluding in binding arbitration in Lagos State.</li>
+      <ul style="padding-left:18px; margin:0 0 16px 0; display:flex; flex-direction:column; gap:8px;">
+        <li><strong>Technology Marketplace Intermediary:</strong> Collekt Technologies Ltd operates strictly as a neutral technology marketplace, software venue, and escrow intermediary. Collekt is not an employer, general contractor, or engineering firm.</li>
+        <li><strong>Milestone Escrow Security:</strong> Project funds are deposited via Korapay and Paystack payment rails into protected escrow custody and disbursed only upon verified milestone approval or 14-day lapse without dispute.</li>
+        <li><strong>Automated NUBAN Payouts:</strong> Freelance professionals receive verified NIBSS instant bank transfers directly to their designated Nigerian commercial bank accounts.</li>
+        <li><strong>Platform Fees:</strong> Transparent 10% platform commission on completed project milestones, alongside optional Pro ($15/mo) and Enterprise ($50/mo) memberships.</li>
+        <li><strong>COREN &amp; CAC Licensure:</strong> Engineers warrant valid COREN registration; corporate entities warrant valid CAC incorporation under CAMA 2020.</li>
+        <li><strong>Workplace HSE Safe Harbor:</strong> Worksites, field safety, and physical compliance remain the exclusive duty of clients and executing contractors.</li>
+        <li><strong>Limitation of Liability:</strong> Aggregate liability is strictly capped at platform commissions received (max NGN 50,000).</li>
+        <li><strong>Binding Lagos Arbitration:</strong> Unresolved controversies defer to a 3-tier resolution concluding in final binding commercial arbitration in Lagos State under the <em>Arbitration and Mediation Act 2023</em>.</li>
       </ul>
-      <div style="text-align:center; margin-top:16px;">
-        <a href="terms.html" target="_blank" class="btn btn-outline btn-sm" style="font-size:12px; font-weight:800; text-decoration:none;">Read Full Terms of Service (30KB) &rarr;</a>
+      <div style="text-align:center; margin-top:14px;">
+        <a href="terms.html" target="_blank" style="color:var(--teal); font-size:12.5px; font-weight:800; text-decoration:underline;">Read Full Terms of Service Document &rarr;</a>
       </div>
     </div>
   ` : `
-    <div style="font-size:13px; line-height:1.7; color:var(--ink);">
-      <div style="background:rgba(20,184,166,0.1); border-left:3px solid var(--teal); padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:12.5px;">
+    <div style="font-size:13px; line-height:1.75; color:var(--ink);">
+      <div style="background:rgba(20,184,166,0.12); border-left:3.5px solid var(--teal); padding:12px 14px; border-radius:10px; margin-bottom:16px; font-size:12.5px;">
         <strong>Supervising Authority:</strong> Nigeria Data Protection Commission (NDPC) &bull; NDPA 2023
       </div>
-      <ul style="padding-left:18px; margin:0 0 16px 0;">
-        <li><strong>Lawful Bases:</strong> We process data strictly under Consent, Contractual Necessity, and Nigerian Legal Obligations.</li>
-        <li><strong>Sensitive Verification Data:</strong> NIN, CAC certificates, and Director credentials submitted for Shield Verification are encrypted with AES-256 and checked against official databases (NIMC, CAC, FIRS).</li>
-        <li><strong>No Selling of Data:</strong> Your project bids, drawings, and contact details are never sold to external data brokers.</li>
-        <li><strong>Security &amp; RLS:</strong> PostgreSQL Row-Level Security ensures only authorized counterparties access your project files.</li>
-        <li><strong>Your Statutory Rights:</strong> You have the right to access, correct, export, or delete your personal data under the NDPA.</li>
+      <ul style="padding-left:18px; margin:0 0 16px 0; display:flex; flex-direction:column; gap:8px;">
+        <li><strong>Lawful Bases for Processing:</strong> We collect and process user data strictly under Explicit Consent, Contractual Necessity, and Nigerian Legal Obligations.</li>
+        <li><strong>Encrypted KYC &amp; Verification:</strong> NIN numbers, CAC incorporation certificates, and Director credentials submitted for Shield Verification are encrypted with AES-256 and checked against official databases (NIMC, CAC, FIRS).</li>
+        <li><strong>Zero Data Brokerage:</strong> Your personal data, proposals, RFPs, CAD drawings, and payment information are never sold or rented to third-party data brokers.</li>
+        <li><strong>PostgreSQL Row-Level Security:</strong> Strict multi-tenant security guarantees that only authorized counterparties can view your project bids and confidential messages.</li>
+        <li><strong>Statutory Data Subject Rights:</strong> Under NDPA 2023 Section 34, you hold complete rights to access, rectify, export, or request deletion of your personal data at any time.</li>
       </ul>
-      <div style="text-align:center; margin-top:16px;">
-        <a href="privacy.html" target="_blank" class="btn btn-outline btn-sm" style="font-size:12px; font-weight:800; text-decoration:none;">Read Full Privacy Policy &rarr;</a>
+      <div style="text-align:center; margin-top:14px;">
+        <a href="privacy.html" target="_blank" style="color:var(--teal); font-size:12.5px; font-weight:800; text-decoration:underline;">Read Full Privacy Policy Document &rarr;</a>
       </div>
     </div>
   `;
 
+  const hasTermsCheckbox = !!document.getElementById('terms');
+
   modal.innerHTML = `
-    <div class="modal-card" style="max-width:540px; width:100%; border-radius:24px; padding:28px; background:var(--white); position:relative; font-family:'Manrope',sans-serif; max-height:90vh; overflow-y:auto;">
-      <button class="modal-close" onclick="document.getElementById('legalQuickViewModal').style.display='none'">&times;</button>
-      <div style="display:inline-block; font-size:11px; font-weight:800; color:var(--teal); background:rgba(20,184,166,0.12); padding:3px 10px; border-radius:99px; margin-bottom:8px; text-transform:uppercase;">
+    <div class="modal-card" style="max-width:560px; width:100%; border-radius:24px; padding:28px 24px; background:var(--white, #101716); border:1px solid var(--line, rgba(255,255,255,0.1)); position:relative; font-family:'Manrope',sans-serif; max-height:88vh; overflow-y:auto; box-shadow:0 24px 60px rgba(0,0,0,0.5);">
+      <button class="modal-close" onclick="document.getElementById('legalQuickViewModal').style.display='none'" style="position:absolute; top:20px; right:20px; background:none; border:none; color:var(--muted, #849694); font-size:24px; cursor:pointer; line-height:1; padding:4px 8px; border-radius:8px;">&times;</button>
+      <div style="display:inline-block; font-size:11px; font-weight:800; color:var(--teal); background:rgba(20,184,166,0.14); border:1px solid rgba(20,184,166,0.25); padding:4px 12px; border-radius:99px; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.04em;">
         ${tag}
       </div>
-      <div style="font-size:20px; font-weight:900; color:var(--ink); margin-bottom:16px;">${title}</div>
+      <div style="font-size:20px; font-weight:900; color:var(--ink); margin-bottom:14px; letter-spacing:-0.01em;">${title}</div>
       ${bodyContent}
-      <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--line); display:flex; justify-content:flex-end;">
-        <button class="btn btn-primary btn-sm" onclick="document.getElementById('legalQuickViewModal').style.display='none'" style="font-weight:800; min-height:36px; padding:0 20px;">
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--line, rgba(255,255,255,0.1)); display:flex; gap:10px; justify-content:flex-end; align-items:center;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('legalQuickViewModal').style.display='none'" style="font-weight:700; min-height:38px; padding:0 18px; border-radius:10px; font-size:13px;">
+          Close
+        </button>
+        ${hasTermsCheckbox ? `
+        <button type="button" class="btn btn-primary btn-sm" onclick="acceptTermsFromModal()" style="font-weight:800; min-height:38px; padding:0 20px; border-radius:10px; background:var(--forest, #0E3B35); color:#fff; font-size:13px;">
+          Agree &amp; Accept
+        </button>
+        ` : `
+        <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('legalQuickViewModal').style.display='none'" style="font-weight:800; min-height:38px; padding:0 20px; border-radius:10px; background:var(--forest, #0E3B35); color:#fff; font-size:13px;">
           I Understand
         </button>
+        `}
       </div>
     </div>
   `;
   modal.style.display = 'flex';
 }
 
+function acceptTermsFromModal() {
+  const chk = document.getElementById('terms');
+  if (chk) {
+    chk.checked = true;
+    const container = document.getElementById('termsContainer');
+    if (container) container.style.borderColor = 'var(--line, #DDE8E6)';
+    const err = document.getElementById('formError');
+    if (err && err.textContent.includes('Terms')) err.style.display = 'none';
+  }
+  const modal = document.getElementById('legalQuickViewModal');
+  if (modal) modal.style.display = 'none';
+  if (typeof showToast === 'function') {
+    showToast('✓ Collekt Terms & Privacy Policy accepted.');
+  }
+}
+
 window.openLegalQuickView = openLegalQuickView;
+window.acceptTermsFromModal = acceptTermsFromModal;
 window.acceptNdpaConsent = acceptNdpaConsent;
 window.acceptAllCookies = acceptAllCookies;
 window.rejectNonEssentialCookies = rejectNonEssentialCookies;
 window.rejectOptionalCookies = rejectOptionalCookies;
 window.initModernCookieBanner = initModernCookieBanner;
 window.initNdpaConsentBanner = initNdpaConsentBanner;
+window.openCookiePreferencesModal = openCookiePreferencesModal;
+window.closeCookiePreferencesModal = closeCookiePreferencesModal;
+window.saveCustomCookiePreferences = saveCustomCookiePreferences;
 window.openCookiePreferencesModal = openCookiePreferencesModal;
 window.closeCookiePreferencesModal = closeCookiePreferencesModal;
 window.saveCustomCookiePreferences = saveCustomCookiePreferences;

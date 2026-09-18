@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=62.0">
-<link rel="stylesheet" href="shared.css?v=62.0">
-<link rel="stylesheet" href="glass.css?v=62.0">
+<link rel="stylesheet" href="style.css?v=63.0">
+<link rel="stylesheet" href="shared.css?v=63.0">
+<link rel="stylesheet" href="glass.css?v=63.0">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -328,6 +328,10 @@ html.dark .success-h { color: #e2efed; }
           </button>
         </div>
 
+        <div style="font-size:11.5px; color:#6B8280; text-align:center; margin-top:-14px; margin-bottom:18px; line-height:1.45;">
+          By joining, you agree to Collekt's <a href="terms.html" target="_blank" style="color:var(--teal); font-weight:800; text-decoration:underline;">Terms of Service</a> &amp; <a href="privacy.html" target="_blank" style="color:var(--teal); font-weight:800; text-decoration:underline;">Privacy Policy</a>.
+        </div>
+
         <div class="reg-divider"><hr><span>or continue with email</span><hr></div>
 
         <button class="btn-reg btn-reg-primary" id="step1Next" onclick="goToStep(2)" disabled>Continue &rarr;</button>
@@ -436,9 +440,9 @@ html.dark .success-h { color: #e2efed; }
           </div>
         </div>
 
-        <div class="terms-check" style="background:var(--paper); border:1.5px solid var(--line); border-radius:12px; padding:14px; margin-bottom:14px;">
+        <div class="terms-check" id="termsContainer" style="background:var(--paper); border:1.5px solid var(--line); border-radius:12px; padding:14px; margin-bottom:14px; transition:all .25s ease;">
           <input type="checkbox" id="terms" style="accent-color:var(--forest); width:18px; height:18px; min-width:18px; min-height:18px; cursor:pointer; margin-top:2px;" required>
-          <label for="terms" style="font-size:12px; color:var(--ink); line-height:1.5; cursor:pointer;">
+          <label for="terms" style="font-size:12px; color:var(--ink); line-height:1.5; cursor:pointer; user-select:none;">
             I have read and agree to Collekt's <a href="terms.html" target="_blank" style="color:var(--teal); font-weight:800; text-decoration:underline;">Terms of Service</a> and <a href="privacy.html" target="_blank" style="color:var(--teal); font-weight:800; text-decoration:underline;">Privacy Policy</a>. I give my express consent to data processing under the <strong>Nigeria Data Protection Act (NDPA) 2023</strong> and acknowledge the platform's escrow, licensure, and binding arbitration framework.
           </label>
         </div>
@@ -476,8 +480,8 @@ html.dark .success-h { color: #e2efed; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=62.0"></script>
-<script src="app.js?v=62.0"></script>
+<script src="supabase.js?v=63.0"></script>
+<script src="app.js?v=63.0"></script>
 <script>
   // Detect if arriving from OAuth callback
   const regHash = window.location.hash || '';
@@ -559,6 +563,7 @@ html.dark .success-h { color: #e2efed; }
     const cpw    = document.getElementById('confirmPw')?.value || '';
     const terms  = document.getElementById('terms')?.checked;
     const err    = document.getElementById('formError');
+    const tBox   = document.getElementById('termsContainer');
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { 
       if (err) { err.textContent = 'Please enter a valid email address.'; err.style.display = 'block'; }
@@ -573,10 +578,22 @@ html.dark .success-h { color: #e2efed; }
       return; 
     }
     if (!terms) { 
-      if (err) { err.textContent = '⚠️ You must review and agree to the Terms of Service, Privacy Policy, and NDPA Data Consent to create a Collekt account.'; err.style.display = 'block'; }
+      if (tBox) {
+        tBox.style.borderColor = '#ef4444';
+        tBox.style.background = 'rgba(239, 68, 68, 0.08)';
+        tBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      if (err) { 
+        err.textContent = '⚠️ You must review and agree to Collekt\'s Terms of Service, Privacy Policy, and NDPA Data Processing Consent to create an account.'; 
+        err.style.display = 'block'; 
+      }
       return; 
     }
 
+    if (tBox) {
+      tBox.style.borderColor = 'var(--line)';
+      tBox.style.background = 'var(--paper)';
+    }
     if (err) err.style.display = 'none';
 
     const isCompany = selectedRole === 'company';
@@ -604,6 +621,7 @@ html.dark .success-h { color: #e2efed; }
     const btn = document.getElementById('submitRegBtn');
     if (btn) { btn.innerHTML = 'Creating account... ⏳'; btn.disabled = true; }
 
+    const consentTimestamp = new Date().toISOString();
     const metadata = {
       name,
       first_name: isCompany ? '' : first_name,
@@ -616,10 +634,13 @@ html.dark .success-h { color: #e2efed; }
       title: isCompany ? (document.getElementById('companyType')?.value || 'Energy & EPC Enterprise') : (document.getElementById('proTitle')?.value || 'Energy Specialist'),
       industry: isCompany ? (document.getElementById('companyType')?.value || 'EPC & Heavy Construction') : (document.getElementById('industry')?.value || 'Engineering'),
       cac: isCompany ? (document.getElementById('rcNumber')?.value.trim() || '') : '',
+      terms_accepted: true,
+      terms_accepted_at: consentTimestamp,
+      terms_version: "2026.1",
       consent_terms_accepted: true,
       consent_privacy_accepted: true,
       consent_ndpa_accepted: true,
-      consent_timestamp: new Date().toISOString(),
+      consent_timestamp: consentTimestamp,
       consent_policy_version: "2026.1",
       consent_jurisdiction: "Federal Republic of Nigeria",
       consent_ip_device: navigator.userAgent || 'Web Browser'
@@ -663,7 +684,7 @@ html.dark .success-h { color: #e2efed; }
     window.location.replace(selectedRole === 'company' ? 'company-dashboard.html' : 'dashboard.html');
   }
 
-  // Enable Enter key to trigger signup on all form inputs
+  // Enable Enter key to trigger signup on all form inputs and watch terms checkbox
   document.addEventListener('DOMContentLoaded', function() {
     const inputIds = ['firstName', 'lastName', 'otherName', 'proTitle', 'companyName', 'rcNumber', 'coRepFirstName', 'coRepLastName', 'coRepOtherName', 'email', 'password', 'confirmPw'];
     inputIds.forEach(id => {
@@ -677,6 +698,23 @@ html.dark .success-h { color: #e2efed; }
         });
       }
     });
+
+    const termsCheckbox = document.getElementById('terms');
+    if (termsCheckbox) {
+      termsCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          const tBox = document.getElementById('termsContainer');
+          if (tBox) {
+            tBox.style.borderColor = 'var(--line)';
+            tBox.style.background = 'var(--paper)';
+          }
+          const err = document.getElementById('formError');
+          if (err && err.textContent.includes('Terms')) {
+            err.style.display = 'none';
+          }
+        }
+      });
+    }
   });
 
   // Pre-select role from URL param or default

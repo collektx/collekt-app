@@ -115,9 +115,20 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
       escrow_balance: wallet ? Number(wallet.escrow_balance || 0) : 0,
       is_verified: false,
       verification_status: 'none',
+      terms_accepted: true,
+      terms_accepted_at: userMetadata.terms_accepted_at || new Date().toISOString(),
+      terms_version: userMetadata.terms_version || '2026.1',
       created_at: new Date().toISOString(),
       ...(profile || {})
     };
+
+    try {
+      await sb.from('profiles').update({
+        terms_accepted: true,
+        terms_accepted_at: localUser.terms_accepted_at,
+        terms_version: localUser.terms_version
+      }).eq('id', authUser.id);
+    } catch(e) {}
 
     localStorage.setItem('collekt_user', JSON.stringify(localUser));
     localStorage.setItem('collekt_last_role', chosenRole);
@@ -400,6 +411,9 @@ async function syncUser() {
           verification_status: 'none',
           wallet_balance: 0,
           escrow_balance: 0,
+          terms_accepted: true,
+          terms_accepted_at: new Date().toISOString(),
+          terms_version: '2026.1',
           created_at: new Date().toISOString()
         };
 
@@ -421,6 +435,9 @@ async function syncUser() {
             avatar: null,
             is_verified: false,
             verification_status: 'none',
+            terms_accepted: true,
+            terms_accepted_at: newProfile.terms_accepted_at,
+            terms_version: newProfile.terms_version,
             updated_at: new Date().toISOString()
           });
         } catch (e) {}
