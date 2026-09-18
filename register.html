@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=67.0">
-<link rel="stylesheet" href="shared.css?v=67.0">
-<link rel="stylesheet" href="glass.css?v=67.0">
+<link rel="stylesheet" href="style.css?v=70.0">
+<link rel="stylesheet" href="shared.css?v=70.0">
+<link rel="stylesheet" href="glass.css?v=70.0">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 
 <style>
@@ -309,7 +309,7 @@ html.dark .success-h { color: #e2efed; }
           <div class="role-card" id="roleCardPro" onclick="selectRole('professional')">
             <div class="role-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
             <div class="role-card-title">I'm a Professional</div>
-            <div class="role-card-desc">Find projects, submit proposals and get hired by top companies</div>
+            <div class="role-card-desc">Find projects, collekt opportunities and get hired by top companies</div>
           </div>
           <div class="role-card" id="roleCardCo" onclick="selectRole('company')">
             <div class="role-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h6"/></svg></div>
@@ -689,8 +689,8 @@ html.dark .success-h { color: #e2efed; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=67.0"></script>
-<script src="app.js?v=67.0"></script>
+<script src="supabase.js?v=70.0"></script>
+<script src="app.js?v=70.0"></script>
 <script>
   // Detect if arriving from OAuth callback
   const regHash = window.location.hash || '';
@@ -948,99 +948,148 @@ html.dark .success-h { color: #e2efed; }
 
     if (err) err.style.display = 'none';
 
-    // Open legal terms and Cloudflare Turnstile modal before final submission
+    // Open User Agreement & Cloudflare Turnstile Modal
     openLegalModal();
   }
 
   async function confirmAndRegister() {
     if (!isTurnstileVerified) {
-      alert('Please complete the security challenge verification.');
+      alert('Please complete the Cloudflare Turnstile verification.');
       return;
     }
-
     const termsChecked = document.getElementById('modalTermsCheck')?.checked;
     if (!termsChecked) {
-      alert('Please agree to Collekt\'s Terms of Service and Privacy Policy to create your account.');
+      alert('Please check the agreement box to accept Collekt\'s Terms of Service and Privacy Policy.');
       return;
-    }
-
-    const confirmBtn = document.getElementById('confirmRegBtn');
-    if (confirmBtn) {
-      confirmBtn.disabled = true;
-      confirmBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;"><svg style="animation:spin 0.8s linear infinite;width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Creating Account...</span>';
     }
 
     const email  = (document.getElementById('email')?.value || '').trim();
     const pw     = document.getElementById('password')?.value || '';
     const isCompany = selectedRole === 'company';
+    let name = '';
+    let first_name = '';
+    let last_name = '';
+    let other_name = '';
+    let rep_first_name = '';
+    let rep_last_name = '';
+    let rep_other_name = '';
 
+    if (isCompany) {
+      name = document.getElementById('companyName')?.value.trim() || 'Company Account';
+      rep_first_name = document.getElementById('coRepFirstName')?.value.trim() || '';
+      rep_last_name  = document.getElementById('coRepLastName')?.value.trim() || '';
+      rep_other_name = document.getElementById('coRepOtherName')?.value.trim() || '';
+    } else {
+      first_name = document.getElementById('firstName')?.value.trim() || '';
+      last_name  = document.getElementById('lastName')?.value.trim() || '';
+      other_name = document.getElementById('otherName')?.value.trim() || '';
+      name = [first_name, other_name, last_name].filter(Boolean).join(' ') || email.split('@')[0];
+    }
+
+    // Show loading on confirmation button
+    const confirmBtn = document.getElementById('confirmRegBtn');
+    if (confirmBtn) {
+      confirmBtn.innerHTML = '<span>Creating account... ⏳</span>';
+      confirmBtn.disabled = true;
+    }
+
+    const consentTimestamp = new Date().toISOString();
     const metadata = {
-      role: selectedRole,
+      name,
+      first_name: isCompany ? '' : first_name,
+      last_name: isCompany ? '' : last_name,
+      other_name: isCompany ? '' : other_name,
+      company_name: isCompany ? name : '',
+      rep_first_name: isCompany ? rep_first_name : '',
+      rep_last_name: isCompany ? rep_last_name : '',
+      rep_other_name: isCompany ? rep_other_name : '',
+      title: isCompany ? (document.getElementById('companyType')?.value || 'Energy & EPC Enterprise') : (document.getElementById('proTitle')?.value || 'Energy Specialist'),
+      industry: isCompany ? (document.getElementById('companyType')?.value || 'EPC & Heavy Construction') : (document.getElementById('industry')?.value || 'Engineering'),
+      cac: isCompany ? (document.getElementById('rcNumber')?.value.trim() || '') : '',
       turnstile_verified: true,
       turnstile_token: turnstileToken,
-      accepted_terms_version: 'v67.0',
-      accepted_terms_timestamp: new Date().toISOString(),
-      ndpa_2023_consent: true,
-      ...(isCompany ? {
-        company_name: document.getElementById('companyName')?.value.trim() || '',
-        company_type: document.getElementById('companyType')?.value || '',
-        rc_number: document.getElementById('rcNumber')?.value.trim() || '',
-        representative_first_name: document.getElementById('coRepFirstName')?.value.trim() || '',
-        representative_last_name: document.getElementById('coRepLastName')?.value.trim() || '',
-        representative_other_name: document.getElementById('coRepOtherName')?.value.trim() || '',
-        full_name: `${document.getElementById('coRepFirstName')?.value.trim() || ''} ${document.getElementById('coRepLastName')?.value.trim() || ''}`.trim()
-      } : {
-        first_name: document.getElementById('firstName')?.value.trim() || '',
-        last_name: document.getElementById('lastName')?.value.trim() || '',
-        other_name: document.getElementById('otherName')?.value.trim() || '',
-        full_name: `${document.getElementById('firstName')?.value.trim() || ''} ${document.getElementById('lastName')?.value.trim() || ''}`.trim(),
-        title: document.getElementById('proTitle')?.value.trim() || '',
-        industry: document.getElementById('industry')?.value || ''
-      })
+      turnstile_timestamp: consentTimestamp,
+      recaptcha_verified: true,
+      recaptcha_timestamp: consentTimestamp,
+      terms_accepted: true,
+      terms_accepted_at: consentTimestamp,
+      terms_version: "2026.1",
+      consent_terms_accepted: true,
+      consent_privacy_accepted: true,
+      consent_ndpa_accepted: true,
+      consent_timestamp: consentTimestamp,
+      consent_policy_version: "2026.1",
+      consent_jurisdiction: "Federal Republic of Nigeria",
+      consent_ip_device: navigator.userAgent || 'Web Browser'
     };
 
-    try {
-      if (typeof signUpWithEmail === 'function') {
-        const result = await signUpWithEmail(email, pw, metadata);
-        if (result && (result.success || result.user || result.data?.user)) {
-          closeLegalModal();
-          goToStep(3);
-        } else {
-          closeLegalModal();
-          const err = document.getElementById('formError');
-          if (err) {
-            err.textContent = result?.error?.message || result?.message || 'Registration failed. Please check your details and try again.';
-            err.style.display = 'block';
-          }
-        }
-      } else {
-        closeLegalModal();
-        goToStep(3);
-      }
-    } catch(err) {
-      closeLegalModal();
-      const formErr = document.getElementById('formError');
-      if (formErr) {
-        formErr.textContent = err.message || 'Registration failed. Please try again.';
-        formErr.style.display = 'block';
-      }
-    } finally {
+    const { user: authUser, session, profile, error: authErr } = await signUpWithEmailPassword({
+      email,
+      password: pw,
+      role: selectedRole,
+      metadata
+    });
+
+    if (authErr) {
       if (confirmBtn) {
-        confirmBtn.disabled = false;
         confirmBtn.innerHTML = '<span>Accept &amp; Create Account &rarr;</span>';
-        checkAgreementReadiness();
+        confirmBtn.disabled = false;
       }
+      closeLegalModal();
+      const err = document.getElementById('formError');
+      if (err) {
+        let msg = authErr.message || 'Registration failed. Please check your details.';
+        if (msg.toLowerCase().includes('already registered')) {
+          msg = 'An account with this email already exists. Please log in instead.';
+        }
+        err.textContent = msg;
+        err.style.display = 'block';
+      }
+      return;
     }
+
+    closeLegalModal();
+
+    if (typeof setUser === 'function' && profile) {
+      setUser(profile);
+    }
+
+    if (typeof showToast === 'function') {
+      showToast('🎉 Account created! Directing to your dashboard...');
+    }
+
+    const targetDashboard = selectedRole === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+    setTimeout(() => {
+      window.location.replace(targetDashboard);
+    }, 400);
   }
 
   function goToDashboardDirect() {
-    window.location.href = selectedRole === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+    window.location.replace(selectedRole === 'company' ? 'company-dashboard.html' : 'dashboard.html');
   }
 
-  // Pre-select role if stored
-  document.addEventListener('DOMContentLoaded', () => {
-    selectRole(selectedRole);
+  // Enable Enter key on form inputs to trigger step 2 validation & open modal
+  document.addEventListener('DOMContentLoaded', function() {
+    const inputIds = ['firstName', 'lastName', 'otherName', 'proTitle', 'companyName', 'rcNumber', 'coRepFirstName', 'coRepLastName', 'coRepOtherName', 'email', 'password', 'confirmPw'];
+    inputIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.keyCode === 13) {
+            e.preventDefault();
+            handleStep2Submit();
+          }
+        });
+      }
+    });
   });
+
+  // Pre-select role from URL param or default
+  (function () {
+    const urlRole = new URLSearchParams(window.location.search).get('role');
+    selectRole(urlRole === 'company' ? 'company' : 'professional');
+  })();
+
 </script>
 </body>
 </html>
