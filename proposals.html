@@ -24,14 +24,14 @@
     }
   })();
 </script>
-<title>My Proposals &mdash; Collekt</title>
-<meta name="description" content="View, track and manage your submitted bidding proposals for engineering tenders and EPC contracts on Collekt.">
+<title>Collektions &mdash; Collekt</title>
+<meta name="description" content="View, track and manage your submitted Collektions for engineering tenders and EPC contracts on Collekt.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=70.0">
-<link rel="stylesheet" href="shared.css?v=70.0">
-<link rel="stylesheet" href="glass.css?v=70.0">
+<link rel="stylesheet" href="style.css?v=71.0">
+<link rel="stylesheet" href="shared.css?v=71.0">
+<link rel="stylesheet" href="glass.css?v=71.0">
 <style>
 html, body {
   background: var(--paper);
@@ -200,8 +200,8 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
       <div class="prop-header-banner">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; position:relative; z-index:2;">
           <div>
-            <h1 class="prop-title">My Bidding <em>Proposals</em></h1>
-            <p class="prop-sub">Track submitted tender proposals, review client contract status, and manage active engineering bids.</p>
+            <h1 class="prop-title">My <em>Collektions</em></h1>
+            <p class="prop-sub">Track submitted Collektions, review client contract status, and manage active engineering bids.</p>
           </div>
           <a href="marketplace.html" class="btn btn-amber" style="font-weight:800; padding:10px 22px;">
             🔍 Browse Live Tenders &rarr;
@@ -212,7 +212,7 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
       <!-- ═ STATS GRID ═ -->
       <div class="prop-stats-grid">
         <div class="prop-stat-card">
-          <span class="prop-stat-lbl">Total Submitted Proposals</span>
+          <span class="prop-stat-lbl">Total Submitted Collektions</span>
           <span class="prop-stat-val" id="statTotalProps">0</span>
         </div>
         <div class="prop-stat-card">
@@ -220,11 +220,11 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
           <span class="prop-stat-val" style="color:var(--amber);" id="statActiveProps">0</span>
         </div>
         <div class="prop-stat-card">
-          <span class="prop-stat-lbl">Contracts Awarded</span>
+          <span class="prop-stat-lbl">JOBS COLLEKTED</span>
           <span class="prop-stat-val" style="color:#16a34a;" id="statAwardedProps">0</span>
         </div>
         <div class="prop-stat-card">
-          <span class="prop-stat-lbl">Active Bid Pipeline Value</span>
+          <span class="prop-stat-lbl">Collektion Pipeline Value</span>
           <span class="prop-stat-val" style="color:var(--teal);" id="statPipelineVal">₦0</span>
         </div>
       </div>
@@ -232,14 +232,14 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
       <!-- ═ FILTER & SEARCH BAR ═ -->
       <div class="prop-filter-bar">
         <div class="prop-pills-wrap" id="propPills">
-          <div class="prop-pill active" onclick="filterProposals('all', this)">All Proposals</div>
+          <div class="prop-pill active" onclick="filterProposals('all', this)">All Collektions</div>
           <div class="prop-pill" onclick="filterProposals('review', this)">⏳ Under Review</div>
-          <div class="prop-pill" onclick="filterProposals('awarded', this)">🎉 Shortlisted / Awarded</div>
-          <div class="prop-pill" onclick="filterProposals('declined', this)">❌ Declined</div>
+          <div class="prop-pill" onclick="filterProposals('awarded', this)">🎉 Jobs Collekted</div>
+          <div class="prop-pill" onclick="filterProposals('declined', this)">❌ Declined / Uncollekted</div>
         </div>
 
         <div style="display:flex; align-items:center; gap:10px; min-width:240px;">
-          <input type="text" class="form-input" id="propSearchInput" placeholder="Search proposals..." onkeyup="renderProposalsList()" style="padding:8px 14px; font-size:12px; border-radius:99px;">
+          <input type="text" class="form-input" id="propSearchInput" placeholder="Search collektions..." onkeyup="renderProposalsList()" style="padding:8px 14px; font-size:12px; border-radius:99px;">
         </div>
       </div>
 
@@ -254,13 +254,13 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=70.0"></script>
-<script src="app.js?v=70.0"></script>
-<script src="collekt-ai.js?v=70.0"></script>
-<script src="settings-popup.js?v=70.0"></script>
+<script src="supabase.js?v=71.0"></script>
+<script src="app.js?v=71.0"></script>
+<script src="collekt-ai.js?v=71.0"></script>
+<script src="settings-popup.js?v=71.0"></script>
 <script>
   /* ═════════════════════════════════════════════════════════
-     MY PROPOSALS PAGE ENGINE v1.0
+     COLLEKTIONS PAGE ENGINE v1.0
      ═════════════════════════════════════════════════════════ */
 
   let _activePropFilter = 'all';
@@ -283,7 +283,7 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
       localProps = localProps.filter(p => !p.userId || p.userId === me.id || p.userEmail === me.email);
     }
 
-    // Only real user submitted proposals
+    // Only real user submitted proposals/collektions
     let combined = [].concat(localProps);
 
     // Deduplicate
@@ -295,6 +295,40 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
     });
   }
 
+  function isProposalCompleted(p) {
+    const st = String(p.status || '').toLowerCase();
+    const jst = String(p.job_status || p.jobStatus || p.contract_status || p.contractStatus || '').toLowerCase();
+    return st === 'completed' || st === 'collekted' || st === 'delivered' || st === 'closed' ||
+           jst === 'completed' || jst === 'collekted' || jst === 'delivered' || jst === 'closed';
+  }
+
+  function isProposalInProgress(p) {
+    const st = String(p.status || '').toLowerCase();
+    const jst = String(p.job_status || p.jobStatus || p.contract_status || p.contractStatus || '').toLowerCase();
+    return st === 'in_progress' || st === 'in-progress' || st === 'active' ||
+           jst === 'in_progress' || jst === 'in-progress' || jst === 'active';
+  }
+
+  function isProposalAwarded(p) {
+    const st = String(p.status || '').toLowerCase();
+    return st === 'awarded' || st === 'accepted';
+  }
+
+  function isProposalUncollekted(p) {
+    const st = String(p.status || '').toLowerCase();
+    return st === 'uncollekted' || st === 'withdrawn';
+  }
+
+  function isProposalDeclined(p) {
+    const st = String(p.status || '').toLowerCase();
+    return st === 'rejected' || st === 'declined';
+  }
+
+  function isProposalUnderReview(p) {
+    const st = String(p.status || '').toLowerCase();
+    return st === 'submitted' || st === 'pending' || st === 'review' || st === 'under_review' || !st;
+  }
+
   function renderProposalsList() {
     const container = document.getElementById('propListContainer');
     const q = document.getElementById('propSearchInput')?.value.toLowerCase().trim() || '';
@@ -304,20 +338,26 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
 
     // Stats calculations
     const totalCount = props.length;
-    const activeCount = props.filter(p => p.status === 'submitted' || p.status === 'pending' || p.status === 'review').length;
-    const awardedCount = props.filter(p => p.status === 'awarded' || p.status === 'accepted').length;
-    const pipelineSum = props.reduce((acc, p) => acc + Number(p.bidAmount || 0), 0);
+    const activeCount = props.filter(p => isProposalUnderReview(p)).length;
+    const jobsCollektedCount = props.filter(p => isProposalAwarded(p) || isProposalInProgress(p) || isProposalCompleted(p)).length;
+
+    // Collektion Pipeline Value: strictly ₦0 until the bid/proposal has actually resulted in a completed/collected job
+    const completedProps = props.filter(p => isProposalCompleted(p));
+    const pipelineSum = completedProps.reduce((acc, p) => {
+      const val = Number(p.bidAmount || p.amount || p.budget || p.proposedAmount || 0);
+      return acc + (isNaN(val) ? 0 : val);
+    }, 0);
 
     if (document.getElementById('statTotalProps')) document.getElementById('statTotalProps').textContent = totalCount;
     if (document.getElementById('statActiveProps')) document.getElementById('statActiveProps').textContent = activeCount;
-    if (document.getElementById('statAwardedProps')) document.getElementById('statAwardedProps').textContent = awardedCount;
-    if (document.getElementById('statPipelineVal')) document.getElementById('statPipelineVal').textContent = typeof formatNaira === 'function' ? formatNaira(pipelineSum, true) : '₦' + pipelineSum;
+    if (document.getElementById('statAwardedProps')) document.getElementById('statAwardedProps').textContent = jobsCollektedCount;
+    if (document.getElementById('statPipelineVal')) document.getElementById('statPipelineVal').textContent = typeof formatNaira === 'function' ? formatNaira(pipelineSum, true) : '₦' + pipelineSum.toLocaleString();
 
     // Filter by tab pill
     let filtered = props.filter(p => {
-      if (_activePropFilter === 'review') return p.status === 'submitted' || p.status === 'pending' || p.status === 'review';
-      if (_activePropFilter === 'awarded') return p.status === 'awarded' || p.status === 'accepted';
-      if (_activePropFilter === 'declined') return p.status === 'rejected' || p.status === 'declined' || p.status === 'withdrawn';
+      if (_activePropFilter === 'review') return isProposalUnderReview(p);
+      if (_activePropFilter === 'awarded') return isProposalAwarded(p) || isProposalInProgress(p) || isProposalCompleted(p);
+      if (_activePropFilter === 'declined') return isProposalDeclined(p) || isProposalUncollekted(p);
       return true;
     });
 
@@ -333,7 +373,7 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
       container.innerHTML = `
         <div style="background:var(--white); border:2px dashed var(--line); border-radius:20px; padding:60px 24px; text-align:center;">
           <div style="font-size:48px; margin-bottom:12px;">📝</div>
-          <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:6px;">No Proposals Match Your View</div>
+          <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:6px;">No Collektions Match Your View</div>
           <div style="font-size:13px; color:var(--muted); margin-bottom:20px;">Collekt open energy tenders in the marketplace to see them here.</div>
           <a href="marketplace.html" class="btn btn-amber btn-sm" style="font-weight:800; padding:8px 20px;">Browse Live Tenders</a>
         </div>
@@ -342,20 +382,39 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
     }
 
     container.innerHTML = filtered.map(p => {
-      const isAwarded = p.status === 'awarded' || p.status === 'accepted';
-      const isDeclined = p.status === 'rejected' || p.status === 'declined' || p.status === 'withdrawn';
+      const isCompleted = isProposalCompleted(p);
+      const isInProg = isProposalInProgress(p);
+      const isAwarded = isProposalAwarded(p);
+      const isUncoll = isProposalUncollekted(p);
+      const isDeclined = isProposalDeclined(p);
 
-      const statusBadge = isAwarded
-        ? `<span class="prop-status-badge badge-awarded">🎉 Contract Awarded</span>`
-        : isDeclined
-        ? `<span class="prop-status-badge badge-declined">❌ Proposal Declined</span>`
-        : `<span class="prop-status-badge badge-review">⏳ Under Review</span>`;
+      let statusBadge = `<span class="prop-status-badge badge-review">⏳ Under Review</span>`;
+      let clientReviewText = 'Reviewing Collektion ⏳';
+
+      if (isCompleted) {
+        statusBadge = `<span class="prop-status-badge badge-awarded">🎉 Jobs Collekted</span>`;
+        clientReviewText = 'Completed & Collekted ✅';
+      } else if (isInProg) {
+        statusBadge = `<span class="prop-status-badge" style="background:#e0f2fe; color:#0369a1; border:1px solid #7dd3fc;">⚡ Job In Progress</span>`;
+        clientReviewText = 'In Progress ⚡';
+      } else if (isAwarded) {
+        statusBadge = `<span class="prop-status-badge badge-awarded">🎉 Collektion Accepted</span>`;
+        clientReviewText = 'Accepted ✅';
+      } else if (isUncoll) {
+        statusBadge = `<span class="prop-status-badge badge-declined">🗑️ Uncollekted</span>`;
+        clientReviewText = 'Uncollekted 🗑️';
+      } else if (isDeclined) {
+        statusBadge = `<span class="prop-status-badge badge-declined">❌ Declined</span>`;
+        clientReviewText = 'Closed ❌';
+      }
 
       const bidFormatted = p.bidAmount ? (typeof formatNaira === 'function' ? formatNaira(p.bidAmount, false) : '₦' + p.bidAmount) : 'Negotiable';
       const dateStr = p.created_at ? new Date(p.created_at).toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' }) : 'Recent';
       const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
       const compProfile = allUsers.find(x => x && ((p.companyId && x.id === p.companyId) || (p.companyName && (x.company_name === p.companyName || x.name === p.companyName))));
       const badge = (compProfile && typeof getShieldBadgeHTML === 'function') ? getShieldBadgeHTML(15, compProfile) : '';
+
+      const canUncollekt = !isCompleted && !isInProg && !isAwarded && !isUncoll && !isDeclined;
 
       return `
         <div class="prop-card">
@@ -382,7 +441,7 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
             </div>
             <div class="prop-detail-item">
               <span class="prop-detail-lbl">Client Review Status</span>
-              <span class="prop-detail-val" style="font-size:13px;">${isAwarded ? 'Accepted ✅' : isDeclined ? 'Closed' : 'Reviewing Bid ⏳'}</span>
+              <span class="prop-detail-val" style="font-size:13px;">${clientReviewText}</span>
             </div>
           </div>
 
@@ -402,9 +461,9 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
               <button class="btn btn-primary btn-sm" style="font-weight:800; font-size:12px; background:var(--teal);" onclick="openAIProposalGeneratorModal('${encodeURIComponent(p.jobTitle || 'Tender Proposal')}', '${encodeURIComponent(p.pitchText || '')}')">
                 ✨ Improve Pitch with AI
               </button>
-              ${!isAwarded && !isDeclined ? `
-                <button class="btn btn-outline btn-sm" style="color:#b91c1c; border-color:#fca5a5; font-weight:800; font-size:12px;" onclick="withdrawUserProposal('${p.id}')">
-                  🗑️ Withdraw Bid
+              ${canUncollekt ? `
+                <button class="btn btn-outline btn-sm" style="color:#b91c1c; border-color:#fca5a5; font-weight:800; font-size:12px;" onclick="uncollektProposal('${p.id}')">
+                  🗑️ UNCOLLEKT
                 </button>
               ` : ''}
             </div>
@@ -414,21 +473,25 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
     }).join('');
   }
 
-  function withdrawUserProposal(propId) {
-    if (!confirm('Are you sure you want to withdraw this proposal?')) return;
+  function uncollektProposal(propId) {
+    if (!confirm('Are you sure you want to uncollekt this proposal?')) return;
     
     let localProps = [];
     try {
       localProps = JSON.parse(localStorage.getItem('collekt_proposals')) || [];
       const idx = localProps.findIndex(p => p.id === propId);
       if (idx !== -1) {
-        localProps[idx].status = 'withdrawn';
+        localProps[idx].status = 'uncollekted';
         localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
       }
     } catch(e){}
 
-    if (typeof showToast === 'function') showToast('🗑️ Proposal withdrawn successfully');
+    if (typeof showToast === 'function') showToast('🗑️ Proposal uncollekted successfully');
     renderProposalsList();
+  }
+
+  function withdrawUserProposal(propId) {
+    uncollektProposal(propId);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
