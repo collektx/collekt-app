@@ -445,13 +445,17 @@ html.dark .shield-badge svg text {
 .card-body { padding: 24px; }
 .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
 .empty-state .e-icon { font-size: 48px; margin-bottom: 12px; }
-.profile-strength-bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; margin: 12px 0; }
-.profile-strength-fill { height: 100%; background: linear-gradient(to right, var(--teal), var(--teal-mid)); border-radius: 4px; transition: width .6s ease; }
-.check-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--line); }
+.profile-strength-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; width: 100%; box-sizing: border-box; }
+html.dark .profile-strength-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+.profile-strength-bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 10px 0; }
+.profile-strength-fill { height: 100%; background: linear-gradient(to right, var(--teal), var(--teal-mid)); border-radius: 99px; transition: width .6s ease; }
+.check-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 4px; font-size: 12px; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.04); min-width: 0; box-sizing: border-box; border-radius: 6px; transition: background .15s ease; }
 .check-item:last-child { border-bottom: none; }
-.check-item .ci-icon { font-size: 16px; }
-.check-item.done { color: var(--teal); }
+.check-item .ci-icon { font-size: 12px; flex-shrink: 0; }
+.check-item.done { color: var(--ink); }
 .check-item.todo { color: var(--muted); }
+html.dark .check-item { border-bottom-color: rgba(255,255,255,.04); }
+
 
 /* ── ANIMATIONS ───────────────────────────────────── */
 @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
