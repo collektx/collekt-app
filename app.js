@@ -2478,13 +2478,13 @@ function calculateUserProfileStrength(user) {
   );
 
   const checks = [
-    { id: 'check-photo', label: 'Profile photo added', done: hasPhoto, weight: 15, action: 'openAvatarStudio' },
-    { id: 'check-bio', label: 'Bio written', done: hasBio, weight: 15, action: 'openEditModal' },
-    { id: 'check-skills', label: 'Skills listed', done: hasSkills, weight: 15, action: 'focusSkills' },
-    { id: 'check-cv', label: 'CV uploaded', done: hasCv, weight: 15, action: 'uploadCv' },
-    { id: 'check-portfolio', label: 'Add portfolio items', done: hasPortfolio, weight: 15, action: 'uploadPortfolio' },
-    { id: 'check-certs', label: 'Upload certifications', done: hasCerts, weight: 15, action: 'uploadCerts' },
-    { id: 'check-identity', label: 'Get identity verified', done: hasIdentity, weight: 10, action: 'verifyIdentity' }
+    { id: 'check-photo', label: 'Profile photo', done: hasPhoto, weight: 15, action: 'openAvatarStudio' },
+    { id: 'check-bio', label: 'Bio / Summary', done: hasBio, weight: 15, action: 'openEditModal' },
+    { id: 'check-skills', label: 'Technical skills', done: hasSkills, weight: 15, action: 'focusSkills' },
+    { id: 'check-cv', label: 'Resume / CV', done: hasCv, weight: 15, action: 'uploadCv' },
+    { id: 'check-portfolio', label: 'Portfolio items', done: hasPortfolio, weight: 15, action: 'uploadPortfolio' },
+    { id: 'check-certs', label: 'Certifications', done: hasCerts, weight: 15, action: 'uploadCerts' },
+    { id: 'check-identity', label: 'Identity verification', done: hasIdentity, weight: 10, action: 'verifyIdentity' }
   ];
 
   const doneWeight = checks.filter(c => c.done).reduce((sum, c) => sum + c.weight, 0);
@@ -2536,12 +2536,12 @@ function calculateCompanyProfileStrength(user) {
   const hasProjects = !!(postedJobs.length > 0 || (u.projects && u.projects.length > 0));
 
   const checks = [
-    { id: 'check-co-logo', label: 'Company logo uploaded', done: hasLogo, weight: 20, action: 'openAvatarStudio' },
-    { id: 'check-co-about', label: 'Company overview written', done: hasAbout, weight: 20, action: 'openCoEditModal' },
-    { id: 'check-co-contact', label: 'Contact representative added', done: hasContact, weight: 15, action: 'openCoEditModal' },
-    { id: 'check-co-cac', label: 'CAC Registration / TIN provided', done: hasCac, weight: 15, action: 'openCoEditModal' },
-    { id: 'check-co-docs', label: 'Corporate documents uploaded', done: hasDocs, weight: 15, action: 'uploadCoDoc' },
-    { id: 'check-co-project', label: 'Post first tender / RFP', done: hasProjects, weight: 15, action: 'postProject' }
+    { id: 'check-co-logo', label: 'Company logo', done: hasLogo, weight: 20, action: 'openAvatarStudio' },
+    { id: 'check-co-about', label: 'Company overview', done: hasAbout, weight: 20, action: 'openCoEditModal' },
+    { id: 'check-co-contact', label: 'Representative contact', done: hasContact, weight: 15, action: 'openCoEditModal' },
+    { id: 'check-co-cac', label: 'CAC / TIN registration', done: hasCac, weight: 15, action: 'openCoEditModal' },
+    { id: 'check-co-docs', label: 'Corporate documents', done: hasDocs, weight: 15, action: 'uploadCoDoc' },
+    { id: 'check-co-project', label: 'First opportunity posted', done: hasProjects, weight: 15, action: 'postProject' }
   ];
 
   const doneWeight = checks.filter(c => c.done).reduce((sum, c) => sum + c.weight, 0);
@@ -2577,7 +2577,7 @@ function renderGlobalProfileStrength(target, customUser) {
   } else if (target && target.nodeType) {
     containers = [target];
   } else {
-    containers = Array.from(document.querySelectorAll('#profileStrengthWidget, #profileStrengthCard, .profile-strength-card'));
+    containers = Array.from(document.querySelectorAll('#profileStrengthWidget, #profileStrengthCard, #coProfileStrengthWidget, .profile-strength-card'));
   }
 
   containers.forEach(container => {
@@ -2586,39 +2586,47 @@ function renderGlobalProfileStrength(target, customUser) {
     const isProfilePage = window.location.pathname.includes('profile');
 
     let html = `
-      <div class="section-title-sm" style="font-size:15px; font-weight:800; margin-bottom:4px; color:var(--ink);">
-        ${isCompany ? 'Company Profile Completion' : 'Profile Strength'}
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:8px;">
+        <div class="section-title-sm" style="font-size:14px; font-weight:800; margin-bottom:0; color:var(--ink); line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+          ${isCompany ? 'Company Profile Completion' : 'Profile Strength'}
+        </div>
+        <span style="color:${data.percent >= 80 ? '#16a34a' : 'var(--teal)'}; font-weight:900; font-size:13px; flex-shrink:0;">${data.percent}%</span>
       </div>
-      <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">
-        ${isCompany ? 'Complete your company verification to attract elite engineering talent.' : 'Complete your details to boost proposal acceptance and search ranking.'}
+      <p style="font-size:11.5px; color:var(--muted); margin-bottom:10px; line-height:1.35;">
+        ${isCompany ? 'Complete company verification to attract verified talent.' : 'Complete your details to boost proposals and search ranking.'}
       </p>
-      <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700; margin-bottom:8px;">
-        <span style="color:var(--ink); font-weight:800;">${data.level}</span>
-        <span style="color:${data.percent >= 80 ? '#16a34a' : 'var(--teal)'}; font-weight:900;">${data.percent}%</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:700; margin-bottom:6px;">
+        <span style="color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:0.04em;">Status:</span>
+        <span style="color:${data.percent >= 80 ? '#16a34a' : 'var(--ink)'}; font-weight:800;">${data.level}</span>
       </div>
-      <div class="profile-strength-bar" style="height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-bottom:14px;">
+      <div class="profile-strength-bar" style="height:6px; background:var(--line); border-radius:99px; overflow:hidden; margin-bottom:12px;">
         <div class="profile-strength-fill" style="width:${data.percent}%; height:100%; background:${data.percent >= 80 ? 'linear-gradient(90deg, #16a34a, #22c55e)' : 'linear-gradient(90deg, var(--teal), #2dd4bf)'}; border-radius:99px; transition:width 0.4s ease;"></div>
       </div>
-      <div class="ps-checklist" style="display:flex; flex-direction:column; gap:6px;">
+      <div class="ps-checklist" style="display:flex; flex-direction:column; gap:5px;">
     `;
 
     data.checks.forEach(item => {
       const checkIcon = item.done 
-        ? `<span class="ci-icon" style="color:#16a34a; font-weight:900; margin-right:6px;">✓</span>`
-        : `<span class="ci-icon" style="color:var(--muted); margin-right:6px;">○</span>`;
+        ? `<span class="ci-icon" style="color:#16a34a; font-weight:900; font-size:11px; flex-shrink:0; width:14px; text-align:center;">✓</span>`
+        : `<span class="ci-icon" style="color:var(--muted); font-size:11px; flex-shrink:0; width:14px; text-align:center; opacity:0.6;">○</span>`;
       
       const textColor = item.done ? 'var(--ink)' : 'var(--muted)';
       const fontWeight = item.done ? '700' : '500';
-      const textStyle = item.done ? 'color:#16a34a; font-weight:700;' : 'color:var(--muted);';
 
       html += `
         <div class="check-item ${item.done ? 'done' : 'todo'}" id="${item.id}" 
-             style="display:flex; align-items:center; font-size:12.5px; padding:4px 0; border-bottom:1px solid rgba(0,0,0,0.03); cursor:pointer;"
+             style="display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; padding:5px 6px; border-radius:6px; transition:background 0.15s ease; cursor:pointer; min-width:0;"
+             onmouseover="this.style.background='var(--paper-subtle, rgba(0,0,0,0.02))'"
+             onmouseout="this.style.background='transparent'"
              onclick="triggerProfileStrengthAction('${item.action}')"
-             title="${item.done ? 'Completed' : 'Click to complete ' + item.label}">
-          ${checkIcon}
-          <span style="color:${textColor}; font-weight:${fontWeight}; flex:1;">${item.label}</span>
-          ${item.done ? `<span style="font-size:10.5px; color:#16a34a; font-weight:800;">Done</span>` : `<span style="font-size:10.5px; color:var(--teal); font-weight:700;">+${item.weight}%</span>`}
+             title="${item.done ? 'Completed: ' + item.label : 'Click to complete ' + item.label}">
+          <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1; overflow:hidden;">
+            ${checkIcon}
+            <span style="color:${textColor}; font-weight:${fontWeight}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12px;">${item.label}</span>
+          </div>
+          ${item.done 
+            ? `<span style="flex-shrink:0; font-size:10px; color:#16a34a; font-weight:800; background:rgba(22,163,74,0.1); padding:2px 7px; border-radius:99px;">Done</span>` 
+            : `<span style="flex-shrink:0; font-size:10px; color:var(--teal); font-weight:800; background:rgba(20,184,166,0.1); padding:2px 7px; border-radius:99px;">+${item.weight}%</span>`}
         </div>
       `;
     });
@@ -2628,8 +2636,8 @@ function renderGlobalProfileStrength(target, customUser) {
     if (isDashboard) {
       const targetHref = isCompany ? 'company-profile.html' : 'profile.html';
       html += `
-        <a href="${targetHref}" class="btn btn-outline btn-sm" style="width:100%; margin-top:14px; min-height:38px; font-size:12.5px; justify-content:center; text-decoration:none; font-weight:800;">
-          ${data.percent >= 100 ? 'View Complete Profile &rarr;' : 'Complete Profile &rarr;'}
+        <a href="${targetHref}" class="btn btn-outline btn-sm" style="width:100%; margin-top:12px; min-height:36px; font-size:12px; justify-content:center; text-decoration:none; font-weight:800; display:flex; align-items:center; gap:6px; border-radius:8px;">
+          ${data.percent >= 100 ? 'View Full Profile &rarr;' : 'Complete Profile &rarr;'}
         </a>
       `;
     }
