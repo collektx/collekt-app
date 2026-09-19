@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=69.0">
-<link rel="stylesheet" href="shared.css?v=69.0">
-<link rel="stylesheet" href="glass.css?v=69.0">
+<link rel="stylesheet" href="style.css?v=71.0">
+<link rel="stylesheet" href="shared.css?v=71.0">
+<link rel="stylesheet" href="glass.css?v=71.0">
 
 <style>
   body { background: var(--paper); }
@@ -115,10 +115,10 @@
       <div class="dash-tab-content active" id="tabContentOverview">
         <!-- Stats -->
         <div class="stats-row fade-in">
-          <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='proposals.html'" title="View All Submitted Proposals">
+          <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='proposals.html'" title="View All Collektions">
             <div class="stat-icon">&#x1F4CC;</div>
             <div class="stat-value" id="statActiveProposals">0</div>
-            <div class="stat-label">Active Proposals &rarr;</div>
+            <div class="stat-label">Active Collektions &rarr;</div>
             <div class="stat-change" style="background:var(--paper); color:var(--muted); font-weight:700; padding:2px 8px; border-radius:99px; font-size:11px; display:inline-block;">View All</div>
           </div>
           <div class="stat-card">
@@ -235,10 +235,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=69.0"></script>
-<script src="app.js?v=69.0"></script>
-<script src="collekt-ai.js?v=69.0"></script>
-<script src="settings-popup.js?v=69.0"></script>
+<script src="supabase.js?v=71.0"></script>
+<script src="app.js?v=71.0"></script>
+<script src="collekt-ai.js?v=71.0"></script>
+<script src="settings-popup.js?v=71.0"></script>
 <script>
   requireAuth();
 
@@ -328,14 +328,14 @@
       container.innerHTML = `
         <div style="padding:40px 20px; text-align:center;">
           <div style="font-size:32px; margin-bottom:12px;">📋</div>
-          <h3 style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Proposals Submitted Yet</h3>
-          <p style="font-size:14px; color:var(--muted); max-width:400px; margin:0 auto; line-height:1.5;">Your active proposals and bid submissions will appear here. Browse open tenders on the Marketplace to submit your first proposal.</p>
+          <h3 style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Collektions Submitted Yet</h3>
+          <p style="font-size:14px; color:var(--muted); max-width:400px; margin:0 auto; line-height:1.5;">Your active Collektions will appear here. Browse open tenders on the Marketplace to submit your first Collektion.</p>
           <a href="marketplace.html" class="btn btn-primary btn-sm" style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;">🔍 Browse Marketplace &rarr;</a>
         </div>
       `;
     } else {
       let html = `
-        <div class=\"card-header\">
+        <div class="card-header">
           <h3>Recent Activity</h3>
           <a href="marketplace.html" style="font-size:13px; color:var(--teal); font-weight:700;">View all</a>
         </div>
@@ -372,7 +372,9 @@
   function renderOpportunities() {
     const jobs = typeof getPostedJobs === 'function' ? getPostedJobs() : [];
     const grid = document.getElementById('opportunitiesGrid');
-    if (!grid) return;\n\n    if (jobs.length === 0) {
+    if (!grid) return;
+
+    if (jobs.length === 0) {
       grid.style.display = 'block'; // override grid if empty state
       grid.innerHTML = `
         <div style="border:1px solid var(--line); border-radius:var(--r-lg); background:var(--white); padding:40px 20px; text-align:center;">
@@ -430,7 +432,7 @@
         <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:60px 20px; text-align:center;">
           <div style="font-size:48px; margin-bottom:16px;">${isFiltered ? '🔍' : '📝'}</div>
           <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:8px;">${isFiltered ? 'No Matching Proposals' : 'No Proposals Yet'}</h3>
-          <p style="font-size:14px; color:var(--muted); max-width:420px; margin:0 auto 20px; line-height:1.6;">${isFiltered ? 'No proposals match the selected filter. Try changing the status filter above.' : 'You haven\\'t submitted any proposals or bids yet. Browse the Marketplace to find projects and submit your first proposal.'}</p>
+          <p style="font-size:14px; color:var(--muted); max-width:420px; margin:0 auto 20px; line-height:1.6;">${isFiltered ? 'No proposals match the selected filter. Try changing the status filter above.' : 'You haven\'t submitted any proposals or bids yet. Browse the Marketplace to find projects and submit your first proposal.'}</p>
           ${isFiltered ? '' : '<a href="marketplace.html" class="btn btn-primary btn-sm" style="display:inline-flex; align-items:center; gap:6px;">🔍 Browse Marketplace →</a>'}
         </div>
       `;
@@ -491,7 +493,7 @@
     renderMyDocs();
     renderRecentActivity();
     renderOpportunities();
-    loadProWallet();
+    loadProWalletAndDVA();
     if (typeof renderPremiumUpgradeCard === 'function') {
       renderPremiumUpgradeCard('premiumUpgradeCard', 'professional');
     }
@@ -510,10 +512,10 @@
       const welcomeBadge = document.getElementById('welcomeBadge');
       if (welcomeBadge) welcomeBadge.innerHTML = getShieldBadgeHTML(22, updatedUser);
     }
-    loadProWallet();
+    loadProWalletAndDVA();
   });
 
-  async function loadProWallet() {
+  async function loadProWalletAndDVA() {
     const user = typeof getUser === 'function' ? getUser() : null;
     if (!user) return;
 
@@ -537,3 +539,4 @@
 <script src="upload-modal.js"></script>
 </body>
 </html>
+
