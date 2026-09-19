@@ -28,9 +28,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=66.0">
-<link rel="stylesheet" href="shared.css?v=66.0">
-<link rel="stylesheet" href="glass.css?v=66.0">
+<link rel="stylesheet" href="style.css?v=70.0">
+<link rel="stylesheet" href="shared.css?v=70.0">
+<link rel="stylesheet" href="glass.css?v=70.0">
 
 <style>
   body { background: var(--paper); }
@@ -131,7 +131,7 @@
             &#128203; My Jobs &amp; Opportunities
           </h1>
           <p style="font-size:14px; color:rgba(255,255,255,.8); max-width:620px;">
-            Track your published listings, review incoming proposals, assess specialist credentials, and award contracts.
+            Track your published listings, review incoming collektors, assess specialist credentials, and award contracts.
           </p>
         </div>
         <div style="display:flex; gap:10px;">
@@ -156,7 +156,7 @@
         <div class="stat-card">
           <div class="stat-icon">&#128233;</div>
           <div class="stat-value" id="statTotalApplicants">0</div>
-          <div class="stat-label">Candidate Proposals</div>
+          <div class="stat-label">Collektors</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">&#128220;</div>
@@ -183,11 +183,11 @@
   </main>
 </div>
 
-<!-- Proposals / Applicants Review Modal -->
+<!-- Collektors Review Modal -->
 <div class="modal-overlay" id="applicantsModal" style="z-index:99999;">
   <div class="modal-card" style="position:relative; max-width:680px; width:100%; max-height:85vh; overflow-y:auto; border-radius:24px; padding:28px;">
     <button class="modal-close" onclick="closeModal('applicantsModal')">&times;</button>
-    <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px;" id="applicantsModalTitle">Proposals &amp; Applicants</div>
+    <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px;" id="applicantsModalTitle">Collektors</div>
     <div style="font-size:12px; color:var(--muted); margin-bottom:16px;">Review candidate pitches, verified credentials, proposed budget, and timeline</div>
     
     <div id="applicantsList" style="display:flex; flex-direction:column; gap:12px;">
@@ -197,9 +197,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=66.0"></script>
-<script src="app.js?v=66.0"></script>
-<script src="settings-popup.js?v=66.0"></script>
+<script src="supabase.js?v=70.0"></script>
+<script src="app.js?v=70.0"></script>
+<script src="settings-popup.js?v=70.0"></script>
 
 <script>
   let _activeFilter = 'all';
@@ -297,14 +297,13 @@
           </div>
 
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-top:1px solid var(--line); padding-top:14px;">
-            <div style="font-size:13px; font-weight:800; color:var(--ink); display:flex; align-items:center; gap:6px;">
-              <span>&#128233; <strong>${propCount}</strong> Proposal${propCount === 1 ? '' : 's'} Received</span>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <button class="btn btn-outline btn-sm" onclick="openApplicantsModal('${j.id}')" style="font-weight:800; border-color:var(--teal); color:var(--teal);">
+                ⚡ Collektors (${propCount})
+              </button>
             </div>
 
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn btn-outline btn-sm" onclick="openApplicantsModal('${j.id}')" style="font-weight:800;">
-                &#128101; Proposals (${propCount})
-              </button>
               <a href="post-job.html?edit=${encodeURIComponent(j.id)}" class="btn btn-outline btn-sm" style="font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
                 ✏️ Edit
               </a>
@@ -312,7 +311,7 @@
                 🗑️ Delete
               </button>
               <a href="marketplace.html" class="btn btn-ghost btn-sm" style="font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
-                &#128065;&#65039; View in Marketplace
+                👁️ View in Marketplace
               </a>
             </div>
           </div>
@@ -342,7 +341,7 @@
     const matched = proposals.filter(p => String(p.jobId) === String(jobId));
 
     const titleEl = document.getElementById('applicantsModalTitle');
-    if (titleEl) titleEl.textContent = 'Proposals — ' + jobTitle;
+    if (titleEl) titleEl.textContent = 'Collektors — ' + jobTitle;
 
     const listEl = document.getElementById('applicantsList');
     if (!listEl) return;
@@ -351,8 +350,8 @@
       listEl.innerHTML = `
         <div style="text-align:center; padding:32px 20px; color:var(--muted);">
           <div style="font-size:32px; margin-bottom:8px;">📭</div>
-          <div style="font-weight:800; color:var(--ink); font-size:15px; margin-bottom:4px;">No Proposals Received Yet</div>
-          <p style="font-size:12px; margin:0;">Certified professionals viewing your tender on the marketplace will submit bids here.</p>
+          <div style="font-weight:800; color:var(--ink); font-size:15px; margin-bottom:4px;">No Collektors Received Yet</div>
+          <p style="font-size:12px; margin:0;">Certified professionals viewing your opportunity on the marketplace will collekt here.</p>
         </div>
       `;
     } else {
