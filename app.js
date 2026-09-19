@@ -4399,22 +4399,42 @@ function getUserProposals() {
   if (!u) return [];
   try {
     const all = JSON.parse(localStorage.getItem('collekt_proposals')) || [];
-    return all.filter(p => p.userId === u.id || p.userEmail === u.email);
+    const uId = String(u.id || '').toLowerCase();
+    const uEmail = String(u.email || '').toLowerCase();
+    return all.filter(p => {
+      const pUserId = String(p.userId || p.freelancer_id || '').toLowerCase();
+      const pUserEmail = String(p.userEmail || p.email || '').toLowerCase();
+      const pCompanyId = String(p.companyId || p.company_id || '').toLowerCase();
+      const pCompanyEmail = String(p.companyEmail || '').toLowerCase();
+      return pUserId === uId || pUserEmail === uEmail || pCompanyId === uId || pCompanyEmail === uEmail;
+    });
   } catch { return []; }
 }
 
 function saveUserProposal(proposalData) {
+  if (!proposalData) return null;
   const u = getUser();
   try {
     const all = JSON.parse(localStorage.getItem('collekt_proposals')) || [];
     if (u) {
-      proposalData.userId = u.id;
-      proposalData.userEmail = u.email;
-      proposalData.userName = u.name;
+      if (!proposalData.userId) proposalData.userId = u.id;
+      if (!proposalData.userEmail) proposalData.userEmail = u.email;
+      if (!proposalData.userName) proposalData.userName = u.name;
+      if (!proposalData.userTitle) proposalData.userTitle = u.title || u.role;
+      if (!proposalData.userAvatar) proposalData.userAvatar = u.avatar || '';
+      if (!proposalData.userLocation) proposalData.userLocation = u.location || u.state || 'Nigeria';
     }
-    proposalData.id = 'prop_' + Date.now();
-    proposalData.created_at = new Date().toISOString();
-    all.unshift(proposalData);
+    if (!proposalData.id) proposalData.id = 'prop_' + Date.now();
+    if (!proposalData.created_at) proposalData.created_at = new Date().toISOString();
+    if (!proposalData.status) proposalData.status = 'pending';
+    
+    // Check if already exists to update or insert
+    const idx = all.findIndex(p => p.id === proposalData.id);
+    if (idx !== -1) {
+      all[idx] = { ...all[idx], ...proposalData };
+    } else {
+      all.unshift(proposalData);
+    }
     localStorage.setItem('collekt_proposals', JSON.stringify(all));
     return proposalData;
   } catch { return null; }
@@ -4425,7 +4445,15 @@ function getUserContracts() {
   if (!u) return [];
   try {
     const all = JSON.parse(localStorage.getItem('collekt_contracts')) || [];
-    return all.filter(c => c.proId === u.id || c.companyId === u.id || c.proEmail === u.email || c.companyEmail === u.email);
+    const uId = String(u.id || '').toLowerCase();
+    const uEmail = String(u.email || '').toLowerCase();
+    return all.filter(c => {
+      const cProId = String(c.proId || c.freelancer_id || c.user_id || '').toLowerCase();
+      const cProEmail = String(c.proEmail || c.email || '').toLowerCase();
+      const cCompId = String(c.companyId || c.company_id || '').toLowerCase();
+      const cCompEmail = String(c.companyEmail || '').toLowerCase();
+      return cProId === uId || cProEmail === uEmail || cCompId === uId || cCompEmail === uEmail;
+    });
   } catch { return []; }
 }
 
