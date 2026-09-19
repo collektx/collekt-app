@@ -246,7 +246,7 @@
         <div class="stat-card">
           <div class="stat-icon">📩</div>
           <div class="stat-value" id="statProposalsReceived">0</div>
-          <div class="stat-label">Proposals &amp; Applications</div>
+          <div class="stat-label">Collektors</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">📜</div>
@@ -571,7 +571,7 @@
 <div class="modal-overlay" id="applicantsModal">
   <div class="modal-card" style="position:relative; max-width:620px; width:100%; max-height:80vh; overflow-y:auto;">
     <button class="modal-close" onclick="closeModal('applicantsModal')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    <div class="modal-title" id="applicantsModalTitle">Proposals</div>
+    <div class="modal-title" id="applicantsModalTitle">Collektors</div>
     <div id="applicantsList" style="display:flex; flex-direction:column; gap:0;">
       <!-- Loaded dynamically by openApplicantsModal() -->
     </div>
@@ -758,7 +758,7 @@
         projectsContainer.innerHTML = `
           <table class="data-table" style="min-width:640px;">
             <thead class="table-head">
-              <tr><th>Title &amp; Type</th><th>Category / Level</th><th>Budget / Compensation</th><th>Proposals</th><th>Status</th><th>Action</th></tr>
+              <tr><th>Title &amp; Type</th><th>Category / Level</th><th>Budget / Compensation</th><th>Collektors</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
               ${jobs.map(p => {
@@ -782,9 +782,9 @@
                       <div style="font-weight:800; color:var(--ink);">${bVal}</div>
                       <div style="font-size:11px; color:var(--muted);">${escapeHTML(p.budget_rate_type || 'Fixed')}</div>
                     </td>
-                    <td><strong style="color:var(--teal);">${pProps.length}</strong> proposal${pProps.length === 1 ? '' : 's'}</td>
+                    <td><strong style="color:var(--teal);">${pProps.length}</strong> collektor${pProps.length === 1 ? '' : 's'}</td>
                     <td><span class="proj-status-pill pill-open">🟢 Open</span></td>
-                    <td><button class="btn btn-primary btn-sm" style="min-height:32px; font-weight:800;" onclick="openApplicantsModal('${p.id||''}','${safeTitle}')">Proposals (${pProps.length})</button></td>
+                    <td><button class="btn btn-primary btn-sm" style="min-height:32px; font-weight:800;" onclick="openApplicantsModal('${p.id||''}','${safeTitle}')">Collektors (${pProps.length})</button></td>
                   </tr>
                 `;
               }).join('')}
@@ -829,8 +829,8 @@
       applicantsContainer.innerHTML = `
         <div style="padding:20px; text-align:center;">
           <div style="font-size:28px; margin-bottom:12px;">&#x1F465;</div>
-          <h4 style="font-size:14px; font-weight:800; color:var(--ink); margin-bottom:6px;">No Applicants Yet</h4>
-          <p style="font-size:12px; color:var(--muted);">Post a project tender to start receiving proposals from qualified professionals.</p>
+          <h4 style="font-size:14px; font-weight:800; color:var(--ink); margin-bottom:6px;">No Collektors Yet</h4>
+          <p style="font-size:12px; color:var(--muted);">Post an opportunity to start receiving collektors from qualified professionals.</p>
         </div>
       `;
     }
@@ -988,12 +988,12 @@
   async function openApplicantsModal(projectId, projectTitle) {
     // Update modal header
     const titleEl = document.getElementById('applicantsModalTitle');
-    if (titleEl) titleEl.innerHTML = 'Proposals &mdash; ' + escapeHTML(projectTitle || 'Project');
+    if (titleEl) titleEl.innerHTML = 'Collektors &mdash; ' + escapeHTML(projectTitle || 'Project');
 
     const listEl = document.getElementById('applicantsList');
     if (!listEl) { openModal('applicantsModal'); return; }
 
-    listEl.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">Loading proposals...</div>';
+    listEl.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">Loading collektors...</div>';
     openModal('applicantsModal');
 
     let allProposals = [];
@@ -1037,7 +1037,7 @@
     } catch(e) {}
 
     if (allProposals.length === 0) {
-      listEl.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">No proposals submitted for this opportunity yet.</div>';
+      listEl.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">No collektors submitted for this opportunity yet.</div>';
       return;
     }
 
@@ -1404,3 +1404,4 @@
 <script src="upload-modal.js"></script>
 </body>
 </html>
+
