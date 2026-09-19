@@ -84,6 +84,70 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
   } catch(e) {}
 })();
 
+// -- UNIVERSAL WALLET SANITIZER (Removes legacy mock/fake DVA numbers from all user accounts) --
+(function sanitizeAllUserWalletsStartup() {
+  try {
+    // 1. Sanitize collekt_user
+    let curr = JSON.parse(localStorage.getItem('collekt_user') || 'null');
+    if (curr) {
+      let changed = false;
+      if (curr.wallet) {
+        if (curr.wallet.account_number && (
+          String(curr.wallet.account_number).startsWith('0129') ||
+          curr.wallet.account_number === '0123456789' ||
+          curr.wallet.account_number === '9800452109' ||
+          (!curr.wallet.nova_linked && !curr.wallet.is_live_paystack && !curr.wallet.is_live_dva)
+        )) {
+          curr.wallet.account_number = '';
+          curr.wallet.bank_assigned = false;
+          if (curr.wallet.bank_name && (curr.wallet.bank_name.includes('Paystack DVA') || curr.wallet.bank_name.includes('NOVA Bank'))) {
+            curr.wallet.bank_name = '';
+          }
+          changed = true;
+        }
+      }
+      if (curr.dva_account && (String(curr.dva_account).startsWith('0129') || curr.dva_account === '9800452109' || curr.dva_account === '0123456789')) {
+        curr.dva_account = '';
+        changed = true;
+      }
+      if (changed) {
+        localStorage.setItem('collekt_user', JSON.stringify(curr));
+      }
+    }
+
+    // 2. Sanitize collekt_all_users
+    let dir = JSON.parse(localStorage.getItem('collekt_all_users') || '[]');
+    if (Array.isArray(dir)) {
+      let changed = false;
+      dir.forEach(u => {
+        if (!u) return;
+        if (u.wallet) {
+          if (u.wallet.account_number && (
+            String(u.wallet.account_number).startsWith('0129') ||
+            u.wallet.account_number === '0123456789' ||
+            u.wallet.account_number === '9800452109' ||
+            (!u.wallet.nova_linked && !u.wallet.is_live_paystack && !u.wallet.is_live_dva)
+          )) {
+            u.wallet.account_number = '';
+            u.wallet.bank_assigned = false;
+            if (u.wallet.bank_name && (u.wallet.bank_name.includes('Paystack DVA') || u.wallet.bank_name.includes('NOVA Bank'))) {
+              u.wallet.bank_name = '';
+            }
+            changed = true;
+          }
+        }
+        if (u.dva_account && (String(u.dva_account).startsWith('0129') || u.dva_account === '9800452109' || u.dva_account === '0123456789')) {
+          u.dva_account = '';
+          changed = true;
+        }
+      });
+      if (changed) {
+        localStorage.setItem('collekt_all_users', JSON.stringify(dir));
+      }
+    }
+  } catch(e) {}
+})();
+
 // -- AUTH ----------------------------------------------
 // getUser() stays synchronous (reads localStorage cache).
 // The cache is refreshed by syncUser() (in supabase.js)
@@ -147,7 +211,26 @@ function getUser() {
     let merged = dirUser ? { ...dirUser, ...u, role: primaryRole } : { ...u, role: primaryRole };
 
     // Self-healing clean state for all accounts
-    // 1. Remove external OAuth avatar from avatar property so it does not count as uploaded photo
+    // 1. Clean legacy fake / mock virtual account numbers from user and wallet
+    if (merged.wallet) {
+      if (merged.wallet.account_number && (
+        String(merged.wallet.account_number).startsWith('0129') ||
+        merged.wallet.account_number === '0123456789' ||
+        merged.wallet.account_number === '9800452109' ||
+        (!merged.wallet.nova_linked && !merged.wallet.is_live_paystack && !merged.wallet.is_live_dva)
+      )) {
+        merged.wallet.account_number = '';
+        merged.wallet.bank_assigned = false;
+        if (merged.wallet.bank_name && (merged.wallet.bank_name.includes('Paystack DVA') || merged.wallet.bank_name.includes('NOVA Bank'))) {
+          merged.wallet.bank_name = '';
+        }
+      }
+    }
+    if (merged.dva_account && (String(merged.dva_account).startsWith('0129') || merged.dva_account === '9800452109' || merged.dva_account === '0123456789')) {
+      merged.dva_account = '';
+    }
+
+    // 2. Remove external OAuth avatar from avatar property so it does not count as uploaded photo
     if (merged.avatar && typeof merged.avatar === 'string' && (merged.avatar.includes('googleusercontent.com') || merged.avatar.includes('licdn.com'))) {
       merged.oauth_avatar = merged.avatar;
       merged.avatar = null;
@@ -1055,20 +1138,23 @@ function getAllRegisteredUsers() {
     });
     raw = uniqueUsers;
 
-    // 8. Ensure every account has a real functional NUBAN wallet
-    const partner = 'NOVA Bank (Nova Commercial Bank)';
+    // 8. Clean wallets without mock account numbers
     raw.forEach(u => {
       if (!u.wallet) u.wallet = { balance: 0, escrow_balance: 0 };
-      if (!u.wallet.account_number || u.wallet.account_number === '0123456789') {
-        u.wallet.bank_assigned = true;
-        u.wallet.bank_name = partner;
-        const seed = String(u.id || u.email || '123456789');
-        let hash = 0;
-        for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash) + seed.charCodeAt(i);
-        const numSuffix = String(Math.abs(hash)).padStart(6, '0').slice(-6);
-        const prefix = '0129';
-        u.wallet.account_number = prefix + numSuffix;
-        u.wallet.account_name = 'COLLEKT / ' + (u.name || u.company_name || 'USER').toUpperCase();
+      if (u.wallet.account_number && (
+        String(u.wallet.account_number).startsWith('0129') ||
+        u.wallet.account_number === '0123456789' ||
+        u.wallet.account_number === '9800452109' ||
+        (!u.wallet.nova_linked && !u.wallet.is_live_paystack && !u.wallet.is_live_dva)
+      )) {
+        u.wallet.account_number = '';
+        u.wallet.bank_assigned = false;
+        if (u.wallet.bank_name && (u.wallet.bank_name.includes('Paystack DVA') || u.wallet.bank_name.includes('NOVA Bank'))) {
+          u.wallet.bank_name = '';
+        }
+      }
+      if (u.dva_account && (String(u.dva_account).startsWith('0129') || u.dva_account === '9800452109' || u.dva_account === '0123456789')) {
+        u.dva_account = '';
       }
     });
 
@@ -1740,6 +1826,21 @@ async function createLivePaystackDVA(targetUser, secretKey, preferredBankSlug) {
 function getOrCreateUserWallet(user) {
   if (!user) return null;
   let wallet = user.wallet || {};
+
+  // Clean legacy fake / mock account numbers
+  if (wallet.account_number && (
+    String(wallet.account_number).startsWith('0129') ||
+    wallet.account_number === '0123456789' ||
+    wallet.account_number === '9800452109' ||
+    (!wallet.nova_linked && !wallet.is_live_paystack && !wallet.is_live_dva)
+  )) {
+    wallet.account_number = '';
+    wallet.bank_assigned = false;
+    if (wallet.bank_name && (wallet.bank_name.includes('Paystack DVA') || wallet.bank_name.includes('NOVA Bank'))) {
+      wallet.bank_name = '';
+    }
+  }
+
   if (wallet.balance === undefined || wallet.balance === 2450000 || wallet.balance === 1450000) {
     const authBal = (user.wallet_balance !== undefined && user.wallet_balance !== 2450000 && user.wallet_balance !== 1450000) ? Number(user.wallet_balance) : 0;
     wallet = {
@@ -1757,18 +1858,15 @@ function getOrCreateUserWallet(user) {
     setUser(user);
   }
 
-  // Auto-sync bank partner name if updated in admin settings
-  const currentPartner = localStorage.getItem('collekt_paystack_bank_partner') || 'NOVA Bank (Paystack DVA)';
-  if (wallet.bank_assigned && wallet.bank_name && !wallet.is_live_paystack && wallet.bank_name !== currentPartner) {
-    wallet.bank_name = currentPartner;
+  // If user has explicitly linked their NOVA account, ensure it's mirrored
+  if (wallet.nova_linked && wallet.nova_account_number) {
+    wallet.bank_assigned = true;
+    wallet.account_number = wallet.nova_account_number;
+    wallet.bank_name = 'NOVA Bank (Nova Commercial Bank)';
     user.wallet = wallet;
     setUser(user);
   }
 
-  // Auto-create dedicated Paystack NUBAN Virtual Account for every registered user!
-  if (!wallet.bank_assigned) {
-    generateVirtualBankAccount(user, false);
-  }
   return user.wallet;
 }
 
@@ -3498,13 +3596,13 @@ function buildSidebar(activePage) {
       { icon: svgUser,      label: 'Profile',      href: 'profile.html',      key: 'profile' },
     ];
     const companyNav = [
-      { icon: svgGrid,      label: 'Overview',                href: 'company-dashboard.html', key: 'dashboard' },
-      { icon: svgPlus,      label: 'Post Job / Opportunity',  href: 'post-job.html',          key: 'post' },
-      { icon: svgBriefcase, label: 'My Jobs & Opportunities', href: 'my-jobs.html',           key: 'projects' },
-      { icon: svgSearch,    label: 'Find Talent',             href: 'marketplace.html',       key: 'marketplace' },
-      { icon: svgMsg,       label: 'Messages',                href: 'messages.html',          key: 'messages' },
-      { icon: svgWallet,    label: 'Payments & Escrow',       href: 'wallet.html',            key: 'wallet' },
-      { icon: svgUser,      label: 'Company Profile',         href: 'company-profile.html',   key: 'profile' },
+      { icon: svgGrid,      label: 'Overview',          href: 'company-dashboard.html', key: 'dashboard' },
+      { icon: svgPlus,      label: 'Post Opportunity',  href: 'post-job.html',          key: 'post' },
+      { icon: svgBriefcase, label: 'My Opportunities',  href: 'my-jobs.html',           key: 'projects' },
+      { icon: svgSearch,    label: 'Find Talent',       href: 'marketplace.html',       key: 'marketplace' },
+      { icon: svgMsg,       label: 'Messages',          href: 'messages.html',          key: 'messages' },
+      { icon: svgWallet,    label: 'Payments & Escrow', href: 'wallet.html',            key: 'wallet' },
+      { icon: svgUser,      label: 'Company Profile',   href: 'company-profile.html',   key: 'profile' },
     ];
 
     const navItems = isCompany ? companyNav : proNav;
