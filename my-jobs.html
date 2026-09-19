@@ -28,9 +28,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=70.0">
-<link rel="stylesheet" href="shared.css?v=70.0">
-<link rel="stylesheet" href="glass.css?v=70.0">
+<link rel="stylesheet" href="style.css?v=73.0">
+<link rel="stylesheet" href="shared.css?v=73.0">
+<link rel="stylesheet" href="glass.css?v=73.0">
 
 <style>
   body { background: var(--paper); }
@@ -197,9 +197,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=70.0"></script>
-<script src="app.js?v=70.0"></script>
-<script src="settings-popup.js?v=70.0"></script>
+<script src="supabase.js?v=73.0"></script>
+<script src="app.js?v=73.0"></script>
+<script src="settings-popup.js?v=73.0"></script>
 
 <script>
   let _activeFilter = 'all';
@@ -333,12 +333,16 @@
     }
   }
 
+  let _myJobsCurrentModalJobId = null;
+
   function openApplicantsModal(jobId) {
+    _myJobsCurrentModalJobId = jobId;
     const jobs = (typeof getPostedJobs === 'function' ? getPostedJobs() : []) || [];
     const job = jobs.find(j => String(j.id) === String(jobId)) || {};
     const jobTitle = job.title || 'Opportunity';
     const proposals = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
-    const matched = proposals.filter(p => String(p.jobId) === String(jobId));
+    const matched = proposals.filter(p => String(p.jobId) === String(jobId) || String(p.projectId) === String(jobId));
+    const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
 
     const titleEl = document.getElementById('applicantsModalTitle');
     if (titleEl) titleEl.textContent = 'Collektors — ' + jobTitle;
@@ -348,51 +352,140 @@
 
     if (matched.length === 0) {
       listEl.innerHTML = `
-        <div style="text-align:center; padding:32px 20px; color:var(--muted);">
-          <div style="font-size:32px; margin-bottom:8px;">📭</div>
+        <div style="text-align:center; padding:36px 20px; color:var(--muted);">
+          <div style="font-size:36px; margin-bottom:10px;">📭</div>
           <div style="font-weight:800; color:var(--ink); font-size:15px; margin-bottom:4px;">No Collektors Received Yet</div>
-          <p style="font-size:12px; margin:0;">Certified professionals viewing your opportunity on the marketplace will collekt here.</p>
+          <p style="font-size:12.5px; margin:0 auto; max-width:320px;">Certified professionals viewing your opportunity on the marketplace will collekt here.</p>
         </div>
       `;
     } else {
-      listEl.innerHTML = matched.map(p => `
-        <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:10px;">
-            <div>
-              <div style="font-weight:800; font-size:14px; color:var(--ink);">${escapeHTML(p.freelancerName || p.userName || 'Professional Candidate')}</div>
-              <div style="font-size:12px; color:var(--muted);">${escapeHTML(p.freelancerTitle || 'Specialist')}</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-weight:900; font-size:15px; color:var(--teal);">${typeof formatNaira === 'function' ? formatNaira(p.bidAmount || 0) : '₦' + (p.bidAmount || 0).toLocaleString()}</div>
-              <div style="font-size:11px; color:var(--muted);">${escapeHTML(p.deliveryTime || 'Flexible timeline')}</div>
-            </div>
-          </div>
-          
-          <div style="font-size:13px; color:var(--ink); line-height:1.5; margin-bottom:12px; background:var(--white); padding:10px 14px; border-radius:10px; border:1px solid var(--line);">
-            "${escapeHTML(p.pitchText || p.coverLetter || 'No cover letter pitch text provided.')}"
-          </div>
+      listEl.innerHTML = matched.map(p => {
+        const proId = p.userId || p.freelancer_id || p.userEmail || '';
+        const matchedUser = allUsers.find(u => u && (u.id === proId || u.email === proId));
+        const name = p.userName || p.freelancerName || (matchedUser ? matchedUser.name : 'Professional Candidate');
+        const title = p.userTitle || p.freelancerTitle || (matchedUser ? matchedUser.title : 'Project Specialist');
+        const loc = p.userLocation || p.location || (matchedUser ? matchedUser.location : 'Nigeria');
+        const avatarImg = p.userAvatar || (matchedUser ? matchedUser.avatar : '') ? `<img src="${p.userAvatar || matchedUser.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : name.charAt(0).toUpperCase();
+        const shieldBadge = (matchedUser && typeof getShieldBadgeHTML === 'function') ? getShieldBadgeHTML(15, matchedUser) : '';
 
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:11px; font-weight:800; color:var(--muted);">Status: <span style="color:var(--teal); text-transform:uppercase;">${escapeHTML(p.status || 'submitted')}</span></span>
-            ${p.status === 'awarded' || p.status === 'accepted' ? `<span class="status-pill status-open" style="background:rgba(19,117,111,0.15); color:var(--teal); font-size:11px; padding:4px 12px; border-radius:20px; font-weight:700;">Awarded ✅</span>` : `
-            <button class="btn btn-primary btn-sm" onclick="awardProposalContract('${p.id}')" style="font-weight:800; padding:4px 14px; font-size:12px;">
-              🏆 Award Contract &amp; Fund Escrow
-            </button>`}
+        const rawDate = p.created_at ? new Date(p.created_at) : new Date();
+        const dateStr = isNaN(rawDate.getTime()) ? 'Recent' : rawDate.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        const timelineStr = p.timeline || p.deliveryTime || '2 Weeks';
+        const cover = p.pitchText || p.coverLetter || 'No cover letter pitch text provided.';
+
+        const status = String(p.status || 'pending').toLowerCase();
+        const isPending = status === 'pending' || status === 'submitted' || status === 'under_review';
+        const isAccepted = status === 'accepted' || status === 'awarded' || status === 'active';
+        const isRejected = status === 'rejected' || status === 'declined';
+        const isCompleted = status === 'completed' || status === 'collekted';
+        const isUncollekted = status === 'uncollekted' || status === 'withdrawn';
+
+        let statusBadge = `<span class="status-pill" style="background:rgba(212,146,11,0.15); color:var(--amber); font-size:11px; padding:4px 10px; border-radius:20px; font-weight:800;">⏳ Pending Review</span>`;
+        if (isAccepted) {
+          statusBadge = `<span class="status-pill" style="background:rgba(19,117,111,0.15); color:var(--teal); font-size:11px; padding:4px 10px; border-radius:20px; font-weight:800;">Accepted ✅ &bull; Contract Active</span>`;
+        } else if (isRejected) {
+          statusBadge = `<span class="status-pill" style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:11px; padding:4px 10px; border-radius:20px; font-weight:800;">Rejected ✕</span>`;
+        } else if (isCompleted) {
+          statusBadge = `<span class="status-pill" style="background:rgba(16,185,129,0.15); color:#10b981; font-size:11px; padding:4px 10px; border-radius:20px; font-weight:800;">Completed 🏆</span>`;
+        } else if (isUncollekted) {
+          statusBadge = `<span class="status-pill" style="background:rgba(100,116,139,0.15); color:var(--muted); font-size:11px; padding:4px 10px; border-radius:20px; font-weight:800;">Uncollekted</span>`;
+        }
+
+        const skillsList = Array.isArray(p.userSkills) ? p.userSkills : (matchedUser && Array.isArray(matchedUser.skills) ? matchedUser.skills : []);
+        const skillsHtml = skillsList.length > 0 ? `
+          <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
+            ${skillsList.slice(0, 4).map(s => `<span style="background:rgba(19,117,111,0.08); color:var(--teal); font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:6px;">${escapeHTML(s)}</span>`).join('')}
           </div>
-        </div>
-      `).join('');
+        ` : '';
+
+        return `
+          <div style="background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="background:var(--teal); width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:16px; flex-shrink:0;">${avatarImg}</div>
+                <div>
+                  <div style="font-weight:900; font-size:15px; color:var(--ink); display:flex; align-items:center; gap:6px;">
+                    ${escapeHTML(name)} ${shieldBadge}
+                  </div>
+                  <div style="font-size:12px; color:var(--muted); margin-top:2px;">${escapeHTML(title)} &bull; 📍 ${escapeHTML(loc)}</div>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-weight:900; font-size:16px; color:var(--forest);">${typeof formatNaira === 'function' ? formatNaira(p.bidAmount || p.proposedAmount || 0, true) : '₦' + (p.bidAmount || p.proposedAmount || 0).toLocaleString()}</div>
+                <div style="font-size:11px; color:var(--muted); font-weight:700; margin-top:2px;">⏱️ ${escapeHTML(timelineStr)} &bull; 📅 ${escapeHTML(dateStr)}</div>
+              </div>
+            </div>
+            
+            <div style="font-size:13px; color:var(--ink); line-height:1.55; margin-bottom:12px; background:var(--white); padding:12px 14px; border-radius:10px; border:1px solid var(--line); white-space:pre-wrap;">
+              "${escapeHTML(cover)}"
+            </div>
+
+            ${skillsHtml}
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:10px; border-top:1px solid var(--line); flex-wrap:wrap; gap:8px;">
+              <div>${statusBadge}</div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <a href="public-profile.html?id=${encodeURIComponent(proId)}" target="_blank" class="btn btn-outline btn-sm" style="font-weight:800; font-size:11.5px; padding:5px 12px; text-decoration:none;">
+                  👁️ View Profile
+                </a>
+                ${isPending ? `
+                  <button class="btn btn-primary btn-sm" onclick="awardProposalContract('${p.id}')" style="font-weight:800; font-size:11.5px; background:var(--teal); padding:5px 14px;">
+                    ✓ Accept Collekt
+                  </button>
+                  <button class="btn btn-outline btn-sm" onclick="rejectProposalContract('${p.id}')" style="font-weight:800; font-size:11.5px; color:#ef4444; border-color:#fca5a5; padding:5px 12px;">
+                    ✕ Reject
+                  </button>
+                ` : ''}
+                ${isAccepted ? `
+                  <a href="messages.html?user=${encodeURIComponent(proId)}" class="btn btn-primary btn-sm" style="font-weight:800; font-size:11.5px; padding:5px 12px;">
+                    💬 Message Specialist
+                  </a>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     openModal('applicantsModal');
   }
 
   function awardProposalContract(propId) {
+    const user = typeof getUser === 'function' ? getUser() : {};
+    let matchedProp = null;
+
     try {
       const proposals = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
       const prop = proposals.find(p => p.id === propId);
       if (prop) {
-        prop.status = 'awarded';
+        prop.status = 'accepted';
+        matchedProp = prop;
         localStorage.setItem('collekt_proposals', JSON.stringify(proposals));
+
+        // Sync with collekt_contracts
+        const allContracts = JSON.parse(localStorage.getItem('collekt_contracts') || '[]');
+        const contractId = 'ctr_' + String(propId).replace(/^prop_/, '');
+        if (!allContracts.some(c => c.id === contractId || c.proposalId === propId)) {
+          allContracts.unshift({
+            id: contractId,
+            proposalId: propId,
+            jobId: prop.jobId || _myJobsCurrentModalJobId,
+            jobTitle: prop.jobTitle || 'Tender Contract Execution',
+            companyId: user.id || prop.companyId || 'company',
+            companyName: user.name || user.company_name || prop.companyName || 'Corporate Client',
+            companyEmail: user.email || prop.companyEmail || '',
+            proId: prop.userId || '',
+            proName: prop.userName || 'Professional Specialist',
+            proEmail: prop.userEmail || '',
+            amount: Number(prop.bidAmount || prop.proposedAmount || prop.amount || 0),
+            budget: Number(prop.budget || prop.bidAmount || 0),
+            timeline: prop.timeline || '2 Weeks',
+            status: 'active',
+            created_at: new Date().toISOString()
+          });
+          localStorage.setItem('collekt_contracts', JSON.stringify(allContracts));
+        }
 
         // Sync with awarded contracts
         const awardedList = JSON.parse(localStorage.getItem('collekt_awarded_contracts') || '[]');
@@ -402,7 +495,7 @@
             proposalId: prop.id,
             title: prop.jobTitle || 'Awarded Tender Execution',
             amount: prop.bidAmount || 0,
-            contractor: prop.freelancerName || prop.userName || 'Professional Candidate',
+            contractor: prop.userName || prop.freelancerName || 'Professional Candidate',
             status: 'Active Escrow',
             created_at: new Date().toISOString()
           });
@@ -411,15 +504,40 @@
       }
 
       if (window.sb) {
-        sb.from('proposals').update({ status: 'awarded' }).eq('id', propId).then(()=>{}).catch(()=>{});
+        sb.from('proposals').update({ status: 'accepted' }).eq('id', propId).then(()=>{}).catch(()=>{});
       }
     } catch(e){}
 
-    closeModal('applicantsModal');
     if (typeof showToast === 'function') {
-      showToast('🎉 Contract awarded! Milestone funds are ready for Escrow deposit.');
+      showToast('🎉 Collekt Accepted! Contract created and ready for milestone escrow.');
     }
     renderJobsPage();
+    if (_myJobsCurrentModalJobId) {
+      openApplicantsModal(_myJobsCurrentModalJobId);
+    }
+  }
+
+  function rejectProposalContract(propId) {
+    try {
+      const proposals = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      const prop = proposals.find(p => p.id === propId);
+      if (prop) {
+        prop.status = 'rejected';
+        localStorage.setItem('collekt_proposals', JSON.stringify(proposals));
+      }
+
+      if (window.sb) {
+        sb.from('proposals').update({ status: 'rejected' }).eq('id', propId).then(()=>{}).catch(()=>{});
+      }
+    } catch(e){}
+
+    if (typeof showToast === 'function') {
+      showToast('Collekt request rejected.');
+    }
+    renderJobsPage();
+    if (_myJobsCurrentModalJobId) {
+      openApplicantsModal(_myJobsCurrentModalJobId);
+    }
   }
 </script>
 </body>
