@@ -3598,7 +3598,7 @@ function buildSidebar(activePage) {
     const proNav = [
       { icon: svgGrid,      label: 'Overview',     href: 'dashboard.html',    key: 'dashboard' },
       { icon: svgStore,     label: 'Marketplace',  href: 'marketplace.html',  key: 'marketplace' },
-      { icon: svgDoc,       label: 'My Proposals', href: 'proposals.html',    key: 'proposals' },
+      { icon: svgDoc,       label: 'Collektions',  href: 'proposals.html',    key: 'proposals' },
       { icon: svgMsg,       label: 'Messages',     href: 'messages.html',     key: 'messages' },
       { icon: svgWallet,    label: 'Wallet',       href: 'wallet.html',       key: 'wallet' },
       { icon: svgUser,      label: 'Profile',      href: 'profile.html',      key: 'profile' },
