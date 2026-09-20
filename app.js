@@ -1329,9 +1329,9 @@ function getOtherRegisteredUsers() {
   return getAllRegisteredUsers().filter(u => u.id !== me.id);
 }
 
-// -- CROSS-USER MESSAGING SYSTEM -----------------------
+/// -- CROSS-USER MESSAGING SYSTEM -----------------------
 // Conversations: [{id, participants: [userId1, userId2], created_at, last_message, last_at}]
-// Messages:      [{id, conversation_id, sender_id, body, created_at}]
+// Messages:      [{id, conversation_id, sender_id, body, media_url, created_at, status, read, read_by}]
 
 function getAllConversations() {
   try { return JSON.parse(localStorage.getItem('collekt_conversations')) || []; }
@@ -1354,10 +1354,17 @@ function saveAllMessages(msgs) {
 function getMyConversations() {
   const me = getUser();
   if (!me) return [];
-  const myIds = [me.id, me.email, me.username].filter(Boolean).map(x => String(x).toLowerCase().trim());
+  const myCanonical = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null);
+  const myIds = [myCanonical, me.id, me.email, me.username]
+    .filter(Boolean)
+    .map(x => String(x).toLowerCase().trim());
+
   return getAllConversations().filter(c => {
     if (!c || !Array.isArray(c.participants)) return false;
-    return c.participants.some(p => myIds.includes(String(p).toLowerCase().trim()));
+    return c.participants.some(p => {
+      const pNorm = String(p || '').toLowerCase().trim();
+      return myIds.includes(pNorm);
+    });
   });
 }
 
@@ -1376,23 +1383,34 @@ function getOrCreateConversation(otherUserId) {
     return uId === target || uEmail === target || uUsername === target;
   });
 
-  const canonicalOtherId = matchedUser ? matchedUser.id : otherUserId;
-  const isDave = String(me.email || '').toLowerCase() === 'ojeoweredave@gmail.com';
-  const myId = isDave ? 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' : (me.id || me.email || 'usr_current');
+  const myCanonical = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null) || me.id || me.email || 'usr_current';
+  const otherCanonical = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(otherUserId) : null) || (matchedUser ? matchedUser.id : otherUserId);
+
+  const myLookups = [myCanonical, me.id, me.email, me.username].filter(Boolean).map(s => String(s).toLowerCase().trim());
+  const otherLookups = [otherCanonical, otherUserId, matchedUser?.id, matchedUser?.email, matchedUser?.username].filter(Boolean).map(s => String(s).toLowerCase().trim());
 
   // Check if conversation already exists between these two users
   let conv = convs.find(c => {
-    const hasMe = c.participants.includes(myId) || (me.id && c.participants.includes(me.id)) || (me.email && c.participants.includes(me.email));
-    const hasOther = c.participants.includes(canonicalOtherId) || (matchedUser && c.participants.includes(matchedUser.email)) || (matchedUser && c.participants.includes(matchedUser.username)) || c.participants.includes(otherUserId);
+    if (!c || !Array.isArray(c.participants)) return false;
+    const p0 = String(c.participants[0] || '').toLowerCase().trim();
+    const p1 = String(c.participants[1] || '').toLowerCase().trim();
+    const hasMe = myLookups.includes(p0) || myLookups.includes(p1);
+    const hasOther = otherLookups.includes(p0) || otherLookups.includes(p1);
     return hasMe && hasOther;
   });
 
-  if (conv) return conv;
+  if (conv) {
+    if (myCanonical && otherCanonical) {
+      conv.participants = [myCanonical, otherCanonical];
+      saveAllConversations(convs);
+    }
+    return conv;
+  }
 
   // Create new conversation
   conv = {
     id: 'conv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
-    participants: [myId, canonicalOtherId],
+    participants: [myCanonical, otherCanonical],
     created_at: new Date().toISOString(),
     last_message: '',
     last_at: new Date().toISOString()
@@ -1400,19 +1418,35 @@ function getOrCreateConversation(otherUserId) {
   convs.push(conv);
   saveAllConversations(convs);
 
-  // Sync to Supabase in background if both users have UUIDs
+  // Sync to Supabase in background
   if (window.sb && typeof createSupabaseConversation === 'function') {
-    const isUuidA = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(myId);
-    const isUuidB = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(canonicalOtherId);
-    if (isUuidA && isUuidB) {
-      createSupabaseConversation(myId, canonicalOtherId).then(sbConv => {
-        if (sbConv && sbConv.id) {
-          conv.id = sbConv.id;
-          saveAllConversations(convs);
+    createSupabaseConversation(myCanonical, otherCanonical).then(sbConv => {
+      if (sbConv && sbConv.id) {
+        const all = getAllConversations();
+        const found = all.find(c => c.id === conv.id || (
+          c.participants && c.participants.includes(myCanonical) && c.participants.includes(otherCanonical)
+        ));
+        if (found) {
+          const oldId = found.id;
+          found.id = sbConv.id;
+          found.participants = [sbConv.participant_a, sbConv.participant_b];
+          saveAllConversations(all);
+
+          if (oldId !== sbConv.id) {
+            const allMsgs = getAllMessages();
+            let msgsUpdated = false;
+            allMsgs.forEach(m => {
+              if (m.conversation_id === oldId) {
+                m.conversation_id = sbConv.id;
+                msgsUpdated = true;
+              }
+            });
+            if (msgsUpdated) saveAllMessages(allMsgs);
+          }
           try { window.dispatchEvent(new Event('collekt_conversations_updated')); } catch(e){}
         }
-      }).catch(e => console.warn('Supabase conversation create notice:', e));
-    }
+      }
+    }).catch(e => console.warn('Supabase conversation create notice:', e));
   }
 
   return conv;
@@ -1426,14 +1460,15 @@ function getUnreadMessageCount() {
   const me = getUser();
   if (!me) return 0;
   
+  const myCanonical = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null) || me.id;
   const msgs = getAllMessages();
   const convs = getMyConversations();
   const myConvIds = new Set(convs.map(c => c.id));
 
   let unread = 0;
   msgs.forEach(m => {
-    if (myConvIds.has(m.conversation_id) && m.sender_id !== me.id) {
-      const isRead = m.read || (m.read_by && m.read_by.includes(me.id));
+    if (myConvIds.has(m.conversation_id) && m.sender_id !== myCanonical && m.sender_id !== me.id) {
+      const isRead = m.read || (m.read_by && (m.read_by.includes(myCanonical) || m.read_by.includes(me.id)));
       if (!isRead) unread++;
     }
   });
@@ -1444,18 +1479,19 @@ function getUnreadMessageCount() {
 function markConversationAsRead(convId) {
   const me = getUser();
   if (!me || !convId) return;
+  const myCanonical = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null) || me.id;
   const msgs = getAllMessages();
   let updated = false;
   msgs.forEach(m => {
-    if (m.conversation_id === convId && m.sender_id !== me.id) {
+    if (m.conversation_id === convId && m.sender_id !== myCanonical && m.sender_id !== me.id) {
       if (!m.read) {
         m.read = true;
         m.status = 'read';
         updated = true;
       }
       if (!m.read_by) m.read_by = [];
-      if (!m.read_by.includes(me.id)) {
-        m.read_by.push(me.id);
+      if (!m.read_by.includes(myCanonical)) {
+        m.read_by.push(myCanonical);
         updated = true;
       }
     }
@@ -1464,6 +1500,10 @@ function markConversationAsRead(convId) {
     saveAllMessages(msgs);
     updateLiveUnreadMessageBadges();
     try { window.dispatchEvent(new Event('collekt_messages_updated')); } catch(e){}
+  }
+
+  if (window.sb && typeof markSupabaseMessagesAsRead === 'function') {
+    markSupabaseMessagesAsRead(convId, myCanonical);
   }
 }
 
@@ -1508,13 +1548,30 @@ function updateLiveUnreadMessageBadges() {
 
 function sendMessage(conversationId, body, mediaUrl = null) {
   const me = getUser();
-  if (!me || !body || !body.trim()) return null;
+  if (!me || !body || !body.trim() || !conversationId) return null;
 
-  const isDave = String(me.email || '').toLowerCase() === 'ojeoweredave@gmail.com';
-  const myId = isDave ? 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' : (me.id || me.email || me.username || 'usr_current');
+  const myId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null) || me.id || me.email || me.username || 'usr_current';
   const msgs = getAllMessages();
+  const convs = getAllConversations();
+  let conv = convs.find(c => c.id === conversationId);
+
+  // Determine other participant for receiver_id
+  let otherParticipantId = null;
+  if (conv && Array.isArray(conv.participants)) {
+    const other = conv.participants.find(p => {
+      const pStr = String(p || '').toLowerCase().trim();
+      return pStr !== String(myId).toLowerCase().trim() &&
+             pStr !== String(me.id || '').toLowerCase().trim() &&
+             pStr !== String(me.email || '').toLowerCase().trim();
+    });
+    if (other) {
+      otherParticipantId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(other) : null) || other;
+    }
+  }
+
+  const msgId = 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
   const msg = {
-    id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+    id: msgId,
     conversation_id: conversationId,
     sender_id: myId,
     body: body.trim(),
@@ -1528,8 +1585,6 @@ function sendMessage(conversationId, body, mediaUrl = null) {
   saveAllMessages(msgs);
 
   // Update conversation metadata
-  const convs = getAllConversations();
-  const conv = convs.find(c => c.id === conversationId);
   if (conv) {
     conv.last_message = body.trim().length > 60 ? body.trim().slice(0, 60) + '...' : body.trim();
     conv.last_at = msg.created_at;
@@ -1552,18 +1607,34 @@ function sendMessage(conversationId, body, mediaUrl = null) {
 
   // Live Supabase Persistence
   if (window.sb && typeof sendSupabaseMessage === 'function') {
-    const isConvUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(conversationId);
-    const isSenderUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(myId);
-    if (isConvUuid && isSenderUuid) {
-      sendSupabaseMessage(conversationId, myId, body.trim(), mediaUrl).then(sbMsg => {
-        if (sbMsg && sbMsg.id) {
-          msg.id = sbMsg.id;
-          saveAllMessages(getAllMessages());
+    (async () => {
+      try {
+        let targetConvId = conversationId;
+        const isConvUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetConvId);
+        
+        if (!isConvUuid && otherParticipantId && typeof createSupabaseConversation === 'function') {
+          const sbConv = await createSupabaseConversation(myId, otherParticipantId);
+          if (sbConv && sbConv.id) {
+            targetConvId = sbConv.id;
+            if (conv) conv.id = sbConv.id;
+            msg.conversation_id = sbConv.id;
+            saveAllConversations(getAllConversations());
+            saveAllMessages(getAllMessages());
+          }
         }
-      }).catch(err => {
+
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetConvId)) {
+          const sbMsg = await sendSupabaseMessage(targetConvId, myId, body.trim(), mediaUrl, otherParticipantId);
+          if (sbMsg && sbMsg.id) {
+            msg.id = sbMsg.id;
+            saveAllMessages(getAllMessages());
+            try { window.dispatchEvent(new Event('collekt_messages_updated')); } catch(e){}
+          }
+        }
+      } catch (err) {
         console.warn('Supabase live message persistence notice:', err);
-      });
-    }
+      }
+    })();
   }
 
   return msg;
@@ -1607,6 +1678,7 @@ function deleteMessage(conversationId, msgId) {
       const activeMsgs = msgs.filter(m => m.conversation_id === conversationId);
       const lastM = activeMsgs.length ? activeMsgs[activeMsgs.length - 1] : null;
       conv.last_message = lastM ? (lastM.recalled ? '🚫 Message recalled' : lastM.body) : 'No messages yet';
+      conv.last_at = lastM ? lastM.created_at : conv.last_at;
       saveAllConversations(convs);
     }
     try { window.dispatchEvent(new Event('collekt_messages_updated')); } catch(e){}
@@ -1644,13 +1716,12 @@ function getOtherParticipant(conversation) {
   const me = getUser();
   if (!me || !conversation || !conversation.participants) return { id: 'unknown', name: 'Collekt Member', role: 'professional', avatar_letter: 'U' };
   
-  const myId = String(me.id || '').toLowerCase().trim();
-  const myEmail = String(me.email || '').toLowerCase().trim();
-  const myUser = String(me.username || '').toLowerCase().trim();
+  const myCanonical = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null);
+  const myIds = [myCanonical, me.id, me.email, me.username].filter(Boolean).map(x => String(x).toLowerCase().trim());
 
   const otherId = conversation.participants.find(id => {
     const s = String(id || '').toLowerCase().trim();
-    return s && s !== myId && s !== myEmail && s !== myUser;
+    return s && !myIds.includes(s);
   });
 
   const dir = getAllRegisteredUsers();
@@ -1662,13 +1733,22 @@ function getOtherParticipant(conversation) {
     const uEmail = String(u.email || '').toLowerCase().trim();
     const uUsername = String(u.username || '').toLowerCase().trim();
     const uName = String(u.name || '').toLowerCase().trim();
-    return uId === target || uEmail === target || uUsername === target || uName === target;
+    const uComp = String(u.company_name || '').toLowerCase().trim();
+    return uId === target || uEmail === target || uUsername === target || uName === target || uComp === target;
   });
 
-  if (match) return match;
+  if (match) {
+    const isCo = match.role === 'company' || match.user_type === 'company';
+    const dispName = (isCo ? (match.company_name || match.name) : (match.name || match.company_name)) || match.email || 'Collekt Member';
+    return {
+      ...match,
+      name: dispName,
+      avatar_letter: dispName.charAt(0).toUpperCase()
+    };
+  }
 
   // Fallback graceful participant metadata
-  const fallbackName = target ? (target.charAt(0).toUpperCase() + target.slice(1)) : 'Collekt Member';
+  const fallbackName = target && !target.includes('-') ? (target.charAt(0).toUpperCase() + target.slice(1)) : 'Collekt Member';
   return { 
     id: otherId || 'unknown', 
     name: fallbackName, 
