@@ -619,6 +619,48 @@ async function fetchRealRegisteredUsers() {
    SUPABASE LIVE REAL-TIME MESSAGING ENGINE
 ------------------------------------------------------*/
 let _activeRealtimeChannel = null;
+let _activeChatBroadcastChannel = null;
+
+function getCanonicalUserId(userOrId) {
+  if (!userOrId) return null;
+  if (typeof userOrId === 'object') {
+    if (userOrId.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userOrId.id)) {
+      return userOrId.id;
+    }
+    const email = String(userOrId.email || '').toLowerCase().trim();
+    if (email) {
+      const all = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+      const match = all.find(u => u && u.email && u.email.toLowerCase().trim() === email);
+      if (match && match.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(match.id)) {
+        return match.id;
+      }
+    }
+    return userOrId.id || userOrId.email || null;
+  }
+
+  const str = String(userOrId).trim();
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)) {
+    return str;
+  }
+
+  const all = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+  const targetLower = str.toLowerCase();
+  const match = all.find(u => {
+    if (!u) return false;
+    const uId = String(u.id || '').toLowerCase();
+    const uEmail = String(u.email || '').toLowerCase();
+    const uUser = String(u.username || '').toLowerCase();
+    const uName = String(u.name || u.company_name || '').toLowerCase();
+    return uId === targetLower || uEmail === targetLower || uUser === targetLower || uName === targetLower;
+  });
+
+  if (match && match.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(match.id)) {
+    return match.id;
+  }
+
+  return str;
+}
+window.getCanonicalUserId = getCanonicalUserId;
 
 function initSupabaseRealtimeMessaging(currentUserId, onNewMessage, onConvUpdate) {
   if (!window.sb || !currentUserId) return null;
@@ -627,9 +669,16 @@ function initSupabaseRealtimeMessaging(currentUserId, onNewMessage, onConvUpdate
     try { window.sb.removeChannel(_activeRealtimeChannel); } catch(e){}
     _activeRealtimeChannel = null;
   }
+  if (_activeChatBroadcastChannel) {
+    try { window.sb.removeChannel(_activeChatBroadcastChannel); } catch(e){}
+    _activeChatBroadcastChannel = null;
+  }
 
   try {
-    const cleanId = String(currentUserId).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const canonicalId = getCanonicalUserId(currentUserId);
+    const cleanId = String(canonicalId).replace(/[^a-zA-Z0-9_-]/g, '_');
+    
+    // 1. Postgres Changes Listener
     const channelName = `collekt_chat_realtime_${cleanId}`;
     const channel = window.sb.channel(channelName)
       .on('postgres_changes', {
@@ -638,10 +687,22 @@ function initSupabaseRealtimeMessaging(currentUserId, onNewMessage, onConvUpdate
         table: 'messages'
       }, payload => {
         const msg = payload.new;
-        if (typeof onNewMessage === 'function') {
-          onNewMessage(msg);
+        if (msg) {
+          const formatted = {
+            id: msg.id,
+            conversation_id: msg.conversation_id,
+            sender_id: msg.sender_id,
+            body: msg.body,
+            media_url: msg.media_url,
+            created_at: msg.created_at,
+            read: msg.is_read,
+            status: 'delivered'
+          };
+          if (typeof onNewMessage === 'function') {
+            onNewMessage(formatted);
+          }
+          try { window.dispatchEvent(new CustomEvent('collekt_supabase_new_message', { detail: formatted })); } catch(e){}
         }
-        try { window.dispatchEvent(new CustomEvent('collekt_supabase_new_message', { detail: msg })); } catch(e){}
       })
       .on('postgres_changes', {
         event: 'UPDATE',
@@ -665,7 +726,44 @@ function initSupabaseRealtimeMessaging(currentUserId, onNewMessage, onConvUpdate
         console.log('Supabase Realtime Messaging subscription status:', status);
       });
 
+    // 2. Broadcast Channel for Instant Sub-100ms Push
+    const broadcastChan = window.sb.channel('collekt_chat_broadcast')
+      .on('broadcast', { event: 'new_message' }, payload => {
+        const msg = payload && payload.payload ? payload.payload : payload;
+        if (msg && msg.conversation_id) {
+          const myId = String(canonicalId).toLowerCase();
+          const targetRecipient = String(msg.receiver_id || '').toLowerCase();
+          const sender = String(msg.sender_id || '').toLowerCase();
+          
+          // Accept if sender is not me and target is me (or in shared conversation)
+          if (sender !== myId && (!targetRecipient || targetRecipient === myId)) {
+            const formatted = {
+              id: msg.id,
+              conversation_id: msg.conversation_id,
+              sender_id: msg.sender_id,
+              body: msg.body,
+              media_url: msg.media_url,
+              created_at: msg.created_at || new Date().toISOString(),
+              read: msg.read || false,
+              status: 'delivered'
+            };
+            if (typeof onNewMessage === 'function') {
+              onNewMessage(formatted);
+            }
+            try { window.dispatchEvent(new CustomEvent('collekt_supabase_new_message', { detail: formatted })); } catch(e){}
+          }
+        }
+      })
+      .on('broadcast', { event: 'messages_read' }, payload => {
+        const data = payload && payload.payload ? payload.payload : payload;
+        if (data && data.conversation_id) {
+          try { window.dispatchEvent(new CustomEvent('collekt_supabase_msg_read', { detail: data })); } catch(e){}
+        }
+      })
+      .subscribe();
+
     _activeRealtimeChannel = channel;
+    _activeChatBroadcastChannel = broadcastChan;
     return channel;
   } catch (err) {
     console.warn('initSupabaseRealtimeMessaging error:', err);
@@ -673,13 +771,28 @@ function initSupabaseRealtimeMessaging(currentUserId, onNewMessage, onConvUpdate
   }
 }
 
+async function broadcastRealtimeMessage(msgPacket) {
+  if (!window.sb || !msgPacket) return;
+  try {
+    const chan = _activeChatBroadcastChannel || window.sb.channel('collekt_chat_broadcast');
+    await chan.send({
+      type: 'broadcast',
+      event: 'new_message',
+      payload: msgPacket
+    });
+  } catch(e) {
+    console.warn('broadcastRealtimeMessage notice:', e);
+  }
+}
+
 async function fetchUserConversationsFromSupabase(userId) {
   if (!window.sb || !userId) return [];
   try {
+    const canonicalId = getCanonicalUserId(userId);
     const { data: convs, error } = await sb
       .from('conversations')
       .select('*')
-      .or(`participant_a.eq.${userId},participant_b.eq.${userId}`)
+      .or(`participant_a.eq.${canonicalId},participant_b.eq.${canonicalId}`)
       .order('last_message_at', { ascending: false });
 
     if (error) throw error;
@@ -726,15 +839,16 @@ async function fetchMessagesFromSupabase(conversationId) {
   }
 }
 
-async function sendSupabaseMessage(conversationId, senderId, body, mediaUrl = null) {
+async function sendSupabaseMessage(conversationId, senderId, body, mediaUrl = null, receiverId = null) {
   if (!window.sb || !conversationId || !senderId || !body) return null;
   try {
+    const canonicalSender = getCanonicalUserId(senderId);
     const trimmed = String(body).trim();
     const { data: msg, error } = await sb
       .from('messages')
       .insert({
         conversation_id: conversationId,
-        sender_id: senderId,
+        sender_id: canonicalSender,
         body: trimmed,
         media_url: mediaUrl,
         is_read: false
@@ -745,29 +859,51 @@ async function sendSupabaseMessage(conversationId, senderId, body, mediaUrl = nu
     if (error) throw error;
 
     const preview = trimmed.length > 60 ? trimmed.slice(0, 60) + '...' : trimmed;
-    await sb
-      .from('conversations')
-      .update({
-        last_message_preview: preview,
-        last_message_at: new Date().toISOString()
-      })
-      .eq('id', conversationId);
+    try {
+      await sb
+        .from('conversations')
+        .update({
+          last_message_preview: preview,
+          last_message_at: new Date().toISOString()
+        })
+        .eq('id', conversationId);
+    } catch(convErr) {
+      console.warn('Update conversation last message notice:', convErr);
+    }
+
+    // Instant Realtime broadcast push
+    broadcastRealtimeMessage({
+      id: msg.id,
+      conversation_id: conversationId,
+      sender_id: canonicalSender,
+      receiver_id: receiverId ? getCanonicalUserId(receiverId) : null,
+      body: trimmed,
+      media_url: mediaUrl,
+      created_at: msg.created_at,
+      read: false
+    });
 
     return msg;
   } catch(err) {
     console.warn('sendSupabaseMessage error:', err);
-    return null;
+    throw err;
   }
 }
 
 async function createSupabaseConversation(participantA, participantB) {
   if (!window.sb || !participantA || !participantB) return null;
   try {
+    const canonicalA = getCanonicalUserId(participantA);
+    const canonicalB = getCanonicalUserId(participantB);
+
+    if (!canonicalA || !canonicalB || canonicalA === canonicalB) return null;
+
+    // Check existing in either direction
     const { data: existingA } = await sb
       .from('conversations')
       .select('*')
-      .eq('participant_a', participantA)
-      .eq('participant_b', participantB)
+      .eq('participant_a', canonicalA)
+      .eq('participant_b', canonicalB)
       .maybeSingle();
 
     if (existingA) return existingA;
@@ -775,17 +911,18 @@ async function createSupabaseConversation(participantA, participantB) {
     const { data: existingB } = await sb
       .from('conversations')
       .select('*')
-      .eq('participant_a', participantB)
-      .eq('participant_b', participantA)
+      .eq('participant_a', canonicalB)
+      .eq('participant_b', canonicalA)
       .maybeSingle();
 
     if (existingB) return existingB;
 
+    // Insert new conversation record
     const { data: newConv, error: insertErr } = await sb
       .from('conversations')
       .insert({
-        participant_a: participantA,
-        participant_b: participantB,
+        participant_a: canonicalA,
+        participant_b: canonicalB,
         last_message_preview: '',
         last_message_at: new Date().toISOString()
       })
@@ -803,12 +940,23 @@ async function createSupabaseConversation(participantA, participantB) {
 async function markSupabaseMessagesAsRead(conversationId, currentUserId) {
   if (!window.sb || !conversationId || !currentUserId) return;
   try {
+    const canonicalUser = getCanonicalUserId(currentUserId);
     await sb
       .from('messages')
       .update({ is_read: true })
       .eq('conversation_id', conversationId)
-      .neq('sender_id', currentUserId)
+      .neq('sender_id', canonicalUser)
       .eq('is_read', false);
+
+    if (_activeChatBroadcastChannel) {
+      try {
+        _activeChatBroadcastChannel.send({
+          type: 'broadcast',
+          event: 'messages_read',
+          payload: { conversation_id: conversationId, reader_id: canonicalUser }
+        });
+      } catch(e){}
+    }
   } catch(err) {
     console.warn('markSupabaseMessagesAsRead notice:', err);
   }
@@ -1555,7 +1703,7 @@ async function generateAndSaveFinalPDF({
  */
 async function initializeWalletFunding({ amount, email, payment_method = 'card', user_id, owner_id, owner_type = 'user', gateway, name, customer_name, displayName }) {
   try {
-    const selectedGateway = gateway || (payment_method === 'korapay' ? 'korapay' : (payment_method === 'opay' ? 'opay' : 'paystack'));
+    const selectedGateway = gateway || (payment_method === 'opay' ? 'opay' : 'korapay');
     const resolvedName = name || customer_name || displayName || '';
     const res = await fetch('/.netlify/functions/paystack-initialize', {
       method: 'POST',
