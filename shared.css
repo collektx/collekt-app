@@ -420,9 +420,10 @@ html.dark .shield-badge svg text {
 .pill-btn.active { background: var(--forest); border-color: var(--forest); color: #fff; }
 
 /* ── CHAT ─────────────────────────────────────────── */
-.bubble { padding: 10px 16px; border-radius: 18px; font-size: 14px; line-height: 1.5; word-break: normal; overflow-wrap: break-word; max-width: 100%; display: inline-block; white-space: pre-wrap; }
-.bubble.received { background: var(--white); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
-.bubble.sent { background: var(--teal); color: #fff; border-bottom-right-radius: 4px; }
+.bubble { padding: 5px 8px 4px 8px; border-radius: 7.5px; font-size: 13px; line-height: 18px; word-break: break-word; max-width: 100%; display: inline-flex; flex-wrap: wrap; align-items: flex-end; width: fit-content; }
+.bubble.received { background: var(--white); border: 1px solid var(--line); border-top-left-radius: 2px; }
+.bubble.sent { background: #d9fdd3; color: #111b21; border-top-right-radius: 2px; }
+html.dark .bubble.sent { background: #005c4b; color: #e9edef; }
 
 /* ── PROJECT ROW ──────────────────────────────────── */
 .project-row { background: var(--white); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 10px; transition: box-shadow .18s; }

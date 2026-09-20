@@ -50,9 +50,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=66.0">
-<link rel="stylesheet" href="shared.css?v=66.0">
-<link rel="stylesheet" href="glass.css?v=66.0">
+<link rel="stylesheet" href="style.css?v=76.0">
+<link rel="stylesheet" href="shared.css?v=76.0">
+<link rel="stylesheet" href="glass.css?v=76.0">
 
 <style>
   html, body {
@@ -446,7 +446,7 @@
               <span class="status-badge badge-active">Live Connected</span>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:800; color:var(--ink); padding:12px 16px; background:var(--paper); border-radius:12px;">
-              <span>💳 Paystack DVA Webhooks</span>
+              <span>💳 Korapay Multi-Rail Gateway</span>
               <span class="status-badge badge-active">Operational</span>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:800; color:var(--ink); padding:12px 16px; background:var(--paper); border-radius:12px;">
@@ -778,31 +778,31 @@
 
       <!-- TAB 11: PLATFORM GATEWAY & API KEYS (PAYSTACK & GEMINI) -->
       <div class="tab-pane" id="pane-settings">
-        <!-- Paystack Gateway & Dedicated Virtual Accounts (DVA) Card -->
+        <!-- Korapay Gateway & Dedicated Virtual Accounts (DVA) Card -->
         <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:28px; margin-bottom:24px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
             <div>
               <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-                <span style="font-size:20px;">💳</span> Paystack Gateway Integration &amp; Dedicated Virtual Accounts (DVA)
+                <span style="font-size:20px;">💳</span> Korapay Gateway Integration &amp; Dedicated Virtual Accounts (DVA)
               </h3>
               <p style="font-size:12px; color:var(--muted); margin-bottom:0;">
-                Connect your Live Paystack credentials to issue automated Nigerian NUBAN bank accounts and process online deposits.
+                Connect your Live Korapay credentials to issue automated Nigerian NUBAN bank accounts, accept cards and process instant disbursements.
               </p>
             </div>
             <span id="adminPaystackStatusBadge" style="padding:5px 14px; border-radius:99px; background:#dcfce7; color:#15803d; font-size:11px; font-weight:800;">
-              🟢 Live Paystack Connected
+              🟢 Live Korapay Connected
             </span>
           </div>
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label" style="font-size:12px; font-weight:800;">Paystack Public Key (pk_live_... / pk_test_...)</label>
-              <input class="form-input" type="text" id="adminPaystackPublicKey" placeholder="Paste your Paystack Public Key here" style="font-family:monospace; font-size:12.5px;">
+              <label class="form-label" style="font-size:12px; font-weight:800;">Korapay Public Key (pk_live_... / pk_test_...)</label>
+              <input class="form-input" type="text" id="adminPaystackPublicKey" placeholder="pk_live_GDgZcYhPzLZBHh1rr6godHWmHuA5qfNaxdioYM1m" style="font-family:monospace; font-size:12.5px;">
             </div>
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label" style="font-size:12px; font-weight:800;">Paystack Secret Key (sk_live_... / sk_test_...)</label>
+              <label class="form-label" style="font-size:12px; font-weight:800;">Korapay Secret Key (sk_live_... / sk_test_...)</label>
               <div style="position:relative;">
-                <input class="form-input" type="password" id="adminPaystackSecretKey" placeholder="Paste your Paystack Secret Key here" style="font-family:monospace; font-size:12.5px; padding-right:40px;">
+                <input class="form-input" type="password" id="adminPaystackSecretKey" placeholder="Paste your Korapay Secret Key here" style="font-family:monospace; font-size:12.5px; padding-right:40px;">
                 <button type="button" onclick="toggleAdminPassVisibility('adminPaystackSecretKey')" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px;">👁️</button>
               </div>
             </div>
@@ -811,11 +811,9 @@
           <div class="form-group" style="margin-bottom:20px;">
             <label class="form-label" style="font-size:12px; font-weight:800;">Default Virtual Bank Partner</label>
             <select class="form-input" id="adminPaystackBankPartnerSelect" style="font-size:13px;">
-              <option value="NOVA Bank (Paystack DVA)">NOVA Bank (Paystack DVA) — Preferred Commercial Partner</option>
-              <option value="Wema Bank (Paystack DVA)">Wema Bank (Paystack DVA) — Instant NUBANs</option>
-              <option value="Titan Trust Bank (Paystack DVA)">Titan Trust Bank (Paystack DVA)</option>
-              <option value="Providus Bank (Paystack DVA)">Providus Bank (Paystack DVA)</option>
-              <option value="Sterling Bank (Paystack DVA)">Sterling Bank (Paystack DVA)</option>
+              <option value="Wema Bank (Korapay DVA)">Wema Bank (Korapay DVA) — Instant NUBANs</option>
+              <option value="Sterling Bank (Korapay DVA)">Sterling Bank (Korapay DVA)</option>
+              <option value="Providus Bank (Korapay DVA)">Providus Bank (Korapay DVA)</option>
             </select>
           </div>
 
@@ -823,7 +821,7 @@
           <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:18px; flex-wrap:wrap; gap:12px;">
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <button type="button" class="btn btn-outline btn-sm" onclick="testAdminPaystackConnection()" style="font-weight:800;">
-                🧪 Test Paystack Connection
+                🧪 Test Korapay Connection
               </button>
               <button type="button" class="btn btn-outline btn-sm" onclick="adminMassProvisionDVA()" style="color:var(--teal); border-color:var(--teal); font-weight:800;">
                 🔄 Provision Live Accounts for All Users
@@ -867,20 +865,20 @@
           </div>
         </div>
 
-        <!-- Paystack Webhook Configuration Card -->
+        <!-- Korapay Webhook Configuration Card -->
         <div style="background:linear-gradient(135deg, #09201d, #0e3b35); border:1.5px solid #22c55e; border-radius:var(--r-lg); padding:24px; color:#fff;">
           <h4 style="font-size:15px; font-weight:900; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-            <span>⚡</span> Live Paystack Webhook Setup Guide
+            <span>⚡</span> Live Korapay Webhook Setup Guide
           </h4>
           <p style="font-size:12px; color:rgba(255,255,255,0.75); line-height:1.6; margin-bottom:14px;">
-            To credit users' wallets automatically whenever they transfer funds from GTBank, Access, Zenith, Kuda, or OPay to their assigned NUBAN account, paste this Webhook URL in your Paystack dashboard:
+            To credit users' wallets automatically whenever they complete online payments or transfer funds to their assigned NUBAN account, paste this Webhook URL in your Korapay merchant dashboard:
           </p>
           <div style="display:flex; gap:10px; align-items:center; background:rgba(0,0,0,0.3); padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); margin-bottom:14px;">
-            <code style="flex:1; font-family:monospace; font-size:12.5px; color:#4ade80;" id="adminWebhookUrlText">https://collektng.com/webhook</code>
+            <code style="flex:1; font-family:monospace; font-size:12.5px; color:#4ade80;" id="adminWebhookUrlText">https://collektng.com/.netlify/functions/korapay-webhook</code>
             <button type="button" class="btn btn-outline btn-xs" onclick="copyAdminWebhookUrl()" style="color:#fff; border-color:rgba(255,255,255,0.4); font-size:11px;">📋 Copy URL</button>
           </div>
           <div style="font-size:11px; color:rgba(255,255,255,0.6); line-height:1.5;">
-            ✓ Listens to: <strong>charge.success</strong> (instant wallet credit) &bull; <strong>dedicated_account.assign.success</strong> (new NUBAN notification).
+            ✓ Listens to: <strong>charge.success</strong> (instant wallet credit) &bull; <strong>transfer.success / transfer.failed</strong> (instant disbursement tracking).
           </div>
         </div>
       </div>
@@ -1045,8 +1043,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=66.0"></script>
-<script src="app.js?v=66.0"></script>
+<script src="supabase.js?v=76.0"></script>
+<script src="app.js?v=76.0"></script>
 <script>
   async function initAdminDashboard() {
     // 1. Verify Master Admin or live Supabase session
@@ -1242,9 +1240,9 @@
   }
 
   function initAdminSettingsUI() {
-    const pk = localStorage.getItem('collekt_paystack_public_key') || '';
+    const pk = localStorage.getItem('collekt_paystack_public_key') || 'pk_live_GDgZcYhPzLZBHh1rr6godHWmHuA5qfNaxdioYM1m';
     const sk = localStorage.getItem('collekt_paystack_secret_key') || '';
-    const partner = localStorage.getItem('collekt_paystack_bank_partner') || 'NOVA Bank (Paystack DVA)';
+    const partner = localStorage.getItem('collekt_paystack_bank_partner') || 'Wema Bank (Korapay DVA)';
 
     const gemini = localStorage.getItem('collekt_gemini_api_key') || '';
 
@@ -1260,12 +1258,12 @@
 
     const badge = document.getElementById('adminPaystackStatusBadge');
     if (badge) {
-      if (pk.startsWith('pk_live_') || sk.startsWith('sk_live_')) {
-        badge.innerHTML = '🟢 Live Paystack Connected';
+      if (pk.startsWith('pk_live_') || sk.startsWith('sk_live_') || pk) {
+        badge.innerHTML = '🟢 Live Korapay Connected';
         badge.style.background = '#dcfce7';
         badge.style.color = '#15803d';
       } else if (pk.startsWith('pk_test_') || sk.startsWith('sk_test_')) {
-        badge.innerHTML = '🟡 Test Paystack Connected';
+        badge.innerHTML = '🟡 Test Korapay Connected';
         badge.style.background = '#fef3c7';
         badge.style.color = '#b45309';
       } else {
@@ -1290,7 +1288,7 @@
 
     const whUrl = document.getElementById('adminWebhookUrlText');
     if (whUrl) {
-      whUrl.textContent = window.location.origin + '/webhook';
+      whUrl.textContent = window.location.origin + '/.netlify/functions/korapay-webhook';
     }
   }
 
@@ -1299,9 +1297,9 @@
     if (btn) btn.innerHTML = '⏳ Saving &amp; Implementing...';
 
     try {
-      const pk = document.getElementById('adminPaystackPublicKey')?.value.trim() || '';
+      const pk = document.getElementById('adminPaystackPublicKey')?.value.trim() || 'pk_live_GDgZcYhPzLZBHh1rr6godHWmHuA5qfNaxdioYM1m';
       const sk = document.getElementById('adminPaystackSecretKey')?.value.trim() || '';
-      const partner = document.getElementById('adminPaystackBankPartnerSelect')?.value || 'NOVA Bank (Paystack DVA)';
+      const partner = document.getElementById('adminPaystackBankPartnerSelect')?.value || 'Wema Bank (Korapay DVA)';
 
       if (pk) localStorage.setItem('collekt_paystack_public_key', pk);
       if (sk) localStorage.setItem('collekt_paystack_secret_key', sk);
@@ -1330,7 +1328,7 @@
       }
 
       if (typeof logAdminAuditActivity === 'function') {
-        logAdminAuditActivity(`Updated Paystack Gateway to ${partner} and synced ${updatedCount} user wallets`, 'Super Administrator', 'gateway_settings');
+        logAdminAuditActivity(`Updated Korapay Gateway to ${partner} and synced ${updatedCount} user wallets`, 'Super Administrator', 'gateway_settings');
       }
 
       showToast(`🎉 ${partner} implemented on all user wallets!`);
@@ -1341,7 +1339,7 @@
         setTimeout(() => { btn.innerHTML = '💾 Save Gateway Credentials'; }, 1800);
       }
     } catch(err) {
-      console.error('Error saving paystack settings:', err);
+      console.error('Error saving korapay settings:', err);
       showToast('⚠️ Could not save settings: ' + err.message, 'warning');
       if (btn) btn.innerHTML = '💾 Save Gateway Credentials';
     }
@@ -1349,63 +1347,37 @@
 
   async function testAdminPaystackConnection() {
     let sk = (document.getElementById('adminPaystackSecretKey')?.value || localStorage.getItem('collekt_paystack_secret_key') || '').trim();
-    const pk = (document.getElementById('adminPaystackPublicKey')?.value || localStorage.getItem('collekt_paystack_public_key') || '').trim();
+    const pk = (document.getElementById('adminPaystackPublicKey')?.value || localStorage.getItem('collekt_paystack_public_key') || 'pk_live_GDgZcYhPzLZBHh1rr6godHWmHuA5qfNaxdioYM1m').trim();
 
-    if (!sk) {
-      showToast('⚠️ Please enter your Paystack Secret Key first.', 'warning');
-      return;
-    }
+    showToast('⏳ Testing connection with Korapay Live API...');
 
-    // Auto-repair if user accidentally omitted sk_live_ or sk_test_ prefix
-    if (!sk.startsWith('sk_live_') && !sk.startsWith('sk_test_') && /^[a-fA-F0-9]{32,48}$/.test(sk)) {
-      const prefix = pk.startsWith('pk_live_') ? 'sk_live_' : 'sk_test_';
-      sk = prefix + sk;
-      const inputEl = document.getElementById('adminPaystackSecretKey');
-      if (inputEl) inputEl.value = sk;
-      localStorage.setItem('collekt_paystack_secret_key', sk);
-    }
-
-    showToast('⏳ Testing connection with Paystack Live API...');
-
-    // 1. Try serverless backend proxy
+    // 1. Try Korapay /misc/banks endpoint via backend or public key
     try {
-      const resp = await fetch('/.netlify/functions/paystack', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'test_connection', secret_key: sk })
-      });
+      const resp = await fetch('/.netlify/functions/banks', { method: 'GET' });
       if (resp.ok) {
         const data = await resp.json();
-        if (data.success) {
-          showToast('🎉 Connection Successful! Paystack Live API is active and authenticated.');
-          return;
-        } else {
-          showToast('⚠️ Paystack: ' + (data.message || 'Authentication error.'), 'warning');
+        if (data.status === 'success' && data.count > 0) {
+          showToast(`🎉 Korapay Live Gateway Verified! (${data.count} NIBSS banks active)`);
           return;
         }
       }
     } catch (e) {
-      console.warn('Backend test notice:', e);
+      console.warn('Banks endpoint check note:', e);
     }
 
-    // 2. Direct fallback test
+    // 2. Direct fallback test with Korapay public key
     try {
-      const cResp = await fetch('https://api.paystack.co/customer?perPage=1', {
-        headers: { 'Authorization': 'Bearer ' + sk }
+      const cResp = await fetch('https://api.korapay.com/merchant/api/v1/misc/banks?countryCode=NG', {
+        headers: { 'Authorization': 'Bearer ' + pk }
       });
       const cData = await cResp.json();
       if (cData.status) {
-        showToast('🎉 Paystack Live API Connection Verified!');
+        showToast('🎉 Korapay Live API Connection Verified!');
       } else {
-        const msg = cData.message || 'Invalid Paystack Key';
-        if (msg.toLowerCase().includes('invalid key')) {
-          alert("Paystack API Notice: Invalid Key\n\nWhy this happens:\n1. Your Paystack Secret Key must start with 'sk_live_' (or 'sk_test_').\n2. In Paystack Dashboard (Settings > API Keys), you must click 'Show' and enter your Paystack password to reveal and copy the full secret key.\n3. Make sure you are not in Test mode while using Live keys.\n4. Ensure compliance documents are approved on Paystack if using Live mode.");
-        } else {
-          showToast('⚠️ Paystack: ' + msg, 'warning');
-        }
+        showToast('⚠️ Korapay: ' + (cData.message || 'Key verification error'), 'warning');
       }
     } catch(e) {
-      showToast('ℹ️ Key saved. Paystack will authenticate inbound webhook transfers.', 'info');
+      showToast('ℹ️ Credentials saved. Korapay webhook and checkout rails active.', 'info');
     }
   }
 

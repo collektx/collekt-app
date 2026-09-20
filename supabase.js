@@ -830,8 +830,8 @@ async function fetchMessagesFromSupabase(conversationId) {
       body: m.body,
       media_url: m.media_url,
       created_at: m.created_at,
-      read: m.is_read,
-      status: 'delivered'
+      read: Boolean(m.is_read),
+      status: m.is_read ? 'read' : 'delivered'
     }));
   } catch(err) {
     console.warn('fetchMessagesFromSupabase error:', err);

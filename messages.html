@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=75.0">
-<link rel="stylesheet" href="shared.css?v=75.0">
-<link rel="stylesheet" href="glass.css?v=75.0">
+<link rel="stylesheet" href="style.css?v=76.0">
+<link rel="stylesheet" href="shared.css?v=76.0">
+<link rel="stylesheet" href="glass.css?v=76.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -112,10 +112,10 @@
   .bubble {
     display: inline-block;
     position: relative;
-    padding: 6px 9px 6px 9px;
+    padding: 4px 8px 4px 8px;
     border-radius: 7.5px;
-    font-size: 13.5px;
-    line-height: 19px;
+    font-size: 13px;
+    line-height: 18px;
     word-break: break-word;
     box-shadow: 0 1px 0.5px rgba(11,20,26,0.13);
     max-width: 100%;
@@ -145,8 +145,8 @@
     border: 1px dashed rgba(0,0,0,0.15);
     color: #667781;
     font-style: italic;
-    font-size: 12.5px;
-    padding: 4px 8px;
+    font-size: 12px;
+    padding: 3px 7px;
   }
   html.dark .bubble.recalled-bubble {
     background: rgba(255,255,255,0.04);
@@ -163,10 +163,10 @@
   .bubble-meta {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: 3px;
     float: right;
-    margin-left: 8px;
-    margin-top: 4px;
+    margin-left: 7px;
+    margin-top: 3px;
     font-size: 10.5px;
     color: #667781;
     user-select: none;
@@ -176,8 +176,8 @@
     white-space: nowrap;
   }
   html.dark .bubble-meta { color: #8696a0; }
-  .bubble.sent .bubble-meta { color: #53bdeb; }
-  html.dark .bubble.sent .bubble-meta { color: #53bdeb; }
+  .bubble.sent .bubble-meta { color: #667781; }
+  html.dark .bubble.sent .bubble-meta { color: #8696a0; }
 
   /* WhatsApp Attachment Popover Menu (+) */
   .wa-attach-popup {
@@ -834,10 +834,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=75.0"></script>
-<script src="app.js?v=75.0"></script>
-<script src="collekt-ai.js?v=75.0"></script>
-<script src="settings-popup.js?v=75.0"></script>
+<script src="supabase.js?v=76.0"></script>
+<script src="app.js?v=76.0"></script>
+<script src="collekt-ai.js?v=76.0"></script>
+<script src="settings-popup.js?v=76.0"></script>
 <script>
   requireAuth();
 
@@ -1130,12 +1130,20 @@
 
   function renderMessageStatusIcon(msg) {
     if (msg.status === 'sending') {
-      return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8696a0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-left:3px; display:inline-block;" title="Sending..."><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+      return `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8696a0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-left:3px; display:inline-block;" title="Sending..."><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
     }
-    if (msg.read || msg.status === 'read' || msg.status === 'seen') {
-      return `<svg width="17" height="14" viewBox="0 0 24 24" fill="none" stroke="#00a884" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-left:3px; display:inline-block;" title="Read (Seen)"><path d="M18 6L7 17l-5-5"/><path d="M22 6l-11 11-2-2"/></svg>`;
+    const isRead = msg.read || msg.status === 'read' || msg.status === 'seen';
+    if (isRead) {
+      // 2 Blue swooshes (Read / Seen)
+      return `<svg width="16" height="11" viewBox="0 0 16 11" fill="none" style="vertical-align:middle; margin-left:3px; display:inline-block;" title="Read"><path d="M11.05 1.5L4.85 7.7L2.15 5" stroke="#53bdeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.05 1.5L7.85 7.7L6.6 6.45" stroke="#53bdeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     }
-    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8696a0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-left:3px; display:inline-block;" title="Delivered"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const isDelivered = msg.status === 'delivered' || msg.delivered;
+    if (isDelivered) {
+      // 2 Grey swooshes (Delivered)
+      return `<svg width="16" height="11" viewBox="0 0 16 11" fill="none" style="vertical-align:middle; margin-left:3px; display:inline-block;" title="Delivered"><path d="M11.05 1.5L4.85 7.7L2.15 5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.05 1.5L7.85 7.7L6.6 6.45" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    }
+    // 1 Grey swoosh (Sent)
+    return `<svg width="15" height="11" viewBox="0 0 16 11" fill="none" style="vertical-align:middle; margin-left:3px; display:inline-block;" title="Sent"><path d="M11.05 1.5L4.85 7.7L2.15 5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   }
 
   function renderChat(conv) {
@@ -1433,8 +1441,7 @@
         fetchMessagesFromSupabase(convId).then(sbMsgs => {
           if (Array.isArray(sbMsgs) && sbMsgs.length > 0) {
             const all = getAllMessages();
-            const others = all.filter(m => m.conversation_id !== convId);
-            saveAllMessages([...others, ...sbMsgs]);
+            saveAllMessages([...all, ...sbMsgs]);
             renderContacts();
           }
         }).catch(e => console.warn('Supabase fetch messages notice:', e));
@@ -2728,8 +2735,7 @@
           const msgs = await fetchMessagesFromSupabase(targetConvId);
           if (Array.isArray(msgs)) {
             const all = getAllMessages();
-            const others = all.filter(m => m.conversation_id !== targetConvId);
-            saveAllMessages([...others, ...msgs]);
+            saveAllMessages([...all, ...msgs]);
             renderContacts();
           }
         } catch(e){}
@@ -2764,18 +2770,8 @@
           const msgs = await fetchMessagesFromSupabase(activeConvId);
           if (Array.isArray(msgs) && msgs.length > 0) {
             const all = getAllMessages();
-            const existingIds = new Set(all.map(m => m.id));
-            let hasNew = false;
-            msgs.forEach(m => {
-              if (!existingIds.has(m.id)) {
-                all.push(m);
-                hasNew = true;
-              }
-            });
-            if (hasNew) {
-              saveAllMessages(all);
-              renderContacts();
-            }
+            saveAllMessages([...all, ...msgs]);
+            renderContacts();
           }
         } catch(e){}
       }
@@ -2822,50 +2818,49 @@
     if (window.sb && typeof initSupabaseRealtimeMessaging === 'function' && myUuid) {
       initSupabaseRealtimeMessaging(myUuid, (newMsg) => {
         const allMsgs = getAllMessages();
-        if (!allMsgs.some(m => m.id === newMsg.id)) {
-          allMsgs.push({
-            id: newMsg.id,
-            conversation_id: newMsg.conversation_id,
-            sender_id: newMsg.sender_id,
-            body: newMsg.body,
-            media_url: newMsg.media_url,
+        const incoming = {
+          id: newMsg.id,
+          client_msg_id: newMsg.client_msg_id || newMsg.id,
+          conversation_id: newMsg.conversation_id,
+          sender_id: newMsg.sender_id,
+          body: newMsg.body,
+          media_url: newMsg.media_url,
+          created_at: newMsg.created_at,
+          read: newMsg.is_read || newMsg.read || false,
+          status: (newMsg.is_read || newMsg.read) ? 'read' : 'delivered'
+        };
+        saveAllMessages([...allMsgs, incoming]);
+
+        const allConvs = getAllConversations();
+        let targetConv = allConvs.find(c => c.id === newMsg.conversation_id);
+        if (targetConv) {
+          targetConv.last_message = newMsg.body.slice(0, 60);
+          targetConv.last_at = newMsg.created_at;
+          saveAllConversations(allConvs);
+        } else {
+          targetConv = {
+            id: newMsg.conversation_id,
+            participants: [newMsg.sender_id, myUuid],
             created_at: newMsg.created_at,
-            read: newMsg.is_read || false,
-            status: 'delivered'
-          });
-          saveAllMessages(allMsgs);
+            last_message: newMsg.body.slice(0, 60),
+            last_at: newMsg.created_at
+          };
+          allConvs.push(targetConv);
+          saveAllConversations(allConvs);
+        }
 
-          const allConvs = getAllConversations();
-          let targetConv = allConvs.find(c => c.id === newMsg.conversation_id);
-          if (targetConv) {
-            targetConv.last_message = newMsg.body.slice(0, 60);
-            targetConv.last_at = newMsg.created_at;
-            saveAllConversations(allConvs);
-          } else {
-            targetConv = {
-              id: newMsg.conversation_id,
-              participants: [newMsg.sender_id, myUuid],
-              created_at: newMsg.created_at,
-              last_message: newMsg.body.slice(0, 60),
-              last_at: newMsg.created_at
-            };
-            allConvs.push(targetConv);
-            saveAllConversations(allConvs);
+        if (activeConvId === newMsg.conversation_id) {
+          _shouldScrollToBottom = true;
+          if (typeof markSupabaseMessagesAsRead === 'function') {
+            markSupabaseMessagesAsRead(activeConvId, myUuid);
           }
+        }
 
-          if (activeConvId === newMsg.conversation_id) {
-            _shouldScrollToBottom = true;
-            if (typeof markSupabaseMessagesAsRead === 'function') {
-              markSupabaseMessagesAsRead(activeConvId, myUuid);
-            }
-          }
+        updateLiveUnreadMessageBadges();
+        renderContacts();
 
-          updateLiveUnreadMessageBadges();
-          renderContacts();
-
-          if (activeConvId === newMsg.conversation_id && targetConv) {
-            try { renderChat(targetConv); } catch(e){}
-          }
+        if (activeConvId === newMsg.conversation_id && targetConv) {
+          try { renderChat(targetConv); } catch(e){}
         }
       }, (convPayload) => {
         renderContacts();

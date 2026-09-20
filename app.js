@@ -1342,13 +1342,71 @@ function saveAllConversations(convs) {
   localStorage.setItem('collekt_conversations', JSON.stringify(convs));
 }
 
+function deduplicateMessages(msgs) {
+  if (!Array.isArray(msgs)) return [];
+  const result = [];
+  
+  for (const msg of msgs) {
+    if (!msg || !msg.body) continue;
+    
+    // Check if there is an existing message in result that matches
+    const existingIdx = result.findIndex(existing => {
+      if (existing.id && msg.id && existing.id === msg.id) return true;
+      if (existing.client_msg_id && msg.client_msg_id && existing.client_msg_id === msg.client_msg_id) return true;
+      if (existing.id && msg.client_msg_id && existing.id === msg.client_msg_id) return true;
+      if (existing.client_msg_id && msg.id && existing.client_msg_id === msg.id) return true;
+      
+      const sameConv = (existing.conversation_id === msg.conversation_id);
+      const sameBody = String(existing.body || '').trim() === String(msg.body || '').trim();
+      if (sameConv && sameBody) {
+        const t1 = new Date(existing.created_at || 0).getTime();
+        const t2 = new Date(msg.created_at || 0).getTime();
+        if (Math.abs(t1 - t2) < 60000) return true;
+      }
+      return false;
+    });
+
+    if (existingIdx === -1) {
+      result.push({ ...msg });
+    } else {
+      const ex = result[existingIdx];
+      const isExUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ex.id);
+      const isMsgUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(msg.id);
+
+      const preferredId = isMsgUuid ? msg.id : ex.id;
+      const preferredClientMsgId = ex.client_msg_id || msg.client_msg_id || (!isExUuid ? ex.id : msg.id);
+
+      const statusRank = { read: 4, seen: 4, delivered: 3, sent: 2, sending: 1 };
+      const exRank = statusRank[ex.status] || 0;
+      const msgRank = statusRank[msg.status] || 0;
+      const preferredStatus = (msgRank >= exRank) ? msg.status : ex.status;
+      const preferredRead = Boolean(ex.read || msg.read || preferredStatus === 'read' || preferredStatus === 'seen');
+
+      result[existingIdx] = {
+        ...ex,
+        ...msg,
+        id: preferredId,
+        client_msg_id: preferredClientMsgId,
+        status: preferredStatus,
+        read: preferredRead,
+        read_by: Array.from(new Set([...(ex.read_by || []), ...(msg.read_by || [])])),
+        recalled: Boolean(ex.recalled || msg.recalled),
+        reaction: msg.reaction || ex.reaction
+      };
+    }
+  }
+
+  return result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+}
+
 function getAllMessages() {
   try { return JSON.parse(localStorage.getItem('collekt_all_messages')) || []; }
   catch { return []; }
 }
 
 function saveAllMessages(msgs) {
-  localStorage.setItem('collekt_all_messages', JSON.stringify(msgs));
+  const deduped = deduplicateMessages(msgs);
+  localStorage.setItem('collekt_all_messages', JSON.stringify(deduped));
 }
 
 function getMyConversations() {
@@ -1453,7 +1511,8 @@ function getOrCreateConversation(otherUserId) {
 }
 
 function getConversationMessages(conversationId) {
-  return getAllMessages().filter(m => m.conversation_id === conversationId);
+  const all = getAllMessages().filter(m => m.conversation_id === conversationId);
+  return deduplicateMessages(all);
 }
 
 function getUnreadMessageCount() {
@@ -1569,15 +1628,16 @@ function sendMessage(conversationId, body, mediaUrl = null) {
     }
   }
 
-  const msgId = 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  const clientMsgId = 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
   const msg = {
-    id: msgId,
+    id: clientMsgId,
+    client_msg_id: clientMsgId,
     conversation_id: conversationId,
     sender_id: myId,
     body: body.trim(),
     media_url: mediaUrl,
     created_at: new Date().toISOString(),
-    status: 'sending',
+    status: 'sent', // Starts as 1 grey swoosh
     read: false,
     read_by: [myId]
   };
@@ -1594,16 +1654,16 @@ function sendMessage(conversationId, body, mediaUrl = null) {
   updateLiveUnreadMessageBadges();
   try { window.dispatchEvent(new Event('collekt_messages_updated')); } catch(e){}
 
-  // Instant delivery transition
+  // Delivered transition (2 grey swooshes)
   setTimeout(() => {
     const all = getAllMessages();
-    const target = all.find(m => m.id === msg.id);
-    if (target && target.status === 'sending') {
+    const target = all.find(m => m.id === clientMsgId || m.client_msg_id === clientMsgId);
+    if (target && target.status === 'sent') {
       target.status = 'delivered';
       saveAllMessages(all);
       try { window.dispatchEvent(new Event('collekt_messages_updated')); } catch(e){}
     }
-  }, 100);
+  }, 400);
 
   // Live Supabase Persistence
   if (window.sb && typeof sendSupabaseMessage === 'function') {
@@ -1619,15 +1679,19 @@ function sendMessage(conversationId, body, mediaUrl = null) {
             if (conv) conv.id = sbConv.id;
             msg.conversation_id = sbConv.id;
             saveAllConversations(getAllConversations());
-            saveAllMessages(getAllMessages());
           }
         }
 
         if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetConvId)) {
           const sbMsg = await sendSupabaseMessage(targetConvId, myId, body.trim(), mediaUrl, otherParticipantId);
           if (sbMsg && sbMsg.id) {
-            msg.id = sbMsg.id;
-            saveAllMessages(getAllMessages());
+            const curAll = getAllMessages();
+            const existingIdx = curAll.findIndex(m => m.id === clientMsgId || m.client_msg_id === clientMsgId);
+            if (existingIdx !== -1) {
+              curAll[existingIdx].id = sbMsg.id;
+              curAll[existingIdx].status = 'delivered';
+              saveAllMessages(curAll);
+            }
             try { window.dispatchEvent(new Event('collekt_messages_updated')); } catch(e){}
           }
         }
