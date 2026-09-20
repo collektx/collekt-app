@@ -337,14 +337,11 @@
 
   let _myJobsCurrentModalJobId = null;
 
-  function openApplicantsModal(jobId) {
+  async function openApplicantsModal(jobId) {
     _myJobsCurrentModalJobId = jobId;
     const jobs = (typeof getPostedJobs === 'function' ? getPostedJobs() : []) || [];
     const job = jobs.find(j => String(j.id) === String(jobId)) || {};
     const jobTitle = job.title || 'Opportunity';
-    const proposals = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
-    const matched = proposals.filter(p => String(p.jobId) === String(jobId) || String(p.projectId) === String(jobId));
-    const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
 
     const titleEl = document.getElementById('applicantsModalTitle');
     if (titleEl) titleEl.textContent = 'Collektors — ' + jobTitle;
@@ -352,7 +349,40 @@
     const listEl = document.getElementById('applicantsList');
     if (!listEl) return;
 
-    if (matched.length === 0) {
+    listEl.innerHTML = '<div style="text-align:center; padding:24px; color:var(--muted);">Loading collektors...</div>';
+    openModal('applicantsModal');
+
+    let collectors = [];
+    if (typeof fetchOpportunityCollectorsFromSupabase === 'function' && jobId) {
+      const res = await fetchOpportunityCollectorsFromSupabase(jobId);
+      if (res.success && Array.isArray(res.data)) {
+        collectors = res.data;
+      }
+    } else {
+      const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+      const proposals = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      const matched = proposals.filter(p => String(p.jobId) === String(jobId) || String(p.projectId) === String(jobId));
+      collectors = matched.map(lp => {
+        const matchedUser = allUsers.find(u => u && (u.id === lp.userId || u.email === lp.userEmail));
+        return {
+          id: lp.id,
+          jobId: lp.jobId || jobId,
+          userId: lp.userId || (matchedUser ? matchedUser.id : ''),
+          userName: lp.userName || (matchedUser ? matchedUser.name : 'Professional Candidate'),
+          userTitle: lp.userTitle || (matchedUser ? matchedUser.title : 'Project Specialist'),
+          userLocation: lp.userLocation || (matchedUser ? matchedUser.location : 'Nigeria'),
+          userAvatar: lp.userAvatar || (matchedUser ? matchedUser.avatar : ''),
+          userSkills: lp.userSkills || (matchedUser ? matchedUser.skills : []),
+          bidAmount: Number(lp.bidAmount || lp.proposedAmount || 0),
+          timeline: lp.timeline || '2 Weeks',
+          pitchText: lp.pitchText || lp.coverLetter || 'No cover letter pitch text provided.',
+          status: String(lp.status || 'PENDING').toUpperCase(),
+          created_at: lp.created_at || new Date().toISOString()
+        };
+      });
+    }
+
+    if (collectors.length === 0) {
       listEl.innerHTML = `
         <div style="text-align:center; padding:36px 20px; color:var(--muted);">
           <div style="font-size:36px; margin-bottom:10px;">📭</div>
@@ -361,39 +391,39 @@
         </div>
       `;
     } else {
-      listEl.innerHTML = matched.map(p => {
-        const proId = p.userId || p.freelancer_id || p.userEmail || '';
-        const matchedUser = allUsers.find(u => u && (u.id === proId || u.email === proId));
-        const name = p.userName || p.freelancerName || (matchedUser ? matchedUser.name : 'Professional Candidate');
-        const title = p.userTitle || p.freelancerTitle || (matchedUser ? matchedUser.title : 'Project Specialist');
-        const loc = p.userLocation || p.location || (matchedUser ? matchedUser.location : 'Nigeria');
-        const avatarImg = p.userAvatar || (matchedUser ? matchedUser.avatar : '') ? `<img src="${p.userAvatar || matchedUser.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : name.charAt(0).toUpperCase();
-        const shieldBadge = (matchedUser && typeof getShieldBadgeHTML === 'function') ? getShieldBadgeHTML(15, matchedUser) : '';
+      const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+
+      listEl.innerHTML = collectors.map(p => {
+        const proId = p.userId || p.user_id || p.pro_id || p.userEmail || '';
+        const matchedUser = allUsers.find(u => u && (u.id === proId || u.email === proId)) || p.profiles || {};
+        const name = p.userName || matchedUser.name || 'Professional Candidate';
+        const title = p.userTitle || matchedUser.title || 'Project Specialist';
+        const loc = p.userLocation || matchedUser.location || 'Nigeria';
+        const avatarUrl = p.userAvatar || matchedUser.avatar || '';
+        const avatarImg = avatarUrl ? `<img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : name.charAt(0).toUpperCase();
+        const shieldBadge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(15, matchedUser) : '';
 
         const rawDate = p.created_at ? new Date(p.created_at) : new Date();
         const dateStr = isNaN(rawDate.getTime()) ? 'Recent' : rawDate.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-        const timelineStr = p.timeline || p.deliveryTime || '2 Weeks';
+        const timelineStr = p.timeline || '2 Weeks';
         const cover = p.pitchText || p.coverLetter || 'No cover letter pitch text provided.';
 
-        const status = String(p.status || 'pending').toLowerCase();
-        const isPending = status === 'pending' || status === 'submitted' || status === 'under_review';
-        const isAccepted = status === 'accepted' || status === 'awarded' || status === 'active';
-        const isRejected = status === 'rejected' || status === 'declined';
-        const isCompleted = status === 'completed' || status === 'collekted';
-        const isUncollekted = status === 'uncollekted' || status === 'withdrawn';
+        const status = String(p.status || 'PENDING').toUpperCase();
+        const isPending = status === 'PENDING' || status === 'SUBMITTED' || status === 'UNDER_REVIEW';
+        const isAccepted = status === 'ACCEPTED' || status === 'AWARDED' || status === 'ACTIVE';
+        const isDeclined = status === 'DECLINED' || status === 'REJECTED';
+        const isCompleted = status === 'COMPLETED' || status === 'COLLEKTED';
 
         let statusBadge = `<span class="status-pill" style="background:rgba(212,146,11,0.15); color:var(--amber); font-size:11px; padding:4px 10px; border-radius:20px; font-weight:800;">⏳ Pending Review</span>`;
         if (isAccepted) {
           statusBadge = `<span class="status-pill" style="background:rgba(19,117,111,0.15); color:var(--teal); font-size:11px; padding:4px 10px; border-radius:20px; font-weight:800;">Accepted ✅ &bull; Contract Active</span>`;
-        } else if (isRejected) {
-          statusBadge = `<span class="status-pill" style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:11px; padding:4px 10px; border-radius:20px; font-weight:800;">Rejected ✕</span>`;
+        } else if (isDeclined) {
+          statusBadge = `<span class="status-pill" style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:11px; padding:4px 10px; border-radius:20px; font-weight:800;">Declined ✕</span>`;
         } else if (isCompleted) {
           statusBadge = `<span class="status-pill" style="background:rgba(16,185,129,0.15); color:#10b981; font-size:11px; padding:4px 10px; border-radius:20px; font-weight:800;">Completed 🏆</span>`;
-        } else if (isUncollekted) {
-          statusBadge = `<span class="status-pill" style="background:rgba(100,116,139,0.15); color:var(--muted); font-size:11px; padding:4px 10px; border-radius:20px; font-weight:800;">Uncollekted</span>`;
         }
 
-        const skillsList = Array.isArray(p.userSkills) ? p.userSkills : (matchedUser && Array.isArray(matchedUser.skills) ? matchedUser.skills : []);
+        const skillsList = Array.isArray(p.userSkills) && p.userSkills.length ? p.userSkills : (Array.isArray(matchedUser.skills) ? matchedUser.skills : []);
         const skillsHtml = skillsList.length > 0 ? `
           <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
             ${skillsList.slice(0, 4).map(s => `<span style="background:rgba(19,117,111,0.08); color:var(--teal); font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:6px;">${escapeHTML(s)}</span>`).join('')}
@@ -413,7 +443,7 @@
                 </div>
               </div>
               <div style="text-align:right;">
-                <div style="font-weight:900; font-size:16px; color:var(--forest);">${typeof formatNaira === 'function' ? formatNaira(p.bidAmount || p.proposedAmount || 0, true) : '₦' + (p.bidAmount || p.proposedAmount || 0).toLocaleString()}</div>
+                <div style="font-weight:900; font-size:16px; color:var(--forest);">${typeof formatNaira === 'function' ? formatNaira(p.bidAmount || 0, true) : '₦' + (p.bidAmount || 0).toLocaleString()}</div>
                 <div style="font-size:11px; color:var(--muted); font-weight:700; margin-top:2px;">⏱️ ${escapeHTML(timelineStr)} &bull; 📅 ${escapeHTML(dateStr)}</div>
               </div>
             </div>
@@ -435,7 +465,7 @@
                     ✓ Accept Collekt
                   </button>
                   <button class="btn btn-outline btn-sm" onclick="rejectProposalContract('${p.id}')" style="font-weight:800; font-size:11.5px; color:#ef4444; border-color:#fca5a5; padding:5px 12px;">
-                    ✕ Reject
+                    ✕ Decline
                   </button>
                 ` : ''}
                 ${isAccepted ? `
@@ -449,93 +479,38 @@
         `;
       }).join('');
     }
-
-    openModal('applicantsModal');
   }
 
-  function awardProposalContract(propId) {
-    const user = typeof getUser === 'function' ? getUser() : {};
-    let matchedProp = null;
-
-    try {
-      const proposals = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
-      const prop = proposals.find(p => p.id === propId);
-      if (prop) {
-        prop.status = 'accepted';
-        matchedProp = prop;
-        localStorage.setItem('collekt_proposals', JSON.stringify(proposals));
-
-        // Sync with collekt_contracts
-        const allContracts = JSON.parse(localStorage.getItem('collekt_contracts') || '[]');
-        const contractId = 'ctr_' + String(propId).replace(/^prop_/, '');
-        if (!allContracts.some(c => c.id === contractId || c.proposalId === propId)) {
-          allContracts.unshift({
-            id: contractId,
-            proposalId: propId,
-            jobId: prop.jobId || _myJobsCurrentModalJobId,
-            jobTitle: prop.jobTitle || 'Tender Contract Execution',
-            companyId: user.id || prop.companyId || 'company',
-            companyName: user.name || user.company_name || prop.companyName || 'Corporate Client',
-            companyEmail: user.email || prop.companyEmail || '',
-            proId: prop.userId || '',
-            proName: prop.userName || 'Professional Specialist',
-            proEmail: prop.userEmail || '',
-            amount: Number(prop.bidAmount || prop.proposedAmount || prop.amount || 0),
-            budget: Number(prop.budget || prop.bidAmount || 0),
-            timeline: prop.timeline || '2 Weeks',
-            status: 'active',
-            created_at: new Date().toISOString()
-          });
-          localStorage.setItem('collekt_contracts', JSON.stringify(allContracts));
+  async function awardProposalContract(propId) {
+    if (typeof acceptCollectorProposalInSupabase === 'function') {
+      const res = await acceptCollectorProposalInSupabase(propId, { jobId: _myJobsCurrentModalJobId });
+      if (res.success) {
+        if (typeof showToast === 'function') {
+          showToast('🎉 Collekt Accepted! Professional engaged & active contract created.');
         }
-
-        // Sync with awarded contracts
-        const awardedList = JSON.parse(localStorage.getItem('collekt_awarded_contracts') || '[]');
-        if (!awardedList.some(c => c.id === 'CTR-' + prop.id)) {
-          awardedList.unshift({
-            id: 'CTR-' + prop.id,
-            proposalId: prop.id,
-            title: prop.jobTitle || 'Awarded Tender Execution',
-            amount: prop.bidAmount || 0,
-            contractor: prop.userName || prop.freelancerName || 'Professional Candidate',
-            status: 'Active Escrow',
-            created_at: new Date().toISOString()
-          });
-          localStorage.setItem('collekt_awarded_contracts', JSON.stringify(awardedList));
+      } else {
+        if (typeof showToast === 'function') {
+          showToast('⚠️ ' + (res.error || 'Failed to accept proposal'), 'error');
         }
       }
-
-      if (window.sb) {
-        sb.from('proposals').update({ status: 'accepted' }).eq('id', propId).then(()=>{}).catch(()=>{});
-      }
-    } catch(e){}
-
-    if (typeof showToast === 'function') {
-      showToast('🎉 Collekt Accepted! Contract created and ready for milestone escrow.');
     }
+
     renderJobsPage();
     if (_myJobsCurrentModalJobId) {
       openApplicantsModal(_myJobsCurrentModalJobId);
     }
   }
 
-  function rejectProposalContract(propId) {
-    try {
-      const proposals = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
-      const prop = proposals.find(p => p.id === propId);
-      if (prop) {
-        prop.status = 'rejected';
-        localStorage.setItem('collekt_proposals', JSON.stringify(proposals));
+  async function rejectProposalContract(propId) {
+    if (typeof declineCollectorProposalInSupabase === 'function') {
+      const res = await declineCollectorProposalInSupabase(propId);
+      if (res.success) {
+        if (typeof showToast === 'function') {
+          showToast('Collekt request declined.');
+        }
       }
-
-      if (window.sb) {
-        sb.from('proposals').update({ status: 'rejected' }).eq('id', propId).then(()=>{}).catch(()=>{});
-      }
-    } catch(e){}
-
-    if (typeof showToast === 'function') {
-      showToast('Collekt request rejected.');
     }
+
     renderJobsPage();
     if (_myJobsCurrentModalJobId) {
       openApplicantsModal(_myJobsCurrentModalJobId);

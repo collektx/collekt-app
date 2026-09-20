@@ -642,6 +642,14 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     const isCompany = !!(u && u.role === 'company');
     const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
 
+    let userProposals = [];
+    try {
+      userProposals = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      if (u) {
+        userProposals = userProposals.filter(p => (!p.userId || p.userId === u.id || p.userEmail === u.email));
+      }
+    } catch(e){}
+
     if (filtered.length === 0) {
       grid.innerHTML = `
         <div style="grid-column: 1 / -1; background: var(--white); border: 2px dashed var(--line); border-radius: 20px; padding: 60px 24px; text-align: center;">
@@ -672,6 +680,9 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
 
       const typeTag = (j.type === 'Job Opening' ? 'Short-Term Job' : j.type) || 'Short-Term Job';
 
+      // Check if current professional user already collected
+      const existingProp = (!isCompany && u) ? userProposals.find(p => String(p.jobId || p.project_id) === String(j.id)) : null;
+
       // Company-only Edit & Delete corner controls
       const companyControlsHtml = isCompany ? `
         <div class="job-company-actions" style="position:absolute; top:12px; right:12px; display:inline-flex; align-items:center; gap:6px; z-index:3;">
@@ -684,9 +695,23 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
         </div>
       ` : '';
 
-      const actionBtnHtml = isCompany
-        ? `<button class="btn btn-outline btn-sm" style="font-weight:800; min-height:36px; padding:0 18px; cursor:pointer;" onclick="openTenderDetailModal('${j.id}')">👁️ Preview</button>`
-        : `<button class="btn btn-primary btn-sm" style="font-weight:800; min-height:36px; padding:0 18px; cursor:pointer;" onclick="openTenderDetailModal('${j.id}')">⚡ Collekt</button>`;
+      let actionBtnHtml = '';
+      if (isCompany) {
+        actionBtnHtml = `<button class="btn btn-outline btn-sm" style="font-weight:800; min-height:36px; padding:0 18px; cursor:pointer;" onclick="openTenderDetailModal('${j.id}')">👁️ Preview</button>`;
+      } else if (existingProp) {
+        const st = String(existingProp.status || 'PENDING').toUpperCase();
+        if (st === 'ACCEPTED' || st === 'ACTIVE') {
+          actionBtnHtml = `<button class="btn btn-sm" style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; font-weight:800; min-height:36px; padding:0 16px; cursor:pointer;" onclick="openTenderDetailModal('${j.id}')">✅ Accepted (Engaged)</button>`;
+        } else if (st === 'COMPLETED') {
+          actionBtnHtml = `<button class="btn btn-sm" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; font-weight:800; min-height:36px; padding:0 16px; cursor:pointer;" onclick="openTenderDetailModal('${j.id}')">🏆 Completed</button>`;
+        } else if (st === 'DECLINED' || st === 'REJECTED') {
+          actionBtnHtml = `<button class="btn btn-sm" style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; font-weight:800; min-height:36px; padding:0 16px; cursor:pointer;" onclick="openTenderDetailModal('${j.id}')">❌ Declined</button>`;
+        } else {
+          actionBtnHtml = `<button class="btn btn-outline btn-sm" style="background:#fffbeb; color:#d97706; border:1px solid #fde68a; font-weight:800; min-height:36px; padding:0 16px; cursor:pointer;" onclick="openTenderDetailModal('${j.id}')">⏳ Collekted (Pending)</button>`;
+        }
+      } else {
+        actionBtnHtml = `<button class="btn btn-primary btn-sm" style="font-weight:800; min-height:36px; padding:0 18px; cursor:pointer;" onclick="openTenderDetailModal('${j.id}')">⚡ Collekt</button>`;
+      }
 
       return `
         <div class="tender-card" style="position:relative;">
@@ -865,6 +890,15 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     const prevSec = document.getElementById('tModalCompanyPreviewSection');
     const editBtn = document.getElementById('tModalEditBtn');
 
+    // Check if current user already submitted a collection request
+    let existingProp = null;
+    if (!isCo && curUser) {
+      try {
+        const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+        existingProp = localProps.find(p => String(p.jobId || p.project_id) === String(job.id) && (p.userId === curUser.id || p.userEmail === curUser.email));
+      } catch(e){}
+    }
+
     if (isCo) {
       if (propSec) propSec.style.display = 'none';
       if (prevSec) prevSec.style.display = 'block';
@@ -872,12 +906,77 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     } else {
       if (propSec) propSec.style.display = 'block';
       if (prevSec) prevSec.style.display = 'none';
-    }
 
-    // Reset inputs
-    if (document.getElementById('propBidAmount')) document.getElementById('propBidAmount').value = (job.budget && Number(job.budget) > 0) ? job.budget : '';
-    if (document.getElementById('propTimeline')) document.getElementById('propTimeline').value = job.duration || '2 Weeks';
-    if (document.getElementById('propPitchText')) document.getElementById('propPitchText').value = '';
+      // Check existing status notice
+      let existingNotice = document.getElementById('tModalExistingCollektNotice');
+      if (!existingNotice) {
+        existingNotice = document.createElement('div');
+        existingNotice.id = 'tModalExistingCollektNotice';
+        propSec.prepend(existingNotice);
+      }
+
+      const submitBtn = document.getElementById('tModalSubmitBtn') || propSec.querySelector('button.btn-primary');
+      if (submitBtn) submitBtn.id = 'tModalSubmitBtn';
+
+      if (existingProp && existingProp.status !== 'uncollekted' && existingProp.status !== 'withdrawn') {
+        const st = String(existingProp.status || 'PENDING').toUpperCase();
+        let badgeColor = '#d97706';
+        let badgeBg = '#fffbeb';
+        if (st === 'ACCEPTED' || st === 'ACTIVE') { badgeColor = '#059669'; badgeBg = '#ecfdf5'; }
+        if (st === 'COMPLETED') { badgeColor = '#2563eb'; badgeBg = '#eff6ff'; }
+        if (st === 'DECLINED' || st === 'REJECTED') { badgeColor = '#dc2626'; badgeBg = '#fef2f2'; }
+
+        existingNotice.style.display = 'block';
+        existingNotice.innerHTML = `
+          <div style="background:${badgeBg}; border:1px solid ${badgeColor}40; border-radius:12px; padding:14px; margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div style="font-weight:900; color:var(--ink); font-size:14px;">⚡ You have collekted this opportunity</div>
+              <span style="background:${badgeColor}; color:#fff; font-size:11px; font-weight:900; padding:3px 10px; border-radius:99px;">${escapeHTML(st)}</span>
+            </div>
+            <div style="font-size:12px; color:var(--muted); margin-top:4px;">
+              Request submitted &bull; Proposed: ${typeof formatNaira === 'function' ? formatNaira(existingProp.bidAmount || existingProp.proposedAmount || 0, true) : '₦' + (existingProp.bidAmount || 0)} &bull; ${escapeHTML(existingProp.timeline || '2 Weeks')}
+            </div>
+          </div>
+        `;
+
+        if (document.getElementById('propBidAmount')) {
+          document.getElementById('propBidAmount').value = existingProp.bidAmount || existingProp.proposedAmount || '';
+          document.getElementById('propBidAmount').disabled = true;
+        }
+        if (document.getElementById('propTimeline')) {
+          document.getElementById('propTimeline').value = existingProp.timeline || '2 Weeks';
+          document.getElementById('propTimeline').disabled = true;
+        }
+        if (document.getElementById('propPitchText')) {
+          document.getElementById('propPitchText').value = existingProp.pitchText || existingProp.coverLetter || '';
+          document.getElementById('propPitchText').disabled = true;
+        }
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.7';
+          submitBtn.innerHTML = `✓ Already Collekted (${escapeHTML(st)})`;
+        }
+      } else {
+        existingNotice.style.display = 'none';
+        if (document.getElementById('propBidAmount')) {
+          document.getElementById('propBidAmount').value = (job.budget && Number(job.budget) > 0) ? job.budget : '';
+          document.getElementById('propBidAmount').disabled = false;
+        }
+        if (document.getElementById('propTimeline')) {
+          document.getElementById('propTimeline').value = job.duration || '2 Weeks';
+          document.getElementById('propTimeline').disabled = false;
+        }
+        if (document.getElementById('propPitchText')) {
+          document.getElementById('propPitchText').value = '';
+          document.getElementById('propPitchText').disabled = false;
+        }
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.innerHTML = '⚡ Collekt This';
+        }
+      }
+    }
 
     openModal('tenderDetailModal');
   }
@@ -894,33 +993,37 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
   }
 
   async function submitTenderProposalClick() {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user) {
+      if (typeof showToast === 'function') showToast('⚠️ Please login to collekt this opportunity.', 'warning');
+      return;
+    }
+    if (user.role === 'company') {
+      if (typeof showToast === 'function') showToast('🏢 Company accounts cannot collect opportunities.', 'warning');
+      return;
+    }
+
     const amount = document.getElementById('propBidAmount')?.value;
     const timeline = document.getElementById('propTimeline')?.value.trim();
     const pitch = document.getElementById('propPitchText')?.value.trim();
 
-    if (!pitch || pitch.length < 15) {
-      if (typeof showToast === 'function') showToast('⚠️ Please provide a technical pitch letter / proposal (min 15 characters)', 'warning');
-      return;
-    }
-
-    const user = typeof getUser === 'function' ? getUser() : null;
-    if (!user) {
-      if (typeof showToast === 'function') showToast('⚠️ Please login to collekt this opportunity.', 'warning');
+    if (!pitch || pitch.length < 10) {
+      if (typeof showToast === 'function') showToast('⚠️ Please provide a technical pitch statement (min 10 characters)', 'warning');
       return;
     }
 
     const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
     const compUser = allUsers.find(u => u && (u.id === _activeTenderJob?.company_id || (u.company_name && u.company_name === (_activeTenderJob?.company_name || _activeTenderJob?.companyName))));
 
-    const proposalData = {
-      id: 'prop_' + Date.now(),
+    const collectionData = {
       jobId: _activeTenderJob?.id,
+      project_id: _activeTenderJob?.id,
       jobTitle: _activeTenderJob?.title,
       companyId: _activeTenderJob?.company_id || _activeTenderJob?.companyId || compUser?.id || '',
       companyName: _activeTenderJob?.companyName || _activeTenderJob?.company_name || compUser?.company_name || compUser?.name || 'Verified Corporate Employer',
       companyEmail: _activeTenderJob?.companyEmail || _activeTenderJob?.company_email || compUser?.email || '',
       userId: user.id,
-      userName: user.name || 'Professional Candidate',
+      userName: user.name || user.username || 'Professional Candidate',
       userEmail: user.email || '',
       userTitle: user.title || user.role || 'Project Specialist',
       userAvatar: user.avatar || '',
@@ -930,43 +1033,45 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
       bidAmount: Number(amount) || Number(_activeTenderJob?.budget) || 0,
       proposedAmount: Number(amount) || Number(_activeTenderJob?.budget) || 0,
       budget: Number(_activeTenderJob?.budget) || 0,
+      deliveryDays: timeline && !isNaN(parseInt(timeline)) ? parseInt(timeline) : 14,
       timeline: timeline || '2 Weeks',
       pitchText: pitch,
       coverLetter: pitch,
-      status: 'pending',
+      status: 'PENDING',
       created_at: new Date().toISOString()
     };
 
-    // Save to user proposals
-    if (typeof saveUserProposal === 'function') {
-      saveUserProposal(proposalData);
+    const submitBtn = document.getElementById('tModalSubmitBtn');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting Collekt...';
+    }
+
+    if (typeof submitCollectionRequestToSupabase === 'function') {
+      const res = await submitCollectionRequestToSupabase(collectionData);
+      if (!res.success && res.duplicate) {
+        if (typeof showToast === 'function') showToast('⚠️ You have already collected this opportunity. Status: ' + (res.data?.status || 'PENDING'), 'warning');
+        closeModal('tenderDetailModal');
+        applyMktFilters();
+        return;
+      }
+      if (!res.success) {
+        if (typeof showToast === 'function') showToast('⚠️ ' + (res.error || 'Failed to submit collection request'), 'error');
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '⚡ Collekt This'; }
+        return;
+      }
     } else {
+      // Fallback local save
       try {
         const props = JSON.parse(localStorage.getItem('collekt_proposals')) || [];
-        props.unshift(proposalData);
+        props.unshift(collectionData);
         localStorage.setItem('collekt_proposals', JSON.stringify(props));
       } catch(e){}
     }
 
-    // Sync to Supabase if connected
-    if (window.sb && typeof sb.from === 'function') {
-      try {
-        await sb.from('proposals').insert([{
-          id: proposalData.id,
-          project_id: proposalData.jobId,
-          user_id: proposalData.userId,
-          bid_amount: proposalData.bidAmount,
-          cover_letter: proposalData.pitchText,
-          status: 'pending',
-          created_at: proposalData.created_at
-        }]);
-      } catch(err) {
-        console.warn('Supabase proposal sync notice:', err);
-      }
-    }
-
     closeModal('tenderDetailModal');
-    if (typeof showToast === 'function') showToast('Successfully Collekted! Proposal sent to client.');
+    if (typeof showToast === 'function') showToast('🚀 Successfully Collekted! Request status: PENDING.');
+    applyMktFilters();
   }
 
   /* ═ POST OPPORTUNITY MODAL ACTIONS ═ */

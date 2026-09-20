@@ -220,12 +220,12 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
           <span class="prop-stat-val" style="color:var(--amber);" id="statActiveProps">0</span>
         </div>
         <div class="prop-stat-card">
-          <span class="prop-stat-lbl">JOBS COLLEKTED</span>
-          <span class="prop-stat-val" style="color:#16a34a;" id="statAwardedProps">0</span>
+          <span class="prop-stat-lbl">Accepted / Engaged</span>
+          <span class="prop-stat-val" style="color:var(--teal);" id="statAcceptedProps">0</span>
         </div>
         <div class="prop-stat-card">
-          <span class="prop-stat-lbl">Collektion Pipeline Value</span>
-          <span class="prop-stat-val" style="color:var(--teal);" id="statPipelineVal">₦0</span>
+          <span class="prop-stat-lbl">JOBS COLLEKTED</span>
+          <span class="prop-stat-val" style="color:#16a34a;" id="statCompletedProps">0</span>
         </div>
       </div>
 
@@ -234,7 +234,8 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
         <div class="prop-pills-wrap" id="propPills">
           <div class="prop-pill active" onclick="filterProposals('all', this)">All Collektions</div>
           <div class="prop-pill" onclick="filterProposals('review', this)">⏳ Under Review</div>
-          <div class="prop-pill" onclick="filterProposals('awarded', this)">🎉 Jobs Collekted</div>
+          <div class="prop-pill" onclick="filterProposals('accepted', this)">✅ Accepted / Engaged</div>
+          <div class="prop-pill" onclick="filterProposals('completed', this)">🏆 Jobs Collekted</div>
           <div class="prop-pill" onclick="filterProposals('declined', this)">❌ Declined / Uncollekted</div>
         </div>
 
@@ -283,12 +284,9 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
       localProps = localProps.filter(p => !p.userId || p.userId === me.id || p.userEmail === me.email);
     }
 
-    // Only real user submitted proposals/collektions
-    let combined = [].concat(localProps);
-
     // Deduplicate
     const seen = new Set();
-    return combined.filter(p => {
+    return localProps.filter(p => {
       if (seen.has(p.id)) return false;
       seen.add(p.id);
       return true;
@@ -296,37 +294,79 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
   }
 
   function isProposalCompleted(p) {
-    const st = String(p.status || '').toLowerCase();
-    const jst = String(p.job_status || p.jobStatus || p.contract_status || p.contractStatus || '').toLowerCase();
-    return st === 'completed' || st === 'collekted' || st === 'delivered' || st === 'closed' ||
-           jst === 'completed' || jst === 'collekted' || jst === 'delivered' || jst === 'closed';
-  }
-
-  function isProposalInProgress(p) {
-    const st = String(p.status || '').toLowerCase();
-    const jst = String(p.job_status || p.jobStatus || p.contract_status || p.contractStatus || '').toLowerCase();
-    return st === 'in_progress' || st === 'in-progress' || st === 'active' ||
-           jst === 'in_progress' || jst === 'in-progress' || jst === 'active';
+    const st = String(p.status || '').toUpperCase();
+    const jst = String(p.job_status || p.jobStatus || p.contract_status || p.contractStatus || '').toUpperCase();
+    return st === 'COMPLETED' || st === 'COLLEKTED' || st === 'DELIVERED' || st === 'CLOSED' ||
+           jst === 'COMPLETED' || jst === 'COLLEKTED' || jst === 'DELIVERED' || jst === 'CLOSED';
   }
 
   function isProposalAwarded(p) {
-    const st = String(p.status || '').toLowerCase();
-    return st === 'awarded' || st === 'accepted';
+    const st = String(p.status || '').toUpperCase();
+    return st === 'ACCEPTED' || st === 'AWARDED' || st === 'ACTIVE' || st === 'IN_PROGRESS';
   }
 
   function isProposalUncollekted(p) {
-    const st = String(p.status || '').toLowerCase();
-    return st === 'uncollekted' || st === 'withdrawn';
+    const st = String(p.status || '').toUpperCase();
+    return st === 'UNCOLLEKTED' || st === 'WITHDRAWN';
   }
 
   function isProposalDeclined(p) {
-    const st = String(p.status || '').toLowerCase();
-    return st === 'rejected' || st === 'declined';
+    const st = String(p.status || '').toUpperCase();
+    return st === 'REJECTED' || st === 'DECLINED';
   }
 
   function isProposalUnderReview(p) {
-    const st = String(p.status || '').toLowerCase();
-    return st === 'submitted' || st === 'pending' || st === 'review' || st === 'under_review' || !st;
+    const st = String(p.status || '').toUpperCase();
+    return st === 'SUBMITTED' || st === 'PENDING' || st === 'REVIEW' || st === 'UNDER_REVIEW' || !st;
+  }
+
+  async function fetchLiveProposalsForUser() {
+    const me = typeof getUser === 'function' ? getUser() : null;
+    if (!me || !window.sb) return;
+
+    try {
+      let q = sb.from('proposals').select('*, projects:project_id(id, title, category, budget, company_id, location)');
+      if (me.id) {
+        q = q.or(`user_id.eq.${me.id},pro_id.eq.${me.id}`);
+      }
+      const { data, error } = await q.order('created_at', { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        let localProps = [];
+        try { localProps = JSON.parse(localStorage.getItem('collekt_proposals')) || []; } catch(e){}
+
+        data.forEach(sp => {
+          const proj = sp.projects || {};
+          const existingIdx = localProps.findIndex(lp => lp.id === sp.id || String(lp.jobId) === String(sp.project_id));
+          const unified = {
+            id: sp.id,
+            jobId: sp.project_id,
+            project_id: sp.project_id,
+            jobTitle: proj.title || 'Marketplace Opportunity',
+            companyId: sp.company_id || proj.company_id || '',
+            companyName: 'Corporate Client',
+            userId: me.id,
+            userEmail: me.email,
+            bidAmount: Number(sp.bid_amount || sp.proposed_amount || 0),
+            proposedAmount: Number(sp.bid_amount || sp.proposed_amount || 0),
+            timeline: sp.delivery_days ? (sp.delivery_days + ' Days') : '2 Weeks',
+            pitchText: sp.pitch_statement || sp.cover_letter || 'Collected via Marketplace',
+            status: String(sp.status || 'PENDING').toUpperCase(),
+            created_at: sp.created_at
+          };
+
+          if (existingIdx >= 0) {
+            localProps[existingIdx] = { ...localProps[existingIdx], ...unified };
+          } else {
+            localProps.push(unified);
+          }
+        });
+
+        localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
+      }
+    } catch(err) {
+      console.warn('fetchLiveProposalsForUser notice:', err);
+    }
   }
 
   function renderProposalsList() {
@@ -339,24 +379,19 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
     // Stats calculations
     const totalCount = props.length;
     const activeCount = props.filter(p => isProposalUnderReview(p)).length;
-    const jobsCollektedCount = props.filter(p => isProposalAwarded(p) || isProposalInProgress(p) || isProposalCompleted(p)).length;
-
-    // Collektion Pipeline Value: strictly ₦0 until the bid/proposal has actually resulted in a completed/collected job
-    const completedProps = props.filter(p => isProposalCompleted(p));
-    const pipelineSum = completedProps.reduce((acc, p) => {
-      const val = Number(p.bidAmount || p.amount || p.budget || p.proposedAmount || 0);
-      return acc + (isNaN(val) ? 0 : val);
-    }, 0);
+    const acceptedCount = props.filter(p => isProposalAwarded(p) && !isProposalCompleted(p)).length;
+    const completedCount = props.filter(p => isProposalCompleted(p)).length;
 
     if (document.getElementById('statTotalProps')) document.getElementById('statTotalProps').textContent = totalCount;
     if (document.getElementById('statActiveProps')) document.getElementById('statActiveProps').textContent = activeCount;
-    if (document.getElementById('statAwardedProps')) document.getElementById('statAwardedProps').textContent = jobsCollektedCount;
-    if (document.getElementById('statPipelineVal')) document.getElementById('statPipelineVal').textContent = typeof formatNaira === 'function' ? formatNaira(pipelineSum, true) : '₦' + pipelineSum.toLocaleString();
+    if (document.getElementById('statAcceptedProps')) document.getElementById('statAcceptedProps').textContent = acceptedCount;
+    if (document.getElementById('statCompletedProps')) document.getElementById('statCompletedProps').textContent = completedCount;
 
     // Filter by tab pill
     let filtered = props.filter(p => {
       if (_activePropFilter === 'review') return isProposalUnderReview(p);
-      if (_activePropFilter === 'awarded') return isProposalAwarded(p) || isProposalInProgress(p) || isProposalCompleted(p);
+      if (_activePropFilter === 'accepted') return isProposalAwarded(p) && !isProposalCompleted(p);
+      if (_activePropFilter === 'completed') return isProposalCompleted(p);
       if (_activePropFilter === 'declined') return isProposalDeclined(p) || isProposalUncollekted(p);
       return true;
     });
@@ -383,7 +418,6 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
 
     container.innerHTML = filtered.map(p => {
       const isCompleted = isProposalCompleted(p);
-      const isInProg = isProposalInProgress(p);
       const isAwarded = isProposalAwarded(p);
       const isUncoll = isProposalUncollekted(p);
       const isDeclined = isProposalDeclined(p);
@@ -392,20 +426,17 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
       let clientReviewText = 'Reviewing Collektion ⏳';
 
       if (isCompleted) {
-        statusBadge = `<span class="prop-status-badge badge-awarded">🎉 Jobs Collekted</span>`;
+        statusBadge = `<span class="prop-status-badge badge-awarded">🏆 Jobs Collekted</span>`;
         clientReviewText = 'Completed & Collekted ✅';
-      } else if (isInProg) {
-        statusBadge = `<span class="prop-status-badge" style="background:#e0f2fe; color:#0369a1; border:1px solid #7dd3fc;">⚡ Job In Progress</span>`;
-        clientReviewText = 'In Progress ⚡';
       } else if (isAwarded) {
-        statusBadge = `<span class="prop-status-badge badge-awarded">🎉 Collektion Accepted</span>`;
-        clientReviewText = 'Accepted ✅';
+        statusBadge = `<span class="prop-status-badge badge-awarded">✅ Accepted &bull; Active Engagement</span>`;
+        clientReviewText = 'Accepted ✅ &bull; Active';
       } else if (isUncoll) {
         statusBadge = `<span class="prop-status-badge badge-declined">🗑️ Uncollekted</span>`;
         clientReviewText = 'Uncollekted 🗑️';
       } else if (isDeclined) {
         statusBadge = `<span class="prop-status-badge badge-declined">❌ Declined</span>`;
-        clientReviewText = 'Closed ❌';
+        clientReviewText = 'Declined ❌';
       }
 
       const bidFormatted = p.bidAmount ? (typeof formatNaira === 'function' ? formatNaira(p.bidAmount, false) : '₦' + p.bidAmount) : 'Negotiable';
@@ -414,7 +445,7 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
       const compProfile = allUsers.find(x => x && ((p.companyId && x.id === p.companyId) || (p.companyName && (x.company_name === p.companyName || x.name === p.companyName))));
       const badge = (compProfile && typeof getShieldBadgeHTML === 'function') ? getShieldBadgeHTML(15, compProfile) : '';
 
-      const canUncollekt = !isCompleted && !isInProg && !isAwarded && !isUncoll && !isDeclined;
+      const canUncollekt = !isCompleted && !isAwarded && !isUncoll && !isDeclined;
 
       return `
         <div class="prop-card">
@@ -458,10 +489,10 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
               <a href="messages.html" class="btn btn-outline btn-sm" style="font-weight:800; font-size:12px;">
                 💬 Message Client
               </a>
-              <button class="btn btn-primary btn-sm" style="font-weight:800; font-size:12px; background:var(--teal);" onclick="openAIProposalGeneratorModal('${encodeURIComponent(p.jobTitle || 'Tender Proposal')}', '${encodeURIComponent(p.pitchText || '')}')">
-                ✨ Improve Pitch with AI
-              </button>
               ${canUncollekt ? `
+                <button class="btn btn-primary btn-sm" style="font-weight:800; font-size:12px; background:var(--teal);" onclick="openAIProposalGeneratorModal('${encodeURIComponent(p.jobTitle || 'Tender Proposal')}', '${encodeURIComponent(p.pitchText || '')}')">
+                  ✨ Improve Pitch with AI
+                </button>
                 <button class="btn btn-outline btn-sm" style="color:#b91c1c; border-color:#fca5a5; font-weight:800; font-size:12px;" onclick="uncollektProposal('${p.id}')">
                   🗑️ UNCOLLEKT
                 </button>
@@ -481,10 +512,16 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
       localProps = JSON.parse(localStorage.getItem('collekt_proposals')) || [];
       const idx = localProps.findIndex(p => p.id === propId);
       if (idx !== -1) {
-        localProps[idx].status = 'uncollekted';
+        localProps[idx].status = 'UNCOLLEKTED';
         localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
       }
     } catch(e){}
+
+    if (window.sb) {
+      try {
+        sb.from('proposals').update({ status: 'WITHDRAWN' }).eq('id', propId).then(()=>{});
+      } catch(e){}
+    }
 
     if (typeof showToast === 'function') showToast('🗑️ Proposal uncollekted successfully');
     renderProposalsList();
@@ -494,12 +531,17 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
     uncollektProposal(propId);
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     if (typeof requireAuth === 'function') requireAuth();
     if (typeof buildSidebar === 'function') buildSidebar('proposals');
     if (typeof buildTopbar === 'function') buildTopbar();
 
     renderProposalsList();
+
+    try {
+      await fetchLiveProposalsForUser();
+      renderProposalsList();
+    } catch(e){}
 
     if (typeof initCollektAICopilot === 'function') {
       initCollektAICopilot();

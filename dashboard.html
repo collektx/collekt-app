@@ -347,14 +347,24 @@
             <tbody>
       `;
       proposals.slice(0, 5).forEach(p => {
-        const dateStr = p.timestamp ? new Date(p.timestamp).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : 'Just now';
+        const rawDate = p.created_at || p.timestamp;
+        const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : 'Just now';
         const title = (typeof escapeHTML === 'function') ? escapeHTML(p.jobTitle || 'Unknown Project') : (p.jobTitle || 'Unknown Project');
         const company = (typeof escapeHTML === 'function') ? escapeHTML(p.companyName || 'Unknown Client') : (p.companyName || 'Unknown Client');
+        const st = String(p.status || 'PENDING').toUpperCase();
+        let statusBadge = '<span class="activity-status status-pending">Under Review</span>';
+        if (st === 'ACCEPTED' || st === 'ACTIVE' || st === 'AWARDED') {
+          statusBadge = '<span class="activity-status status-accepted">Accepted</span>';
+        } else if (st === 'COMPLETED' || st === 'COLLEKTED') {
+          statusBadge = '<span class="activity-status" style="background:#dcfce7; color:#15803d;">Completed</span>';
+        } else if (st === 'DECLINED' || st === 'REJECTED') {
+          statusBadge = '<span class="activity-status status-rejected">Declined</span>';
+        }
         html += `
           <tr class="tx-row">
             <td style="font-weight:700; color:var(--ink);">${title}</td>
             <td>${company}</td>
-            <td><span class="activity-status status-review">Under Review</span></td>
+            <td>${statusBadge}</td>
             <td>${dateStr}</td>
             <td><a href="messages.html" class="btn btn-outline btn-sm" style="min-height:32px;">Message</a></td>
           </tr>

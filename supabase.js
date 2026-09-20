@@ -1151,6 +1151,363 @@ function initSupabaseRealtimeProjects(onProjectChange) {
   }
 }
 
+/* ═════════════════════════════════════════════════════════
+   COLLECTIONS / PROPOSALS / CONTRACTS DATABASE ENGINE v3.0
+   ═════════════════════════════════════════════════════════ */
+
+function isValidUUID(str) {
+  return typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
+/**
+ * Submits a new collection request for an opportunity
+ * Enforces duplicate prevention.
+ */
+async function submitCollectionRequestToSupabase(req) {
+  const user = typeof getUser === 'function' ? getUser() : null;
+  const proId = req.proId || req.userId || user?.id;
+  const projectId = req.projectId || req.jobId;
+
+  if (!proId || !projectId) {
+    throw new Error('Missing professional ID or opportunity ID for collection request');
+  }
+
+  // 1. Check local storage for duplicate
+  let localProps = [];
+  try {
+    localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+  } catch(e) { localProps = []; }
+
+  const existingLocal = localProps.find(p => 
+    (String(p.jobId) === String(projectId) || String(p.projectId) === String(projectId)) &&
+    (String(p.userId) === String(proId) || String(p.userEmail).toLowerCase() === String(user?.email || '').toLowerCase())
+  );
+
+  if (existingLocal) {
+    return {
+      alreadyExists: true,
+      proposal: existingLocal,
+      status: existingLocal.status || 'PENDING'
+    };
+  }
+
+  const bidAmountNum = (req.bidAmount != null && !isNaN(req.bidAmount) && Number(req.bidAmount) > 0) ? Number(req.bidAmount) : null;
+  const deliveryDaysNum = parseInt(req.deliveryDays || req.timeline || '14') || 14;
+  const pitchStr = req.pitchText || req.coverLetter || req.pitch_statement || 'Collected via Marketplace';
+
+  const proposalRecord = {
+    id: req.id || ('prop_' + Date.now()),
+    jobId: projectId,
+    projectId: projectId,
+    jobTitle: req.jobTitle || 'Marketplace Opportunity',
+    companyId: req.companyId || req.company_id || '',
+    companyName: req.companyName || req.company_name || 'Verified Corporate Employer',
+    companyEmail: req.companyEmail || '',
+    userId: proId,
+    proId: proId,
+    userName: req.userName || user?.name || 'Professional Specialist',
+    userEmail: req.userEmail || user?.email || '',
+    userTitle: req.userTitle || user?.title || 'Energy Specialist',
+    userAvatar: req.userAvatar || user?.avatar || '',
+    userRating: req.userRating || user?.rating || 0,
+    userLocation: req.userLocation || user?.location || 'Nigeria',
+    userSkills: req.userSkills || user?.skills || [],
+    bidAmount: bidAmountNum,
+    proposedAmount: bidAmountNum,
+    budget: req.budget || bidAmountNum || 0,
+    timeline: req.timeline || (deliveryDaysNum + ' Days'),
+    deliveryDays: deliveryDaysNum,
+    pitchText: pitchStr,
+    coverLetter: pitchStr,
+    status: 'PENDING',
+    created_at: new Date().toISOString()
+  };
+
+  // 2. Save to Supabase if connected
+  if (window.sb && isValidUUID(projectId)) {
+    try {
+      const validProId = isValidUUID(proId) ? proId : (user?.id && isValidUUID(user.id) ? user.id : '0f9ae84c-c5dd-4067-8ded-82638a6e9e01');
+      
+      // Check if already in Supabase
+      const { data: existingSb } = await window.sb
+        .from('proposals')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('pro_id', validProId)
+        .maybeSingle();
+
+      if (existingSb) {
+        proposalRecord.id = existingSb.id;
+        proposalRecord.status = existingSb.status || 'PENDING';
+        localProps.unshift(proposalRecord);
+        localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
+        return {
+          alreadyExists: true,
+          proposal: proposalRecord,
+          status: proposalRecord.status
+        };
+      }
+
+      const { data: sbInserted, error: sbErr } = await window.sb
+        .from('proposals')
+        .insert([{
+          project_id: projectId,
+          pro_id: validProId,
+          bid_amount: bidAmountNum,
+          delivery_days: deliveryDaysNum,
+          pitch_statement: pitchStr,
+          status: 'PENDING'
+        }])
+        .select();
+
+      if (sbErr) {
+        console.warn('Supabase proposal insert notice:', sbErr);
+      } else if (sbInserted && sbInserted[0]) {
+        proposalRecord.id = sbInserted[0].id;
+        proposalRecord.status = sbInserted[0].status;
+      }
+    } catch (err) {
+      console.warn('Supabase collection sync error:', err);
+    }
+  }
+
+  // 3. Save to local storage
+  localProps.unshift(proposalRecord);
+  localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
+  try { window.dispatchEvent(new CustomEvent('collekt_proposals_updated', { detail: proposalRecord })); } catch(e){}
+
+  return {
+    success: true,
+    proposal: proposalRecord,
+    status: 'PENDING'
+  };
+}
+
+/**
+ * Fetches all collectors for an opportunity
+ */
+async function fetchOpportunityCollectorsFromSupabase(projectId) {
+  let collectors = [];
+
+  // Local collection records
+  try {
+    const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+    collectors = localProps.filter(p => String(p.jobId) === String(projectId) || String(p.projectId) === String(projectId));
+  } catch(e){}
+
+  // Supabase records
+  if (window.sb && isValidUUID(projectId)) {
+    try {
+      const { data: sbProps, error } = await window.sb
+        .from('proposals')
+        .select('*, profiles(id, name, title, location, rating, avatar, skills)')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false });
+
+      if (!error && sbProps && sbProps.length > 0) {
+        sbProps.forEach(sp => {
+          const pro = sp.profiles || {};
+          const existingIdx = collectors.findIndex(c => c.id === sp.id || (c.userId === sp.pro_id && (c.jobId === sp.project_id || c.projectId === sp.project_id)));
+          const norm = {
+            id: sp.id,
+            jobId: sp.project_id,
+            projectId: sp.project_id,
+            userId: sp.pro_id,
+            proId: sp.pro_id,
+            userName: pro.name || 'Professional Specialist',
+            userTitle: pro.title || 'Energy Specialist',
+            userAvatar: pro.avatar || '',
+            userRating: pro.rating || 0,
+            userLocation: pro.location || 'Nigeria',
+            userSkills: pro.skills || [],
+            bidAmount: sp.bid_amount,
+            proposedAmount: sp.bid_amount,
+            timeline: sp.delivery_days ? `${sp.delivery_days} Days` : '2 Weeks',
+            deliveryDays: sp.delivery_days,
+            pitchText: sp.pitch_statement,
+            coverLetter: sp.pitch_statement,
+            status: sp.status || 'PENDING',
+            created_at: sp.created_at,
+            profiles: pro
+          };
+
+          if (existingIdx !== -1) {
+            collectors[existingIdx] = { ...collectors[existingIdx], ...norm };
+          } else {
+            collectors.unshift(norm);
+          }
+        });
+      }
+    } catch(err) {
+      console.warn('fetchOpportunityCollectorsFromSupabase notice:', err);
+    }
+  }
+
+  return collectors;
+}
+
+/**
+ * Accepts a collector proposal, moves status to ACCEPTED, and creates an active job engagement contract.
+ */
+async function acceptCollectorProposalInSupabase(proposalId, details = {}) {
+  const user = typeof getUser === 'function' ? getUser() : {};
+  let updatedProp = null;
+
+  // 1. Update local proposals
+  try {
+    const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+    const idx = localProps.findIndex(p => String(p.id) === String(proposalId));
+    if (idx !== -1) {
+      localProps[idx].status = 'ACCEPTED';
+      localProps[idx].accepted_at = new Date().toISOString();
+      updatedProp = localProps[idx];
+      localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
+    }
+  } catch(e){}
+
+  // 2. Create linked contract engagement (Status: ACTIVE, NOT completed!)
+  const contractId = 'ctr_' + String(proposalId).replace(/^prop_/, '');
+  const newContract = {
+    id: contractId,
+    proposalId: proposalId,
+    jobId: details.jobId || updatedProp?.jobId || updatedProp?.projectId || '',
+    jobTitle: details.jobTitle || updatedProp?.jobTitle || 'Tender Contract Engagement',
+    companyId: user.id || details.companyId || updatedProp?.companyId || 'company',
+    companyName: user.name || user.company_name || details.companyName || updatedProp?.companyName || 'Corporate Client',
+    companyEmail: user.email || details.companyEmail || updatedProp?.companyEmail || '',
+    proId: details.proId || updatedProp?.userId || updatedProp?.proId || '',
+    proName: details.proName || updatedProp?.userName || 'Professional Specialist',
+    proEmail: details.proEmail || updatedProp?.userEmail || '',
+    amount: Number(details.amount || updatedProp?.bidAmount || updatedProp?.proposedAmount || updatedProp?.budget || 0),
+    budget: Number(details.budget || updatedProp?.budget || updatedProp?.bidAmount || 0),
+    timeline: details.timeline || updatedProp?.timeline || '2 Weeks',
+    status: 'ACTIVE',
+    created_at: new Date().toISOString()
+  };
+
+  try {
+    const allContracts = JSON.parse(localStorage.getItem('collekt_contracts') || '[]');
+    const cIdx = allContracts.findIndex(c => c.id === contractId || c.proposalId === proposalId);
+    if (cIdx !== -1) {
+      allContracts[cIdx] = { ...allContracts[cIdx], ...newContract };
+    } else {
+      allContracts.unshift(newContract);
+    }
+    localStorage.setItem('collekt_contracts', JSON.stringify(allContracts));
+
+    const awardedList = JSON.parse(localStorage.getItem('collekt_awarded_contracts') || '[]');
+    if (!awardedList.some(c => c.id === 'CTR-' + proposalId)) {
+      awardedList.unshift({
+        id: 'CTR-' + proposalId,
+        proposalId: proposalId,
+        title: newContract.jobTitle,
+        amount: newContract.amount,
+        contractor: newContract.proName,
+        status: 'Active Engagement',
+        created_at: new Date().toISOString()
+      });
+      localStorage.setItem('collekt_awarded_contracts', JSON.stringify(awardedList));
+    }
+  } catch(e){}
+
+  // 3. Sync to Supabase
+  if (window.sb) {
+    try {
+      if (isValidUUID(proposalId)) {
+        await window.sb
+          .from('proposals')
+          .update({ status: 'ACCEPTED', updated_at: new Date().toISOString() })
+          .eq('id', proposalId);
+      }
+
+      if (isValidUUID(newContract.jobId) && isValidUUID(newContract.proId) && isValidUUID(newContract.companyId) && isValidUUID(proposalId)) {
+        await window.sb
+          .from('contracts')
+          .upsert([{
+            project_id: newContract.jobId,
+            proposal_id: proposalId,
+            company_id: newContract.companyId,
+            pro_id: newContract.proId,
+            total_amount: newContract.amount,
+            status: 'ACTIVE'
+          }]);
+      }
+    } catch(err) {
+      console.warn('acceptCollectorProposalInSupabase notice:', err);
+    }
+  }
+
+  try { window.dispatchEvent(new CustomEvent('collekt_contracts_updated', { detail: newContract })); } catch(e){}
+  return { success: true, contract: newContract, proposal: updatedProp };
+}
+
+/**
+ * Declines a collector proposal, moves status to DECLINED.
+ */
+async function declineCollectorProposalInSupabase(proposalId) {
+  try {
+    const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+    const idx = localProps.findIndex(p => String(p.id) === String(proposalId));
+    if (idx !== -1) {
+      localProps[idx].status = 'DECLINED';
+      localProps[idx].declined_at = new Date().toISOString();
+      localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
+    }
+  } catch(e){}
+
+  if (window.sb && isValidUUID(proposalId)) {
+    try {
+      await window.sb
+        .from('proposals')
+        .update({ status: 'DECLINED', updated_at: new Date().toISOString() })
+        .eq('id', proposalId);
+    } catch(err) {
+      console.warn('declineCollectorProposalInSupabase notice:', err);
+    }
+  }
+
+  try { window.dispatchEvent(new CustomEvent('collekt_proposals_updated', { detail: { id: proposalId, status: 'DECLINED' } })); } catch(e){}
+  return { success: true, status: 'DECLINED' };
+}
+
+/**
+ * Marks a completed job engagement
+ */
+async function completeCollectorEngagementInSupabase(contractId, proposalId) {
+  try {
+    const allContracts = JSON.parse(localStorage.getItem('collekt_contracts') || '[]');
+    const cIdx = allContracts.findIndex(c => c.id === contractId || c.proposalId === proposalId);
+    if (cIdx !== -1) {
+      allContracts[cIdx].status = 'COMPLETED';
+      allContracts[cIdx].completed_at = new Date().toISOString();
+      localStorage.setItem('collekt_contracts', JSON.stringify(allContracts));
+    }
+
+    const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+    const pIdx = localProps.findIndex(p => p.id === proposalId || (allContracts[cIdx] && p.id === allContracts[cIdx].proposalId));
+    if (pIdx !== -1) {
+      localProps[pIdx].status = 'COMPLETED';
+      localProps[pIdx].completed_at = new Date().toISOString();
+      localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
+    }
+  } catch(e){}
+
+  if (window.sb) {
+    try {
+      if (isValidUUID(proposalId)) {
+        await window.sb.from('proposals').update({ status: 'COMPLETED', updated_at: new Date().toISOString() }).eq('id', proposalId);
+      }
+      if (isValidUUID(contractId)) {
+        await window.sb.from('contracts').update({ status: 'COMPLETED', completed_at: new Date().toISOString() }).eq('id', contractId);
+      }
+    } catch(err) {
+      console.warn('completeCollectorEngagementInSupabase notice:', err);
+    }
+  }
+
+  return { success: true, status: 'COMPLETED' };
+}
+
 // Auto-initialize session listener and OAuth redirect handler
 if (window.sb && window.sb.auth) {
   try {
@@ -2303,6 +2660,432 @@ async function withdrawWalletFunds(params) {
     return { success: false, error: err.message || 'Withdrawal network error' };
   }
 }
+
+/**
+ * 9. Submit Professional Collection Request (Marketplace 'Collekt')
+ */
+async function submitCollectionRequestToSupabase(req) {
+  try {
+    const user = typeof getUser === 'function' ? getUser() : JSON.parse(localStorage.getItem('collekt_user') || '{}');
+    const proId = req.userId || req.user_id || req.pro_id || user?.id || '';
+    const proEmail = req.userEmail || req.user_email || user?.email || '';
+    const projectId = req.jobId || req.project_id || req.projectId || '';
+
+    if (!projectId) {
+      return { success: false, error: 'Opportunity ID is required' };
+    }
+    if (!proId && !proEmail) {
+      return { success: false, error: 'Professional identification required' };
+    }
+
+    // 1. Check existing in Local Storage
+    let localProps = [];
+    try {
+      localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+    } catch(e){}
+
+    const existingLocal = localProps.find(p => 
+      (String(p.jobId || p.project_id) === String(projectId)) &&
+      ((proId && String(p.userId || p.pro_id) === String(proId)) || (proEmail && String(p.userEmail || '').toLowerCase() === String(proEmail).toLowerCase()))
+    );
+
+    // 2. Check existing in Supabase
+    let existingSb = null;
+    if (window.sb) {
+      try {
+        let q = sb.from('proposals').select('*').eq('project_id', projectId);
+        if (proId) {
+          q = q.or(`user_id.eq.${proId},pro_id.eq.${proId}`);
+        }
+        const { data } = await q.maybeSingle();
+        if (data) existingSb = data;
+      } catch(sbErr) {
+        console.warn('Check existing proposal Supabase note:', sbErr);
+      }
+    }
+
+    const existing = existingSb || existingLocal;
+    if (existing && existing.status !== 'uncollekted' && existing.status !== 'withdrawn') {
+      return {
+        success: false,
+        duplicate: true,
+        data: existing,
+        message: 'You have already collected this opportunity.'
+      };
+    }
+
+    const proposalId = req.id || ('prop_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7));
+    const nowIso = new Date().toISOString();
+
+    const proposalData = {
+      id: proposalId,
+      jobId: projectId,
+      project_id: projectId,
+      projectId: projectId,
+      jobTitle: req.jobTitle || req.title || 'Marketplace Opportunity',
+      companyId: req.companyId || req.company_id || '',
+      company_id: req.companyId || req.company_id || '',
+      companyName: req.companyName || req.company_name || 'Verified Corporate Employer',
+      company_name: req.companyName || req.company_name || 'Verified Corporate Employer',
+      companyEmail: req.companyEmail || req.company_email || '',
+      userId: proId,
+      user_id: proId,
+      pro_id: proId,
+      userName: req.userName || user?.name || user?.username || 'Professional Candidate',
+      userEmail: proEmail,
+      userTitle: req.userTitle || user?.title || 'Project Specialist',
+      userAvatar: req.userAvatar || user?.avatar || '',
+      userRating: req.userRating || user?.rating || 0,
+      userLocation: req.userLocation || user?.location || 'Nigeria',
+      userSkills: req.userSkills || user?.skills || [],
+      bidAmount: Number(req.bidAmount || req.proposedAmount || req.budget || 0),
+      proposedAmount: Number(req.bidAmount || req.proposedAmount || req.budget || 0),
+      budget: Number(req.budget || req.bidAmount || 0),
+      deliveryDays: Number(req.deliveryDays || req.delivery_days || 14),
+      timeline: req.timeline || '2 Weeks',
+      pitchText: req.pitchText || req.coverLetter || 'Collected via Marketplace',
+      coverLetter: req.pitchText || req.coverLetter || 'Collected via Marketplace',
+      status: 'PENDING',
+      created_at: nowIso,
+      updated_at: nowIso
+    };
+
+    // Save to Local Storage immediately
+    const updatedLocal = localProps.filter(p => p.id !== proposalId && String(p.jobId || p.project_id) !== String(projectId));
+    updatedLocal.unshift(proposalData);
+    localStorage.setItem('collekt_proposals', JSON.stringify(updatedLocal));
+
+    // Persist to Supabase
+    if (window.sb) {
+      try {
+        const sbPayload = {
+          id: proposalId,
+          project_id: projectId,
+          user_id: proId || null,
+          pro_id: proId || null,
+          company_id: proposalData.companyId || null,
+          bid_amount: proposalData.bidAmount,
+          proposed_amount: proposalData.bidAmount,
+          delivery_days: proposalData.deliveryDays,
+          pitch_statement: proposalData.pitchText,
+          cover_letter: proposalData.coverLetter,
+          status: 'PENDING',
+          created_at: nowIso
+        };
+        const { error } = await sb.from('proposals').upsert(sbPayload);
+        if (error) console.warn('Supabase submitCollectionRequest notice:', error.message);
+      } catch(sbErr) {
+        console.warn('Supabase submitCollectionRequest exception:', sbErr);
+      }
+    }
+
+    try {
+      window.dispatchEvent(new CustomEvent('collekt_proposals_updated', { detail: proposalData }));
+    } catch(e){}
+
+    return {
+      success: true,
+      data: proposalData,
+      message: 'Collection request submitted successfully! Status: PENDING.'
+    };
+  } catch(err) {
+    console.error('submitCollectionRequestToSupabase error:', err);
+    return { success: false, error: err.message || 'Collection submission error' };
+  }
+}
+
+/**
+ * 10. Fetch Collectors / Proposals for an Opportunity
+ */
+async function fetchOpportunityCollectorsFromSupabase(projectId) {
+  let collectors = [];
+  const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+
+  if (window.sb && projectId) {
+    try {
+      const { data, error } = await sb
+        .from('proposals')
+        .select('*, profiles:user_id(id, name, title, location, rating, avatar, skills, verified, is_verified, identity_verified)')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        collectors = data.map(p => {
+          const proProf = p.profiles || {};
+          const matchedUser = allUsers.find(u => u && (u.id === (p.user_id || p.pro_id) || u.email === proProf.email));
+          return {
+            id: p.id,
+            jobId: p.project_id,
+            project_id: p.project_id,
+            userId: p.user_id || p.pro_id,
+            user_id: p.user_id || p.pro_id,
+            pro_id: p.pro_id || p.user_id,
+            userName: proProf.name || matchedUser?.name || 'Professional Candidate',
+            userEmail: proProf.email || matchedUser?.email || '',
+            userTitle: proProf.title || matchedUser?.title || 'Project Specialist',
+            userAvatar: proProf.avatar || matchedUser?.avatar || '',
+            userLocation: proProf.location || matchedUser?.location || 'Nigeria',
+            userRating: proProf.rating || matchedUser?.rating || 0,
+            userSkills: proProf.skills || matchedUser?.skills || [],
+            bidAmount: Number(p.bid_amount || p.proposed_amount || 0),
+            timeline: p.delivery_days ? (p.delivery_days + ' Days') : '2 Weeks',
+            pitchText: p.pitch_statement || p.cover_letter || 'Collected via Marketplace',
+            status: String(p.status || 'PENDING').toUpperCase(),
+            created_at: p.created_at,
+            profiles: proProf
+          };
+        });
+      }
+    } catch(err) {
+      console.warn('fetchOpportunityCollectorsFromSupabase notice:', err);
+    }
+  }
+
+  // Merge with Local Storage
+  try {
+    const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+    const matchedLocal = localProps.filter(p => String(p.jobId || p.project_id) === String(projectId));
+
+    matchedLocal.forEach(lp => {
+      const idx = collectors.findIndex(c => c.id === lp.id || (c.userId && lp.userId && c.userId === lp.userId));
+      if (idx === -1) {
+        const matchedUser = allUsers.find(u => u && (u.id === lp.userId || u.email === lp.userEmail));
+        collectors.push({
+          id: lp.id,
+          jobId: lp.jobId || projectId,
+          project_id: lp.jobId || projectId,
+          userId: lp.userId || (matchedUser ? matchedUser.id : ''),
+          user_id: lp.userId || (matchedUser ? matchedUser.id : ''),
+          pro_id: lp.userId || (matchedUser ? matchedUser.id : ''),
+          userName: lp.userName || (matchedUser ? matchedUser.name : 'Professional Candidate'),
+          userEmail: lp.userEmail || (matchedUser ? matchedUser.email : ''),
+          userTitle: lp.userTitle || (matchedUser ? matchedUser.title : 'Project Specialist'),
+          userAvatar: lp.userAvatar || (matchedUser ? matchedUser.avatar : ''),
+          userLocation: lp.userLocation || (matchedUser ? matchedUser.location : 'Nigeria'),
+          userRating: lp.userRating || (matchedUser ? matchedUser.rating : 0),
+          userSkills: lp.userSkills || (matchedUser ? matchedUser.skills : []),
+          bidAmount: Number(lp.bidAmount || lp.proposedAmount || 0),
+          timeline: lp.timeline || '2 Weeks',
+          pitchText: lp.pitchText || lp.coverLetter || 'Collected via Marketplace',
+          status: String(lp.status || 'PENDING').toUpperCase(),
+          created_at: lp.created_at || new Date().toISOString()
+        });
+      } else {
+        collectors[idx] = { ...collectors[idx], ...lp, status: String(lp.status || collectors[idx].status || 'PENDING').toUpperCase() };
+      }
+    });
+  } catch(e){}
+
+  return { success: true, data: collectors };
+}
+
+/**
+ * 11. Company Accepts Collection Request (Creates Active Engagement Contract)
+ */
+async function acceptCollectorProposalInSupabase(proposalId, details) {
+  try {
+    const user = typeof getUser === 'function' ? getUser() : JSON.parse(localStorage.getItem('collekt_user') || '{}');
+    const nowIso = new Date().toISOString();
+
+    // 1. Update proposal status to ACCEPTED in Supabase
+    if (window.sb) {
+      try {
+        await sb.from('proposals').update({
+          status: 'ACCEPTED',
+          updated_at: nowIso
+        }).eq('id', proposalId);
+      } catch(sbErr) {
+        console.warn('Supabase accept proposal update notice:', sbErr);
+      }
+    }
+
+    // 2. Update local proposals
+    let matchedProp = null;
+    try {
+      const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      const idx = localProps.findIndex(p => p.id === proposalId);
+      if (idx !== -1) {
+        localProps[idx].status = 'ACCEPTED';
+        matchedProp = localProps[idx];
+        localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
+      }
+    } catch(e){}
+
+    const contractId = 'ctr_' + String(proposalId).replace(/^prop_/, '');
+    const contractData = {
+      id: contractId,
+      proposal_id: proposalId,
+      proposalId: proposalId,
+      project_id: details?.jobId || details?.project_id || matchedProp?.jobId || matchedProp?.project_id || '',
+      jobId: details?.jobId || details?.project_id || matchedProp?.jobId || matchedProp?.project_id || '',
+      jobTitle: details?.jobTitle || details?.title || matchedProp?.jobTitle || 'Tender Contract Execution',
+      company_id: user.id || details?.companyId || matchedProp?.companyId || 'company',
+      companyId: user.id || details?.companyId || matchedProp?.companyId || 'company',
+      companyName: user.company_name || user.name || matchedProp?.companyName || 'Corporate Client',
+      companyEmail: user.email || matchedProp?.companyEmail || '',
+      pro_id: details?.proId || matchedProp?.userId || matchedProp?.pro_id || '',
+      proId: details?.proId || matchedProp?.userId || matchedProp?.pro_id || '',
+      proName: details?.proName || matchedProp?.userName || 'Professional Specialist',
+      proEmail: details?.proEmail || matchedProp?.userEmail || '',
+      total_amount: Number(details?.amount || matchedProp?.bidAmount || matchedProp?.proposedAmount || 0),
+      amount: Number(details?.amount || matchedProp?.bidAmount || matchedProp?.proposedAmount || 0),
+      pro_payout_amount: Number(details?.amount || matchedProp?.bidAmount || matchedProp?.proposedAmount || 0),
+      timeline: details?.timeline || matchedProp?.timeline || '2 Weeks',
+      status: 'ACTIVE', // Acceptance creates ACTIVE engagement, NOT completed
+      created_at: nowIso,
+      updated_at: nowIso
+    };
+
+    // 3. Insert into Supabase contracts table
+    if (window.sb) {
+      try {
+        const sbContract = {
+          id: contractId,
+          proposal_id: proposalId,
+          project_id: contractData.project_id || null,
+          company_id: contractData.company_id || null,
+          pro_id: contractData.pro_id || null,
+          total_amount: contractData.total_amount,
+          pro_payout_amount: contractData.pro_payout_amount,
+          status: 'ACTIVE',
+          created_at: nowIso
+        };
+        const { error } = await sb.from('contracts').upsert(sbContract);
+        if (error) console.warn('Supabase contract insert notice:', error.message);
+      } catch(sbErr) {
+        console.warn('Supabase contract insert exception:', sbErr);
+      }
+    }
+
+    // 4. Save to Local Storage contracts
+    try {
+      const allContracts = JSON.parse(localStorage.getItem('collekt_contracts') || '[]');
+      const existIdx = allContracts.findIndex(c => c.id === contractId || c.proposalId === proposalId);
+      if (existIdx >= 0) {
+        allContracts[existIdx] = { ...allContracts[existIdx], ...contractData };
+      } else {
+        allContracts.unshift(contractData);
+      }
+      localStorage.setItem('collekt_contracts', JSON.stringify(allContracts));
+
+      // Also mirror in collekt_awarded_contracts for legacy views
+      const awardedList = JSON.parse(localStorage.getItem('collekt_awarded_contracts') || '[]');
+      if (!awardedList.some(c => c.id === 'CTR-' + proposalId)) {
+        awardedList.unshift({
+          id: 'CTR-' + proposalId,
+          proposalId: proposalId,
+          title: contractData.jobTitle,
+          amount: contractData.total_amount,
+          contractor: contractData.proName,
+          status: 'Active Escrow',
+          created_at: nowIso
+        });
+        localStorage.setItem('collekt_awarded_contracts', JSON.stringify(awardedList));
+      }
+    } catch(e){}
+
+    try {
+      window.dispatchEvent(new CustomEvent('collekt_proposals_updated'));
+      window.dispatchEvent(new CustomEvent('collekt_contracts_updated', { detail: contractData }));
+    } catch(e){}
+
+    return {
+      success: true,
+      contract: contractData,
+      message: 'Collekt accepted successfully! Professional engaged & active contract created.'
+    };
+  } catch(err) {
+    console.error('acceptCollectorProposalInSupabase error:', err);
+    return { success: false, error: err.message || 'Acceptance error' };
+  }
+}
+
+/**
+ * 12. Company Declines Collection Request
+ */
+async function declineCollectorProposalInSupabase(proposalId) {
+  try {
+    const nowIso = new Date().toISOString();
+
+    if (window.sb) {
+      try {
+        await sb.from('proposals').update({
+          status: 'DECLINED',
+          updated_at: nowIso
+        }).eq('id', proposalId);
+      } catch(sbErr) {
+        console.warn('Supabase decline proposal update notice:', sbErr);
+      }
+    }
+
+    try {
+      const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      const idx = localProps.findIndex(p => p.id === proposalId);
+      if (idx !== -1) {
+        localProps[idx].status = 'DECLINED';
+        localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
+      }
+    } catch(e){}
+
+    try {
+      window.dispatchEvent(new CustomEvent('collekt_proposals_updated'));
+    } catch(e){}
+
+    return { success: true, message: 'Collection request declined.' };
+  } catch(err) {
+    console.error('declineCollectorProposalInSupabase error:', err);
+    return { success: false, error: err.message || 'Decline error' };
+  }
+}
+
+/**
+ * 13. Complete Collector Engagement / Job
+ */
+async function completeCollectorEngagementInSupabase(contractId, proposalId) {
+  try {
+    const nowIso = new Date().toISOString();
+
+    if (window.sb) {
+      try {
+        if (contractId) {
+          await sb.from('contracts').update({ status: 'COMPLETED', updated_at: nowIso }).eq('id', contractId);
+        }
+        if (proposalId) {
+          await sb.from('proposals').update({ status: 'COMPLETED', updated_at: nowIso }).eq('id', proposalId);
+        }
+      } catch(sbErr) {
+        console.warn('Supabase complete engagement notice:', sbErr);
+      }
+    }
+
+    try {
+      const allContracts = JSON.parse(localStorage.getItem('collekt_contracts') || '[]');
+      const cIdx = allContracts.findIndex(c => c.id === contractId || c.proposalId === proposalId);
+      if (cIdx !== -1) {
+        allContracts[cIdx].status = 'COMPLETED';
+        localStorage.setItem('collekt_contracts', JSON.stringify(allContracts));
+      }
+
+      const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      const pIdx = localProps.findIndex(p => p.id === proposalId || (contractId && p.id === contractId.replace(/^ctr_/, 'prop_')));
+      if (pIdx !== -1) {
+        localProps[pIdx].status = 'COMPLETED';
+        localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
+      }
+    } catch(e){}
+
+    try {
+      window.dispatchEvent(new CustomEvent('collekt_proposals_updated'));
+      window.dispatchEvent(new CustomEvent('collekt_contracts_updated'));
+    } catch(e){}
+
+    return { success: true, message: 'Engagement successfully marked as COMPLETED.' };
+  } catch(err) {
+    console.error('completeCollectorEngagementInSupabase error:', err);
+    return { success: false, error: err.message || 'Completion error' };
+  }
+}
+
 
 
 
