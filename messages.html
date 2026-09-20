@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=88.0">
-<link rel="stylesheet" href="shared.css?v=88.0">
-<link rel="stylesheet" href="glass.css?v=88.0">
+<link rel="stylesheet" href="style.css?v=89.0">
+<link rel="stylesheet" href="shared.css?v=89.0">
+<link rel="stylesheet" href="glass.css?v=89.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -834,10 +834,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=88.0"></script>
-<script src="app.js?v=88.0"></script>
-<script src="collekt-ai.js?v=88.0"></script>
-<script src="settings-popup.js?v=88.0"></script>
+<script src="supabase.js?v=89.0"></script>
+<script src="app.js?v=89.0"></script>
+<script src="collekt-ai.js?v=89.0"></script>
+<script src="settings-popup.js?v=89.0"></script>
 <script>
   requireAuth();
 
@@ -1215,7 +1215,9 @@
       const isMine = msg.sender_id === me.id;
       const time = new Date(msg.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
       
-      const isCallLog = msg.body.includes('call ended') || msg.body.includes('Voice call') || msg.body.includes('Video call');
+      const isCallLog = msg.body && (msg.body.includes('call ended') || msg.body.includes('Voice call') || msg.body.includes('Video call'));
+      const isSystemEvent = msg.metadata?.is_system || msg.is_system || 
+        (typeof msg.body === 'string' && (msg.body.startsWith('⚡') || msg.body.startsWith('🎉') || msg.body.startsWith('ℹ️') || msg.body.startsWith('🔒')));
 
       if (isCallLog) {
         html += `
@@ -1223,6 +1225,35 @@
             <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:99px; background:var(--paper); border:1px solid var(--line); font-size:12px; font-weight:700; color:var(--slate);">
               ${escapeHTML(msg.body)}
             </span>
+          </div>
+        `;
+      } else if (isSystemEvent && !msg.body.includes('[WALLET_TRANSFER_RECEIPT]')) {
+        let borderCol = 'rgba(212, 146, 11, 0.4)';
+        let tagCol = '#facc15';
+        let bgGrad = 'linear-gradient(135deg, rgba(14,59,53,0.92), rgba(7,18,16,0.95))';
+        let eventLabel = '⚡ Market Activity';
+
+        if (msg.body.startsWith('🎉') || msg.metadata?.event_type === 'COLLECTION_REQUEST_ACCEPTED') {
+          borderCol = 'rgba(34, 197, 94, 0.5)';
+          tagCol = '#4ade80';
+          eventLabel = '🎉 Engagement Activated';
+        } else if (msg.body.startsWith('ℹ️') || msg.metadata?.event_type === 'COLLECTION_REQUEST_DECLINED') {
+          borderCol = 'rgba(239, 68, 68, 0.4)';
+          tagCol = '#f87171';
+          eventLabel = 'ℹ️ Opportunity Notice';
+        }
+
+        html += `
+          <div style="text-align:center; margin:14px auto; max-width:88%;">
+            <div style="display:inline-block; padding:12px 18px; border-radius:14px; background:${bgGrad}; border:1px solid ${borderCol}; box-shadow:0 6px 20px rgba(0,0,0,0.22); text-align:left; color:#fff;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:4px; gap:12px;">
+                <span style="font-size:10px; font-weight:800; color:${tagCol}; text-transform:uppercase; letter-spacing:0.06em;">${eventLabel}</span>
+                <span style="font-size:10px; opacity:0.6; font-weight:600;">${time}</span>
+              </div>
+              <div style="font-size:12.5px; font-weight:700; color:#f1f5f9; line-height:1.5;">
+                ${escapeHTML(msg.body)}
+              </div>
+            </div>
           </div>
         `;
       } else if (msg.recalled) {
@@ -2596,7 +2627,7 @@
     }
   };
 
-  window.executeInChatTransfer = function() {
+  window.executeInChatTransfer = async function() {
     if (!activeConvId) return;
     const convs = getMyConversations();
     const conv = convs.find(c => c.id === activeConvId);
@@ -2607,6 +2638,7 @@
     const amount = amountInput ? parseFloat(amountInput.value) : 0;
     const noteInput = document.getElementById('chatTransferNoteInput');
     const note = noteInput ? noteInput.value.trim() : 'Milestone Disbursal';
+    const confirmBtn = document.getElementById('confirmChatTransferBtn');
 
     if (!amount || amount <= 0) {
       showToast('⚠️ Please enter a valid transfer amount.', 'warning');
@@ -2614,61 +2646,78 @@
     }
 
     const me = getUser() || {};
-    const senderWallet = typeof getOrCreateUserWallet === 'function' ? getOrCreateUserWallet(me) : (me?.wallet || { balance: 0 });
-    let currentBal = Number(me.wallet_balance ?? senderWallet.available_balance ?? senderWallet.balance ?? 0);
-    if (currentBal === 2450000 || currentBal === 1450000) currentBal = 0;
+    const senderId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : me.id) || me.id;
+    const recipientId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(other.id || other.email) : other.id) || other.id;
 
-    if (amount > currentBal) {
-      showToast('⚠️ Insufficient wallet balance. Please top up your wallet.', 'warning');
+    if (!senderId || !recipientId) {
+      showToast('⚠️ Unable to resolve sender or recipient account.', 'error');
       return;
     }
 
-    // 1. Deduct sender balance
-    senderWallet.balance = currentBal - amount;
-    if (typeof saveUserWallet === 'function') saveUserWallet(senderWallet);
+    if (confirmBtn) {
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<span>⏳ Processing Live Transfer...</span>';
+    }
 
-    // 2. Credit recipient wallet
-    if (other && other.id) {
-      const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
-      const recipUser = allUsers.find(u => u.id === other.id || u.email === other.email);
-      if (recipUser) {
-        if (!recipUser.wallet) recipUser.wallet = { balance: 0 };
-        recipUser.wallet.balance = (recipUser.wallet.balance || 0) + amount;
-        registerUserInDirectory(recipUser);
+    try {
+      const transferRef = `TX-PAY-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      
+      let transferResult = null;
+      if (typeof executeWalletTransferInSupabase === 'function') {
+        transferResult = await executeWalletTransferInSupabase({
+          senderId: senderId,
+          recipientId: recipientId,
+          amount: amount,
+          reference: transferRef,
+          conversationId: activeConvId,
+          projectId: conv.project_id || null,
+          note: note,
+          recipientName: other.name
+        });
+      }
+
+      if (!transferResult || !transferResult.success) {
+        const errorMsg = transferResult?.error || 'Transfer failed. Please check your available balance.';
+        showToast('⚠️ ' + errorMsg, 'error');
+        if (confirmBtn) {
+          confirmBtn.disabled = false;
+          confirmBtn.innerHTML = '💸 Confirm &amp; Transfer';
+        }
+        return;
+      }
+
+      // Success!
+      closeModal('chatTransferModal');
+      
+      // Update sender balance display in chat transfer modal for future opens
+      const senderBalEl = document.getElementById('chatTransferSenderBalance');
+      if (senderBalEl && transferResult.sender_new_balance != null) {
+        senderBalEl.textContent = 'NGN ' + Number(transferResult.sender_new_balance).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+      }
+
+      // Send or render receipt in chat
+      const receiptMsg = `[WALLET_TRANSFER_RECEIPT]\nAmount: ₦${amount.toLocaleString('en-NG', { minimumFractionDigits: 2 })}\nNote: ${note}\nRef: ${transferResult.reference || transferRef}`;
+      
+      const msgs = getConversationMessages(activeConvId);
+      if (!msgs.some(m => m.body && m.body.includes(transferResult.reference || transferRef))) {
+        if (typeof sendMessage === 'function') {
+          sendMessage(activeConvId, receiptMsg);
+        }
+      }
+
+      _shouldScrollToBottom = true;
+      renderContacts();
+      showToast(`🎉 Verified: ₦${amount.toLocaleString()} transferred to ${other.name}!`);
+
+    } catch (err) {
+      console.error('executeInChatTransfer error:', err);
+      showToast('⚠️ Transfer execution error: ' + (err.message || 'Network error'), 'error');
+    } finally {
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '💸 Confirm &amp; Transfer';
       }
     }
-
-    // 3. Record transaction
-    const txId = 'TX-PAY-' + Math.floor(100000 + Math.random() * 900000);
-    const newTx = {
-      id: txId,
-      title: `Disbursal to ${other.name}`,
-      category: 'payout',
-      type: 'debit',
-      amount: amount,
-      balance_before: currentBal,
-      status: 'Completed',
-      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-      note: `${note} (In-Chat Disbursal)`
-    };
-
-    if (typeof saveTransaction === 'function') {
-      saveTransaction(newTx);
-    } else if (typeof getSavedTransactions === 'function' && typeof saveLocalTransactions === 'function') {
-      const txs = getSavedTransactions();
-      txs.unshift(newTx);
-      saveLocalTransactions(me?.id, txs);
-    }
-
-    // 4. Send receipt message in chat
-    const receiptMsg = `[WALLET_TRANSFER_RECEIPT]\nAmount: ₦${amount.toLocaleString('en-NG', { minimumFractionDigits: 2 })}\nNote: ${note}\nRef: ${txId}`;
-    
-    if (typeof sendMessage === 'function') {
-      sendMessage(activeConvId, receiptMsg);
-    }
-
-    closeModal('chatTransferModal');
-    showToast(`🎉 NGN ${amount.toLocaleString()} transferred to ${other.name}!`);
   };
 
   // -- New Conversation Modal --

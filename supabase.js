@@ -1152,360 +1152,12 @@ function initSupabaseRealtimeProjects(onProjectChange) {
 }
 
 /* ═════════════════════════════════════════════════════════
-   COLLECTIONS / PROPOSALS / CONTRACTS DATABASE ENGINE v3.0
+   COLLECTIONS / PROPOSALS / CONTRACTS DATABASE ENGINE
+   (Canonical implementations defined below in Section 9-14)
    ═════════════════════════════════════════════════════════ */
 
 function isValidUUID(str) {
   return typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-}
-
-/**
- * Submits a new collection request for an opportunity
- * Enforces duplicate prevention.
- */
-async function submitCollectionRequestToSupabase(req) {
-  const user = typeof getUser === 'function' ? getUser() : null;
-  const proId = req.proId || req.userId || user?.id;
-  const projectId = req.projectId || req.jobId;
-
-  if (!proId || !projectId) {
-    throw new Error('Missing professional ID or opportunity ID for collection request');
-  }
-
-  // 1. Check local storage for duplicate
-  let localProps = [];
-  try {
-    localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
-  } catch(e) { localProps = []; }
-
-  const existingLocal = localProps.find(p => 
-    (String(p.jobId) === String(projectId) || String(p.projectId) === String(projectId)) &&
-    (String(p.userId) === String(proId) || String(p.userEmail).toLowerCase() === String(user?.email || '').toLowerCase())
-  );
-
-  if (existingLocal) {
-    return {
-      alreadyExists: true,
-      proposal: existingLocal,
-      status: existingLocal.status || 'PENDING'
-    };
-  }
-
-  const bidAmountNum = (req.bidAmount != null && !isNaN(req.bidAmount) && Number(req.bidAmount) > 0) ? Number(req.bidAmount) : null;
-  const deliveryDaysNum = parseInt(req.deliveryDays || req.timeline || '14') || 14;
-  const pitchStr = req.pitchText || req.coverLetter || req.pitch_statement || 'Collected via Marketplace';
-
-  const proposalRecord = {
-    id: req.id || ('prop_' + Date.now()),
-    jobId: projectId,
-    projectId: projectId,
-    jobTitle: req.jobTitle || 'Marketplace Opportunity',
-    companyId: req.companyId || req.company_id || '',
-    companyName: req.companyName || req.company_name || 'Verified Corporate Employer',
-    companyEmail: req.companyEmail || '',
-    userId: proId,
-    proId: proId,
-    userName: req.userName || user?.name || 'Professional Specialist',
-    userEmail: req.userEmail || user?.email || '',
-    userTitle: req.userTitle || user?.title || 'Energy Specialist',
-    userAvatar: req.userAvatar || user?.avatar || '',
-    userRating: req.userRating || user?.rating || 0,
-    userLocation: req.userLocation || user?.location || 'Nigeria',
-    userSkills: req.userSkills || user?.skills || [],
-    bidAmount: bidAmountNum,
-    proposedAmount: bidAmountNum,
-    budget: req.budget || bidAmountNum || 0,
-    timeline: req.timeline || (deliveryDaysNum + ' Days'),
-    deliveryDays: deliveryDaysNum,
-    pitchText: pitchStr,
-    coverLetter: pitchStr,
-    status: 'PENDING',
-    created_at: new Date().toISOString()
-  };
-
-  // 2. Save to Supabase if connected
-  if (window.sb && isValidUUID(projectId)) {
-    try {
-      const validProId = isValidUUID(proId) ? proId : (user?.id && isValidUUID(user.id) ? user.id : '0f9ae84c-c5dd-4067-8ded-82638a6e9e01');
-      
-      // Check if already in Supabase
-      const { data: existingSb } = await window.sb
-        .from('proposals')
-        .select('*')
-        .eq('project_id', projectId)
-        .eq('pro_id', validProId)
-        .maybeSingle();
-
-      if (existingSb) {
-        proposalRecord.id = existingSb.id;
-        proposalRecord.status = existingSb.status || 'PENDING';
-        localProps.unshift(proposalRecord);
-        localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
-        return {
-          alreadyExists: true,
-          proposal: proposalRecord,
-          status: proposalRecord.status
-        };
-      }
-
-      const { data: sbInserted, error: sbErr } = await window.sb
-        .from('proposals')
-        .insert([{
-          project_id: projectId,
-          pro_id: validProId,
-          bid_amount: bidAmountNum,
-          delivery_days: deliveryDaysNum,
-          pitch_statement: pitchStr,
-          status: 'PENDING'
-        }])
-        .select();
-
-      if (sbErr) {
-        console.warn('Supabase proposal insert notice:', sbErr);
-      } else if (sbInserted && sbInserted[0]) {
-        proposalRecord.id = sbInserted[0].id;
-        proposalRecord.status = sbInserted[0].status;
-      }
-    } catch (err) {
-      console.warn('Supabase collection sync error:', err);
-    }
-  }
-
-  // 3. Save to local storage
-  localProps.unshift(proposalRecord);
-  localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
-  try { window.dispatchEvent(new CustomEvent('collekt_proposals_updated', { detail: proposalRecord })); } catch(e){}
-
-  return {
-    success: true,
-    proposal: proposalRecord,
-    status: 'PENDING'
-  };
-}
-
-/**
- * Fetches all collectors for an opportunity
- */
-async function fetchOpportunityCollectorsFromSupabase(projectId) {
-  let collectors = [];
-
-  // Local collection records
-  try {
-    const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
-    collectors = localProps.filter(p => String(p.jobId) === String(projectId) || String(p.projectId) === String(projectId));
-  } catch(e){}
-
-  // Supabase records
-  if (window.sb && isValidUUID(projectId)) {
-    try {
-      const { data: sbProps, error } = await window.sb
-        .from('proposals')
-        .select('*, profiles(id, name, title, location, rating, avatar, skills)')
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: false });
-
-      if (!error && sbProps && sbProps.length > 0) {
-        sbProps.forEach(sp => {
-          const pro = sp.profiles || {};
-          const existingIdx = collectors.findIndex(c => c.id === sp.id || (c.userId === sp.pro_id && (c.jobId === sp.project_id || c.projectId === sp.project_id)));
-          const norm = {
-            id: sp.id,
-            jobId: sp.project_id,
-            projectId: sp.project_id,
-            userId: sp.pro_id,
-            proId: sp.pro_id,
-            userName: pro.name || 'Professional Specialist',
-            userTitle: pro.title || 'Energy Specialist',
-            userAvatar: pro.avatar || '',
-            userRating: pro.rating || 0,
-            userLocation: pro.location || 'Nigeria',
-            userSkills: pro.skills || [],
-            bidAmount: sp.bid_amount,
-            proposedAmount: sp.bid_amount,
-            timeline: sp.delivery_days ? `${sp.delivery_days} Days` : '2 Weeks',
-            deliveryDays: sp.delivery_days,
-            pitchText: sp.pitch_statement,
-            coverLetter: sp.pitch_statement,
-            status: sp.status || 'PENDING',
-            created_at: sp.created_at,
-            profiles: pro
-          };
-
-          if (existingIdx !== -1) {
-            collectors[existingIdx] = { ...collectors[existingIdx], ...norm };
-          } else {
-            collectors.unshift(norm);
-          }
-        });
-      }
-    } catch(err) {
-      console.warn('fetchOpportunityCollectorsFromSupabase notice:', err);
-    }
-  }
-
-  return collectors;
-}
-
-/**
- * Accepts a collector proposal, moves status to ACCEPTED, and creates an active job engagement contract.
- */
-async function acceptCollectorProposalInSupabase(proposalId, details = {}) {
-  const user = typeof getUser === 'function' ? getUser() : {};
-  let updatedProp = null;
-
-  // 1. Update local proposals
-  try {
-    const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
-    const idx = localProps.findIndex(p => String(p.id) === String(proposalId));
-    if (idx !== -1) {
-      localProps[idx].status = 'ACCEPTED';
-      localProps[idx].accepted_at = new Date().toISOString();
-      updatedProp = localProps[idx];
-      localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
-    }
-  } catch(e){}
-
-  // 2. Create linked contract engagement (Status: ACTIVE, NOT completed!)
-  const contractId = 'ctr_' + String(proposalId).replace(/^prop_/, '');
-  const newContract = {
-    id: contractId,
-    proposalId: proposalId,
-    jobId: details.jobId || updatedProp?.jobId || updatedProp?.projectId || '',
-    jobTitle: details.jobTitle || updatedProp?.jobTitle || 'Tender Contract Engagement',
-    companyId: user.id || details.companyId || updatedProp?.companyId || 'company',
-    companyName: user.name || user.company_name || details.companyName || updatedProp?.companyName || 'Corporate Client',
-    companyEmail: user.email || details.companyEmail || updatedProp?.companyEmail || '',
-    proId: details.proId || updatedProp?.userId || updatedProp?.proId || '',
-    proName: details.proName || updatedProp?.userName || 'Professional Specialist',
-    proEmail: details.proEmail || updatedProp?.userEmail || '',
-    amount: Number(details.amount || updatedProp?.bidAmount || updatedProp?.proposedAmount || updatedProp?.budget || 0),
-    budget: Number(details.budget || updatedProp?.budget || updatedProp?.bidAmount || 0),
-    timeline: details.timeline || updatedProp?.timeline || '2 Weeks',
-    status: 'ACTIVE',
-    created_at: new Date().toISOString()
-  };
-
-  try {
-    const allContracts = JSON.parse(localStorage.getItem('collekt_contracts') || '[]');
-    const cIdx = allContracts.findIndex(c => c.id === contractId || c.proposalId === proposalId);
-    if (cIdx !== -1) {
-      allContracts[cIdx] = { ...allContracts[cIdx], ...newContract };
-    } else {
-      allContracts.unshift(newContract);
-    }
-    localStorage.setItem('collekt_contracts', JSON.stringify(allContracts));
-
-    const awardedList = JSON.parse(localStorage.getItem('collekt_awarded_contracts') || '[]');
-    if (!awardedList.some(c => c.id === 'CTR-' + proposalId)) {
-      awardedList.unshift({
-        id: 'CTR-' + proposalId,
-        proposalId: proposalId,
-        title: newContract.jobTitle,
-        amount: newContract.amount,
-        contractor: newContract.proName,
-        status: 'Active Engagement',
-        created_at: new Date().toISOString()
-      });
-      localStorage.setItem('collekt_awarded_contracts', JSON.stringify(awardedList));
-    }
-  } catch(e){}
-
-  // 3. Sync to Supabase
-  if (window.sb) {
-    try {
-      if (isValidUUID(proposalId)) {
-        await window.sb
-          .from('proposals')
-          .update({ status: 'ACCEPTED', updated_at: new Date().toISOString() })
-          .eq('id', proposalId);
-      }
-
-      if (isValidUUID(newContract.jobId) && isValidUUID(newContract.proId) && isValidUUID(newContract.companyId) && isValidUUID(proposalId)) {
-        await window.sb
-          .from('contracts')
-          .upsert([{
-            project_id: newContract.jobId,
-            proposal_id: proposalId,
-            company_id: newContract.companyId,
-            pro_id: newContract.proId,
-            total_amount: newContract.amount,
-            status: 'ACTIVE'
-          }]);
-      }
-    } catch(err) {
-      console.warn('acceptCollectorProposalInSupabase notice:', err);
-    }
-  }
-
-  try { window.dispatchEvent(new CustomEvent('collekt_contracts_updated', { detail: newContract })); } catch(e){}
-  return { success: true, contract: newContract, proposal: updatedProp };
-}
-
-/**
- * Declines a collector proposal, moves status to DECLINED.
- */
-async function declineCollectorProposalInSupabase(proposalId) {
-  try {
-    const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
-    const idx = localProps.findIndex(p => String(p.id) === String(proposalId));
-    if (idx !== -1) {
-      localProps[idx].status = 'DECLINED';
-      localProps[idx].declined_at = new Date().toISOString();
-      localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
-    }
-  } catch(e){}
-
-  if (window.sb && isValidUUID(proposalId)) {
-    try {
-      await window.sb
-        .from('proposals')
-        .update({ status: 'DECLINED', updated_at: new Date().toISOString() })
-        .eq('id', proposalId);
-    } catch(err) {
-      console.warn('declineCollectorProposalInSupabase notice:', err);
-    }
-  }
-
-  try { window.dispatchEvent(new CustomEvent('collekt_proposals_updated', { detail: { id: proposalId, status: 'DECLINED' } })); } catch(e){}
-  return { success: true, status: 'DECLINED' };
-}
-
-/**
- * Marks a completed job engagement
- */
-async function completeCollectorEngagementInSupabase(contractId, proposalId) {
-  try {
-    const allContracts = JSON.parse(localStorage.getItem('collekt_contracts') || '[]');
-    const cIdx = allContracts.findIndex(c => c.id === contractId || c.proposalId === proposalId);
-    if (cIdx !== -1) {
-      allContracts[cIdx].status = 'COMPLETED';
-      allContracts[cIdx].completed_at = new Date().toISOString();
-      localStorage.setItem('collekt_contracts', JSON.stringify(allContracts));
-    }
-
-    const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
-    const pIdx = localProps.findIndex(p => p.id === proposalId || (allContracts[cIdx] && p.id === allContracts[cIdx].proposalId));
-    if (pIdx !== -1) {
-      localProps[pIdx].status = 'COMPLETED';
-      localProps[pIdx].completed_at = new Date().toISOString();
-      localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
-    }
-  } catch(e){}
-
-  if (window.sb) {
-    try {
-      if (isValidUUID(proposalId)) {
-        await window.sb.from('proposals').update({ status: 'COMPLETED', updated_at: new Date().toISOString() }).eq('id', proposalId);
-      }
-      if (isValidUUID(contractId)) {
-        await window.sb.from('contracts').update({ status: 'COMPLETED', completed_at: new Date().toISOString() }).eq('id', contractId);
-      }
-    } catch(err) {
-      console.warn('completeCollectorEngagementInSupabase notice:', err);
-    }
-  }
-
-  return { success: true, status: 'COMPLETED' };
 }
 
 // Auto-initialize session listener and OAuth redirect handler
@@ -2779,6 +2431,70 @@ async function submitCollectionRequestToSupabase(req) {
       }
     }
 
+    // 3. Automated Chat Workflow: Create/resolve conversation and log system notification
+    const actualCompanyId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(proposalData.companyId) : proposalData.companyId);
+    const actualProId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(proId) : proId);
+
+    if (actualCompanyId && actualProId && actualCompanyId !== actualProId) {
+      const sysMsgText = `⚡ ${proposalData.userName} submitted a collection request for "${proposalData.jobTitle}". (Status: Pending Review)`;
+      
+      if (window.sb && typeof createSupabaseConversation === 'function') {
+        try {
+          const conv = await createSupabaseConversation(actualCompanyId, actualProId);
+          if (conv && conv.id) {
+            await sb.from('messages').insert({
+              conversation_id: conv.id,
+              sender_id: actualProId,
+              body: sysMsgText,
+              is_read: false,
+              project_id: (projectId && isValidUUID(projectId)) ? projectId : null,
+              metadata: {
+                is_system: true,
+                event_type: 'COLLECTION_REQUEST_SUBMITTED',
+                project_id: projectId,
+                proposal_id: proposalId,
+                pro_id: actualProId,
+                company_id: actualCompanyId,
+                job_title: proposalData.jobTitle
+              }
+            });
+            await sb.from('conversations').update({
+              last_message_preview: `⚡ Collection request: ${proposalData.jobTitle.slice(0, 40)}`,
+              last_message_at: nowIso
+            }).eq('id', conv.id);
+          }
+        } catch (convErr) {
+          console.warn('submitCollectionRequest conversation linking notice:', convErr);
+        }
+      }
+
+      // Local storage sync for instant UI updates
+      try {
+        const localConvId = `conv_${[actualCompanyId, actualProId].sort().join('_')}`;
+        const sysMsgObj = {
+          id: 'msg_sys_' + Date.now(),
+          conversation_id: localConvId,
+          sender_id: actualProId,
+          receiver_id: actualCompanyId,
+          body: sysMsgText,
+          created_at: nowIso,
+          status: 'delivered',
+          read: false,
+          metadata: {
+            is_system: true,
+            event_type: 'COLLECTION_REQUEST_SUBMITTED',
+            project_id: projectId,
+            proposal_id: proposalId
+          }
+        };
+        const allLocalMsgs = JSON.parse(localStorage.getItem('collekt_all_messages') || '[]');
+        if (!allLocalMsgs.some(m => m.metadata?.proposal_id === proposalId && m.metadata?.event_type === 'COLLECTION_REQUEST_SUBMITTED')) {
+          allLocalMsgs.push(sysMsgObj);
+          localStorage.setItem('collekt_all_messages', JSON.stringify(allLocalMsgs));
+        }
+      } catch(e){}
+    }
+
     try {
       window.dispatchEvent(new CustomEvent('collekt_proposals_updated', { detail: proposalData }));
     } catch(e){}
@@ -2984,9 +2700,74 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
       }
     } catch(e){}
 
+    // 5. Automated Chat Workflow: Create/resolve conversation and log acceptance notification
+    const actualCompanyId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(contractData.company_id) : contractData.company_id);
+    const actualProId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(contractData.pro_id) : contractData.pro_id);
+
+    if (actualCompanyId && actualProId && actualCompanyId !== actualProId) {
+      const acceptMsgText = `🎉 Collection request for "${contractData.jobTitle}" has been ACCEPTED by ${contractData.companyName}! Active project engagement has commenced.`;
+
+      if (window.sb && typeof createSupabaseConversation === 'function') {
+        try {
+          const conv = await createSupabaseConversation(actualCompanyId, actualProId);
+          if (conv && conv.id) {
+            await sb.from('messages').insert({
+              conversation_id: conv.id,
+              sender_id: actualCompanyId,
+              body: acceptMsgText,
+              is_read: false,
+              project_id: (contractData.project_id && isValidUUID(contractData.project_id)) ? contractData.project_id : null,
+              metadata: {
+                is_system: true,
+                event_type: 'COLLECTION_REQUEST_ACCEPTED',
+                project_id: contractData.project_id,
+                proposal_id: proposalId,
+                contract_id: contractId,
+                pro_id: actualProId,
+                company_id: actualCompanyId,
+                job_title: contractData.jobTitle,
+                amount: contractData.total_amount
+              }
+            });
+            await sb.from('conversations').update({
+              last_message_preview: `🎉 Accepted: ${contractData.jobTitle.slice(0, 40)}`,
+              last_message_at: nowIso
+            }).eq('id', conv.id);
+          }
+        } catch (convErr) {
+          console.warn('acceptCollectorProposal conversation linking notice:', convErr);
+        }
+      }
+
+      // Local storage sync
+      try {
+        const localConvId = `conv_${[actualCompanyId, actualProId].sort().join('_')}`;
+        const sysMsgObj = {
+          id: 'msg_sys_' + Date.now(),
+          conversation_id: localConvId,
+          sender_id: actualCompanyId,
+          receiver_id: actualProId,
+          body: acceptMsgText,
+          created_at: nowIso,
+          status: 'delivered',
+          read: false,
+          metadata: {
+            is_system: true,
+            event_type: 'COLLECTION_REQUEST_ACCEPTED',
+            proposal_id: proposalId,
+            contract_id: contractId
+          }
+        };
+        const allLocalMsgs = JSON.parse(localStorage.getItem('collekt_all_messages') || '[]');
+        allLocalMsgs.push(sysMsgObj);
+        localStorage.setItem('collekt_all_messages', JSON.stringify(allLocalMsgs));
+      } catch(e){}
+    }
+
     try {
       window.dispatchEvent(new CustomEvent('collekt_proposals_updated'));
       window.dispatchEvent(new CustomEvent('collekt_contracts_updated', { detail: contractData }));
+      window.dispatchEvent(new CustomEvent('collekt_messages_updated'));
     } catch(e){}
 
     return {
@@ -3005,8 +2786,30 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
  */
 async function declineCollectorProposalInSupabase(proposalId) {
   try {
+    const user = typeof getUser === 'function' ? getUser() : JSON.parse(localStorage.getItem('collekt_user') || '{}');
     const nowIso = new Date().toISOString();
 
+    // 1. Find proposal details
+    let prop = null;
+    if (window.sb) {
+      try {
+        const { data } = await sb.from('proposals').select('*, projects(title, company_id)').eq('id', proposalId).maybeSingle();
+        if (data) prop = data;
+      } catch(e){}
+    }
+    if (!prop) {
+      try {
+        const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+        prop = localProps.find(p => p.id === proposalId);
+      } catch(e){}
+    }
+
+    const jobTitle = prop?.projects?.title || prop?.jobTitle || prop?.title || 'Marketplace Opportunity';
+    const companyName = user.company_name || user.name || prop?.companyName || 'Corporate Client';
+    const companyId = user.id || prop?.company_id || prop?.companyId || 'company';
+    const proId = prop?.user_id || prop?.pro_id || prop?.userId || '';
+
+    // 2. Update status in Supabase
     if (window.sb) {
       try {
         await sb.from('proposals').update({
@@ -3018,6 +2821,7 @@ async function declineCollectorProposalInSupabase(proposalId) {
       }
     }
 
+    // 3. Update local storage
     try {
       const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
       const idx = localProps.findIndex(p => p.id === proposalId);
@@ -3027,8 +2831,68 @@ async function declineCollectorProposalInSupabase(proposalId) {
       }
     } catch(e){}
 
+    // 4. Automated Chat Workflow: Log decline notification in conversation
+    const actualCompanyId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(companyId) : companyId);
+    const actualProId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(proId) : proId);
+
+    if (actualCompanyId && actualProId && actualCompanyId !== actualProId) {
+      const declineMsgText = `ℹ️ Collection request for "${jobTitle}" has been declined by ${companyName}.`;
+
+      if (window.sb && typeof createSupabaseConversation === 'function') {
+        try {
+          const conv = await createSupabaseConversation(actualCompanyId, actualProId);
+          if (conv && conv.id) {
+            await sb.from('messages').insert({
+              conversation_id: conv.id,
+              sender_id: actualCompanyId,
+              body: declineMsgText,
+              is_read: false,
+              metadata: {
+                is_system: true,
+                event_type: 'COLLECTION_REQUEST_DECLINED',
+                proposal_id: proposalId,
+                pro_id: actualProId,
+                company_id: actualCompanyId,
+                job_title: jobTitle
+              }
+            });
+            await sb.from('conversations').update({
+              last_message_preview: `ℹ️ Declined: ${jobTitle.slice(0, 40)}`,
+              last_message_at: nowIso
+            }).eq('id', conv.id);
+          }
+        } catch(convErr) {
+          console.warn('declineCollectorProposal conversation linking notice:', convErr);
+        }
+      }
+
+      // Local storage sync
+      try {
+        const localConvId = `conv_${[actualCompanyId, actualProId].sort().join('_')}`;
+        const sysMsgObj = {
+          id: 'msg_sys_' + Date.now(),
+          conversation_id: localConvId,
+          sender_id: actualCompanyId,
+          receiver_id: actualProId,
+          body: declineMsgText,
+          created_at: nowIso,
+          status: 'delivered',
+          read: false,
+          metadata: {
+            is_system: true,
+            event_type: 'COLLECTION_REQUEST_DECLINED',
+            proposal_id: proposalId
+          }
+        };
+        const allLocalMsgs = JSON.parse(localStorage.getItem('collekt_all_messages') || '[]');
+        allLocalMsgs.push(sysMsgObj);
+        localStorage.setItem('collekt_all_messages', JSON.stringify(allLocalMsgs));
+      } catch(e){}
+    }
+
     try {
       window.dispatchEvent(new CustomEvent('collekt_proposals_updated'));
+      window.dispatchEvent(new CustomEvent('collekt_messages_updated'));
     } catch(e){}
 
     return { success: true, message: 'Collection request declined.' };
@@ -3083,6 +2947,129 @@ async function completeCollectorEngagementInSupabase(contractId, proposalId) {
   } catch(err) {
     console.error('completeCollectorEngagementInSupabase error:', err);
     return { success: false, error: err.message || 'Completion error' };
+  }
+}
+
+/**
+ * 14. Execute Real Server-Side / Database Direct Wallet Transfer
+ */
+async function executeWalletTransferInSupabase(transferParams) {
+  try {
+    const senderId = transferParams.senderId || transferParams.sender_id || transferParams.userId;
+    const recipientId = transferParams.recipientId || transferParams.recipient_id || transferParams.proId;
+    const amount = parseFloat(transferParams.amount);
+    const reference = (transferParams.reference || `TX-PAY-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`).trim();
+    const projectId = transferParams.projectId || transferParams.project_id || null;
+    const proposalId = transferParams.proposalId || transferParams.proposal_id || null;
+    const conversationId = transferParams.conversationId || transferParams.conversation_id || null;
+    const note = (transferParams.note || 'In-Chat Direct Transfer').trim();
+
+    if (!senderId || !recipientId) {
+      return { success: false, status: 'FAILED', error: 'Missing sender or recipient identifier.' };
+    }
+    if (isNaN(amount) || amount <= 0) {
+      return { success: false, status: 'FAILED', error: 'Please enter a valid positive transfer amount.' };
+    }
+    if (senderId === recipientId) {
+      return { success: false, status: 'FAILED', error: 'Cannot transfer funds to yourself.' };
+    }
+
+    const canonicalSender = typeof getCanonicalUserId === 'function' ? getCanonicalUserId(senderId) : senderId;
+    const canonicalRecipient = typeof getCanonicalUserId === 'function' ? getCanonicalUserId(recipientId) : recipientId;
+
+    // 1. Try serverless backend endpoint first
+    let serverRes = null;
+    const endpoints = ['/api/wallet-transfer', '/.netlify/functions/wallet-transfer'];
+    for (const ep of endpoints) {
+      try {
+        const fetchRes = await fetch(ep, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sender_id: canonicalSender,
+            recipient_id: canonicalRecipient,
+            amount: amount,
+            reference: reference,
+            project_id: projectId && isValidUUID(projectId) ? projectId : null,
+            proposal_id: proposalId && isValidUUID(proposalId) ? proposalId : null,
+            conversation_id: conversationId && isValidUUID(conversationId) ? conversationId : null,
+            note: note
+          })
+        });
+        if (fetchRes.ok) {
+          serverRes = await fetchRes.json();
+          if (serverRes) break;
+        } else {
+          const errData = await fetchRes.json().catch(() => null);
+          if (errData && errData.error) {
+            serverRes = errData;
+            break;
+          }
+        }
+      } catch (fErr) {
+        // Fallback to next endpoint or direct RPC
+      }
+    }
+
+    // 2. Direct Supabase RPC fallback if serverless endpoint was unreachable
+    if (!serverRes && window.sb) {
+      const { data: rpcData, error: rpcErr } = await window.sb.rpc('execute_wallet_transfer', {
+        p_sender_id: canonicalSender,
+        p_recipient_id: canonicalRecipient,
+        p_amount: amount,
+        p_reference: reference,
+        p_project_id: projectId && isValidUUID(projectId) ? projectId : null,
+        p_proposal_id: proposalId && isValidUUID(proposalId) ? proposalId : null,
+        p_conversation_id: conversationId && isValidUUID(conversationId) ? conversationId : null,
+        p_note: note
+      });
+
+      if (rpcErr) {
+        return { success: false, status: 'FAILED', error: rpcErr.message || 'Database error during wallet transfer.' };
+      }
+      serverRes = rpcData;
+    }
+
+    if (!serverRes || !serverRes.success) {
+      return serverRes || { success: false, status: 'FAILED', error: 'Transfer failed. Check balance.' };
+    }
+
+    // 3. Update local caches with genuine server-returned balances
+    try {
+      const me = typeof getUser === 'function' ? getUser() : null;
+      if (me && (me.id === senderId || me.id === canonicalSender)) {
+        me.wallet_balance = serverRes.sender_new_balance;
+        if (me.wallet) me.wallet.balance = serverRes.sender_new_balance;
+        localStorage.setItem('collekt_user', JSON.stringify(me));
+      }
+
+      const localTx = {
+        id: serverRes.reference || reference,
+        title: `Disbursal to ${transferParams.recipientName || 'Professional'}`,
+        category: 'payout',
+        type: 'debit',
+        amount: amount,
+        balance_after: serverRes.sender_new_balance,
+        status: 'Completed',
+        date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+        created_at: new Date().toISOString(),
+        note: note
+      };
+
+      if (typeof saveTransaction === 'function') {
+        saveTransaction(localTx);
+      }
+    } catch (cacheErr) {}
+
+    try {
+      window.dispatchEvent(new CustomEvent('collekt_wallet_updated', { detail: serverRes }));
+      window.dispatchEvent(new CustomEvent('collekt_messages_updated'));
+    } catch(e) {}
+
+    return serverRes;
+  } catch(err) {
+    console.error('executeWalletTransferInSupabase error:', err);
+    return { success: false, status: 'FAILED', error: err.message || 'Wallet transfer execution error' };
   }
 }
 
@@ -3533,6 +3520,8 @@ window.setAiMessageIntent = setAiMessageIntent;
 window.updateAiMessageCustomInstruction = updateAiMessageCustomInstruction;
 window.regenerateAiMessageDraft = regenerateAiMessageDraft;
 window.sendAiMessageFromModal = sendAiMessageFromModal;
+window.executeWalletTransferInSupabase = executeWalletTransferInSupabase;
+
 
 
 
