@@ -3384,6 +3384,12 @@ function openModal(id) {
   if (!el) return;
   el.classList.add('open');
   el.style.display = 'flex';
+  el.style.justifyContent = 'center';
+  el.style.alignItems = 'center';
+  const card = el.querySelector('.modal-card, .modal-box, .modal-dialog, .modal-content, .upload-panel, .settings-panel, .upload-modal-card');
+  if (card) {
+    card.style.margin = 'auto';
+  }
   // Trap focus inside modal for accessibility
   const first = el.querySelector('button, input, select, textarea, a[href]');
   if (first) first.focus();

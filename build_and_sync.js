@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-console.log('--- SYNCING DIST & BUMPING ASSET CACHE TO v=82.0 ---');
+console.log('--- SYNCING DIST & BUMPING ASSET CACHE TO v=83.0 ---');
 
 const rootDir = __dirname;
 const distDir = path.join(__dirname, 'dist');
@@ -17,18 +17,21 @@ const htmlFiles = fs.readdirSync(rootDir).filter(f => f.endsWith('.html'));
 htmlFiles.forEach(file => {
   const filePath = path.join(rootDir, file);
   let content = fs.readFileSync(filePath, 'utf8');
-  content = content.replace(/\?v=\d+\.\d+/g, '?v=82.0');
+  content = content.replace(/\?v=\d+\.\d+/g, '?v=83.0');
   fs.writeFileSync(filePath, content, 'utf8');
 });
-console.log(`Bumped cache version to ?v=82.0 across ${htmlFiles.length} root HTML files.`);
+console.log(`Bumped cache version to ?v=83.0 across ${htmlFiles.length} root HTML files.`);
 
 // 2. Sync all static files to dist/
 const filesToCopy = [
   ...htmlFiles,
   'app.js',
   'supabase.js',
+  'style.css',
   'shared.css',
   'glass.css',
+  'settings-popup.js',
+  'upload-modal.js',
   'collekt-ai.js',
   'chart.js',
   'auth.js',
