@@ -56,7 +56,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // Payment is verified as SUCCESS on Korapay/Gateway!
+    // Payment is verified as SUCCESS on Paystack!
     const ownerId = tx?.owner_id || tx?.user_id || verification.metadata?.owner_id || verification.metadata?.user_id;
 
     if (!ownerId) {

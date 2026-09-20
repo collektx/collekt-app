@@ -15,7 +15,7 @@ exports.handler = async (event) => {
     const {
       amount,
       email,
-      payment_method = 'korapay',
+      payment_method = 'card',
       user_id,
       userId,
       owner_id,
@@ -167,7 +167,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // Initialize checkout session via chosen provider (Korapay primary)
+    // Initialize checkout session via chosen provider (Paystack / Korapay / OPay)
     const provider = getPaymentProvider(selectedGateway);
     const returnUrl = callback_url || `${event.headers?.origin || event.headers?.Origin || 'https://collektng.com'}/payment-result.html`;
     const customerFullName = body.name || body.displayName || body.customer_name || body.company_name || '';

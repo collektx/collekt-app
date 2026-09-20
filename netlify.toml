@@ -1,9 +1,13 @@
 # Netlify Configuration for Collekt Static Deployment & Admin Portal
 
 [build]
-  publish = "."
+  publish = "dist"
   functions = "netlify/functions"
-  command = "echo 'Collekt static build ready'"
+  command = "node build_and_sync.js"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 # Security Headers & Global Settings
 [[headers]]
