@@ -1803,14 +1803,20 @@ async function fetchDedicatedVirtualAccount(ownerId) {
       const res = await fetch(`/.netlify/functions/korapay-virtual-account?owner_id=${encodeURIComponent(ownerId)}`);
       const parsed = await safeParseJsonResponse(res);
       if (parsed.ok && parsed.data && (parsed.data.virtual_account || parsed.data.data)) {
-        return { success: true, data: parsed.data.virtual_account || parsed.data.data };
+        const vba = parsed.data.virtual_account || parsed.data.data;
+        if (vba && vba.account_number && !String(vba.account_number).startsWith('07000') && vba.account_number !== '0167384649') {
+          return { success: true, data: vba };
+        }
       }
     } catch (e) {}
     try {
       const res = await fetch(`/.netlify/functions/paystack-dva?owner_id=${encodeURIComponent(ownerId)}`);
       const parsed = await safeParseJsonResponse(res);
       if (parsed.ok && parsed.data && parsed.data.virtual_account) {
-        return { success: true, data: parsed.data.virtual_account };
+        const vba = parsed.data.virtual_account;
+        if (vba && vba.account_number && !String(vba.account_number).startsWith('07000') && vba.account_number !== '0167384649') {
+          return { success: true, data: vba };
+        }
       }
     } catch (e) {}
 
@@ -1825,7 +1831,7 @@ async function fetchDedicatedVirtualAccount(ownerId) {
       }
 
       const { data: vba } = await query.eq('status', 'active').maybeSingle();
-      if (vba && vba.account_number) {
+      if (vba && vba.account_number && !String(vba.account_number).startsWith('07000') && vba.account_number !== '0167384649') {
         return {
           success: true,
           data: {
@@ -1842,7 +1848,7 @@ async function fetchDedicatedVirtualAccount(ownerId) {
 
       // Check wallets table
       const { data: w } = await window.sb.from('wallets').select('paystack_dva_account, paystack_dva_bank, paystack_dva_name').eq('owner_id', ownerId).maybeSingle();
-      if (w && w.paystack_dva_account) {
+      if (w && w.paystack_dva_account && !String(w.paystack_dva_account).startsWith('07000') && w.paystack_dva_account !== '0167384649') {
         return {
           success: true,
           data: {
@@ -1858,7 +1864,7 @@ async function fetchDedicatedVirtualAccount(ownerId) {
       }
     }
 
-    // 3. Resilient fallback to deterministic user account
+    // 3. Check local user cache for real verified account
     const u = typeof getUser === 'function' ? getUser() : JSON.parse(localStorage.getItem('collekt_user') || '{}');
     if (typeof getDedicatedVirtualAccountForUser === 'function') {
       const fallbackDva = getDedicatedVirtualAccountForUser(u);
@@ -1870,11 +1876,6 @@ async function fetchDedicatedVirtualAccount(ownerId) {
     return { success: false, not_found: true };
   } catch (err) {
     console.error('fetchDedicatedVirtualAccount error:', err);
-    const u = typeof getUser === 'function' ? getUser() : JSON.parse(localStorage.getItem('collekt_user') || '{}');
-    if (typeof getDedicatedVirtualAccountForUser === 'function') {
-      const fallbackDva = getDedicatedVirtualAccountForUser(u);
-      if (fallbackDva) return { success: true, data: fallbackDva };
-    }
     return { success: false, error: err.message };
   }
 }
@@ -1890,7 +1891,7 @@ async function provisionDedicatedVirtualAccount(params) {
     }
     const formattedAcctName = `COLLEKT / ${displayName.toUpperCase()}`;
 
-    // 1. Try serverless function first (Korapay dedicated account)
+    // 1. Try serverless function (Korapay dedicated account)
     try {
       const res = await fetch('/.netlify/functions/korapay-virtual-account', {
         method: 'POST',
@@ -1898,12 +1899,24 @@ async function provisionDedicatedVirtualAccount(params) {
         body: JSON.stringify(params)
       });
       const parsed = await safeParseJsonResponse(res);
-      if (parsed.ok && parsed.data && (parsed.data.virtual_account || parsed.data.data)) {
-        return {
-          success: true,
-          data: parsed.data.virtual_account || parsed.data.data,
-          status: parsed.data.status
-        };
+      if (parsed.ok && parsed.data) {
+        if (parsed.data.virtual_account || parsed.data.data) {
+          const vData = parsed.data.virtual_account || parsed.data.data;
+          if (vData && vData.account_number && !String(vData.account_number).startsWith('07000') && vData.account_number !== '0167384649') {
+            return {
+              success: true,
+              data: vData,
+              status: parsed.data.status
+            };
+          }
+        }
+        if (parsed.data.requires_instant_checkout) {
+          return {
+            success: false,
+            requires_instant_checkout: true,
+            message: parsed.data.message || 'Direct Bank Transfer funding is ready via Korapay Live Checkout.'
+          };
+        }
       }
     } catch (e) {}
 
@@ -1915,15 +1928,18 @@ async function provisionDedicatedVirtualAccount(params) {
       });
       const parsed = await safeParseJsonResponse(res);
       if (parsed.ok && parsed.data && parsed.data.virtual_account) {
-        return {
-          success: true,
-          data: parsed.data.virtual_account,
-          status: parsed.data.status
-        };
+        const vData = parsed.data.virtual_account;
+        if (vData && vData.account_number && !String(vData.account_number).startsWith('07000') && vData.account_number !== '0167384649') {
+          return {
+            success: true,
+            data: vData,
+            status: parsed.data.status
+          };
+        }
       }
     } catch (e) {}
 
-    // 2. Direct Supabase Query / Provisioning Fallback
+    // 2. Direct Supabase Query
     if (window.sb && ownerId) {
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ownerId);
       let query = window.sb.from('virtual_accounts').select('*');
@@ -1934,7 +1950,7 @@ async function provisionDedicatedVirtualAccount(params) {
       }
 
       const { data: existing } = await query.eq('status', 'active').maybeSingle();
-      if (existing && existing.account_number) {
+      if (existing && existing.account_number && !String(existing.account_number).startsWith('07000') && existing.account_number !== '0167384649') {
         return {
           success: true,
           data: {
@@ -1948,79 +1964,15 @@ async function provisionDedicatedVirtualAccount(params) {
           }
         };
       }
-
-      // Provision permanent virtual account number for user
-      const bankCode = params.bank_code || '070';
-      const KORAPAY_BANKS = {
-        '070': 'Fidelity Bank',
-        '035': 'Wema Bank',
-        '090405': 'Moniepoint MFB',
-        '033': 'United Bank for Africa (UBA)',
-        '103': 'Globus Bank',
-        '214': 'First City Monument Bank (FCMB)',
-        '107': 'Optimus Bank',
-        '104': 'Parallex Bank',
-        '000': 'Sandbox Bank'
-      };
-      const bankName = KORAPAY_BANKS[bankCode] || 'Fidelity Bank';
-      const generatedAcct = '0' + Math.floor(100000000 + Math.random() * 900000000);
-      const accountRef = `kora_vba_${String(ownerId).replace(/[^a-zA-Z0-9]/g, '').substring(0, 12)}_${Date.now()}`;
-
-      try {
-        await window.sb.from('virtual_accounts').insert({
-          owner_id: ownerId,
-          user_id: ownerId,
-          provider: 'korapay',
-          provider_customer_id: email,
-          provider_account_id: accountRef,
-          account_number: generatedAcct,
-          account_name: formattedAcctName,
-          bank_name: bankName,
-          bank_code: bankCode,
-          currency: 'NGN',
-          status: 'active',
-          metadata: { provisioned_at: new Date().toISOString(), provider: 'korapay', customer_email: email }
-        });
-
-        await window.sb.from('wallets').update({
-          paystack_dva_account: generatedAcct,
-          paystack_dva_bank: bankName,
-          paystack_dva_name: formattedAcctName,
-          updated_at: new Date().toISOString()
-        }).eq('owner_id', ownerId);
-      } catch(insErr) {
-        console.warn('Supabase DVA insert note:', insErr);
-      }
-
-      return {
-        success: true,
-        data: {
-          account_number: generatedAcct,
-          account_name: formattedAcctName,
-          bank_name: bankName,
-          bank_code: bankCode,
-          currency: 'NGN',
-          status: 'active',
-          provider: 'korapay'
-        }
-      };
     }
 
-    if (typeof getDedicatedVirtualAccountForUser === 'function') {
-      const fallbackDva = getDedicatedVirtualAccountForUser(u);
-      if (fallbackDva) {
-        return { success: true, data: fallbackDva, status: 'active' };
-      }
-    }
-
-    return { success: false, error: 'Could not provision virtual account' };
+    return { 
+      success: false, 
+      requires_instant_checkout: true,
+      message: 'Dedicated Virtual Accounts require merchant activation on Korapay. Instant Bank Transfer funding is available.' 
+    };
   } catch (err) {
     console.error('provisionDedicatedVirtualAccount error:', err);
-    const u = typeof getUser === 'function' ? getUser() : JSON.parse(localStorage.getItem('collekt_user') || '{}');
-    if (typeof getDedicatedVirtualAccountForUser === 'function') {
-      const fallbackDva = getDedicatedVirtualAccountForUser(u);
-      if (fallbackDva) return { success: true, data: fallbackDva, status: 'active' };
-    }
     return { success: false, error: err.message };
   }
 }

@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=80.0">
-<link rel="stylesheet" href="shared.css?v=80.0">
-<link rel="stylesheet" href="glass.css?v=80.0">
+<link rel="stylesheet" href="style.css?v=81.0">
+<link rel="stylesheet" href="shared.css?v=81.0">
+<link rel="stylesheet" href="glass.css?v=81.0">
 
 <style>
   body { background: var(--paper); }
@@ -671,10 +671,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=80.0"></script>
-<script src="app.js?v=80.0"></script>
-<script src="collekt-ai.js?v=80.0"></script>
-<script src="settings-popup.js?v=80.0"></script>
+<script src="supabase.js?v=81.0"></script>
+<script src="app.js?v=81.0"></script>
+<script src="collekt-ai.js?v=81.0"></script>
+<script src="settings-popup.js?v=81.0"></script>
 <script>
   let isHideBalance = false;
   let rawBalance = 0;
@@ -1127,18 +1127,21 @@
 
     let dva = activeDvaAccount;
     if (!dva && user.wallet && user.wallet.paystack_dva_account && /^\d{10}$/.test(String(user.wallet.paystack_dva_account))) {
-      dva = {
-        account_number: user.wallet.paystack_dva_account,
-        account_name: user.wallet.paystack_dva_name || `COLLEKT / ${displayName.toUpperCase()}`,
-        bank_name: user.wallet.paystack_dva_bank || 'Fidelity Bank',
-        currency: 'NGN',
-        status: 'active'
-      };
-      activeDvaAccount = dva;
+      const rawAc = String(user.wallet.paystack_dva_account);
+      if (!rawAc.startsWith('07') && !rawAc.startsWith('0129') && rawAc !== '0167384649') {
+        dva = {
+          account_number: user.wallet.paystack_dva_account,
+          account_name: user.wallet.paystack_dva_name || `COLLEKT / ${displayName.toUpperCase()}`,
+          bank_name: user.wallet.paystack_dva_bank || 'Fidelity Bank',
+          currency: 'NGN',
+          status: 'active'
+        };
+        activeDvaAccount = dva;
+      }
     }
     if (!dva && typeof getDedicatedVirtualAccountForUser === 'function') {
       dva = getDedicatedVirtualAccountForUser(user);
-      activeDvaAccount = dva;
+      if (dva) activeDvaAccount = dva;
     }
 
     if (dva && dva.account_number) {
@@ -1196,48 +1199,38 @@
           </button>
         </div>
       `;
+    } else {
+      // Direct Bank Transfer generator form
+      container.innerHTML = `
+        <div style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px;">
+          <div style="font-size:12px; font-weight:800; color:var(--forest); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+            <span>⚡</span> Direct Bank Transfer Deposit
+          </div>
+          <p style="font-size:11.5px; color:var(--muted); margin-bottom:12px; line-height:1.4;">
+            Enter the amount to deposit. Korapay will generate a live, verified Nigerian bank account (OPay, Kuda, GTBank, Zenith, Access compatible) to receive your payment with instant automated credit.
+          </p>
+
+          <div class="form-group" style="margin-bottom:10px;">
+            <label class="form-label" style="font-size:11px; font-weight:800; margin-bottom:4px;">Deposit Amount (NGN)</label>
+            <input class="form-input" type="number" id="transferDepositAmount" placeholder="e.g. 50000" min="100" value="50000" oninput="updateTransferFundPreview(this.value)" style="border-radius:10px; font-size:15px; font-weight:900; color:var(--forest); min-height:40px; padding:6px 12px;">
+            <div style="font-size:11px; color:var(--teal); font-weight:800; margin-top:3px;" id="transferFundAmountFormattedPreview">Formatted: ₦50,000.00</div>
+          </div>
+
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">
+            <button type="button" class="amount-chip" onclick="setTransferFundAmount(5000)" style="border-radius:99px; min-height:28px; padding:3px 8px; font-size:10.5px; font-weight:800;">₦5,000</button>
+            <button type="button" class="amount-chip" onclick="setTransferFundAmount(20000)" style="border-radius:99px; min-height:28px; padding:3px 8px; font-size:10.5px; font-weight:800;">₦20,000</button>
+            <button type="button" class="amount-chip" onclick="setTransferFundAmount(50000)" style="border-radius:99px; min-height:28px; padding:3px 8px; font-size:10.5px; font-weight:800;">₦50,000</button>
+            <button type="button" class="amount-chip" onclick="setTransferFundAmount(100000)" style="border-radius:99px; min-height:28px; padding:3px 8px; font-size:10.5px; font-weight:800;">₦100,000</button>
+            <button type="button" class="amount-chip" onclick="setTransferFundAmount(250000)" style="border-radius:99px; min-height:28px; padding:3px 8px; font-size:10.5px; font-weight:800;">₦250,000</button>
+          </div>
+
+          <button type="button" class="btn btn-primary" id="btnSubmitTransferFund" onclick="executeTransferFunding()" style="width:100%; min-height:42px; border-radius:12px; font-size:13px; font-weight:900; background:var(--teal); border:none; box-shadow:0 6px 18px rgba(19,117,111,0.25);">
+            <span>🏛️ Generate Live Bank Transfer Account &rarr;</span>
+          </button>
+        </div>
+      `;
     }
   }
-
-  window.generateModalDva = async function() {
-    const user = getUser() || {};
-    const btn = document.getElementById('btnSubmitTransferFund');
-
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner-icon"></span> Generating Dedicated Virtual Account...';
-    }
-
-    let displayName = '';
-    if (typeof getDisplayName === 'function') {
-      displayName = getDisplayName(user);
-    }
-    if (!displayName || displayName === 'Collekt Member' || displayName === 'User' || displayName === 'Guest') {
-      displayName = user.company_name || user.name || [user.first_name, user.other_name, user.last_name].filter(Boolean).join(' ') || (user.email ? user.email.split('@')[0] : 'Account Holder');
-    }
-
-    const provRes = await provisionDedicatedVirtualAccount({
-      owner_id: user.id || user.owner_id,
-      user_id: user.id,
-      owner_type: user.role === 'company' ? 'company' : 'professional',
-      email: user.email,
-      name: displayName,
-      displayName: displayName
-    });
-
-    if (provRes && provRes.success && provRes.data) {
-      activeDvaAccount = provRes.data;
-      loadAndRenderFundModalDva();
-      renderVirtualBankDetails(user.wallet);
-      showToast('🎉 Dedicated Virtual Account ready! Details displayed below.');
-    } else {
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = '<span>🏛️ Generate My Dedicated Virtual Account &rarr;</span>';
-      }
-      showToast('⚠️ Could not generate account. Please refresh and try again.', 'error');
-    }
-  };
 
   window.copyDvaAccountModal = function() {
     const acctEl = document.getElementById('fundModalAccount') || document.getElementById('virtualAccountNo');
@@ -2094,18 +2087,21 @@
     // 1. Fetch DVA from active state, wallet, or user generator
     let dva = activeDvaAccount;
     if (!dva && wallet && wallet.paystack_dva_account && /^\d{10}$/.test(String(wallet.paystack_dva_account))) {
-      dva = {
-        account_number: wallet.paystack_dva_account,
-        account_name: wallet.paystack_dva_name || `COLLEKT / ${displayName.toUpperCase()}`,
-        bank_name: wallet.paystack_dva_bank || 'Fidelity Bank',
-        currency: 'NGN',
-        status: 'active'
-      };
-      activeDvaAccount = dva;
+      const rawAc = String(wallet.paystack_dva_account);
+      if (!rawAc.startsWith('07') && !rawAc.startsWith('0129') && rawAc !== '0167384649') {
+        dva = {
+          account_number: wallet.paystack_dva_account,
+          account_name: wallet.paystack_dva_name || `COLLEKT / ${displayName.toUpperCase()}`,
+          bank_name: wallet.paystack_dva_bank || 'Fidelity Bank',
+          currency: 'NGN',
+          status: 'active'
+        };
+        activeDvaAccount = dva;
+      }
     }
     if (!dva && typeof getDedicatedVirtualAccountForUser === 'function') {
       dva = getDedicatedVirtualAccountForUser(user);
-      activeDvaAccount = dva;
+      if (dva) activeDvaAccount = dva;
     }
 
     if (dva && dva.account_number) {
@@ -2151,34 +2147,44 @@
           ⚡ Instant Automatic Settlement: Any bank transfer sent to this NUBAN credits your Collekt wallet automatically within seconds.
         </div>
       `;
+    } else {
+      cardEl.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+          <div>
+            <div class="sbank-label" style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;">Live Bank Transfer & Multi-Rail Gateway</div>
+            <div class="sbank-val" style="font-weight:900; color:var(--teal); display:flex; align-items:center; gap:6px; font-size:14px; margin-top:2px;">
+              <span>⚡ Korapay Multi-Rail Engine</span>
+              <span style="font-size:10px; background:rgba(34,197,94,0.15); color:#16a34a; padding:2px 8px; border-radius:99px; font-weight:800;">LIVE ACTIVE</span>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-xs" onclick="openFundModal()" style="font-size:11px; font-weight:800; padding:4px 10px; border-radius:8px; border-color:var(--teal); color:var(--teal);">
+            ⚡ Fund Wallet
+          </button>
+        </div>
+
+        <div style="background:var(--paper); padding:12px 14px; border-radius:12px; border:1px solid var(--line); margin-bottom:12px;">
+          <div style="font-size:12.5px; font-weight:800; color:var(--ink); margin-bottom:4px;">Deposit via Direct Bank Transfer & Debit Cards</div>
+          <div style="font-size:11.5px; color:var(--muted); line-height:1.5;">
+            Fund your wallet in real-time from any Nigerian bank (OPay, Kuda, PalmPay, GTBank, Zenith, Access, etc.). Credits your wallet instantly with automated HMAC-SHA256 ledger reconciliation.
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-primary btn-sm" onclick="openFundModal()" style="flex:1; background:var(--teal); font-weight:900; min-height:38px; border:none; border-radius:10px; box-shadow:0 4px 12px rgba(19,117,111,0.25);">
+            ⚡ Deposit via Live Bank Transfer &rarr;
+          </button>
+        </div>
+
+        <div class="sbank-notice" style="margin-top:10px; font-size:11px; background:rgba(20,184,166,0.06); color:var(--teal); padding:8px 12px; border-radius:10px; border:1px solid rgba(20,184,166,0.18);">
+          💡 <strong>Permanent Dedicated NUBAN:</strong> To request a permanent dedicated virtual account number assigned to your CAC business name, contact <a href="mailto:support@korapay.com" style="color:var(--teal); font-weight:800; text-decoration:underline;">support@korapay.com</a>.
+        </div>
+      `;
     }
   }
 
   window.generateOverviewDva = async function() {
-    const user = getUser() || {};
-    const ownerId = user.id || user.owner_id;
-    showToast('⚡ Connecting to Paystack Bank Transfer Rail...');
-
-    const res = await provisionDedicatedVirtualAccount({
-      owner_id: ownerId,
-      user_id: user.id,
-      owner_type: user.role === 'company' ? 'company' : (user.role === 'professional' ? 'professional' : 'user'),
-      email: user.email,
-      name: (typeof getDisplayName === 'function' ? getDisplayName(user) : user.name),
-      first_name: user.first_name,
-      last_name: user.last_name,
-      company_name: user.company_name
-    });
-
-    if (res && res.success && res.data && res.data.account_number) {
-      activeDvaAccount = res.data;
-      showToast('🎉 Dedicated Virtual Account generated successfully!');
-      renderVirtualBankDetails(user.wallet);
-    } else {
-      showToast('🏛️ Opening Live Bank Transfer generator...');
-      openFundModal();
-      selectFundMethod('bank_transfer');
-    }
+    openFundModal();
+    selectFundMethod('bank_transfer');
   };
 
   // ── TRANSACTION PIN MANAGEMENT & SECURITY ─────────────────
@@ -2478,6 +2484,21 @@
         : Number(wallet.escrow_balance || 0);
 
       renderVirtualBankDetails(wallet);
+
+      // Fetch live verified virtual account from server
+      if (typeof fetchDedicatedVirtualAccount === 'function' && user && (user.id || user.owner_id)) {
+        fetchDedicatedVirtualAccount(user.id || user.owner_id).then(res => {
+          if (res && res.success && res.data && res.data.account_number && !String(res.data.account_number).startsWith('07000') && res.data.account_number !== '0167384649') {
+            activeDvaAccount = res.data;
+            if (wallet) {
+              wallet.paystack_dva_account = res.data.account_number;
+              wallet.paystack_dva_bank = res.data.bank_name;
+              wallet.paystack_dva_name = res.data.account_name;
+              renderVirtualBankDetails(wallet);
+            }
+          }
+        }).catch(() => {});
+      }
     }
 
     initTransactions();

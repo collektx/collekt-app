@@ -196,17 +196,45 @@ exports.handler = async (event) => {
 
       const bankCode = body.bank_code || body.bankCode || '070'; // Default 070 Fidelity Bank
 
-      const vbaRes = await koraProvider.createVirtualAccount({
-        account_name: formattedAcctName,
-        account_reference: accountRef,
-        bank_code: bankCode,
-        permanent: true,
-        customer: {
-          name: preferredName,
-          email: customerEmail
-        },
-        kyc: kycData
-      });
+      let vbaRes;
+      try {
+        vbaRes = await koraProvider.createVirtualAccount({
+          account_name: formattedAcctName,
+          account_reference: accountRef,
+          bank_code: bankCode,
+          permanent: true,
+          customer: {
+            name: preferredName,
+            email: customerEmail
+          },
+          kyc: kycData
+        });
+      } catch (koraErr) {
+        console.warn('Korapay VBA creation failed:', koraErr.message);
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({
+            status: false,
+            requires_instant_checkout: true,
+            message: koraErr.message || 'Dedicated Virtual Bank Accounts require merchant approval from Korapay. Instant Bank Transfer funding is available.',
+            provider: 'korapay'
+          })
+        };
+      }
+
+      if (!vbaRes || !vbaRes.account_number) {
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({
+            status: false,
+            requires_instant_checkout: true,
+            message: 'Live Bank Transfer available via Korapay Checkout',
+            provider: 'korapay'
+          })
+        };
+      }
 
       // Save to Supabase virtual_accounts
       await supabase

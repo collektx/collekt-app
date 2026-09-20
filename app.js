@@ -84,7 +84,7 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
   } catch(e) {}
 })();
 
-// -- UNIVERSAL WALLET INITIALIZER (Ensures every user has an active dedicated virtual account) --
+// -- UNIVERSAL WALLET INITIALIZER (Only uses verified provider accounts, never generates fake NUBANs) --
 function getDedicatedVirtualAccountForUser(user) {
   if (!user) return null;
   let displayName = '';
@@ -99,29 +99,26 @@ function getDedicatedVirtualAccountForUser(user) {
   let existingAcct = (user.wallet && (user.wallet.paystack_dva_account || user.wallet.account_number)) || user.dva_account || '';
   existingAcct = String(existingAcct).trim();
 
-  let bankName = (user.wallet && (user.wallet.paystack_dva_bank || user.wallet.bank_name)) || 'Fidelity Bank';
-  if (!bankName || bankName.includes('Paystack DVA') || bankName.includes('NOVA Bank')) {
-    bankName = 'Fidelity Bank';
+  // If missing or a known dummy/fake placeholder, do not return a fake account
+  const isInvalidOrFake = !/^\d{10}$/.test(existingAcct) || 
+    existingAcct === '0123456789' || 
+    existingAcct === '9800452109' || 
+    existingAcct.startsWith('012900') ||
+    existingAcct === '0167384649' ||
+    existingAcct.startsWith('07000') ||
+    existingAcct.startsWith('0777');
+
+  if (isInvalidOrFake) {
+    return null;
   }
 
-  // If not valid 10 digits or is a known legacy placeholder, generate a deterministic 10-digit NUBAN
-  if (!/^\d{10}$/.test(existingAcct) || existingAcct === '0123456789' || existingAcct === '9800452109' || existingAcct.startsWith('012900')) {
-    const seed = String(user.id || user.email || 'collekt_user_' + displayName);
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) {
-      hash = ((hash << 5) - hash) + seed.charCodeAt(i);
-      hash |= 0;
-    }
-    const absHash = Math.abs(hash);
-    const numPart = String(absHash).padStart(9, '7').slice(-9);
-    existingAcct = '0' + numPart;
-  }
+  let bankName = (user.wallet && (user.wallet.paystack_dva_bank || user.wallet.bank_name)) || 'Fidelity Bank';
 
   return {
     account_number: existingAcct,
-    account_name: formattedAcctName,
+    account_name: (user.wallet && user.wallet.paystack_dva_name) || formattedAcctName,
     bank_name: bankName,
-    bank_code: bankName.includes('Wema') ? '035' : (bankName.includes('Moniepoint') ? '090405' : '070'),
+    bank_code: (user.wallet && user.wallet.bank_code) || (bankName.includes('Wema') ? '035' : (bankName.includes('Moniepoint') ? '090405' : '070')),
     currency: 'NGN',
     status: 'active',
     is_live_dva: true
@@ -130,43 +127,61 @@ function getDedicatedVirtualAccountForUser(user) {
 
 (function sanitizeAllUserWalletsStartup() {
   try {
-    // 1. Ensure collekt_user has active DVA
+    // 1. Sanitize collekt_user
     let curr = JSON.parse(localStorage.getItem('collekt_user') || 'null');
     if (curr) {
       const dva = getDedicatedVirtualAccountForUser(curr);
       if (!curr.wallet) curr.wallet = {};
-      curr.wallet.paystack_dva_account = dva.account_number;
-      curr.wallet.paystack_dva_bank = dva.bank_name;
-      curr.wallet.paystack_dva_name = dva.account_name;
-      curr.wallet.account_number = dva.account_number;
-      curr.wallet.bank_name = dva.bank_name;
-      curr.wallet.account_name = dva.account_name;
-      curr.wallet.bank_assigned = true;
-      curr.wallet.is_live_dva = true;
-      curr.dva_account = dva.account_number;
-      curr.dva_bank = dva.bank_name;
-      curr.dva_name = dva.account_name;
+      if (dva) {
+        curr.wallet.paystack_dva_account = dva.account_number;
+        curr.wallet.paystack_dva_bank = dva.bank_name;
+        curr.wallet.paystack_dva_name = dva.account_name;
+        curr.wallet.account_number = dva.account_number;
+        curr.wallet.bank_name = dva.bank_name;
+        curr.wallet.account_name = dva.account_name;
+        curr.wallet.bank_assigned = true;
+        curr.wallet.is_live_dva = true;
+        curr.dva_account = dva.account_number;
+        curr.dva_bank = dva.bank_name;
+        curr.dva_name = dva.account_name;
+      } else {
+        // Clean out legacy fake accounts
+        if (curr.wallet.paystack_dva_account && !curr.wallet.nova_linked) {
+          const ac = String(curr.wallet.paystack_dva_account);
+          if (ac.startsWith('07') || ac.startsWith('0129') || ac === '0167384649') {
+            curr.wallet.paystack_dva_account = '';
+            curr.wallet.account_number = '';
+            curr.dva_account = '';
+          }
+        }
+      }
       localStorage.setItem('collekt_user', JSON.stringify(curr));
     }
 
-    // 2. Ensure collekt_all_users have active DVA
+    // 2. Sanitize collekt_all_users
     let dir = JSON.parse(localStorage.getItem('collekt_all_users') || '[]');
     if (Array.isArray(dir)) {
       dir.forEach(u => {
         if (!u) return;
         const dva = getDedicatedVirtualAccountForUser(u);
         if (!u.wallet) u.wallet = {};
-        u.wallet.paystack_dva_account = dva.account_number;
-        u.wallet.paystack_dva_bank = dva.bank_name;
-        u.wallet.paystack_dva_name = dva.account_name;
-        u.wallet.account_number = dva.account_number;
-        u.wallet.bank_name = dva.bank_name;
-        u.wallet.account_name = dva.account_name;
-        u.wallet.bank_assigned = true;
-        u.wallet.is_live_dva = true;
-        u.dva_account = dva.account_number;
-        u.dva_bank = dva.bank_name;
-        u.dva_name = dva.account_name;
+        if (dva) {
+          u.wallet.paystack_dva_account = dva.account_number;
+          u.wallet.paystack_dva_bank = dva.bank_name;
+          u.wallet.paystack_dva_name = dva.account_name;
+          u.wallet.account_number = dva.account_number;
+          u.wallet.bank_name = dva.bank_name;
+          u.wallet.account_name = dva.account_name;
+        } else {
+          if (u.wallet.paystack_dva_account && !u.wallet.nova_linked) {
+            const ac = String(u.wallet.paystack_dva_account);
+            if (ac.startsWith('07') || ac.startsWith('0129') || ac === '0167384649') {
+              u.wallet.paystack_dva_account = '';
+              u.wallet.account_number = '';
+              u.dva_account = '';
+            }
+          }
+        }
       });
       localStorage.setItem('collekt_all_users', JSON.stringify(dir));
     }
@@ -2004,14 +2019,14 @@ function getOrCreateUserWallet(user) {
 
   wallet = {
     ...wallet,
-    bank_assigned: true,
-    is_live_dva: true,
-    bank_name: dva ? dva.bank_name : (wallet.bank_name || 'Fidelity Bank'),
-    bank_code: dva ? dva.bank_code : (wallet.bank_code || '070'),
+    bank_assigned: !!dva || !!(wallet.nova_linked && wallet.nova_account_number),
+    is_live_dva: !!dva,
+    bank_name: dva ? dva.bank_name : (wallet.bank_name || ''),
+    bank_code: dva ? dva.bank_code : (wallet.bank_code || ''),
     account_number: dva ? dva.account_number : (wallet.account_number || ''),
     account_name: dva ? dva.account_name : (wallet.account_name || ''),
     paystack_dva_account: dva ? dva.account_number : (wallet.paystack_dva_account || ''),
-    paystack_dva_bank: dva ? dva.bank_name : (wallet.paystack_dva_bank || 'Fidelity Bank'),
+    paystack_dva_bank: dva ? dva.bank_name : (wallet.paystack_dva_bank || ''),
     paystack_dva_name: dva ? dva.account_name : (wallet.paystack_dva_name || ''),
     balance: authBal,
     available_balance: authBal,
@@ -2031,6 +2046,8 @@ function getOrCreateUserWallet(user) {
     user.dva_account = dva.account_number;
     user.dva_bank = dva.bank_name;
     user.dva_name = dva.account_name;
+  } else if (!wallet.nova_linked) {
+    user.dva_account = '';
   }
   setUser(user);
 
