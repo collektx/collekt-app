@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=87.0">
-<link rel="stylesheet" href="shared.css?v=87.0">
-<link rel="stylesheet" href="glass.css?v=87.0">
+<link rel="stylesheet" href="style.css?v=88.0">
+<link rel="stylesheet" href="shared.css?v=88.0">
+<link rel="stylesheet" href="glass.css?v=88.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -834,10 +834,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=87.0"></script>
-<script src="app.js?v=87.0"></script>
-<script src="collekt-ai.js?v=87.0"></script>
-<script src="settings-popup.js?v=87.0"></script>
+<script src="supabase.js?v=88.0"></script>
+<script src="app.js?v=88.0"></script>
+<script src="collekt-ai.js?v=88.0"></script>
+<script src="settings-popup.js?v=88.0"></script>
 <script>
   requireAuth();
 
@@ -1171,6 +1171,9 @@
       </div>
       <div class="chat-actions" style="display:flex; align-items:center; gap:8px;">
         ${isCompanySender ? `
+        <button class="btn btn-outline btn-sm" onclick="openChatAiDraftModal()" style="font-weight:800; font-size:12px; display:inline-flex; align-items:center; gap:5px; border-radius:10px; min-height:36px; padding:0 12px; background:var(--paper); border:1.5px solid var(--line);" title="Draft a contextual, zero-fabrication message using AI">
+          <span>✨</span> AI Draft
+        </button>
         <button class="btn btn-primary btn-sm" onclick="openChatTransferModal()" style="font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f); color:#fff; display:flex; align-items:center; gap:6px; padding:0 14px; border-radius:10px; min-height:36px; box-shadow:0 4px 12px rgba(14,59,53,0.25);" title="Transfer money directly to recipient wallet">
           <span style="font-size:14px;">💸</span> Transfer to Wallet
         </button>
@@ -2748,6 +2751,34 @@
     }
   };
 
+  window.openChatAiDraftModal = function() {
+    if (!activeConvId) {
+      if (typeof showToast === 'function') showToast('⚠️ Please select a conversation first');
+      return;
+    }
+    const convs = getMyConversations();
+    const conv = convs.find(c => c.id === activeConvId);
+    if (!conv) return;
+    const other = getOtherParticipant(conv);
+
+    const allJobs = typeof getLiveJobsFromState === 'function' ? getLiveJobsFromState() : (JSON.parse(localStorage.getItem('collekt_jobs') || '[]'));
+    const relevantJob = (conv.project_id ? allJobs.find(j => j.id === conv.project_id) : null) || allJobs[0] || {};
+
+    if (typeof openAiMessageModal === 'function') {
+      openAiMessageModal({
+        proId: other.id || other.email,
+        proName: other.name || other.company_name || 'Specialist',
+        proSkills: other.skills || [],
+        projectId: relevantJob.id || conv.project_id || '',
+        projectTitle: relevantJob.title || 'Marketplace Opportunity',
+        projectDesc: relevantJob.description || '',
+        projectFee: relevantJob.budget || relevantJob.professional_fee || null,
+        collectionStatus: 'ACCEPTED',
+        defaultIntent: 'acceptance_kickoff'
+      });
+    }
+  };
+
   // -- Real-time Event Listeners & Polling for instant delivery --
   window.addEventListener('collekt_messages_updated', () => {
     renderContacts();
@@ -2883,6 +2914,18 @@
       renderContacts();
     } else {
       renderContacts();
+    }
+
+    // Pre-fill drafted message if passed in URL
+    const targetDraftParam = urlParams.get('draft') || urlParams.get('msg') || urlParams.get('text');
+    if (targetDraftParam) {
+      setTimeout(() => {
+        const chatInput = document.getElementById('chatInput');
+        if (chatInput) {
+          chatInput.value = targetDraftParam;
+          chatInput.focus();
+        }
+      }, 350);
     }
 
     // Add new conversation button to sidebar header

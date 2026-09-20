@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=87.0">
-<link rel="stylesheet" href="shared.css?v=87.0">
-<link rel="stylesheet" href="glass.css?v=87.0">
+<link rel="stylesheet" href="style.css?v=88.0">
+<link rel="stylesheet" href="shared.css?v=88.0">
+<link rel="stylesheet" href="glass.css?v=88.0">
 
 <style>
   html, body {
@@ -539,9 +539,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=87.0"></script>
-<script src="app.js?v=87.0"></script>
-<script src="collekt-ai.js?v=87.0"></script>
+<script src="supabase.js?v=88.0"></script>
+<script src="app.js?v=88.0"></script>
+<script src="collekt-ai.js?v=88.0"></script>
 <script>
   requireCompany();
   
@@ -1115,10 +1115,13 @@
 
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:10px; border-top:1px solid var(--line); flex-wrap:wrap; gap:8px;">
             <div>${statusBadge}</div>
-            <div style="display:flex; gap:8px; align-items:center;">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
               <a href="public-profile.html?id=${encodeURIComponent(proId)}" target="_blank" class="btn btn-outline btn-sm" style="font-weight:800; font-size:11.5px; padding:5px 12px; text-decoration:none;">
                 👁️ View Profile
               </a>
+              <button class="btn btn-outline btn-sm" style="font-weight:800; font-size:11.5px; padding:5px 12px; display:inline-flex; align-items:center; gap:4px;" onclick="triggerCompanyAiMessageModal('${escapeHTML(proId)}', '${escapeHTML(name)}', '${escapeHTML(prop.id)}', '${escapeHTML(status)}')">
+                ✨ AI Message
+              </button>
               ${isPending ? `
                 <button class="btn btn-primary btn-sm" style="font-weight:800; font-size:11.5px; background:var(--teal); padding:5px 14px;" onclick="acceptApplicant('${escapeHTML(prop.id)}')">
                   ✓ Accept Collekt
@@ -1128,9 +1131,9 @@
                 </button>
               ` : ''}
               ${isAccepted ? `
-                <a href="messages.html?user=${encodeURIComponent(proId)}" class="btn btn-primary btn-sm" style="font-weight:800; font-size:11.5px; padding:5px 12px;">
+                <button class="btn btn-primary btn-sm" style="font-weight:800; font-size:11.5px; padding:5px 14px;" onclick="triggerCompanyAiMessageModal('${escapeHTML(proId)}', '${escapeHTML(name)}', '${escapeHTML(prop.id)}', 'ACCEPTED')">
                   💬 Message Specialist
-                </a>
+                </button>
               ` : ''}
             </div>
           </div>
@@ -1138,7 +1141,42 @@
     }).join('');
   }
 
+  function triggerCompanyAiMessageModal(proId, proName, proposalId, collectionStatus) {
+    const allJobs = typeof getLiveJobsFromState === 'function' ? getLiveJobsFromState() : (JSON.parse(localStorage.getItem('collekt_jobs') || '[]'));
+    const matchedJob = allJobs.find(j => j.id === _currentApplicantsProjectId) || {};
+    const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+    const matchedUser = allUsers.find(u => u && (u.id === proId || u.email === proId)) || {};
+
+    if (typeof openAiMessageModal === 'function') {
+      openAiMessageModal({
+        proId: proId,
+        proName: proName,
+        proSkills: matchedUser.skills || [],
+        projectId: _currentApplicantsProjectId,
+        projectTitle: _currentApplicantsProjectTitle || matchedJob.title || 'Marketplace Opportunity',
+        projectDesc: matchedJob.description || '',
+        projectFee: matchedJob.budget || matchedJob.professional_fee || null,
+        proposalId: proposalId,
+        collectionStatus: collectionStatus || 'PENDING',
+        defaultIntent: collectionStatus === 'ACCEPTED' ? 'acceptance_kickoff' : 'acceptance_kickoff'
+      });
+    }
+  }
+
   async function acceptApplicant(proposalId) {
+    let acceptedProId = '';
+    let acceptedProName = 'Professional Specialist';
+    let acceptedSkills = [];
+
+    // Find details before accept
+    const props = _currentApplicantsList || [];
+    const targetProp = props.find(p => p.id === proposalId);
+    if (targetProp) {
+      acceptedProId = targetProp.userId || targetProp.user_id || targetProp.pro_id || targetProp.userEmail || '';
+      acceptedProName = targetProp.userName || targetProp.name || 'Specialist';
+      acceptedSkills = targetProp.userSkills || targetProp.skills || [];
+    }
+
     if (typeof acceptCollectorProposalInSupabase === 'function') {
       const res = await acceptCollectorProposalInSupabase(proposalId, {
         jobId: _currentApplicantsProjectId,
@@ -1147,6 +1185,27 @@
       if (res.success) {
         if (typeof showToast === 'function') {
           showToast('🎉 Collekt Accepted! Professional engaged & active contract created.');
+        }
+
+        // Offer immediate AI kickoff message drafting
+        if (acceptedProId && typeof openAiMessageModal === 'function') {
+          setTimeout(() => {
+            const allJobs = typeof getLiveJobsFromState === 'function' ? getLiveJobsFromState() : (JSON.parse(localStorage.getItem('collekt_jobs') || '[]'));
+            const matchedJob = allJobs.find(j => j.id === _currentApplicantsProjectId) || {};
+
+            openAiMessageModal({
+              proId: acceptedProId,
+              proName: acceptedProName,
+              proSkills: acceptedSkills,
+              projectId: _currentApplicantsProjectId,
+              projectTitle: _currentApplicantsProjectTitle || matchedJob.title || 'Marketplace Opportunity',
+              projectDesc: matchedJob.description || '',
+              projectFee: matchedJob.budget || matchedJob.professional_fee || null,
+              proposalId: proposalId,
+              collectionStatus: 'ACCEPTED',
+              defaultIntent: 'acceptance_kickoff'
+            });
+          }, 400);
         }
       } else {
         if (typeof showToast === 'function') {
@@ -1572,7 +1631,7 @@
   </div>
 </div>
 
-<script src="settings-popup.js?v=87.0"></script>
+<script src="settings-popup.js?v=88.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>

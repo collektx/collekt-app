@@ -28,9 +28,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=87.0">
-<link rel="stylesheet" href="shared.css?v=87.0">
-<link rel="stylesheet" href="glass.css?v=87.0">
+<link rel="stylesheet" href="style.css?v=88.0">
+<link rel="stylesheet" href="shared.css?v=88.0">
+<link rel="stylesheet" href="glass.css?v=88.0">
 
 <style>
   body { background: var(--paper); }
@@ -197,9 +197,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=87.0"></script>
-<script src="app.js?v=87.0"></script>
-<script src="settings-popup.js?v=87.0"></script>
+<script src="supabase.js?v=88.0"></script>
+<script src="app.js?v=88.0"></script>
+<script src="settings-popup.js?v=88.0"></script>
 
 <script>
   let _activeFilter = 'all';
@@ -456,22 +456,25 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:10px; border-top:1px solid var(--line); flex-wrap:wrap; gap:8px;">
               <div>${statusBadge}</div>
-              <div style="display:flex; gap:8px; align-items:center;">
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                 <a href="public-profile.html?id=${encodeURIComponent(proId)}" target="_blank" class="btn btn-outline btn-sm" style="font-weight:800; font-size:11.5px; padding:5px 12px; text-decoration:none;">
                   👁️ View Profile
                 </a>
+                <button class="btn btn-outline btn-sm" style="font-weight:800; font-size:11.5px; padding:5px 12px; display:inline-flex; align-items:center; gap:4px;" onclick="triggerMyJobsAiMessageModal('${escapeHTML(proId)}', '${escapeHTML(name)}', '${escapeHTML(p.id)}', '${escapeHTML(status)}')">
+                  ✨ AI Message
+                </button>
                 ${isPending ? `
-                  <button class="btn btn-primary btn-sm" onclick="awardProposalContract('${p.id}')" style="font-weight:800; font-size:11.5px; background:var(--teal); padding:5px 14px;">
+                  <button class="btn btn-primary btn-sm" onclick="awardProposalContract('${escapeHTML(p.id)}')" style="font-weight:800; font-size:11.5px; background:var(--teal); padding:5px 14px;">
                     ✓ Accept Collekt
                   </button>
-                  <button class="btn btn-outline btn-sm" onclick="rejectProposalContract('${p.id}')" style="font-weight:800; font-size:11.5px; color:#ef4444; border-color:#fca5a5; padding:5px 12px;">
+                  <button class="btn btn-outline btn-sm" onclick="rejectProposalContract('${escapeHTML(p.id)}')" style="font-weight:800; font-size:11.5px; color:#ef4444; border-color:#fca5a5; padding:5px 12px;">
                     ✕ Decline
                   </button>
                 ` : ''}
                 ${isAccepted ? `
-                  <a href="messages.html?user=${encodeURIComponent(proId)}" class="btn btn-primary btn-sm" style="font-weight:800; font-size:11.5px; padding:5px 12px;">
+                  <button class="btn btn-primary btn-sm" style="font-weight:800; font-size:11.5px; padding:5px 14px;" onclick="triggerMyJobsAiMessageModal('${escapeHTML(proId)}', '${escapeHTML(name)}', '${escapeHTML(p.id)}', 'ACCEPTED')">
                     💬 Message Specialist
-                  </a>
+                  </button>
                 ` : ''}
               </div>
             </div>
@@ -481,12 +484,67 @@
     }
   }
 
+  function triggerMyJobsAiMessageModal(proId, proName, proposalId, collectionStatus) {
+    const allJobs = typeof getLiveJobsFromState === 'function' ? getLiveJobsFromState() : (JSON.parse(localStorage.getItem('collekt_jobs') || '[]'));
+    const matchedJob = allJobs.find(j => j.id === _myJobsCurrentModalJobId) || {};
+    const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+    const matchedUser = allUsers.find(u => u && (u.id === proId || u.email === proId)) || {};
+
+    if (typeof openAiMessageModal === 'function') {
+      openAiMessageModal({
+        proId: proId,
+        proName: proName,
+        proSkills: matchedUser.skills || [],
+        projectId: _myJobsCurrentModalJobId,
+        projectTitle: matchedJob.title || 'Marketplace Opportunity',
+        projectDesc: matchedJob.description || '',
+        projectFee: matchedJob.budget || matchedJob.professional_fee || null,
+        proposalId: proposalId,
+        collectionStatus: collectionStatus || 'PENDING',
+        defaultIntent: collectionStatus === 'ACCEPTED' ? 'acceptance_kickoff' : 'acceptance_kickoff'
+      });
+    }
+  }
+
   async function awardProposalContract(propId) {
+    let acceptedProId = '';
+    let acceptedProName = 'Professional Specialist';
+    let acceptedSkills = [];
+
+    const allProps = typeof getOpportunityCollectorsFromState === 'function' ? getOpportunityCollectorsFromState(_myJobsCurrentModalJobId) : (JSON.parse(localStorage.getItem('collekt_proposals') || '[]'));
+    const targetProp = allProps.find(p => p.id === propId);
+    if (targetProp) {
+      acceptedProId = targetProp.userId || targetProp.user_id || targetProp.pro_id || targetProp.userEmail || '';
+      acceptedProName = targetProp.userName || targetProp.name || 'Specialist';
+      acceptedSkills = targetProp.userSkills || targetProp.skills || [];
+    }
+
     if (typeof acceptCollectorProposalInSupabase === 'function') {
       const res = await acceptCollectorProposalInSupabase(propId, { jobId: _myJobsCurrentModalJobId });
       if (res.success) {
         if (typeof showToast === 'function') {
           showToast('🎉 Collekt Accepted! Professional engaged & active contract created.');
+        }
+
+        // Offer immediate AI kickoff message drafting
+        if (acceptedProId && typeof openAiMessageModal === 'function') {
+          setTimeout(() => {
+            const allJobs = typeof getLiveJobsFromState === 'function' ? getLiveJobsFromState() : (JSON.parse(localStorage.getItem('collekt_jobs') || '[]'));
+            const matchedJob = allJobs.find(j => j.id === _myJobsCurrentModalJobId) || {};
+
+            openAiMessageModal({
+              proId: acceptedProId,
+              proName: acceptedProName,
+              proSkills: acceptedSkills,
+              projectId: _myJobsCurrentModalJobId,
+              projectTitle: matchedJob.title || 'Marketplace Opportunity',
+              projectDesc: matchedJob.description || '',
+              projectFee: matchedJob.budget || matchedJob.professional_fee || null,
+              proposalId: propId,
+              collectionStatus: 'ACCEPTED',
+              defaultIntent: 'acceptance_kickoff'
+            });
+          }, 400);
         }
       } else {
         if (typeof showToast === 'function') {

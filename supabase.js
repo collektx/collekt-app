@@ -3086,6 +3086,454 @@ async function completeCollectorEngagementInSupabase(contractId, proposalId) {
   }
 }
 
+/**
+ * 14. Send Direct Message from Company to Professional (Database Persisted)
+ */
+async function sendCompanyDirectMessage({ proId, companyId = null, messageBody, projectId = null, proposalId = null, opportunityTitle = '' }) {
+  if (!proId || !messageBody) {
+    return { success: false, error: 'Missing recipient or message text.' };
+  }
+
+  try {
+    const me = (typeof getUser === 'function' ? getUser() : null) || {};
+    const actualCompanyId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(companyId || me.id || me.email) : (companyId || me.id));
+    const actualProId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(proId) : proId);
+    const cleanBody = String(messageBody).trim();
+
+    if (!cleanBody) {
+      return { success: false, error: 'Message body cannot be empty.' };
+    }
+
+    let convId = null;
+
+    // 1. Ensure conversation in Supabase
+    if (window.sb && typeof createSupabaseConversation === 'function') {
+      try {
+        const conv = await createSupabaseConversation(actualCompanyId, actualProId);
+        if (conv && conv.id) {
+          convId = conv.id;
+          if (projectId) {
+            try {
+              await window.sb.from('conversations').update({
+                project_id: projectId,
+                metadata: { opportunity_title: opportunityTitle, proposal_id: proposalId }
+              }).eq('id', convId);
+            } catch(e){}
+          }
+        }
+      } catch(convErr) {
+        console.warn('createSupabaseConversation in sendCompanyDirectMessage notice:', convErr);
+      }
+    }
+
+    // Fallback conversation ID if offline
+    if (!convId) {
+      convId = `conv_${[actualCompanyId, actualProId].sort().join('_')}`;
+    }
+
+    // 2. Insert into Supabase messages table
+    let messageRecord = null;
+    if (window.sb) {
+      try {
+        const insertPayload = {
+          conversation_id: convId,
+          sender_id: actualCompanyId,
+          body: cleanBody,
+          is_read: false,
+          created_at: new Date().toISOString()
+        };
+        if (projectId) insertPayload.project_id = projectId;
+        insertPayload.metadata = {
+          opportunity_title: opportunityTitle,
+          proposal_id: proposalId,
+          is_ai_drafted: true
+        };
+
+        const { data: inserted, error: msgErr } = await window.sb
+          .from('messages')
+          .insert(insertPayload)
+          .select()
+          .single();
+
+        if (!msgErr && inserted) {
+          messageRecord = inserted;
+        }
+      } catch(sbErr) {
+        console.warn('Supabase message insert notice:', sbErr);
+      }
+    }
+
+    const finalMsgId = messageRecord?.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+    const msgObj = {
+      id: finalMsgId,
+      conversation_id: convId,
+      sender_id: actualCompanyId,
+      receiver_id: actualProId,
+      body: cleanBody,
+      created_at: new Date().toISOString(),
+      read: false,
+      status: 'delivered',
+      project_id: projectId,
+      metadata: {
+        opportunity_title: opportunityTitle,
+        proposal_id: proposalId,
+        is_ai_drafted: true
+      }
+    };
+
+    // 3. Save to local storage for instant cross-tab consistency
+    try {
+      const allMsgs = JSON.parse(localStorage.getItem('collekt_all_messages') || '[]');
+      allMsgs.push(msgObj);
+      localStorage.setItem('collekt_all_messages', JSON.stringify(allMsgs));
+
+      const allConvs = JSON.parse(localStorage.getItem('collekt_conversations') || '[]');
+      let existingConv = allConvs.find(c => c.id === convId);
+      if (existingConv) {
+        existingConv.last_message = cleanBody.slice(0, 60);
+        existingConv.last_at = new Date().toISOString();
+      } else {
+        allConvs.push({
+          id: convId,
+          participants: [actualCompanyId, actualProId],
+          created_at: new Date().toISOString(),
+          last_message: cleanBody.slice(0, 60),
+          last_at: new Date().toISOString(),
+          project_id: projectId
+        });
+      }
+      localStorage.setItem('collekt_conversations', JSON.stringify(allConvs));
+    } catch(e){}
+
+    // 4. Broadcast Realtime event
+    if (typeof broadcastRealtimeMessage === 'function') {
+      broadcastRealtimeMessage(msgObj);
+    }
+
+    // 5. Trace to ai_generations
+    if (typeof saveAiGenerationRecord === 'function') {
+      saveAiGenerationRecord({
+        userId: actualCompanyId,
+        generationType: 'company_pro_message',
+        prompt: `Direct message for opportunity: ${opportunityTitle}`,
+        outputText: cleanBody,
+        status: 'sent'
+      }).catch(()=>{});
+    }
+
+    try {
+      window.dispatchEvent(new CustomEvent('collekt_messages_updated'));
+    } catch(e){}
+
+    return {
+      success: true,
+      messageId: finalMsgId,
+      conversationId: convId,
+      proId: actualProId
+    };
+  } catch(err) {
+    console.error('sendCompanyDirectMessage error:', err);
+    return { success: false, error: err.message || 'Send message failed' };
+  }
+}
+
+/**
+ * 15. Global Contextual AI Message Composer Modal
+ */
+let _activeAiMessageModalContext = null;
+
+function openAiMessageModal(options = {}) {
+  const me = (typeof getUser === 'function' ? getUser() : null) || {};
+  const companyName = me.company_name || me.name || 'Hiring Enterprise';
+  const proId = options.proId || options.pro_id || '';
+  const proName = options.proName || options.pro_name || options.name || 'Professional Specialist';
+  const proSkills = options.proSkills || options.skills || [];
+  const projectId = options.projectId || options.project_id || options.jobId || '';
+  const projectTitle = options.projectTitle || options.opportunityTitle || options.title || 'Marketplace Opportunity';
+  const projectDesc = options.projectDesc || options.opportunityDesc || options.description || '';
+  const projectFee = options.projectFee || options.fee || options.budget || null;
+  const proposalId = options.proposalId || options.proposal_id || '';
+  const collectionStatus = options.collectionStatus || options.status || 'PENDING';
+  let defaultIntent = options.defaultIntent || (collectionStatus === 'ACCEPTED' ? 'acceptance_kickoff' : 'acceptance_kickoff');
+
+  _activeAiMessageModalContext = {
+    companyName,
+    proId,
+    proName,
+    proSkills,
+    projectId,
+    projectTitle,
+    projectDesc,
+    projectFee,
+    proposalId,
+    collectionStatus,
+    intent: defaultIntent,
+    customInstruction: ''
+  };
+
+  let modal = document.getElementById('aiMessageComposerModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'aiMessageComposerModal';
+    modal.className = 'modal-overlay';
+    modal.style.zIndex = '999999';
+    document.body.appendChild(modal);
+  }
+
+  const feeDisplay = (projectFee && typeof projectFee === 'number' && projectFee > 0)
+    ? `₦${projectFee.toLocaleString('en-NG')}`
+    : (projectFee && typeof projectFee === 'string' && !projectFee.toLowerCase().includes('not specified') ? projectFee : 'Price not specified');
+
+  const skillsDisplay = Array.isArray(proSkills) && proSkills.length > 0 
+    ? proSkills.slice(0, 4).join(', ') 
+    : (typeof proSkills === 'string' && proSkills ? proSkills : 'Verified Technical Skills');
+
+  modal.innerHTML = `
+    <div class="modal-card" style="max-width:580px; width:100%; border-radius:22px; padding:26px; background:var(--white); border:1px solid var(--line); font-family:'Manrope',sans-serif; box-shadow:0 20px 50px rgba(0,0,0,0.18);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #0f766e, #134e4a); display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; box-shadow:0 4px 12px rgba(15,118,110,0.25);">
+            ✨
+          </div>
+          <div>
+            <div style="font-size:17px; font-weight:900; color:var(--ink); line-height:1.2;">Message Specialist</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">Contextual AI Drafter &bull; Zero-Fabrication Assured</div>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeAiMessageModal()" style="background:transparent; border:none; font-size:22px; cursor:pointer; color:var(--muted); line-height:1;">&times;</button>
+      </div>
+
+      <!-- Real Facts Context Card -->
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:16px; font-size:12px;">
+        <div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--teal); margin-bottom:8px; display:flex; align-items:center; gap:5px;">
+          <span>🔒 Verified Interaction Context</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px 12px;">
+          <div><span style="color:var(--muted);">Professional:</span> <strong style="color:var(--ink);">${escapeHTML(proName)}</strong></div>
+          <div><span style="color:var(--muted);">Opportunity:</span> <strong style="color:var(--ink);">${escapeHTML(projectTitle)}</strong></div>
+          <div><span style="color:var(--muted);">Status:</span> <span class="status-pill" style="font-size:10px; padding:2px 8px; font-weight:800; background:rgba(19,117,111,0.12); color:var(--teal); border-radius:12px;">${escapeHTML(collectionStatus)}</span></div>
+          <div><span style="color:var(--muted);">Professional Fee:</span> <strong style="color:var(--forest);">${escapeHTML(feeDisplay)}</strong></div>
+        </div>
+        <div style="margin-top:6px; font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+          Skills: <span style="color:var(--ink);">${escapeHTML(skillsDisplay)}</span>
+        </div>
+      </div>
+
+      <!-- Drafting Intent Selector -->
+      <div style="margin-bottom:14px;">
+        <label style="font-size:11.5px; font-weight:800; color:var(--ink); display:block; margin-bottom:6px;">Drafting Intent</label>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;" id="aiMsgIntentPills">
+          <button type="button" class="btn btn-sm" onclick="setAiMessageIntent('acceptance_kickoff')" data-intent="acceptance_kickoff" style="font-size:11px; font-weight:800; border-radius:99px; padding:4px 12px; background:#0e3b35; color:#fff; border:1.5px solid #0e3b35;">🚀 Project Kickoff</button>
+          <button type="button" class="btn btn-sm" onclick="setAiMessageIntent('request_clarification')" data-intent="request_clarification" style="font-size:11px; font-weight:700; border-radius:99px; padding:4px 12px; background:var(--paper); color:var(--ink); border:1.5px solid var(--line);">📋 Request Details</button>
+          <button type="button" class="btn btn-sm" onclick="setAiMessageIntent('scope_discussion')" data-intent="scope_discussion" style="font-size:11px; font-weight:700; border-radius:99px; padding:4px 12px; background:var(--paper); color:var(--ink); border:1.5px solid var(--line);">🔍 Scope Alignment</button>
+          <button type="button" class="btn btn-sm" onclick="setAiMessageIntent('general')" data-intent="general" style="font-size:11px; font-weight:700; border-radius:99px; padding:4px 12px; background:var(--paper); color:var(--ink); border:1.5px solid var(--line);">💬 General Note</button>
+        </div>
+      </div>
+
+      <!-- Custom AI Instructions (Optional) -->
+      <div style="margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <label style="font-size:11.5px; font-weight:800; color:var(--ink);">Custom Employer Note (Optional)</label>
+          <span style="font-size:10.5px; color:var(--muted);">AI will incorporate this note</span>
+        </div>
+        <input type="text" id="aiMsgCustomInstruction" class="form-input" placeholder="e.g. Ask for availability for a kickoff meeting on Monday..." style="font-size:12px; padding:8px 12px;" onchange="updateAiMessageCustomInstruction(this.value)">
+      </div>
+
+      <!-- Editable Message Draft -->
+      <div style="margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <label style="font-size:12px; font-weight:800; color:var(--ink);">Review &amp; Edit Message Draft</label>
+          <button type="button" class="btn btn-outline btn-sm" id="btnAiRegenerate" onclick="regenerateAiMessageDraft()" style="font-size:11px; padding:3px 10px; border-radius:8px; display:inline-flex; align-items:center; gap:4px;">
+            <span>🔄 Regenerate</span>
+          </button>
+        </div>
+        <textarea id="aiMessageDraftArea" class="form-textarea" rows="6" style="width:100%; font-size:13px; line-height:1.55; padding:12px; border-radius:12px; border:1.5px solid var(--line); font-family:inherit; resize:vertical; background:var(--white);" placeholder="Generating draft..."></textarea>
+        <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:4px;">
+          <span>Draft is editable before sending</span>
+          <span id="aiMsgCharCount">0 characters</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; justify-content:flex-end; gap:10px; align-items:center; padding-top:10px; border-top:1px solid var(--line);">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeAiMessageModal()" style="font-weight:700; font-size:12px; padding:8px 16px;">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnSendAiMsg" onclick="sendAiMessageFromModal()" style="font-weight:800; font-size:12.5px; padding:8px 20px; background:var(--teal); box-shadow:0 4px 14px rgba(19,117,111,0.3);">
+          🚀 Send Message to ${escapeHTML(proName.split(' ')[0] || 'Specialist')}
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+  modal.style.display = 'flex';
+
+  const draftArea = document.getElementById('aiMessageDraftArea');
+  if (draftArea) {
+    draftArea.addEventListener('input', () => {
+      const cc = document.getElementById('aiMsgCharCount');
+      if (cc) cc.textContent = `${draftArea.value.length} characters`;
+    });
+  }
+
+  // Generate initial draft
+  regenerateAiMessageDraft();
+}
+
+function closeAiMessageModal() {
+  const modal = document.getElementById('aiMessageComposerModal');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
+  _activeAiMessageModalContext = null;
+}
+
+function setAiMessageIntent(intent) {
+  if (!_activeAiMessageModalContext) return;
+  _activeAiMessageModalContext.intent = intent;
+  document.querySelectorAll('#aiMsgIntentPills button').forEach(b => {
+    const isSel = b.dataset.intent === intent;
+    b.style.background = isSel ? '#0e3b35' : 'var(--paper)';
+    b.style.color = isSel ? '#fff' : 'var(--ink)';
+    b.style.borderColor = isSel ? '#0e3b35' : 'var(--line)';
+  });
+  regenerateAiMessageDraft();
+}
+
+function updateAiMessageCustomInstruction(val) {
+  if (!_activeAiMessageModalContext) return;
+  _activeAiMessageModalContext.customInstruction = val;
+}
+
+async function regenerateAiMessageDraft() {
+  if (!_activeAiMessageModalContext) return;
+  const draftArea = document.getElementById('aiMessageDraftArea');
+  const btnRegen = document.getElementById('btnAiRegenerate');
+  
+  if (draftArea) {
+    draftArea.disabled = true;
+    draftArea.placeholder = '✨ Kolly AI is drafting a factual message...';
+  }
+  if (btnRegen) {
+    btnRegen.disabled = true;
+    btnRegen.innerHTML = '<span>⏳ Drafting...</span>';
+  }
+
+  try {
+    let generated = '';
+    if (typeof generateCompanyCandidateMessage === 'function') {
+      generated = await generateCompanyCandidateMessage({
+        companyName: _activeAiMessageModalContext.companyName,
+        proName: _activeAiMessageModalContext.proName,
+        skills: _activeAiMessageModalContext.proSkills,
+        opportunityTitle: _activeAiMessageModalContext.projectTitle,
+        opportunityDescription: _activeAiMessageModalContext.projectDesc,
+        fee: _activeAiMessageModalContext.projectFee,
+        collectionStatus: _activeAiMessageModalContext.collectionStatus,
+        intent: _activeAiMessageModalContext.intent,
+        customInstruction: _activeAiMessageModalContext.customInstruction
+      });
+    } else {
+      generated = `Hello ${_activeAiMessageModalContext.proName},\n\nWe are pleased to connect regarding "${_activeAiMessageModalContext.projectTitle}" on Collekt. We would like to discuss next steps with you.\n\nBest regards,\n${_activeAiMessageModalContext.companyName}`;
+    }
+
+    if (draftArea) {
+      draftArea.value = generated;
+      draftArea.disabled = false;
+      const cc = document.getElementById('aiMsgCharCount');
+      if (cc) cc.textContent = `${generated.length} characters`;
+    }
+  } catch(e) {
+    console.error('Draft generation error:', e);
+    if (draftArea) {
+      draftArea.disabled = false;
+      draftArea.value = `Hello ${_activeAiMessageModalContext.proName},\n\nWe are reaching out regarding "${_activeAiMessageModalContext.projectTitle}" on Collekt. Looking forward to connecting.\n\nBest regards,\n${_activeAiMessageModalContext.companyName}`;
+    }
+  } finally {
+    if (btnRegen) {
+      btnRegen.disabled = false;
+      btnRegen.innerHTML = '<span>🔄 Regenerate</span>';
+    }
+  }
+}
+
+async function sendAiMessageFromModal() {
+  if (!_activeAiMessageModalContext) return;
+  const draftArea = document.getElementById('aiMessageDraftArea');
+  const text = draftArea ? draftArea.value.trim() : '';
+
+  if (!text) {
+    if (typeof showToast === 'function') showToast('⚠️ Message body cannot be empty', 'warning');
+    return;
+  }
+
+  const btnSend = document.getElementById('btnSendAiMsg');
+  if (btnSend) {
+    btnSend.disabled = true;
+    btnSend.innerHTML = '<span>⏳ Sending...</span>';
+  }
+
+  try {
+    const res = await sendCompanyDirectMessage({
+      proId: _activeAiMessageModalContext.proId,
+      messageBody: text,
+      projectId: _activeAiMessageModalContext.projectId,
+      proposalId: _activeAiMessageModalContext.proposalId,
+      opportunityTitle: _activeAiMessageModalContext.projectTitle
+    });
+
+    if (res.success) {
+      const proName = _activeAiMessageModalContext.proName;
+      const proId = _activeAiMessageModalContext.proId;
+      closeAiMessageModal();
+
+      if (typeof showToast === 'function') {
+        showToast(`✅ Message sent to ${proName}!`);
+      }
+
+      // Show temporary notification card with link to conversation
+      const toastEl = document.createElement('div');
+      toastEl.className = 'collekt-toast';
+      toastEl.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:9999999; background:#0f2b26; color:#fff; padding:16px 20px; border-radius:14px; border:1px solid #134e4a; box-shadow:0 10px 30px rgba(0,0,0,0.3); font-family:sans-serif; display:flex; align-items:center; gap:12px;';
+      toastEl.innerHTML = `
+        <span style="font-size:20px;">💬</span>
+        <div>
+          <div style="font-weight:800; font-size:13px;">Message delivered to ${escapeHTML(proName)}</div>
+          <div style="font-size:11px; opacity:0.8; margin-top:2px;">Visible in real-time in Messages inbox</div>
+        </div>
+        <a href="messages.html?user=${encodeURIComponent(proId)}" class="btn btn-sm" style="background:var(--teal); color:#fff; font-size:11px; font-weight:800; padding:5px 12px; text-decoration:none; margin-left:8px; border-radius:8px;">
+          Open Chat &rarr;
+        </a>
+      `;
+      document.body.appendChild(toastEl);
+      setTimeout(() => { toastEl.remove(); }, 6000);
+    } else {
+      if (typeof showToast === 'function') {
+        showToast('⚠️ ' + (res.error || 'Failed to send message'), 'error');
+      }
+      if (btnSend) {
+        btnSend.disabled = false;
+        btnSend.innerHTML = '🚀 Send Message';
+      }
+    }
+  } catch(err) {
+    console.error('sendAiMessageFromModal error:', err);
+    if (typeof showToast === 'function') showToast('⚠️ An error occurred while sending', 'error');
+    if (btnSend) {
+      btnSend.disabled = false;
+      btnSend.innerHTML = '🚀 Send Message';
+    }
+  }
+}
+
+window.sendCompanyDirectMessage = sendCompanyDirectMessage;
+window.openAiMessageModal = openAiMessageModal;
+window.closeAiMessageModal = closeAiMessageModal;
+window.setAiMessageIntent = setAiMessageIntent;
+window.updateAiMessageCustomInstruction = updateAiMessageCustomInstruction;
+window.regenerateAiMessageDraft = regenerateAiMessageDraft;
+window.sendAiMessageFromModal = sendAiMessageFromModal;
+
 
 
 

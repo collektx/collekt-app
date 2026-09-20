@@ -149,6 +149,59 @@ function localDraftJobScope(prompt, user) {
   };
 }
 
+function localDraftCompanyMessage(context) {
+  const companyName = context.company_name || context.companyName || 'Our Team';
+  const proName = context.pro_name || context.proName || 'Specialist';
+  const oppTitle = context.opportunity_title || context.opportunityTitle || 'the opportunity';
+  const status = String(context.collection_status || context.collectionStatus || '').toUpperCase();
+  const fee = context.fee || context.budget || context.professional_fee;
+  const intent = context.intent || 'acceptance_kickoff';
+  const customNote = (context.custom_instruction || context.customInstruction || '').trim();
+
+  let feeSentence = '';
+  if (fee && typeof fee === 'number' && fee > 0) {
+    feeSentence = ` as aligned with our posted fee of ₦${fee.toLocaleString('en-NG')}`;
+  } else if (typeof fee === 'string' && fee.trim() && !fee.toLowerCase().includes('not specified') && !fee.toLowerCase().includes('null')) {
+    feeSentence = ` as aligned with the specified fee of ${fee}`;
+  }
+
+  let opening = `Hello ${proName},\n\n`;
+  let body = '';
+
+  if (intent === 'acceptance_kickoff' || status === 'ACCEPTED') {
+    body = `We are pleased to connect with you regarding "${oppTitle}" on Collekt${feeSentence}. We reviewed your profile and collection request and would like to proceed with the next steps for project engagement.\n\n`;
+    if (customNote) {
+      body += `${customNote}\n\n`;
+    } else {
+      body += `Please let us know your availability so we can align on project commencement, kickoff coordination, and milestone execution.\n\n`;
+    }
+  } else if (intent === 'request_clarification') {
+    body = `Thank you for collecting "${oppTitle}" on Collekt. We are currently reviewing candidate profiles and would appreciate a quick clarification regarding your technical background.\n\n`;
+    if (customNote) {
+      body += `${customNote}\n\n`;
+    } else {
+      body += `Could you share any recent relevant execution experience related to this opportunity?\n\n`;
+    }
+  } else if (intent === 'scope_discussion') {
+    body = `Thank you for your interest in "${oppTitle}". We would like to discuss the technical scope and deliverables in more detail with you.\n\n`;
+    if (customNote) {
+      body += `${customNote}\n\n`;
+    } else {
+      body += `Please let us know when you are open for a brief discussion to walk through the technical expectations.\n\n`;
+    }
+  } else {
+    body = `We are reaching out regarding "${oppTitle}" on Collekt.\n\n`;
+    if (customNote) {
+      body += `${customNote}\n\n`;
+    } else {
+      body += `We would like to connect and discuss next steps for collaboration on this opportunity.\n\n`;
+    }
+  }
+
+  const closing = `Best regards,\n${companyName}`;
+  return (opening + body + closing).trim();
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -165,10 +218,42 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { action, prompt, job, candidates, user, apiKey } = req.body || {};
+    const { action, prompt, job, candidates, user, apiKey, context } = req.body || {};
     const keyToUse = apiKey || DEFAULT_GEMINI_KEY;
 
     switch (action) {
+      case 'generate_company_message':
+      case 'draft_company_message': {
+        const msgContext = context || req.body || {};
+        try {
+          const geminiPrompt = `
+You are Kolly, the professional communications assistant for Collekt (Nigeria's energy & engineering talent marketplace).
+Draft a concise, courteous message from the hiring Company to the Professional Candidate.
+
+CONTEXT PROVIDED:
+- Company Name: ${msgContext.company_name || msgContext.companyName || 'Hiring Enterprise'}
+- Professional Candidate Name: ${msgContext.pro_name || msgContext.proName || 'Specialist'}
+- Opportunity Title: ${msgContext.opportunity_title || msgContext.opportunityTitle || 'Energy Opportunity'}
+- Opportunity Description: ${msgContext.opportunity_description || msgContext.opportunityDescription || 'N/A'}
+- Candidate Skills: ${Array.isArray(msgContext.skills) ? msgContext.skills.join(', ') : (msgContext.skills || 'N/A')}
+- Collection Status: ${msgContext.collection_status || msgContext.collectionStatus || 'N/A'}
+- Posted / Agreed Fee: ${msgContext.fee ? (typeof msgContext.fee === 'number' ? '₦' + msgContext.fee.toLocaleString() : msgContext.fee) : 'Not specified / unpriced'}
+- Intent: ${msgContext.intent || 'General communication'}
+- Custom Employer Instruction: ${msgContext.custom_instruction || msgContext.customInstruction || 'None'}
+
+STRICT ANTI-FABRICATION RULES:
+1. Ground your message ONLY in the provided facts above.
+2. DO NOT invent salaries, fees, daily rates, start dates, deadlines, certifications, company policies, NDA requirements, previous chats, or commitments.
+3. If Fee is "Not specified / unpriced" or omitted, DO NOT mention any number or price.
+4. Keep the message under 150 words. Format cleanly with greeting and signature for in-app chat.
+`;
+          const draftText = await callGeminiAPI(keyToUse, geminiPrompt);
+          return res.status(200).json({ success: true, source: 'gemini', draft: draftText, reply: draftText });
+        } catch(err) {
+          const localDraft = localDraftCompanyMessage(msgContext);
+          return res.status(200).json({ success: true, source: 'kolly_engine', draft: localDraft, reply: localDraft });
+        }
+      }
       case 'match_talent': {
         if (!job || !Array.isArray(candidates)) {
           return res.status(400).json({ error: 'Missing job or candidates array' });
@@ -238,3 +323,7 @@ Requirements: Under 160 words, professional, covers milestone deliverables and s
     return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 };
+
+module.exports.localDraftCompanyMessage = localDraftCompanyMessage;
+module.exports.localMatchTalent = localMatchTalent;
+module.exports.localDraftJobScope = localDraftJobScope;

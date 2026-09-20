@@ -221,6 +221,134 @@ function generateCollektSmartFallback(prompt, user = null, action = 'chat') {
 }
 
 /**
+ * Strict Zero-Fabrication Company Candidate Message Engine
+ */
+function localDraftCompanyMessage(context = {}) {
+  const companyName = context.company_name || context.companyName || 'Our Team';
+  const proName = context.pro_name || context.proName || 'Specialist';
+  const oppTitle = context.opportunity_title || context.opportunityTitle || 'the opportunity';
+  const status = String(context.collection_status || context.collectionStatus || '').toUpperCase();
+  const fee = context.fee || context.budget || context.professional_fee;
+  const intent = context.intent || 'acceptance_kickoff';
+  const customNote = (context.custom_instruction || context.customInstruction || '').trim();
+
+  let feeSentence = '';
+  if (fee && typeof fee === 'number' && fee > 0) {
+    feeSentence = ` as aligned with our posted fee of ₦${fee.toLocaleString('en-NG')}`;
+  } else if (typeof fee === 'string' && fee.trim() && !fee.toLowerCase().includes('not specified') && !fee.toLowerCase().includes('null')) {
+    feeSentence = ` as aligned with the specified fee of ${fee}`;
+  }
+
+  let opening = `Hello ${proName},\n\n`;
+  let body = '';
+
+  if (intent === 'acceptance_kickoff' || status === 'ACCEPTED') {
+    body = `We are pleased to connect with you regarding "${oppTitle}" on Collekt${feeSentence}. We reviewed your profile and collection request and would like to proceed with the next steps for project engagement.\n\n`;
+    if (customNote) {
+      body += `${customNote}\n\n`;
+    } else {
+      body += `Please let us know your availability so we can align on project commencement, kickoff coordination, and milestone execution.\n\n`;
+    }
+  } else if (intent === 'request_clarification') {
+    body = `Thank you for collecting "${oppTitle}" on Collekt. We are currently reviewing candidate profiles and would appreciate a quick clarification regarding your technical background.\n\n`;
+    if (customNote) {
+      body += `${customNote}\n\n`;
+    } else {
+      body += `Could you share any recent relevant execution experience related to this opportunity?\n\n`;
+    }
+  } else if (intent === 'scope_discussion') {
+    body = `Thank you for your interest in "${oppTitle}". We would like to discuss the technical scope and deliverables in more detail with you.\n\n`;
+    if (customNote) {
+      body += `${customNote}\n\n`;
+    } else {
+      body += `Please let us know when you are open for a brief discussion to walk through the technical expectations.\n\n`;
+    }
+  } else {
+    body = `We are reaching out regarding "${oppTitle}" on Collekt.\n\n`;
+    if (customNote) {
+      body += `${customNote}\n\n`;
+    } else {
+      body += `We would like to connect and discuss next steps for collaboration on this opportunity.\n\n`;
+    }
+  }
+
+  const closing = `Best regards,\n${companyName}`;
+  return (opening + body + closing).trim();
+}
+
+async function generateCompanyCandidateMessage(context = {}) {
+  const apiKey = getGeminiApiKey();
+  const user = typeof getUser === 'function' ? getUser() : null;
+  const companyName = context.company_name || context.companyName || user?.name || user?.company_name || 'Hiring Enterprise';
+  const proName = context.pro_name || context.proName || 'Specialist';
+  const oppTitle = context.opportunity_title || context.opportunityTitle || 'Opportunity';
+  const oppDesc = context.opportunity_description || context.opportunityDescription || '';
+  const skills = Array.isArray(context.skills) ? context.skills.join(', ') : (context.skills || '');
+  const status = context.collection_status || context.collectionStatus || 'PENDING';
+  const fee = context.fee || context.budget || context.professional_fee || null;
+  const intent = context.intent || 'acceptance_kickoff';
+  const customInstruction = context.custom_instruction || context.customInstruction || '';
+
+  const payloadContext = {
+    company_name: companyName,
+    pro_name: proName,
+    opportunity_title: oppTitle,
+    opportunity_description: oppDesc,
+    skills: skills,
+    collection_status: status,
+    fee: fee,
+    intent: intent,
+    custom_instruction: customInstruction
+  };
+
+  // 1. Try serverless Gemini / API Gateway
+  try {
+    const res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'generate_company_message',
+        context: payloadContext,
+        apiKey: apiKey
+      })
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json && (json.draft || json.reply || json.response)) {
+        return (json.draft || json.reply || json.response).trim();
+      }
+    }
+  } catch (e) {
+    console.warn('API gemini draft notice:', e);
+  }
+
+  // 2. Try Netlify serverless function
+  try {
+    const res = await fetch('/.netlify/functions/ai-copilot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'generate_company_message',
+        prompt: `Draft a message from ${companyName} to ${proName} for opportunity "${oppTitle}". Status: ${status}. Fee: ${fee ? '₦' + Number(fee).toLocaleString() : 'Not specified'}. Intent: ${intent}. ${customInstruction}`,
+        context: JSON.stringify(payloadContext),
+        apiKey: apiKey
+      })
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json && (json.reply || json.response || json.draft)) {
+        return (json.reply || json.response || json.draft).trim();
+      }
+    }
+  } catch (e) {
+    console.warn('Netlify ai-copilot notice:', e);
+  }
+
+  // 3. Fallback to 100% deterministic zero-fabrication local engine
+  return localDraftCompanyMessage(payloadContext);
+}
+
+/**
  * Generate AI Proposal Pitch
  */
 async function generateAIProposalPitch(projectTitle, projectDesc, userSkills) {
