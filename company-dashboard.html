@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=85.0">
-<link rel="stylesheet" href="shared.css?v=85.0">
-<link rel="stylesheet" href="glass.css?v=85.0">
+<link rel="stylesheet" href="style.css?v=86.0">
+<link rel="stylesheet" href="shared.css?v=86.0">
+<link rel="stylesheet" href="glass.css?v=86.0">
 
 <style>
   html, body {
@@ -263,46 +263,6 @@
       <div class="dash-grid">
         <div>
 
-          <!-- Company Financial & Dedicated Virtual Account Hub -->
-          <div class="content-card fade-in" style="margin-bottom:24px; background: linear-gradient(135deg, rgba(14, 42, 38, 0.95), rgba(16, 23, 22, 0.98)); border: 1px solid rgba(20, 184, 166, 0.25); border-radius: var(--r-lg); padding: 22px; color: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.25);">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:18px;">
-              <div>
-                <div style="font-size:11px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.08em; display:flex; align-items:center; gap:6px;">
-                  <span>💳</span> Company Financial Hub &bull; Multi-User Wallet
-                </div>
-                <div style="font-size:18px; font-weight:900; margin-top:4px; color:#fff; display:flex; align-items:center; gap:8px;">
-                  <span>Collekt Business Account</span>
-                  <span id="coUserRoleBadge" style="background:rgba(20,184,166,0.15); color:var(--teal); border:1px solid rgba(20,184,166,0.3); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Owner</span>
-                </div>
-              </div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <a href="wallet.html" class="btn btn-amber btn-sm" style="font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                  <span>+</span> Fund Wallet
-                </a>
-                <a href="wallet.html" class="btn btn-outline btn-sm" style="color:#fff; border-color:rgba(255,255,255,0.25); font-weight:800; text-decoration:none;">
-                  Manage Ledger &rarr;
-                </a>
-              </div>
-            </div>
-
-            <!-- Balances Grid -->
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-bottom:16px;">
-              <!-- Available Balance -->
-              <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:14px 16px;">
-                <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Available Balance</div>
-                <div style="font-size:22px; font-weight:900; color:#fff;" id="coAvailableBal">₦0.00</div>
-                <div style="font-size:11px; color:var(--teal); font-weight:700; margin-top:4px;">Ready for contracts &amp; payouts</div>
-              </div>
-
-              <!-- Escrow Balance -->
-              <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:14px 16px;">
-                <div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Locked in Escrow 🔒</div>
-                <div style="font-size:22px; font-weight:900; color:var(--amber);" id="coEscrowBal">₦0.00</div>
-                <div style="font-size:11px; color:rgba(255,255,255,0.6); font-weight:600; margin-top:4px;">Active milestone guarantees</div>
-              </div>
-            </div>
-          </div>
-
           <!-- Post a Job / Opportunity Quick Card -->
           <div class="post-card fade-in" id="postQuickCard" onclick="window.location.href='post-job.html'" style="cursor:pointer;">
             <div style="font-size:36px; margin-bottom:10px;">💼</div>
@@ -345,16 +305,16 @@
                 <span style="font-size:18px;">👥</span>
                 <div>
                   <h3 style="margin-bottom:2px;">Company Team &amp; Access Roles</h3>
-                  <div style="font-size:11px; color:var(--muted);">Manage authorized members and financial approval permissions</div>
+                  <div style="font-size:11px; color:var(--muted);">Manage authorized members and role-based permissions</div>
                 </div>
               </div>
-              <button class="btn btn-outline btn-sm" onclick="openInviteTeamModal()" style="font-weight:800;">
+              <button id="btnAddTeamMember" class="btn btn-outline btn-sm" onclick="openInviteTeamModal()" style="font-weight:800; display:none;">
                 + Add Member
               </button>
             </div>
             <div class="card-body" style="padding:16px 20px;">
               <div id="companyTeamList" style="display:flex; flex-direction:column; gap:10px;">
-                <!-- Dynamically populated -->
+                <!-- Dynamically populated with real company team members -->
               </div>
             </div>
           </div>
@@ -579,9 +539,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=85.0"></script>
-<script src="app.js?v=85.0"></script>
-<script src="collekt-ai.js?v=85.0"></script>
+<script src="supabase.js?v=86.0"></script>
+<script src="app.js?v=86.0"></script>
+<script src="collekt-ai.js?v=86.0"></script>
 <script>
   requireCompany();
   
@@ -1363,39 +1323,20 @@
   }
 
   /* -----------------------------------------------------
-     COMPANY FINANCIAL HUB & DVA MANAGEMENT
-  ------------------------------------------------------*/
-  async function loadCompanyWalletAndDVA() {
-    const user = typeof getUser === 'function' ? getUser() : null;
-    if (!user) return;
-
-    // 1. Available & Escrow Balances
-    const wallet = (user.wallet && typeof user.wallet === 'object') ? user.wallet : {};
-    let avail = Number(user.wallet_balance ?? wallet.available_balance ?? wallet.balance ?? 0);
-    if (avail === 2450000 || avail === 1450000) avail = 0;
-    let escrow = Number(user.escrow_balance ?? wallet.escrow_balance ?? wallet.escrow ?? 0);
-
-    // If Supabase is connected, query live wallet
-    if (window.sb && user.id) {
-      try {
-        const { data: wRow } = await sb.from('wallets').select('*').or(`user_id.eq.${user.id},owner_id.eq.${user.id}`).maybeSingle();
-        if (wRow) {
-          avail = Number(wRow.available_balance || 0);
-          escrow = Number(wRow.escrow_balance || 0);
-        }
-      } catch(e){}
-    }
-
-    const availEl = document.getElementById('coAvailableBal');
-    if (availEl) availEl.textContent = (typeof formatNaira === 'function') ? formatNaira(avail, true) : '₦' + avail.toLocaleString();
-
-    const escrowEl = document.getElementById('coEscrowBal');
-    if (escrowEl) escrowEl.textContent = (typeof formatNaira === 'function') ? formatNaira(escrow, true) : '₦' + escrow.toLocaleString();
-  }
-
-  /* -----------------------------------------------------
      COMPANY TEAM & RBAC MANAGEMENT
   ------------------------------------------------------*/
+  let _companyTeamMembersCache = [];
+
+  function escapeHtmlSafe(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   async function loadCompanyTeamMembers() {
     const user = typeof getUser === 'function' ? getUser() : null;
     if (!user) return;
@@ -1403,60 +1344,91 @@
     const container = document.getElementById('companyTeamList');
     if (!container) return;
 
-    let members = [];
-    try {
-      members = JSON.parse(localStorage.getItem('collekt_company_team_' + (user.id || user.email)) || '[]');
-    } catch(e){}
+    const companyId = user.company_id || user.id;
 
-    if (members.length === 0) {
-      members = [
-        {
-          id: 'mem_owner',
-          name: user.name || 'Primary Owner',
-          email: user.email || 'owner@company.com',
-          role: 'owner',
-          status: 'active'
-        },
-        {
-          id: 'mem_finance',
-          name: 'Finance & Treasury Officer',
-          email: 'finance@' + (user.email ? user.email.split('@')[1] : 'company.com'),
-          role: 'finance',
-          status: 'active'
-        }
-      ];
-      localStorage.setItem('collekt_company_team_' + (user.id || user.email), JSON.stringify(members));
+    // Check user authority
+    const btnAdd = document.getElementById('btnAddTeamMember');
+    const isOwnerOrAdmin = (user.role === 'company') || (user.id === companyId);
+    if (btnAdd) {
+      btnAdd.style.display = isOwnerOrAdmin ? 'inline-flex' : 'none';
     }
 
-    const roleBadges = {
-      owner: '<span style="background:rgba(212,146,11,0.15); color:var(--amber); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Owner 👑</span>',
-      admin: '<span style="background:rgba(20,184,166,0.15); color:var(--teal); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Admin ⚡</span>',
-      finance: '<span style="background:rgba(34,197,94,0.15); color:#16a34a; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Finance 💳</span>',
-      member: '<span style="background:rgba(59,130,246,0.15); color:#2563eb; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Member 👤</span>',
-      viewer: '<span style="background:rgba(107,114,128,0.15); color:var(--muted); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Viewer 👁️</span>'
-    };
+    try {
+      const { data: members, error } = typeof fetchCompanyMembers === 'function'
+        ? await fetchCompanyMembers(companyId)
+        : { data: [], error: null };
 
-    container.innerHTML = members.map(m => `
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--paper); border:1px solid var(--line); border-radius:12px; flex-wrap:wrap; gap:10px;">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <div style="width:36px; height:36px; border-radius:50%; background:var(--forest); color:#fff; font-weight:900; display:grid; place-items:center; font-size:14px;">
-            ${(m.name || 'U').charAt(0).toUpperCase()}
+      _companyTeamMembersCache = Array.isArray(members) ? members : [];
+
+      // Also check if current user is admin in membership
+      const myMembership = _companyTeamMembersCache.find(m => m.user_id === user.id || m.email === user.email);
+      const hasAdminRights = isOwnerOrAdmin || (myMembership && (myMembership.role === 'owner' || myMembership.role === 'admin'));
+      if (btnAdd) {
+        btnAdd.style.display = hasAdminRights ? 'inline-flex' : 'none';
+      }
+
+      if (_companyTeamMembersCache.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:32px 16px; border:1.5px dashed var(--line); border-radius:14px; color:var(--muted); background:rgba(255,255,255,0.02);">
+            <div style="font-size:32px; margin-bottom:8px;">👥</div>
+            <div style="font-weight:800; font-size:14px; color:var(--ink);">No team members yet.</div>
+            <div style="font-size:12px; margin-top:4px; max-width:320px; margin-left:auto; margin-right:auto; line-height:1.4;">
+              ${hasAdminRights ? 'Click "+ Add Member" above to invite real colleagues and assign administrative roles.' : 'Authorized team members will appear here.'}
+            </div>
           </div>
-          <div>
-            <div style="font-size:13px; font-weight:800; color:var(--ink);">${typeof escapeHTML === 'function' ? escapeHTML(m.name) : m.name}</div>
-            <div style="font-size:11px; color:var(--muted);">${typeof escapeHTML === 'function' ? escapeHTML(m.email) : m.email}</div>
+        `;
+        return;
+      }
+
+      const roleBadges = {
+        owner: '<span style="background:rgba(212,146,11,0.15); color:var(--amber); font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Owner 👑</span>',
+        admin: '<span style="background:rgba(20,184,166,0.15); color:var(--teal); font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Admin ⚡</span>',
+        finance: '<span style="background:rgba(34,197,94,0.15); color:#16a34a; font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Finance 💳</span>',
+        member: '<span style="background:rgba(59,130,246,0.15); color:#2563eb; font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Member 👤</span>',
+        viewer: '<span style="background:rgba(107,114,128,0.15); color:var(--muted); font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Viewer 👁️</span>'
+      };
+
+      container.innerHTML = _companyTeamMembersCache.map(m => {
+        const initial = (m.name || m.email || 'U').charAt(0).toUpperCase();
+        const isPending = m.status === 'pending';
+        const isOwnerRow = m.role === 'owner';
+
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--paper); border:1px solid var(--line); border-radius:14px; flex-wrap:wrap; gap:12px; transition:border-color .2s;">
+            <div style="display:flex; align-items:center; gap:12px; min-width:0;">
+              <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, var(--forest), #1a7a6f); color:#fff; font-weight:900; display:grid; place-items:center; font-size:15px; flex-shrink:0;">
+                ${initial}
+              </div>
+              <div style="min-width:0;">
+                <div style="font-size:13.5px; font-weight:800; color:var(--ink); display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <span>${escapeHtmlSafe(m.name || 'Team Member')}</span>
+                  ${isPending ? '<span style="background:#fef3c7; color:#b45309; font-size:10px; font-weight:800; padding:1px 7px; border-radius:99px;">Invited (Pending)</span>' : '<span style="background:#dcfce7; color:#16a34a; font-size:10px; font-weight:800; padding:1px 7px; border-radius:99px;">Active</span>'}
+                </div>
+                <div style="font-size:12px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtmlSafe(m.email || '')}</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              ${hasAdminRights && !isOwnerRow ? `
+                <select class="form-select form-input" onchange="changeCompanyMemberRole('${m.id}', this.value)" style="padding:4px 10px; font-size:11.5px; font-weight:800; border-radius:8px; width:auto; min-width:110px;">
+                  <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>Admin ⚡</option>
+                  <option value="finance" ${m.role === 'finance' ? 'selected' : ''}>Finance 💳</option>
+                  <option value="member" ${m.role === 'member' ? 'selected' : ''}>Member 👤</option>
+                  <option value="viewer" ${m.role === 'viewer' ? 'selected' : ''}>Viewer 👁️</option>
+                </select>
+              ` : (roleBadges[m.role] || roleBadges.member)}
+              
+              ${hasAdminRights && !isOwnerRow ? `
+                <button class="btn btn-ghost btn-xs" onclick="removeCompanyMember('${m.id}', '${escapeHtmlSafe(m.name || m.email)}')" title="Remove member" style="color:#ef4444; font-size:13px; font-weight:800; padding:4px 8px; border-radius:6px;">
+                  ✕
+                </button>
+              ` : ''}
+            </div>
           </div>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px;">
-          ${roleBadges[m.role] || roleBadges.member}
-          ${m.role !== 'owner' ? `
-            <button class="btn btn-ghost btn-xs" onclick="removeCompanyMember('${m.id}')" title="Remove member" style="color:#ef4444; font-size:11px; padding:2px 6px;">
-              ✕
-            </button>
-          ` : ''}
-        </div>
-      </div>
-    `).join('');
+        `;
+      }).join('');
+    } catch(err) {
+      console.error('[loadCompanyTeamMembers error]:', err);
+    }
   }
 
   function openInviteTeamModal() {
@@ -1464,6 +1436,8 @@
     if (modal) {
       modal.style.display = 'flex';
       modal.classList.add('open');
+      const input = document.getElementById('teamMemberName');
+      if (input) setTimeout(() => input.focus(), 50);
     }
   }
 
@@ -1475,76 +1449,117 @@
     }
   }
 
-  function saveCompanyMember() {
-    const name = document.getElementById('teamMemberName')?.value.trim();
-    const email = document.getElementById('teamMemberEmail')?.value.trim();
-    const role = document.getElementById('teamMemberRole')?.value || 'member';
+  async function saveCompanyMember() {
+    const nameEl = document.getElementById('teamMemberName');
+    const emailEl = document.getElementById('teamMemberEmail');
+    const roleEl = document.getElementById('teamMemberRole');
+    const btnSubmit = document.getElementById('btnSubmitInviteMember');
 
-    if (!name || !email) {
-      if (typeof showToast === 'function') showToast('⚠️ Please enter member name and email', 'warning');
+    const name = nameEl?.value.trim();
+    const email = emailEl?.value.trim();
+    const role = roleEl?.value || 'member';
+
+    if (!name) {
+      if (typeof showToast === 'function') showToast('⚠️ Please enter the member full name', 'warning');
+      nameEl?.focus();
+      return;
+    }
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (typeof showToast === 'function') showToast('⚠️ Please enter a valid email address', 'warning');
+      emailEl?.focus();
       return;
     }
 
     const user = typeof getUser === 'function' ? getUser() : null;
     if (!user) return;
+    const companyId = user.company_id || user.id;
 
-    let members = [];
-    try {
-      members = JSON.parse(localStorage.getItem('collekt_company_team_' + (user.id || user.email)) || '[]');
-    } catch(e){}
-
-    members.push({
-      id: 'mem_' + Date.now(),
-      name,
-      email,
-      role,
-      status: 'active',
-      added_at: new Date().toISOString()
-    });
-
-    localStorage.setItem('collekt_company_team_' + (user.id || user.email), JSON.stringify(members));
-
-    // Also persist to Supabase company_members if available
-    if (window.sb && user.id) {
-      sb.from('company_members').insert({
-        company_id: user.id,
-        user_id: user.id,
-        role: role,
-        status: 'active'
-      }).then(()=>{}).catch(()=>{});
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = 'Sending Invitation...';
     }
 
-    closeInviteTeamModal();
-    if (typeof showToast === 'function') showToast(`🎉 ${name} added to company team as ${role.toUpperCase()}!`);
-    loadCompanyTeamMembers();
+    try {
+      const res = typeof inviteCompanyMember === 'function'
+        ? await inviteCompanyMember(companyId, user.id, name, email, role)
+        : { success: false, error: 'Invite function not loaded' };
 
-    // Reset fields
-    if (document.getElementById('teamMemberName')) document.getElementById('teamMemberName').value = '';
-    if (document.getElementById('teamMemberEmail')) document.getElementById('teamMemberEmail').value = '';
+      if (!res.success) {
+        if (typeof showToast === 'function') showToast(`⚠️ ${res.error || 'Failed to send invitation'}`, 'error');
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.innerHTML = '+ Send Invitation';
+        }
+        return;
+      }
+
+      if (typeof showToast === 'function') {
+        showToast(`🎉 Invitation sent to ${name} (${role.toUpperCase()})!`);
+      }
+
+      closeInviteTeamModal();
+      if (nameEl) nameEl.value = '';
+      if (emailEl) emailEl.value = '';
+      await loadCompanyTeamMembers();
+    } catch(e) {
+      console.error('saveCompanyMember error:', e);
+      if (typeof showToast === 'function') showToast(`⚠️ ${e.message || 'An error occurred'}`, 'error');
+    } finally {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = '+ Send Invitation';
+      }
+    }
   }
 
-  function removeCompanyMember(memberId) {
-    if (!confirm('Are you sure you want to remove this member from your company team?')) return;
+  async function removeCompanyMember(memberId, memberName) {
+    if (!confirm(`Are you sure you want to remove ${memberName || 'this member'} from your company team?`)) return;
     const user = typeof getUser === 'function' ? getUser() : null;
     if (!user) return;
+    const companyId = user.company_id || user.id;
 
-    let members = [];
     try {
-      members = JSON.parse(localStorage.getItem('collekt_company_team_' + (user.id || user.email)) || '[]');
-    } catch(e){}
+      const res = typeof removeCompanyMemberFromDb === 'function'
+        ? await removeCompanyMemberFromDb(companyId, user.id, memberId)
+        : { success: false };
 
-    members = members.filter(m => m.id !== memberId);
-    localStorage.setItem('collekt_company_team_' + (user.id || user.email), JSON.stringify(members));
+      if (res.success) {
+        if (typeof showToast === 'function') showToast('Member removed from company team.');
+        await loadCompanyTeamMembers();
+      } else {
+        if (typeof showToast === 'function') showToast(`⚠️ ${res.error || 'Failed to remove member'}`, 'error');
+      }
+    } catch(e) {
+      console.error('removeCompanyMember error:', e);
+    }
+  }
 
-    if (typeof showToast === 'function') showToast('Member removed from team.');
-    loadCompanyTeamMembers();
+  async function changeCompanyMemberRole(memberId, newRole) {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user) return;
+    const companyId = user.company_id || user.id;
+
+    try {
+      const res = typeof updateCompanyMemberRoleInDb === 'function'
+        ? await updateCompanyMemberRoleInDb(companyId, user.id, memberId, newRole)
+        : { success: false };
+
+      if (res.success) {
+        if (typeof showToast === 'function') showToast(`Member access role updated to ${newRole.toUpperCase()}.`);
+        await loadCompanyTeamMembers();
+      } else {
+        if (typeof showToast === 'function') showToast(`⚠️ ${res.error || 'Failed to update role'}`, 'error');
+      }
+    } catch(e) {
+      console.error('changeCompanyMemberRole error:', e);
+    }
   }
 
   // Hook into initial dashboard render
   const origRenderDashboardData = window.renderDashboardData;
   window.renderDashboardData = function() {
     if (typeof origRenderDashboardData === 'function') origRenderDashboardData();
-    loadCompanyWalletAndDVA();
     loadCompanyTeamMembers();
   };
 
@@ -1561,38 +1576,38 @@
       <div style="width:44px; height:44px; border-radius:14px; background:rgba(20,184,166,0.15); color:var(--teal); display:grid; place-items:center; font-size:22px;">👥</div>
       <div>
         <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:2px;">Add Company Team Member</h3>
-        <div style="font-size:12px; color:var(--muted);">Assign role-based access permissions for wallet and tenders</div>
+        <div style="font-size:12px; color:var(--muted);">Assign role-based access permissions for company operations</div>
       </div>
     </div>
 
     <div class="form-group" style="margin-bottom:14px;">
-      <label class="form-label" style="font-weight:800; font-size:12px;">Full Name</label>
-      <input type="text" id="teamMemberName" class="form-input" placeholder="e.g. Boma Alabo" style="font-size:13px;">
+      <label class="form-label" style="font-weight:800; font-size:12px;">Full Real Name</label>
+      <input type="text" id="teamMemberName" class="form-input" placeholder="e.g. Babatunde Alabi" style="font-size:13px;">
     </div>
 
     <div class="form-group" style="margin-bottom:14px;">
       <label class="form-label" style="font-weight:800; font-size:12px;">Email Address</label>
-      <input type="email" id="teamMemberEmail" class="form-input" placeholder="e.g. boma@company.com" style="font-size:13px;">
+      <input type="email" id="teamMemberEmail" class="form-input" placeholder="e.g. babatunde@company.com" style="font-size:13px;">
     </div>
 
     <div class="form-group" style="margin-bottom:20px;">
-      <label class="form-label" style="font-weight:800; font-size:12px;">Access Role &amp; Financial Permissions</label>
+      <label class="form-label" style="font-weight:800; font-size:12px;">Access Role &amp; Permissions</label>
       <select id="teamMemberRole" class="form-input form-select" style="font-size:13px;">
-        <option value="admin">Admin — Full project &amp; team management</option>
-        <option value="finance" selected>Finance — Wallet funding, payment releases &amp; escrow</option>
-        <option value="member">Member — Post opportunities &amp; review proposals</option>
-        <option value="viewer">Viewer — Read-only access to company tenders</option>
+        <option value="admin">Admin — Full project, tender &amp; team management</option>
+        <option value="finance">Finance — Payment approvals, funding &amp; escrow releases</option>
+        <option value="member" selected>Member — Post opportunities &amp; review proposals</option>
+        <option value="viewer">Viewer — Read-only access to company postings &amp; contracts</option>
       </select>
     </div>
 
     <div style="display:flex; gap:10px; justify-content:flex-end;">
       <button class="btn btn-outline btn-sm" onclick="closeInviteTeamModal()">Cancel</button>
-      <button class="btn btn-primary btn-sm" onclick="saveCompanyMember()" style="font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f);">+ Add Member</button>
+      <button class="btn btn-primary btn-sm" id="btnSubmitInviteMember" onclick="saveCompanyMember()" style="font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f);">+ Send Invitation</button>
     </div>
   </div>
 </div>
 
-<script src="settings-popup.js?v=85.0"></script>
+<script src="settings-popup.js?v=86.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>

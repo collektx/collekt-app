@@ -156,6 +156,16 @@
   status = 200
 
 [[redirects]]
+  from = "/api/company-team"
+  to = "/.netlify/functions/company-team"
+  status = 200
+
+[[redirects]]
+  from = "/api/company/team"
+  to = "/.netlify/functions/company-team"
+  status = 200
+
+[[redirects]]
   from = "/api/webhooks/resend"
   to = "/.netlify/functions/resend-webhook"
   status = 200

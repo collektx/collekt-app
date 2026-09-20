@@ -1996,18 +1996,170 @@ async function fetchWalletLedger(ownerId) {
  * 5. Fetch Company Members & Roles
  */
 async function fetchCompanyMembers(companyId) {
-  if (!window.sb || !companyId) return { data: [], error: null };
+  if (!companyId) return { data: [], error: null };
   try {
-    const { data, error } = await sb
-      .from('company_members')
-      .select('*')
-      .eq('company_id', companyId)
-      .order('created_at', { ascending: true });
+    // 1. Try serverless function first
+    try {
+      const res = await fetch(`/.netlify/functions/company-team?company_id=${encodeURIComponent(companyId)}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.status === 'success' && Array.isArray(json.data)) {
+          return { data: json.data, error: null };
+        }
+      }
+    } catch(e) {}
 
-    return { data: data || [], error };
+    // 2. Direct Supabase fallback
+    if (window.sb) {
+      const { data, error } = await sb
+        .from('company_members')
+        .select('*')
+        .eq('company_id', companyId)
+        .neq('status', 'removed')
+        .order('created_at', { ascending: true });
+
+      return { data: data || [], error };
+    }
+
+    return { data: [], error: null };
   } catch (err) {
     console.error('fetchCompanyMembers error:', err);
     return { data: [], error: err };
+  }
+}
+
+/**
+ * 5b. Invite Company Member
+ */
+async function inviteCompanyMember(companyId, inviterId, name, email, role) {
+  if (!companyId || !email || !name) {
+    return { success: false, error: 'Company ID, name, and email are required.' };
+  }
+  try {
+    const payload = {
+      action: 'invite',
+      company_id: companyId,
+      inviter_id: inviterId,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      role: role || 'member'
+    };
+
+    const res = await fetch('/.netlify/functions/company-team', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const json = await res.json();
+    if (!res.ok || json.status === 'error') {
+      return { success: false, error: json.error || 'Failed to send invitation' };
+    }
+
+    return { success: true, data: json.data, message: json.message };
+  } catch (err) {
+    console.error('inviteCompanyMember error:', err);
+    // Direct Supabase fallback if network fails
+    if (window.sb) {
+      try {
+        const { data, error } = await sb
+          .from('company_members')
+          .insert({
+            company_id: companyId,
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            role: role || 'member',
+            status: 'pending',
+            invited_by: inviterId || null,
+            invited_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+        if (error) return { success: false, error: error.message };
+        return { success: true, data, message: 'Member invited successfully' };
+      } catch(sbErr) {
+        return { success: false, error: sbErr.message };
+      }
+    }
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * 5c. Remove Company Member
+ */
+async function removeCompanyMemberFromDb(companyId, inviterId, memberId) {
+  if (!companyId || !memberId) return { success: false, error: 'Missing parameters' };
+  try {
+    const res = await fetch('/.netlify/functions/company-team', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'remove',
+        company_id: companyId,
+        inviter_id: inviterId,
+        member_id: memberId
+      })
+    });
+    const json = await res.json();
+    if (!res.ok || json.status === 'error') {
+      return { success: false, error: json.error || 'Failed to remove member' };
+    }
+    return { success: true };
+  } catch (err) {
+    console.error('removeCompanyMember error:', err);
+    if (window.sb) {
+      try {
+        await sb.from('company_members').delete().eq('id', memberId).eq('company_id', companyId);
+        return { success: true };
+      } catch(sbErr) {
+        return { success: false, error: sbErr.message };
+      }
+    }
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * 5d. Update Company Member Role
+ */
+async function updateCompanyMemberRoleInDb(companyId, inviterId, memberId, role) {
+  if (!companyId || !memberId || !role) return { success: false, error: 'Missing parameters' };
+  try {
+    const res = await fetch('/.netlify/functions/company-team', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update_role',
+        company_id: companyId,
+        inviter_id: inviterId,
+        member_id: memberId,
+        role: role
+      })
+    });
+    const json = await res.json();
+    if (!res.ok || json.status === 'error') {
+      return { success: false, error: json.error || 'Failed to update role' };
+    }
+    return { success: true, data: json.data };
+  } catch (err) {
+    console.error('updateCompanyMemberRole error:', err);
+    if (window.sb) {
+      try {
+        const { data, error } = await sb
+          .from('company_members')
+          .update({ role: role, updated_at: new Date().toISOString() })
+          .eq('id', memberId)
+          .eq('company_id', companyId)
+          .select()
+          .single();
+        if (error) return { success: false, error: error.message };
+        return { success: true, data };
+      } catch(sbErr) {
+        return { success: false, error: sbErr.message };
+      }
+    }
+    return { success: false, error: err.message };
   }
 }
 

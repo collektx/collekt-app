@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=85.0">
-<link rel="stylesheet" href="shared.css?v=85.0">
-<link rel="stylesheet" href="glass.css?v=85.0">
+<link rel="stylesheet" href="style.css?v=86.0">
+<link rel="stylesheet" href="shared.css?v=86.0">
+<link rel="stylesheet" href="glass.css?v=86.0">
 
 <style>
   body { background: var(--paper); }
@@ -165,11 +165,12 @@
 
         <!-- Tabs -->
         <div class="profile-tabs-bar">
-          <div class="profile-tab active" onclick="switchTab('overview',this)">🏢 Overview</div>
-          <div class="profile-tab" onclick="switchTab('projects',this)">📋 Open Jobs &amp; Opportunities</div>
-          <div class="profile-tab" onclick="switchTab('reviews',this)">⭐ Reviews</div>
-          <div class="profile-tab" onclick="switchTab('documents',this)">📄 Documents</div>
-          <div class="profile-tab" onclick="switchTab('identity',this)">🛡️ Identity &amp; Verification</div>
+          <div class="profile-tab active" data-tab="overview" onclick="switchTab('overview',this)">🏢 Overview</div>
+          <div class="profile-tab" data-tab="projects" onclick="switchTab('projects',this)">📋 Open Jobs &amp; Opportunities</div>
+          <div class="profile-tab" data-tab="team" onclick="switchTab('team',this)">👥 Team &amp; Access</div>
+          <div class="profile-tab" data-tab="reviews" onclick="switchTab('reviews',this)">⭐ Reviews</div>
+          <div class="profile-tab" data-tab="documents" onclick="switchTab('documents',this)">📄 Documents</div>
+          <div class="profile-tab" data-tab="identity" onclick="switchTab('identity',this)">🛡️ Identity &amp; Verification</div>
         </div>
       </div>
 
@@ -241,6 +242,24 @@
             <button class="btn btn-amber btn-sm" onclick="location.href='post-job.html'" style="font-weight:800;">+ Post Job / Opportunity</button>
           </div>
           <div id="coProjectsContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px;"></div>
+        </div>
+      </div>
+
+      <!-- TAB 3: TEAM & ACCESS -->
+      <div id="tab-team" style="display:none;" class="fade-in">
+        <div class="content-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div class="section-title-sm" style="margin-bottom:2px;">Company Team &amp; Access Roles</div>
+              <div style="font-size:12px; color:var(--muted);">Manage authorized members and role-based permissions</div>
+            </div>
+            <button id="btnProfileAddTeamMember" class="btn btn-outline btn-sm" onclick="openInviteTeamModal()" style="font-weight:800; display:none;">
+              + Add Member
+            </button>
+          </div>
+          <div id="coProfileTeamList" style="display:flex; flex-direction:column; gap:10px;">
+            <!-- Dynamically populated with real team members -->
+          </div>
         </div>
       </div>
 
@@ -763,10 +782,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=85.0"></script>
-<script src="app.js?v=85.0"></script>
-<script src="collekt-ai.js?v=85.0"></script>
-<script src="settings-popup.js?v=85.0"></script>
+<script src="supabase.js?v=86.0"></script>
+<script src="app.js?v=86.0"></script>
+<script src="collekt-ai.js?v=86.0"></script>
+<script src="settings-popup.js?v=86.0"></script>
 <script src="upload-modal.js"></script>
 <script>
   requireCompany();
@@ -1185,10 +1204,13 @@
   function switchTab(tab, el) {
     document.querySelectorAll('.profile-tab').forEach(t => { t.classList.remove('active'); t.style.color = ''; t.style.borderBottomColor = ''; });
     if (el) el.classList.add('active');
-    ['overview','projects','reviews','documents','identity'].forEach(t => {
+    ['overview','projects','team','reviews','documents','identity'].forEach(t => {
       const e = document.getElementById('tab-' + t);
       if (e) e.style.display = t === tab ? '' : 'none';
     });
+    if (tab === 'team' && typeof loadCompanyProfileTeam === 'function') {
+      loadCompanyProfileTeam();
+    }
     if (tab === 'identity' && typeof renderCoIdentityStatus === 'function') {
       renderCoIdentityStatus();
     }
@@ -1802,7 +1824,280 @@
         el.style.background = 'linear-gradient(to right, var(--forest), var(--teal-mid))';
       }
     }
-  };
+  /* -----------------------------------------------------
+     COMPANY PROFILE TEAM & RBAC MANAGEMENT
+  ------------------------------------------------------*/
+  let _coProfileTeamCache = [];
+
+  function escapeHtmlSafeProfile(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  async function loadCompanyProfileTeam() {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user) return;
+
+    const container = document.getElementById('coProfileTeamList');
+    if (!container) return;
+
+    const companyId = user.company_id || user.id;
+
+    const btnAdd = document.getElementById('btnProfileAddTeamMember');
+    const isOwnerOrAdmin = (user.role === 'company') || (user.id === companyId);
+    if (btnAdd) {
+      btnAdd.style.display = isOwnerOrAdmin ? 'inline-flex' : 'none';
+    }
+
+    try {
+      const { data: members } = typeof fetchCompanyMembers === 'function'
+        ? await fetchCompanyMembers(companyId)
+        : { data: [] };
+
+      _coProfileTeamCache = Array.isArray(members) ? members : [];
+
+      const myMembership = _coProfileTeamCache.find(m => m.user_id === user.id || m.email === user.email);
+      const hasAdminRights = isOwnerOrAdmin || (myMembership && (myMembership.role === 'owner' || myMembership.role === 'admin'));
+      if (btnAdd) {
+        btnAdd.style.display = hasAdminRights ? 'inline-flex' : 'none';
+      }
+
+      if (_coProfileTeamCache.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:32px 16px; border:1.5px dashed var(--line); border-radius:14px; color:var(--muted); background:rgba(255,255,255,0.02);">
+            <div style="font-size:32px; margin-bottom:8px;">👥</div>
+            <div style="font-weight:800; font-size:14px; color:var(--ink);">No team members yet.</div>
+            <div style="font-size:12px; margin-top:4px; max-width:320px; margin-left:auto; margin-right:auto; line-height:1.4;">
+              ${hasAdminRights ? 'Click "+ Add Member" above to invite real colleagues and assign administrative roles.' : 'Authorized team members will appear here.'}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const roleBadges = {
+        owner: '<span style="background:rgba(212,146,11,0.15); color:var(--amber); font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Owner 👑</span>',
+        admin: '<span style="background:rgba(20,184,166,0.15); color:var(--teal); font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Admin ⚡</span>',
+        finance: '<span style="background:rgba(34,197,94,0.15); color:#16a34a; font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Finance 💳</span>',
+        member: '<span style="background:rgba(59,130,246,0.15); color:#2563eb; font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Member 👤</span>',
+        viewer: '<span style="background:rgba(107,114,128,0.15); color:var(--muted); font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Viewer 👁️</span>'
+      };
+
+      container.innerHTML = _coProfileTeamCache.map(m => {
+        const initial = (m.name || m.email || 'U').charAt(0).toUpperCase();
+        const isPending = m.status === 'pending';
+        const isOwnerRow = m.role === 'owner';
+
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--paper); border:1px solid var(--line); border-radius:14px; flex-wrap:wrap; gap:12px; transition:border-color .2s;">
+            <div style="display:flex; align-items:center; gap:12px; min-width:0;">
+              <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, var(--forest), #1a7a6f); color:#fff; font-weight:900; display:grid; place-items:center; font-size:15px; flex-shrink:0;">
+                ${initial}
+              </div>
+              <div style="min-width:0;">
+                <div style="font-size:13.5px; font-weight:800; color:var(--ink); display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <span>${escapeHtmlSafeProfile(m.name || 'Team Member')}</span>
+                  ${isPending ? '<span style="background:#fef3c7; color:#b45309; font-size:10px; font-weight:800; padding:1px 7px; border-radius:99px;">Invited (Pending)</span>' : '<span style="background:#dcfce7; color:#16a34a; font-size:10px; font-weight:800; padding:1px 7px; border-radius:99px;">Active</span>'}
+                </div>
+                <div style="font-size:12px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtmlSafeProfile(m.email || '')}</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              ${hasAdminRights && !isOwnerRow ? `
+                <select class="form-select form-input" onchange="changeCompanyProfileMemberRole('${m.id}', this.value)" style="padding:4px 10px; font-size:11.5px; font-weight:800; border-radius:8px; width:auto; min-width:110px;">
+                  <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>Admin ⚡</option>
+                  <option value="finance" ${m.role === 'finance' ? 'selected' : ''}>Finance 💳</option>
+                  <option value="member" ${m.role === 'member' ? 'selected' : ''}>Member 👤</option>
+                  <option value="viewer" ${m.role === 'viewer' ? 'selected' : ''}>Viewer 👁️</option>
+                </select>
+              ` : (roleBadges[m.role] || roleBadges.member)}
+              
+              ${hasAdminRights && !isOwnerRow ? `
+                <button class="btn btn-ghost btn-xs" onclick="removeCompanyProfileMember('${m.id}', '${escapeHtmlSafeProfile(m.name || m.email)}')" title="Remove member" style="color:#ef4444; font-size:13px; font-weight:800; padding:4px 8px; border-radius:6px;">
+                  ✕
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch(err) {
+      console.error('[loadCompanyProfileTeam error]:', err);
+    }
+  }
+
+  function openInviteTeamModal() {
+    const modal = document.getElementById('inviteTeamModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('open');
+      const input = document.getElementById('teamMemberName');
+      if (input) setTimeout(() => input.focus(), 50);
+    }
+  }
+
+  function closeInviteTeamModal() {
+    const modal = document.getElementById('inviteTeamModal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('open');
+    }
+  }
+
+  async function saveCompanyMember() {
+    const nameEl = document.getElementById('teamMemberName');
+    const emailEl = document.getElementById('teamMemberEmail');
+    const roleEl = document.getElementById('teamMemberRole');
+    const btnSubmit = document.getElementById('btnSubmitInviteMember');
+
+    const name = nameEl?.value.trim();
+    const email = emailEl?.value.trim();
+    const role = roleEl?.value || 'member';
+
+    if (!name) {
+      if (typeof showToast === 'function') showToast('⚠️ Please enter the member full name', 'warning');
+      nameEl?.focus();
+      return;
+    }
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (typeof showToast === 'function') showToast('⚠️ Please enter a valid email address', 'warning');
+      emailEl?.focus();
+      return;
+    }
+
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user) return;
+    const companyId = user.company_id || user.id;
+
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = 'Sending Invitation...';
+    }
+
+    try {
+      const res = typeof inviteCompanyMember === 'function'
+        ? await inviteCompanyMember(companyId, user.id, name, email, role)
+        : { success: false, error: 'Invite function not loaded' };
+
+      if (!res.success) {
+        if (typeof showToast === 'function') showToast(`⚠️ ${res.error || 'Failed to send invitation'}`, 'error');
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.innerHTML = '+ Send Invitation';
+        }
+        return;
+      }
+
+      if (typeof showToast === 'function') {
+        showToast(`🎉 Invitation sent to ${name} (${role.toUpperCase()})!`);
+      }
+
+      closeInviteTeamModal();
+      if (nameEl) nameEl.value = '';
+      if (emailEl) emailEl.value = '';
+      await loadCompanyProfileTeam();
+    } catch(e) {
+      console.error('saveCompanyMember error:', e);
+      if (typeof showToast === 'function') showToast(`⚠️ ${e.message || 'An error occurred'}`, 'error');
+    } finally {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = '+ Send Invitation';
+      }
+    }
+  }
+
+  async function removeCompanyProfileMember(memberId, memberName) {
+    if (!confirm(`Are you sure you want to remove ${memberName || 'this member'} from your company team?`)) return;
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user) return;
+    const companyId = user.company_id || user.id;
+
+    try {
+      const res = typeof removeCompanyMemberFromDb === 'function'
+        ? await removeCompanyMemberFromDb(companyId, user.id, memberId)
+        : { success: false };
+
+      if (res.success) {
+        if (typeof showToast === 'function') showToast('Member removed from company team.');
+        await loadCompanyProfileTeam();
+      } else {
+        if (typeof showToast === 'function') showToast(`⚠️ ${res.error || 'Failed to remove member'}`, 'error');
+      }
+    } catch(e) {
+      console.error('removeCompanyProfileMember error:', e);
+    }
+  }
+
+  async function changeCompanyProfileMemberRole(memberId, newRole) {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    if (!user) return;
+    const companyId = user.company_id || user.id;
+
+    try {
+      const res = typeof updateCompanyMemberRoleInDb === 'function'
+        ? await updateCompanyMemberRoleInDb(companyId, user.id, memberId, newRole)
+        : { success: false };
+
+      if (res.success) {
+        if (typeof showToast === 'function') showToast(`Member access role updated to ${newRole.toUpperCase()}.`);
+        await loadCompanyProfileTeam();
+      } else {
+        if (typeof showToast === 'function') showToast(`⚠️ ${res.error || 'Failed to update role'}`, 'error');
+      }
+    } catch(e) {
+      console.error('changeCompanyProfileMemberRole error:', e);
+    }
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+  });
 </script>
+
+<!-- Invite Team Member Modal -->
+<div class="modal-overlay" id="inviteTeamModal" style="display:none; position:fixed; inset:0; z-index:9990; background:rgba(4,14,13,0.8); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px;">
+  <div class="modal-card" style="position:relative; max-width:480px; width:100%; border-radius:24px; padding:28px; background:var(--white); border:1px solid var(--line); box-shadow:0 30px 80px rgba(0,0,0,0.4);">
+    <button class="modal-close" onclick="closeInviteTeamModal()" style="position:absolute; right:20px; top:20px; font-size:24px; border:none; background:none; cursor:pointer; color:var(--muted);">&times;</button>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+      <div style="width:44px; height:44px; border-radius:14px; background:rgba(20,184,166,0.15); color:var(--teal); display:grid; place-items:center; font-size:22px;">👥</div>
+      <div>
+        <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:2px;">Add Company Team Member</h3>
+        <div style="font-size:12px; color:var(--muted);">Assign role-based access permissions for company operations</div>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:14px;">
+      <label class="form-label" style="font-weight:800; font-size:12px;">Full Real Name</label>
+      <input type="text" id="teamMemberName" class="form-input" placeholder="e.g. Babatunde Alabi" style="font-size:13px;">
+    </div>
+
+    <div class="form-group" style="margin-bottom:14px;">
+      <label class="form-label" style="font-weight:800; font-size:12px;">Email Address</label>
+      <input type="email" id="teamMemberEmail" class="form-input" placeholder="e.g. babatunde@company.com" style="font-size:13px;">
+    </div>
+
+    <div class="form-group" style="margin-bottom:20px;">
+      <label class="form-label" style="font-weight:800; font-size:12px;">Access Role &amp; Permissions</label>
+      <select id="teamMemberRole" class="form-input form-select" style="font-size:13px;">
+        <option value="admin">Admin — Full project, tender &amp; team management</option>
+        <option value="finance">Finance — Payment approvals, funding &amp; escrow releases</option>
+        <option value="member" selected>Member — Post opportunities &amp; review proposals</option>
+        <option value="viewer">Viewer — Read-only access to company postings &amp; contracts</option>
+      </select>
+    </div>
+
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn btn-outline btn-sm" onclick="closeInviteTeamModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="btnSubmitInviteMember" onclick="saveCompanyMember()" style="font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f);">+ Send Invitation</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
