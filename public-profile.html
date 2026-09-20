@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=73.0">
-<link rel="stylesheet" href="shared.css?v=73.0">
-<link rel="stylesheet" href="glass.css?v=73.0">
+<link rel="stylesheet" href="style.css?v=75.0">
+<link rel="stylesheet" href="shared.css?v=75.0">
+<link rel="stylesheet" href="glass.css?v=75.0">
 <style>
 /* ═ PAGE ═ */
 body { background: var(--paper); }
@@ -137,12 +137,6 @@ body { background: var(--paper); }
   font-size: 22px; font-weight: 900; color: var(--ink);
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
-.verified-tick {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: #2563eb; color: #fff; font-size: 11px; font-weight: 900;
-  flex-shrink: 0;
-}
 .profile-title-text { font-size: 14px; color: var(--muted); margin-top: 3px; font-weight: 500; }
 .profile-loc {
   display: flex; align-items: center; gap: 5px;
@@ -191,15 +185,16 @@ body { background: var(--paper); }
 
 /* ═ TABS ═ */
 .profile-tabs-bar {
-  display: flex; padding: 0 32px; overflow-x: auto;
-  scrollbar-width: none;
+  display: flex; padding: 0 24px; overflow-x: auto;
+  scrollbar-width: none; border-bottom: 1px solid var(--line);
 }
 .profile-tabs-bar::-webkit-scrollbar { display: none; }
 .p-tab {
-  padding: 16px 22px; font-size: 14px; font-weight: 700;
+  padding: 16px 18px; font-size: 13.5px; font-weight: 800;
   color: var(--muted); border-bottom: 2.5px solid transparent;
   cursor: pointer; white-space: nowrap;
-  transition: color .5s cubic-bezier(.22,.61,.36,1), border-color .5s cubic-bezier(.22,.61,.36,1);
+  transition: color .3s cubic-bezier(.22,.61,.36,1), border-color .3s cubic-bezier(.22,.61,.36,1);
+  display: inline-flex; align-items: center; gap: 6px;
 }
 .p-tab:hover { color: var(--ink); }
 .p-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
@@ -213,10 +208,10 @@ body { background: var(--paper); }
   border: 1px solid var(--line);
   border-radius: 16px; padding: 24px;
   margin-bottom: 20px;
-  transition: box-shadow .6s cubic-bezier(.22,.61,.36,1), transform .6s cubic-bezier(.22,.61,.36,1);
+  transition: box-shadow .3s cubic-bezier(.22,.61,.36,1), transform .3s cubic-bezier(.22,.61,.36,1);
 }
-.content-card:hover { box-shadow: 0 12px 40px rgba(14,59,53,.10); transform: translateY(-2px); }
-.card-title { font-size: 15px; font-weight: 900; color: var(--ink); margin-bottom: 16px; }
+.content-card:hover { box-shadow: 0 12px 40px rgba(14,59,53,.08); }
+.card-title { font-size: 15px; font-weight: 900; color: var(--ink); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
 
 /* ═ SKILLS ═ */
 .skills-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -225,7 +220,7 @@ body { background: var(--paper); }
   background: var(--teal-lt); color: var(--teal);
   font-size: 12px; font-weight: 800;
   border: 1px solid rgba(19,117,111,.18);
-  transition: all .5s cubic-bezier(.22,.61,.36,1);
+  transition: all .3s cubic-bezier(.22,.61,.36,1);
 }
 .skill-chip:hover { background: var(--teal); color: #fff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(19,117,111,.25); }
 
@@ -241,9 +236,9 @@ body { background: var(--paper); }
   border-radius: 16px; padding: 24px;
   color: #fff; margin-bottom: 20px;
   box-shadow: 0 12px 36px rgba(14,59,53,.25);
-  transition: all .6s cubic-bezier(.22,.61,.36,1);
+  transition: all .4s cubic-bezier(.22,.61,.36,1);
 }
-.hire-card:hover { transform: translateY(-4px); box-shadow: 0 24px 56px rgba(14,59,53,.32); }
+.hire-card:hover { transform: translateY(-3px); box-shadow: 0 20px 48px rgba(14,59,53,.30); }
 .hire-card-title { font-size: 18px; font-weight: 900; margin-bottom: 4px; }
 .hire-card-sub { font-size: 13px; color: rgba(255,255,255,.65); margin-bottom: 20px; }
 .hire-rate-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.10); }
@@ -256,7 +251,7 @@ body { background: var(--paper); }
   background: var(--amber); color: #fff; font-weight: 900; font-size: 15px;
   border: none; cursor: pointer;
   box-shadow: 0 8px 24px rgba(212,146,11,.30);
-  transition: all .6s cubic-bezier(.22,.61,.36,1);
+  transition: all .4s cubic-bezier(.22,.61,.36,1);
   text-decoration: none;
 }
 .btn-hire:hover { transform: translateY(-3px); box-shadow: 0 16px 36px rgba(212,146,11,.48); }
@@ -266,32 +261,73 @@ body { background: var(--paper); }
 .port-card {
   border-radius: 14px; overflow: hidden;
   border: 1px solid var(--line);
-  transition: all .6s cubic-bezier(.22,.61,.36,1);
+  transition: all .4s cubic-bezier(.22,.61,.36,1);
   background: var(--white);
 }
-.port-card:hover { transform: translateY(-6px); box-shadow: 0 16px 48px rgba(14,59,53,.14); border-color: var(--teal-lt); }
+.port-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(14,59,53,.12); border-color: var(--teal-lt); }
 .port-thumb {
-  height: 120px; display: flex; align-items: center; justify-content: center;
+  height: 130px; display: flex; align-items: center; justify-content: center;
   font-size: 36px; position: relative; overflow: hidden;
 }
 .port-info { padding: 14px; }
-.port-name { font-size: 13px; font-weight: 800; color: var(--ink); margin-bottom: 4px; line-height: 1.4; }
-.port-client { font-size: 11px; color: var(--muted); font-weight: 600; }
+.port-name { font-size: 13.5px; font-weight: 800; color: var(--ink); margin-bottom: 4px; line-height: 1.4; }
+.port-client { font-size: 11.5px; color: var(--muted); font-weight: 600; }
 .port-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
 .port-tag {
   font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 99px;
   background: var(--teal-lt); color: var(--teal);
-  transition: all .5s cubic-bezier(.22,.61,.36,1);
 }
+
+/* ═ EXPERIENCE & QUALIFICATIONS & CERTS CARDS ═ */
+.exp-card-item, .qual-card-item, .job-card-item {
+  padding: 18px 20px; border-radius: 14px; border: 1px solid var(--line);
+  background: var(--white); margin-bottom: 14px;
+  transition: all .3s cubic-bezier(.22,.61,.36,1);
+}
+.exp-card-item:hover, .qual-card-item:hover, .job-card-item:hover {
+  transform: translateY(-2px); box-shadow: 0 8px 28px rgba(14,59,53,.08); border-color: var(--teal-lt);
+}
+.exp-header, .qual-header, .job-header {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px; flex-wrap: wrap;
+}
+.exp-role, .qual-degree, .job-title-text {
+  font-size: 15px; font-weight: 800; color: var(--ink);
+}
+.exp-company, .qual-inst, .job-client-text {
+  font-size: 13px; font-weight: 700; color: var(--teal); margin-top: 2px;
+}
+.exp-period, .qual-year, .job-date-text {
+  font-size: 12px; font-weight: 700; color: var(--muted); background: var(--paper);
+  padding: 4px 10px; border-radius: 99px; border: 1px solid var(--line); white-space: nowrap;
+}
+.exp-desc, .qual-desc, .job-desc {
+  font-size: 13px; color: var(--muted); line-height: 1.7; margin-top: 8px;
+}
+
+/* ═ CERTIFICATIONS ROWS ═ */
+.cert-row-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 16px; border-radius: 14px; border: 1px solid var(--line);
+  margin-bottom: 12px; background: var(--white);
+  transition: all .3s cubic-bezier(.22,.61,.36,1);
+}
+.cert-row-item:hover { transform: translateX(4px); box-shadow: 0 6px 24px rgba(14,59,53,.08); border-color: var(--teal-lt); }
+.cert-icon-wrap {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  background: var(--teal-lt); color: var(--teal);
+  display: grid; place-items: center; font-size: 20px;
+}
+.cert-name-text { font-size: 14px; font-weight: 800; color: var(--ink); }
+.cert-issuer-text { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
 /* ═ REVIEWS ═ */
 .review-card {
   padding: 20px; border-radius: 14px;
   border: 1px solid var(--line); background: var(--white);
   margin-bottom: 16px;
-  transition: all .6s cubic-bezier(.22,.61,.36,1);
+  transition: all .3s cubic-bezier(.22,.61,.36,1);
 }
-.review-card:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(14,59,53,.09); }
+.review-card:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(14,59,53,.08); }
 .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
 .review-author { font-weight: 800; font-size: 14px; color: var(--ink); }
 .review-company { font-size: 12px; color: var(--muted); margin-top: 2px; }
@@ -299,22 +335,14 @@ body { background: var(--paper); }
 .review-text { font-size: 13px; color: var(--muted); line-height: 1.7; }
 .review-date { font-size: 11px; color: var(--muted); margin-top: 10px; font-weight: 600; }
 
-/* ═ CERTIFICATIONS ═ */
-.cert-row {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px; border-radius: 12px; border: 1px solid var(--line);
-  margin-bottom: 12px; background: var(--white);
-  transition: all .6s cubic-bezier(.22,.61,.36,1);
+/* ═ EMPTY STATES ═ */
+.empty-tab-state {
+  text-align: center; padding: 48px 24px; border: 2px dashed var(--line);
+  border-radius: 16px; color: var(--muted); background: var(--white);
 }
-.cert-row:hover { transform: translateX(4px); box-shadow: 0 4px 20px rgba(14,59,53,.08); border-color: var(--teal-lt); }
-.cert-icon-wrap {
-  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
-  background: var(--teal-lt); color: var(--teal);
-  display: grid; place-items: center; font-size: 20px;
-}
-.cert-name { font-size: 14px; font-weight: 800; color: var(--ink); }
-.cert-issuer { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.cert-verified { margin-left: auto; font-size: 11px; font-weight: 800; color: #16a34a; flex-shrink: 0; }
+.empty-tab-icon { font-size: 36px; margin-bottom: 10px; }
+.empty-tab-title { font-weight: 800; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+.empty-tab-sub { font-size: 12.5px; color: var(--muted); max-width: 440px; margin: 0 auto; line-height: 1.6; }
 
 /* ═ FOOTER ═ */
 .pub-footer {
@@ -331,7 +359,7 @@ body { background: var(--paper); }
 .pub-footer-brand p { font-size: 13px; line-height: 1.7; margin-top: 12px; max-width: 260px; }
 .pub-footer-logo { height: 40px; mix-blend-mode: multiply; }
 .pub-footer-col h4 { font-size: 12px; font-weight: 900; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; }
-.pub-footer-col a { display: block; font-size: 13px; color: rgba(255,255,255,.65); margin-bottom: 9px; font-weight: 600; transition: color .5s cubic-bezier(.22,.61,.36,1), padding-left .5s cubic-bezier(.22,.61,.36,1); }
+.pub-footer-col a { display: block; font-size: 13px; color: rgba(255,255,255,.65); margin-bottom: 9px; font-weight: 600; transition: color .3s cubic-bezier(.22,.61,.36,1), padding-left .3s cubic-bezier(.22,.61,.36,1); }
 .pub-footer-col a:hover { color: #fff; padding-left: 4px; }
 .pub-footer-bottom { border-top: 1px solid rgba(255,255,255,.07); padding-top: 22px; display: flex; justify-content: space-between; font-size: 12px; flex-wrap: wrap; gap: 10px; }
 
@@ -369,7 +397,7 @@ body { background: var(--paper); }
 }
 
 /* ═ REVEAL ANIMATION ═ */
-.reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.22,.61,.36,1), transform .9s cubic-bezier(.22,.61,.36,1); }
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity .6s cubic-bezier(.22,.61,.36,1), transform .6s cubic-bezier(.22,.61,.36,1); }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
 /* Tab panels */
@@ -435,7 +463,11 @@ body { background: var(--paper); }
     <!-- Tab Bar -->
     <div class="profile-tabs-bar" role="tablist" aria-label="Profile sections">
       <div class="p-tab active" role="tab" id="tab-btn-overview" aria-selected="true" aria-controls="panel-overview" tabindex="0" onclick="switchPubTab('overview',this)">👤 Overview</div>
-      <div class="p-tab" role="tab" id="tab-btn-portfolio" aria-selected="false" aria-controls="panel-portfolio" tabindex="0" onclick="switchPubTab('portfolio',this)">💼 Portfolio</div>
+      <div class="p-tab" role="tab" id="tab-btn-experience" aria-selected="false" aria-controls="panel-experience" tabindex="0" onclick="switchPubTab('experience',this)">💼 Experience</div>
+      <div class="p-tab" role="tab" id="tab-btn-qualifications" aria-selected="false" aria-controls="panel-qualifications" tabindex="0" onclick="switchPubTab('qualifications',this)">🎓 Qualifications</div>
+      <div class="p-tab" role="tab" id="tab-btn-certifications" aria-selected="false" aria-controls="panel-certifications" tabindex="0" onclick="switchPubTab('certifications',this)">📜 Certifications</div>
+      <div class="p-tab" role="tab" id="tab-btn-portfolio" aria-selected="false" aria-controls="panel-portfolio" tabindex="0" onclick="switchPubTab('portfolio',this)">📁 Portfolio</div>
+      <div class="p-tab" role="tab" id="tab-btn-jobs" aria-selected="false" aria-controls="panel-jobs" tabindex="0" onclick="switchPubTab('jobs',this)">⚡ Completed Jobs</div>
       <div class="p-tab" role="tab" id="tab-btn-reviews" aria-selected="false" aria-controls="panel-reviews" tabindex="0" onclick="switchPubTab('reviews',this)">⭐ Reviews</div>
     </div>
   </div>
@@ -443,7 +475,7 @@ body { background: var(--paper); }
   <!-- ═ TAB CONTENT ═ -->
   <div class="pub-content">
 
-    <!-- OVERVIEW TAB -->
+    <!-- 1. OVERVIEW TAB -->
     <div class="tab-panel active" id="panel-overview" role="tabpanel" aria-labelledby="tab-btn-overview">
       <div class="pub-grid">
 
@@ -452,16 +484,26 @@ body { background: var(--paper); }
           <!-- About -->
           <div class="content-card reveal">
             <div class="card-title">About</div>
-            <p style="font-size:14px; color:var(--muted); line-height:1.8;">
-              Loading bio...
-            </p>
+            <div id="overviewBioContainer">
+              <p style="font-size:14px; color:var(--muted); line-height:1.8;">
+                Loading bio...
+              </p>
+            </div>
           </div>
 
           <!-- Skills -->
           <div class="content-card reveal">
-            <div class="card-title">Core Skills</div>
-            <div class="skills-wrap">
+            <div class="card-title">Core Technical Skills</div>
+            <div class="skills-wrap" id="overviewSkillsContainer">
               <span style="font-size:13px; color:var(--muted); font-style:italic;">Loading skills...</span>
+            </div>
+          </div>
+
+          <!-- Disciplines & Specializations -->
+          <div class="content-card reveal" id="overviewDisciplineCard">
+            <div class="card-title">Industry Discipline &amp; Focus</div>
+            <div class="skills-wrap" id="overviewDisciplineContainer">
+              <span style="font-size:13px; color:var(--muted); font-style:italic;">Loading discipline...</span>
             </div>
           </div>
 
@@ -492,19 +534,20 @@ body { background: var(--paper); }
               <span class="hire-rate-value">&lt; 2 hours</span>
             </div>
             <div class="hire-rate-row">
-              <span class="hire-rate-label">Last Active</span>
-              <span class="hire-rate-value" style="color:#4ade80;">Today</span>
+              <span class="hire-rate-label">Availability</span>
+              <span class="hire-rate-value" style="color:#4ade80;" id="hireCardAvailability">Available</span>
             </div>
             <a href="login.html" class="btn-hire" id="hireBtn">⚡ Connect &rarr;</a>
             <button class="btn btn-outline" id="leaveReviewBtn" style="width:100%; margin-top:12px; border-color:var(--amber); color:var(--amber); font-weight:900;">⭐ Leave a Review</button>
-            <!-- Quick Stats Card -->
-            <div class="content-card reveal" style="margin-bottom:20px;">
-              <div class="card-title">Verification &amp; Badges</div>
-              <div style="display:flex; flex-direction:column; gap:12px;">
-                <div style="display:flex; align-items:center; gap:12px;" id="verificationStatusBlock">
-                  <div style="width:40px; height:40px; border-radius:10px; background:#f1f5f9; display:grid; place-items:center; font-size:18px; flex-shrink:0;">🛡️</div>
-                  <div><div style="font-size:13px; font-weight:800; color:var(--muted);">Pending Verification</div><div style="font-size:11px; color:var(--muted);">Requires 100% Profile Completion &amp; Identity Verification</div></div>
-                </div>
+          </div>
+
+          <!-- Quick Verification Status Card -->
+          <div class="content-card reveal" style="margin-bottom:20px;">
+            <div class="card-title">Verification &amp; Badges</div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="display:flex; align-items:center; gap:12px;" id="verificationStatusBlock">
+                <div style="width:40px; height:40px; border-radius:10px; background:#f1f5f9; display:grid; place-items:center; font-size:18px; flex-shrink:0;">🛡️</div>
+                <div><div style="font-size:13px; font-weight:800; color:var(--muted);">Pending Verification</div><div style="font-size:11px; color:var(--muted);">Requires 100% Profile Completion &amp; Identity Verification</div></div>
               </div>
             </div>
           </div>
@@ -512,19 +555,76 @@ body { background: var(--paper); }
       </div>
     </div>
 
-    <!-- PORTFOLIO TAB -->
-    <div class="tab-panel" id="panel-portfolio" role="tabpanel" aria-labelledby="tab-btn-portfolio">
+    <!-- 2. EXPERIENCE TAB -->
+    <div class="tab-panel" id="panel-experience" role="tabpanel" aria-labelledby="tab-btn-experience">
       <div class="content-card reveal">
-        <div class="card-title" style="font-size:18px; margin-bottom:24px;">Portfolio Projects</div>
-        <div class="portfolio-grid">
-          <!-- Populated dynamically by JS from real user data -->
+        <div class="card-title" style="font-size:18px; margin-bottom:20px;">
+          <span>Work Experience &amp; Career History</span>
+          <span id="expCountBadge" style="font-size:12px; color:var(--muted); font-weight:700;"></span>
+        </div>
+        <div id="experienceListContainer">
+          <!-- Populated dynamically -->
         </div>
       </div>
     </div>
 
-    <!-- REVIEWS TAB -->
+    <!-- 3. QUALIFICATIONS TAB -->
+    <div class="tab-panel" id="panel-qualifications" role="tabpanel" aria-labelledby="tab-btn-qualifications">
+      <div class="content-card reveal">
+        <div class="card-title" style="font-size:18px; margin-bottom:20px;">
+          <span>Academic Degrees &amp; Qualifications</span>
+          <span id="qualCountBadge" style="font-size:12px; color:var(--muted); font-weight:700;"></span>
+        </div>
+        <div id="qualificationsListContainer">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. CERTIFICATIONS TAB -->
+    <div class="tab-panel" id="panel-certifications" role="tabpanel" aria-labelledby="tab-btn-certifications">
+      <div class="content-card reveal">
+        <div class="card-title" style="font-size:18px; margin-bottom:20px;">
+          <span>Professional Certifications &amp; Accreditations</span>
+          <span id="certCountBadge" style="font-size:12px; color:var(--muted); font-weight:700;"></span>
+        </div>
+        <div id="certificationsListContainer">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. PORTFOLIO TAB -->
+    <div class="tab-panel" id="panel-portfolio" role="tabpanel" aria-labelledby="tab-btn-portfolio">
+      <div class="content-card reveal">
+        <div class="card-title" style="font-size:18px; margin-bottom:24px;">
+          <span>Portfolio &amp; Work Samples</span>
+          <span id="portCountBadge" style="font-size:12px; color:var(--muted); font-weight:700;"></span>
+        </div>
+        <div class="portfolio-grid" id="portfolioGridContainer">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. COMPLETED JOBS TAB -->
+    <div class="tab-panel" id="panel-jobs" role="tabpanel" aria-labelledby="tab-btn-jobs">
+      <div class="content-card reveal">
+        <div class="card-title" style="font-size:18px; margin-bottom:20px;">
+          <span>Completed Platform Contracts &amp; Jobs Collekted</span>
+          <span id="jobsCountBadge" style="font-size:12px; color:var(--muted); font-weight:700;"></span>
+        </div>
+        <div id="completedJobsListContainer">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. REVIEWS TAB -->
     <div class="tab-panel" id="panel-reviews" role="tabpanel" aria-labelledby="tab-btn-reviews">
-      <!-- Populated dynamically by JS from real database reviews or clean empty state -->
+      <div id="reviewsListContainer">
+        <!-- Populated dynamically -->
+      </div>
     </div>
 
   </div><!-- /pub-content -->
@@ -565,9 +665,9 @@ body { background: var(--paper); }
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=73.0"></script>
-<script src="app.js?v=73.0"></script>
-<script src="settings-popup.js?v=73.0"></script>
+<script src="supabase.js?v=75.0"></script>
+<script src="app.js?v=75.0"></script>
+<script src="settings-popup.js?v=75.0"></script>
 <script>
   /* ═ TAB SWITCHER ═ */
   function switchPubTab(tab, el) {
@@ -597,16 +697,16 @@ body { background: var(--paper); }
       if (entry.isIntersecting) {
         const siblings = Array.from(entry.target.parentElement?.children || []);
         const idx = siblings.indexOf(entry.target);
-        entry.target.style.transitionDelay = (idx * 0.08) + 's';
+        entry.target.style.transitionDelay = (idx * 0.06) + 's';
         entry.target.classList.add('visible');
         revealObs.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+  }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
   document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 
   /* ═ AUTHENTIC PROFILE DATA ENGINE ═ */
-  (function applyProfileFromUrl() {
+  (async function applyProfileFromUrl() {
     const searchParams = new URLSearchParams(window.location.search);
     const targetId = searchParams.get("id") || searchParams.get("user") || searchParams.get("u") || searchParams.get("username") || searchParams.get("email") || searchParams.get("uid") || searchParams.get("name");
     const me = typeof getUser === 'function' ? getUser() : null;
@@ -657,11 +757,11 @@ body { background: var(--paper); }
       banner.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">👁️ <strong>Public Profile Preview</strong> &mdash; This is how your profile appears to clients on Collekt.</span><a href="${backUrl}" style="background:#D4920B; color:#fff; padding:6px 14px; border-radius:99px; text-decoration:none; font-size:12px; font-weight:900; white-space:nowrap; flex-shrink:0;">&larr; Back to Edit Profile</a>`;
       document.body.insertBefore(banner, document.body.firstChild);
 
-      _renderUserToPublicProfile(me, true);
+      await _hydrateAndRenderUser(me, true);
       return;
     }
 
-    // Search for real target profile in registered users directory
+    // Lookup target user: first local directory, then Supabase async query
     let targetUser = null;
     const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
 
@@ -673,27 +773,28 @@ body { background: var(--paper); }
         const uEmail = String(u.email || '').toLowerCase().trim();
         const uUsername = String(u.username || '').toLowerCase().trim();
         const uName = String(u.name || '').toLowerCase().trim();
-        return uId === term || uEmail === term || uUsername === term || uName === term || (uId && uId.includes(term)) || (uEmail && uEmail.includes(term));
+        return uId === term || uEmail === term || uUsername === term || uName === term;
       });
     }
 
-    if (targetUser) {
-      _renderUserToPublicProfile(targetUser, false);
-      return;
+    // Try Supabase lookup if not found or to get freshest data
+    if (targetId && window.sb && typeof sb.from === 'function') {
+      try {
+        const { data: pData } = await sb.from("profiles")
+          .select("*")
+          .or(`id.eq.${targetId},email.eq.${targetId}`)
+          .maybeSingle();
+
+        if (pData) {
+          targetUser = Object.assign({}, targetUser || {}, pData);
+        }
+      } catch(e) {
+        console.warn('Supabase profile fetch notice:', e);
+      }
     }
 
-    // Asynchronous Supabase profile lookup for UUIDs / Cloud users
-    if (targetId && window.sb && typeof sb.from === 'function') {
-      (async function() {
-        try {
-          const { data } = await sb.from("profiles").select("*").or(`id.eq.${targetId},email.eq.${targetId}`).maybeSingle();
-          if (data) {
-            _renderUserToPublicProfile(data, false);
-            return;
-          }
-        } catch(e){}
-        _renderNotFoundState();
-      })();
+    if (targetUser) {
+      await _hydrateAndRenderUser(targetUser, false);
       return;
     }
 
@@ -716,10 +817,231 @@ body { background: var(--paper); }
     }
   }
 
-  function _renderUserToPublicProfile(prof, isMe) {
+  async function _hydrateAndRenderUser(user, isMe) {
+    if (!user) return;
+
+    const uId = user.id || user.email;
+    const uEmail = user.email || '';
+
+    // Concurrently fetch deep professional metadata, documents, contracts, and reviews from Supabase & local storage
+    let proDetails = {};
+    let dbDocuments = [];
+    let dbContracts = [];
+    let dbReviews = [];
+
+    if (window.sb && typeof sb.from === 'function' && user.id) {
+      try {
+        const [proRes, docsRes, contractsRes, revsRes] = await Promise.all([
+          sb.from('professional_profiles').select('*').eq('user_id', user.id).maybeSingle(),
+          sb.from('user_documents').select('*').eq('user_id', user.id),
+          sb.from('contracts').select('*').eq('pro_id', user.id).in('status', ['COMPLETED', 'completed', 'Job Collekted', 'closed']),
+          sb.from('reviews').select('*').eq('target_id', user.id)
+        ]);
+
+        if (proRes?.data) proDetails = proRes.data;
+        if (Array.isArray(docsRes?.data)) dbDocuments = docsRes.data;
+        if (Array.isArray(contractsRes?.data)) dbContracts = contractsRes.data;
+        if (Array.isArray(revsRes?.data)) dbReviews = revsRes.data;
+      } catch(e) {
+        console.warn('Async Supabase deep profile fetch notice:', e);
+      }
+    }
+
+    // Merge professional fields
+    const enrichedUser = Object.assign({}, user, {
+      title: proDetails.title || user.title,
+      discipline: proDetails.discipline || user.discipline || user.industry,
+      years_experience: proDetails.years_experience || user.years_experience,
+      hourly_rate: proDetails.hourly_rate || user.hourly_rate || user.rate,
+      availability: proDetails.availability || user.availability,
+      accreditation: proDetails.accreditation || user.accreditation,
+      cv_url: proDetails.cv_url || user.cv_url
+    });
+
+    // 1. Gather Experience
+    let experienceList = [];
+    if (Array.isArray(enrichedUser.experience) && enrichedUser.experience.length > 0) {
+      experienceList = enrichedUser.experience;
+    } else {
+      try {
+        const expKey = 'collekt_experience_' + (enrichedUser.id || enrichedUser.email);
+        experienceList = JSON.parse(localStorage.getItem(expKey) || '[]');
+      } catch(e){}
+    }
+
+    // 2. Gather Qualifications (Degrees & Diplomas)
+    let customQuals = [];
+    if (Array.isArray(enrichedUser.qualifications) && enrichedUser.qualifications.length > 0) {
+      customQuals = enrichedUser.qualifications;
+    } else if (isMe) {
+      try {
+        customQuals = JSON.parse(localStorage.getItem('collekt_custom_quals') || '[]');
+      } catch(e){}
+    }
+    // Add any academic documents from Supabase user_documents
+    dbDocuments.filter(d => d.document_type === 'academic' || d.document_type === 'degree').forEach(d => {
+      if (!customQuals.some(q => q.fileName === d.file_name || q.name === d.title)) {
+        customQuals.push({
+          name: d.title || d.file_name,
+          issuer: d.metadata?.institution || d.metadata?.issuer || 'Academic Institution',
+          category: d.metadata?.category || 'Academic Degree',
+          year: d.metadata?.year || 'Verified',
+          fileName: d.file_name,
+          dataURL: d.file_url,
+          fileUrl: d.file_url,
+          size: d.file_size,
+          type: d.mime_type
+        });
+      }
+    });
+
+    // 3. Gather Certifications & Accreditations
+    let certFiles = [];
+    if (Array.isArray(enrichedUser.certifications) && enrichedUser.certifications.length > 0) {
+      certFiles = enrichedUser.certifications;
+    } else if (isMe && typeof getUploadedFiles === 'function') {
+      certFiles = getUploadedFiles('certifications').filter(f => f && (f.dataURL || f.fileUrl || (f.size && f.size > 0)));
+    }
+    // Add certifications from Supabase user_documents
+    dbDocuments.filter(d => d.document_type === 'certifications' || d.document_type === 'certification').forEach(d => {
+      if (!certFiles.some(c => (c.name || c.fileName) === d.file_name || (c.title || c.name) === d.title)) {
+        certFiles.push({
+          name: d.title || d.file_name,
+          title: d.title || d.file_name,
+          issuer: d.metadata?.issuer || 'Accreditation Board',
+          dataURL: d.file_url,
+          fileUrl: d.file_url,
+          size: d.file_size,
+          type: d.mime_type,
+          timestamp: d.created_at ? new Date(d.created_at).getTime() : Date.now()
+        });
+      }
+    });
+    // If accreditation text string exists (e.g. COREN, NSE)
+    if (enrichedUser.accreditation && typeof enrichedUser.accreditation === 'string' && enrichedUser.accreditation.trim()) {
+      const accList = enrichedUser.accreditation.split(',').map(s => s.trim()).filter(Boolean);
+      accList.forEach(acc => {
+        if (!certFiles.some(c => (c.title || c.name || '').toLowerCase().includes(acc.toLowerCase()))) {
+          certFiles.push({
+            name: acc,
+            title: acc,
+            issuer: 'Professional Accreditation Board',
+            is_verified: true
+          });
+        }
+      });
+    }
+
+    // 4. Gather Portfolio Items
+    let portFiles = [];
+    if (Array.isArray(enrichedUser.portfolio) && enrichedUser.portfolio.length > 0) {
+      portFiles = enrichedUser.portfolio;
+    } else if (isMe && typeof getUploadedFiles === 'function') {
+      portFiles = getUploadedFiles('portfolio');
+    }
+    dbDocuments.filter(d => d.document_type === 'portfolio').forEach(d => {
+      if (!portFiles.some(p => (p.name || p.title) === d.file_name || (p.title || p.name) === d.title)) {
+        portFiles.push({
+          name: d.title || d.file_name,
+          title: d.title || d.file_name,
+          dataURL: d.file_url,
+          fileUrl: d.file_url,
+          size: d.file_size,
+          type: d.mime_type,
+          timestamp: d.created_at ? new Date(d.created_at).getTime() : Date.now()
+        });
+      }
+    });
+
+    // 5. Gather Completed Jobs
+    let completedJobs = [];
+    if (dbContracts.length > 0) {
+      dbContracts.forEach(c => {
+        completedJobs.push({
+          id: c.id,
+          title: c.project_title || c.title || 'Platform Contract Delivery',
+          client: c.company_name || 'Verified Client',
+          amount: c.total_amount || c.amount || 0,
+          date: c.completed_at ? new Date(c.completed_at).toLocaleDateString() : 'Completed',
+          status: 'Escrow Completed'
+        });
+      });
+    }
+    // Also check local completed proposals / contracts
+    try {
+      const allProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      allProps.forEach(p => {
+        const pUser = String(p.userId || p.freelancer_id || p.author_email || p.email || '').toLowerCase();
+        if (((uId && pUser === String(uId).toLowerCase()) || (uEmail && pUser === String(uEmail).toLowerCase())) &&
+            (p.status === 'completed' || p.status === 'Job Collekted' || p.status === 'COMPLETED' || p.status === 'closed')) {
+          if (!completedJobs.some(j => j.id === p.id || j.title === p.jobTitle)) {
+            completedJobs.push({
+              id: p.id,
+              title: p.jobTitle || 'Tender Execution',
+              client: p.clientName || 'Verified Client',
+              amount: p.bidAmount || p.budget || 0,
+              date: p.completedAt ? new Date(p.completedAt).toLocaleDateString() : 'Completed',
+              status: 'Job Collekted'
+            });
+          }
+        }
+      });
+    } catch(e){}
+
+    // 6. Gather Client Reviews
+    let realReviews = [];
+    if (Array.isArray(enrichedUser.reviews) && enrichedUser.reviews.length > 0) {
+      realReviews = enrichedUser.reviews;
+    }
+    if (dbReviews.length > 0) {
+      dbReviews.forEach(r => {
+        if (!realReviews.some(x => x.id === r.id)) {
+          realReviews.push({
+            id: r.id,
+            author: r.reviewer_name || 'Client',
+            role: r.reviewer_company || 'Project Client',
+            rating: Number(r.rating) || 5,
+            text: r.comment || '',
+            date: r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Recent'
+          });
+        }
+      });
+    }
+    try {
+      const rKey1 = 'collekt_reviews_' + (enrichedUser.id || '');
+      const rKey2 = 'collekt_reviews_' + (enrichedUser.email || '');
+      const r1 = JSON.parse(localStorage.getItem(rKey1) || '[]');
+      const r2 = JSON.parse(localStorage.getItem(rKey2) || '[]');
+      [...r1, ...r2].forEach(r => {
+        if (!realReviews.some(x => x.id === r.id || (x.author === r.author && x.text === r.text))) {
+          realReviews.push(r);
+        }
+      });
+    } catch(e){}
+
+    // Bind documents registry for viewer modal
+    window.publicDocsRegistry = [].concat(customQuals, certFiles, portFiles).filter(Boolean);
+
+    _renderUserToPublicProfile(enrichedUser, isMe, {
+      experienceList,
+      customQuals,
+      certFiles,
+      portFiles,
+      completedJobs,
+      realReviews
+    });
+  }
+
+  function _renderUserToPublicProfile(prof, isMe, deepData = {}) {
     if (!prof) return;
 
     var isCompany = prof.role === 'company' || prof.user_type === 'company';
+    var expList = deepData.experienceList || [];
+    var qualList = deepData.customQuals || [];
+    var certList = deepData.certFiles || [];
+    var portList = deepData.portFiles || [];
+    var jobList = deepData.completedJobs || [];
+    var revList = deepData.realReviews || [];
 
     // Avatar / Logo
     var av = document.querySelector(".profile-avatar");
@@ -732,7 +1054,7 @@ body { background: var(--paper); }
         : (prof.avatar || (savedAvatar ? savedAvatar.dataURL : null));
 
       if (displayImage) {
-        av.innerHTML = `<img src="${displayImage}" style="width:100%;height:100%;border-radius:${isCompany ? '16px' : '50%'};object-fit:cover;" alt="${prof.name || 'Profile'} logo" loading="lazy" decoding="async">`;
+        av.innerHTML = `<img src="${displayImage}" style="width:100%;height:100%;border-radius:${isCompany ? '16px' : '50%'};object-fit:cover;" alt="${escapeHTML(prof.name || 'Profile')} logo" loading="lazy" decoding="async">`;
       } else {
         av.textContent = (prof.name || prof.company_name || "C").charAt(0).toUpperCase();
         av.setAttribute("aria-label", (prof.name || "User") + " avatar");
@@ -753,17 +1075,28 @@ body { background: var(--paper); }
     if (statsBar) {
       var metrics = (typeof getRealTimeUserMetrics === 'function') 
         ? getRealTimeUserMetrics(prof) 
-        : { projects_completed: prof.projects_completed || 0, total_earned: prof.total_earned || 0, success_rate: 0, rating: 0.0, review_count: 0 };
+        : { projects_completed: jobList.length, total_earned: prof.total_earned || 0, success_rate: 0, rating: 0.0, review_count: revList.length };
 
-      var projVal = metrics.projects_completed;
-      var ratingVal = metrics.rating > 0 ? metrics.rating.toFixed(1) : '0.0';
-      var compVal = metrics.success_rate + '%';
-      var earnedVal = metrics.total_earned > 0 ? (typeof formatNaira === 'function' ? formatNaira(metrics.total_earned, true) : '₦' + metrics.total_earned.toLocaleString()) : '₦0';
+      var projVal = jobList.length > 0 ? jobList.length : metrics.projects_completed;
+      
+      // Calculate true rating
+      var ratingVal = '0.0';
+      if (revList.length > 0) {
+        const sum = revList.reduce((acc, r) => acc + (Number(r.rating || r.stars) || 5), 0);
+        ratingVal = (sum / revList.length).toFixed(1);
+      } else if (metrics.rating > 0) {
+        ratingVal = metrics.rating.toFixed(1);
+      }
+
+      var compVal = metrics.success_rate > 0 ? metrics.success_rate + '%' : (projVal > 0 ? '100%' : '0%');
+      var earnedVal = metrics.total_earned > 0 
+        ? (typeof formatNaira === 'function' ? formatNaira(metrics.total_earned, true) : '₦' + metrics.total_earned.toLocaleString()) 
+        : '₦0';
 
       statsBar.innerHTML = `
-        <div class="ps-stat"><div class="ps-val">${projVal}</div><div class="ps-lbl">${isCompany ? 'Posted Projects' : 'Projects'}</div></div>
+        <div class="ps-stat"><div class="ps-val">${projVal}</div><div class="ps-lbl">${isCompany ? 'Posted Projects' : 'Completed Projects'}</div></div>
         <div class="ps-stat"><div class="ps-val">${ratingVal} <span style="color:var(--amber); font-size:16px;">★</span></div><div class="ps-lbl">Rating</div></div>
-        <div class="ps-stat"><div class="ps-val">${compVal}</div><div class="ps-lbl">Completion</div></div>
+        <div class="ps-stat"><div class="ps-val">${compVal}</div><div class="ps-lbl">Success Rate</div></div>
         <div class="ps-stat"><div class="ps-val">${earnedVal}</div><div class="ps-lbl">${isCompany ? 'Contracted' : 'Earned'}</div></div>
       `;
     }
@@ -819,11 +1152,19 @@ body { background: var(--paper); }
     var rateLabelEl = document.querySelector(".hire-rate-label");
     if (rateLabelEl) rateLabelEl.textContent = isCompany ? "Contract Capacity" : "Hourly Rate";
 
-    var rateVal = prof.hourly_rate ? (typeof formatNaira === 'function' ? formatNaira(prof.hourly_rate, true) : '₦' + prof.hourly_rate) : (prof.rate ? prof.rate : (isCompany ? 'Enterprise Contracting' : 'Negotiable'));
+    var rateVal = prof.hourly_rate 
+      ? (typeof formatNaira === 'function' ? formatNaira(prof.hourly_rate, true) : '₦' + Number(prof.hourly_rate).toLocaleString()) 
+      : (prof.rate ? prof.rate : (isCompany ? 'Enterprise Contracting' : 'Negotiable'));
     var hireRateEl = document.querySelector(".hire-rate-value");
     if (hireRateEl) hireRateEl.textContent = (rateVal.includes('/hr') || isCompany || rateVal === 'Negotiable' ? rateVal : rateVal + "/hr");
 
-    // Title, Subtitle & Action Button
+    // Availability
+    var availEl = document.getElementById("hireCardAvailability");
+    if (availEl) {
+      availEl.textContent = prof.availability || (isCompany ? "Accepting Tenders" : "Available for Projects");
+    }
+
+    // CTA Button actions
     var firstName = (prof.name || "User").split(" ")[0];
     var hireCardTitle = document.querySelector(".hire-card-title");
     if (hireCardTitle) hireCardTitle.textContent = isCompany ? "Partner With Us" : "Hire " + firstName;
@@ -836,14 +1177,16 @@ body { background: var(--paper); }
     }
 
     var hireBtn = document.getElementById("hireBtn");
+    var connectBtn = document.getElementById("connectBtn");
+    var messageBtn = document.getElementById("messageBtn");
+    var targetLink = "messages.html?user=" + encodeURIComponent(prof.id || prof.email);
+
     if (hireBtn) {
       hireBtn.innerHTML = isCompany ? "🤝 Partner With Us &rarr;" : "⚡ Hire Professional &rarr;";
-      
-      const currentUser = typeof getUser === 'function' ? getUser() : null;
-      if (currentUser) {
-        hireBtn.href = "messages.html?user=" + encodeURIComponent(prof.id || prof.email);
-      }
+      hireBtn.href = targetLink;
     }
+    if (connectBtn) connectBtn.href = targetLink;
+    if (messageBtn) messageBtn.href = targetLink;
 
     var leaveBtn = document.getElementById("leaveReviewBtn");
     if (leaveBtn) {
@@ -851,27 +1194,89 @@ body { background: var(--paper); }
       var targetName = prof.name || prof.company_name || "Member";
       leaveBtn.textContent = isCompany ? "⭐ Leave Company Review" : "⭐ Leave a Review";
       leaveBtn.onclick = function() {
-        openReviewSubmissionModal(targetId, targetName, isCompany ? "Completed Tender Contract" : "Completed Project");
+        if (typeof openReviewSubmissionModal === 'function') {
+          openReviewSubmissionModal(targetId, targetName, isCompany ? "Completed Tender Contract" : "Completed Project");
+        } else {
+          alert('Leave Review for ' + targetName);
+        }
       };
     }
 
-    var aboutCard = document.querySelector("#panel-overview .pub-grid > div:first-child .content-card");
-    if (aboutCard) {
+    // ═ 1. OVERVIEW TAB: Bio, Skills, Discipline, Languages ═
+    var bioContainer = document.getElementById("overviewBioContainer");
+    if (bioContainer) {
       var userBio = (prof.bio || prof.about || prof.description || '').trim();
-      var cardTitleText = isCompany ? "About Company" : "About " + firstName;
-      
       if (userBio) {
         var paragraphs = userBio.split(/\n\s*\n/).map(function(pText) {
           return `<p style="font-size:14px; color:var(--muted); line-height:1.8; margin-bottom:12px;">${escapeHTML(pText)}</p>`;
         }).join("");
-
-        aboutCard.innerHTML = `<div class="card-title">${cardTitleText}</div>${paragraphs}`;
+        bioContainer.innerHTML = paragraphs;
       } else {
-        aboutCard.innerHTML = `
-          <div class="card-title">${cardTitleText}</div>
-          <div style="font-size:13px; color:var(--muted); font-style:italic;">No bio description provided yet.</div>
-        `;
+        bioContainer.innerHTML = `<div style="font-size:13px; color:var(--muted); font-style:italic;">No bio description provided yet.</div>`;
       }
+    }
+
+    // Skills
+    var skillContainer = document.getElementById("overviewSkillsContainer");
+    if (skillContainer) {
+      var rawSkills = prof.skills;
+      var skillList = [];
+      if (Array.isArray(rawSkills)) skillList = rawSkills;
+      else if (typeof rawSkills === 'string' && rawSkills.trim()) {
+        skillList = rawSkills.split(',').map(s => s.trim()).filter(Boolean);
+      }
+
+      if (skillList.length > 0) {
+        skillContainer.innerHTML = skillList.map(function(s){ return `<span class="skill-chip">${escapeHTML(s)}</span>`; }).join("");
+      } else {
+        skillContainer.innerHTML = `<span style="font-size:13px; color:var(--muted); font-style:italic;">No technical skills listed yet.</span>`;
+      }
+    }
+
+    // Discipline
+    var discContainer = document.getElementById("overviewDisciplineContainer");
+    if (discContainer) {
+      var rawDisc = prof.discipline || prof.industry;
+      var discList = [];
+      if (Array.isArray(rawDisc)) discList = rawDisc;
+      else if (typeof rawDisc === 'string' && rawDisc.trim()) {
+        discList = rawDisc.split(',').map(s => s.trim()).filter(Boolean);
+      }
+
+      if (discList.length > 0) {
+        discContainer.innerHTML = discList.map(function(d){ return `<span class="skill-chip" style="background:var(--paper); border-color:var(--line); color:var(--ink);">${escapeHTML(d)}</span>`; }).join("");
+      } else {
+        discContainer.innerHTML = `<span style="font-size:13px; color:var(--muted); font-style:italic;">Energy, Oil &amp; Gas, EPC &amp; Project Engineering</span>`;
+      }
+    }
+
+    // Languages
+    var langContainer = document.getElementById("publicLanguagesContainer");
+    if (langContainer) {
+      var rawLangs = prof.languages;
+      var langList = [];
+
+      if (Array.isArray(rawLangs) && rawLangs.length > 0) {
+        langList = rawLangs;
+      } else if (typeof rawLangs === 'string' && rawLangs.trim()) {
+        langList = rawLangs.split(',').map(s => s.trim()).filter(Boolean);
+      } else if (prof.language) {
+        langList = [prof.language];
+      } else {
+        langList = ['English'];
+      }
+
+      langContainer.innerHTML = langList.map(function(lang, idx) {
+        var langName = typeof lang === 'object' ? (lang.name || lang.label) : lang;
+        var langLevel = typeof lang === 'object' ? (lang.level || 'Fluent') : (idx === 0 ? 'Native / Fluent' : 'Conversational');
+        var isLast = idx === langList.length - 1;
+        return `
+          <div class="lang-row" style="${isLast ? 'border-bottom:none;' : ''}">
+            <span class="lang-name">${escapeHTML(langName)}</span>
+            <span class="lang-level">${escapeHTML(langLevel)}</span>
+          </div>
+        `;
+      }).join('');
     }
 
     // Corporate Registration Details Card (For Companies)
@@ -915,134 +1320,230 @@ body { background: var(--paper); }
       }
     }
 
-    // Skills
-    var skillWrap = document.querySelector(".skills-wrap");
-    if (skillWrap) {
-      if (prof.skills && prof.skills.length) {
-        skillWrap.innerHTML = prof.skills.map(function(s){ return `<span class="skill-chip">${escapeHTML(s)}</span>`; }).join("");
+    // ═ 2. EXPERIENCE TAB ═
+    var expContainer = document.getElementById("experienceListContainer");
+    var expCountBadge = document.getElementById("expCountBadge");
+    if (expContainer) {
+      if (expCountBadge) expCountBadge.textContent = expList.length > 0 ? `${expList.length} Position${expList.length === 1 ? '' : 's'}` : '';
+      if (expList.length > 0) {
+        expContainer.innerHTML = expList.map(function(exp) {
+          var role = exp.title || exp.role || 'Project Specialist';
+          var company = exp.company || exp.organization || 'Energy Enterprise';
+          var period = exp.period || exp.duration || (exp.start_date ? exp.start_date + ' – ' + (exp.end_date || 'Present') : 'Verified Term');
+          var loc = exp.location ? '📍 ' + exp.location : '';
+          var desc = exp.summary || exp.description || exp.responsibilities || '';
+          return `
+            <div class="exp-card-item">
+              <div class="exp-header">
+                <div>
+                  <div class="exp-role">${escapeHTML(role)}</div>
+                  <div class="exp-company">${escapeHTML(company)} ${loc ? '&bull; <span style="color:var(--muted); font-weight:600;">' + escapeHTML(loc) + '</span>' : ''}</div>
+                </div>
+                <div class="exp-period">${escapeHTML(period)}</div>
+              </div>
+              ${desc ? `<div class="exp-desc">${escapeHTML(desc)}</div>` : ''}
+            </div>
+          `;
+        }).join('');
       } else {
-        skillWrap.innerHTML = `<span style="font-size:13px; color:var(--muted); font-style:italic;">No technical skills listed yet.</span>`;
-      }
-    }
-
-    // Languages
-    var langContainer = document.getElementById("publicLanguagesContainer");
-    if (langContainer) {
-      var rawLangs = prof.languages;
-      var langList = [];
-
-      if (Array.isArray(rawLangs) && rawLangs.length > 0) {
-        langList = rawLangs;
-      } else if (typeof rawLangs === 'string' && rawLangs.trim()) {
-        langList = rawLangs.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
-      } else if (prof.language) {
-        langList = [prof.language];
-      } else {
-        langList = ['English'];
-      }
-
-      langContainer.innerHTML = langList.map(function(lang, idx) {
-        var langName = typeof lang === 'object' ? (lang.name || lang.label) : lang;
-        var langLevel = typeof lang === 'object' ? (lang.level || 'Fluent') : (idx === 0 ? 'Native / Fluent' : 'Conversational');
-        var isLast = idx === langList.length - 1;
-        return `
-          <div class="lang-row" style="${isLast ? 'border-bottom:none;' : ''}">
-            <span class="lang-name">${escapeHTML(langName)}</span>
-            <span class="lang-level">${escapeHTML(langLevel)}</span>
+        expContainer.innerHTML = `
+          <div class="empty-tab-state">
+            <div class="empty-tab-icon">💼</div>
+            <div class="empty-tab-title">No work experience history listed yet</div>
+            <div class="empty-tab-sub">Verified work history, past corporate appointments, and major energy project appointments will appear here.</div>
           </div>
         `;
-      }).join('');
+      }
     }
 
-    // Portfolio Projects Renderer
-    var portfolioGrid = document.querySelector(".portfolio-grid");
-    if (portfolioGrid) {
-      var uploadedPortFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('portfolio') : [];
-      var profPortItems = Array.isArray(prof.portfolio) ? prof.portfolio : [];
-      var portFiles = [].concat(uploadedPortFiles, profPortItems).filter(Boolean);
-
-      window.publicPortFiles = portFiles;
-
-      if (portFiles && portFiles.length > 0) {
-        portfolioGrid.innerHTML = portFiles.map(function(f, idx) {
-          var isImage = f.type && f.type.startsWith('image/');
-          var sz = f.size ? (typeof formatFileSize === 'function' ? formatFileSize(f.size) : '') : 'Work Sample';
-          var title = f.name || f.title || 'Project Work Sample';
-          var icon = typeof getFileTypeIcon === 'function' ? getFileTypeIcon(f.type, f.name) : '📄';
+    // ═ 3. QUALIFICATIONS TAB ═
+    var qualContainer = document.getElementById("qualificationsListContainer");
+    var qualCountBadge = document.getElementById("qualCountBadge");
+    if (qualContainer) {
+      if (qualCountBadge) qualCountBadge.textContent = qualList.length > 0 ? `${qualList.length} Qualification${qualList.length === 1 ? '' : 's'}` : '';
+      if (qualList.length > 0) {
+        qualContainer.innerHTML = qualList.map(function(q, idx) {
+          var qName = q.name || q.degree || 'Academic Qualification';
+          var qInst = q.issuer || q.institution || 'Accredited University / Institute';
+          var qCat = q.category || 'Degree';
+          var qYear = q.year || '';
+          var hasDoc = !!(q.dataURL || q.fileUrl);
 
           return `
-            <div class="port-card" style="display:flex; flex-direction:column; justify-space-between;">
+            <div class="qual-card-item" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+              <div style="flex:1; min-width:240px;">
+                <div class="qual-header" style="margin-bottom:4px;">
+                  <div class="qual-degree">🎓 ${escapeHTML(qName)}</div>
+                  ${qYear ? `<div class="qual-year">${escapeHTML(String(qYear))}</div>` : ''}
+                </div>
+                <div class="qual-inst">${escapeHTML(qInst)} &bull; <span style="color:var(--muted); font-weight:600;">${escapeHTML(qCat)}</span></div>
+                ${q.fileName ? `<div style="font-size:11.5px; color:var(--muted); margin-top:4px;">📎 ${escapeHTML(q.fileName)}</div>` : ''}
+              </div>
+              ${hasDoc ? `
+                <div>
+                  <button class="btn btn-outline btn-sm" style="color:var(--teal); border-color:var(--teal); font-weight:800; font-size:12px;" onclick="openDocumentViewer(window.publicDocsRegistry[${idx}])">👁️ Preview Certificate</button>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+      } else {
+        qualContainer.innerHTML = `
+          <div class="empty-tab-state">
+            <div class="empty-tab-icon">🎓</div>
+            <div class="empty-tab-title">No academic qualifications added yet</div>
+            <div class="empty-tab-sub">University degrees, higher education diplomas, and academic credentials added by this member will appear here.</div>
+          </div>
+        `;
+      }
+    }
+
+    // ═ 4. CERTIFICATIONS TAB ═
+    var certContainer = document.getElementById("certificationsListContainer");
+    var certCountBadge = document.getElementById("certCountBadge");
+    if (certContainer) {
+      if (certCountBadge) certCountBadge.textContent = certList.length > 0 ? `${certList.length} Certificate${certList.length === 1 ? '' : 's'}` : '';
+      if (certList.length > 0) {
+        certContainer.innerHTML = certList.map(function(c, idx) {
+          var title = c.title || c.name || 'Professional Certification';
+          var issuer = c.issuer || 'Accreditation Board';
+          var isVerified = c.is_verified || true;
+          var hasDoc = !!(c.dataURL || c.fileUrl);
+          var regIdx = qualList.length + idx;
+
+          return `
+            <div class="cert-row-item">
+              <div style="display:flex; align-items:center; gap:14px; min-width:0; flex:1;">
+                <div class="cert-icon-wrap">🏅</div>
+                <div style="min-width:0; flex:1;">
+                  <div class="cert-name-text">${escapeHTML(title)}</div>
+                  <div class="cert-issuer-text">${escapeHTML(issuer)} &bull; <span style="color:#16a34a; font-weight:800;">${isVerified ? '✅ Verified Accreditation' : 'Uploaded Credential'}</span></div>
+                </div>
+              </div>
+              ${hasDoc ? `
+                <div style="flex-shrink:0;">
+                  <button class="btn btn-outline btn-sm" style="color:var(--teal); border-color:var(--teal); font-weight:800; font-size:12px;" onclick="openDocumentViewer(window.publicDocsRegistry[${regIdx}])">👁️ Preview</button>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+      } else {
+        certContainer.innerHTML = `
+          <div class="empty-tab-state">
+            <div class="empty-tab-icon">📜</div>
+            <div class="empty-tab-title">No professional certifications uploaded yet</div>
+            <div class="empty-tab-sub">Professional engineering licenses (COREN), industry memberships (NSE), and safety certifications (BOSIET, NISP) will appear here.</div>
+          </div>
+        `;
+      }
+    }
+
+    // ═ 5. PORTFOLIO TAB ═
+    var portGrid = document.getElementById("portfolioGridContainer");
+    var portCountBadge = document.getElementById("portCountBadge");
+    if (portGrid) {
+      if (portCountBadge) portCountBadge.textContent = portList.length > 0 ? `${portList.length} Item${portList.length === 1 ? '' : 's'}` : '';
+      if (portList.length > 0) {
+        portGrid.innerHTML = portList.map(function(f, idx) {
+          var isImage = f.type && f.type.startsWith('image/');
+          var sz = f.size ? (typeof formatFileSize === 'function' ? formatFileSize(f.size) : Math.round(f.size/1024) + ' KB') : 'Work Sample';
+          var title = f.name || f.title || 'Project Work Sample';
+          var icon = typeof getFileTypeIcon === 'function' ? getFileTypeIcon(f.type, f.name) : '📄';
+          var regIdx = qualList.length + certList.length + idx;
+
+          return `
+            <div class="port-card" style="display:flex; flex-direction:column; justify-content:space-between;">
               ${isImage && f.dataURL
                 ? `<div style="height:150px; background:url('${f.dataURL}') center/cover; border-radius:12px 12px 0 0;"></div>`
-                : `<div class="port-thumb" style="height:130px; background:linear-gradient(135deg,#0E3B35,#13756F); display:grid; place-items:center; font-size:36px; border-radius:12px 12px 0 0;">${icon}</div>`}
-              <div class="port-info" style="padding:14px; flex:1; display:flex; flex-direction:column; justify-content:space-between;">
+                : `<div class="port-thumb" style="background:linear-gradient(135deg,#0E3B35,#13756F); color:#fff;">${icon}</div>`}
+              <div class="port-info" style="flex:1; display:flex; flex-direction:column; justify-content:space-between;">
                 <div>
-                  <div class="port-name" style="font-weight:800; font-size:14px; color:var(--ink); margin-bottom:4px;" title="${escapeHTML(title)}">${escapeHTML(title)}</div>
-                  <div class="port-client" style="font-size:11px; color:var(--muted); margin-bottom:10px;">${sz} &bull; Verified Work Sample</div>
+                  <div class="port-name" title="${escapeHTML(title)}">${escapeHTML(title)}</div>
+                  <div class="port-client">${sz} &bull; Verified Work Sample</div>
                 </div>
-                ${f.dataURL ? `<button class="btn btn-outline btn-sm" style="width:100%; color:var(--teal); border-color:var(--teal); font-weight:800; font-size:11px;" onclick="openDocumentViewer(window.publicPortFiles[${idx}])">👁️ View Work Sample</button>` : ''}
+                ${f.dataURL || f.fileUrl ? `<button class="btn btn-outline btn-sm" style="width:100%; margin-top:10px; color:var(--teal); border-color:var(--teal); font-weight:800; font-size:11px;" onclick="openDocumentViewer(window.publicDocsRegistry[${regIdx}])">👁️ View Work Sample</button>` : ''}
               </div>
             </div>
           `;
-        }).join("");
+        }).join('');
       } else {
-        portfolioGrid.innerHTML = `
-          <div style="text-align:center; padding:48px 20px; border:2px dashed var(--line); border-radius:16px; color:var(--muted); font-size:13px; grid-column:1/-1;">
-            <div style="font-size:32px; margin-bottom:8px;">💼</div>
-            <div style="font-weight:800; font-size:15px; color:var(--ink);">No Portfolio Projects Uploaded Yet</div>
-            <div style="font-size:12px; margin-top:4px;">Work samples, engineering diagrams, and project documentation uploaded by this member will appear here.</div>
+        portGrid.innerHTML = `
+          <div class="empty-tab-state" style="grid-column:1/-1;">
+            <div class="empty-tab-icon">📁</div>
+            <div class="empty-tab-title">No Portfolio Projects Uploaded Yet</div>
+            <div class="empty-tab-sub">Work samples, engineering diagrams, and project documentation uploaded by this member will appear here.</div>
           </div>
         `;
       }
     }
 
-    // Dynamic Real Client Reviews Panel
-    var reviewsPanel = document.getElementById("panel-reviews");
-    if (reviewsPanel) {
-      let realReviews = [];
-      if (Array.isArray(prof.reviews)) {
-        realReviews = prof.reviews;
-      } else {
-        try {
-          const rKey1 = 'collekt_reviews_' + (prof.id || '');
-          const rKey2 = 'collekt_reviews_' + (prof.email || '');
-          const r1 = JSON.parse(localStorage.getItem(rKey1) || '[]');
-          const r2 = JSON.parse(localStorage.getItem(rKey2) || '[]');
-          realReviews = [].concat(r1, r2);
-          // Deduplicate reviews
-          const seenR = new Set();
-          realReviews = realReviews.filter(r => {
-            const id = r.id || (r.author + r.date + r.text);
-            if (seenR.has(id)) return false;
-            seenR.add(id);
-            return true;
-          });
-        } catch(e){}
-      }
+    // ═ 6. COMPLETED JOBS TAB ═
+    var jobsContainer = document.getElementById("completedJobsListContainer");
+    var jobsCountBadge = document.getElementById("jobsCountBadge");
+    if (jobsContainer) {
+      if (jobsCountBadge) jobsCountBadge.textContent = jobList.length > 0 ? `${jobList.length} Job${jobList.length === 1 ? '' : 's'}` : '';
+      if (jobList.length > 0) {
+        jobsContainer.innerHTML = jobList.map(function(job) {
+          var jTitle = job.title || 'Completed Platform Engagement';
+          var jClient = job.client || 'Verified Platform Client';
+          var jDate = job.date || 'Completed';
+          var jAmount = job.amount > 0 ? (typeof formatNaira === 'function' ? formatNaira(job.amount, true) : '₦' + Number(job.amount).toLocaleString()) : 'Escrow Secured';
+          var jStatus = job.status || 'Escrow Completed';
 
-      if (realReviews.length > 0) {
-        const sumRating = realReviews.reduce((acc, r) => acc + (Number(r.rating || r.stars) || 5), 0);
-        const avgRating = (sumRating / realReviews.length).toFixed(1);
+          return `
+            <div class="job-card-item">
+              <div class="job-header">
+                <div>
+                  <div class="job-title-text">⚡ ${escapeHTML(jTitle)}</div>
+                  <div class="job-client-text">Client: ${escapeHTML(jClient)}</div>
+                </div>
+                <div class="job-date-text">📅 ${escapeHTML(jDate)}</div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; pt-2; border-top:1px solid var(--line); padding-top:10px;">
+                <span style="font-size:13px; font-weight:800; color:var(--ink);">${jAmount}</span>
+                <span style="font-size:11.5px; font-weight:800; color:#16a34a; background:#dcfce7; padding:3px 10px; border-radius:99px;">✅ ${escapeHTML(jStatus)}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        jobsContainer.innerHTML = `
+          <div class="empty-tab-state">
+            <div class="empty-tab-icon">⚡</div>
+            <div class="empty-tab-title">No completed jobs on Collekt yet</div>
+            <div class="empty-tab-sub">Escrow-verified completed contracts and milestone deliveries performed on Collekt will appear here.</div>
+          </div>
+        `;
+      }
+    }
+
+    // ═ 7. REVIEWS TAB ═
+    var revContainer = document.getElementById("reviewsListContainer");
+    if (revContainer) {
+      if (revList.length > 0) {
+        const sumRating = revList.reduce((acc, r) => acc + (Number(r.rating || r.stars) || 5), 0);
+        const avgRating = (sumRating / revList.length).toFixed(1);
 
         var revHeaderHtml = `
           <div class="content-card" style="margin-bottom:0;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-              <div class="card-title" style="font-size:18px; margin-bottom:0;">Client Reviews</div>
+              <div class="card-title" style="font-size:18px; margin-bottom:0;">Client Reviews &amp; Testimonials</div>
               <div style="display:flex; align-items:center; gap:8px;">
                 <span style="font-size:28px; font-weight:900; color:var(--ink);">${avgRating}</span>
                 <div>
-                  <div style="color:var(--amber); font-size:15px; letter-spacing:2px;">★ ${realReviews.length} review${realReviews.length === 1 ? '' : 's'}</div>
+                  <div style="color:var(--amber); font-size:15px; letter-spacing:2px;">★ ${revList.length} review${revList.length === 1 ? '' : 's'}</div>
                 </div>
               </div>
             </div>
         `;
-        var revItemsHtml = realReviews.map(function(r) {
+        var revItemsHtml = revList.map(function(r) {
           return `
             <div class="review-card">
               <div class="review-header">
                 <div>
                   <div class="review-author">${escapeHTML(r.author || r.reviewer_name || 'Client')}</div>
-                  <div class="review-company">${escapeHTML(r.role || r.project_title || 'Completed Project')}</div>
+                  <div class="review-company">${escapeHTML(r.role || r.reviewer_company || 'Completed Project')}</div>
                 </div>
                 <div class="star-row">★ ${(Number(r.rating || r.stars) || 5).toFixed(1)}</div>
               </div>
@@ -1051,21 +1552,21 @@ body { background: var(--paper); }
             </div>
           `;
         }).join('');
-        reviewsPanel.innerHTML = revHeaderHtml + revItemsHtml + '</div>';
+        revContainer.innerHTML = revHeaderHtml + revItemsHtml + '</div>';
       } else {
-        reviewsPanel.innerHTML = `
+        revContainer.innerHTML = `
           <div class="content-card" style="margin-bottom:0;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-              <div class="card-title" style="font-size:18px; margin-bottom:0;">Client Reviews</div>
+              <div class="card-title" style="font-size:18px; margin-bottom:0;">Client Reviews &amp; Testimonials</div>
               <div style="display:flex; align-items:center; gap:8px;">
                 <span style="font-size:24px; font-weight:900; color:var(--ink);">0.0</span>
                 <div style="color:var(--muted); font-size:12px; font-weight:700;">★ 0 reviews</div>
               </div>
             </div>
-            <div style="text-align:center; padding:40px 20px; border:2px dashed var(--line); border-radius:16px; color:var(--muted); font-size:13px;">
-              <div style="font-size:32px; margin-bottom:8px;">⭐</div>
-              <div style="font-weight:800; color:var(--ink); font-size:14px;">No reviews yet</div>
-              <div style="font-size:12px; margin-top:4px;">Client ratings &amp; testimonials will appear here as contracts are awarded and completed.</div>
+            <div class="empty-tab-state">
+              <div class="empty-tab-icon">⭐</div>
+              <div class="empty-tab-title">No reviews yet</div>
+              <div class="empty-tab-sub">Client ratings &amp; testimonials will appear here as contracts are awarded and completed.</div>
             </div>
           </div>
         `;

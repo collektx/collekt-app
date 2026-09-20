@@ -1183,7 +1183,7 @@ function getRealTimeUserMetrics(user) {
       const pUser = String(p.userId || p.freelancer_id || p.author_email || p.email || '').toLowerCase();
       if ((uId && pUser === uId) || (uEmail && pUser === uEmail) || (uUsername && pUser === uUsername)) {
         totalProposals++;
-        if (p.status === 'accepted' || p.status === 'completed' || p.status === 'hired' || p.status === 'delivered') {
+        if (p.status === 'completed' || p.status === 'Job Collekted' || p.status === 'COMPLETED' || p.status === 'closed') {
           completedProjects++;
         }
       }
@@ -1195,7 +1195,7 @@ function getRealTimeUserMetrics(user) {
     allContracts.forEach(c => {
       const cUser = String(c.freelancer_id || c.pro_id || c.user_id || '').toLowerCase();
       if ((uId && cUser === uId) || (uEmail && cUser === uEmail)) {
-        if (c.status === 'completed' || c.status === 'closed') completedProjects++;
+        if (c.status === 'completed' || c.status === 'closed' || c.status === 'Job Collekted' || c.status === 'COMPLETED') completedProjects++;
       }
     });
   } catch(e){}
