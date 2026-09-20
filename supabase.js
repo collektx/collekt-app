@@ -1800,6 +1800,13 @@ async function fetchDedicatedVirtualAccount(ownerId) {
 
     // 1. Try serverless function first
     try {
+      const res = await fetch(`/.netlify/functions/korapay-virtual-account?owner_id=${encodeURIComponent(ownerId)}`);
+      const parsed = await safeParseJsonResponse(res);
+      if (parsed.ok && parsed.data && (parsed.data.virtual_account || parsed.data.data)) {
+        return { success: true, data: parsed.data.virtual_account || parsed.data.data };
+      }
+    } catch (e) {}
+    try {
       const res = await fetch(`/.netlify/functions/paystack-dva?owner_id=${encodeURIComponent(ownerId)}`);
       const parsed = await safeParseJsonResponse(res);
       if (parsed.ok && parsed.data && parsed.data.virtual_account) {
@@ -1883,7 +1890,23 @@ async function provisionDedicatedVirtualAccount(params) {
     }
     const formattedAcctName = `COLLEKT / ${displayName.toUpperCase()}`;
 
-    // 1. Try serverless function first
+    // 1. Try serverless function first (Korapay dedicated account)
+    try {
+      const res = await fetch('/.netlify/functions/korapay-virtual-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params)
+      });
+      const parsed = await safeParseJsonResponse(res);
+      if (parsed.ok && parsed.data && (parsed.data.virtual_account || parsed.data.data)) {
+        return {
+          success: true,
+          data: parsed.data.virtual_account || parsed.data.data,
+          status: parsed.data.status
+        };
+      }
+    } catch (e) {}
+
     try {
       const res = await fetch('/.netlify/functions/paystack-dva', {
         method: 'POST',
