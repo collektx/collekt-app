@@ -7,6 +7,7 @@ const supabase = createClient(
 );
 
 function paystackApi(endpoint, method, postData) {
+  const secretKey = process.env.PAYSTACK_SECRET_KEY || '';
   return new Promise((resolve, reject) => {
     const dataString = postData ? JSON.stringify(postData) : '';
     const req = https.request({
@@ -15,7 +16,7 @@ function paystackApi(endpoint, method, postData) {
       path: endpoint,
       method: method,
       headers: {
-        'Authorization': Bearer ,
+        'Authorization': `Bearer ${secretKey}`,
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(dataString)
       }
@@ -26,7 +27,7 @@ function paystackApi(endpoint, method, postData) {
         try {
           resolve(JSON.parse(body));
         } catch (e) {
-          reject(new Error(Paystack returned non-JSON response: ));
+          reject(new Error(`Paystack returned non-JSON response: ${body}`));
         }
       });
     });

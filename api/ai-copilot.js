@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
     const postData = JSON.stringify({
       contents: [{
         parts: [{
-          text: You are Kolly, the AI assistant for Collekt (an energy talent & EPC engineering marketplace in Nigeria). Context: . User prompt: 
+          text: `You are Kolly, the AI assistant for Collekt (an energy talent & EPC engineering marketplace in Nigeria). Context: ${context || 'None'}. User prompt: ${prompt}`
         }]
       }]
     });
@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
     const aiRes = await new Promise((resolve, reject) => {
       const gReq = https.request({
         hostname: 'generativelanguage.googleapis.com',
-        path: /v1beta/models/:generateContent?key=,
+        path: `/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ module.exports = async (req, res) => {
           try {
             resolve({ statusCode: gRes.statusCode, body: JSON.parse(data) });
           } catch (e) {
-            reject(new Error(Gemini returned non-JSON response: ));
+            reject(new Error(`Gemini returned non-JSON response: ${data}`));
           }
         });
       });
