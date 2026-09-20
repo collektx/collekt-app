@@ -12,7 +12,7 @@ exports.handler = async (event) => {
 
   try {
     const rawBody = event.body || '';
-    const secretKey = process.env.KORAPAY_SECRET_KEY || process.env.KORAPAY_WEBHOOK_SECRET || Buffer.from('c2tfbGl2ZV8yQm5mUzdxMVNGRkZHanFOTW5uQnFEajhMUnV2eVZTQ3llUWFVblhT', 'base64').toString('utf8');
+    const secretKey = process.env.KORAPAY_SECRET_KEY || process.env.KORAPAY_WEBHOOK_SECRET || Buffer.from('c2tfbGl2ZV8yQm5mUzdxMVNGRkZHanFOTW5uQnFEajhMUlV2eVZTQ3llUWFVblhT', 'base64').toString('utf8');
     const signature = event.headers['x-korapay-signature'] || 
                       event.headers['X-Korapay-Signature'] || 
                       event.headers['x-kora-signature'] || 

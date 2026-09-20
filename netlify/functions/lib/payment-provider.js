@@ -423,7 +423,7 @@ class KorapayProvider extends PaymentProvider {
     super();
     this.gateway = 'korapay';
     this.publicKey = publicKey || process.env.KORAPAY_PUBLIC_KEY || 'pk_live_GDgZcYhPzLZBHh1rr6godHWmHuA5qfNaxdioYM1m';
-    this.secretKey = secretKey || process.env.KORAPAY_SECRET_KEY || Buffer.from('c2tfbGl2ZV8yQm5mUzdxMVNGRkZHanFOTW5uQnFEajhMUnV2eVZTQ3llUWFVblhT', 'base64').toString('utf8');
+    this.secretKey = secretKey || process.env.KORAPAY_SECRET_KEY || Buffer.from('c2tfbGl2ZV8yQm5mUzdxMVNGRkZHanFOTW5uQnFEajhMUlV2eVZTQ3llUWFVblhT', 'base64').toString('utf8');
     this.webhookSecret = webhookSecret || process.env.KORAPAY_WEBHOOK_SECRET || this.secretKey;
     this.encryptionKey = encryptionKey || process.env.KORAPAY_ENCRYPTION_KEY || 'uinGDvszNY5CRCZN3fEp3MXdbPGEM2wh';
     this.environment = process.env.KORAPAY_ENVIRONMENT || (this.secretKey.startsWith('sk_live_') || this.publicKey.startsWith('pk_live_') ? 'live' : 'test');

@@ -1748,21 +1748,17 @@ async function initializeWalletFunding({ amount, email, payment_method = 'card',
       if (parsed.ok && parsed.data && (parsed.data.authorization_url || parsed.data.checkout_url || parsed.data.status === 'success')) {
         return { success: true, data: parsed.data };
       }
+      if (parsed.data && parsed.data.error) {
+        return { success: false, error: parsed.data.error };
+      }
     } catch (netErr) {
       console.warn('Serverless payment init note:', netErr.message);
+      return { success: false, error: netErr.message || 'Connection to payment gateway failed' };
     }
 
-    // 2. Direct Korapay checkout session fallback
     return {
-      success: true,
-      data: {
-        status: 'success',
-        authorization_url: `https://checkout.korapay.com/simulate/${cleanRef}?amount=${numAmount}`,
-        checkout_url: `https://checkout.korapay.com/simulate/${cleanRef}?amount=${numAmount}`,
-        access_code: `kora_${cleanRef}`,
-        reference: cleanRef,
-        amount: numAmount
-      }
+      success: false,
+      error: 'Unable to initialize payment session. Please try again.'
     };
   } catch (err) {
     console.error('initializeWalletFunding error:', err);
