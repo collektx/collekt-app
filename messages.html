@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=66.0">
-<link rel="stylesheet" href="shared.css?v=66.0">
-<link rel="stylesheet" href="glass.css?v=66.0">
+<link rel="stylesheet" href="style.css?v=74.0">
+<link rel="stylesheet" href="shared.css?v=74.0">
+<link rel="stylesheet" href="glass.css?v=74.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -834,10 +834,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=66.0"></script>
-<script src="app.js?v=66.0"></script>
-<script src="collekt-ai.js?v=66.0"></script>
-<script src="settings-popup.js?v=66.0"></script>
+<script src="supabase.js?v=74.0"></script>
+<script src="app.js?v=74.0"></script>
+<script src="collekt-ai.js?v=74.0"></script>
+<script src="settings-popup.js?v=74.0"></script>
 <script>
   requireAuth();
 
@@ -1440,9 +1440,8 @@
         }).catch(e => console.warn('Supabase fetch messages notice:', e));
 
         const me = getUser();
-        const isDave = String(me?.email || '').toLowerCase() === 'ojeoweredave@gmail.com';
-        const myId = isDave ? 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' : me?.id;
-        if (typeof markSupabaseMessagesAsRead === 'function') {
+        const myId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null) || me?.id;
+        if (typeof markSupabaseMessagesAsRead === 'function' && myId) {
           markSupabaseMessagesAsRead(convId, myId);
         }
       }
@@ -2680,18 +2679,56 @@
   window.startConversationWith = async function(userId) {
     closeNewMessageModal();
     if (!userId) return;
+    const me = getUser();
+    if (!me) return;
+
+    const myId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null) || me.id || me.email;
+    const otherId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(userId) : null) || userId;
+
+    let sbConvId = null;
+    if (window.sb && typeof createSupabaseConversation === 'function') {
+      try {
+        const sbConv = await createSupabaseConversation(myId, otherId);
+        if (sbConv && sbConv.id) {
+          sbConvId = sbConv.id;
+          const allConvs = getAllConversations();
+          let existing = allConvs.find(c => c.id === sbConv.id || (
+            c.participants && (
+              (c.participants.includes(myId) && c.participants.includes(otherId)) ||
+              (c.participants.includes(sbConv.participant_a) && c.participants.includes(sbConv.participant_b))
+            )
+          ));
+          if (existing) {
+            existing.id = sbConv.id;
+            existing.participants = [sbConv.participant_a, sbConv.participant_b];
+          } else {
+            allConvs.push({
+              id: sbConv.id,
+              participants: [sbConv.participant_a, sbConv.participant_b],
+              created_at: sbConv.created_at,
+              last_message: sbConv.last_message_preview || '',
+              last_at: sbConv.last_message_at || sbConv.created_at
+            });
+          }
+          saveAllConversations(allConvs);
+        }
+      } catch(e) {
+        console.warn('Supabase start conversation sync notice:', e);
+      }
+    }
+
     const conv = getOrCreateConversation(userId);
-    if (conv) {
-      activeConvId = conv.id;
+    const targetConvId = sbConvId || (conv ? conv.id : null);
+    if (targetConvId) {
+      activeConvId = targetConvId;
       renderContacts();
 
-      // If Supabase UUID, fetch live messages
-      if (window.sb && typeof fetchMessagesFromSupabase === 'function' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(conv.id)) {
+      if (window.sb && typeof fetchMessagesFromSupabase === 'function' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetConvId)) {
         try {
-          const msgs = await fetchMessagesFromSupabase(conv.id);
+          const msgs = await fetchMessagesFromSupabase(targetConvId);
           if (Array.isArray(msgs)) {
             const all = getAllMessages();
-            const others = all.filter(m => m.conversation_id !== conv.id);
+            const others = all.filter(m => m.conversation_id !== targetConvId);
             saveAllMessages([...others, ...msgs]);
             renderContacts();
           }
@@ -2710,16 +2747,39 @@
     renderContacts();
   });
   window.addEventListener('storage', (e) => {
-    if (!e.key || e.key === 'collekt_messages' || e.key === 'collekt_conversations') {
+    if (!e.key || e.key === 'collekt_all_messages' || e.key === 'collekt_messages' || e.key === 'collekt_conversations') {
       renderContacts();
     }
   });
 
   function startPolling() {
     if (pollTimer) clearInterval(pollTimer);
-    pollTimer = setInterval(() => {
+    pollTimer = setInterval(async () => {
       renderContacts();
-    }, 1500);
+      
+      const me = getUser();
+      const myUuid = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null) || me?.id;
+      if (window.sb && activeConvId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(activeConvId)) {
+        try {
+          const msgs = await fetchMessagesFromSupabase(activeConvId);
+          if (Array.isArray(msgs) && msgs.length > 0) {
+            const all = getAllMessages();
+            const existingIds = new Set(all.map(m => m.id));
+            let hasNew = false;
+            msgs.forEach(m => {
+              if (!existingIds.has(m.id)) {
+                all.push(m);
+                hasNew = true;
+              }
+            });
+            if (hasNew) {
+              saveAllMessages(all);
+              renderContacts();
+            }
+          }
+        } catch(e){}
+      }
+    }, 2500);
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
@@ -2731,8 +2791,7 @@
 
     const me = getUser();
     if (me) registerUserInDirectory(me);
-    const isDave = String(me?.email || '').toLowerCase() === 'ojeoweredave@gmail.com';
-    const myUuid = isDave ? 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' : me?.id;
+    const myUuid = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null) || me?.id;
 
     // 1. Fetch real registered users from Supabase profiles
     if (typeof fetchRealRegisteredUsers === 'function') {
@@ -2771,7 +2830,7 @@
             body: newMsg.body,
             media_url: newMsg.media_url,
             created_at: newMsg.created_at,
-            read: newMsg.is_read,
+            read: newMsg.is_read || false,
             status: 'delivered'
           });
           saveAllMessages(allMsgs);
@@ -2813,13 +2872,16 @@
       });
     }
 
-    // Check if redirected with a target user parameter (e.g., messages.html?user=... or ?u=... or ?to=...)
+    // Check if redirected with a target conversation or user parameter
     const urlParams = new URLSearchParams(window.location.search);
+    const targetConvParam = urlParams.get('conv') || urlParams.get('c') || urlParams.get('conversation');
     const targetUserParam = urlParams.get('user') || urlParams.get('id') || urlParams.get('start') || urlParams.get('u') || urlParams.get('to') || urlParams.get('with') || urlParams.get('username') || urlParams.get('email');
 
     // Load conversations
     const myConvs = getMyConversations();
-    if (targetUserParam) {
+    if (targetConvParam) {
+      selectConversation(targetConvParam);
+    } else if (targetUserParam) {
       startConversationWith(targetUserParam);
     } else if (myConvs.length > 0) {
       activeConvId = myConvs.sort((a, b) => new Date(b.last_at) - new Date(a.last_at))[0].id;
