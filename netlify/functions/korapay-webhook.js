@@ -47,9 +47,10 @@ exports.handler = async (event) => {
       const amountInNaira = Number(data.amount_paid || data.amount || payload.amount || 0);
       let ownerId = data.metadata?.owner_id || data.metadata?.user_id;
 
-      // 1. Check virtual_accounts table by account_number or account_reference (for DVA deposits)
-      const virtualAcctNo = data.virtual_bank_account?.account_number || data.account_number;
-      const acctRef = data.account_reference || data.virtual_bank_account?.account_reference;
+      const vbaObj = data.virtual_bank_account_details?.virtual_bank_account || data.virtual_bank_account || {};
+      const payerObj = data.virtual_bank_account_details?.payer_bank_account || data.payer_bank_account || {};
+      const virtualAcctNo = vbaObj.account_number || data.account_number;
+      const acctRef = vbaObj.account_reference || data.account_reference;
 
       if (!ownerId && (virtualAcctNo || acctRef)) {
         let query = supabase.from('virtual_accounts').select('owner_id, user_id');
@@ -104,18 +105,24 @@ exports.handler = async (event) => {
         ownerId = `${hash.substring(0,8)}-${hash.substring(8,12)}-4${hash.substring(13,16)}-a${hash.substring(17,20)}-${hash.substring(20,32)}`;
       }
 
+      const payerDesc = payerObj.account_name 
+        ? `Bank Transfer Deposit (from ${payerObj.account_name} • ${payerObj.bank_name || 'Bank'})`
+        : (virtualAcctNo ? `Virtual Bank Account Deposit (${vbaObj.bank_name || 'Korapay'})` : 'Wallet Funding via Korapay');
+
       // 2. Double-entry credit execution
       const { error: rpcError } = await supabase.rpc('credit_wallet_atomic', {
         p_owner_id: ownerId,
         p_amount: amountInNaira,
         p_reference: reference,
         p_entry_type: 'credit',
-        p_description: 'Wallet Funding via Korapay Secure Channel',
+        p_description: payerDesc,
         p_metadata: {
           gateway: 'korapay',
-          payment_method: data.payment_method || data.channel || 'korapay',
+          payment_method: data.payment_method || data.channel || 'bank_transfer',
           fee: data.fee || 0,
-          paid_at: data.paid_at || new Date().toISOString()
+          payer: payerObj,
+          virtual_account: vbaObj,
+          paid_at: data.paid_at || data.transaction_date || new Date().toISOString()
         }
       });
 

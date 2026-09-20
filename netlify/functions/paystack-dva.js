@@ -132,20 +132,29 @@ exports.handler = async (event) => {
     // 3. Provision Dedicated Virtual Account (Korapay primary, Paystack fallback)
     let dvaResult = null;
     let usedProvider = 'korapay';
-    const koraAccountRef = `kora_dva_${effectiveOwnerId.replace(/-/g, '').substring(0, 12)}_${Date.now()}`;
+    const koraAccountRef = `kora_vba_${effectiveOwnerId.replace(/-/g, '').substring(0, 12)}_${Date.now()}`;
     const formattedAcctName = `COLLEKT / ${preferredName}`;
+
+    // Extract KYC BVN / NIN if available in profile or request payload
+    const userBvn = body.bvn || body.kyc?.bvn || profile?.bvn || profile?.kyc_bvn || profile?.metadata?.bvn;
+    const userNin = body.nin || body.kyc?.nin || profile?.nin || profile?.kyc_nin || profile?.metadata?.nin;
+    const kycData = (userBvn || userNin) ? { bvn: userBvn, nin: userNin } : undefined;
+
+    // Preferred Bank Code: default to Fidelity Bank ('070') or configured partner
+    const requestedBankCode = body.bank_code || body.bankCode || '070';
 
     try {
       const koraProvider = getPaymentProvider('korapay');
       dvaResult = await koraProvider.createVirtualAccount({
         account_name: formattedAcctName,
         account_reference: koraAccountRef,
-        bank_code: '000',
+        bank_code: requestedBankCode,
         permanent: true,
         customer: {
           name: preferredName,
           email: customerEmail
-        }
+        },
+        kyc: kycData
       });
       usedProvider = 'korapay';
     } catch (koraErr) {

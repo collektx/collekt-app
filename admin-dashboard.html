@@ -50,9 +50,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=76.0">
-<link rel="stylesheet" href="shared.css?v=76.0">
-<link rel="stylesheet" href="glass.css?v=76.0">
+<link rel="stylesheet" href="style.css?v=77.0">
+<link rel="stylesheet" href="shared.css?v=77.0">
+<link rel="stylesheet" href="glass.css?v=77.0">
 
 <style>
   html, body {
@@ -809,11 +809,17 @@
           </div>
 
           <div class="form-group" style="margin-bottom:20px;">
-            <label class="form-label" style="font-size:12px; font-weight:800;">Default Virtual Bank Partner</label>
+            <label class="form-label" style="font-size:12px; font-weight:800;">Default Virtual Bank Partner (Korapay NGN Rails)</label>
             <select class="form-input" id="adminPaystackBankPartnerSelect" style="font-size:13px;">
-              <option value="Wema Bank (Korapay DVA)">Wema Bank (Korapay DVA) — Instant NUBANs</option>
-              <option value="Sterling Bank (Korapay DVA)">Sterling Bank (Korapay DVA)</option>
-              <option value="Providus Bank (Korapay DVA)">Providus Bank (Korapay DVA)</option>
+              <option value="Fidelity Bank (070)">Fidelity Bank (Code: 070) — Recommended Primary</option>
+              <option value="Wema Bank (035)">Wema Bank (Code: 035) — Instant NUBANs</option>
+              <option value="Moniepoint MFB (090405)">Moniepoint MFB (Code: 090405)</option>
+              <option value="United Bank for Africa (033)">United Bank for Africa / UBA (Code: 033)</option>
+              <option value="Globus Bank (103)">Globus Bank (Code: 103)</option>
+              <option value="First City Monument Bank (214)">First City Monument Bank / FCMB (Code: 214)</option>
+              <option value="Optimus Bank (107)">Optimus Bank (Code: 107)</option>
+              <option value="Parallex Bank (104)">Parallex Bank (Code: 104)</option>
+              <option value="Sandbox Bank (000)">Sandbox Environment (Code: 000) — Test Mode</option>
             </select>
           </div>
 
@@ -825,6 +831,9 @@
               </button>
               <button type="button" class="btn btn-outline btn-sm" onclick="adminMassProvisionDVA()" style="color:var(--teal); border-color:var(--teal); font-weight:800;">
                 🔄 Provision Live Accounts for All Users
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="adminTestSandboxCredit()" style="color:#b45309; border-color:#f59e0b; font-weight:800;" title="Test credit simulation on Sandbox Virtual Bank Account">
+                ⚡ Simulate Sandbox Deposit
               </button>
             </div>
             <button type="button" id="saveGatewayCredsBtn" class="btn btn-primary btn-sm" onclick="saveAdminPaystackConfig()" style="background:#09a5db; border:none; font-weight:900; min-width:180px;">
@@ -1043,8 +1052,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=76.0"></script>
-<script src="app.js?v=76.0"></script>
+<script src="supabase.js?v=77.0"></script>
+<script src="app.js?v=77.0"></script>
 <script>
   async function initAdminDashboard() {
     // 1. Verify Master Admin or live Supabase session
@@ -1378,6 +1387,35 @@
       }
     } catch(e) {
       showToast('ℹ️ Credentials saved. Korapay webhook and checkout rails active.', 'info');
+    }
+  }
+
+  async function adminTestSandboxCredit() {
+    const acctNo = prompt('Enter the 10-digit Sandbox Virtual Account number to simulate deposit:', '0657789765');
+    if (!acctNo) return;
+    const amountStr = prompt('Enter NGN amount to simulate (min 100):', '5000');
+    const amount = Number(amountStr) || 5000;
+
+    showToast(`⏳ Simulating Korapay Sandbox credit of ₦${amount.toLocaleString()} to ${acctNo}...`);
+
+    try {
+      const res = await fetch('/.netlify/functions/korapay-virtual-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'credit_sandbox',
+          account_number: acctNo.trim(),
+          amount: amount
+        })
+      });
+      const data = await res.json();
+      if (data.status) {
+        showToast(`🎉 Sandbox VBA deposit simulated successfully! Korapay webhook will credit the recipient wallet.`);
+      } else {
+        showToast(`ℹ️ Korapay Sandbox Response: ${data.message || 'Simulation recorded'}`, 'info');
+      }
+    } catch(err) {
+      showToast(`⚠️ Simulation error: ${err.message}`, 'warning');
     }
   }
 

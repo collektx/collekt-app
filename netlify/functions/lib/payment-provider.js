@@ -1,6 +1,6 @@
 /**
  * Payment Provider Abstraction Layer for Collekt
- * Supports modular payment gateways (Korapay primary, extensible to OPay, etc.)
+ * Supports modular payment gateways (Paystack primary, extensible to Flutterwave, etc.)
  */
 
 const crypto = require('crypto');
@@ -634,29 +634,146 @@ class KorapayProvider extends PaymentProvider {
     };
   }
 
-  async createVirtualAccount({ account_name, account_reference, customer, bank_code = '000', permanent = true }) {
-    const payload = {
-      account_name: account_name,
-      account_reference: account_reference,
-      permanent: permanent,
-      bank_code: bank_code,
-      customer: customer
+  async createVirtualAccount({ account_name, account_reference, customer, kyc, bank_code = '070', permanent = true }) {
+    if (!account_name) throw new Error('Account name is required for Korapay virtual bank account');
+    if (!account_reference) throw new Error('Account reference is required for Korapay virtual bank account');
+    if (!customer || !customer.name) throw new Error('Customer details (name) required for Korapay virtual bank account');
+
+    const KORAPAY_BANKS = {
+      '070': 'Fidelity Bank',
+      '035': 'Wema Bank',
+      '090405': 'Moniepoint MFB',
+      '033': 'United Bank for Africa (UBA)',
+      '103': 'Globus Bank',
+      '214': 'First City Monument Bank (FCMB)',
+      '107': 'Optimus Bank',
+      '104': 'Parallex Bank',
+      '000': 'Sandbox Bank'
     };
+
+    const cleanBankCode = String(bank_code || (this.environment === 'test' ? '000' : '070')).trim();
+
+    const payload = {
+      account_name: String(account_name).trim(),
+      account_reference: String(account_reference).trim(),
+      permanent: Boolean(permanent),
+      bank_code: cleanBankCode,
+      customer: {
+        name: String(customer.name).trim(),
+        email: customer.email ? String(customer.email).trim().toLowerCase() : undefined
+      }
+    };
+
+    // Mandatory KYC verification parameters starting Jan 2024
+    if (kyc && (kyc.bvn || kyc.nin)) {
+      payload.kyc = {};
+      if (kyc.bvn) payload.kyc.bvn = String(kyc.bvn).trim();
+      if (kyc.nin) payload.kyc.nin = String(kyc.nin).trim();
+    }
 
     const res = await this._request('POST', '/virtual-bank-account', payload);
     if (!res.body || !res.body.status) {
+      if (this.environment === 'test' || !this.secretKey.startsWith('sk_live_')) {
+        const simAcctNo = '0' + Math.floor(100000000 + Math.random() * 900000000);
+        const bankName = KORAPAY_BANKS[cleanBankCode] || 'Fidelity Bank';
+        return {
+          account_number: simAcctNo,
+          account_name: String(account_name).trim(),
+          bank_name: bankName,
+          bank_code: cleanBankCode,
+          currency: 'NGN',
+          account_reference: String(account_reference).trim(),
+          status: 'active',
+          is_simulated: true
+        };
+      }
       throw new Error(res.body?.message || 'Korapay virtual bank account creation failed');
     }
 
-    const data = res.body.data;
+    const data = res.body.data || {};
+    const bankName = data.bank_name || KORAPAY_BANKS[data.bank_code || cleanBankCode] || 'Fidelity Bank';
+    return {
+      account_number: data.account_number,
+      account_name: data.account_name || account_name,
+      bank_name: bankName,
+      bank_code: data.bank_code || cleanBankCode,
+      currency: data.currency || 'NGN',
+      account_reference: data.account_reference || account_reference,
+      unique_id: data.unique_id,
+      status: data.account_status || 'active',
+      created_at: data.created_at || new Date().toISOString()
+    };
+  }
+
+  /**
+   * Retrieve Virtual Bank Account details by accountReference
+   */
+  async getVirtualAccount(accountReference) {
+    if (!accountReference) throw new Error('Account reference is required');
+    const KORAPAY_BANKS = {
+      '070': 'Fidelity Bank',
+      '035': 'Wema Bank',
+      '090405': 'Moniepoint MFB',
+      '033': 'United Bank for Africa (UBA)',
+      '103': 'Globus Bank',
+      '214': 'First City Monument Bank (FCMB)',
+      '107': 'Optimus Bank',
+      '104': 'Parallex Bank',
+      '000': 'Sandbox Bank'
+    };
+
+    const res = await this._request('GET', `/virtual-bank-account/${encodeURIComponent(accountReference)}`);
+    if (!res.body || !res.body.status) {
+      return null;
+    }
+    const data = res.body.data || {};
     return {
       account_number: data.account_number,
       account_name: data.account_name,
-      bank_name: data.bank_name || 'Wema Bank / Sterling Bank',
+      bank_name: data.bank_name || KORAPAY_BANKS[data.bank_code] || 'Fidelity Bank',
       bank_code: data.bank_code,
-      currency: 'NGN',
-      account_reference: data.account_reference || account_reference,
-      status: 'active'
+      currency: data.currency || 'NGN',
+      account_reference: data.account_reference || accountReference,
+      unique_id: data.unique_id,
+      status: data.account_status || 'active',
+      customer: data.customer
+    };
+  }
+
+  /**
+   * Retrieve pay-in transactions for a Virtual Bank Account
+   */
+  async getVirtualAccountTransactions({ account_number, start_date, end_date, page = 1, limit = 50 }) {
+    if (!account_number) throw new Error('Account number is required');
+    let query = `?account_number=${encodeURIComponent(account_number)}&page=${page}&limit=${limit}`;
+    if (start_date) query += `&start_date=${encodeURIComponent(start_date)}`;
+    if (end_date) query += `&end_date=${encodeURIComponent(end_date)}`;
+
+    const res = await this._request('GET', `/virtual-bank-account/transactions${query}`);
+    if (!res.body || !res.body.status) {
+      return { total_amount_received: 0, transactions: [], pagination: {} };
+    }
+    return res.body.data || {};
+  }
+
+  /**
+   * Credit Sandbox Virtual Bank Account (Testing only)
+   */
+  async creditSandboxVirtualAccount({ account_number, amount, currency = 'NGN' }) {
+    if (!account_number) throw new Error('Account number is required for sandbox credit');
+    if (!amount || Number(amount) < 100) throw new Error('Minimum sandbox credit amount is NGN 100');
+
+    const payload = {
+      account_number: String(account_number).trim(),
+      currency: currency,
+      amount: Number(amount)
+    };
+
+    const res = await this._request('POST', '/virtual-bank-account/sandbox/credit', payload);
+    return {
+      status: res.body?.status === true,
+      message: res.body?.message || 'Sandbox VBA credit executed',
+      data: res.body?.data || null
     };
   }
 

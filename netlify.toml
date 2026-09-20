@@ -87,6 +87,16 @@
   status = 200
 
 [[redirects]]
+  from = "/api/virtual-account"
+  to = "/.netlify/functions/korapay-virtual-account"
+  status = 200
+
+[[redirects]]
+  from = "/api/korapay/virtual-account"
+  to = "/.netlify/functions/korapay-virtual-account"
+  status = 200
+
+[[redirects]]
   from = "/api/payments/paystack/webhook"
   to = "/.netlify/functions/paystack-webhook"
   status = 200
