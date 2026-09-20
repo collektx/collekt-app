@@ -258,6 +258,18 @@ async function runTests() {
   } catch (err) {
     console.error('Test execution exception:', err);
     failed++;
+  } finally {
+    // Clean up test transactions, messages, and reset wallets back to 0.00
+    try {
+      await supabase.from('wallet_ledger').delete().or('reference.like.TX-TEST-%,reference.like.TX-FAIL-%,reference.like.TEST-%,reference.like.COLLEKT-TRANSFER-TEST%');
+      await supabase.from('wallet_transactions').delete().or('reference.like.TX-TEST-%,reference.like.TX-FAIL-%,reference.like.TEST-%,reference.like.COLLEKT-TRANSFER-TEST%');
+      await supabase.from('transactions').delete().or('reference.like.TX-TEST-%,reference.like.TX-FAIL-%,reference.like.TEST-%,reference.like.COLLEKT-TRANSFER-TEST%');
+      await supabase.from('messages').delete().or('body.like.%TX-TEST-%,body.like.%TX-FAIL-%,body.like.%COLLEKT-TRANSFER-TEST%');
+      await supabase.from('wallets').update({ balance: 0.00, available_balance: 0.00, total_deposited: 0.00, total_earned: 0.00, escrow_balance: 0.00 }).eq('user_id', companyId);
+      await supabase.from('wallets').update({ balance: 0.00, available_balance: 0.00, total_deposited: 0.00, total_earned: 0.00, escrow_balance: 0.00 }).eq('user_id', proId);
+    } catch(e) {
+      console.warn('Post-test cleanup warning:', e.message);
+    }
   }
 
   console.log('\n════════════════════════════════════════════════════════════');
