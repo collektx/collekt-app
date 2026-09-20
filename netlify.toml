@@ -151,6 +151,16 @@
   status = 200
 
 [[redirects]]
+  from = "/api/resend/webhook"
+  to = "/.netlify/functions/resend-webhook"
+  status = 200
+
+[[redirects]]
+  from = "/api/webhooks/resend"
+  to = "/.netlify/functions/resend-webhook"
+  status = 200
+
+[[redirects]]
   from = "/api/paystack/withdraw"
   to = "/.netlify/functions/paystack-withdraw"
   status = 200
