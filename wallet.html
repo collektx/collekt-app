@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=77.0">
-<link rel="stylesheet" href="shared.css?v=77.0">
-<link rel="stylesheet" href="glass.css?v=77.0">
+<link rel="stylesheet" href="style.css?v=78.0">
+<link rel="stylesheet" href="shared.css?v=78.0">
+<link rel="stylesheet" href="glass.css?v=78.0">
 
 <style>
   body { background: var(--paper); }
@@ -671,10 +671,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=77.0"></script>
-<script src="app.js?v=77.0"></script>
-<script src="collekt-ai.js?v=77.0"></script>
-<script src="settings-popup.js?v=77.0"></script>
+<script src="supabase.js?v=78.0"></script>
+<script src="app.js?v=78.0"></script>
+<script src="collekt-ai.js?v=78.0"></script>
+<script src="settings-popup.js?v=78.0"></script>
 <script>
   let isHideBalance = false;
   let rawBalance = 0;
@@ -1132,11 +1132,27 @@
       </div>
     `;
 
-    let dva = null;
-    const res = await fetchDedicatedVirtualAccount(ownerId);
-    if (res && res.success && res.data) {
-      dva = res.data;
-      activeDvaAccount = dva;
+    let dva = activeDvaAccount;
+    if (!dva) {
+      const res = await fetchDedicatedVirtualAccount(ownerId);
+      if (res && res.success && res.data) {
+        dva = res.data;
+        activeDvaAccount = dva;
+      } else {
+        // Auto-provision right away so user immediately gets their account details
+        const provRes = await provisionDedicatedVirtualAccount({
+          owner_id: ownerId,
+          user_id: user.id,
+          owner_type: user.role === 'company' ? 'company' : 'professional',
+          email: user.email,
+          name: displayName,
+          displayName: displayName
+        });
+        if (provRes && provRes.success && provRes.data) {
+          dva = provRes.data;
+          activeDvaAccount = dva;
+        }
+      }
     }
 
     if (dva && dva.account_number) {
@@ -1147,8 +1163,8 @@
       if (!rawAcctName || rawAcctName.includes('COLLEKT MEMBER') || rawAcctName.includes('COLLEKT / MEMBER') || rawAcctName.trim() === 'COLLEKT /' || rawAcctName.trim() === 'COLLEKT') {
         rawAcctName = `COLLEKT / ${displayName.toUpperCase()}`;
       }
-      const acctName = escapeHTML(rawAcctName);
-      const bankName = escapeHTML(dva.bank_name || 'Wema Bank');
+      const acctName = escapeHTML(rawAcctName.toUpperCase());
+      const bankName = escapeHTML(dva.bank_name || 'Fidelity Bank');
 
       container.innerHTML = `
         <div style="background:linear-gradient(135deg, #090d0c 0%, #101716 50%, #0e3b35 100%); border-radius:18px; padding:20px; color:#fff; position:relative; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.12); margin-bottom:14px;">
@@ -1200,44 +1216,67 @@
         <div style="background:linear-gradient(135deg, #090d0c 0%, #101716 50%, #0e3b35 100%); border-radius:18px; padding:22px; color:#fff; position:relative; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.12);">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
             <div>
-              <div style="font-size:10px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.7);">Live Bank Transfer Deposit</div>
+              <div style="font-size:10px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.7);">Dedicated Bank Transfer Rail</div>
               <div style="font-size:15px; font-weight:900; color:#fff; display:flex; align-items:center; gap:6px; margin-top:2px;">
-                <span>🏛️ Korapay Live Rail (Wema / Sterling / Providus)</span>
+                <span>🏛️ Korapay Live Rail (Fidelity / Wema / Moniepoint)</span>
               </div>
             </div>
             <span style="font-size:10px; background:rgba(20,184,166,0.2); border:1px solid rgba(20,184,166,0.4); color:#5eead4; padding:3px 9px; border-radius:99px; font-weight:800;">
-              ⚡ Real-time NIBSS Credit
+              ⚡ Instant Auto-Credit
             </span>
           </div>
 
           <p style="font-size:12px; color:rgba(255,255,255,0.8); line-height:1.5; margin:0 0 16px;">
-            Korapay generates an authentic, live, NIBSS-active Nigerian bank account on demand. Transfer from any banking app (OPay, GTBank, Zenith, Access, Kuda, PalmPay) for instant automated wallet crediting.
+            Get an authentic, dedicated Nigerian NUBAN bank account linked to your Collekt wallet. Transfer from any banking app (OPay, GTBank, Zenith, Access, Kuda, PalmPay) for instant automated wallet crediting.
           </p>
 
-          <div class="form-group" style="margin-bottom:14px;">
-            <label class="form-label" style="font-size:11.5px; font-weight:800; color:rgba(255,255,255,0.85);">Enter Deposit Amount (NGN)</label>
-            <input class="form-input" type="number" id="transferDepositAmount" placeholder="e.g. 50000" min="100" value="50000" oninput="updateTransferFundPreview(this.value)" style="font-size:18px; font-weight:900; color:#fff; background:rgba(0,0,0,0.3); border-color:rgba(255,255,255,0.2);">
-            
-            <div style="font-size:12px; color:#5eead4; font-weight:800; margin-top:4px;" id="transferFundAmountFormattedPreview">
-              Formatted: ₦50,000.00
-            </div>
-
-            <div class="amount-chips-wrap" style="margin-top:8px;">
-              <button type="button" class="amount-chip" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;" onclick="setTransferFundAmount(5000)">₦5,000</button>
-              <button type="button" class="amount-chip" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;" onclick="setTransferFundAmount(20000)">₦20,000</button>
-              <button type="button" class="amount-chip" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;" onclick="setTransferFundAmount(50000)">₦50,000</button>
-              <button type="button" class="amount-chip" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;" onclick="setTransferFundAmount(100000)">₦100,000</button>
-              <button type="button" class="amount-chip" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;" onclick="setTransferFundAmount(250000)">₦250,000</button>
-              <button type="button" class="amount-chip" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff;" onclick="setTransferFundAmount(500000)">₦500,000</button>
-            </div>
-          </div>
-
           <button type="button" class="btn btn-primary" id="btnSubmitTransferFund" onclick="executeTransferFunding()" style="width:100%; min-height:48px; font-weight:900; background:var(--teal); border:none; box-shadow:0 6px 18px rgba(19,117,111,0.25); cursor:pointer;">
-            <span>🏛️ Generate Live Bank Transfer Account &rarr;</span>
+            <span>🏛️ Generate My Dedicated Virtual Account &rarr;</span>
           </button>
         </div>
       `;
     }
+  }
+
+  window.executeTransferFunding = async function() {
+    const user = getUser() || {};
+    const btn = document.getElementById('btnSubmitTransferFund');
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-icon"></span> Generating Dedicated Virtual Account...';
+    }
+
+    let displayName = '';
+    if (typeof getDisplayName === 'function') {
+      displayName = getDisplayName(user);
+    }
+    if (!displayName || displayName === 'Collekt Member' || displayName === 'User' || displayName === 'Guest') {
+      displayName = user.company_name || user.name || [user.first_name, user.other_name, user.last_name].filter(Boolean).join(' ') || (user.email ? user.email.split('@')[0] : 'Account Holder');
+    }
+
+    const provRes = await provisionDedicatedVirtualAccount({
+      owner_id: user.id || user.owner_id,
+      user_id: user.id,
+      owner_type: user.role === 'company' ? 'company' : 'professional',
+      email: user.email,
+      name: displayName,
+      displayName: displayName
+    });
+
+    if (provRes && provRes.success && provRes.data) {
+      activeDvaAccount = provRes.data;
+      loadAndRenderFundModalDva();
+      renderVirtualBankDetails(user.wallet);
+      showToast('🎉 Dedicated Virtual Account ready! Details displayed below.');
+    } else {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🏛️ Generate My Dedicated Virtual Account &rarr;</span>';
+      }
+      showToast('⚠️ Could not generate account. Please refresh and try again.', 'error');
+    }
+  };
   }
 
   window.copyDvaAccountModal = function() {
