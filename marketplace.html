@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=86.0">
-<link rel="stylesheet" href="shared.css?v=86.0">
-<link rel="stylesheet" href="glass.css?v=86.0">
+<link rel="stylesheet" href="style.css?v=87.0">
+<link rel="stylesheet" href="shared.css?v=87.0">
+<link rel="stylesheet" href="glass.css?v=87.0">
 <style>
 /* ═ LIVE MARKETPLACE STYLES ═ */
 html, body {
@@ -330,7 +330,7 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
           </select>
 
           <button class="btn btn-amber btn-sm" id="mktPostTenderBtn" onclick="openPostTenderModal()" style="font-weight:800; padding:7px 16px; display:none;">
-            + Post Job / Opportunity
+            + Post Opportunity
           </button>
         </div>
       </div>
@@ -366,8 +366,8 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
       <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 16px;">
-        <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase;">Contract Budget</div>
-        <div style="font-size:20px; font-weight:900; color:var(--forest);" id="tModalBudget">₦0</div>
+        <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase;">Budget / Amount Offered</div>
+        <div style="font-size:18px; font-weight:900; color:var(--forest);" id="tModalBudget">Price not specified</div>
       </div>
       <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 16px;">
         <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase;">Location / State</div>
@@ -375,10 +375,10 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
       </div>
     </div>
 
-    <!-- Proposal Form Box -->
-    <div style="border-top:1px solid var(--line); padding-top:20px; margin-top:20px;">
+    <!-- Proposal Form Box (Visible to Professionals) -->
+    <div id="tModalProposalSection" style="border-top:1px solid var(--line); padding-top:20px; margin-top:20px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <div style="font-size:16px; font-weight:900; color:var(--ink);">Collekt</div>
+        <div style="font-size:16px; font-weight:900; color:var(--ink);">Submit Proposal</div>
         <button class="btn btn-outline btn-sm" onclick="triggerAIPropForTender()" style="color:var(--teal); border-color:var(--teal); font-weight:800; font-size:12px;">
           ✨ AI Pitch Writer
         </button>
@@ -404,23 +404,41 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
         ⚡ Collekt This
       </button>
     </div>
+
+    <!-- Company Preview Notice (Visible to Company Accounts) -->
+    <div id="tModalCompanyPreviewSection" style="border-top:1px solid var(--line); padding-top:20px; margin-top:20px; display:none;">
+      <div style="background:rgba(212,146,11,0.08); border:1px solid rgba(212,146,11,0.25); border-radius:14px; padding:18px 20px; text-align:center;">
+        <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:4px;">👁️ Company Opportunity Preview Mode</div>
+        <div style="font-size:12.5px; color:var(--muted); line-height:1.6; max-width:520px; margin:0 auto 14px;">
+          This is how your opportunity is displayed to verified professionals across the live Marketplace. Professionals can review your requirements, inspect deliverables, and submit competitive proposals with escrow milestones.
+        </div>
+        <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" id="tModalEditBtn" style="font-weight:800; display:none;" onclick="editActiveModalJob()">
+            ✏️ Edit Opportunity
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="closeModal('tenderDetailModal')" style="font-weight:800;">
+            Close Preview
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- ═ POST NEW JOB / OPPORTUNITY MODAL ═ -->
+<!-- ═ POST NEW OPPORTUNITY MODAL ═ -->
 <div class="modal-overlay" id="postTenderModal" style="z-index:99999;">
   <div class="modal-card" style="position:relative; max-width:640px; width:100%; max-height:90vh; overflow-y:auto; border-radius:24px; padding:28px; background:var(--white); font-family:'Manrope',sans-serif;">
     <button class="modal-close" onclick="closeModal('postTenderModal')">&times;</button>
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
       <div style="width:44px; height:44px; border-radius:14px; background:rgba(212,146,11,0.15); color:var(--amber); display:grid; place-items:center; font-size:22px;">💼</div>
       <div>
-        <div style="font-size:19px; font-weight:900; color:var(--ink); margin-bottom:2px;">Post a Job / Opportunity</div>
+        <div style="font-size:19px; font-weight:900; color:var(--ink); margin-bottom:2px;">Post Opportunity</div>
         <div style="font-size:12px; color:var(--muted);">Reach 1,200+ verified Nigerian &amp; international energy specialists</div>
       </div>
     </div>
 
     <div class="form-group" style="margin-bottom:12px;">
-      <label class="form-label" style="font-size:12px; font-weight:800;">Opportunity / Job Title</label>
+      <label class="form-label" style="font-size:12px; font-weight:800;">Opportunity Title</label>
       <input class="form-input" type="text" id="postTitle" placeholder="e.g. Senior Subsea Piping Engineer, 33kV Substation EPC Tender">
     </div>
 
@@ -478,8 +496,8 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
       <div class="form-group" style="margin-bottom:0;">
-        <label class="form-label" style="font-size:12px; font-weight:800;">Budget / Compensation (₦)</label>
-        <input class="form-input" type="number" id="postBudget" placeholder="e.g. 2500000">
+        <label class="form-label" style="font-size:12px; font-weight:800;">Budget / Amount Offered (₦)</label>
+        <input class="form-input" type="number" id="postBudget" placeholder="e.g. 2500000 (Leave blank if not specified)">
       </div>
       <div class="form-group" style="margin-bottom:0;">
         <label class="form-label" style="font-size:12px; font-weight:800;">Rate Type</label>
@@ -519,17 +537,17 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     </div>
 
     <button class="btn btn-amber" onclick="submitNewTenderProject()" style="width:100%; min-height:46px; font-weight:800; border:none; box-shadow:0 6px 20px rgba(212,146,11,0.3);">
-      🚀 Publish Job / Opportunity Live
+      🚀 Publish Opportunity Live
     </button>
   </div>
 </div>
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=86.0"></script>
-<script src="app.js?v=86.0"></script>
-<script src="collekt-ai.js?v=86.0"></script>
-<script src="settings-popup.js?v=86.0"></script>
+<script src="supabase.js?v=87.0"></script>
+<script src="app.js?v=87.0"></script>
+<script src="collekt-ai.js?v=87.0"></script>
+<script src="settings-popup.js?v=87.0"></script>
 <script>
   /* ═════════════════════════════════════════════════════════
      LIVE MARKETPLACE ENGINE v3.0
@@ -631,7 +649,7 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
           <div style="font-size: 18px; font-weight: 900; color: var(--ink); margin-bottom: 6px;">No Live Opportunities Found</div>
           <div style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">Try adjusting your search keywords or category filters.</div>
           ${isCompany 
-            ? `<button class="btn btn-amber btn-sm" onclick="openPostTenderModal()" style="font-weight:800; padding:8px 20px;">+ Post a Job / Opportunity</button>` 
+            ? `<button class="btn btn-amber btn-sm" onclick="openPostTenderModal()" style="font-weight:800; padding:8px 20px;">+ Post Opportunity</button>` 
             : `<button class="btn btn-primary btn-sm" onclick="clearMktFilters()" style="font-weight:800; padding:8px 20px;">🔄 Clear Filters &amp; View All</button>`}
         </div>
       `;
@@ -643,8 +661,11 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
       const compProfile = allUsers.find(x => x && (x.id === j.company_id || (x.company_name && x.company_name === j.company_name) || (x.name && x.name === j.company_name)));
       const shieldBadge = (compProfile && typeof getShieldBadgeHTML === 'function') ? getShieldBadgeHTML(14, compProfile) : '';
 
-      const budgetFormatted = j.budget ? (typeof formatNaira === 'function' ? formatNaira(j.budget, true) : '₦' + Number(j.budget).toLocaleString()) : 'Negotiable';
-      const rateTypeLabel = j.budget_rate_type || 'Contract Budget';
+      const bNum = Number(j.budget || j.professional_fee || 0);
+      const budgetFormatted = (bNum > 0)
+        ? (typeof formatNaira === 'function' ? formatNaira(bNum, true) : '₦' + bNum.toLocaleString())
+        : 'Price not specified';
+      const rateTypeLabel = (bNum > 0 && j.budget_rate_type) ? j.budget_rate_type : 'Professional Fee';
       const skillsHtml = (j.skills && j.skills.length)
         ? j.skills.map(s => `<span class="tender-skill-chip">${escapeHTML(s)}</span>`).join('')
         : `<span class="tender-skill-chip">${escapeHTML(j.category || 'Engineering')}</span>`;
@@ -662,6 +683,10 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
           </button>
         </div>
       ` : '';
+
+      const actionBtnHtml = isCompany
+        ? `<button class="btn btn-outline btn-sm" style="font-weight:800; min-height:36px; padding:0 18px; cursor:pointer;" onclick="openTenderDetailModal('${j.id}')">👁️ Preview</button>`
+        : `<button class="btn btn-primary btn-sm" style="font-weight:800; min-height:36px; padding:0 18px; cursor:pointer;" onclick="openTenderDetailModal('${j.id}')">⚡ Collekt</button>`;
 
       return `
         <div class="tender-card" style="position:relative;">
@@ -693,9 +718,7 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
               <span class="tender-budget-lbl">${escapeHTML(rateTypeLabel)}</span>
               <span class="tender-budget-val">${budgetFormatted}</span>
             </div>
-            <button class="btn btn-primary btn-sm" style="font-weight:800; min-height:36px; padding:0 18px; cursor:pointer;" onclick="openTenderDetailModal('${j.id}')">
-              ⚡ Collekt
-            </button>
+            ${actionBtnHtml}
           </div>
         </div>
       `;
@@ -824,18 +847,45 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     }
     if (document.getElementById('tModalScope')) document.getElementById('tModalScope').textContent = job.scope || job.description;
     if (document.getElementById('tModalBudget')) {
-      const bText = job.budget ? (typeof formatNaira === 'function' ? formatNaira(job.budget, false) : '₦' + Number(job.budget).toLocaleString()) : 'Negotiable';
-      const rText = job.budget_rate_type ? ` (${job.budget_rate_type})` : '';
+      const bNum = Number(job.budget || job.professional_fee || 0);
+      const bText = bNum > 0 
+        ? (typeof formatNaira === 'function' ? formatNaira(bNum, false) : '₦' + bNum.toLocaleString())
+        : 'Price not specified';
+      const rText = (bNum > 0 && job.budget_rate_type) ? ` (${job.budget_rate_type})` : '';
       document.getElementById('tModalBudget').textContent = bText + rText;
     }
     if (document.getElementById('tModalLocation')) document.getElementById('tModalLocation').textContent = job.location || 'Nigeria';
 
+    // Toggle Proposal form vs Company Preview notice based on user role
+    const curUser = typeof getUser === 'function' ? getUser() : null;
+    const isCo = !!(curUser && curUser.role === 'company');
+    const isOwner = isCo && (curUser.id === job.company_id || curUser.email === job.companyEmail || (curUser.company_name && curUser.company_name === (job.company_name || job.companyName)));
+
+    const propSec = document.getElementById('tModalProposalSection');
+    const prevSec = document.getElementById('tModalCompanyPreviewSection');
+    const editBtn = document.getElementById('tModalEditBtn');
+
+    if (isCo) {
+      if (propSec) propSec.style.display = 'none';
+      if (prevSec) prevSec.style.display = 'block';
+      if (editBtn) editBtn.style.display = isOwner ? 'inline-flex' : 'none';
+    } else {
+      if (propSec) propSec.style.display = 'block';
+      if (prevSec) prevSec.style.display = 'none';
+    }
+
     // Reset inputs
-    if (document.getElementById('propBidAmount')) document.getElementById('propBidAmount').value = job.budget || '';
+    if (document.getElementById('propBidAmount')) document.getElementById('propBidAmount').value = (job.budget && Number(job.budget) > 0) ? job.budget : '';
     if (document.getElementById('propTimeline')) document.getElementById('propTimeline').value = job.duration || '2 Weeks';
     if (document.getElementById('propPitchText')) document.getElementById('propPitchText').value = '';
 
     openModal('tenderDetailModal');
+  }
+
+  function editActiveModalJob() {
+    if (_activeTenderJob && _activeTenderJob.id) {
+      window.location.href = 'post-job.html?edit=' + encodeURIComponent(_activeTenderJob.id);
+    }
   }
 
   function triggerAIPropForTender() {
@@ -919,12 +969,12 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     if (typeof showToast === 'function') showToast('Successfully Collekted! Proposal sent to client.');
   }
 
-  /* ═ POST JOB / TENDER MODAL ACTIONS ═ */
+  /* ═ POST OPPORTUNITY MODAL ACTIONS ═ */
   function openPostTenderModal() {
     const user = typeof getUser === 'function' ? getUser() : null;
     if (!user || user.role !== 'company') {
       if (typeof showToast === 'function') {
-        showToast('🏢 Only registered Company accounts can post jobs, tenders & RFPs.', 'warning');
+        showToast('🏢 Only registered Company accounts can post opportunities.', 'warning');
       }
       return;
     }
@@ -935,7 +985,7 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     const user = typeof getUser === 'function' ? getUser() : null;
     if (!user || user.role !== 'company') {
       if (typeof showToast === 'function') {
-        showToast('🏢 Only registered Company accounts can publish jobs and tenders.', 'warning');
+        showToast('🏢 Only registered Company accounts can publish opportunities.', 'warning');
       }
       return;
     }
@@ -954,9 +1004,11 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     const scope          = document.getElementById('postScope')?.value.trim();
 
     if (!title || !scope) {
-      if (typeof showToast === 'function') showToast('⚠️ Please enter an opportunity title and job description / scope', 'warning');
+      if (typeof showToast === 'function') showToast('⚠️ Please enter an opportunity title and description / scope', 'warning');
       return;
     }
+
+    const budgetVal = (budget !== undefined && budget !== null && budget !== '' && !isNaN(Number(budget)) && Number(budget) > 0) ? Number(budget) : null;
 
     const jobData = {
       id: 'job_' + Date.now(),
@@ -970,7 +1022,8 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
       company_logo: user.company_logo || '',
       companyVerified: !!(user.identity_verified || user.is_verified || user.verified),
       location: location,
-      budget: budget ? Number(budget) : 0,
+      budget: budgetVal,
+      professional_fee: budgetVal,
       budget_rate_type: budgetRateType,
       duration: duration,
       deadline: deadline,
@@ -990,7 +1043,7 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     }
 
     closeModal('postTenderModal');
-    if (typeof showToast === 'function') showToast('🚀 Job / Opportunity published live to Marketplace!');
+    if (typeof showToast === 'function') showToast('🚀 Opportunity published live to Marketplace!');
     
     // Reset inputs
     if (document.getElementById('postTitle')) document.getElementById('postTitle').value = '';

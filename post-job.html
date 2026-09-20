@@ -24,13 +24,13 @@
     }
   })();
 </script>
-<title>Post a Job / Opportunity &mdash; Collekt</title>
+<title>Post Opportunity &mdash; Collekt</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=86.0">
-<link rel="stylesheet" href="shared.css?v=86.0">
-<link rel="stylesheet" href="glass.css?v=86.0">
+<link rel="stylesheet" href="style.css?v=87.0">
+<link rel="stylesheet" href="shared.css?v=87.0">
+<link rel="stylesheet" href="glass.css?v=87.0">
 
 <style>
   body { background: var(--paper); }
@@ -150,15 +150,15 @@
         <div>
           <div style="font-size:11px; font-weight:800; color:var(--amber); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;">Employer Portal</div>
           <h1 style="font-size:24px; font-weight:900; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-            &#128188; Post a Job / Opportunity
+            &#128188; Post Opportunity
           </h1>
           <p style="font-size:14px; color:rgba(255,255,255,.8); max-width:620px;">
-            Publish short-term jobs, EPC tenders, fixed-price project contracts, or specialist consultancies to reach verified Nigerian and international energy experts.
+            Publish short-term opportunities, EPC tenders, fixed-price project contracts, or specialist consultancies to reach verified Nigerian and international energy experts.
           </p>
         </div>
         <div style="display:flex; gap:10px;">
           <a href="my-jobs.html" class="btn btn-ghost btn-sm" style="min-height:38px; color:#fff; border-color:rgba(255,255,255,0.25); text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-            &#128203; My Jobs &amp; Opportunities
+            &#128203; My Posted Opportunities
           </a>
         </div>
       </div>
@@ -176,7 +176,7 @@
               <h3 style="font-size:17px; font-weight:900; color:var(--ink); margin-bottom:14px;">Basic Details</h3>
 
               <div class="form-group" style="margin-bottom:16px;">
-                <label class="form-label" style="font-weight:800;">Opportunity / Job Title <span style="color:var(--amber);">*</span></label>
+                <label class="form-label" style="font-weight:800;">Opportunity Title <span style="color:var(--amber);">*</span></label>
                 <input class="form-input" type="text" id="postTitleInput" placeholder="e.g. Senior Subsea Piping Engineer, 33kV Substation EPC Tender" required oninput="updateLivePreview()">
               </div>
 
@@ -273,8 +273,8 @@
 
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
                 <div class="form-group">
-                  <label class="form-label" style="font-weight:800;">Budget / Target Compensation (&#8358;)</label>
-                  <input class="form-input" type="number" id="postBudgetInput" placeholder="e.g. 2500000" oninput="updateLivePreview()">
+                  <label class="form-label" style="font-weight:800;">Budget / Amount Offered (&#8358;)</label>
+                  <input class="form-input" type="number" id="postBudgetInput" placeholder="e.g. 2500000 (Leave blank if not specified)" oninput="updateLivePreview()">
                 </div>
 
                 <div class="form-group">
@@ -283,7 +283,7 @@
                     <option value="Total Contract Budget">Total Contract Budget</option>
                     <option value="Monthly Salary">Monthly Salary / Retainer</option>
                     <option value="Daily / Hourly Rate">Daily / Hourly Rate</option>
-                    <option value="Negotiable">Negotiable</option>
+                    <option value="Fixed Price">Fixed Milestone Price</option>
                   </select>
                 </div>
               </div>
@@ -306,7 +306,7 @@
 
               <div class="form-group" style="margin-bottom:20px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                  <label class="form-label" style="font-weight:800; margin-bottom:0;">Scope of Work / Job Description <span style="color:var(--amber);">*</span></label>
+                  <label class="form-label" style="font-weight:800; margin-bottom:0;">Scope of Work / Opportunity Description <span style="color:var(--amber);">*</span></label>
                   <button type="button" class="btn btn-outline btn-xs" onclick="generateAiTenderSpec('postTitleInput', 'postDescInput')" style="font-weight:800; font-size:11px; color:var(--teal); border-color:rgba(19,117,111,0.3);">
                     &#10024; AI Generate Spec
                   </button>
@@ -317,7 +317,7 @@
               <div style="display:flex; gap:12px; justify-content:flex-end;">
                 <a href="company-dashboard.html" class="btn btn-outline" style="font-weight:700; text-decoration:none; display:inline-flex; align-items:center;">Cancel</a>
                 <button type="submit" class="btn btn-amber" id="submitJobBtn" style="font-weight:900; padding:12px 28px; font-size:14px;">
-                  &#128640; Publish Job / Opportunity Live
+                  &#128640; Publish Opportunity Live
                 </button>
               </div>
             </div>
@@ -361,11 +361,11 @@
 
               <div class="tender-footer" style="padding-top:12px;">
                 <div class="tender-budget">
-                  <span class="tender-budget-lbl" id="prevRateType">Contract Budget</span>
-                  <span class="tender-budget-val" id="prevBudget" style="font-size:17px;">Negotiable</span>
+                  <span class="tender-budget-lbl" id="prevRateType">Professional Fee</span>
+                  <span class="tender-budget-val" id="prevBudget" style="font-size:16px; font-weight:900;">Price not specified</span>
                 </div>
-                <button type="button" class="btn btn-primary btn-sm" style="font-weight:800; font-size:12px; pointer-events:none;">
-                  &#128221; Apply / View
+                <button type="button" class="btn btn-primary btn-sm" onclick="openLiveCardFullPreview()" style="font-weight:800; font-size:12px; cursor:pointer;">
+                  👁️ Preview
                 </button>
               </div>
             </div>
@@ -382,11 +382,53 @@
   </main>
 </div>
 
+<!-- ═ OPPORTUNITY PREVIEW MODAL ═ -->
+<div class="modal-overlay" id="opportunityPreviewModal" style="z-index:99999;">
+  <div class="modal-card" style="position:relative; max-width:680px; width:100%; max-height:92vh; overflow-y:auto; border-radius:24px; padding:28px; background:var(--white); font-family:'Manrope',sans-serif;">
+    <button class="modal-close" onclick="closeModal('opportunityPreviewModal')">&times;</button>
+    
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px;">
+      <span class="tender-cat-tag" id="prevModalCategory">EPC &amp; Engineering</span>
+      <span style="font-size:12px; font-weight:700; color:var(--muted);" id="prevModalDeadline">Deadline: Ongoing</span>
+    </div>
+
+    <h2 style="font-size:22px; font-weight:900; color:var(--ink); line-height:1.3; margin-bottom:8px;" id="prevModalTitle">Opportunity Title</h2>
+    <div style="font-size:13px; font-weight:800; color:var(--teal); margin-bottom:16px; display:flex; align-items:center; gap:6px;" id="prevModalCompanyLine">
+      <!-- Company Name & Badge -->
+    </div>
+
+    <div style="background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:20px;">
+      <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px;">Project Scope &amp; Deliverables</div>
+      <div style="font-size:13px; color:var(--ink); line-height:1.7; white-space:pre-wrap;" id="prevModalScope">Scope details...</div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 16px;">
+        <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase;">Budget / Amount Offered</div>
+        <div style="font-size:18px; font-weight:900; color:var(--forest);" id="prevModalBudget">Price not specified</div>
+      </div>
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 16px;">
+        <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase;">Location / State</div>
+        <div style="font-size:15px; font-weight:800; color:var(--ink);" id="prevModalLocation">Nigeria</div>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--line); padding-top:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div style="font-size:12px; color:var(--muted);">
+        👁️ <strong>Company Preview Mode:</strong> This is how verified professionals see your opportunity in the live marketplace.
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="closeModal('opportunityPreviewModal')" style="font-weight:800;">
+        Close Preview
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=86.0"></script>
-<script src="app.js?v=86.0"></script>
-<script src="collekt-ai.js?v=86.0"></script>
-<script src="settings-popup.js?v=86.0"></script>
+<script src="supabase.js?v=87.0"></script>
+<script src="app.js?v=87.0"></script>
+<script src="collekt-ai.js?v=87.0"></script>
+<script src="settings-popup.js?v=87.0"></script>
 
 <script>
   let editingJobId = null;
@@ -445,7 +487,7 @@
     if (document.getElementById('postSectorInput')) document.getElementById('postSectorInput').value = job.category || 'EPC & Engineering';
     if (document.getElementById('postExpInput')) document.getElementById('postExpInput').value = job.experience || 'Any Experience Level';
     if (document.getElementById('postLocInput')) document.getElementById('postLocInput').value = job.location || 'Nigeria';
-    if (document.getElementById('postBudgetInput')) document.getElementById('postBudgetInput').value = job.budget || '';
+    if (document.getElementById('postBudgetInput')) document.getElementById('postBudgetInput').value = (job.budget && Number(job.budget) > 0) ? job.budget : '';
     if (document.getElementById('postRateTypeInput')) document.getElementById('postRateTypeInput').value = job.budget_rate_type || 'Total Contract Budget';
     if (document.getElementById('postDurationInput')) document.getElementById('postDurationInput').value = job.duration || '';
     if (document.getElementById('postDeadlineInput')) document.getElementById('postDeadlineInput').value = job.deadline || '';
@@ -459,9 +501,9 @@
       submitBtn.innerHTML = '💾 Save Changes &amp; Update Live';
     }
 
-    const headingEl = document.querySelector('.page-header h1');
+    const headingEl = document.querySelector('.post-header-banner h1');
     if (headingEl) {
-      headingEl.textContent = 'Edit Job / Opportunity';
+      headingEl.innerHTML = '&#128188; Edit Opportunity';
     }
 
     updateLivePreview();
@@ -512,14 +554,17 @@
     if (prevDeadlineEl) prevDeadlineEl.innerHTML = deadline ? `&#9203; ${escapeHTML(deadline)}` : '&#9203; Ongoing';
 
     const prevRateEl = document.getElementById('prevRateType');
-    if (prevRateEl) prevRateEl.textContent = rateType;
+    if (prevRateEl) prevRateEl.textContent = 'Budget / Amount Offered';
 
     const prevBudgetEl = document.getElementById('prevBudget');
     if (prevBudgetEl) {
       if (budget && !isNaN(budget) && Number(budget) > 0) {
-        prevBudgetEl.textContent = (typeof formatNaira === 'function') ? formatNaira(Number(budget), true) : ('₦' + Number(budget).toLocaleString());
+        const formatted = (typeof formatNaira === 'function') ? formatNaira(Number(budget), true) : ('₦' + Number(budget).toLocaleString());
+        prevBudgetEl.textContent = formatted;
+        prevBudgetEl.style.color = 'var(--forest)';
       } else {
-        prevBudgetEl.textContent = 'Negotiable';
+        prevBudgetEl.textContent = 'Price not specified';
+        prevBudgetEl.style.color = 'var(--muted)';
       }
     }
 
@@ -543,13 +588,58 @@
     }
   }
 
+  function openLiveCardFullPreview() {
+    const title     = document.getElementById('postTitleInput')?.value.trim() || 'Untitled Opportunity';
+    const type      = document.getElementById('postTypeHidden')?.value || 'Short-Term Job';
+    const sector    = document.getElementById('postSectorInput')?.value || 'EPC & Engineering';
+    const loc       = document.getElementById('postLocInput')?.value || 'Nigeria';
+    const budget    = document.getElementById('postBudgetInput')?.value;
+    const rateType  = document.getElementById('postRateTypeInput')?.value || 'Total Contract Budget';
+    const deadline  = document.getElementById('postDeadlineInput')?.value.trim() || 'Ongoing';
+    const desc      = document.getElementById('postDescInput')?.value.trim() || 'Full deliverables and project specifications will be listed here.';
+
+    const user = typeof getUser === 'function' ? getUser() : {};
+    const compName = user?.company_name || user?.name || 'Company Account';
+
+    if (document.getElementById('prevModalCategory')) {
+      document.getElementById('prevModalCategory').innerHTML = `${type} &bull; ${escapeHTML(sector)}`;
+    }
+    if (document.getElementById('prevModalTitle')) {
+      document.getElementById('prevModalTitle').textContent = title;
+    }
+    if (document.getElementById('prevModalDeadline')) {
+      document.getElementById('prevModalDeadline').textContent = 'Deadline: ' + deadline;
+    }
+    if (document.getElementById('prevModalCompanyLine')) {
+      const badge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(15, user) : '';
+      document.getElementById('prevModalCompanyLine').innerHTML = `🏢 ${escapeHTML(compName)} ${badge} &bull; 📍 ${escapeHTML(loc)}`;
+    }
+    if (document.getElementById('prevModalScope')) {
+      document.getElementById('prevModalScope').textContent = desc;
+    }
+    if (document.getElementById('prevModalBudget')) {
+      if (budget && !isNaN(budget) && Number(budget) > 0) {
+        const formatted = (typeof formatNaira === 'function') ? formatNaira(Number(budget), false) : ('₦' + Number(budget).toLocaleString());
+        document.getElementById('prevModalBudget').textContent = `${formatted} (${rateType})`;
+      } else {
+        document.getElementById('prevModalBudget').textContent = 'Price not specified';
+      }
+    }
+    if (document.getElementById('prevModalLocation')) {
+      document.getElementById('prevModalLocation').textContent = loc;
+    }
+
+    openModal('opportunityPreviewModal');
+  }
+
   async function publishJobListing() {
     const title          = document.getElementById('postTitleInput')?.value.trim();
     const type           = document.getElementById('postTypeHidden')?.value || 'Short-Term Job';
     const category       = document.getElementById('postSectorInput')?.value || 'EPC & Engineering';
     const experience     = document.getElementById('postExpInput')?.value || 'Any Experience Level';
     const location       = document.getElementById('postLocInput')?.value || 'Nigeria';
-    const budget         = parseFloat(document.getElementById('postBudgetInput')?.value) || 0;
+    const budgetRaw      = document.getElementById('postBudgetInput')?.value;
+    const budget         = (budgetRaw && !isNaN(budgetRaw) && Number(budgetRaw) > 0) ? Number(budgetRaw) : 0;
     const budgetRateType = document.getElementById('postRateTypeInput')?.value || 'Total Contract Budget';
     const duration       = document.getElementById('postDurationInput')?.value.trim() || 'Flexible';
     const deadline       = document.getElementById('postDeadlineInput')?.value.trim() || 'Ongoing';
@@ -558,7 +648,7 @@
     const desc           = document.getElementById('postDescInput')?.value.trim();
 
     if (!title || !desc) {
-      if (typeof showToast === 'function') showToast('⚠️ Please enter title and job description / scope.', 'warning');
+      if (typeof showToast === 'function') showToast('⚠️ Please enter opportunity title and description / scope.', 'warning');
       return;
     }
 
@@ -574,11 +664,13 @@
       experience: experience,
       location: location,
       budget: budget,
+      professional_fee: budget,
       budget_rate_type: budgetRateType,
       duration: duration,
       deadline: deadline,
       skills: skills,
       description: desc,
+      scope: desc,
       companyName: user.name || user.company_name || 'Verified Corporate Employer',
       company_name: user.name || user.company_name || 'Verified Corporate Employer',
       company_id: user.id || user.email || 'company',
@@ -592,13 +684,13 @@
       if (editingJobId) {
         if (typeof updatePostedJob === 'function') updatePostedJob(editingJobId, jobData);
         if (typeof updateJobInSupabase === 'function') await updateJobInSupabase(editingJobId, jobData);
-        if (typeof showToast === 'function') showToast('🎉 Job / Opportunity updated successfully!');
+        if (typeof showToast === 'function') showToast('🎉 Opportunity updated successfully!');
       } else {
         if (typeof savePostedJob === 'function') savePostedJob(jobData);
         if (typeof publishJobToSupabase === 'function') {
           await publishJobToSupabase(jobData);
         }
-        if (typeof showToast === 'function') showToast('🎉 Job / Opportunity published live to the Marketplace!');
+        if (typeof showToast === 'function') showToast('🎉 Opportunity published live to the Marketplace!');
       }
 
       setTimeout(() => {

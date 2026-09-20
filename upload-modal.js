@@ -356,7 +356,7 @@
       storageCategory: 'company-docs',
     },
     'job-posting': {
-      title: 'Post a Job',
+      title: 'Post Opportunity',
     },
   };
 
@@ -518,7 +518,7 @@
         <div class="upload-actions">
           <button class="upload-btn upload-btn-cancel" id="uploadCancelBtn">Cancel</button>
           <button class="upload-btn upload-btn-primary" id="uploadSubmitBtn" ${isFileUpload ? 'disabled' : ''}>
-            ${isJobPosting ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M12 5v14M5 12h14"/></svg> Post Job' : '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg> Upload'}
+            ${isJobPosting ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M12 5v14M5 12h14"/></svg> Post Opportunity' : '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg> Upload'}
           </button>
         </div>
       </div>

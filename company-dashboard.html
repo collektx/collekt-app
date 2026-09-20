@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=86.0">
-<link rel="stylesheet" href="shared.css?v=86.0">
-<link rel="stylesheet" href="glass.css?v=86.0">
+<link rel="stylesheet" href="style.css?v=87.0">
+<link rel="stylesheet" href="shared.css?v=87.0">
+<link rel="stylesheet" href="glass.css?v=87.0">
 
 <style>
   html, body {
@@ -227,12 +227,12 @@
         <div>
           <div style="font-size:11px; font-weight:800; color:var(--amber); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;">Company Dashboard</div>
           <h1 style="font-size:22px; font-weight:900; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">Welcome, <span id="companyWelcomeName">Company Account</span><span id="coWelcomeBadge"></span> &#x1F44F;</h1>
-          <p style="font-size:14px; color:rgba(255,255,255,.7);">Find verified talent, post jobs or opportunities and manage contracts &mdash; all in one place.</p>
+          <p style="font-size:14px; color:rgba(255,255,255,.7);">Find verified talent, post opportunities and manage contracts &mdash; all in one place.</p>
         </div>
         <div class="co-welcome-actions">
           <a href="marketplace.html" class="btn btn-ghost btn-sm" style="min-height:40px;">&#x1F50D; Browse Talent</a>
           <a href="wallet.html" class="btn btn-outline btn-sm" style="min-height:40px; color:#fff; border-color:rgba(255,255,255,0.3); font-weight:800; display:inline-flex; align-items:center; gap:6px;">💸 Pay Professionals</a>
-          <a href="post-job.html" class="btn btn-amber" style="min-height:40px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center;">+ Post Job / Opportunity</a>
+          <a href="post-job.html" class="btn btn-amber" style="min-height:40px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center;">+ Post Opportunity</a>
         </div>
       </div>
 
@@ -241,7 +241,7 @@
         <div class="stat-card">
           <div class="stat-icon">💼</div>
           <div class="stat-value" id="statActiveProj">0</div>
-          <div class="stat-label">Active Jobs &amp; Opportunities</div>
+          <div class="stat-label">Active Opportunities</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">📩</div>
@@ -263,23 +263,23 @@
       <div class="dash-grid">
         <div>
 
-          <!-- Post a Job / Opportunity Quick Card -->
+          <!-- Post Opportunity Quick Card -->
           <div class="post-card fade-in" id="postQuickCard" onclick="window.location.href='post-job.html'" style="cursor:pointer;">
             <div style="font-size:36px; margin-bottom:10px;">💼</div>
-            <div style="font-size:18px; font-weight:900; color:var(--amber); margin-bottom:8px;">Post a Job / Opportunity</div>
-            <div style="font-size:14px; color:var(--muted); line-height:1.5;">Reach 1,200+ verified professionals and specialists. Post full-time jobs, tenders, EPC contracts, or consultant requests and receive applications within 24 hours.</div>
+            <div style="font-size:18px; font-weight:900; color:var(--amber); margin-bottom:8px;">Post Opportunity</div>
+            <div style="font-size:14px; color:var(--muted); line-height:1.5;">Reach 1,200+ verified professionals and specialists. Post full-time opportunities, tenders, EPC contracts, or consultant requests and receive applications within 24 hours.</div>
             <div style="margin-top:14px;">
-              <a href="post-job.html" class="btn btn-amber btn-sm" style="font-weight:800; cursor:pointer; text-decoration:none; display:inline-block;">+ Create New Listing &rarr;</a>
+              <a href="post-job.html" class="btn btn-amber btn-sm" style="font-weight:800; cursor:pointer; text-decoration:none; display:inline-block;">+ Post Opportunity &rarr;</a>
             </div>
           </div>
 
-          <!-- My Jobs & Opportunities -->
+          <!-- My Posted Opportunities -->
           <div class="content-card fade-in" style="margin-bottom:24px;">
             <div class="card-header">
-              <h3>My Posted Jobs &amp; Opportunities</h3>
+              <h3>My Posted Opportunities</h3>
               <div style="display:flex; gap:10px; align-items:center;">
                 <a href="my-jobs.html" style="font-size:12px; color:var(--teal); font-weight:800; text-decoration:none;">View All &rarr;</a>
-                <a href="post-job.html" class="btn btn-amber btn-sm" style="text-decoration:none;">+ Post New</a>
+                <a href="post-job.html" class="btn btn-amber btn-sm" style="text-decoration:none;">+ Post Opportunity</a>
               </div>
             </div>
             <div style="overflow-x:auto;" id="myProjectsContainer">
@@ -337,7 +337,7 @@
           <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; margin-bottom:16px;">
             <h4 style="font-size:14px; font-weight:800; margin-bottom:14px;">Quick Actions</h4>
             <div style="display:flex; flex-direction:column; gap:10px;">
-              <button class="btn btn-amber" style="width:100%; min-height:40px; font-size:13px; font-weight:800;" onclick="openPostModal()">+ Post a Job / Opportunity</button>
+              <a href="post-job.html" class="btn btn-amber" style="width:100%; min-height:40px; font-size:13px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">+ Post Opportunity</a>
               <a href="marketplace.html" class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center;">&#x1F91D; Browse All Professionals</a>
               <a href="messages.html" id="quickLinkMessages" class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center;">&#x1F4AC; Open Messages</a>
               <a href="wallet.html" class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center;">&#x1F4B0; Manage Payments</a>
@@ -406,20 +406,20 @@
   </main>
 </div>
 
-<!-- Post a Job / Opportunity Modal -->
+<!-- Post Opportunity Modal -->
 <div class="modal-overlay" id="postModal">
   <div class="modal-card" style="position:relative; max-width:640px; width:100%; max-height:90vh; overflow-y:auto; border-radius:24px; padding:28px;">
     <button class="modal-close" onclick="closePostModal()">&times;</button>
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
       <div style="width:44px; height:44px; border-radius:14px; background:rgba(212,146,11,0.15); color:var(--amber); display:grid; place-items:center; font-size:22px;">💼</div>
       <div>
-        <div class="modal-title" style="font-size:19px; font-weight:900; color:var(--ink); margin-bottom:2px;">Post a Job / Opportunity</div>
+        <div class="modal-title" style="font-size:19px; font-weight:900; color:var(--ink); margin-bottom:2px;">Post Opportunity</div>
         <div style="font-size:12px; color:var(--muted);">Publish openings, tenders, contracts, or consultant requests to the live marketplace</div>
       </div>
     </div>
 
     <div class="form-group">
-      <label class="form-label" style="font-weight:800;">Opportunity / Job Title</label>
+      <label class="form-label" style="font-weight:800;">Opportunity Title</label>
       <input class="form-input" type="text" id="projTitle" placeholder="e.g. Senior Subsea Piping Engineer, 33kV Substation EPC Tender">
     </div>
 
@@ -480,8 +480,8 @@
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
       <div class="form-group">
-        <label class="form-label" style="font-weight:800;">Budget / Compensation (₦)</label>
-        <input class="form-input" type="number" id="projBudget" placeholder="e.g. 2500000">
+        <label class="form-label" style="font-weight:800;">Budget / Amount Offered (₦)</label>
+        <input class="form-input" type="number" id="projBudget" placeholder="e.g. 2500000 (Leave blank if not specified)">
       </div>
       <div class="form-group">
         <label class="form-label" style="font-weight:800;">Rate Type</label>
@@ -512,7 +512,7 @@
 
     <div class="form-group">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-        <label class="form-label" style="font-weight:800; margin-bottom:0;">Scope of Work / Job Description</label>
+        <label class="form-label" style="font-weight:800; margin-bottom:0;">Scope of Work / Description</label>
         <button type="button" class="btn btn-outline btn-xs" onclick="generateAiTenderSpec('projTitle', 'projDesc')" style="font-weight:800; font-size:11px; color:var(--teal); border-color:rgba(19,117,111,0.3);">
           ✨ AI Generate Spec
         </button>
@@ -522,7 +522,7 @@
 
     <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:8px;">
       <button type="button" class="btn btn-outline" onclick="closePostModal()">Cancel</button>
-      <button type="button" class="btn btn-amber" id="postSubmitBtn" style="font-weight:900; padding:10px 24px;" onclick="submitProject()">🚀 Publish to Marketplace</button>
+      <button type="button" class="btn btn-amber" id="postSubmitBtn" style="font-weight:900; padding:10px 24px;" onclick="submitProject()">🚀 Publish Opportunity</button>
     </div>
   </div>
 </div>
@@ -539,9 +539,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=86.0"></script>
-<script src="app.js?v=86.0"></script>
-<script src="collekt-ai.js?v=86.0"></script>
+<script src="supabase.js?v=87.0"></script>
+<script src="app.js?v=87.0"></script>
+<script src="collekt-ai.js?v=87.0"></script>
 <script>
   requireCompany();
   
@@ -710,9 +710,9 @@
         projectsContainer.innerHTML = `
           <div style="padding:40px 20px; text-align:center;">
             <div style="font-size:40px; margin-bottom:12px;">📁</div>
-            <h4 style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Posted Jobs or Opportunities Yet</h4>
+            <h4 style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Posted Opportunities Yet</h4>
             <p style="font-size:13px; color:var(--muted); max-width:340px; margin:0 auto 16px;">Post employment openings, EPC tenders, contracts, or consultant requests to start receiving proposals from top verified talent across Nigeria.</p>
-            <button class="btn btn-amber btn-sm" onclick="openPostModal()" style="margin:0 auto; font-weight:800;">+ Post Your First Job / Opportunity &rarr;</button>
+            <a href="post-job.html" class="btn btn-amber btn-sm" style="margin:0 auto; font-weight:800; text-decoration:none; display:inline-block;">+ Post Your First Opportunity &rarr;</a>
           </div>
         `;
       } else {
@@ -720,12 +720,14 @@
         projectsContainer.innerHTML = `
           <table class="data-table" style="min-width:640px;">
             <thead class="table-head">
-              <tr><th>Title &amp; Type</th><th>Category / Level</th><th>Budget / Compensation</th><th>Collektors</th><th>Status</th><th>Action</th></tr>
+              <tr><th>Title &amp; Type</th><th>Category / Level</th><th>Budget / Amount Offered</th><th>Collektors</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
               ${jobs.map(p => {
                 const pProps = allProps.filter(pr => String(pr.jobId) === String(p.id) || String(pr.project_id) === String(p.id));
-                const bVal = p.budget ? (typeof formatNaira === 'function' ? formatNaira(p.budget, true) : '₦' + Number(p.budget).toLocaleString()) : ((p.budgetMax || p.budgetMin) ? ('₦' + (p.budgetMin||0).toLocaleString() + ' - ₦' + (p.budgetMax||0).toLocaleString()) : 'Negotiable');
+                const bVal = (p.budget && Number(p.budget) > 0)
+                  ? (typeof formatNaira === 'function' ? formatNaira(p.budget, true) : '₦' + Number(p.budget).toLocaleString())
+                  : 'Price not specified';
                 const typeLabel = (p.type === 'Job Opening' ? 'Short-Term Job' : p.type) || 'Short-Term Job';
                 const safeTitle = (p.title || 'Untitled Opportunity').replace(/'/g, "\\'");
                 return `
@@ -741,8 +743,8 @@
                       <div style="font-size:11px; color:var(--muted);">${escapeHTML(p.experience || p.location || '')}</div>
                     </td>
                     <td>
-                      <div style="font-weight:800; color:var(--ink);">${bVal}</div>
-                      <div style="font-size:11px; color:var(--muted);">${escapeHTML(p.budget_rate_type || 'Fixed')}</div>
+                      <div style="font-weight:800; color:${(p.budget && Number(p.budget) > 0) ? 'var(--ink)' : 'var(--muted)'}; font-size:13px;">${bVal}</div>
+                      <div style="font-size:11px; color:var(--muted);">${escapeHTML(p.budget_rate_type || 'Total Contract Budget')}</div>
                     </td>
                     <td><strong style="color:var(--teal);">${pProps.length}</strong> collektor${pProps.length === 1 ? '' : 's'}</td>
                     <td><span class="proj-status-pill pill-open">🟢 Open</span></td>
@@ -1224,7 +1226,8 @@
     const category       = document.getElementById('projCategory')?.value || 'Engineering & EPC';
     const experience     = document.getElementById('projExperience')?.value || 'Any Experience Level';
     const location       = document.getElementById('projLocation')?.value || 'Nigeria';
-    const budget         = parseFloat(document.getElementById('projBudget')?.value) || 0;
+    const rawBudget      = document.getElementById('projBudget')?.value;
+    const budget         = (rawBudget !== undefined && rawBudget !== null && rawBudget !== '' && !isNaN(Number(rawBudget)) && Number(rawBudget) > 0) ? Number(rawBudget) : null;
     const budgetRateType = document.getElementById('projBudgetRateType')?.value || 'Total Contract Budget';
     const duration       = document.getElementById('projDuration')?.value.trim() || 'Flexible';
     const deadline       = document.getElementById('projDeadline')?.value.trim() || 'Ongoing';
@@ -1233,11 +1236,11 @@
     const desc           = document.getElementById('projDesc')?.value.trim() || '';
 
     if (!title) {
-      if (typeof showToast === 'function') showToast('⚠️ Please enter an opportunity or job title.', 'warning');
+      if (typeof showToast === 'function') showToast('⚠️ Please enter an opportunity title.', 'warning');
       return;
     }
     if (!desc) {
-      if (typeof showToast === 'function') showToast('⚠️ Please provide a brief job description or scope of work.', 'warning');
+      if (typeof showToast === 'function') showToast('⚠️ Please provide a brief description or scope of work.', 'warning');
       return;
     }
 
@@ -1253,6 +1256,7 @@
       experience,
       location,
       budget,
+      professional_fee: budget,
       budgetMin: budget,
       budgetMax: budget,
       budget_rate_type: budgetRateType,
@@ -1283,11 +1287,11 @@
       }
     }
 
-    if (btn) { btn.textContent = '🚀 Publish to Marketplace'; btn.disabled = false; }
+    if (btn) { btn.textContent = '🚀 Publish Opportunity'; btn.disabled = false; }
 
     closePostModal();
     if (typeof showToast === 'function') {
-      showToast('🎉 Job / Opportunity published live to the Marketplace!');
+      showToast('🎉 Opportunity published live to the Marketplace!');
     }
 
     // Reset inputs
@@ -1607,7 +1611,7 @@
   </div>
 </div>
 
-<script src="settings-popup.js?v=86.0"></script>
+<script src="settings-popup.js?v=87.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>

@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=86.0">
-<link rel="stylesheet" href="shared.css?v=86.0">
-<link rel="stylesheet" href="glass.css?v=86.0">
+<link rel="stylesheet" href="style.css?v=87.0">
+<link rel="stylesheet" href="shared.css?v=87.0">
+<link rel="stylesheet" href="glass.css?v=87.0">
 
 <style>
   body { background: var(--paper); }
@@ -234,12 +234,12 @@
         </div>
       </div>
 
-      <!-- TAB 2: OPEN JOBS & OPPORTUNITIES -->
+      <!-- TAB 2: OPEN OPPORTUNITIES -->
       <div id="tab-projects" style="display:none;" class="fade-in">
         <div class="content-section">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
-            <div class="section-title-sm" style="margin-bottom:0;">Published Jobs &amp; Opportunities</div>
-            <button class="btn btn-amber btn-sm" onclick="location.href='post-job.html'" style="font-weight:800;">+ Post Job / Opportunity</button>
+            <div class="section-title-sm" style="margin-bottom:0;">Published Opportunities</div>
+            <button class="btn btn-amber btn-sm" onclick="location.href='post-job.html'" style="font-weight:800;">+ Post Opportunity</button>
           </div>
           <div id="coProjectsContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px;"></div>
         </div>
@@ -782,10 +782,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=86.0"></script>
-<script src="app.js?v=86.0"></script>
-<script src="collekt-ai.js?v=86.0"></script>
-<script src="settings-popup.js?v=86.0"></script>
+<script src="supabase.js?v=87.0"></script>
+<script src="app.js?v=87.0"></script>
+<script src="collekt-ai.js?v=87.0"></script>
+<script src="settings-popup.js?v=87.0"></script>
 <script src="upload-modal.js"></script>
 <script>
   requireCompany();
@@ -1154,22 +1154,29 @@
       container.innerHTML = `
         <div style="grid-column: 1 / -1; text-align:center; padding:40px 20px; border:2px dashed var(--line); border-radius:var(--r); color:var(--muted);">
           <div style="font-size:28px; margin-bottom:8px;">💼</div>
-          <div style="font-size:15px; font-weight:800; color:var(--ink);">No Published Jobs or Opportunities Yet</div>
-          <div style="font-size:13px; margin-top:4px;">Click '+ Post Job / Opportunity' to publish openings and tenders to the live marketplace.</div>
+          <div style="font-size:15px; font-weight:800; color:var(--ink);">No Published Opportunities Yet</div>
+          <div style="font-size:13px; margin-top:4px;">Click '+ Post Opportunity' to publish openings and tenders to the live marketplace.</div>
         </div>`;
       return;
     }
-    container.innerHTML = jobs.map(j => `
-      <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r); padding:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <span style="font-size:10px; font-weight:800; padding:2px 7px; border-radius:99px; background:rgba(212,146,11,0.15); color:var(--amber);">${escapeHTML((j.type === 'Job Opening' ? 'Short-Term Job' : j.type) || 'Short-Term Job')}</span>
-          <span style="font-size:11px; font-weight:800; color:var(--teal); text-transform:uppercase;">${escapeHTML(j.category || 'Engineering')}</span>
+    container.innerHTML = jobs.map(j => {
+      const bVal = (j.budget && Number(j.budget) > 0)
+        ? (typeof formatNaira === 'function' ? formatNaira(j.budget, true) : '₦' + Number(j.budget).toLocaleString())
+        : 'Price not specified';
+      const bRate = (j.budget && Number(j.budget) > 0 && j.budget_rate_type) ? ` <span style="font-size:11px;">(${escapeHTML(j.budget_rate_type)})</span>` : '';
+
+      return `
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r); padding:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:10px; font-weight:800; padding:2px 7px; border-radius:99px; background:rgba(212,146,11,0.15); color:var(--amber);">${escapeHTML((j.type === 'Job Opening' ? 'Short-Term Job' : j.type) || 'Short-Term Job')}</span>
+            <span style="font-size:11px; font-weight:800; color:var(--teal); text-transform:uppercase;">${escapeHTML(j.category || 'Engineering')}</span>
+          </div>
+          <div style="font-size:15px; font-weight:800; color:var(--ink); margin-bottom:6px;">${escapeHTML(j.title || 'Opportunity')}</div>
+          <div style="font-size:13px; color:var(--muted); margin-bottom:12px;">Budget / Amount Offered: <strong style="color:${(j.budget && Number(j.budget) > 0) ? 'var(--ink)' : 'var(--muted)'};">${bVal}</strong>${bRate}</div>
+          <button class="btn btn-outline btn-sm" onclick="location.href='my-jobs.html'" style="width:100%; font-weight:800;">Manage Opportunity &rarr;</button>
         </div>
-        <div style="font-size:15px; font-weight:800; color:var(--ink); margin-bottom:6px;">${escapeHTML(j.title || 'Opportunity')}</div>
-        <div style="font-size:13px; color:var(--muted); margin-bottom:12px;">Compensation: <strong>₦${(Number(j.budget || 0)).toLocaleString()}</strong> <span style="font-size:11px;">(${escapeHTML(j.budget_rate_type || 'Fixed')})</span></div>
-        <button class="btn btn-outline btn-sm" onclick="location.href='my-jobs.html'" style="width:100%; font-weight:800;">Manage Opportunity &rarr;</button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   function initCoProfilePage() {

@@ -982,6 +982,7 @@ async function fetchLiveJobsFromSupabase() {
       const co = p.company || {};
       const companyName = p.company_name || co.company_name || co.full_name || 'Energy Enterprise';
       const isVerified = (co.is_verified === true || co.verification_status === 'verified');
+      const budgetNum = (p.budget != null && !isNaN(p.budget) && Number(p.budget) > 0) ? Number(p.budget) : (p.professional_fee != null && !isNaN(p.professional_fee) && Number(p.professional_fee) > 0 ? Number(p.professional_fee) : 0);
 
       return {
         id: p.id,
@@ -990,7 +991,8 @@ async function fetchLiveJobsFromSupabase() {
         category: p.category || 'EPC & Engineering',
         experience: p.experience_level || 'Senior Specialist (8-14 Years)',
         location: p.location || 'Lagos, Nigeria',
-        budget: Number(p.budget || 0),
+        budget: budgetNum,
+        professional_fee: budgetNum,
         budget_rate_type: p.budget_rate_type || 'Total Contract Budget',
         duration: p.duration || 'Flexible',
         deadline: p.deadline || 'Ongoing',
@@ -1028,6 +1030,8 @@ async function publishJobToSupabase(jobData) {
       companyId = '0f9ae84c-c5dd-4067-8ded-82638a6e9e01';
     }
 
+    const budgetVal = (jobData.budget != null && !isNaN(jobData.budget) && Number(jobData.budget) > 0) ? Number(jobData.budget) : null;
+
     const payload = {
       company_id: companyId,
       company_name: jobData.company_name || jobData.companyName || user?.company_name || user?.name || 'Collekt Technologies Ltd',
@@ -1036,9 +1040,11 @@ async function publishJobToSupabase(jobData) {
       category: jobData.category || 'EPC & Engineering',
       opportunity_type: jobData.type || 'Short-Term Job',
       experience_level: jobData.experience || 'Any Experience Level',
-      budget: Number(jobData.budget || 0),
+      budget: budgetVal,
+      professional_fee: budgetVal,
       budget_rate_type: jobData.budget_rate_type || 'Total Contract Budget',
       duration: jobData.duration || 'Flexible',
+      deadline: jobData.deadline || 'Ongoing',
       location: jobData.location || 'Nigeria',
       skills_required: Array.isArray(jobData.skills) ? jobData.skills : [],
       status: 'OPEN'
@@ -1062,15 +1068,19 @@ async function publishJobToSupabase(jobData) {
 async function updateJobInSupabase(jobId, jobData) {
   if (!window.sb || !jobId) return false;
   try {
+    const budgetVal = (jobData.budget != null && !isNaN(jobData.budget) && Number(jobData.budget) > 0) ? Number(jobData.budget) : null;
+
     const payload = {
       title: jobData.title,
       description: jobData.description || jobData.scope || '',
       category: jobData.category || 'EPC & Engineering',
       opportunity_type: jobData.type || 'Short-Term Job',
       experience_level: jobData.experience || 'Any Experience Level',
-      budget: Number(jobData.budget || 0),
+      budget: budgetVal,
+      professional_fee: budgetVal,
       budget_rate_type: jobData.budget_rate_type || 'Total Contract Budget',
       duration: jobData.duration || 'Flexible',
+      deadline: jobData.deadline || 'Ongoing',
       location: jobData.location || 'Nigeria',
       skills_required: Array.isArray(jobData.skills) ? jobData.skills : [],
       updated_at: new Date().toISOString()

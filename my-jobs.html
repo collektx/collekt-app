@@ -24,13 +24,13 @@
     }
   })();
 </script>
-<title>My Jobs &amp; Opportunities &mdash; Collekt</title>
+<title>My Posted Opportunities &mdash; Collekt</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=86.0">
-<link rel="stylesheet" href="shared.css?v=86.0">
-<link rel="stylesheet" href="glass.css?v=86.0">
+<link rel="stylesheet" href="style.css?v=87.0">
+<link rel="stylesheet" href="shared.css?v=87.0">
+<link rel="stylesheet" href="glass.css?v=87.0">
 
 <style>
   body { background: var(--paper); }
@@ -128,15 +128,15 @@
         <div>
           <div style="font-size:11px; font-weight:800; color:var(--amber); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;">Employer Management</div>
           <h1 style="font-size:24px; font-weight:900; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-            &#128203; My Jobs &amp; Opportunities
+            &#128203; My Posted Opportunities
           </h1>
           <p style="font-size:14px; color:rgba(255,255,255,.8); max-width:620px;">
-            Track your published listings, review incoming collektors, assess specialist credentials, and award contracts.
+            Track your published opportunities, review incoming collektors, assess specialist credentials, and award contracts.
           </p>
         </div>
         <div style="display:flex; gap:10px;">
           <a href="post-job.html" class="btn btn-amber btn-sm" style="min-height:40px; font-weight:800; padding:0 20px; text-decoration:none; display:inline-flex; align-items:center;">
-            + Post New Opportunity
+            + Post Opportunity
           </a>
         </div>
       </div>
@@ -146,7 +146,7 @@
         <div class="stat-card">
           <div class="stat-icon">&#128188;</div>
           <div class="stat-value" id="statTotalJobs">0</div>
-          <div class="stat-label">Total Listings Posted</div>
+          <div class="stat-label">Total Opportunities Posted</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">&#9889;</div>
@@ -167,7 +167,7 @@
 
       <!-- Filter Tabs -->
       <div class="filter-pills-bar fade-in">
-        <button class="filter-pill-btn active" onclick="filterJobList('all', this)">All Listings</button>
+        <button class="filter-pill-btn active" onclick="filterJobList('all', this)">All Opportunities</button>
         <button class="filter-pill-btn" onclick="filterJobList('Short-Term Job', this)">&#127991;&#65039; Short-Term Jobs</button>
         <button class="filter-pill-btn" onclick="filterJobList('Tender / RFP', this)">&#127959;&#65039; Tenders / RFPs</button>
         <button class="filter-pill-btn" onclick="filterJobList('Project Contract', this)">&#9889; Project Contracts</button>
@@ -197,9 +197,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=86.0"></script>
-<script src="app.js?v=86.0"></script>
-<script src="settings-popup.js?v=86.0"></script>
+<script src="supabase.js?v=87.0"></script>
+<script src="app.js?v=87.0"></script>
+<script src="settings-popup.js?v=87.0"></script>
 
 <script>
   let _activeFilter = 'all';
@@ -258,9 +258,9 @@
       container.innerHTML = `
         <div style="background:var(--white); border:2px dashed var(--line); border-radius:20px; padding:60px 24px; text-align:center;">
           <div style="font-size:48px; margin-bottom:12px;">&#128188;</div>
-          <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:6px;">No Listings Found</div>
+          <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:6px;">No Opportunities Found</div>
           <div style="font-size:13px; color:var(--muted); margin-bottom:20px;">You haven't posted any opportunities in this category yet.</div>
-          <a href="post-job.html" class="btn btn-amber btn-sm" style="font-weight:800; padding:9px 24px; text-decoration:none; display:inline-block;">+ Post a Job / Opportunity</a>
+          <a href="post-job.html" class="btn btn-amber btn-sm" style="font-weight:800; padding:9px 24px; text-decoration:none; display:inline-block;">+ Post Opportunity</a>
         </div>
       `;
       return;
@@ -269,8 +269,10 @@
     container.innerHTML = filtered.map(j => {
       const matchedProps = proposals.filter(p => String(p.jobId) === String(j.id));
       const propCount = matchedProps.length;
-      const budgetFormatted = j.budget ? (typeof formatNaira === 'function' ? formatNaira(j.budget, true) : '&#8358;' + Number(j.budget).toLocaleString()) : 'Negotiable';
-      const rateType = j.budget_rate_type || 'Contract Budget';
+      const budgetFormatted = (j.budget && Number(j.budget) > 0)
+        ? (typeof formatNaira === 'function' ? formatNaira(j.budget, true) : '₦' + Number(j.budget).toLocaleString())
+        : 'Price not specified';
+      const rateType = 'Budget / Amount Offered';
       const typeTag = (j.type === 'Job Opening' ? 'Short-Term Job' : j.type) || 'Short-Term Job';
 
       return `
@@ -288,7 +290,7 @@
 
             <div style="text-align:right;">
               <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase;">${escapeHTML(rateType)}</div>
-              <div style="font-size:18px; font-weight:900; color:var(--forest);">${budgetFormatted}</div>
+              <div style="font-size:17px; font-weight:900; color:${(j.budget && Number(j.budget) > 0) ? 'var(--forest)' : 'var(--muted)'};">${budgetFormatted}</div>
             </div>
           </div>
 
