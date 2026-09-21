@@ -1,5 +1,6 @@
 const https = require('https');
 const { createClient } = require('@supabase/supabase-js');
+const { enforceRateLimit } = require('./lib/rate-limiter');
 
 const supabaseUrl = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder';
@@ -63,6 +64,18 @@ exports.handler = async (event) => {
     const action = body.action || body.skill || 'chat';
     const context = body.context || '';
     const user = body.user || null;
+
+    // Abuse throttling: limit 20 AI requests/min per user/IP
+    const rateCheck = enforceRateLimit(event, {
+      action: 'ai-copilot',
+      userId: user?.id || null,
+      limit: 20,
+      windowMs: 60 * 1000,
+      customHeaders: headers
+    });
+    if (!rateCheck.allowed) {
+      return rateCheck.response;
+    }
 
     if (!prompt) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing prompt' }) };

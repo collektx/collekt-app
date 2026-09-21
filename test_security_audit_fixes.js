@@ -474,6 +474,122 @@ async function runSecurityAuditProbes() {
     console.error('Probe 21 exception:', err);
     assert(false, 'Distribution packaging header sync failed');
   }
+
+  // -------------------------------------------------------------
+  // PROBE 22: Sliding Window Rate Limiter Unit Logic (OWASP API4:2023)
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 22: Sliding Window Rate Limiter Unit Logic ---');
+  try {
+    const { checkRateLimit, resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+    resetRateLimiterStore();
+
+    // Test standard window consumption
+    const testKey = 'test:unit:probe22';
+    const r1 = checkRateLimit({ key: testKey, limit: 3, windowMs: 10000 });
+    assert(r1.allowed === true, 'First request within rate limit is allowed');
+    assert(r1.remaining === 2, `Remaining requests correctly decremented to 2: ${r1.remaining}`);
+
+    const r2 = checkRateLimit({ key: testKey, limit: 3, windowMs: 10000 });
+    assert(r2.allowed === true, 'Second request is allowed');
+    assert(r2.remaining === 1, `Remaining requests correctly decremented to 1: ${r2.remaining}`);
+
+    const r3 = checkRateLimit({ key: testKey, limit: 3, windowMs: 10000 });
+    assert(r3.allowed === true, 'Third request is allowed');
+    assert(r3.remaining === 0, `Remaining requests is 0: ${r3.remaining}`);
+
+    const r4 = checkRateLimit({ key: testKey, limit: 3, windowMs: 10000 });
+    assert(r4.allowed === false, 'Fourth request exceeding limit is rejected');
+    assert(r4.retryAfter > 0, `Retry-After header calculation is positive: ${r4.retryAfter}s`);
+    assert(r4.resetTime > 0, `Reset time calculation is positive: ${r4.resetTime}`);
+  } catch (err) {
+    console.error('Probe 22 exception:', err);
+    assert(false, 'Rate limiter unit logic test failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 23: Financial Mutation Abuse Throttling (Wallet Transfer)
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 23: Financial Mutation Abuse Throttling ---');
+  try {
+    const { enforceRateLimit, resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+    resetRateLimiterStore();
+
+    const mockEvent = {
+      headers: {
+        'x-nf-client-connection-ip': '102.89.23.44',
+        'origin': 'https://collektng.com'
+      }
+    };
+    const testUserId = 'usr_financial_audit_test';
+
+    // Simulate 10 requests allowed
+    let allAllowed = true;
+    for (let i = 1; i <= 10; i++) {
+      const res = enforceRateLimit(mockEvent, {
+        action: 'wallet-transfer',
+        userId: testUserId,
+        limit: 10,
+        windowMs: 60000
+      });
+      if (!res.allowed) allAllowed = false;
+    }
+    assert(allAllowed, 'First 10 rapid financial mutation requests are permitted');
+
+    // 11th request must be throttled with HTTP 429
+    const throttledRes = enforceRateLimit(mockEvent, {
+      action: 'wallet-transfer',
+      userId: testUserId,
+      limit: 10,
+      windowMs: 60000
+    });
+    assert(throttledRes.allowed === false, '11th financial transfer request is blocked');
+    assert(throttledRes.response != null, 'Throttled response object is generated');
+    assert(throttledRes.response.statusCode === 429, `Status code is HTTP 429: ${throttledRes.response.statusCode}`);
+    assert(throttledRes.response.headers['Retry-After'] != null, 'Response includes Retry-After header');
+    assert(throttledRes.response.headers['X-RateLimit-Remaining'] === '0', 'X-RateLimit-Remaining is 0');
+
+    const body = JSON.parse(throttledRes.response.body);
+    assert(body.error === 'Too Many Requests', `Response payload error is Too Many Requests: ${body.error}`);
+    assert(body.status === 'FAILED', 'Response payload status is FAILED');
+  } catch (err) {
+    console.error('Probe 23 exception:', err);
+    assert(false, 'Financial mutation abuse throttling failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 24: AI Copilot & Bank Resolution Abuse Throttling
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 24: AI Copilot & Public Lookup Abuse Throttling ---');
+  try {
+    const { enforceRateLimit, resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+    resetRateLimiterStore();
+
+    const mockAiEvent = {
+      headers: {
+        'client-ip': '197.210.45.12'
+      }
+    };
+
+    // AI copilot rate limit is 20
+    for (let i = 1; i <= 20; i++) {
+      enforceRateLimit(mockAiEvent, {
+        action: 'ai-copilot',
+        limit: 20,
+        windowMs: 60000
+      });
+    }
+
+    const aiThrottled = enforceRateLimit(mockAiEvent, {
+      action: 'ai-copilot',
+      limit: 20,
+      windowMs: 60000
+    });
+    assert(aiThrottled.allowed === false, '21st AI copilot generation request is blocked with HTTP 429');
+    assert(aiThrottled.response.statusCode === 429, 'AI copilot throttling returns HTTP 429');
+  } catch (err) {
+    console.error('Probe 24 exception:', err);
+    assert(false, 'AI copilot abuse throttling probe failed');
+  }
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
   console.log('════════════════════════════════════════════════════════════\n');
 

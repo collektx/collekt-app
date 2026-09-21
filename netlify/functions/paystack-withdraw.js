@@ -1,5 +1,7 @@
 const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
+const { authenticateRequest } = require('./lib/auth-middleware');
+const { enforceRateLimit } = require('./lib/rate-limiter');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -7,6 +9,24 @@ exports.handler = async (event) => {
   }
 
   try {
+    const { user, error: authError } = await authenticateRequest(event);
+    if (authError || !user) {
+      return { statusCode: 401, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Authentication required', details: authError }) };
+    }
+
+    // Abuse throttling: limit 10 withdrawals/min and max 3 withdrawals/5s per user
+    const rateCheck = enforceRateLimit(event, {
+      action: 'paystack-withdraw',
+      userId: user.id,
+      limit: 10,
+      windowMs: 60 * 1000,
+      burstLimit: 3,
+      burstMs: 5 * 1000
+    });
+    if (!rateCheck.allowed) {
+      return rateCheck.response;
+    }
+
     const body = JSON.parse(event.body || '{}');
     const {
       amount,
@@ -38,7 +58,7 @@ exports.handler = async (event) => {
       };
     }
 
-    const effectiveOwnerId = owner_id || user_id;
+    const effectiveOwnerId = user.id;
     if (!effectiveOwnerId) {
       return {
         statusCode: 400,
@@ -48,7 +68,8 @@ exports.handler = async (event) => {
     }
 
     // Role-based authorization: explicitly reject viewer or non-finance roles
-    const callerRole = String(body.role || '').toLowerCase().trim();
+    const { data: profileData } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    const callerRole = (profileData?.role || '').toLowerCase().trim();
     if (callerRole && ['viewer', 'member', 'read-only'].includes(callerRole)) {
       return {
         statusCode: 403,

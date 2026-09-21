@@ -1,7 +1,31 @@
 const { getPaymentProvider } = require('./lib/payment-provider');
+const { enforceRateLimit } = require('./lib/rate-limiter');
 
 exports.handler = async (event) => {
   const method = event.httpMethod;
+
+  if (method === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+      },
+      body: ''
+    };
+  }
+
+  // Rate limiting to prevent NUBAN account enumeration (max 60 lookups/min per IP)
+  const rateCheck = enforceRateLimit(event, {
+    action: 'bank-resolve',
+    limit: 60,
+    windowMs: 60 * 1000
+  });
+  if (!rateCheck.allowed) {
+    return rateCheck.response;
+  }
+
   let account_number, bank_code;
 
   if (method === 'GET') {
@@ -19,16 +43,6 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: 'Invalid JSON payload' })
       };
     }
-  } else if (method === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-      },
-      body: ''
-    };
   } else {
     return {
       statusCode: 405,

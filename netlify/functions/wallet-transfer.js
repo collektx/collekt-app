@@ -1,5 +1,6 @@
 const { supabase } = require('./lib/supabase-client');
 const { authenticateRequest } = require('./lib/auth-middleware');
+const { enforceRateLimit } = require('./lib/rate-limiter');
 
 exports.handler = async (event) => {
   const origin = event.headers.origin || event.headers.Origin || '';
@@ -34,6 +35,21 @@ exports.handler = async (event) => {
     if (authError || !user) {
       return { statusCode: 401, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Authentication required', details: authError }) };
     }
+
+    // Abuse throttling: limit 10 transfers/min and max 3 transfers/5s per user
+    const rateCheck = enforceRateLimit(event, {
+      action: 'wallet-transfer',
+      userId: user.id,
+      limit: 10,
+      windowMs: 60 * 1000,
+      burstLimit: 3,
+      burstMs: 5 * 1000,
+      customHeaders: headers
+    });
+    if (!rateCheck.allowed) {
+      return rateCheck.response;
+    }
+
     const body = JSON.parse(event.body || '{}');
     const senderId = user.id;
     const recipientId = body.recipient_id || body.recipientId || body.proId;

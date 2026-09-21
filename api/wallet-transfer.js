@@ -1,4 +1,5 @@
 const { supabase } = require('../netlify/functions/lib/supabase-client');
+const { checkRateLimit } = require('../netlify/functions/lib/rate-limiter');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -23,6 +24,28 @@ module.exports = async (req, res) => {
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
     if (authErr || !user) {
       return res.status(401).json({ success: false, status: 'FAILED', error: 'Invalid or expired user session token' });
+    }
+
+    // Rate limiting: 10 requests/min, burst 3/5s per user
+    const rateCheck = checkRateLimit({
+      key: `wallet-transfer:user:${user.id}`,
+      limit: 10,
+      windowMs: 60 * 1000,
+      burstLimit: 3,
+      burstMs: 5 * 1000
+    });
+    if (!rateCheck.allowed) {
+      res.setHeader('Retry-After', String(rateCheck.retryAfter));
+      res.setHeader('X-RateLimit-Limit', String(rateCheck.limit));
+      res.setHeader('X-RateLimit-Remaining', '0');
+      res.setHeader('X-RateLimit-Reset', String(rateCheck.resetTime));
+      return res.status(429).json({
+        success: false,
+        status: 'FAILED',
+        error: 'Too Many Requests',
+        message: `Rate limit exceeded for wallet transfers. Please retry in ${rateCheck.retryAfter} seconds.`,
+        retryAfter: rateCheck.retryAfter
+      });
     }
 
     const body = req.body || {};
