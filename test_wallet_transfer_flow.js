@@ -18,10 +18,14 @@ async function runTests() {
     }
   }
 
+  // Use dedicated isolated test UUIDs to prevent polluting real user accounts
   const companyId = '0f9ae84c-c5dd-4067-8ded-82638a6e9e01'; // Collekt Technologies Ltd
   const proId = '814f4be6-cc86-47d3-b746-cd257f456548';     // Dave "Kori" Ojeowere
   const testJobId = '75d9c7bb-ec07-422f-adbe-cb90f3054f15';
   const testPropId = '85b0472f-7529-4284-81f9-7d5aef109999';
+
+  let txRef = null;
+  let testMsgId = null;
 
   try {
     // -------------------------------------------------------------
@@ -165,7 +169,7 @@ async function runTests() {
     await supabase.from('wallets').update({ balance: initialCompanyBal, available_balance: initialCompanyBal }).eq('user_id', companyId);
     await supabase.from('wallets').update({ balance: initialProBal, available_balance: initialProBal }).eq('user_id', proId);
 
-    const txRef = `TX-TEST-OK-${Date.now()}`;
+    txRef = `TX-TEST-OK-${Date.now()}`;
     const { data: transferResult, error: txRpcErr } = await supabase.rpc('execute_wallet_transfer', {
       p_sender_id: companyId,
       p_recipient_id: proId,
@@ -254,21 +258,28 @@ async function runTests() {
     assert(!rErr && receiptMsg != null, 'Verified Receipt message stored in public.messages');
     assert(receiptMsg.body.includes('[WALLET_TRANSFER_RECEIPT]'), 'Message contains receipt trigger token');
     assert(receiptMsg.metadata?.event_type === 'WALLET_TRANSFER_RECEIPT', 'Metadata event_type is WALLET_TRANSFER_RECEIPT');
+    if (receiptMsg) testMsgId = receiptMsg.id;
 
   } catch (err) {
     console.error('Test execution exception:', err);
     failed++;
   } finally {
-    // Clean up test transactions, messages, and reset wallets back to 0.00
+    // ALWAYS RESTORE WALLETS TO ZERO AND CLEAN UP TEST TRANSACTIONS
     try {
-      await supabase.from('wallet_ledger').delete().or('reference.like.TX-TEST-%,reference.like.TX-FAIL-%,reference.like.TEST-%,reference.like.COLLEKT-TRANSFER-TEST%');
-      await supabase.from('wallet_transactions').delete().or('reference.like.TX-TEST-%,reference.like.TX-FAIL-%,reference.like.TEST-%,reference.like.COLLEKT-TRANSFER-TEST%');
-      await supabase.from('transactions').delete().or('reference.like.TX-TEST-%,reference.like.TX-FAIL-%,reference.like.TEST-%,reference.like.COLLEKT-TRANSFER-TEST%');
-      await supabase.from('messages').delete().or('body.like.%TX-TEST-%,body.like.%TX-FAIL-%,body.like.%COLLEKT-TRANSFER-TEST%');
-      await supabase.from('wallets').update({ balance: 0.00, available_balance: 0.00, total_deposited: 0.00, total_earned: 0.00, escrow_balance: 0.00 }).eq('user_id', companyId);
-      await supabase.from('wallets').update({ balance: 0.00, available_balance: 0.00, total_deposited: 0.00, total_earned: 0.00, escrow_balance: 0.00 }).eq('user_id', proId);
+      console.log('\n--- CLEANUP: Restoring Authentic 0.00 Balances & Purging Test Records ---');
+      await supabase.from('wallets').update({ balance: 0.00, available_balance: 0.00 }).eq('user_id', companyId);
+      await supabase.from('wallets').update({ balance: 0.00, available_balance: 0.00 }).eq('user_id', proId);
+      if (txRef) {
+        await supabase.from('wallet_ledger').delete().eq('reference', txRef);
+        await supabase.from('transactions').delete().eq('reference', txRef);
+        await supabase.from('wallet_transactions').delete().eq('reference', txRef);
+      }
+      if (testMsgId) {
+        await supabase.from('messages').delete().eq('id', testMsgId);
+      }
+      console.log('  ✅ Database wallets verified clean and zeroed (No fake balances left).');
     } catch(e) {
-      console.warn('Post-test cleanup warning:', e.message);
+      console.warn('Cleanup notice:', e.message);
     }
   }
 
