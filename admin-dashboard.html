@@ -50,9 +50,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=90.0">
-<link rel="stylesheet" href="shared.css?v=90.0">
-<link rel="stylesheet" href="glass.css?v=90.0">
+<link rel="stylesheet" href="style.css?v=95.0">
+<link rel="stylesheet" href="shared.css?v=95.0">
+<link rel="stylesheet" href="glass.css?v=95.0">
 
 <style>
   html, body {
@@ -1052,8 +1052,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=90.0"></script>
-<script src="app.js?v=90.0"></script>
+<script src="supabase.js?v=95.0"></script>
+<script src="app.js?v=95.0"></script>
 <script>
   async function initAdminDashboard() {
     // 1. Verify Master Admin or live Supabase session
@@ -2128,7 +2128,7 @@
     }
   }
 
-  function inspectProCredentials(userId) {
+  async function inspectProCredentials(userId) {
     const users = getAllRegisteredUsers();
     const target = String(userId || '').toLowerCase().trim();
     const u = users.find(x => String(x.id || '').toLowerCase() === target || String(x.email || '').toLowerCase() === target || String(x.username || '').toLowerCase() === target);
@@ -2139,6 +2139,29 @@
 
     // Collect all documents for this specific user
     let userDocs = [];
+
+    // 0. Query authentic Supabase user_documents via RLS
+    if (window.sb && u.id) {
+      try {
+        const { data: dbDocs } = await window.sb.from('user_documents').select('*').eq('user_id', u.id);
+        if (Array.isArray(dbDocs) && dbDocs.length > 0) {
+          for (const d of dbDocs) {
+            userDocs.push({
+              name: d.title || d.file_name || 'Document.pdf',
+              category: d.document_type === 'cv' ? 'CV / Resume' : d.document_type === 'cac' ? 'CAC Corporate Incorporation' : d.document_type === 'nin' ? 'NIN Verification Document' : (d.document_type || 'Attached Credential'),
+              size: d.file_size || 450000,
+              filePath: d.file_path,
+              storageBucket: d.storage_bucket || 'documents',
+              type: d.mime_type || 'application/pdf',
+              fileUrl: d.file_url,
+              dataURL: d.file_url || null
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('Notice querying authentic user_documents:', err);
+      }
+    }
 
     // 1. Check user-specific uploaded files directory
     let userUploads = {};
@@ -2163,6 +2186,8 @@
             category: cat === 'cv' ? 'CV / Resume' : cat === 'certifications' ? 'Engineering Certification' : cat === 'company-docs' ? 'CAC Corporate Incorporation' : cat === 'documents' ? 'NIN / Government ID' : 'Portfolio Document',
             size: f.size || 420000,
             dataURL: f.dataURL || null,
+            filePath: f.filePath || null,
+            storageBucket: f.storageBucket || 'documents',
             type: f.type || 'application/pdf'
           });
         }
@@ -2267,7 +2292,7 @@
                     <div style="font-size:11px; color:var(--teal); font-weight:700;">${escapeHTML(d.category)} &bull; ${typeof formatFileSize === 'function' ? formatFileSize(d.size) : '450 KB'}</div>
                   </div>
                 </div>
-                <button class="btn btn-outline btn-xs" style="flex-shrink:0; font-weight:800; padding:6px 12px;" onclick="viewAdminDocument('${escapeHTML(d.name)}', '${escapeHTML(d.category)}', '${d.dataURL || ''}')">
+                <button class="btn btn-outline btn-xs" style="flex-shrink:0; font-weight:800; padding:6px 12px;" onclick="viewAdminDocument('${escapeHTML(d.name)}', '${escapeHTML(d.category)}', '${d.dataURL || ''}', '${d.filePath || ''}', '${d.storageBucket || 'documents'}')">
                   👁️ View Document
                 </button>
               </div>
@@ -2313,14 +2338,23 @@
     }
   }
 
-  function viewAdminDocument(name, category, dataURL) {
+  async function viewAdminDocument(name, category, dataURL, filePath, storageBucket) {
+    let resolvedUrl = dataURL;
+    if (filePath && typeof window.getSignedDocumentUrl === 'function') {
+      try {
+        const sRes = await window.getSignedDocumentUrl(storageBucket || 'documents', filePath, 300);
+        if (sRes && sRes.signedUrl) resolvedUrl = sRes.signedUrl;
+      } catch(e) {}
+    }
     if (typeof openDocumentViewer === 'function') {
       openDocumentViewer({
         name: name,
         category: category,
         size: 500000,
         type: (name.endsWith('.png') || name.endsWith('.jpg')) ? 'image/png' : 'application/pdf',
-        dataURL: dataURL || null
+        dataURL: resolvedUrl || null,
+        filePath: filePath,
+        storageBucket: storageBucket
       });
     } else {
       showToast(`📄 Viewing ${name} (${category})`);

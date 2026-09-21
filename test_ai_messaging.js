@@ -65,15 +65,18 @@ async function runTests() {
   // TEST 3: Database-backed in-app conversation and message persistence
   console.log('\n--- TEST 3: Database Conversation & Message Persistence ---');
   
-  // 3a. Get real company and professional profiles from database
-  const { data: profiles, error: profErr } = await supabase.from('profiles').select('id, name, email, role').limit(5);
-  assert(!profErr && profiles && profiles.length >= 2, 'Successfully fetched real user profiles from Supabase');
+  // Authenticate as test company runner
+  const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({
+    email: 'test-runner-company@collekt.ng',
+    password: 'CollektTest2026!'
+  });
+  assert(!authErr && authData?.user, 'Successfully authenticated as test-runner-company');
 
-  const companyUser = profiles.find(p => p.role === 'company') || profiles[0];
-  const proUser = profiles.find(p => p.id !== companyUser.id) || profiles[1];
+  const companyUser = { id: 'd0000001-0000-4000-a000-000000000001', name: 'Test Runner Company Ltd' };
+  const proUser = { id: 'd0000002-0000-4000-a000-000000000002', name: 'Test Runner Professional' };
 
-  console.log(`Using Sender (Company): ${companyUser.name || companyUser.email} (${companyUser.id})`);
-  console.log(`Using Recipient (Pro): ${proUser.name || proUser.email} (${proUser.id})`);
+  console.log(`Using Sender (Company): ${companyUser.name} (${companyUser.id})`);
+  console.log(`Using Recipient (Pro): ${proUser.name} (${proUser.id})`);
 
   // 3b. Create or get conversation in Supabase
   let convId = null;
@@ -163,6 +166,19 @@ async function runTests() {
     .single();
 
   assert(!aiLogErr && aiLog, `Logged generation in public.ai_generations (ID: ${aiLog?.id})`);
+
+  // Cleanup test records
+  try {
+    if (convId) {
+      await supabase.from('messages').delete().eq('conversation_id', convId);
+      await supabase.from('conversations').delete().eq('id', convId);
+    }
+    if (aiLog?.id) {
+      await supabase.from('ai_generations').delete().eq('id', aiLog.id);
+    }
+  } catch(e) {
+    // Non-fatal cleanup
+  }
 
   console.log('\n====================================================');
   console.log(`📊 TEST RESULTS: ${passed} PASSED, ${failed} FAILED`);

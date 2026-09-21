@@ -15,8 +15,18 @@ module.exports = async (req, res) => {
   }
 
   try {
+    const authHeader = req.headers['authorization'] || req.headers['Authorization'] || '';
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, status: 'FAILED', error: 'Authentication required: Missing Bearer token' });
+    }
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
+    if (authErr || !user) {
+      return res.status(401).json({ success: false, status: 'FAILED', error: 'Invalid or expired user session token' });
+    }
+
     const body = req.body || {};
-    const senderId = body.sender_id || body.senderId || body.userId;
+    const senderId = user.id;
     const recipientId = body.recipient_id || body.recipientId || body.proId;
     const amount = parseFloat(body.amount);
     const reference = (body.reference || `TX-PAY-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`).trim();

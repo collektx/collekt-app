@@ -1,4 +1,5 @@
 const { supabase } = require('./lib/supabase-client');
+const { authenticateRequest } = require('./lib/auth-middleware');
 
 exports.handler = async (event) => {
   const origin = event.headers.origin || event.headers.Origin || '';
@@ -29,8 +30,12 @@ exports.handler = async (event) => {
   }
 
   try {
+    const { user, error: authError } = await authenticateRequest(event);
+    if (authError || !user) {
+      return { statusCode: 401, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Authentication required', details: authError }) };
+    }
     const body = JSON.parse(event.body || '{}');
-    const senderId = body.sender_id || body.senderId || body.userId;
+    const senderId = user.id;
     const recipientId = body.recipient_id || body.recipientId || body.proId;
     const amount = parseFloat(body.amount);
     const reference = (body.reference || `TX-PAY-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`).trim();

@@ -1,4 +1,5 @@
 const { supabase } = require('./lib/supabase-client');
+const { authenticateRequest } = require('./lib/auth-middleware');
 
 /**
  * Company Team & RBAC Management Function
@@ -25,6 +26,11 @@ exports.handler = async (event) => {
   };
 
   try {
+    const { user, error: authError } = await authenticateRequest(event);
+    if (authError || !user) {
+      return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Authentication required', details: authError }) };
+    }
+
     // 1. GET: Fetch Team Members for a Company
     if (method === 'GET') {
       const companyId = event.queryStringParameters?.company_id;
@@ -34,6 +40,11 @@ exports.handler = async (event) => {
           headers: corsHeaders,
           body: JSON.stringify({ status: 'error', error: 'Missing company_id parameter' })
         };
+      }
+
+      const { data: companyCheck } = await supabase.from('companies').select('owner_id').eq('id', companyId).single();
+      if (!companyCheck || companyCheck.owner_id !== user.id) {
+        return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ status: 'error', error: 'Unauthorized: Not the company owner' }) };
       }
 
       const { data, error } = await supabase
@@ -62,7 +73,8 @@ exports.handler = async (event) => {
     // 2. POST: Actions (invite, remove, update_role)
     if (method === 'POST') {
       const payload = JSON.parse(event.body || '{}');
-      const { action, company_id, inviter_id, name, email, role, member_id } = payload;
+      const { action, company_id, name, email, role, member_id } = payload;
+      const inviter_id = user.id;
 
       if (!company_id) {
         return {
@@ -70,6 +82,11 @@ exports.handler = async (event) => {
           headers: corsHeaders,
           body: JSON.stringify({ status: 'error', error: 'Missing company_id' })
         };
+      }
+
+      const { data: companyCheck } = await supabase.from('companies').select('owner_id').eq('id', company_id).single();
+      if (!companyCheck || companyCheck.owner_id !== user.id) {
+        return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ status: 'error', error: 'Unauthorized: Not the company owner' }) };
       }
 
       // Action: INVITE

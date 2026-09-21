@@ -582,11 +582,12 @@ async function handleOAuthSessionRouting(session) {
 
 /* -----------------------------------------------------
    REAL USERS DIRECTORY SYNC: Supabase Profiles Engine
+   (Queries public_profiles view to exclude sensitive KYC PII)
 ------------------------------------------------------*/
 async function fetchRealRegisteredUsers() {
   if (!window.sb) return typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
   try {
-    const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: true });
+    const { data, error } = await sb.from('public_profiles').select('*').order('created_at', { ascending: true });
     if (error) throw error;
     if (Array.isArray(data) && data.length > 0) {
       const realUsers = data.map(p => {
@@ -1206,6 +1207,9 @@ if (window.sb && window.sb.auth) {
 /**
  * Upload any File, Blob, or Uint8Array to Supabase Storage
  */
+/**
+ * Upload any File, Blob, or Uint8Array to Supabase Storage
+ */
 async function uploadFileToSupabaseStorage(bucket, path, file, contentType) {
   if (!window.sb || !window.sb.storage) {
     return { error: { message: 'Supabase storage client not available' } };
@@ -1221,13 +1225,94 @@ async function uploadFileToSupabaseStorage(bucket, path, file, contentType) {
       return { error };
     }
 
-    const { data: pubData } = window.sb.storage.from(bucket).getPublicUrl(path);
-    const publicUrl = pubData ? pubData.publicUrl : null;
-    return { data, publicUrl, path, error: null };
+    let publicUrl = null;
+    let signedUrl = null;
+
+    if (bucket === 'documents') {
+      try {
+        const { data: signData } = await window.sb.storage.from(bucket).createSignedUrl(path, 3600);
+        signedUrl = signData ? signData.signedUrl : null;
+        publicUrl = signedUrl;
+      } catch (e) {
+        console.warn('[Supabase Storage] createSignedUrl fallback error:', e);
+      }
+    } else {
+      const { data: pubData } = window.sb.storage.from(bucket).getPublicUrl(path);
+      publicUrl = pubData ? pubData.publicUrl : null;
+    }
+
+    return { data, publicUrl, signedUrl, path, error: null };
   } catch (err) {
     console.error('[Supabase Storage] Unexpected upload failure:', err);
     return { error: err };
   }
+}
+
+/**
+ * Generate a time-limited signed URL for a private storage object (OWASP ASVS compliant)
+ * Default expiration: 300 seconds (5 minutes)
+ */
+async function getSignedDocumentUrl(bucket, filePath, expiresIn = 300) {
+  if (!window.sb || !window.sb.storage) {
+    return { signedUrl: null, error: { message: 'Supabase storage client not available' } };
+  }
+  try {
+    const targetBucket = bucket || 'documents';
+    const cleanPath = (filePath || '').replace(/^[\\/]+/, '');
+    const { data, error } = await window.sb.storage.from(targetBucket).createSignedUrl(cleanPath, expiresIn);
+    if (error) {
+      console.warn(`[Supabase Storage] Failed to generate signed URL for "${cleanPath}" in "${targetBucket}":`, error);
+      return { signedUrl: null, error };
+    }
+    return { signedUrl: data?.signedUrl || null, error: null };
+  } catch (err) {
+    console.error('[Supabase Storage] getSignedDocumentUrl error:', err);
+    return { signedUrl: null, error: err };
+  }
+}
+
+/**
+ * Resolves a viewable URL for a document object.
+ * Automatically requests a time-limited signed URL for private storage files.
+ */
+async function getOrGenerateDocumentViewUrl(doc, expiresIn = 300) {
+  if (!doc) return null;
+  if (typeof doc === 'string') {
+    if (doc.startsWith('data:') || doc.startsWith('blob:')) return doc;
+    if (doc.includes('token=')) return doc;
+    const match = doc.match(/\/storage\/v1\/object\/(?:public|authenticated)\/documents\/(.+)$/);
+    if (match && match[1]) {
+      const path = decodeURIComponent(match[1].split('?')[0]);
+      const res = await getSignedDocumentUrl('documents', path, expiresIn);
+      if (res.signedUrl) return res.signedUrl;
+    }
+    return doc;
+  }
+
+  if (doc.dataURL && (doc.dataURL.startsWith('data:') || doc.dataURL.startsWith('blob:'))) {
+    return doc.dataURL;
+  }
+
+  const filePath = doc.file_path || doc.filePath || doc.path;
+  const bucket = doc.storage_bucket || doc.storageBucket || 'documents';
+  if (filePath && window.sb && window.sb.storage) {
+    const res = await getSignedDocumentUrl(bucket, filePath, expiresIn);
+    if (res.signedUrl) return res.signedUrl;
+  }
+
+  const rawUrl = doc.file_url || doc.fileUrl || doc.url || doc.dataURL;
+  if (rawUrl && typeof rawUrl === 'string') {
+    if (rawUrl.includes('token=')) return rawUrl;
+    const match = rawUrl.match(/\/storage\/v1\/object\/(?:public|authenticated)\/documents\/(.+)$/);
+    if (match && match[1]) {
+      const path = decodeURIComponent(match[1].split('?')[0]);
+      const res = await getSignedDocumentUrl('documents', path, expiresIn);
+      if (res.signedUrl) return res.signedUrl;
+    }
+    return rawUrl;
+  }
+
+  return null;
 }
 
 /**
@@ -1289,6 +1374,8 @@ async function uploadAndSaveUserDocument({ file, documentType, title, relatedEnt
   const uploadRes = await uploadFileToSupabaseStorage('documents', filePath, file, mimeType);
   if (uploadRes.error) return { error: uploadRes.error };
 
+  const finalViewUrl = uploadRes.signedUrl || uploadRes.publicUrl || '';
+
   const docRecord = await saveUserDocumentRecord({
     user_id: userId,
     document_type: documentType || 'other',
@@ -1299,7 +1386,7 @@ async function uploadAndSaveUserDocument({ file, documentType, title, relatedEnt
     file_size: file.size || 0,
     storage_bucket: 'documents',
     file_path: filePath,
-    file_url: uploadRes.publicUrl,
+    file_url: finalViewUrl,
     is_generated: isGenerated,
     source_data: sourceData,
     related_entity_type: relatedEntityType,
@@ -1310,9 +1397,9 @@ async function uploadAndSaveUserDocument({ file, documentType, title, relatedEnt
   // If CV, also update professional_profiles and local session
   if (documentType === 'cv') {
     try {
-      await window.sb.from('professional_profiles').update({ cv_url: uploadRes.publicUrl }).eq('user_id', userId);
+      await window.sb.from('professional_profiles').update({ cv_url: finalViewUrl }).eq('user_id', userId);
       if (user) {
-        user.cv_url = uploadRes.publicUrl;
+        user.cv_url = finalViewUrl;
         user.cv_name = cleanName;
         user.cv_size = file.size || 0;
         if (typeof setUser === 'function') setUser(user);
@@ -1320,7 +1407,7 @@ async function uploadAndSaveUserDocument({ file, documentType, title, relatedEnt
     } catch(e) { console.warn('CV profile sync warning:', e); }
   }
 
-  return { data: docRecord.data, publicUrl: uploadRes.publicUrl, error: null };
+  return { data: docRecord.data, publicUrl: finalViewUrl, signedUrl: uploadRes.signedUrl, filePath: filePath, path: filePath, error: null };
 }
 
 /**
@@ -2289,9 +2376,20 @@ async function withdrawWalletFunds(params) {
       role: params.role || user.role || 'professional'
     };
 
+    let authHeaderVal = '';
+    try {
+      const sess = await window.sb?.auth?.getSession();
+      if (sess?.data?.session?.access_token) {
+        authHeaderVal = `Bearer ${sess.data.session.access_token}`;
+      }
+    } catch(e){}
+
     const res = await fetch('/.netlify/functions/paystack-withdraw', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(authHeaderVal ? { 'Authorization': authHeaderVal } : {})
+      },
       body: JSON.stringify(payload)
     });
 
@@ -2982,9 +3080,20 @@ async function executeWalletTransferInSupabase(transferParams) {
     const endpoints = ['/api/wallet-transfer', '/.netlify/functions/wallet-transfer'];
     for (const ep of endpoints) {
       try {
+        let authHeaderVal = '';
+        try {
+          const sess = await window.sb?.auth?.getSession();
+          if (sess?.data?.session?.access_token) {
+            authHeaderVal = `Bearer ${sess.data.session.access_token}`;
+          }
+        } catch(e){}
+
         const fetchRes = await fetch(ep, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            ...(authHeaderVal ? { 'Authorization': authHeaderVal } : {})
+          },
           body: JSON.stringify({
             sender_id: canonicalSender,
             recipient_id: canonicalRecipient,
@@ -3521,6 +3630,8 @@ window.updateAiMessageCustomInstruction = updateAiMessageCustomInstruction;
 window.regenerateAiMessageDraft = regenerateAiMessageDraft;
 window.sendAiMessageFromModal = sendAiMessageFromModal;
 window.executeWalletTransferInSupabase = executeWalletTransferInSupabase;
+window.getSignedDocumentUrl = getSignedDocumentUrl;
+window.getOrGenerateDocumentViewUrl = getOrGenerateDocumentViewUrl;
 
 
 

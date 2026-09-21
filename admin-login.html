@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=90.0">
-<link rel="stylesheet" href="shared.css?v=90.0">
-<link rel="stylesheet" href="glass.css?v=90.0">
+<link rel="stylesheet" href="style.css?v=95.0">
+<link rel="stylesheet" href="shared.css?v=95.0">
+<link rel="stylesheet" href="glass.css?v=95.0">
 
 <style>
   body {
@@ -216,8 +216,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=90.0"></script>
-<script src="app.js?v=90.0"></script>
+<script src="supabase.js?v=95.0"></script>
+<script src="app.js?v=95.0"></script>
 <script>
   function togglePassVisibility() {
     const input = document.getElementById('adminPassVal');
@@ -226,27 +226,10 @@
     }
   }
 
-  // Permitted Master Admin Credentials
-  const MASTER_USERNAMES = [
-    'admin@collekt.ng',
-    'admin',
-    'superadmin@collekt.ng',
-    'collektng@gmail.com',
-    'admin@collekt.com'
-  ];
-
-  const MASTER_PASSWORDS = [
-    'AdminPass2026!',
-    'CollektAdmin2026!',
-    'admin123',
-    'admin',
-    'Admin2026!',
-    'adminpass'
-  ];
-
   async function handleAdminLoginSubmit(e) {
+    if (e) e.preventDefault();
     const rawInput = (document.getElementById('adminEmailVal')?.value || '').trim().toLowerCase();
-    const email = (rawInput === 'admin' || rawInput === 'superadmin') ? 'admin@collekt.ng' : rawInput;
+    const email = rawInput;
     const password = (document.getElementById('adminPassVal')?.value || '').trim();
     const alertBox = document.getElementById('adminErrorAlert');
     const btn = document.getElementById('adminLoginBtn');
@@ -265,7 +248,7 @@
       btn.innerHTML = '<span class="spinner-icon"></span> Authenticating Admin...';
     }
 
-    // 1. Try Supabase Auth first with official database credentials
+    // Authenticate exclusively with official Supabase database credentials
     try {
       if (window.sb && window.sb.auth) {
         const { data, error } = await sb.auth.signInWithPassword({
@@ -308,6 +291,19 @@
               window.location.href = 'admin-dashboard.html';
             }, 300);
             return;
+          } else {
+            if (alertBox) {
+              alertBox.style.background = 'rgba(220, 38, 38, 0.2)';
+              alertBox.style.borderColor = 'rgba(220, 38, 38, 0.5)';
+              alertBox.style.color = '#fca5a5';
+              alertBox.textContent = '⛔ Access Denied: This account does not have administrative privileges.';
+              alertBox.style.display = 'block';
+            }
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = '🔑 Authenticate &amp; Launch Command Portal';
+            }
+            return;
           }
         }
       }
@@ -315,50 +311,11 @@
       console.warn('Supabase remote admin auth notice:', err);
     }
 
-    // 2. Offline / Master Admin Fallback
-    const isMasterUser = MASTER_USERNAMES.includes(rawInput) || MASTER_USERNAMES.includes(email) || rawInput === 'admin';
-    const isMasterPass = MASTER_PASSWORDS.includes(password);
-
-    if (isMasterUser && isMasterPass) {
-      const masterSession = {
-        id: 'a1111111-1111-4111-a111-111111111111',
-        email: email.includes('@') ? email : 'admin@collekt.ng',
-        name: 'Super Administrator',
-        role: 'admin',
-        token: 'adm_master_' + Date.now(),
-        authenticatedAt: new Date().toISOString()
-      };
-
-      try {
-        localStorage.setItem('collekt_admin_auth', JSON.stringify(masterSession));
-        localStorage.setItem('collekt_user', JSON.stringify(masterSession));
-        localStorage.setItem('collekt_last_role', 'admin');
-        sessionStorage.setItem('collekt_admin_auth', JSON.stringify(masterSession));
-        sessionStorage.setItem('collekt_user', JSON.stringify(masterSession));
-        document.cookie = "collekt_admin_auth=1; path=/; max-age=86400; SameSite=Lax";
-      } catch(err) {
-        console.warn('Storage notice:', err);
-      }
-
-      if (alertBox) {
-        alertBox.style.background = 'rgba(34, 197, 94, 0.2)';
-        alertBox.style.borderColor = 'rgba(34, 197, 94, 0.6)';
-        alertBox.style.color = '#4ade80';
-        alertBox.innerHTML = '✅ <strong>Access Authorized!</strong> Initializing Operational Command Dashboard...';
-        alertBox.style.display = 'block';
-      }
-
-      setTimeout(() => {
-        window.location.href = 'admin-dashboard.html';
-      }, 300);
-      return;
-    }
-
     if (alertBox) {
       alertBox.style.background = 'rgba(220, 38, 38, 0.2)';
       alertBox.style.borderColor = 'rgba(220, 38, 38, 0.5)';
       alertBox.style.color = '#fca5a5';
-      alertBox.textContent = '⚠️ Invalid administrative credentials. Please check your username and password.';
+      alertBox.textContent = '⚠️ Invalid administrative credentials. Please check your email and password.';
       alertBox.style.display = 'block';
     }
     if (btn) {
@@ -366,6 +323,20 @@
       btn.innerHTML = '🔑 Authenticate &amp; Launch Command Portal';
     }
   }
+
+  (function checkAdminTimeoutNotice() {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('reason') === 'timeout') {
+      const alertBox = document.getElementById('adminErrorAlert');
+      if (alertBox) {
+        alertBox.style.background = 'rgba(19, 117, 111, 0.25)';
+        alertBox.style.borderColor = 'rgba(19, 117, 111, 0.6)';
+        alertBox.style.color = '#a7f3d0';
+        alertBox.textContent = '🔒 Administrative session closed after 15 minutes of inactivity for compliance and treasury protection.';
+        alertBox.style.display = 'block';
+      }
+    }
+  })();
 </script>
 </body>
 </html>

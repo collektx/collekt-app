@@ -88,9 +88,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=90.0">
-<link rel="stylesheet" href="shared.css?v=90.0">
-<link rel="stylesheet" href="glass.css?v=90.0">
+<link rel="stylesheet" href="style.css?v=95.0">
+<link rel="stylesheet" href="shared.css?v=95.0">
+<link rel="stylesheet" href="glass.css?v=95.0">
 <style>
 /* -- GLOBAL OVERRIDES ------------------------------- */
 html.dark body { background: #090d0c; }
@@ -1313,9 +1313,9 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=90.0"></script>
-<script src="app.js?v=90.0"></script>
-<script src="settings-popup.js?v=90.0"></script>
+<script src="supabase.js?v=95.0"></script>
+<script src="app.js?v=95.0"></script>
+<script src="settings-popup.js?v=95.0"></script>
 <script>
   // Phone tab switcher & Mascot handler
   let currentPhoneRole = 'professional';
@@ -1427,65 +1427,8 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
     } catch(e) {}
 
     const term = email.toLowerCase().trim();
-    const isDave = term === 'ojeoweredave@gmail.com' || term === 'ojeoweredave' || term.includes('ojeoweredave');
-
-    if (isDave) {
-      // 1. Immediately scrub from deleted users blacklist
-      try {
-        let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
-        del = del.filter(x => {
-          const s = String(x || '').toLowerCase().trim();
-          return s !== 'ojeoweredave@gmail.com' && s !== 'usr_dave_ojeowere' && s !== 'ojeoweredave' && !s.includes('ojeoweredave');
-        });
-        localStorage.setItem('collekt_deleted_users', JSON.stringify(del));
-      } catch(e){}
-
-      const daveProfile = {
-        id: 'usr_dave_ojeowere',
-        name: 'Dave Oladapo Ojeowere',
-        first_name: 'Dave',
-        last_name: 'Ojeowere',
-        other_name: 'Oladapo',
-        username: 'ojeoweredave',
-        email: 'ojeoweredave@gmail.com',
-        role: 'professional',
-        title: 'Senior Proposal Manager & Technical Specialist',
-        location: 'Lagos, Nigeria',
-        bio: 'Senior Proposal Manager and Technical Commercial Specialist with extensive experience delivering multi-million dollar EPC & IOC bids across West Africa.',
-        skills: ['Proposal Management', 'EPC Tendering', 'COREN Compliance', 'Commercial Valuation', 'IOC Contracting'],
-        verified: true,
-        is_verified: true,
-        verification_status: 'verified',
-        identity_verified: true,
-        status: 'active',
-        suspended: false,
-        rating: 5.0,
-        review_count: 3,
-        projects_completed: 4,
-        total_earned: 0,
-        success_rate: 100,
-        wallet: {
-          balance: 0,
-          escrow_balance: 0,
-          bank_name: '',
-          account_number: '',
-          account_name: '',
-          bank_assigned: false
-        }
-      };
-
-      if (typeof setUser === 'function') setUser(daveProfile);
-      if (typeof registerUserInDirectory === 'function') registerUserInDirectory(daveProfile);
-      localStorage.setItem('collekt_last_user_email', 'ojeoweredave@gmail.com');
-      showMascotMsg('✓ Welcome back, Dave! Redirecting to Dashboard...', false);
-      setTimeout(() => {
-        window.location.href = 'dashboard.html';
-      }, 300);
-      return;
-    }
-
     const deletedUsers = (JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]')).map(x => String(x).toLowerCase().trim());
-    if (!isDave && deletedUsers.some(d => d && (term === d || (email && email.split('@')[0] === d)))) {
+    if (deletedUsers.some(d => d && (term === d || (email && email.split('@')[0] === d)))) {
       showMascotMsg('⛔ This account has been deleted by platform administration.', true);
       return;
     }

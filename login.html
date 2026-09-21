@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=90.0">
-<link rel="stylesheet" href="shared.css?v=90.0">
-<link rel="stylesheet" href="glass.css?v=90.0">
+<link rel="stylesheet" href="style.css?v=95.0">
+<link rel="stylesheet" href="shared.css?v=95.0">
+<link rel="stylesheet" href="glass.css?v=95.0">
 
 <style>
   body { background: var(--paper); }
@@ -201,8 +201,8 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=90.0"></script>
-<script src="app.js?v=90.0"></script>
+<script src="supabase.js?v=95.0"></script>
+<script src="app.js?v=95.0"></script>
 <script>
   // Detect if arriving from OAuth callback & show immediate feedback
   const oauthHash = window.location.hash || '';
@@ -252,10 +252,24 @@
     }
   };
 
-  // Check URL error for role mismatch on load
+  // Check URL error for role mismatch or session timeout on load
   (function handleRoleMismatchNotice() {
     const p = new URLSearchParams(window.location.search);
-    if (p.get('error') === 'role_mismatch') {
+    if (p.get('reason') === 'timeout') {
+      const errEl = document.getElementById('loginError');
+      if (errEl) {
+        errEl.innerHTML = `
+          <div style="background:rgba(19,117,111,0.08); border:1.5px solid rgba(19,117,111,0.4); color:var(--teal, #0E3B35); padding:14px 16px; border-radius:12px; font-size:13px; line-height:1.5; text-align:left; margin-bottom:14px; box-shadow:0 4px 12px rgba(19,117,111,0.1);">
+            <div style="font-weight:900; font-size:14px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+              <span>🔒</span> Session Timeout &mdash; Security Safeguard
+            </div>
+            Your session was safely locked after 15 minutes of inactivity in compliance with CBN Cybersecurity and OWASP financial guidelines. Please sign in again to continue.
+          </div>
+        `;
+        errEl.style.display = 'block';
+      }
+      setLoginRoleTab(loginRole);
+    } else if (p.get('error') === 'role_mismatch') {
       const exp = p.get('expected') || 'portal';
       const act = p.get('actual') || 'other';
       const expTitle = exp === 'company' ? 'Company' : 'Professional';
@@ -357,76 +371,6 @@
     }
 
     try {
-      // 1. Check permanent deleted blacklist
-      const isDave = term === 'ojeoweredave@gmail.com' || term === 'ojeoweredave' || term.includes('ojeoweredave');
-
-      if (isDave) {
-        if (loginRole === 'company') {
-          if (btn) { btn.innerHTML = 'Log In'; btn.disabled = false; }
-          if (errEl) {
-            errEl.innerHTML = `
-              <div style="background:#fef2f2; border:1.5px solid #ef4444; color:#991b1b; padding:14px 16px; border-radius:12px; font-size:13px; line-height:1.5; text-align:left; margin-bottom:14px; box-shadow:0 4px 12px rgba(239,68,68,0.15);">
-                <div style="font-weight:900; font-size:14px; margin-bottom:4px;">⛔ Access Denied &mdash; Strict Role Mismatch</div>
-                This account (Dave Ojeowere) is registered as a <strong>Professional</strong>. You cannot log in through the <strong>Company</strong> portal.<br>
-                <div style="margin-top:8px; font-size:12px; font-weight:700; color:#7f1d1d;">&rarr; Please switch to the <strong>Professional</strong> tab above to log in.</div>
-              </div>
-            `;
-            errEl.style.display = 'block';
-          }
-          return;
-        }
-
-        // 1. Immediately scrub from deleted users blacklist
-        try {
-          let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
-          del = del.filter(x => {
-            const s = String(x || '').toLowerCase().trim();
-            return s !== 'ojeoweredave@gmail.com' && s !== 'usr_dave_ojeowere' && s !== 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' && s !== 'ojeoweredave' && !s.includes('ojeoweredave');
-          });
-          localStorage.setItem('collekt_deleted_users', JSON.stringify(del));
-        } catch(e){}
-
-        const daveProfile = {
-          id: 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
-          name: 'Dave Oladapo Ojeowere',
-          first_name: 'Dave',
-          last_name: 'Ojeowere',
-          other_name: 'Oladapo',
-          username: 'ojeoweredave',
-          email: 'ojeoweredave@gmail.com',
-          role: 'professional',
-          title: 'Senior Proposal Manager & Technical Specialist',
-          location: 'Lagos, Nigeria',
-          bio: 'Senior Proposal Manager and Technical Commercial Specialist with extensive experience delivering multi-million dollar EPC & IOC bids across West Africa.',
-          skills: ['Proposal Management', 'EPC Tendering', 'COREN Compliance', 'Commercial Valuation', 'IOC Contracting'],
-          verified: true,
-          is_verified: true,
-          verification_status: 'verified',
-          identity_verified: true,
-          status: 'active',
-          suspended: false,
-          rating: 5.0,
-          review_count: 3,
-          projects_completed: 4,
-          total_earned: 0,
-          success_rate: 100,
-          wallet: {
-            balance: 0,
-            escrow_balance: 0,
-            bank_name: '',
-            account_number: '',
-            account_name: '',
-            bank_assigned: false
-          }
-        };
-
-        if (typeof setUser === 'function') setUser(daveProfile);
-        if (typeof registerUserInDirectory === 'function') registerUserInDirectory(daveProfile);
-        localStorage.setItem('collekt_last_user_email', 'ojeoweredave@gmail.com');
-        window.location.replace('dashboard.html');
-        return;
-      }
-
       let deletedUsers = [];
       try {
         deletedUsers = (JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]')).map(x => String(x).toLowerCase().trim());

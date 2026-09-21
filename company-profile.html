@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=90.0">
-<link rel="stylesheet" href="shared.css?v=90.0">
-<link rel="stylesheet" href="glass.css?v=90.0">
+<link rel="stylesheet" href="style.css?v=95.0">
+<link rel="stylesheet" href="shared.css?v=95.0">
+<link rel="stylesheet" href="glass.css?v=95.0">
 
 <style>
   body { background: var(--paper); }
@@ -782,10 +782,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=90.0"></script>
-<script src="app.js?v=90.0"></script>
-<script src="collekt-ai.js?v=90.0"></script>
-<script src="settings-popup.js?v=90.0"></script>
+<script src="supabase.js?v=95.0"></script>
+<script src="app.js?v=95.0"></script>
+<script src="collekt-ai.js?v=95.0"></script>
+<script src="settings-popup.js?v=95.0"></script>
 <script src="upload-modal.js"></script>
 <script>
   requireCompany();
@@ -805,15 +805,21 @@
     openModal('logoOptionsModal');
   }
 
-  function removeCompanyLogo() {
+  window.removeCompanyLogo = async function() {
     closeModal('logoOptionsModal');
     const user = getUser() || {};
     delete user.company_logo;
+    delete user.avatar;
     setUser(user);
     if (typeof removeUploadedFile === 'function') removeUploadedFile('company-logo');
+    if (window.sb && user.id) {
+      try {
+        await sb.from('profiles').update({ company_logo: null, avatar: null }).eq('id', user.id);
+      } catch(e){}
+    }
     _renderCompanyProfileToUI(user);
     showToast('Company logo reset to default initial.');
-  }
+  };
 
   function openAvatarStudioForCompany() {
     const user = getUser() || {};
@@ -978,7 +984,7 @@
   function _renderCompanyProfileToUI(user) {
     if (!user) return;
     const coStrength = typeof calculateCompanyProfileStrength === 'function' ? calculateCompanyProfileStrength(user) : null;
-    const isVerified = !!(user.identity_verified || user.is_verified || user.verified) && (coStrength ? coStrength.percent >= 100 : false);
+    const isVerified = (user.verification_status === 'verified' && (user.is_verified === true || user.identity_verified === true) && !!user.cac);
     if (document.getElementById('coProfileName')) {
       const uName = user.name || 'Company Account';
       const badge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(22, user) : '';
@@ -1012,9 +1018,14 @@
         badgeEl.style.fontWeight = '800';
         badgeEl.style.fontSize = '12px';
         badgeEl.style.cursor = 'pointer';
-        badgeEl.title = 'Click to verify company CAC & TIN';
-        badgeEl.onclick = function() { switchTab('identity', document.querySelectorAll('.profile-tab')[4]); };
-        badgeEl.innerHTML = `⚠️ Complete Corporate Verification &rarr;`;
+        badgeEl.title = 'Click to view company verification status';
+        badgeEl.onclick = function() { 
+          const tab = document.querySelector('.profile-tab[data-tab="identity"]'); 
+          switchTab('identity', tab); 
+        };
+        badgeEl.innerHTML = (user.verification_status === 'under_review' || (user.cac && !isVerified))
+          ? `⏳ Verification Under Review`
+          : `⚠️ Complete Corporate Verification &rarr;`;
       }
     }
     if (document.getElementById('coContactName')) {
@@ -1027,7 +1038,7 @@
       document.getElementById('coContactAddr').textContent = user.address || user.location || 'Not specified';
     }
     if (document.getElementById('coContactRegulated')) {
-      document.getElementById('coContactRegulated').textContent = isVerified ? 'NOGICJDA Compliant & Verified' : 'Pending Verification';
+      document.getElementById('coContactRegulated').textContent = isVerified ? 'NOGICJDA Compliant & Verified' : (user.verification_status === 'under_review' ? 'Compliance Under Review' : 'Pending Verification');
     }
     if (document.getElementById('coAbout')) {
       document.getElementById('coAbout').textContent = user.about || 'No company description provided yet. Click \'Edit Profile\' to add your company overview and mission.';
@@ -1126,7 +1137,7 @@
                     <div style="font-size:13px; font-weight:800; color:var(--ink);">${escapeHTML(r.author || r.reviewer_name || 'Professional')}</div>
                     <div style="font-size:11px; color:var(--muted);">${escapeHTML(r.role || r.reviewer_company || 'Certified Contractor')}</div>
                   </div>
-                  <div style="color:var(--amber); font-weight:900; font-size:13px;">★ ${r.rating || 5}.0</div>
+                  <div style="color:var(--amber); font-weight:900; font-size:13px;">★ ${(r.rating || 5).toFixed(1)}</div>
                 </div>
                 <p style="font-size:13px; color:var(--ink); line-height:1.5;">"${escapeHTML(r.text || r.comment || '')}"</p>
                 <div style="font-size:11px; color:var(--muted); margin-top:4px;">${r.date || 'Recent'}</div>
@@ -1139,7 +1150,7 @@
       container.innerHTML = `
         <div style="text-align:center; padding:40px 20px; border:2px dashed var(--line); border-radius:var(--r); color:var(--muted);">
           <div style="font-size:28px; margin-bottom:8px;">💬</div>
-          <div style="font-size:15px; font-weight:800; color:var(--ink);">0.0 ★ Rating &bull; New Employer</div>
+          <div style="font-size:15px; font-weight:800; color:var(--ink);">No Reviews Yet</div>
           <div style="font-size:13px; margin-top:4px;">Reviews from professionals and contractors who have completed tenders with your company will appear here.</div>
         </div>
       `;
@@ -1230,8 +1241,8 @@
     const badgeEl = document.getElementById('coIdentityBadgePill');
     const iconBox = document.getElementById('coIdentityIconBox');
     const banner = document.getElementById('coIdentityBanner');
+    const submitCard = document.getElementById('coSubmitCard');
 
-    const isVerified = !!(user.identity_verified || user.is_verified || user.verified);
     if (user.cac && document.getElementById('coCacNumber')) document.getElementById('coCacNumber').value = user.cac;
     if (user.tin && document.getElementById('coTinNumber')) document.getElementById('coTinNumber').value = user.tin;
     
@@ -1245,9 +1256,12 @@
     if (document.getElementById('coDirectorOtherName')) document.getElementById('coDirectorOtherName').value = dirOn;
     if (user.director_nin && document.getElementById('coDirectorNin')) document.getElementById('coDirectorNin').value = user.director_nin;
 
+    const isVerified = (user.verification_status === 'verified' && (user.is_verified === true || user.identity_verified === true) && !!user.cac);
+    const isUnderReview = (user.verification_status === 'under_review' || (user.cac && !isVerified));
+
     if (isVerified) {
       if (titleEl) titleEl.textContent = '✅ Corporate Account Verified';
-      if (subEl) subEl.textContent = 'CAC Registration & TIN Compliance verified. Your company profile now displays corporate verification status.';
+      if (subEl) subEl.textContent = 'CAC Registration & TIN Compliance verified. Your company profile displays corporate verification status across Collekt.';
       if (badgeEl) {
         badgeEl.style.background = '#dcfce7';
         badgeEl.style.color = '#15803d';
@@ -1258,6 +1272,47 @@
         iconBox.textContent = '🏢';
       }
       if (banner) banner.style.borderColor = '#16a34a';
+      if (submitCard) {
+        submitCard.innerHTML = `
+          <h4 style="font-size:15px; font-weight:900; margin-bottom:6px; color:#fff;">Corporate Compliance Verified</h4>
+          <p style="font-size:12px; opacity:0.85; margin-bottom:0; line-height:1.5;">Your corporate registration (CAC RC ${escapeHTML(user.cac || '')}) and compliance documents have been verified by Collekt compliance officers.</p>
+        `;
+      }
+    } else if (isUnderReview) {
+      if (titleEl) titleEl.textContent = '⏳ Corporate Compliance Verification Under Review';
+      if (subEl) subEl.textContent = 'Your CAC, TIN, and Director credentials have been submitted and are under review by Collekt Compliance officers.';
+      if (badgeEl) {
+        badgeEl.style.background = '#fef3c7';
+        badgeEl.style.color = '#b45309';
+        badgeEl.innerHTML = '⏳ Under Review';
+      }
+      if (iconBox) {
+        iconBox.style.background = '#fef3c7';
+        iconBox.textContent = '⏳';
+      }
+      if (banner) banner.style.borderColor = 'var(--amber)';
+      if (submitCard) {
+        submitCard.innerHTML = `
+          <h4 style="font-size:15px; font-weight:900; margin-bottom:6px; color:#fff;">Submission Under Review</h4>
+          <p style="font-size:12px; opacity:0.85; margin-bottom:12px; line-height:1.5;">Compliance verification is currently in progress. You may update your submitted details below if necessary.</p>
+          <button class="btn btn-outline" onclick="submitCorporateVerification()" style="width:100%; min-height:40px; font-weight:800; background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3);">
+            Update Submission
+          </button>
+        `;
+      }
+    } else {
+      if (titleEl) titleEl.textContent = 'Corporate Compliance Verification Pending';
+      if (subEl) subEl.textContent = 'Submit your CAC Registration & FIRS Tax Identification Number (TIN) to earn verified company status.';
+      if (badgeEl) {
+        badgeEl.style.background = '#fef3c7';
+        badgeEl.style.color = '#b45309';
+        badgeEl.innerHTML = '⏳ Pending Verification';
+      }
+      if (iconBox) {
+        iconBox.style.background = '#f1f5f9';
+        iconBox.textContent = '🏢';
+      }
+      if (banner) banner.style.borderColor = 'var(--line)';
     }
   }
 
@@ -1285,7 +1340,7 @@
     showToast('💳 Director ID scan attached.');
   };
 
-  function submitCorporateVerification() {
+  async function submitCorporateVerification() {
     const cac = document.getElementById('coCacNumber')?.value.trim();
     const tin = document.getElementById('coTinNumber')?.value.trim();
     const directorFirstName = document.getElementById('coDirectorFirstName')?.value.trim() || '';
@@ -1311,18 +1366,36 @@
     user.director_other_name = directorOtherName;
     user.director_name       = directorName;
     user.director_nin        = directorNin;
-    user.identity_verified   = true;
-    user.is_verified         = true;
-    user.verified            = true;
-    user.verification_status = 'verified';
+    user.identity_verified   = false;
+    user.is_verified         = false;
+    user.verified            = false;
+    user.verification_status = 'under_review';
     setUser(user);
+
+    if (window.sb && user.id) {
+      try {
+        await sb.from('profiles').update({
+          cac,
+          tin,
+          director_first_name: directorFirstName,
+          director_last_name: directorLastName,
+          director_other_name: directorOtherName,
+          director_name: directorName,
+          director_nin: directorNin,
+          verification_status: 'under_review',
+          is_verified: false
+        }).eq('id', user.id);
+      } catch(e) {
+        console.warn('Supabase corporate verification update:', e);
+      }
+    }
 
     _renderCompanyProfileToUI(user);
     renderCoIdentityStatus();
     if (typeof buildSidebar === 'function') buildSidebar('profile');
     if (typeof buildTopbar === 'function') buildTopbar();
 
-    showToast('🎉 Corporate Identity Verification Approved! Verification badge active.');
+    showToast('📜 Corporate Compliance Package submitted for review! You will be notified once verified.');
   }
 
   function openEditModal() {
@@ -1583,13 +1656,32 @@
       <div class="doc-item">
         <span style="font-size:22px;">📄</span>
         <div style="flex:1; overflow:hidden;">
-          <div style="font-size:13px; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.name || 'Company_Document.pdf'}</div>
+          <div style="font-size:13px; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(d.name || 'Company_Document.pdf')}</div>
           <div style="font-size:11px; color:var(--muted);">${d.size ? (d.size/1024).toFixed(1) + ' KB' : 'PDF Document'}</div>
         </div>
-        <button class="btn btn-outline btn-xs" onclick="if(window.viewOrDownloadDoc) viewOrDownloadDoc('company-docs', ${i}); else showToast('Opening document...');">View</button>
+        <button class="btn btn-outline btn-xs" onclick="viewCompanyDoc(${i})">View</button>
+        <button class="btn btn-ghost btn-xs" onclick="removeCompanyDoc(${i})" style="color:#ef4444; padding:4px 8px; font-weight:800;" title="Delete Document">✕</button>
       </div>
     `).join('');
   }
+
+  window.viewCompanyDoc = function(index) {
+    const docs = typeof getUploadedFiles === 'function' ? getUploadedFiles('company-docs') : [];
+    const doc = docs[index];
+    if (doc && typeof openDocumentViewer === 'function') {
+      openDocumentViewer(doc);
+    } else {
+      showToast('Document not found', 'warning');
+    }
+  };
+
+  window.removeCompanyDoc = function(index) {
+    if (typeof removeUploadedFile === 'function') {
+      removeUploadedFile('company-docs', index);
+      renderCompanyDocs();
+      showToast('Document removed from Company Vault.');
+    }
+  };
 
   function updateProfileCompletion() {
     if (typeof renderGlobalProfileStrength === 'function') {
@@ -1805,14 +1897,17 @@
     closeModal('coverPhotoStudioModal');
   };
 
-  window.removeCoverPhoto = function() {
-    const user = getUser();
-    if (user) {
-      delete user.cover_photo_url;
-      setUser(user);
-    }
+  window.removeCoverPhoto = async function() {
+    const user = getUser() || {};
+    delete user.cover_photo_url;
+    setUser(user);
     localStorage.removeItem('collekt_user_cover_photo');
     _applyCoverPhoto(null);
+    if (window.sb && user.id) {
+      try {
+        await sb.from('profiles').update({ cover_photo_url: null }).eq('id', user.id);
+      } catch(e){}
+    }
     showToast('Company cover photo reset to default gradient.');
     closeModal('coverPhotoStudioModal');
   };

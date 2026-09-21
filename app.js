@@ -29,7 +29,7 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
     let dave = dir.find(u => u && u.email && u.email.toLowerCase().trim() === 'ojeoweredave@gmail.com');
     if (!dave) {
       dave = {
-        id: 'usr_dave_ojeowere',
+        id: 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
         name: 'Dave Oladapo Ojeowere',
         first_name: 'Dave',
         last_name: 'Ojeowere',
@@ -41,17 +41,17 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
         location: 'Lagos, Nigeria',
         bio: 'Senior Proposal Manager and Technical Commercial Specialist with extensive experience delivering multi-million dollar EPC & IOC bids across West Africa.',
         skills: ['Proposal Management', 'EPC Tendering', 'COREN Compliance', 'Commercial Valuation', 'IOC Contracting'],
-        verified: true,
-        is_verified: true,
-        verification_status: 'verified',
-        identity_verified: true,
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        identity_verified: false,
         status: 'active',
         suspended: false,
-        rating: 5.0,
-        review_count: 3,
-        projects_completed: 4,
+        rating: 0.0,
+        review_count: 0,
+        projects_completed: 0,
         total_earned: 0,
-        success_rate: 100,
+        success_rate: 0,
         wallet: {
           balance: 0,
           escrow_balance: 0,
@@ -66,9 +66,6 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
     } else {
       dave.suspended = false;
       dave.status = 'active';
-      dave.verified = true;
-      dave.is_verified = true;
-      dave.verification_status = 'verified';
       if (dave.wallet && (dave.wallet.balance === 2450000 || dave.wallet.balance === 1450000)) {
         dave.wallet.balance = 0;
       }
@@ -328,22 +325,24 @@ async function loginWithSocialProvider(provider, explicitRole) {
 }
 
 // Global listener for Google OAuth popup authorization callbacks
-window.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'GOOGLE_AUTH_SUCCESS' && event.data.user) {
-    const user = event.data.user;
-    setUser(user);
-    if (typeof getOrCreateUserWallet === 'function') {
-      getOrCreateUserWallet(user);
+if (typeof window !== 'undefined' && window.addEventListener) {
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'GOOGLE_AUTH_SUCCESS' && event.data.user) {
+      const user = event.data.user;
+      setUser(user);
+      if (typeof getOrCreateUserWallet === 'function') {
+        getOrCreateUserWallet(user);
+      }
+      if (typeof showToast === 'function') {
+        showToast(`✅ Signed in as ${user.name} (${user.email})!`);
+      }
+      const targetPage = user.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+      setTimeout(() => {
+        window.location.replace(targetPage);
+      }, 400);
     }
-    if (typeof showToast === 'function') {
-      showToast(`✅ Signed in as ${user.name} (${user.email})!`);
-    }
-    const targetPage = user.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
-    setTimeout(() => {
-      window.location.replace(targetPage);
-    }, 400);
-  }
-});
+  });
+}
 
 
 function selectGoogleModalRole(role) {
@@ -1087,11 +1086,11 @@ function getAllRegisteredUsers() {
       is_verified: false,
       verification_status: 'none',
       identity_verified: false,
-      rating: 5.0,
-      review_count: 3,
-      projects_completed: 4,
+      rating: 0.0,
+      review_count: 0,
+      projects_completed: 0,
       total_earned: 0,
-      success_rate: 100
+      success_rate: 0
     };
 
     if (daveIdx >= 0) {
@@ -1111,9 +1110,15 @@ function getAllRegisteredUsers() {
       title: 'Energy & EPC Enterprise',
       location: 'Lagos, Nigeria',
       about: 'Leading digital energy and infrastructure procurement enterprise powering West African tenders and talent matching.',
-      verified: true,
-      is_verified: true,
-      verification_status: 'verified'
+      verified: false,
+      is_verified: false,
+      verification_status: 'none',
+      identity_verified: false,
+      rating: 0.0,
+      review_count: 0,
+      projects_completed: 0,
+      total_earned: 0,
+      success_rate: 0
     };
 
     // Remove any duplicates of Collekt company account
@@ -2640,9 +2645,9 @@ function calculateUserProfileStrength(user) {
     customQuals.length > 0
   );
 
-  // Identity verification requires explicit submission of NIN/docs
+  // Identity verification requires authentic approved verification status
   const hasIdentity = !!(
-    (u.verified === true || u.identity_verified === true || u.is_verified === true || u.verification_status === 'verified' || u.verification_status === 'under_review') &&
+    (u.verification_status === 'verified' && (u.is_verified === true || u.identity_verified === true)) &&
     (u.nin || localStorage.getItem('collekt_user_nin') || (typeof getUploadedFiles === 'function' && getUploadedFiles('document').length > 0))
   );
 
@@ -2659,8 +2664,10 @@ function calculateUserProfileStrength(user) {
   const doneWeight = checks.filter(c => c.done).reduce((sum, c) => sum + c.weight, 0);
   const percent = Math.min(100, doneWeight);
   let level = 'Beginner';
-  if (percent >= 100) level = 'Fully Verified';
-  else if (percent >= 80) level = 'Expert';
+  const isFullyVerified = (u.verification_status === 'verified' && (u.is_verified === true || u.identity_verified === true));
+  if (percent >= 100 && isFullyVerified) level = 'Fully Verified';
+  else if (percent >= 100) level = '100% Profile Complete';
+  else if (percent >= 80) level = 'Advanced';
   else if (percent >= 45) level = 'Intermediate';
 
   return {
@@ -2716,8 +2723,10 @@ function calculateCompanyProfileStrength(user) {
   const doneWeight = checks.filter(c => c.done).reduce((sum, c) => sum + c.weight, 0);
   const percent = Math.min(100, doneWeight);
   let level = 'Beginner';
-  if (percent >= 100) level = 'Verified Enterprise';
-  else if (percent >= 80) level = 'Enterprise In Review';
+  const isEnterpriseVerified = (u.verification_status === 'verified' && (u.is_verified === true || u.identity_verified === true) && !!(u.cac || u.rc_number));
+  if (percent >= 100 && isEnterpriseVerified) level = 'Verified Enterprise';
+  else if (percent >= 100) level = '100% Complete';
+  else if (percent >= 80) level = 'Enterprise Setup';
   else if (percent >= 45) level = 'Good Standing';
 
   return {
@@ -3702,8 +3711,9 @@ function getShieldBadgeHTML(size = 16, user = null) {
     return '';
   }
 
-  const isVerified = (u.verified === true || u.is_verified === true || u.verification_status === 'verified');
+  const isVerified = (u.verification_status === 'verified' && (u.is_verified === true || u.identity_verified === true));
   if (!isVerified) return '';
+  if (isCompany && !(u.cac || u.rc_number || u.rcNumber)) return '';
 
   return _renderShieldBadgeMarkup(size);
 }
@@ -4482,7 +4492,10 @@ function getUploadedFiles(category, passedUser) {
 
 function removeUploadedFile(category, index) {
   const all = _getAllUploads();
-  if (all[category] && all[category][index] !== undefined) {
+  if (index === undefined) {
+    all[category] = [];
+    _saveAllUploads(all);
+  } else if (all[category] && all[category][index] !== undefined) {
     all[category].splice(index, 1);
     _saveAllUploads(all);
   }
@@ -4645,8 +4658,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ═ WATERMARKED DOCUMENT VIEWER & SAVER SYSTEM ═ */
 
-function openDocumentViewer(docData) {
+async function openDocumentViewer(docData) {
   if (!docData) return;
+
+  // Resolve authentic time-limited signed URL for private documents if required
+  let resolvedUrl = docData.dataURL || docData.file_url || docData.fileUrl || null;
+  if (typeof window.getOrGenerateDocumentViewUrl === 'function') {
+    try {
+      resolvedUrl = await window.getOrGenerateDocumentViewUrl(docData, 300);
+    } catch(e) {
+      console.warn('[DocViewer] Could not generate signed URL:', e);
+    }
+  }
+
+  const activeDocData = Object.assign({}, docData, { dataURL: resolvedUrl });
 
   let modal = document.getElementById('collektDocViewerModal');
   if (!modal) {
@@ -4657,19 +4682,19 @@ function openDocumentViewer(docData) {
     document.body.appendChild(modal);
   }
 
-  const title = docData.name || docData.title || 'Document Preview';
-  const category = docData.category || docData.cat || docData.label || 'Candidate Credential';
-  const sizeStr = docData.size ? (typeof formatFileSize === 'function' ? formatFileSize(docData.size) : Math.round(docData.size/1024) + ' KB') : '';
+  const title = activeDocData.name || activeDocData.title || 'Document Preview';
+  const category = activeDocData.category || activeDocData.cat || activeDocData.label || 'Candidate Credential';
+  const sizeStr = activeDocData.size ? (typeof formatFileSize === 'function' ? formatFileSize(activeDocData.size) : Math.round(activeDocData.size/1024) + ' KB') : '';
 
-  const isPdf = (docData.type === 'application/pdf') || (docData.name && docData.name.toLowerCase().endsWith('.pdf')) || (docData.dataURL && docData.dataURL.startsWith('data:application/pdf'));
-  const isImage = (docData.type && docData.type.startsWith('image/')) || (docData.dataURL && docData.dataURL.startsWith('data:image'));
+  const isPdf = (activeDocData.type === 'application/pdf') || (activeDocData.name && activeDocData.name.toLowerCase().endsWith('.pdf')) || (activeDocData.dataURL && (activeDocData.dataURL.startsWith('data:application/pdf') || activeDocData.dataURL.includes('.pdf') || activeDocData.dataURL.includes('application%2Fpdf') || activeDocData.dataURL.includes('/documents/')));
+  const isImage = (activeDocData.type && activeDocData.type.startsWith('image/')) || (activeDocData.dataURL && (activeDocData.dataURL.startsWith('data:image') || /\.(png|jpg|jpeg|webp|svg)/i.test(activeDocData.dataURL.split('?')[0])));
 
   let bodyHTML = '';
 
-  if (docData.dataURL && isImage) {
+  if (activeDocData.dataURL && isImage) {
     bodyHTML = `
       <div style="position:relative; width:min(680px, 100%); max-height:560px; overflow:hidden; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,0.22); border:2px solid #d1e3e1; display:flex; align-items:center; justify-content:center; background:#1e293b;">
-        <img src="${docData.dataURL}" style="max-width:100%; max-height:540px; object-fit:contain; display:block;" alt="Uploaded Document">
+        <img src="${activeDocData.dataURL}" style="max-width:100%; max-height:540px; object-fit:contain; display:block;" alt="Uploaded Document">
         <!-- Center COLLEKT Watermark Overlay -->
         <div style="position:absolute; inset:0; pointer-events:none; display:flex; align-items:center; justify-content:center; z-index:10; background:rgba(255,255,255,0.03);">
           <div style="transform:rotate(-30deg); font-size:min(76px, 14vw); font-weight:900; color:rgba(19,117,111,0.52); text-shadow:0 2px 14px rgba(14,59,53,0.3); letter-spacing:0.06em; font-family:'Manrope', sans-serif; text-align:center; user-select:none;">
@@ -4679,10 +4704,10 @@ function openDocumentViewer(docData) {
         </div>
       </div>
     `;
-  } else if (docData.dataURL && isPdf) {
+  } else if (activeDocData.dataURL && isPdf) {
     bodyHTML = `
       <div style="position:relative; width:100%; height:550px; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,0.22); border:2px solid #d1e3e1; overflow:hidden; background:#334155;">
-        <iframe src="${docData.dataURL}#toolbar=0" style="width:100%; height:100%; border:none;"></iframe>
+        <iframe src="${activeDocData.dataURL}#toolbar=0" style="width:100%; height:100%; border:none;"></iframe>
         <!-- Center COLLEKT Watermark Overlay -->
         <div style="position:absolute; inset:0; pointer-events:none; display:flex; align-items:center; justify-content:center; z-index:10;">
           <div style="transform:rotate(-30deg); font-size:min(76px, 14vw); font-weight:900; color:rgba(19,117,111,0.52); text-shadow:0 2px 14px rgba(14,59,53,0.3); letter-spacing:0.06em; font-family:'Manrope', sans-serif; text-align:center; user-select:none;">
@@ -4748,13 +4773,13 @@ function openDocumentViewer(docData) {
   modal.style.display = 'flex';
 
   if (!isImage && !isPdf) {
-    renderDocCanvas(docData);
+    renderDocCanvas(activeDocData);
   }
 
   const dlBtn = document.getElementById('downloadDocBtn');
   if (dlBtn) {
     dlBtn.onclick = function() {
-      downloadWatermarkedDocument(docData);
+      downloadWatermarkedDocument(activeDocData);
     };
   }
 }
@@ -6749,9 +6774,243 @@ window.initNdpaConsentBanner = initNdpaConsentBanner;
 window.openCookiePreferencesModal = openCookiePreferencesModal;
 window.closeCookiePreferencesModal = closeCookiePreferencesModal;
 window.saveCustomCookiePreferences = saveCustomCookiePreferences;
-window.openCookiePreferencesModal = openCookiePreferencesModal;
-window.closeCookiePreferencesModal = closeCookiePreferencesModal;
-window.saveCustomCookiePreferences = saveCustomCookiePreferences;
+
+/* ═ SESSION INACTIVITY & TIMEOUT MANAGER (OWASP ASVS & CBN GUIDELINES) ═ */
+
+const CollektSessionManager = (function() {
+  const config = {
+    idleMs: 15 * 60 * 1000,     // 15 minutes
+    warningMs: 60 * 1000,       // 60 seconds
+    storageKey: 'collekt_last_active_timestamp',
+    throttleMs: 3000            // Throttle activity updates to once every 3s
+  };
+
+  let checkTimer = null;
+  let countdownTimer = null;
+  let isWarningVisible = false;
+  let remainingSeconds = 60;
+  let lastRecordedActivity = Date.now();
+
+  function isProtectedPage() {
+    try {
+      if (typeof window === 'undefined' || !window.location) return false;
+      const path = (window.location.pathname || '').toLowerCase();
+      const hasUser = typeof getUser === 'function' && !!getUser();
+      const hasAdmin = typeof localStorage !== 'undefined' && !!localStorage.getItem('collekt_admin_auth');
+
+      // Exclude public authentication or OAuth processing pages
+      if (path.endsWith('login.html') || path.endsWith('admin-login.html') || path.endsWith('auth-callback.html') || path.endsWith('register.html')) {
+        return false;
+      }
+
+      // If user or admin is authenticated on any portal or financial page
+      if (hasUser || hasAdmin) {
+        return true;
+      }
+      return false;
+    } catch(e) {
+      return false;
+    }
+  }
+
+  function updateActivityTimestamp(force = false) {
+    const now = Date.now();
+    if (force || now - lastRecordedActivity >= config.throttleMs) {
+      lastRecordedActivity = now;
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(config.storageKey, String(now));
+        }
+      } catch(e) {}
+    }
+    if (isWarningVisible) {
+      hideWarningModal();
+    }
+  }
+
+  function getEffectiveLastActive() {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem(config.storageKey);
+        if (stored) {
+          const parsed = parseInt(stored, 10);
+          if (!isNaN(parsed) && parsed > 0) {
+            return Math.max(parsed, lastRecordedActivity);
+          }
+        }
+      }
+    } catch(e) {}
+    return lastRecordedActivity;
+  }
+
+  function showWarningModal() {
+    if (isWarningVisible) return;
+    isWarningVisible = true;
+    remainingSeconds = Math.round(config.warningMs / 1000);
+
+    if (typeof document === 'undefined') return;
+
+    let modal = document.getElementById('collektInactivityModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'collektInactivityModal';
+      modal.style.cssText = 'position:fixed; inset:0; background:rgba(4,14,13,0.88); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:99999999; display:flex; align-items:center; justify-content:center; padding:20px; animation:fadeIn 0.25s ease-out;';
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+      <div style="background:#0c1816; border:1.5px solid rgba(19,117,111,0.35); border-radius:24px; padding:32px 28px; max-width:440px; width:100%; text-align:center; box-shadow:0 32px 80px rgba(0,0,0,0.6); position:relative; font-family:'Manrope',sans-serif;">
+        <div style="width:64px; height:64px; border-radius:50%; background:rgba(212,146,11,0.15); border:2px solid rgba(212,146,11,0.5); display:grid; place-items:center; font-size:30px; margin:0 auto 20px auto;">
+          🛡️
+        </div>
+        <div style="font-size:20px; font-weight:900; color:#fff; letter-spacing:-0.4px; margin-bottom:8px;">
+          Session Inactivity Notice
+        </div>
+        <div style="font-size:13px; color:#a1b8b5; line-height:1.6; margin-bottom:20px;">
+          For your financial and wallet security under <strong>CBN</strong> and <strong>OWASP ASVS</strong> guidelines, your session has been idle for 15 minutes.
+        </div>
+        <div style="background:rgba(19,117,111,0.15); border:1px solid rgba(19,117,111,0.3); border-radius:12px; padding:12px; margin-bottom:24px;">
+          <div style="font-size:12px; color:#68d391; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;">Auto-Signing Out In</div>
+          <div id="collektInactivitySeconds" style="font-size:32px; font-weight:900; color:#fff; font-variant-numeric:tabular-nums; margin-top:2px;">
+            ${remainingSeconds}s
+          </div>
+        </div>
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <button id="collektSignOutNowBtn" class="btn btn-outline" style="flex:1; padding:12px; border-color:rgba(255,255,255,0.2); color:#e2efed; font-size:13px; font-weight:800; border-radius:12px; cursor:pointer;">
+            Sign Out Now
+          </button>
+          <button id="collektKeepSignedInBtn" class="btn btn-primary" style="flex:1; padding:12px; background:linear-gradient(135deg, #0e3b35, #13756f); color:#fff; border:none; font-size:13px; font-weight:900; border-radius:12px; cursor:pointer; box-shadow:0 8px 24px rgba(19,117,111,0.4);">
+            Keep Me Signed In
+          </button>
+        </div>
+      </div>
+    `;
+    modal.style.display = 'flex';
+
+    document.getElementById('collektKeepSignedInBtn')?.addEventListener('click', () => {
+      updateActivityTimestamp(true);
+      hideWarningModal();
+    });
+
+    document.getElementById('collektSignOutNowBtn')?.addEventListener('click', () => {
+      terminateSession();
+    });
+
+    if (countdownTimer) clearInterval(countdownTimer);
+    countdownTimer = setInterval(() => {
+      remainingSeconds--;
+      const secEl = document.getElementById('collektInactivitySeconds');
+      if (secEl) secEl.textContent = `${remainingSeconds}s`;
+
+      if (remainingSeconds <= 0) {
+        clearInterval(countdownTimer);
+        terminateSession();
+      }
+    }, 1000);
+  }
+
+  function hideWarningModal() {
+    isWarningVisible = false;
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+    if (typeof document !== 'undefined') {
+      const modal = document.getElementById('collektInactivityModal');
+      if (modal) modal.style.display = 'none';
+    }
+  }
+
+  function terminateSession() {
+    hideWarningModal();
+    if (checkTimer) clearInterval(checkTimer);
+
+    const isAdmin = typeof localStorage !== 'undefined' && !!localStorage.getItem('collekt_admin_auth');
+    if (isAdmin && typeof logoutAdminUser === 'function') {
+      logoutAdminUser();
+      if (typeof window !== 'undefined') window.location.replace('admin-login.html?reason=timeout');
+    } else if (typeof logout === 'function') {
+      logout();
+      if (typeof window !== 'undefined') window.location.replace('login.html?reason=timeout');
+    } else {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('collekt_user');
+        localStorage.removeItem('collekt_admin_auth');
+      }
+      if (typeof window !== 'undefined') window.location.replace('login.html?reason=timeout');
+    }
+  }
+
+  function tick() {
+    if (!isProtectedPage()) return;
+
+    const now = Date.now();
+    const lastActive = getEffectiveLastActive();
+    const idleDuration = now - lastActive;
+
+    if (idleDuration >= config.idleMs + config.warningMs) {
+      terminateSession();
+    } else if (idleDuration >= config.idleMs) {
+      if (!isWarningVisible) {
+        showWarningModal();
+      }
+    } else {
+      if (isWarningVisible) {
+        hideWarningModal();
+      }
+    }
+  }
+
+  function init() {
+    if (!isProtectedPage()) return;
+
+    updateActivityTimestamp(true);
+
+    if (typeof window !== 'undefined') {
+      const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'];
+      events.forEach(ev => {
+        window.addEventListener(ev, () => updateActivityTimestamp(false), { passive: true });
+      });
+
+      window.addEventListener('storage', (e) => {
+        if (e && e.key === config.storageKey) {
+          if (isWarningVisible) hideWarningModal();
+        }
+      });
+
+      if (checkTimer) clearInterval(checkTimer);
+      checkTimer = setInterval(tick, 1000);
+    }
+  }
+
+  return {
+    init,
+    tick,
+    updateActivityTimestamp,
+    showWarningModal,
+    hideWarningModal,
+    terminateSession,
+    isProtectedPage,
+    setConfig: (newCfg) => Object.assign(config, newCfg),
+    getConfig: () => ({ ...config })
+  };
+})();
+
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => CollektSessionManager.init());
+  } else {
+    CollektSessionManager.init();
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.CollektSessionManager = CollektSessionManager;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { CollektSessionManager };
+}
 
 
 

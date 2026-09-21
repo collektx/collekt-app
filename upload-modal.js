@@ -709,9 +709,12 @@
             } else {
               const docType = cfg?.storageCategory === 'cv' ? 'cv' : (cfg?.storageCategory || 'document');
               window.uploadAndSaveUserDocument({ file, documentType: docType, title: file.name }).then(res => {
-                if (res && res.publicUrl) {
-                  fileData.publicUrl = res.publicUrl;
-                  fileData.fileUrl = res.publicUrl;
+                if (res) {
+                  fileData.publicUrl = res.publicUrl || res.signedUrl || null;
+                  fileData.fileUrl = res.publicUrl || res.signedUrl || null;
+                  fileData.signedUrl = res.signedUrl || null;
+                  fileData.filePath = res.filePath || res.data?.file_path || null;
+                  fileData.storageBucket = 'documents';
                   if (typeof window.saveUploadedFile === 'function') {
                     window.saveUploadedFile(cfg.storageCategory, fileData);
                   }

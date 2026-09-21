@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=90.0">
-<link rel="stylesheet" href="shared.css?v=90.0">
-<link rel="stylesheet" href="glass.css?v=90.0">
+<link rel="stylesheet" href="style.css?v=95.0">
+<link rel="stylesheet" href="shared.css?v=95.0">
+<link rel="stylesheet" href="glass.css?v=95.0">
 
 <style>
   body { background: var(--paper); }
@@ -1061,9 +1061,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=90.0"></script>
-<script src="app.js?v=90.0"></script>
-<script src="collekt-ai.js?v=90.0"></script>
+<script src="supabase.js?v=95.0"></script>
+<script src="app.js?v=95.0"></script>
+<script src="collekt-ai.js?v=95.0"></script>
 <script>
   requireAuth();
 
@@ -1187,20 +1187,9 @@
     const iconBox = document.getElementById('identityIconBox');
     const bannerWrap = document.getElementById('identityBannerWrap');
 
-    const status = user.verification_status || (user.identity_verified || user.is_verified ? 'verified' : 'unverified');
-    const submittedAt = user.verification_submitted_at ? new Date(user.verification_submitted_at).getTime() : 0;
-
-    const fiveMinutesMs = 5 * 60 * 1000;
-    const elapsedMs = submittedAt ? (Date.now() - submittedAt) : 0;
-
-    // Auto-approve after 5 minutes review
-    if (status === 'under_review' && elapsedMs >= fiveMinutesMs) {
-      user.verification_status = 'verified';
-      user.identity_verified = true;
-      user.is_verified = true;
-      setUser(user);
-      if (verificationTicker) clearInterval(verificationTicker);
-    }
+    const isVerified = (user.verification_status === 'verified' && (user.is_verified === true || user.identity_verified === true));
+    const isUnderReview = (user.verification_status === 'under_review');
+    const isRejected = (user.verification_status === 'rejected');
 
     const savedNin = localStorage.getItem('collekt_user_nin') || user.nin || '';
     if (savedNin && document.getElementById('idNinNumber')) {
@@ -1210,7 +1199,7 @@
     const profStrength = typeof calculateUserProfileStrength === 'function' ? calculateUserProfileStrength(user) : null;
     const is100 = (profStrength ? profStrength.percent >= 100 : false);
 
-    if (user.verification_status === 'verified' || user.identity_verified || user.is_verified) {
+    if (isVerified) {
       if (is100) {
         if (titleEl) titleEl.textContent = '✅ Identity Verified & Verified Shield Badge Active';
         if (subEl) subEl.textContent = 'Your National ID, Facial Biometrics, and Address documents have been verified. Your 100% complete profile now displays the green verified badge.';
@@ -1238,39 +1227,45 @@
         }
         if (bannerWrap) bannerWrap.style.borderColor = 'var(--amber)';
       }
-    } else if (user.verification_status === 'under_review') {
-      const remainingMs = Math.max(0, fiveMinutesMs - (Date.now() - submittedAt));
-      const remMins = Math.floor(remainingMs / (1000 * 60));
-      const remSecs = Math.floor((remainingMs % (1000 * 60)) / 1000);
-      const timeStr = `${remMins}m ${remSecs}s remaining`;
-
-      if (titleEl) titleEl.textContent = '⏳ Verification Under 5-Minute Review';
-      if (subEl) subEl.textContent = `Your NIN, Government ID & Biometrics are currently being reviewed. Account will be automatically verified in ${timeStr}.`;
+    } else if (isUnderReview) {
+      if (titleEl) titleEl.textContent = '⏳ Identity Verification Under Review';
+      if (subEl) subEl.textContent = 'Your NIN, Government ID & Biometrics have been submitted and are currently being reviewed by Collekt Compliance officers.';
       if (badgeEl) {
         badgeEl.style.background = '#e0f2fe';
         badgeEl.style.color = '#0369a1';
-        badgeEl.innerHTML = `⏳ 5-Min Review (${remMins}m ${remSecs}s)`;
+        badgeEl.innerHTML = '⏳ Under Review';
       }
       if (iconBox) {
         iconBox.style.background = '#e0f2fe';
         iconBox.textContent = '⏳';
       }
       if (bannerWrap) bannerWrap.style.borderColor = '#0284c7';
-
-      // Live 1-second countdown ticker
-      if (!verificationTicker) {
-        verificationTicker = setInterval(() => {
-          renderIdentityStatus();
-        }, 1000);
+    } else if (isRejected) {
+      if (titleEl) titleEl.textContent = '❌ Identity Verification Not Approved';
+      if (subEl) subEl.textContent = 'Your verification submission could not be approved. Please check your documents and resubmit.';
+      if (badgeEl) {
+        badgeEl.style.background = '#fee2e2';
+        badgeEl.style.color = '#991b1b';
+        badgeEl.innerHTML = '❌ Action Required';
       }
+      if (iconBox) {
+        iconBox.style.background = '#fee2e2';
+        iconBox.textContent = '❌';
+      }
+      if (bannerWrap) bannerWrap.style.borderColor = '#ef4444';
     } else {
       if (titleEl) titleEl.textContent = '🛡️ Identity Verification Pending';
-      if (subEl) subEl.textContent = 'Verify your National ID & Biometrics to unlock verified status and earn your green verified badge after a quick 5-minute review.';
+      if (subEl) subEl.textContent = 'Verify your National ID & Biometrics to earn verified specialist status on Collekt.';
       if (badgeEl) {
         badgeEl.style.background = '#fef3c7';
         badgeEl.style.color = '#b45309';
         badgeEl.innerHTML = '○ Unverified';
       }
+      if (iconBox) {
+        iconBox.style.background = '#f1f5f9';
+        iconBox.textContent = '🛡️';
+      }
+      if (bannerWrap) bannerWrap.style.borderColor = 'var(--line)';
     }
   }
 
@@ -2959,7 +2954,7 @@
     </div>
   </div>
 </div>
-<script src="settings-popup.js?v=90.0"></script>
+<script src="settings-popup.js?v=95.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>
