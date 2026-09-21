@@ -237,13 +237,13 @@
     box-shadow: 0 0 0 3px rgba(19, 117, 111, 0.15);
   }
   .sett-btn-primary {
-    background: linear-gradient(135deg, #13756F, #0E5A55);
+    background: linear-gradient(135deg, #10b981, #059669);
     color: #FFFFFF !important;
     border: 1.5px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 4px 14px rgba(19, 117, 111, 0.28);
   }
   .sett-btn-primary:hover {
-    background: linear-gradient(135deg, #0E5A55, #083D39);
+    background: linear-gradient(135deg, #059669, #047857);
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(19, 117, 111, 0.38);
   }
@@ -764,13 +764,9 @@
       else alert('Change Password flow coming soon!');
     });
 
-    /* Delete account */
+    /* Delete account: Open NDPA Section 34 verification modal */
     document.getElementById('sett-delete-btn')?.addEventListener('click', () => {
-      const confirmed = confirm('Are you absolutely sure? This action permanently deletes your account and all your data. This CANNOT be undone.');
-      if (confirmed) {
-        localStorage.clear();
-        window.location.href = 'index.html';
-      }
+      openAccountDeletionModal();
     });
   }
 
@@ -1156,6 +1152,226 @@
       renderCommunityReviews();
     }
   }
+
+  /* -- NDPA 2023 SECTION 34: ACCOUNT DELETION MODAL --- */
+  let deletionModalBuilt = false;
+
+  function buildDeletionModal() {
+    if (document.getElementById('accountDeletionModal')) return;
+
+    const html = `
+    <div class="settings-backdrop" id="accountDeletionModal" style="display:none; z-index:9950;">
+      <div class="settings-panel" style="max-width:520px; border-color:rgba(239,68,68,0.35); box-shadow:0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(239,68,68,0.2);">
+        <div class="settings-header" style="border-bottom-color:rgba(239,68,68,0.15);">
+          <div class="settings-title" style="color:#dc2626;">
+            <span style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:rgba(239,68,68,0.12); color:#dc2626; font-size:15px;">⚠️</span>
+            Permanently Delete Account
+          </div>
+          <button class="settings-close" id="closeAccountDeletionBtn" type="button" aria-label="Close">✕</button>
+        </div>
+        
+        <div class="settings-body" style="padding:22px 28px 24px; display:flex; flex-direction:column; gap:16px;">
+          <!-- Statutory Compliance Badge -->
+          <div style="display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:800; color:#dc2626; background:rgba(239,68,68,0.08); padding:6px 12px; border-radius:8px; border:1px solid rgba(239,68,68,0.2); width:fit-content;">
+            <span>🇳🇬</span> NDPA 2023 Section 34 &bull; Right to Erasure
+          </div>
+
+          <!-- Description -->
+          <div style="font-size:13.5px; color:inherit; opacity:0.85; line-height:1.55;">
+            <p style="margin:0 0 10px 0;">This action will <strong>permanently purge</strong> your personal profile data, biography, contact details, and delete all uploaded KYC identity documents (NIN, CAC, Passports) from secure cloud storage.</p>
+            <p style="margin:0; font-size:12px; opacity:0.75; background:rgba(0,0,0,0.04); padding:10px 12px; border-radius:10px; border:1px dashed rgba(239,68,68,0.25); line-height:1.5;">
+              <strong>CBN AML/CFT Notice:</strong> In accordance with Central Bank of Nigeria financial regulations, historical double-entry ledger transactions are retained with anonymized identity placeholders. Accounts with active contracts or positive wallet balances must be settled prior to closure.
+            </p>
+          </div>
+
+          <!-- Error Alert Box -->
+          <div id="deletionModalError" style="display:none; font-size:12.5px; color:#b91c1c; background:rgba(254,242,242,0.9); border:1px solid #fecaca; padding:10px 14px; border-radius:10px; line-height:1.4;"></div>
+
+          <!-- Acknowledgment Checkbox -->
+          <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; font-size:13px; font-weight:700; color:inherit;">
+            <input type="checkbox" id="confirmDeletionCheckbox" style="margin-top:2px; width:16px; height:16px; accent-color:#dc2626; cursor:pointer;">
+            <span>I understand that this action is irreversible and all my KYC identity records and profile data will be permanently destroyed.</span>
+          </label>
+
+          <!-- Confirmation Input -->
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <label style="font-size:12px; font-weight:800; color:inherit; opacity:0.9;">
+              To confirm, type <span style="color:#dc2626; font-family:monospace; font-size:13px; font-weight:900;">DELETE</span> in capital letters below:
+            </label>
+            <input type="text" id="confirmDeletionTextInput" class="sett-input" placeholder="Type DELETE to enable" style="font-family:monospace; letter-spacing:1px; text-transform:uppercase; border-color:rgba(239,68,68,0.3);" autocomplete="off">
+          </div>
+
+          <!-- Actions -->
+          <div style="display:flex; align-items:center; justify-content:flex-end; gap:12px; margin-top:8px;">
+            <button type="button" class="sett-btn sett-btn-outline" id="cancelAccountDeletionBtn" style="padding:10px 18px;">Cancel</button>
+            <button type="button" class="sett-btn sett-btn-danger" id="executeAccountDeletionBtn" disabled style="padding:10px 20px; font-weight:800; background:#ef4444; color:#ffffff; border-color:#dc2626; opacity:0.5; cursor:not-allowed;">Permanently Erase My Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    `;
+
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    document.body.appendChild(div.firstElementChild);
+
+    const modal = document.getElementById('accountDeletionModal');
+    const closeBtn = document.getElementById('closeAccountDeletionBtn');
+    const cancelBtn = document.getElementById('cancelAccountDeletionBtn');
+    const chk = document.getElementById('confirmDeletionCheckbox');
+    const txtInput = document.getElementById('confirmDeletionTextInput');
+    const execBtn = document.getElementById('executeAccountDeletionBtn');
+    const errBox = document.getElementById('deletionModalError');
+
+    function checkEnable() {
+      const isChecked = chk && chk.checked;
+      const isTyped = txtInput && txtInput.value.trim() === 'DELETE';
+      if (isChecked && isTyped) {
+        execBtn.disabled = false;
+        execBtn.style.opacity = '1';
+        execBtn.style.cursor = 'pointer';
+      } else {
+        execBtn.disabled = true;
+        execBtn.style.opacity = '0.5';
+        execBtn.style.cursor = 'not-allowed';
+      }
+    }
+
+    chk?.addEventListener('change', checkEnable);
+    txtInput?.addEventListener('input', checkEnable);
+
+    closeBtn?.addEventListener('click', closeAccountDeletionModal);
+    cancelBtn?.addEventListener('click', closeAccountDeletionModal);
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeAccountDeletionModal();
+    });
+
+    execBtn?.addEventListener('click', async () => {
+      if (execBtn.disabled) return;
+      execBtn.disabled = true;
+      execBtn.innerHTML = '<span>⏳</span> Erasing account...';
+      if (errBox) errBox.style.display = 'none';
+
+      try {
+        let token = null;
+        if (window.sb && window.sb.auth) {
+          const { data: sessionData } = await window.sb.auth.getSession();
+          token = sessionData?.session?.access_token;
+        }
+
+        if (!token) {
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) {
+              try {
+                const parsed = JSON.parse(localStorage.getItem(k));
+                token = parsed?.access_token;
+                if (token) break;
+              } catch(e) {}
+            }
+          }
+        }
+
+        if (!token) {
+          if (errBox) {
+            errBox.textContent = 'Session authentication not found. Please log in again.';
+            errBox.style.display = 'block';
+          }
+          execBtn.disabled = false;
+          execBtn.textContent = 'Permanently Erase My Account';
+          return;
+        }
+
+        const resp = await fetch('/api/account-delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          }
+        });
+
+        const data = await resp.json().catch(() => ({}));
+
+        if (!resp.ok || !data.success) {
+          if (errBox) {
+            errBox.textContent = data.error || 'Failed to erase account. Please contact support.';
+            errBox.style.display = 'block';
+          }
+          execBtn.disabled = false;
+          execBtn.textContent = 'Permanently Erase My Account';
+          return;
+        }
+
+        execBtn.textContent = '✓ Account Erased';
+        execBtn.style.background = '#059669';
+        execBtn.style.borderColor = '#047857';
+
+        if (window.sb && window.sb.auth) {
+          try { await window.sb.auth.signOut(); } catch(e) {}
+        }
+        localStorage.clear();
+        sessionStorage.clear();
+
+        setTimeout(() => {
+          window.location.href = 'index.html?account_deleted=true';
+        }, 1200);
+
+      } catch (err) {
+        console.error('[AccountDelete UI Error]:', err);
+        if (errBox) {
+          errBox.textContent = 'Network or system error. Please try again or reach out to support.';
+          errBox.style.display = 'block';
+        }
+        execBtn.disabled = false;
+        execBtn.textContent = 'Permanently Erase My Account';
+      }
+    });
+
+    deletionModalBuilt = true;
+  }
+
+  function openAccountDeletionModal() {
+    const settingsBackdrop = document.getElementById('settingsBackdrop');
+    if (settingsBackdrop) {
+      settingsBackdrop.classList.remove('open');
+      settingsBackdrop.style.display = 'none';
+    }
+
+    if (!deletionModalBuilt) buildDeletionModal();
+
+    const modal = document.getElementById('accountDeletionModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        modal.classList.add('open');
+        const txt = document.getElementById('confirmDeletionTextInput');
+        if (txt) { txt.value = ''; txt.focus(); }
+        const chk = document.getElementById('confirmDeletionCheckbox');
+        if (chk) chk.checked = false;
+        const execBtn = document.getElementById('executeAccountDeletionBtn');
+        if (execBtn) {
+          execBtn.disabled = true;
+          execBtn.style.opacity = '0.5';
+          execBtn.style.cursor = 'not-allowed';
+          execBtn.textContent = 'Permanently Erase My Account';
+          execBtn.style.background = '#ef4444';
+        }
+        const errBox = document.getElementById('deletionModalError');
+        if (errBox) errBox.style.display = 'none';
+      });
+    });
+  }
+
+  function closeAccountDeletionModal() {
+    const modal = document.getElementById('accountDeletionModal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    setTimeout(() => { modal.style.display = 'none'; }, 350);
+  }
+
+  window.openAccountDeletionModal = openAccountDeletionModal;
+  window.closeAccountDeletionModal = closeAccountDeletionModal;
 
   window.openWebsiteReviewModal = openWebsiteReviewModal;
   window.closeWebsiteReviewModal = closeWebsiteReviewModal;
