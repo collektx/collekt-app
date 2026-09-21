@@ -408,6 +408,72 @@ async function runSecurityAuditProbes() {
     console.error('Probe 18 exception:', err);
     assert(false, 'Login timeout feedback verification failed');
   }
+
+  // -------------------------------------------------------------
+  // PROBE 19: Content-Security-Policy (CSP) Directive Integrity (OWASP ASVS V14)
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 19: Content-Security-Policy (CSP) Directive Integrity ---');
+  try {
+    const fs = require('fs');
+    const headersContent = fs.readFileSync(require('path').join(__dirname, '_headers'), 'utf8');
+    const tomlContent = fs.readFileSync(require('path').join(__dirname, 'netlify.toml'), 'utf8');
+
+    // Verify CSP directives in _headers
+    assert(headersContent.includes("default-src 'self'"), "_headers contains strict default-src 'self'");
+    assert(headersContent.includes("object-src 'none'"), "_headers prohibits legacy plugins via object-src 'none'");
+    assert(headersContent.includes("accounts.google.com"), "_headers whitelists Google OAuth authentication endpoints");
+    assert(headersContent.includes("*.googleusercontent.com"), "_headers whitelists Google avatar/profile pictures");
+    assert(headersContent.includes("wss://*.supabase.co"), "_headers whitelists Supabase Realtime WebSockets");
+    assert(headersContent.includes("js.paystack.co") && headersContent.includes("api.korapay.com"), "_headers whitelists authorized payment gateways");
+    assert(headersContent.includes("flagcdn.com"), "_headers whitelists currency and country flag CDN");
+
+    // Verify CSP directives in netlify.toml
+    assert(tomlContent.includes("Content-Security-Policy"), "netlify.toml defines Content-Security-Policy");
+    assert(tomlContent.includes("default-src 'self'"), "netlify.toml enforces default-src 'self'");
+    assert(tomlContent.includes("object-src 'none'"), "netlify.toml enforces object-src 'none'");
+  } catch (err) {
+    console.error('Probe 19 exception:', err);
+    assert(false, 'CSP directive integrity verification failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 20: Anti-Clickjacking Enforcement on Administrative & Financial Endpoints
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 20: Anti-Clickjacking Enforcement (OWASP ASVS & CBN) ---');
+  try {
+    const fs = require('fs');
+    const headersContent = fs.readFileSync(require('path').join(__dirname, '_headers'), 'utf8');
+    const tomlContent = fs.readFileSync(require('path').join(__dirname, 'netlify.toml'), 'utf8');
+
+    // Admin endpoints must strictly deny framing
+    const adminHeadersDenied = headersContent.includes('/admin*') && headersContent.includes("X-Frame-Options: DENY") && headersContent.includes("frame-ancestors 'none'");
+    assert(adminHeadersDenied, "_headers enforces X-Frame-Options: DENY and frame-ancestors 'none' on /admin*");
+
+    const adminTomlDenied = tomlContent.includes('for = "/admin*"') && tomlContent.includes('X-Frame-Options = "DENY"') && tomlContent.includes("frame-ancestors 'none'");
+    assert(adminTomlDenied, "netlify.toml enforces X-Frame-Options = 'DENY' and frame-ancestors 'none' on /admin*");
+
+    // Wallet endpoints must restrict framing to self
+    const walletHeadersProtected = headersContent.includes('/wallet*') && headersContent.includes("X-Frame-Options: SAMEORIGIN") && headersContent.includes("frame-ancestors 'self'");
+    assert(walletHeadersProtected, "_headers enforces X-Frame-Options: SAMEORIGIN and frame-ancestors 'self' on /wallet*");
+  } catch (err) {
+    console.error('Probe 20 exception:', err);
+    assert(false, 'Anti-clickjacking enforcement probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 21: Distribution Packaging Header Sync
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 21: Distribution Packaging Header Sync ---');
+  try {
+    const fs = require('fs');
+    const buildSyncContent = fs.readFileSync(require('path').join(__dirname, 'build_and_sync.js'), 'utf8');
+
+    const hasHeadersInBuild = buildSyncContent.includes("'_headers'");
+    assert(hasHeadersInBuild, 'build_and_sync.js explicitly packages _headers into distribution dist/');
+  } catch (err) {
+    console.error('Probe 21 exception:', err);
+    assert(false, 'Distribution packaging header sync failed');
+  }
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
   console.log('════════════════════════════════════════════════════════════\n');
 
