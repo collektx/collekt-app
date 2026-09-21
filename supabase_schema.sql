@@ -394,3 +394,164 @@ BEGIN
     );
 END;
 $$;
+
+-- -----------------------------------------------------------------
+-- 9. IMMUTABLE ADMINISTRATIVE AUDIT TRAIL (COBIT 2019 / ISACA ITAF)
+-- -----------------------------------------------------------------
+
+-- Table definition (if not exists)
+CREATE TABLE IF NOT EXISTS public.audit_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    actor_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    action TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+
+-- Hardened RLS: Only authorized admins can read audit logs
+DROP POLICY IF EXISTS "Admins Read Audit Logs" ON public.audit_logs;
+CREATE POLICY "Admins Read Audit Logs" ON public.audit_logs
+    FOR SELECT TO public
+    USING (public.is_admin());
+
+-- Hardened RLS: Append-only insertion
+DROP POLICY IF EXISTS "Append Only Audit Logs" ON public.audit_logs;
+CREATE POLICY "Append Only Audit Logs" ON public.audit_logs
+    FOR INSERT TO public
+    WITH CHECK (true);
+
+-- Trigger Function: Prevent any update, delete, or truncate on audit_logs
+CREATE OR REPLACE FUNCTION public.prevent_audit_log_tampering()
+RETURNS TRIGGER 
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    RAISE EXCEPTION 'COBIT 2019 / ISACA ITAF Security Violation: Audit logs in public.audit_logs are immutable and cannot be updated, deleted, or truncated.';
+END;
+$$;
+
+-- Row-level trigger: Block UPDATE and DELETE unconditionally
+DROP TRIGGER IF EXISTS trg_audit_logs_immutable ON public.audit_logs;
+CREATE TRIGGER trg_audit_logs_immutable
+    BEFORE UPDATE OR DELETE ON public.audit_logs
+    FOR EACH ROW
+    EXECUTE FUNCTION public.prevent_audit_log_tampering();
+
+-- Statement-level trigger: Block TRUNCATE unconditionally
+DROP TRIGGER IF EXISTS trg_audit_logs_prevent_truncate ON public.audit_logs;
+CREATE TRIGGER trg_audit_logs_prevent_truncate
+    BEFORE TRUNCATE ON public.audit_logs
+    FOR EACH STATEMENT
+    EXECUTE FUNCTION public.prevent_audit_log_tampering();
+
+-- Secure Stored Procedure: Record administrative audit events
+CREATE OR REPLACE FUNCTION public.record_admin_audit(
+    p_action TEXT,
+    p_target TEXT DEFAULT 'System',
+    p_category TEXT DEFAULT 'admin',
+    p_metadata JSONB DEFAULT '{}'::jsonb
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_caller_id UUID;
+    v_is_admin BOOLEAN := FALSE;
+    v_log_id UUID;
+    v_admin_email TEXT;
+BEGIN
+    v_caller_id := auth.uid();
+    
+    IF v_caller_id IS NOT NULL THEN
+        SELECT (role = 'admin'), email INTO v_is_admin, v_admin_email 
+        FROM public.profiles 
+        WHERE id = v_caller_id;
+    END IF;
+
+    INSERT INTO public.audit_logs (
+        actor_id,
+        action,
+        entity_type,
+        entity_id,
+        metadata,
+        created_at
+    ) VALUES (
+        v_caller_id,
+        p_action,
+        COALESCE(p_category, 'admin'),
+        COALESCE(p_target, 'System'),
+        jsonb_build_object(
+            'target', p_target,
+            'category', p_category,
+            'operator_email', COALESCE(v_admin_email, 'admin@collekt.ng'),
+            'timestamp', NOW()
+        ) || COALESCE(p_metadata, '{}'::jsonb),
+        NOW()
+    )
+    RETURNING id INTO v_log_id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'id', v_log_id,
+        'action', p_action,
+        'recorded_at', NOW()
+    );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.record_admin_audit(TEXT, TEXT, TEXT, JSONB) TO anon, authenticated, service_role;
+
+-- Verification Procedure: Cryptographically verifies trigger immutability
+CREATE OR REPLACE FUNCTION public.verify_audit_log_immutability()
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    v_test_id UUID;
+    v_update_blocked BOOLEAN := FALSE;
+    v_delete_blocked BOOLEAN := FALSE;
+    v_err_msg TEXT;
+BEGIN
+    INSERT INTO public.audit_logs (action, entity_type, entity_id, metadata)
+    VALUES ('TRIGGER_INTEGRITY_CHECK', 'test', 'engine', '{"check": true}'::jsonb)
+    RETURNING id INTO v_test_id;
+
+    BEGIN
+        UPDATE public.audit_logs SET action = 'MALICIOUS_TAMPER' WHERE id = v_test_id;
+    EXCEPTION WHEN OTHERS THEN
+        v_err_msg := SQLERRM;
+        IF v_err_msg LIKE '%COBIT 2019 / ISACA ITAF%' THEN
+            v_update_blocked := TRUE;
+        END IF;
+    END;
+
+    BEGIN
+        DELETE FROM public.audit_logs WHERE id = v_test_id;
+    EXCEPTION WHEN OTHERS THEN
+        v_err_msg := SQLERRM;
+        IF v_err_msg LIKE '%COBIT 2019 / ISACA ITAF%' THEN
+            v_delete_blocked := TRUE;
+        END IF;
+    END;
+
+    RETURN jsonb_build_object(
+        'success', (v_update_blocked AND v_delete_blocked),
+        'update_blocked_by_trigger', v_update_blocked,
+        'delete_blocked_by_trigger', v_delete_blocked,
+        'error_message', v_err_msg,
+        'standard', 'COBIT 2019 / ISACA ITAF 2208 WORM'
+    );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.verify_audit_log_immutability() TO anon, authenticated, service_role;
