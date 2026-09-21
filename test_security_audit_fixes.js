@@ -590,6 +590,76 @@ async function runSecurityAuditProbes() {
     console.error('Probe 24 exception:', err);
     assert(false, 'AI copilot abuse throttling probe failed');
   }
+
+  // -------------------------------------------------------------
+  // PROBE 25: NDPA Section 34 Account Erasure API Authentication & Guardrails
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 25: NDPA Section 34 Account Erasure API Authentication ---');
+  try {
+    const accountDelete = require('./netlify/functions/account-delete');
+
+    // 1. Unauthenticated invocation must be rejected with HTTP 401
+    const unauthRes = await accountDelete.handler({
+      httpMethod: 'POST',
+      headers: { 'client-ip': '102.89.23.44' }
+    });
+    assert(unauthRes.statusCode === 401, `Unauthenticated deletion request rejected with HTTP 401: ${unauthRes.statusCode}`);
+    const unauthBody = JSON.parse(unauthRes.body);
+    assert(unauthBody.error.toLowerCase().includes('authentication') || unauthBody.error.toLowerCase().includes('token'), 'Response explains token/authentication is required');
+
+    // 2. Disallowed HTTP methods must be rejected with HTTP 405
+    const getRes = await accountDelete.handler({
+      httpMethod: 'GET',
+      headers: {}
+    });
+    assert(getRes.statusCode === 405, `GET request on account erasure rejected with HTTP 405: ${getRes.statusCode}`);
+
+    // 3. Preflight OPTIONS request must return 200 with CORS headers
+    const optRes = await accountDelete.handler({
+      httpMethod: 'OPTIONS',
+      headers: {}
+    });
+    assert(optRes.statusCode === 200, `OPTIONS preflight returns HTTP 200: ${optRes.statusCode}`);
+    assert(optRes.headers['Access-Control-Allow-Origin'] === '*', 'Preflight includes Access-Control-Allow-Origin: *');
+  } catch (err) {
+    console.error('Probe 25 exception:', err);
+    assert(false, 'Account erasure API authentication probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 26: Stored Procedure & UI Liquid-Glass Confirmation Architecture
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 26: Stored Procedure & UI Liquid-Glass NDPA Verification ---');
+  try {
+    const fs = require('fs');
+    const path = require('path');
+
+    // 1. Verify RPC procedure execution against non-existent UUID
+    const { data: rpcRes, error: rpcErr } = await anonClient.rpc('request_data_subject_erasure', {
+      target_user_id: '00000000-0000-0000-0000-000000000000'
+    });
+    assert(!rpcErr, 'RPC request_data_subject_erasure executes without PostgreSQL exception');
+    assert(rpcRes && rpcRes.success === false && rpcRes.error === 'User profile not found.', 'RPC handles unknown UUID with graceful error response');
+
+    // 2. Verify _redirects routing
+    const redirectsContent = fs.readFileSync(path.join(__dirname, '_redirects'), 'utf8');
+    assert(redirectsContent.includes('/api/account-delete /.netlify/functions/account-delete 200'), '_redirects contains canonical /api/account-delete route');
+
+    // 3. Verify settings-popup.js UI safeguards
+    const settingsJs = fs.readFileSync(path.join(__dirname, 'settings-popup.js'), 'utf8');
+    assert(settingsJs.includes('openAccountDeletionModal'), 'settings-popup.js exports openAccountDeletionModal');
+    assert(settingsJs.includes('confirmDeletionCheckbox'), 'settings-popup.js enforces confirmation checkbox');
+    assert(settingsJs.includes('confirmDeletionTextInput'), 'settings-popup.js enforces typing DELETE confirmation word');
+    assert(settingsJs.includes('executeAccountDeletionBtn'), 'settings-popup.js includes executeAccountDeletionBtn');
+    assert(settingsJs.includes('NDPA 2023 Section 34'), 'settings-popup.js includes statutory NDPA Section 34 compliance badge');
+
+    // 4. Verify index.html toast notification handling
+    const indexHtml = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+    assert(indexHtml.includes("account_deleted") && indexHtml.includes("NDPA 2023 Section 34"), 'index.html handles account_deleted query param with NDPA Section 34 toast');
+  } catch (err) {
+    console.error('Probe 26 exception:', err);
+    assert(false, 'Stored procedure and UI liquid-glass NDPA verification failed');
+  }
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
   console.log('════════════════════════════════════════════════════════════\n');
 
