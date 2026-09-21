@@ -216,3 +216,181 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- -----------------------------------------------------------------
+-- 8. NDPA 2023 SECTION 34: DATA SUBJECT RIGHTS & ERASURE
+-- -----------------------------------------------------------------
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ DEFAULT NULL;
+
+-- Public Profiles View: Filters out deleted accounts
+CREATE OR REPLACE VIEW public.public_profiles AS
+SELECT 
+    id, full_name, name, username, email, role, title, sector,
+    avatar, company_logo, country, state, location, website,
+    linkedin_url, bio, skills, languages, work_preference,
+    availability, accreditation, projects_completed, rating,
+    review_count, total_earned, is_verified, verification_status,
+    company_name, tagline, about, industry, size, founded_year,
+    capabilities, created_at, updated_at
+FROM public.profiles
+WHERE (is_deleted IS NOT TRUE);
+
+-- Stored procedure for atomic NDPA Section 34 data subject erasure
+CREATE OR REPLACE FUNCTION public.request_data_subject_erasure(target_user_id UUID)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+DECLARE
+    caller_id UUID;
+    is_admin BOOLEAN := FALSE;
+    user_prof RECORD;
+    active_contracts_count INT;
+    wallet_bal NUMERIC(15,2);
+    erased_email TEXT;
+    erased_username TEXT;
+BEGIN
+    caller_id := auth.uid();
+    
+    IF caller_id IS NOT NULL THEN
+        SELECT (role = 'admin') INTO is_admin FROM public.profiles WHERE id = caller_id;
+    END IF;
+
+    IF caller_id IS NOT NULL AND caller_id <> target_user_id AND NOT COALESCE(is_admin, FALSE) THEN
+        RETURN jsonb_build_object(
+            'success', false,
+            'error', 'Unauthorized: You may only request erasure of your own account.'
+        );
+    END IF;
+
+    SELECT * INTO user_prof FROM public.profiles WHERE id = target_user_id;
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object(
+            'success', false,
+            'error', 'User profile not found.'
+        );
+    END IF;
+
+    IF COALESCE(user_prof.is_deleted, FALSE) = TRUE THEN
+        RETURN jsonb_build_object(
+            'success', true,
+            'message', 'Account has already been erased.'
+        );
+    END IF;
+
+    SELECT COUNT(*) INTO active_contracts_count
+    FROM public.contracts
+    WHERE (company_id = target_user_id OR pro_id = target_user_id)
+      AND status IN ('active', 'in_progress', 'disputed', 'submitted');
+
+    IF active_contracts_count > 0 THEN
+        RETURN jsonb_build_object(
+            'success', false,
+            'error', 'Cannot delete account with active or disputed contracts. Please resolve all pending contracts before closing your account.',
+            'active_contracts_count', active_contracts_count
+        );
+    END IF;
+
+    SELECT COALESCE(wallet_balance, 0.00) INTO wallet_bal
+    FROM public.profiles
+    WHERE id = target_user_id;
+
+    IF wallet_bal > 50.00 THEN
+        RETURN jsonb_build_object(
+            'success', false,
+            'error', 'Cannot delete account with positive wallet balance of ₦' || TO_CHAR(wallet_bal, 'FM999,999,990.00') || '. Please withdraw your funds first.',
+            'balance', wallet_bal
+        );
+    END IF;
+
+    DELETE FROM public.user_documents WHERE user_id = target_user_id;
+    DELETE FROM public.user_inputs WHERE user_id = target_user_id;
+    DELETE FROM public.ai_generations WHERE user_id = target_user_id;
+
+    erased_email := 'deleted_' || substr(target_user_id::text, 1, 8) || '@erased.collekt.invalid';
+    erased_username := 'deleted_' || substr(target_user_id::text, 1, 8);
+
+    UPDATE public.profiles SET
+        name = 'Deleted User',
+        full_name = 'Deleted User',
+        first_name = NULL,
+        last_name = NULL,
+        other_name = NULL,
+        username = erased_username,
+        email = erased_email,
+        phone = NULL,
+        avatar = NULL,
+        avatar_url = NULL,
+        company_logo = NULL,
+        website = NULL,
+        linkedin_url = NULL,
+        bio = NULL,
+        about = NULL,
+        skills = '{}',
+        languages = NULL,
+        work_preference = NULL,
+        availability = NULL,
+        accreditation = NULL,
+        nin = NULL,
+        id_type = NULL,
+        id_gov_number = NULL,
+        cac_number = NULL,
+        tin_number = NULL,
+        director_name = NULL,
+        director_nin = NULL,
+        company_name = NULL,
+        tagline = NULL,
+        contact_person = NULL,
+        rep_first_name = NULL,
+        rep_last_name = NULL,
+        rep_other_name = NULL,
+        cac = NULL,
+        dpr_license = NULL,
+        corporate_email = NULL,
+        corporate_phone = NULL,
+        address = NULL,
+        capabilities = NULL,
+        verification_status = 'deleted',
+        is_verified = FALSE,
+        wallet_balance = 0.00,
+        escrow_balance = 0.00,
+        is_deleted = TRUE,
+        deleted_at = NOW(),
+        updated_at = NOW()
+    WHERE id = target_user_id;
+
+    UPDATE public.wallet_transactions 
+    SET narration = 'Transaction of erased account (NDPA s.34)'
+    WHERE user_id = target_user_id;
+
+    INSERT INTO public.audit_logs (
+        actor_id,
+        action,
+        entity_type,
+        entity_id,
+        metadata,
+        created_at
+    ) VALUES (
+        target_user_id,
+        'DATA_SUBJECT_ERASURE',
+        'profile',
+        target_user_id::text,
+        jsonb_build_object(
+            'regulation', 'NDPA 2023 Section 34',
+            'erased_at', NOW(),
+            'executed_by', COALESCE(caller_id::text, 'service_role'),
+            'status', 'completed'
+        ),
+        NOW()
+    );
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'message', 'Personal data and KYC documents permanently erased in compliance with NDPA 2023 Section 34.',
+        'user_id', target_user_id,
+        'erased_email', erased_email
+    );
+END;
+$$;
