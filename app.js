@@ -808,6 +808,16 @@ async function logoutAdminUser() {
   window.location.replace('admin-login.html');
 }
 
+function getAdminUser() {
+  try {
+    const a = JSON.parse(localStorage.getItem('collekt_admin_auth') || sessionStorage.getItem('collekt_admin_auth') || 'null');
+    if (a && a.role === 'admin') return a;
+    const u = JSON.parse(localStorage.getItem('collekt_user') || 'null');
+    if (u && u.role === 'admin') return u;
+  } catch(e) {}
+  return null;
+}
+
 function getAdminAuditLogs() {
   try {
     return JSON.parse(localStorage.getItem('collekt_admin_audit_logs')) || [];
@@ -816,26 +826,123 @@ function getAdminAuditLogs() {
   }
 }
 
-function logAdminAuditActivity(action, target = 'System', category = 'admin') {
+async function fetchAdminAuditLogs(limit = 100) {
+  try {
+    const client = window.sb;
+    if (client && typeof client.from === 'function') {
+      const { data, error } = await client
+        .from('audit_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (!error && data && Array.isArray(data)) {
+        const remoteLogs = data.map(row => {
+          const meta = row.metadata || {};
+          return {
+            id: row.id,
+            action: row.action || 'Admin Action',
+            target: meta.target || row.entity_id || 'System',
+            admin: meta.operator_email || meta.admin_name || 'Super Administrator',
+            category: meta.category || row.entity_type || 'admin',
+            timestamp: row.created_at || new Date().toISOString(),
+            isRemote: true,
+            rawId: row.id
+          };
+        });
+
+        const localLogs = getAdminAuditLogs();
+        const combined = [...remoteLogs];
+        const seen = new Set(remoteLogs.map(r => r.id || `${r.action}_${r.timestamp}`));
+
+        localLogs.forEach(l => {
+          const key = l.id || `${l.action}_${l.timestamp}`;
+          if (!seen.has(key)) {
+            combined.push(l);
+            seen.add(key);
+          }
+        });
+
+        combined.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        if (combined.length > limit) combined.length = limit;
+
+        try {
+          localStorage.setItem('collekt_admin_audit_logs', JSON.stringify(combined));
+        } catch(e) {}
+
+        return combined;
+      }
+    }
+  } catch(e) {
+    console.warn('Remote audit logs fetch notice:', e);
+  }
+  return getAdminAuditLogs();
+}
+
+function logAdminAuditActivity(action, target = 'System', category = 'admin', metadata = {}) {
+  const adminObj = typeof getAdminUser === 'function' ? getAdminUser() : null;
+  const adminName = adminObj ? (adminObj.name || adminObj.email) : 'Super Administrator';
+  const adminEmail = adminObj ? (adminObj.email || 'admin@collekt.ng') : 'admin@collekt.ng';
+  const nowIso = new Date().toISOString();
+  const localId = 'audit_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+
+  // 1. Maintain immediate synchronous local storage for zero-latency UI
   try {
     const logs = getAdminAuditLogs();
-    const adminObj = typeof getAdminUser === 'function' ? getAdminUser() : null;
-    const adminName = adminObj ? (adminObj.name || adminObj.email) : 'Super Administrator';
-    
     logs.unshift({
-      id: 'audit_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      id: localId,
       action: String(action || 'Admin Action'),
       target: String(target || 'System'),
       admin: adminName,
       category: category,
-      timestamp: new Date().toISOString()
+      timestamp: nowIso
     });
-
     if (logs.length > 100) logs.length = 100;
     localStorage.setItem('collekt_admin_audit_logs', JSON.stringify(logs));
   } catch(e) {
-    console.warn('Audit logging notice:', e);
+    console.warn('Local audit cache notice:', e);
   }
+
+  // 2. Asynchronously transmit to Supabase immutable public.audit_logs
+  (async () => {
+    try {
+      const client = window.sb;
+      if (client) {
+        const payloadMeta = Object.assign({
+          target: String(target || 'System'),
+          category: String(category || 'admin'),
+          admin_name: adminName,
+          operator_email: adminEmail,
+          client_timestamp: nowIso,
+          source: 'admin-dashboard'
+        }, metadata);
+
+        // Attempt via stored procedure record_admin_audit first
+        if (typeof client.rpc === 'function') {
+          const { data: rpcRes, error: rpcErr } = await client.rpc('record_admin_audit', {
+            p_action: String(action || 'Admin Action'),
+            p_target: String(target || 'System'),
+            p_category: String(category || 'admin'),
+            p_metadata: payloadMeta
+          });
+          if (!rpcErr && rpcRes && rpcRes.success) return;
+        }
+
+        // Fallback to direct table insertion if RPC unavailable
+        if (typeof client.from === 'function') {
+          await client.from('audit_logs').insert([{
+            action: String(action || 'Admin Action'),
+            entity_type: String(category || 'admin'),
+            entity_id: String(target || 'System'),
+            metadata: payloadMeta,
+            created_at: nowIso
+          }]);
+        }
+      }
+    } catch(remoteErr) {
+      console.warn('Immutable remote audit log dispatch notice:', remoteErr);
+    }
+  })();
 }
 
 function getDisplayName(user) {

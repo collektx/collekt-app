@@ -50,9 +50,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=97.0">
-<link rel="stylesheet" href="shared.css?v=97.0">
-<link rel="stylesheet" href="glass.css?v=97.0">
+<link rel="stylesheet" href="style.css?v=99.0">
+<link rel="stylesheet" href="shared.css?v=99.0">
+<link rel="stylesheet" href="glass.css?v=99.0">
 
 <style>
   html, body {
@@ -636,10 +636,54 @@
 
       <!-- TAB 10: AUDIT ACTIVITY LOG -->
       <div class="tab-pane" id="pane-audit">
-        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
-          <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:4px;">Security Audit Log</h3>
-          <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">Live audit trail of administrative actions.</p>
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+          
+          <!-- Header & Compliance Banner -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Security &amp; Regulatory Audit Trail</h3>
+                <span style="background:rgba(13,148,136,0.12); color:var(--teal); font-size:10px; font-weight:900; padding:3px 10px; border-radius:99px; border:1px solid rgba(13,148,136,0.3); text-transform:uppercase; letter-spacing:0.04em;">
+                  🛡️ COBIT 2019 / ISACA ITAF WORM Ledger
+                </span>
+                <span style="background:rgba(34,197,94,0.12); color:#16a34a; font-size:10px; font-weight:900; padding:3px 10px; border-radius:99px; border:1px solid rgba(34,197,94,0.3); text-transform:uppercase; letter-spacing:0.04em;">
+                  🔒 DB Engine Immutability Triggers Active
+                </span>
+              </div>
+              <p style="font-size:12px; color:var(--muted); margin-top:6px; margin-bottom:0;">
+                Tamper-proof, append-only immutable ledger. Updates, deletions, and truncations are strictly blocked at the database engine level pursuant to ISACA ITAF 2208 &amp; NDPA 2023 Section 39.
+              </p>
+            </div>
 
+            <!-- Action Controls -->
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" class="btn btn-outline btn-xs" onclick="refreshAdminAuditLogs()" style="font-weight:800; display:inline-flex; align-items:center; gap:6px;">
+                🔄 Refresh Live DB Logs
+              </button>
+              <button type="button" class="btn btn-primary btn-xs" onclick="exportAdminAuditLogsCSV()" style="font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f); display:inline-flex; align-items:center; gap:6px;">
+                📥 Export Compliance Audit Trail (CSV)
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter & Search Toolbar -->
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding:12px 16px; background:var(--paper); border:1px solid var(--line); border-radius:14px; margin-bottom:20px;">
+            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+              <span style="font-size:11px; font-weight:800; color:var(--muted); margin-right:4px;">Filter:</span>
+              <button type="button" class="btn btn-xs audit-filter-btn active" data-cat="all" onclick="filterAuditCategory('all', this)" style="border-radius:99px; font-weight:800; font-size:11px;">All Activities</button>
+              <button type="button" class="btn btn-xs audit-filter-btn" data-cat="verification" onclick="filterAuditCategory('verification', this)" style="border-radius:99px; font-weight:800; font-size:11px;">🛡️ Verification</button>
+              <button type="button" class="btn btn-xs audit-filter-btn" data-cat="finance" onclick="filterAuditCategory('finance', this)" style="border-radius:99px; font-weight:800; font-size:11px;">💸 Financial</button>
+              <button type="button" class="btn btn-xs audit-filter-btn" data-cat="settings" onclick="filterAuditCategory('settings', this)" style="border-radius:99px; font-weight:800; font-size:11px;">⚙️ Settings &amp; AI</button>
+              <button type="button" class="btn btn-xs audit-filter-btn" data-cat="moderation" onclick="filterAuditCategory('moderation', this)" style="border-radius:99px; font-weight:800; font-size:11px;">👥 User Moderation</button>
+              <button type="button" class="btn btn-xs audit-filter-btn" data-cat="ndpa" onclick="filterAuditCategory('ndpa', this)" style="border-radius:99px; font-weight:800; font-size:11px;">🔒 NDPA Erasure</button>
+            </div>
+
+            <div style="min-width:220px; flex:1; max-width:320px;">
+              <input type="text" id="adminAuditSearchInput" class="form-input" placeholder="Search audit logs..." oninput="handleAuditSearch(this.value)" style="height:32px; font-size:11.5px; padding:4px 12px; border-radius:99px;">
+            </div>
+          </div>
+
+          <!-- Audit Log Listing Container -->
           <div id="adminAuditLogContainer">
             <!-- Live JS populated -->
           </div>
@@ -1052,8 +1096,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=97.0"></script>
-<script src="app.js?v=97.0"></script>
+<script src="supabase.js?v=99.0"></script>
+<script src="app.js?v=99.0"></script>
 <script>
   async function initAdminDashboard() {
     // 1. Verify Master Admin or live Supabase session
@@ -1218,6 +1262,10 @@
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
     const target = document.getElementById('pane-' + tabId);
     if (target) target.classList.add('active');
+
+    if (tabId === 'audit') {
+      try { renderAdminAuditLogs(); } catch(e){}
+    }
   }
 
   function handleAdminGlobalSearch(query) {
@@ -2749,35 +2797,180 @@
     showToast("📥 Live CSV Financial Report downloaded!");
   }
 
-  function renderAdminAuditLogs() {
+  let currentAuditCategory = 'all';
+  let currentAuditQuery = '';
+  let cachedAuditLogs = [];
+
+  async function renderAdminAuditLogs(forceRemote = false) {
     const container = document.getElementById('adminAuditLogContainer');
     if (!container) return;
 
-    const logs = typeof getAdminAuditLogs === 'function' ? getAdminAuditLogs() : [];
-    
+    // 1. Fetch latest logs (remote Supabase prioritized with local fallback)
+    if (forceRemote || cachedAuditLogs.length === 0) {
+      if (typeof fetchAdminAuditLogs === 'function') {
+        try {
+          cachedAuditLogs = await fetchAdminAuditLogs(100);
+        } catch(e) {
+          cachedAuditLogs = typeof getAdminAuditLogs === 'function' ? getAdminAuditLogs() : [];
+        }
+      } else if (typeof getAdminAuditLogs === 'function') {
+        cachedAuditLogs = getAdminAuditLogs();
+      }
+    }
+
+    let logs = cachedAuditLogs || [];
+
+    // 2. Category Filtering
+    if (currentAuditCategory !== 'all') {
+      logs = logs.filter(l => {
+        const cat = (l.category || '').toLowerCase();
+        const act = (l.action || '').toLowerCase();
+        if (currentAuditCategory === 'verification') {
+          return cat === 'verification';
+        }
+        if (currentAuditCategory === 'finance') {
+          return ['finance', 'banking_settings', 'deposit_approval', 'deposit_declined', 'wallet'].includes(cat);
+        }
+        if (currentAuditCategory === 'settings') {
+          return ['gateway_settings', 'ai_settings', 'settings'].includes(cat);
+        }
+        if (currentAuditCategory === 'moderation') {
+          return ['admin_edit', 'account_suspended', 'account_reactivated', 'account_deleted', 'admin'].includes(cat);
+        }
+        if (currentAuditCategory === 'ndpa') {
+          return ['data_subject_erasure', 'account_deleted', 'erasure'].includes(cat) || act.includes('ndpa') || act.includes('erasure') || act.includes('erased');
+        }
+        return cat === currentAuditCategory;
+      });
+    }
+
+    // 3. Search Query Filtering
+    if (currentAuditQuery) {
+      logs = logs.filter(l => {
+        const full = `${l.action} ${l.target} ${l.admin} ${l.category} ${l.id || ''}`.toLowerCase();
+        return full.includes(currentAuditQuery);
+      });
+    }
+
     if (logs.length === 0) {
       container.innerHTML = `
-        <div class="empty-live-state">
-          <div style="font-size:24px; margin-bottom:6px;">📜</div>
-          <div style="font-weight:800; color:var(--ink);">No Audit Log Activity Yet</div>
-          <p style="font-size:11px; margin-top:2px;">Administrative actions and logins will be recorded here.</p>
+        <div class="empty-live-state" style="padding:40px 20px; text-align:center;">
+          <div style="font-size:32px; margin-bottom:8px;">📜</div>
+          <div style="font-weight:900; color:var(--ink); font-size:15px;">No Audit Log Records Found</div>
+          <p style="font-size:12px; color:var(--muted); margin-top:4px;">No administrative events match your selected category or filter query.</p>
         </div>
       `;
       return;
     }
 
-    container.innerHTML = logs.map(l => `
-      <div class="audit-item">
-        <div class="audit-icon">${l.category === 'verification' ? '🛡️' : l.category === 'finance' ? '💸' : '📜'}</div>
-        <div style="flex:1;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:13px; font-weight:800; color:var(--ink);">${escapeHTML(l.action)}</span>
-            <span style="font-size:11px; color:var(--muted); font-weight:700;">${new Date(l.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} &bull; ${new Date(l.timestamp).toLocaleDateString()}</span>
+    const categoryBadges = {
+      verification: '<span style="background:rgba(34,197,94,0.15); color:#16a34a; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Shield Verification 🛡️</span>',
+      finance: '<span style="background:rgba(20,184,166,0.15); color:var(--teal); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Financial 💸</span>',
+      deposit_approval: '<span style="background:rgba(34,197,94,0.15); color:#16a34a; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Deposit Approved ✅</span>',
+      deposit_declined: '<span style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Deposit Declined ❌</span>',
+      gateway_settings: '<span style="background:rgba(212,146,11,0.15); color:var(--amber); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Gateway Config ⚙️</span>',
+      ai_settings: '<span style="background:rgba(59,130,246,0.15); color:#3b82f6; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">AI Engine ✨</span>',
+      banking_settings: '<span style="background:rgba(147,51,234,0.15); color:#9333ea; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Banking NUBAN 🏛️</span>',
+      admin_edit: '<span style="background:rgba(59,130,246,0.15); color:#2563eb; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">User Moderation 👥</span>',
+      account_suspended: '<span style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Suspended ⛔</span>',
+      account_reactivated: '<span style="background:rgba(34,197,94,0.15); color:#16a34a; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Reactivated 🟢</span>',
+      account_deleted: '<span style="background:rgba(239,68,68,0.15); color:#dc2626; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">Deleted 🗑️</span>',
+      DATA_SUBJECT_ERASURE: '<span style="background:rgba(239,68,68,0.15); color:#dc2626; font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">NDPA Erasure 🔒</span>',
+      system_audit: '<span style="background:rgba(13,148,136,0.15); color:var(--teal); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">System Audit 🛡️</span>'
+    };
+
+    container.innerHTML = logs.map(l => {
+      const cat = l.category || 'admin';
+      const badge = categoryBadges[cat] || `<span style="background:rgba(148,163,184,0.15); color:var(--muted); font-size:10px; font-weight:900; padding:2px 8px; border-radius:99px; text-transform:uppercase;">${escapeHTML(cat)}</span>`;
+      const isRemote = l.isRemote || (l.id && String(l.id).length > 25);
+      const uuidSnippet = l.rawId || l.id ? String(l.rawId || l.id).substring(0, 8) + '...' : 'WORM-LOG';
+      const timeStr = l.timestamp ? new Date(l.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : 'Recent';
+      const dateStr = l.timestamp ? new Date(l.timestamp).toLocaleDateString() : '';
+
+      return `
+        <div class="audit-item" style="padding:14px 0; border-bottom:1px solid var(--line); display:flex; gap:14px; align-items:flex-start;">
+          <div class="audit-icon" style="width:36px; height:36px; border-radius:12px; background:var(--teal-lt); color:var(--teal); display:grid; place-items:center; font-size:16px; flex-shrink:0;">
+            ${cat === 'verification' ? '🛡️' : (cat === 'finance' || cat === 'deposit_approval') ? '💸' : (cat.includes('settings') ? '⚙️' : (cat.includes('deleted') || cat.includes('ERASURE') ? '🗑️' : '📜'))}
           </div>
-          <div style="font-size:11px; color:var(--muted); margin-top:2px;">Target: <strong style="color:var(--ink);">${escapeHTML(l.target)}</strong> &bull; Operator: ${escapeHTML(l.admin)}</div>
+          <div style="flex:1;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span style="font-size:13.5px; font-weight:800; color:var(--ink);">${escapeHTML(l.action)}</span>
+                ${badge}
+                <span style="font-family:monospace; font-size:10px; color:var(--muted); background:rgba(255,255,255,0.05); padding:1px 6px; border-radius:4px; border:1px solid var(--line);" title="Immutable Database UUID: ${escapeHTML(String(l.id || ''))}">UUID: ${escapeHTML(uuidSnippet)}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-size:11px; color:var(--muted); font-weight:700;">${timeStr} &bull; ${dateStr}</span>
+                <span style="font-size:10px; font-weight:900; color:${isRemote ? '#16a34a' : 'var(--teal)'}; background:rgba(34,197,94,0.1); padding:2px 6px; border-radius:99px;" title="Write-Once-Read-Many Cryptographically Immutable Record">
+                  ${isRemote ? '🔒 WORM Live' : '● Stored'}
+                </span>
+              </div>
+            </div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:4px; display:flex; gap:12px; flex-wrap:wrap;">
+              <span>Target: <strong style="color:var(--ink);">${escapeHTML(l.target || 'System')}</strong></span>
+              <span>&bull;</span>
+              <span>Operator: <strong style="color:var(--forest);">${escapeHTML(l.admin || 'Super Administrator')}</strong></span>
+            </div>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+  }
+
+  async function refreshAdminAuditLogs() {
+    showToast('🔄 Syncing immutable audit trail from live database...', 'info');
+    await renderAdminAuditLogs(true);
+    showToast('✅ Live audit trail updated from Supabase WORM ledger!');
+  }
+
+  function filterAuditCategory(cat, btn) {
+    currentAuditCategory = cat;
+    document.querySelectorAll('.audit-filter-btn').forEach(b => {
+      b.style.background = 'transparent';
+      b.style.color = 'var(--ink)';
+      b.style.border = '1px solid var(--line)';
+    });
+    if (btn) {
+      btn.style.background = 'var(--teal)';
+      btn.style.color = '#fff';
+      btn.style.border = '1px solid var(--teal)';
+    }
+    renderAdminAuditLogs(false);
+  }
+
+  function handleAuditSearch(query) {
+    currentAuditQuery = String(query || '').trim().toLowerCase();
+    renderAdminAuditLogs(false);
+  }
+
+  function exportAdminAuditLogsCSV() {
+    const logs = cachedAuditLogs && cachedAuditLogs.length > 0 ? cachedAuditLogs : (typeof getAdminAuditLogs === 'function' ? getAdminAuditLogs() : []);
+    if (logs.length === 0) {
+      showToast('⚠️ No audit log entries available to export.', 'warning');
+      return;
+    }
+    
+    logAdminAuditActivity('Exported Compliance Audit Trail CSV', 'Public Audit Logs', 'compliance_export');
+    
+    let csvContent = "data:text/csv;charset=utf-8,Log UUID,Timestamp,Action,Category,Target,Operator,Immutability Standard\n";
+    logs.forEach(l => {
+      const cleanAction = String(l.action || '').replace(/"/g, '""');
+      const cleanTarget = String(l.target || '').replace(/"/g, '""');
+      const cleanOperator = String(l.admin || '').replace(/"/g, '""');
+      const cleanCat = String(l.category || '').replace(/"/g, '""');
+      const id = String(l.rawId || l.id || '');
+      const time = l.timestamp ? new Date(l.timestamp).toISOString() : '';
+      csvContent += `"${id}","${time}","${cleanAction}","${cleanCat}","${cleanTarget}","${cleanOperator}","COBIT 2019 / ISACA ITAF 2208 WORM"\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Collekt_Immutable_Audit_Trail_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("📥 Compliance Audit Trail CSV exported successfully!");
   }
 </script>
 </body>

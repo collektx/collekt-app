@@ -555,3 +555,5 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.verify_audit_log_immutability() TO anon, authenticated, service_role;
+
+

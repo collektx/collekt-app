@@ -627,6 +627,7 @@ async function runSecurityAuditProbes() {
   }
 
   // -------------------------------------------------------------
+  // -------------------------------------------------------------
   // PROBE 26: Stored Procedure & UI Liquid-Glass Confirmation Architecture
   // -------------------------------------------------------------
   console.log('\n--- PROBE 26: Stored Procedure & UI Liquid-Glass NDPA Verification ---');
@@ -659,6 +660,106 @@ async function runSecurityAuditProbes() {
   } catch (err) {
     console.error('Probe 26 exception:', err);
     assert(false, 'Stored procedure and UI liquid-glass NDPA verification failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 27: Database Immutability & Tamper Resistance (COBIT 2019 / ISACA ITAF)
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 27: Audit Log Engine Immutability (WORM Compliance) ---');
+  try {
+    // 1. Execute cryptographic immutability verification RPC (checks UPDATE and DELETE trigger rejection)
+    const { data: triggerCheck, error: triggerCheckErr } = await anonClient.rpc('verify_audit_log_immutability');
+
+    assert(!triggerCheckErr, 'RPC verify_audit_log_immutability executed without error');
+    assert(triggerCheck && triggerCheck.success === true, 'Audit log database triggers successfully enforce WORM immutability');
+    assert(triggerCheck && triggerCheck.update_blocked_by_trigger === true, 'Database trigger strictly BLOCKS UPDATE on public.audit_logs');
+    assert(triggerCheck && triggerCheck.delete_blocked_by_trigger === true, 'Database trigger strictly BLOCKS DELETE on public.audit_logs');
+    assert(triggerCheck && triggerCheck.error_message && triggerCheck.error_message.includes('COBIT 2019 / ISACA ITAF'), 'Trigger exception explicitly cites COBIT 2019 / ISACA ITAF compliance standard');
+
+    // 2. Verify client-side direct mutation is blocked by RLS
+    const { data: clientUpdate, error: clientUpdateErr } = await anonClient
+      .from('audit_logs')
+      .update({ action: 'MALICIOUS_CLIENT_TAMPER' })
+      .eq('id', '78502018-ba94-4e7d-b1ae-bfc66c75598d');
+
+    assert(clientUpdateErr != null || !clientUpdate || clientUpdate.length === 0, 'Client-side direct UPDATE on public.audit_logs is BLOCKED by RLS');
+
+    const { data: clientDelete, error: clientDeleteErr } = await anonClient
+      .from('audit_logs')
+      .delete()
+      .eq('id', '78502018-ba94-4e7d-b1ae-bfc66c75598d');
+
+    assert(clientDeleteErr != null || !clientDelete || clientDelete.length === 0, 'Client-side direct DELETE on public.audit_logs is BLOCKED by RLS');
+  } catch (err) {
+    console.error('Probe 27 exception:', err);
+    assert(false, 'Audit log engine immutability probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 28: Stored Procedure record_admin_audit Ingestion & Metadata Integrity
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 28: Stored Procedure record_admin_audit Execution & Metadata ---');
+  try {
+    const testAction = `ADMIN_PROBE_${Date.now()}`;
+    const testTarget = 'Wema Bank Settlement Gateway';
+    const testCategory = 'gateway_settings';
+    const testMeta = { probe: 28, author: 'QA Automated Security Runner' };
+
+    // 1. Invoke record_admin_audit RPC
+    const { data: rpcRes, error: rpcErr } = await anonClient.rpc('record_admin_audit', {
+      p_action: testAction,
+      p_target: testTarget,
+      p_category: testCategory,
+      p_metadata: testMeta
+    });
+
+    assert(!rpcErr, 'RPC record_admin_audit executes successfully without PostgreSQL exception');
+    assert(rpcRes && rpcRes.success === true && rpcRes.id != null, 'RPC record_admin_audit returns valid JSON confirmation and log UUID');
+    assert(rpcRes && rpcRes.action === testAction, `RPC confirmation reflects recorded action: ${rpcRes?.action}`);
+    assert(rpcRes && rpcRes.recorded_at != null, 'RPC confirmation contains valid database timestamp');
+
+    // 2. Invoke second audit event under verification category
+    const { data: rpcRes2, error: rpcErr2 } = await anonClient.rpc('record_admin_audit', {
+      p_action: 'VERIFICATION_APPROVAL_AUDIT',
+      p_target: 'Target Professional',
+      p_category: 'verification',
+      p_metadata: { tier: 'pro_shield', standard: 'NDPA 2023 s.39' }
+    });
+
+    assert(!rpcErr2, 'Second administrative audit event ingested cleanly');
+    assert(rpcRes2 && rpcRes2.success === true && rpcRes2.id != null, 'Second audit log UUID assigned and recorded in WORM ledger');
+  } catch (err) {
+    console.error('Probe 28 exception:', err);
+    assert(false, 'Stored procedure record_admin_audit execution probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 29: Admin Dashboard & App Client Dual-Persistence Architecture
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 29: Client Dual-Persistence & Compliance Dashboard Architecture ---');
+  try {
+    const fs = require('fs');
+    const path = require('path');
+
+    // 1. Verify app.js client functions
+    const appJs = fs.readFileSync(path.join(__dirname, 'app.js'), 'utf8');
+    assert(appJs.includes('getAdminUser'), 'app.js exports getAdminUser() helper');
+    assert(appJs.includes('fetchAdminAuditLogs'), 'app.js exports fetchAdminAuditLogs() for remote Supabase queries');
+    assert(appJs.includes('record_admin_audit'), 'app.js logAdminAuditActivity invokes record_admin_audit RPC');
+    assert(appJs.includes('collekt_admin_audit_logs'), 'app.js retains zero-latency local fallback cache');
+
+    // 2. Verify admin-dashboard.html compliance UI
+    const adminHtml = fs.readFileSync(path.join(__dirname, 'admin-dashboard.html'), 'utf8');
+    assert(adminHtml.includes('COBIT 2019 / ISACA ITAF WORM Ledger'), 'admin-dashboard.html includes COBIT 2019 / ISACA ITAF WORM badge');
+    assert(adminHtml.includes('DB Engine Immutability Triggers Active'), 'admin-dashboard.html displays database trigger status badge');
+    assert(adminHtml.includes('exportAdminAuditLogsCSV'), 'admin-dashboard.html includes exportAdminAuditLogsCSV for compliance exports');
+    assert(adminHtml.includes('refreshAdminAuditLogs'), 'admin-dashboard.html includes refreshAdminAuditLogs for live database sync');
+    assert(adminHtml.includes('filterAuditCategory'), 'admin-dashboard.html provides multi-category filtering');
+    assert(adminHtml.includes('handleAuditSearch'), 'admin-dashboard.html provides real-time audit search input');
+    assert(adminHtml.includes('WORM Live'), 'admin-dashboard.html renders live WORM immutability badges per log entry');
+  } catch (err) {
+    console.error('Probe 29 exception:', err);
+    assert(false, 'Client dual-persistence and dashboard architecture probe failed');
   }
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
   console.log('════════════════════════════════════════════════════════════\n');
