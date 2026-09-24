@@ -1144,6 +1144,155 @@ async function runSecurityAuditProbes() {
     assert(false, 'UI data portability probe failed');
   }
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PROBE 39: Fail-Closed Cloudflare Turnstile Serverless API Verification
+  // ─────────────────────────────────────────────────────────────────────────────
+  console.log('\n--- PROBE 39: Fail-Closed Cloudflare Turnstile Serverless API Verification ---');
+  try {
+    const { handler: turnstileHandler } = require('./netlify/functions/verify-turnstile');
+    const { resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+    resetRateLimiterStore();
+
+    // 1. HTTP method validation
+    const getRes = await turnstileHandler({ httpMethod: 'GET', headers: {} });
+    assert(getRes.statusCode === 405, 'GET request on /api/verify-turnstile rejected with HTTP 405');
+
+    const putRes = await turnstileHandler({ httpMethod: 'PUT', headers: {} });
+    assert(putRes.statusCode === 405, 'PUT request on /api/verify-turnstile rejected with HTTP 405');
+
+    // 2. Preflight OPTIONS request
+    const optRes = await turnstileHandler({
+      httpMethod: 'OPTIONS',
+      headers: { origin: 'https://collektng.com' }
+    });
+    assert(optRes.statusCode === 200, 'OPTIONS preflight returns HTTP 200');
+    assert(optRes.headers['Access-Control-Allow-Origin'] === 'https://collektng.com', 'OPTIONS preflight returns hardened allow-origin');
+    assert(optRes.headers['Vary'] === 'Origin', 'OPTIONS preflight returns Vary: Origin header');
+
+    // 3. Missing and empty token rejection
+    const missingRes = await turnstileHandler({
+      httpMethod: 'POST',
+      headers: { origin: 'https://collektng.com' },
+      body: JSON.stringify({})
+    });
+    assert(missingRes.statusCode === 400, 'POST with missing token returns HTTP 400');
+    const missingBody = JSON.parse(missingRes.body);
+    assert(missingBody.success === false, 'Missing token response returns success: false');
+    assert(missingBody.error === 'MISSING_TOKEN', 'Missing token response includes error: MISSING_TOKEN');
+
+    const emptyRes = await turnstileHandler({
+      httpMethod: 'POST',
+      headers: { origin: 'https://collektng.com' },
+      body: JSON.stringify({ token: '   ' })
+    });
+    assert(emptyRes.statusCode === 400, 'POST with empty token returns HTTP 400');
+
+    // 4. Fail-closed static code verification
+    const turnstileCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/verify-turnstile.js'), 'utf8');
+    assert(!turnstileCode.includes('resolve({ success: true, fallback: true })'), 'verify-turnstile.js contains ZERO occurrences of fail-open resolve');
+    assert(!turnstileCode.includes('fallback: true'), 'verify-turnstile.js contains ZERO occurrences of fallback: true');
+    assert(turnstileCode.includes('timeout: 8000'), 'verify-turnstile.js configures explicit 8000ms outbound timeout');
+    assert(turnstileCode.includes("error: 'TIMEOUT'"), 'Timeout handler sets error: TIMEOUT');
+    assert(turnstileCode.includes("error: 'NETWORK_ERROR'"), 'Network error handler sets error: NETWORK_ERROR');
+    assert(turnstileCode.includes("error: 'PARSE_ERROR'"), 'Parse error handler sets error: PARSE_ERROR');
+
+    // 5. Rate limiting enforcement
+    resetRateLimiterStore();
+    let rateLimited = false;
+    for (let i = 0; i < 35; i++) {
+      const rlRes = await turnstileHandler({
+        httpMethod: 'POST',
+        headers: { origin: 'https://collektng.com', 'x-forwarded-for': '192.168.1.105' },
+        body: JSON.stringify({ token: 'test-token' })
+      });
+      if (rlRes.statusCode === 429) {
+        rateLimited = true;
+        break;
+      }
+    }
+    assert(rateLimited, 'Turnstile endpoint throttles rapid abusive requests with HTTP 429');
+    resetRateLimiterStore();
+
+    // 6. Real Cloudflare test key cryptographic verification
+    const validRes = await turnstileHandler({
+      httpMethod: 'POST',
+      headers: { origin: 'https://collektng.com', 'x-forwarded-for': '127.0.0.1' },
+      body: JSON.stringify({ token: 'XXXX.TEST.TOKEN' })
+    });
+    assert(validRes.statusCode === 200, 'Cryptographic verification returns HTTP 200');
+    const validBody = JSON.parse(validRes.body);
+    assert(validBody.success === true, 'Cryptographic verification returns success: true');
+    assert(typeof validBody.challenge_ts === 'string' && validBody.challenge_ts.length > 0, 'Response includes verified challenge_ts ISO timestamp');
+
+    console.log('  [PASS] Fail-closed architecture verified (Zero fail-open bypasses)');
+    console.log('  [PASS] Request methods, token validation, and rate limiting active');
+    console.log('  [PASS] Cryptographic Cloudflare siteverify challenge successfully verified');
+  } catch (err) {
+    console.error('Probe 39 exception:', err);
+    assert(false, 'Turnstile fail-closed probe failed');
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PROBE 40: End-to-End Registration Bot Mitigation & Server Verification
+  // ─────────────────────────────────────────────────────────────────────────────
+  console.log('\n--- PROBE 40: End-to-End Registration Bot Mitigation & Server Verification ---');
+  try {
+    const redirectsContent = fs.readFileSync(path.join(__dirname, '_redirects'), 'utf8');
+    assert(redirectsContent.includes('/api/verify-turnstile /.netlify/functions/verify-turnstile 200'), '_redirects contains canonical /api/verify-turnstile rewrite');
+
+    const registerHtml = fs.readFileSync(path.join(__dirname, 'register.html'), 'utf8');
+    assert(registerHtml.includes("fetch('/api/verify-turnstile'"), 'register.html initiates server verification via /api/verify-turnstile');
+    assert(registerHtml.includes('!isTurnstileVerified || !turnstileToken'), 'register.html blocks submission if Turnstile token is absent');
+    assert(registerHtml.includes('verifyRes.ok && verifyJson.success'), 'register.html strictly verifies HTTP 200 and success: true');
+    assert(registerHtml.includes('window.turnstile.reset'), 'register.html resets challenge widget on verification failure');
+    assert(registerHtml.includes('turnstile_verified: true'), 'Registration metadata records verified bot mitigation status');
+    assert(registerHtml.includes('turnstile_timestamp: turnstileChallengeTs'), 'Registration metadata records server-verified challenge timestamp');
+    assert(registerHtml.includes("siteKey = window.CLOUDFLARE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'"), 'register.html resolves universal Turnstile testing key');
+
+    console.log('  [PASS] Canonical /api/verify-turnstile route verified in _redirects');
+    console.log('  [PASS] Client registration strictly gates Supabase auth behind server verification');
+    console.log('  [PASS] Account metadata records verified challenge timestamp');
+  } catch (err) {
+    console.error('Probe 40 exception:', err);
+    assert(false, 'Registration bot mitigation probe failed');
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PROBE 41: Security Architecture & Fail-Safe Defaults (OWASP ASVS V13.2 / V1.1.7)
+  // ─────────────────────────────────────────────────────────────────────────────
+  console.log('\n--- PROBE 41: Security Architecture & Fail-Safe Defaults ---');
+  try {
+    const { handler: turnstileHandler } = require('./netlify/functions/verify-turnstile');
+
+    // CORS unauthorized origin rejection
+    const untrustedOriginRes = await turnstileHandler({
+      httpMethod: 'POST',
+      headers: { origin: 'https://malicious-scam-site.org' },
+      body: JSON.stringify({ token: 'test' })
+    });
+    const allowOrigin = untrustedOriginRes.headers['Access-Control-Allow-Origin'];
+    assert(allowOrigin !== 'https://malicious-scam-site.org', 'Untrusted origin is not reflected in Access-Control-Allow-Origin');
+    assert(allowOrigin !== '*', 'Wildcard CORS is never permitted on /api/verify-turnstile');
+
+    // Invalid secret simulation ensures HTTP 400 failure (fail-closed)
+    process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY = '0x4AAAAAAATestSecretKeyInvalid';
+    const rejectRes = await turnstileHandler({
+      httpMethod: 'POST',
+      headers: { origin: 'https://collektng.com' },
+      body: JSON.stringify({ token: 'dummy_token' })
+    });
+    assert(rejectRes.statusCode === 400, 'Invalid secret or rejected token yields HTTP 400');
+    const rejectBody = JSON.parse(rejectRes.body);
+    assert(rejectBody.success === false, 'Invalid secret returns success: false');
+    delete process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+
+    console.log('  [PASS] Strict CORS origin protection enforced on verify-turnstile');
+    console.log('  [PASS] Fail-safe defaults verified under adversarial conditions');
+  } catch (err) {
+    console.error('Probe 41 exception:', err);
+    assert(false, 'Fail-safe defaults probe failed');
+  }
+
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
 
 

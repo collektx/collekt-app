@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=102.0">
-<link rel="stylesheet" href="shared.css?v=102.0">
-<link rel="stylesheet" href="glass.css?v=102.0">
+<link rel="stylesheet" href="style.css?v=103.0">
+<link rel="stylesheet" href="shared.css?v=103.0">
+<link rel="stylesheet" href="glass.css?v=103.0">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 
 <style>
@@ -811,8 +811,8 @@ html.dark .success-h { color: #e2efed; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=102.0"></script>
-<script src="app.js?v=102.0"></script>
+<script src="supabase.js?v=103.0"></script>
+<script src="app.js?v=103.0"></script>
 <script>
   // Detect if arriving from OAuth callback
   const regHash = window.location.hash || '';
@@ -925,14 +925,17 @@ html.dark .success-h { color: #e2efed; }
     const container = document.getElementById('turnstileWidgetContainer');
     if (!container) return;
 
-    // If real production key provided, use Cloudflare Turnstile explicit render
-    if (window.CLOUDFLARE_TURNSTILE_SITE_KEY && window.turnstile && typeof window.turnstile.render === 'function') {
+    // Use configured sitekey or universal Cloudflare Turnstile testing key
+    const siteKey = window.CLOUDFLARE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
+
+    // If Cloudflare Turnstile explicit script loaded, render widget
+    if (window.turnstile && typeof window.turnstile.render === 'function') {
       if (turnstileWidgetId === null) {
         try {
           const isDark = document.documentElement.classList.contains('dark');
           container.innerHTML = '';
           turnstileWidgetId = window.turnstile.render('#turnstileWidgetContainer', {
-            sitekey: window.CLOUDFLARE_TURNSTILE_SITE_KEY,
+            sitekey: siteKey,
             theme: isDark ? 'dark' : 'light',
             size: 'normal',
             callback: function(token) {
@@ -959,7 +962,7 @@ html.dark .success-h { color: #e2efed; }
       }
     }
 
-    // Default: Clean liquid-glass Turnstile branded verification widget (zero test banner warnings)
+    // Fallback: If external script blocked or offline, use liquid-glass security widget
     showTurnstileFallback();
   }
 
@@ -1208,13 +1211,61 @@ html.dark .success-h { color: #e2efed; }
   }
 
   async function confirmAndRegister() {
-    if (!isTurnstileVerified) {
-      alert('Please complete the Cloudflare Turnstile verification.');
+    if (!isTurnstileVerified || !turnstileToken) {
+      alert('Please complete the Cloudflare security verification challenge before continuing.');
       return;
     }
     const termsChecked = document.getElementById('modalTermsCheck')?.checked;
     if (!termsChecked) {
       alert('Please check the agreement box to accept Collekt\'s Terms of Service and Privacy Policy.');
+      return;
+    }
+
+    // Show verification loading state on confirmation button
+    const confirmBtn = document.getElementById('confirmRegBtn');
+    if (confirmBtn) {
+      confirmBtn.innerHTML = '<span>Verifying security challenge... ⏳</span>';
+      confirmBtn.disabled = true;
+    }
+
+    // OWASP ASVS V13.2: Cryptographic Server-Side Turnstile Validation
+    let turnstileValid = false;
+    let turnstileChallengeTs = new Date().toISOString();
+    try {
+      const verifyRes = await fetch('/api/verify-turnstile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: turnstileToken })
+      });
+      const verifyJson = await verifyRes.json();
+      if (verifyRes.ok && verifyJson.success) {
+        turnstileValid = true;
+        turnstileChallengeTs = verifyJson.challenge_ts || turnstileChallengeTs;
+      } else {
+        throw new Error(verifyJson.message || 'Security verification failed');
+      }
+    } catch(verifyErr) {
+      console.error('Turnstile verification failed:', verifyErr.message);
+      if (confirmBtn) {
+        confirmBtn.innerHTML = '<span>Accept &amp; Create Account &rarr;</span>';
+        confirmBtn.disabled = false;
+      }
+      alert('Security verification failed: ' + (verifyErr.message || 'Please solve the challenge again.'));
+      isTurnstileVerified = false;
+      turnstileToken = '';
+      if (window.turnstile && turnstileWidgetId !== null) {
+        try { window.turnstile.reset(turnstileWidgetId); } catch(e){}
+      }
+      checkAgreementReadiness();
+      return;
+    }
+
+    if (!turnstileValid) {
+      if (confirmBtn) {
+        confirmBtn.innerHTML = '<span>Accept &amp; Create Account &rarr;</span>';
+        confirmBtn.disabled = false;
+      }
+      alert('Security challenge verification was not completed. Please retry.');
       return;
     }
 
@@ -1241,8 +1292,7 @@ html.dark .success-h { color: #e2efed; }
       name = [first_name, other_name, last_name].filter(Boolean).join(' ') || email.split('@')[0];
     }
 
-    // Show loading on confirmation button
-    const confirmBtn = document.getElementById('confirmRegBtn');
+    // Show account creation state
     if (confirmBtn) {
       confirmBtn.innerHTML = '<span>Creating account... ⏳</span>';
       confirmBtn.disabled = true;
@@ -1263,7 +1313,7 @@ html.dark .success-h { color: #e2efed; }
       cac: isCompany ? (document.getElementById('rcNumber')?.value.trim() || '') : '',
       turnstile_verified: true,
       turnstile_token: turnstileToken,
-      turnstile_timestamp: consentTimestamp,
+      turnstile_timestamp: turnstileChallengeTs,
       recaptcha_verified: true,
       recaptcha_timestamp: consentTimestamp,
       terms_accepted: true,

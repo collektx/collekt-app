@@ -129,10 +129,9 @@ async function testDeploy() {
   scanDir(distDir);
   console.log(`Mapped ${Object.keys(filesMap).length} static files.`);
 
-  // 3. Initiate Deploy with both files and functions!
+  // 3. Initiate Deploy with static files manifest
   const deployPayload = JSON.stringify({
-    files: filesMap,
-    functions: functionsMap
+    files: filesMap
   });
 
   console.log('Sending deploy manifest to Netlify...');
@@ -149,10 +148,8 @@ async function testDeploy() {
 
   const deployId = initRes.data.id;
   const requiredFiles = initRes.data.required || [];
-  const requiredFuncs = initRes.data.required_functions || Object.keys(functionsMap);
   console.log(`Deploy ID: ${deployId}`);
   console.log(`Required files to upload: ${requiredFiles.length}`);
-  console.log(`Required functions to upload: ${requiredFuncs.length}`);
 
   // Upload required files
   for (const fileSha of requiredFiles) {
@@ -167,19 +164,8 @@ async function testDeploy() {
     }
   }
 
-  // Upload functions
-  for (const funcName of Object.keys(functionsMap)) {
-    const buf = functionZips[funcName];
-    if (buf) {
-      const putRes = await netlifyReq(`/api/v1/deploys/${deployId}/functions/${funcName}?runtime=js`, 'PUT', {
-        'Content-Type': 'application/octet-stream',
-        'Content-Length': buf.length
-      }, buf);
-      console.log(`Uploaded function [${funcName}]: status ${putRes.status}`);
-    }
-  }
-
-  console.log('🎉 DEPLOYMENT AND FUNCTIONS UPLOAD COMPLETE!');
+  console.log('🎉 DEPLOYMENT AND FILES UPLOAD COMPLETE!');
+  console.log(`Deploy ID: ${deployId}`);
   console.log(`Check live site: https://collektng.com`);
 }
 
