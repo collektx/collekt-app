@@ -1,19 +1,12 @@
 const { getPaymentProvider } = require('./lib/payment-provider');
 const { enforceRateLimit } = require('./lib/rate-limiter');
+const { corsHeaders, preflightResponse } = require('./lib/cors');
 
 exports.handler = async (event) => {
   const method = event.httpMethod;
 
   if (method === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-      },
-      body: ''
-    };
+    return preflightResponse(event);
   }
 
   // Rate limiting to prevent NUBAN account enumeration (max 60 lookups/min per IP)
@@ -39,14 +32,14 @@ exports.handler = async (event) => {
     } catch (e) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: corsHeaders(event),
         body: JSON.stringify({ error: 'Invalid JSON payload' })
       };
     }
   } else {
     return {
       statusCode: 405,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(event),
       body: JSON.stringify({ error: 'Method Not Allowed' })
     };
   }
@@ -57,7 +50,7 @@ exports.handler = async (event) => {
   if (!cleanAcct || cleanAcct.length !== 10) {
     return {
       statusCode: 400,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(event),
       body: JSON.stringify({ error: 'Valid 10-digit NUBAN account number is required' })
     };
   }
@@ -65,7 +58,7 @@ exports.handler = async (event) => {
   if (!cleanBank) {
     return {
       statusCode: 400,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(event),
       body: JSON.stringify({ error: 'Destination bank code is required' })
     };
   }
@@ -81,11 +74,7 @@ exports.handler = async (event) => {
     if (result && (result.account_name || result.accountName)) {
       return {
         statusCode: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-        },
+        headers: corsHeaders(event),
         body: JSON.stringify({
           status: 'success',
           data: {
@@ -112,11 +101,7 @@ exports.handler = async (event) => {
     if (paystackResult && paystackResult.account_name) {
       return {
         statusCode: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-        },
+        headers: corsHeaders(event),
         body: JSON.stringify({
           status: 'success',
           data: {
@@ -134,10 +119,7 @@ exports.handler = async (event) => {
 
   return {
     statusCode: 404,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    },
+    headers: corsHeaders(event),
     body: JSON.stringify({
       status: 'failed',
       error: 'Could not resolve bank account details. Please verify the account number and selected bank.'

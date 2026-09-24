@@ -1,20 +1,16 @@
 const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
 const crypto = require('crypto');
+const { corsHeaders: buildCorsHeaders, preflightResponse } = require('./lib/cors');
 
 exports.handler = async (event) => {
   const method = event.httpMethod;
 
-  // CORS headers
-  const headers = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-  };
+  // CORS headers resolved from hardened allowlist (never wildcard)
+  const headers = buildCorsHeaders(event);
 
   if (method === 'OPTIONS') {
-    return { statusCode: 204, headers, body: '' };
+    return preflightResponse(event);
   }
 
   try {

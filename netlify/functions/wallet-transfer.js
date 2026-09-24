@@ -1,6 +1,8 @@
 const { supabase } = require('./lib/supabase-client');
 const { authenticateRequest } = require('./lib/auth-middleware');
 const { enforceRateLimit } = require('./lib/rate-limiter');
+const { corsHeaders: resolveCorsHeaders } = require('./lib/cors');
+
 
 exports.handler = async (event) => {
   const origin = event.headers.origin || event.headers.Origin || '';
@@ -33,7 +35,7 @@ exports.handler = async (event) => {
   try {
     const { user, error: authError } = await authenticateRequest(event);
     if (authError || !user) {
-      return { statusCode: 401, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Authentication required', details: authError }) };
+      return { statusCode: 401, headers: resolveCorsHeaders(event), body: JSON.stringify({ error: 'Authentication required', details: authError }) };
     }
 
     // Abuse throttling: limit 10 transfers/min and max 3 transfers/5s per user

@@ -1,10 +1,11 @@
 const { supabase } = require('./lib/supabase-client');
 const { authenticateCaller } = require('./lib/auth-middleware');
 const { enforceRateLimit } = require('./lib/rate-limiter');
+const { corsHeaders, preflightResponse } = require('./lib/cors');
 
 /**
  * NDPA 2023 Section 34: Data Subject Rights & Account Erasure Endpoint
- * 
+ *
  * Cryptographically verifies caller session, enforces pre-conditions (no active contracts/escrows),
  * purges uploaded KYC identity files from private storage buckets, permanently scrubs PII
  * from public profiles and user documents, and preserves financial double-entry ledger integrity
@@ -14,26 +15,13 @@ exports.handler = async (event) => {
   const method = event.httpMethod;
 
   if (method === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS'
-      },
-      body: ''
-    };
+    return preflightResponse(event);
   }
-
-  const corsHeaders = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*'
-  };
 
   if (method !== 'POST') {
     return {
       statusCode: 405,
-      headers: corsHeaders,
+      headers: corsHeaders(event),
       body: JSON.stringify({ error: 'Method not allowed. Use POST.' })
     };
   }
@@ -47,7 +35,7 @@ exports.handler = async (event) => {
     } catch (authErr) {
       return {
         statusCode: authErr.statusCode || 401,
-        headers: corsHeaders,
+        headers: corsHeaders(event),
         body: JSON.stringify({
           error: authErr.message || 'Authentication required'
         })
@@ -57,7 +45,7 @@ exports.handler = async (event) => {
     if (!authUser || !authUser.id) {
       return {
         statusCode: 401,
-        headers: corsHeaders,
+        headers: corsHeaders(event),
         body: JSON.stringify({ error: 'Unauthorized: Valid session required.' })
       };
     }
@@ -104,7 +92,7 @@ exports.handler = async (event) => {
       console.error('[AccountDelete] RPC failure:', rpcError);
       return {
         statusCode: 500,
-        headers: corsHeaders,
+        headers: corsHeaders(event),
         body: JSON.stringify({
           error: 'Database erasure procedure failed.',
           details: rpcError.message
@@ -115,7 +103,7 @@ exports.handler = async (event) => {
     if (!rpcResult || rpcResult.success === false) {
       return {
         statusCode: 400,
-        headers: corsHeaders,
+        headers: corsHeaders(event),
         body: JSON.stringify({
           error: rpcResult?.error || 'Account erasure rejected.',
           details: rpcResult
@@ -144,7 +132,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: corsHeaders,
+      headers: corsHeaders(event),
       body: JSON.stringify({
         success: true,
         message: 'Account and personal data erased pursuant to NDPA 2023 Section 34.',
@@ -157,7 +145,7 @@ exports.handler = async (event) => {
     console.error('[AccountDelete] Unexpected error:', err);
     return {
       statusCode: 500,
-      headers: corsHeaders,
+      headers: corsHeaders(event),
       body: JSON.stringify({
         error: 'An unexpected error occurred while processing account erasure.',
         details: err.message

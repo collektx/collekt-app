@@ -1,11 +1,16 @@
 const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
+const { corsHeaders, preflightResponse } = require('./lib/cors');
 
 exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return preflightResponse(event);
+  }
+
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(event),
       body: JSON.stringify({ error: 'Method Not Allowed' })
     };
   }
@@ -29,7 +34,7 @@ exports.handler = async (event) => {
     if (!numAmount || isNaN(numAmount) || numAmount < 100) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: corsHeaders(event),
         body: JSON.stringify({ error: 'Minimum funding amount is ₦100' })
       };
     }
@@ -38,7 +43,7 @@ exports.handler = async (event) => {
     if (!cleanEmail || !cleanEmail.includes('@')) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: corsHeaders(event),
         body: JSON.stringify({ error: 'Valid customer email is required' })
       };
     }
@@ -48,161 +53,88 @@ exports.handler = async (event) => {
     const effectiveUserId = user_id || userId || effectiveOwnerId;
 
     if (!effectiveOwnerId && cleanEmail) {
-      const { data: prof } = await supabase.from('profiles').select('id').eq('email', cleanEmail).maybeSingle();
-      if (prof) effectiveOwnerId = prof.id;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+      if (profile) effectiveOwnerId = profile.id;
     }
+
     if (!effectiveOwnerId) {
-      const hash = require('crypto').createHash('md5').update(cleanEmail).digest('hex');
-      effectiveOwnerId = `${hash.substring(0,8)}-${hash.substring(8,12)}-4${hash.substring(13,16)}-a${hash.substring(17,20)}-${hash.substring(20,32)}`;
-    } else {
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(effectiveOwnerId);
-      if (!isUUID) {
-        const hash = require('crypto').createHash('md5').update(String(effectiveOwnerId)).digest('hex');
-        effectiveOwnerId = `${hash.substring(0,8)}-${hash.substring(8,12)}-4${hash.substring(13,16)}-a${hash.substring(17,20)}-${hash.substring(20,32)}`;
-      }
+      return {
+        statusCode: 400,
+        headers: corsHeaders(event),
+        body: JSON.stringify({ error: 'User account not found for provided email.' })
+      };
     }
 
-    // Role-based permission check for company wallets
-    if (effectiveOwnerType === 'company' && effectiveUserId && effectiveUserId !== effectiveOwnerId) {
-      const { data: membership } = await supabase
-        .from('company_members')
-        .select('role, status')
-        .eq('company_id', effectiveOwnerId)
-        .eq('user_id', effectiveUserId)
-        .maybeSingle();
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(effectiveOwnerId);
 
-      if (!membership || membership.status !== 'active' || !['owner', 'admin', 'finance'].includes(membership.role)) {
-        return {
-          statusCode: 403,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify({ error: 'Unauthorized: only company owners, admins, or finance officers can fund company wallets.' })
-        };
-      }
-    }
-
-    // Find or verify wallet exists
-    let wallet = null;
-    const { data: ownerWallet } = await supabase
-      .from('wallets')
-      .select('id, available_balance')
-      .eq('owner_id', effectiveOwnerId)
-      .maybeSingle();
-
-    if (ownerWallet) {
-      wallet = ownerWallet;
-    } else {
-      const { data: userWallet } = await supabase
-        .from('wallets')
-        .select('id, available_balance')
-        .eq('user_id', effectiveOwnerId)
-        .maybeSingle();
-      wallet = userWallet;
-    }
-
-    if (!wallet) {
-      const { data: newWallet } = await supabase
-        .from('wallets')
-        .insert({
-          owner_id: effectiveOwnerId,
-          user_id: effectiveUserId,
-          owner_type: effectiveOwnerType,
-          currency: 'NGN',
-          available_balance: 0.00,
-          balance: 0.00
-        })
-        .select()
-        .single();
-      wallet = newWallet;
-    }
-
-    // Generate unique transaction reference
+    const provider = getPaymentProvider('paystack');
     const timestamp = Date.now();
     const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const reference = `COL-FUND-${timestamp}-${randomSuffix}`;
+    const reference = `COL-PAY-${timestamp}-${randomSuffix}`;
 
-    // Determine channels for Korapay Multi-Rail Checkout
-    let channels = ['card', 'bank_transfer', 'pay_with_bank'];
-    if (payment_method === 'card') {
-      channels = ['card'];
-    } else if (payment_method === 'bank_transfer') {
-      channels = ['bank_transfer'];
+    const callbackUrl = callback_url ||
+      `${event.headers['x-forwarded-proto'] || 'https'}://${event.headers.host || 'collektng.com'}/payment-result.html`;
+
+    const initResult = await provider.initializePayment({
+      email: cleanEmail,
+      amount: numAmount,
+      reference,
+      payment_method,
+      callback_url: callbackUrl,
+      metadata: {
+        owner_id: effectiveOwnerId,
+        user_id: effectiveUserId,
+        owner_type: effectiveOwnerType,
+        payment_method,
+        custom_fields: [
+          { display_name: 'Platform', variable_name: 'platform', value: 'Collekt' },
+          { display_name: 'Payment Method', variable_name: 'payment_method', value: payment_method }
+        ]
+      }
+    });
+
+    if (!initResult || !initResult.authorization_url) {
+      return {
+        statusCode: 502,
+        headers: corsHeaders(event),
+        body: JSON.stringify({ error: 'Payment initialization failed. Please try again.' })
+      };
     }
 
-    // Determine gateway - Korapay is the platform primary payment engine
-    const selectedGateway = body.gateway === 'opay' && process.env.OPAY_PUBLIC_KEY ? 'opay' : 'korapay';
-
-    // Create pending transaction in Supabase
-    const txPayload = {
-      id: reference,
-      type: 'credit',
+    // Record pending transaction
+    await supabase.from('transactions').insert({
       owner_id: effectiveOwnerId,
-      user_id: effectiveOwnerId,
-      reference: reference,
-      gateway: selectedGateway,
+      user_id: effectiveUserId,
+      type: 'credit',
       transaction_type: 'wallet_funding',
-      payment_method: payment_method,
+      payment_method,
+      gateway: 'paystack',
+      reference,
       amount: numAmount,
       currency: 'NGN',
       status: 'pending',
       metadata: {
         owner_type: effectiveOwnerType,
-        email: cleanEmail,
-        channels: channels
-      }
-    };
-    if (wallet?.id) {
-      txPayload.wallet_id = wallet.id;
-    }
-
-    const { error: txError } = await supabase
-      .from('transactions')
-      .insert(txPayload);
-
-    if (txError) {
-      console.error('Failed to create pending transaction:', txError);
-      return {
-        statusCode: 500,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: 'Database transaction initialization failed: ' + txError.message })
-      };
-    }
-
-    // Initialize checkout session via chosen provider (Paystack / Korapay / OPay)
-    const provider = getPaymentProvider(selectedGateway);
-    const returnUrl = callback_url || `${event.headers?.origin || event.headers?.Origin || 'https://collektng.com'}/payment-result.html`;
-    const customerFullName = body.name || body.displayName || body.customer_name || body.company_name || '';
-
-    const initResult = await provider.initializePayment({
-      amount: numAmount,
-      email: cleanEmail,
-      reference: reference,
-      callback_url: returnUrl,
-      return_url: returnUrl,
-      channels: channels,
-      metadata: {
-        user_id: user_id || effectiveOwnerId,
-        owner_id: effectiveOwnerId,
-        owner_type: effectiveOwnerType,
-        wallet_id: wallet?.id || '',
-        payment_method: payment_method,
-        gateway: selectedGateway,
-        customer_name: customerFullName
+        payment_method,
+        callback_url: callbackUrl
       }
     });
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      },
+      headers: corsHeaders(event),
       body: JSON.stringify({
         status: 'success',
         authorization_url: initResult.authorization_url,
         access_code: initResult.access_code,
-        reference: initResult.reference,
-        amount: numAmount
+        reference,
+        amount: numAmount,
+        gateway: 'paystack',
+        payment_method
       })
     };
 
@@ -210,7 +142,7 @@ exports.handler = async (event) => {
     console.error('paystack-initialize error:', err);
     return {
       statusCode: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(event),
       body: JSON.stringify({ error: err.message || 'Payment initialization failed' })
     };
   }

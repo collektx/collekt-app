@@ -2,16 +2,24 @@ const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
 const { authenticateRequest } = require('./lib/auth-middleware');
 const { enforceRateLimit } = require('./lib/rate-limiter');
+const { corsHeaders: resolveCorsHeaders } = require('./lib/cors');
+
 
 exports.handler = async (event) => {
+  const headers = resolveCorsHeaders(event);
+
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
+  }
+
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
   try {
     const { user, error: authError } = await authenticateRequest(event);
     if (authError || !user) {
-      return { statusCode: 401, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Authentication required', details: authError }) };
+      return { statusCode: 401, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] }, body: JSON.stringify({ error: 'Authentication required', details: authError }) };
     }
 
     // Abuse throttling: limit 10 withdrawals/min and max 3 withdrawals/5s per user
@@ -44,7 +52,7 @@ exports.handler = async (event) => {
     if (!numAmount || isNaN(numAmount) || numAmount < 500) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
         body: JSON.stringify({ error: 'Minimum withdrawal amount is ₦500' })
       };
     }
@@ -53,7 +61,7 @@ exports.handler = async (event) => {
     if (cleanAcct.length !== 10) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
         body: JSON.stringify({ error: 'Valid 10-digit Nigerian NUBAN account number is required' })
       };
     }
@@ -62,7 +70,7 @@ exports.handler = async (event) => {
     if (!effectiveOwnerId) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
         body: JSON.stringify({ error: 'Account owner ID is required' })
       };
     }
@@ -73,7 +81,7 @@ exports.handler = async (event) => {
     if (callerRole && ['viewer', 'member', 'read-only'].includes(callerRole)) {
       return {
         statusCode: 403,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
         body: JSON.stringify({ error: 'Unauthorized: viewers and non-finance members cannot initiate withdrawals.' })
       };
     }
@@ -90,7 +98,7 @@ exports.handler = async (event) => {
       if (!membership || membership.status !== 'active' || !['owner', 'admin', 'finance'].includes(membership.role)) {
         return {
           statusCode: 403,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
           body: JSON.stringify({ error: 'Unauthorized: only company owners, admins, or finance officers can authorize withdrawals.' })
         };
       }
@@ -106,7 +114,7 @@ exports.handler = async (event) => {
     if (!wallet || Number(wallet.available_balance || 0) < numAmount) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
         body: JSON.stringify({
           error: `Insufficient available funds. Available: ₦${Number(wallet?.available_balance || 0).toLocaleString()}`
         })
@@ -122,7 +130,7 @@ exports.handler = async (event) => {
     if (debitError || !debitResult || debitResult.length === 0) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
         body: JSON.stringify({ error: 'Debit failed: balance changed concurrently or insufficient funds.' })
       };
     }
@@ -248,7 +256,7 @@ exports.handler = async (event) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'],
         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
       },
       body: JSON.stringify({
@@ -267,8 +275,10 @@ exports.handler = async (event) => {
     console.error('paystack-withdraw error:', err);
     return {
       statusCode: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
       body: JSON.stringify({ error: err.message || 'Withdrawal processing failed' })
     };
   }
 };
+
+

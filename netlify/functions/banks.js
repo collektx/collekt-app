@@ -1,3 +1,4 @@
+const { corsHeaders: buildCorsHeaders, preflightResponse } = require('./lib/cors');
 const https = require('https');
 
 // Top priority commercial banks order
@@ -213,7 +214,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://collektng.com',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Methods': 'GET, OPTIONS'
       },
@@ -224,7 +225,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'GET') {
     return {
       statusCode: 405,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://collektng.com' },
       body: JSON.stringify({ error: 'Method Not Allowed' })
     };
   }
@@ -265,7 +266,7 @@ exports.handler = async (event) => {
     statusCode: 200,
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://collektng.com',
       'Cache-Control': 'public, max-age=3600, s-maxage=86400'
     },
     body: JSON.stringify({
@@ -275,3 +276,4 @@ exports.handler = async (event) => {
     })
   };
 };
+

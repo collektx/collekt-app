@@ -1,3 +1,4 @@
+const { corsHeaders: buildCorsHeaders, preflightResponse } = require('./lib/cors');
 const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
 
@@ -25,7 +26,7 @@ exports.handler = async (event) => {
     } else {
       return {
         statusCode: 405,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://collektng.com' },
         body: JSON.stringify({ error: 'Method Not Allowed' })
       };
     }
@@ -33,7 +34,7 @@ exports.handler = async (event) => {
     if (!owner_id) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://collektng.com' },
         body: JSON.stringify({ error: 'Account owner ID is required' })
       };
     }
@@ -70,7 +71,7 @@ exports.handler = async (event) => {
         statusCode: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Origin': 'https://collektng.com',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization'
         },
         body: JSON.stringify({
@@ -92,7 +93,7 @@ exports.handler = async (event) => {
     if (method === 'GET') {
       return {
         statusCode: 404,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://collektng.com' },
         body: JSON.stringify({ status: 'not_found', message: 'No dedicated virtual account provisioned yet' })
       };
     }
@@ -124,7 +125,7 @@ exports.handler = async (event) => {
     if (!customerEmail) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://collektng.com' },
         body: JSON.stringify({ error: 'Valid email address is required to provision virtual account' })
       };
     }
@@ -182,7 +183,7 @@ exports.handler = async (event) => {
         statusCode: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Origin': 'https://collektng.com',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization'
         },
         body: JSON.stringify({
@@ -238,7 +239,7 @@ exports.handler = async (event) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://collektng.com',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
       },
       body: JSON.stringify({
@@ -259,8 +260,9 @@ exports.handler = async (event) => {
     console.error('paystack-dva error:', err);
     return {
       statusCode: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://collektng.com' },
       body: JSON.stringify({ error: err.message || 'Virtual account provisioning failed' })
     };
   }
 };
+

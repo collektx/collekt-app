@@ -1,5 +1,6 @@
 const { supabase } = require('./lib/supabase-client');
 const { authenticateRequest } = require('./lib/auth-middleware');
+const { corsHeaders: buildCorsHeaders, preflightResponse } = require('./lib/cors');
 
 /**
  * Company Team & RBAC Management Function
@@ -9,21 +10,10 @@ exports.handler = async (event) => {
   const method = event.httpMethod;
 
   if (method === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-      },
-      body: ''
-    };
+    return preflightResponse(event);
   }
 
-  const corsHeaders = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*'
-  };
+  const corsHeaders = buildCorsHeaders(event);
 
   try {
     const { user, error: authError } = await authenticateRequest(event);

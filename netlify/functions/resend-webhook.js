@@ -1,29 +1,24 @@
 const { supabase } = require('./lib/supabase-client');
 const crypto = require('crypto');
+const { corsHeaders, preflightResponse } = require('./lib/cors');
 
 /**
  * Resend Webhook Handler
  * Receives email status events: delivered, bounced, complained, opened, clicked, etc.
+ * Note: Resend sends server-to-server webhooks (no browser CORS needed), but we still
+ * return hardened CORS headers to prevent any wildcard exposure.
  */
 exports.handler = async (event) => {
   const method = event.httpMethod;
 
   if (method === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type, svix-id, svix-timestamp, svix-signature',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS'
-      },
-      body: ''
-    };
+    return preflightResponse(event);
   }
 
   if (method !== 'POST') {
     return {
       statusCode: 405,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(event),
       body: JSON.stringify({ error: 'Method Not Allowed' })
     };
   }
@@ -68,10 +63,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
+      headers: corsHeaders(event),
       body: JSON.stringify({
         status: 'success',
         received: true,
@@ -83,7 +75,7 @@ exports.handler = async (event) => {
     console.error('[Resend Webhook Error]:', err);
     return {
       statusCode: 400,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(event),
       body: JSON.stringify({ error: 'Invalid webhook payload: ' + err.message })
     };
   }

@@ -1,7 +1,12 @@
 const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
+const { corsHeaders, preflightResponse } = require('./lib/cors');
 
 exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return preflightResponse(event);
+  }
+
   // Support both GET (query param) and POST (body)
   const reference = event.queryStringParameters?.reference || 
                     event.queryStringParameters?.trxref ||
@@ -10,7 +15,7 @@ exports.handler = async (event) => {
   if (!reference) {
     return {
       statusCode: 400,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(event),
       body: JSON.stringify({ error: 'Transaction reference is required' })
     };
   }
@@ -42,7 +47,7 @@ exports.handler = async (event) => {
 
       return {
         statusCode: 200,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: corsHeaders(event),
         body: JSON.stringify({
           status: verification.status || 'failed',
           verified: false,
@@ -102,11 +107,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      },
+      headers: corsHeaders(event),
       body: JSON.stringify({
         status: 'successful',
         verified: true,
@@ -126,7 +127,7 @@ exports.handler = async (event) => {
     console.error('paystack-verify error:', err);
     return {
       statusCode: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(event),
       body: JSON.stringify({ error: err.message || 'Payment verification failed' })
     };
   }

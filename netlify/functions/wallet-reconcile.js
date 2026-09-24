@@ -1,9 +1,14 @@
 const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
+const { corsHeaders, preflightResponse } = require('./lib/cors');
 
 exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return preflightResponse(event);
+  }
+
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers: corsHeaders(event), body: 'Method Not Allowed' };
   }
 
   try {
@@ -38,7 +43,7 @@ exports.handler = async (event) => {
 
         return {
           statusCode: 200,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+          headers: corsHeaders(event),
           body: JSON.stringify({
             status: 'success',
             reconciled: true,
@@ -51,7 +56,7 @@ exports.handler = async (event) => {
 
       return {
         statusCode: 200,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: corsHeaders(event),
         body: JSON.stringify({
           status: verification.status,
           reconciled: false,
@@ -66,14 +71,14 @@ exports.handler = async (event) => {
       const res = await provider.requeryVirtualAccount({ account_number });
       return {
         statusCode: 200,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: corsHeaders(event),
         body: JSON.stringify({ status: 'success', requery: res })
       };
     }
 
     return {
       statusCode: 400,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(event),
       body: JSON.stringify({ error: 'Please provide either a transaction reference or DVA account number to reconcile.' })
     };
 
@@ -81,7 +86,7 @@ exports.handler = async (event) => {
     console.error('wallet-reconcile error:', err);
     return {
       statusCode: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(event),
       body: JSON.stringify({ error: err.message || 'Reconciliation failed' })
     };
   }

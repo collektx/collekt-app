@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 const { supabase: adminSupabase, SUPABASE_URL } = require('./netlify/functions/lib/supabase-client');
 
@@ -620,7 +622,7 @@ async function runSecurityAuditProbes() {
       headers: {}
     });
     assert(optRes.statusCode === 200, `OPTIONS preflight returns HTTP 200: ${optRes.statusCode}`);
-    assert(optRes.headers['Access-Control-Allow-Origin'] === '*', 'Preflight includes Access-Control-Allow-Origin: *');
+    assert(optRes.headers['Access-Control-Allow-Origin'] && optRes.headers['Access-Control-Allow-Origin'] !== '*', 'Preflight returns hardened origin (never wildcard)');
   } catch (err) {
     console.error('Probe 25 exception:', err);
     assert(false, 'Account erasure API authentication probe failed');
@@ -669,6 +671,7 @@ async function runSecurityAuditProbes() {
   try {
     // 1. Execute cryptographic immutability verification RPC (checks UPDATE and DELETE trigger rejection)
     const { data: triggerCheck, error: triggerCheckErr } = await anonClient.rpc('verify_audit_log_immutability');
+    if (triggerCheckErr) console.error('  [DEBUG triggerCheckErr]:', triggerCheckErr);
 
     assert(!triggerCheckErr, 'RPC verify_audit_log_immutability executed without error');
     assert(triggerCheck && triggerCheck.success === true, 'Audit log database triggers successfully enforce WORM immutability');
@@ -761,6 +764,146 @@ async function runSecurityAuditProbes() {
     console.error('Probe 29 exception:', err);
     assert(false, 'Client dual-persistence and dashboard architecture probe failed');
   }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PROBE 30: Shared CORS Utility Module — OWASP ASVS v4.0 V13.3.1
+  // CBN Cybersecurity Framework Section 4.1 | ISACA ITAF 5th Edition
+  // ─────────────────────────────────────────────────────────────────────────────
+  console.log('\n--- PROBE 30: Shared CORS Utility Module & Origin Allowlist (OWASP ASVS V13.3.1) ---');
+  try {
+    const corsPath = path.join(__dirname, 'netlify/functions/lib/cors.js');
+    assert(fs.existsSync(corsPath), 'cors.js utility must exist at netlify/functions/lib/cors.js');
+
+    const corsModule = require(corsPath);
+
+    // Verify exports
+    assert(typeof corsModule.resolveOrigin === 'function', 'resolveOrigin must be exported');
+    assert(typeof corsModule.corsHeaders === 'function', 'corsHeaders must be exported');
+    assert(typeof corsModule.preflightResponse === 'function', 'preflightResponse must be exported');
+    assert(Array.isArray(corsModule.ALLOWED_ORIGINS), 'ALLOWED_ORIGINS must be an array');
+
+    // Production origins must be in the allowlist
+    assert(corsModule.ALLOWED_ORIGINS.includes('https://collektng.com'), 'Primary production origin must be allowed');
+    assert(corsModule.ALLOWED_ORIGINS.includes('https://collektng.xyz'), 'Secondary production origin must be allowed');
+    assert(!corsModule.ALLOWED_ORIGINS.includes('*'), 'Wildcard must NEVER appear in ALLOWED_ORIGINS');
+
+    // Approved origin resolves to itself
+    const approvedEvent = { headers: { origin: 'https://collektng.com' } };
+    const approvedOrigin = corsModule.resolveOrigin(approvedEvent);
+    assert(approvedOrigin === 'https://collektng.com', 'Approved origin must resolve to itself');
+
+    // Unlisted attacker origin must NOT resolve to wildcard — must fall back to default
+    const attackerEvent = { headers: { origin: 'https://evil-attacker.com' } };
+    const attackerOrigin = corsModule.resolveOrigin(attackerEvent);
+    assert(attackerOrigin !== '*', 'Attacker origin must NEVER resolve to wildcard');
+    assert(attackerOrigin === 'https://collektng.com', 'Attacker origin must fall back to primary production domain');
+
+    // corsHeaders() must return valid CORS object, never wildcard
+    const hdrs = corsModule.corsHeaders(approvedEvent);
+    assert(hdrs['Access-Control-Allow-Origin'] === 'https://collektng.com', 'corsHeaders() must return correct origin');
+    assert(hdrs['Vary'] === 'Origin', 'corsHeaders() must include Vary: Origin');
+    assert(hdrs['Access-Control-Allow-Credentials'] === 'true', 'corsHeaders() must allow credentials for authenticated endpoints');
+
+    // preflightResponse() must return HTTP 200
+    const preflight = corsModule.preflightResponse(approvedEvent);
+    assert(preflight.statusCode === 200, 'preflightResponse() must return HTTP 200');
+    assert(preflight.headers['Access-Control-Allow-Origin'] !== '*', 'preflightResponse() must NOT return wildcard');
+
+    console.log('  [PASS] cors.js module exports resolveOrigin, corsHeaders, preflightResponse, ALLOWED_ORIGINS');
+    console.log('  [PASS] Approved origins resolve correctly');
+    console.log('  [PASS] Attacker origins fall back to production domain (never wildcard)');
+    console.log('  [PASS] Vary: Origin present in all corsHeaders() responses');
+    console.log('  [PASS] Access-Control-Allow-Credentials: true for authenticated endpoints');
+    console.log('  [PASS] preflightResponse() returns HTTP 200 with correct CORS headers');
+  } catch (err) {
+    console.error('Probe 30 exception:', err);
+    assert(false, 'CORS utility module probe failed');
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PROBE 31: No Wildcard Access-Control-Allow-Origin: * in Financial Functions
+  // OWASP ASVS v4.0 V13.3.1 — All Sensitive API Functions
+  // ─────────────────────────────────────────────────────────────────────────────
+  console.log('\n--- PROBE 31: No Wildcard CORS in Sensitive Serverless Functions (OWASP ASVS V13.3.1) ---');
+  try {
+    const sensitiveFiles = [
+      'paystack-initialize.js',
+      'paystack-verify.js',
+      'paystack-dva.js',
+      'paystack-withdraw.js',
+      'bank-resolve.js',
+      'banks.js',
+      'korapay-virtual-account.js',
+      'company-team.js',
+      'account-delete.js',
+      'wallet-reconcile.js',
+      'wallet-transfer.js',
+      'resend-webhook.js',
+      'verify-turnstile.js'
+    ];
+
+    for (const fn of sensitiveFiles) {
+      const fnPath = path.join(__dirname, 'netlify/functions', fn);
+      assert(fs.existsSync(fnPath), `${fn} must exist`);
+      const content = fs.readFileSync(fnPath, 'utf8');
+      const hasWildcard = /['"]Access-Control-Allow-Origin['"]\s*:\s*['"]\*['"]/.test(content);
+      assert(!hasWildcard, `${fn} must NOT contain Access-Control-Allow-Origin: * (wildcard CORS)`);
+      console.log(`  [PASS] ${fn} — no wildcard CORS`);
+    }
+
+    console.log(`  [PASS] All ${sensitiveFiles.length} sensitive functions verified free of wildcard CORS`);
+  } catch (err) {
+    console.error('Probe 31 exception:', err);
+    assert(false, 'Wildcard CORS detection probe failed');
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PROBE 32: cors.js Module Integration — preflightResponse & corsHeaders Validation
+  // OWASP ASVS v4.0 V13.3.1 | CBN Cybersecurity Framework Section 4.1
+  // ─────────────────────────────────────────────────────────────────────────────
+  console.log('\n--- PROBE 32: CORS Module Integration — All Production Origins & Preflight Behaviour ---');
+  try {
+    const { resolveOrigin, corsHeaders: buildHeaders, preflightResponse, ALLOWED_ORIGINS } = require('./netlify/functions/lib/cors');
+
+    // Validate all allowed origins resolve to themselves
+    for (const origin of ALLOWED_ORIGINS) {
+      const evt = { headers: { origin } };
+      const resolved = resolveOrigin(evt);
+      assert(resolved === origin, `Allowed origin ${origin} must resolve to itself`);
+    }
+
+    // Validate localhost origins (dev environments)
+    const localOrigins = ALLOWED_ORIGINS.filter(o => o.startsWith('http://localhost') || o.startsWith('http://127.0.0.1'));
+    assert(localOrigins.length >= 2, 'At least 2 localhost origins must be in the allowlist for local development');
+
+    // Validate no production Vary: Origin missing
+    const evt = { headers: { origin: 'https://collektng.com' } };
+    const hdrs = buildHeaders(evt);
+    assert(hdrs['Vary'] === 'Origin', 'Vary: Origin must be set to prevent CDN caching wildcard responses');
+    assert(hdrs['Access-Control-Allow-Methods'].includes('POST'), 'Allow-Methods must include POST for financial endpoints');
+
+    // Validate preflight for both GET and POST methods
+    const preflight = preflightResponse(evt);
+    assert(preflight.statusCode === 200, 'Preflight must return 200 OK');
+    assert(preflight.body === '', 'Preflight body must be empty');
+    assert(preflight.headers['Access-Control-Allow-Origin'] === 'https://collektng.com',
+      'Preflight must return specific origin not wildcard');
+
+    // netlify.toml must contain Vary = "Origin"
+    const tomlPath = path.join(__dirname, 'netlify.toml');
+    const tomlContent = fs.readFileSync(tomlPath, 'utf8');
+    assert(tomlContent.includes('Vary = "Origin"'), 'netlify.toml must include Vary = "Origin" for CDN cache correctness');
+
+    console.log(`  [PASS] All ${ALLOWED_ORIGINS.length} canonical origins resolve correctly`);
+    console.log('  [PASS] Local development origins present in allowlist');
+    console.log('  [PASS] Vary: Origin header present in all corsHeaders() responses');
+    console.log('  [PASS] OPTIONS preflight returns HTTP 200 with specific origin (not wildcard)');
+    console.log('  [PASS] netlify.toml includes Vary = "Origin" for CDN CORS cache correctness');
+  } catch (err) {
+    console.error('Probe 32 exception:', err);
+    assert(false, 'CORS integration probe failed');
+  }
+
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
   console.log('════════════════════════════════════════════════════════════\n');
 
@@ -773,3 +916,4 @@ runSecurityAuditProbes().catch(err => {
   console.error('Test runner fatal error:', err);
   process.exit(1);
 });
+
