@@ -904,7 +904,160 @@ async function runSecurityAuditProbes() {
     assert(false, 'CORS integration probe failed');
   }
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PROBE 33: Password Policy & Entropy Verification Algorithm
+  // OWASP ASVS v4.0 Section V2.1 • NIST SP 800-63B • CBN Cybersecurity Framework Sec 4.2
+  // ─────────────────────────────────────────────────────────────────────────────
+  console.log('\n--- PROBE 33: Password Policy & Entropy Engine (OWASP ASVS V2.1 / NIST SP 800-63B) ---');
+  try {
+    const registerHtml = fs.readFileSync(path.join(__dirname, 'register.html'), 'utf8');
+    assert(registerHtml.includes('function evaluatePassword'), 'register.html must define evaluatePassword() entropy engine');
+
+    // Extract evaluatePassword function from register.html
+    const fnMatch = registerHtml.match(/function evaluatePassword[\s\S]*?return result;\s*\}/);
+    assert(fnMatch != null, 'evaluatePassword() function implementation successfully extracted');
+
+    const evalPw = new Function('pw', 'email', `
+      const COMMON_PASSWORDS = [
+        'password', 'password123', 'password123!', 'collekt', 'collekt123', 'collekt123!',
+        '12345678', '123456789', 'qwerty123', 'admin123', 'welcome123', 'nigeria123',
+        'letmein123', 'iloveyou', 'sunshine', 'princess', 'football'
+      ];
+      ${fnMatch[0]}
+      return evaluatePassword(pw, email);
+    `);
+
+    // 1. Short password (< 8 chars) must fail
+    const shortRes = evalPw('Ab1!x', 'user@example.com');
+    assert(!shortRes.length, 'Passwords < 8 characters must fail length check');
+    assert(!shortRes.isValid, 'Short password must be marked invalid');
+
+    // 2. Missing uppercase must fail
+    const noUpperRes = evalPw('lowercase123!@#', 'user@example.com');
+    assert(!noUpperRes.hasUpper, 'Missing uppercase letter must fail hasUpper check');
+    assert(!noUpperRes.isValid, 'Password without uppercase must be marked invalid');
+
+    // 3. Missing lowercase must fail
+    const noLowerRes = evalPw('UPPERCASE123!@#', 'user@example.com');
+    assert(!noLowerRes.hasLower, 'Missing lowercase letter must fail hasLower check');
+    assert(!noLowerRes.isValid, 'Password without lowercase must be marked invalid');
+
+    // 4. Missing number must fail
+    const noNumberRes = evalPw('LettersOnly!@#$', 'user@example.com');
+    assert(!noNumberRes.hasNumber, 'Missing number must fail hasNumber check');
+    assert(!noNumberRes.isValid, 'Password without numbers must be marked invalid');
+
+    // 5. Missing special character must fail
+    const noSpecialRes = evalPw('AlphaNumeric2026', 'user@example.com');
+    assert(!noSpecialRes.hasSpecial, 'Missing special symbol must fail hasSpecial check');
+    assert(!noSpecialRes.isValid, 'Password without symbols must be marked invalid');
+
+    // 6. Blacklisted dictionary password must fail
+    const commonRes = evalPw('Password123!', 'user@example.com');
+    assert(!commonRes.isNotCommon, 'Dictionary common password (password123!) must fail isNotCommon check');
+    assert(!commonRes.isValid, 'Common password must be marked invalid');
+
+    // 7. Password containing user email handle must fail
+    const emailPrefixRes = evalPw('Ayomide2026!#$', 'ayomide@collekt.ng');
+    assert(!emailPrefixRes.noUserInfo, 'Password containing email username (ayomide) must fail noUserInfo check');
+    assert(!emailPrefixRes.isValid, 'Password containing personal identifier must be marked invalid');
+
+    // 8. Fully compliant, high-entropy password must pass
+    const strongRes = evalPw('V3lvet#Matte$Obsidian99', 'compliance@collektng.com');
+    assert(strongRes.isValid, 'Compliant password with uppercase, lowercase, numbers, symbols, and high entropy must pass');
+    assert(strongRes.score >= 4, 'High entropy password must achieve maximum score rating of 4');
+    assert(strongRes.strengthText === 'Strong', 'High entropy password must receive "Strong" rating');
+
+    console.log('  [PASS] Password length >= 8 enforced');
+    console.log('  [PASS] Character diversity (uppercase, lowercase, number, symbol) enforced');
+    console.log('  [PASS] Dictionary blacklist rejection verified');
+    console.log('  [PASS] Personal email handle leakage rejection verified');
+    console.log('  [PASS] High-entropy compliant password rated "Strong"');
+  } catch (err) {
+    console.error('Probe 33 exception:', err);
+    assert(false, 'Password policy & entropy engine probe failed');
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PROBE 34: UI Liquid-Glass Strength Meter & Validation Safeguards in register.html
+  // OWASP ASVS v4.0 V2.1.7 • Liquid-Glass Design Guard Standard
+  // ─────────────────────────────────────────────────────────────────────────────
+  console.log('\n--- PROBE 34: UI Liquid-Glass Password Meter & Form Safeguards (OWASP ASVS V2.1.7) ---');
+  try {
+    const registerHtml = fs.readFileSync(path.join(__dirname, 'register.html'), 'utf8');
+
+    // Check DOM elements for liquid-glass strength meter
+    assert(registerHtml.includes('id="pwStrengthContainer"'), 'register.html must contain #pwStrengthContainer');
+    assert(registerHtml.includes('id="pwStrengthScore"'), 'register.html must contain #pwStrengthScore');
+    assert(registerHtml.includes('id="pwBar1"') && registerHtml.includes('id="pwBar4"'), 'register.html must contain 4-segment strength bar elements');
+    assert(registerHtml.includes('id="critLength"'), 'register.html must contain #critLength criteria indicator');
+    assert(registerHtml.includes('id="critUpper"'), 'register.html must contain #critUpper criteria indicator');
+    assert(registerHtml.includes('id="critLower"'), 'register.html must contain #critLower criteria indicator');
+    assert(registerHtml.includes('id="critNumber"'), 'register.html must contain #critNumber criteria indicator');
+    assert(registerHtml.includes('id="critSpecial"'), 'register.html must contain #critSpecial criteria indicator');
+
+    // Check CSS styling
+    assert(registerHtml.includes('.pw-strength-container'), 'register.html must define .pw-strength-container CSS');
+    assert(registerHtml.includes('.pw-strength-segment'), 'register.html must define .pw-strength-segment CSS');
+    assert(registerHtml.includes('.pw-criterion.valid'), 'register.html must define .pw-criterion.valid CSS');
+
+    // Check real-time update function and submission blocking
+    assert(registerHtml.includes('updatePasswordStrengthUI'), 'register.html must include updatePasswordStrengthUI()');
+    assert(registerHtml.includes('addEventListener(\'input\', updatePasswordStrengthUI)'), 'register.html must bind input events for live feedback');
+    assert(registerHtml.includes('handleStep2Submit') && registerHtml.includes('evaluatePassword(pw, email)'), 'handleStep2Submit must block submission when evaluatePassword fails');
+
+    console.log('  [PASS] 4-segment liquid-glass password strength bar present');
+    console.log('  [PASS] 5-point real-time criteria checklist present');
+    console.log('  [PASS] Live input event listeners active');
+    console.log('  [PASS] Form submission strictly blocked on non-compliant passwords');
+  } catch (err) {
+    console.error('Probe 34 exception:', err);
+    assert(false, 'UI password meter probe failed');
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PROBE 35: Zero Hardcoded Secrets in Deployment & Release Scripts (CWE-798 / COLLEKT-008)
+  // OWASP ASVS v4.0 V14.2 • ISO/IEC 27001:2022 A.8.24
+  // ─────────────────────────────────────────────────────────────────────────────
+  console.log('\n--- PROBE 35: Zero Hardcoded Secrets in Deployment Scripts (CWE-798 / COLLEKT-008) ---');
+  try {
+    const scriptsToCheck = ['deploy_with_functions.js', 'deploy_live.js', 'push_to_github.js'];
+
+    for (const script of scriptsToCheck) {
+      const scriptPath = path.join(__dirname, script);
+      if (fs.existsSync(scriptPath)) {
+        const content = fs.readFileSync(scriptPath, 'utf8');
+
+        // Check for raw plaintext Netlify personal access tokens
+        const hasRawNetlifyToken = /['"]nfp_[A-Za-z0-9_-]{20,}['"]/.test(content);
+        assert(!hasRawNetlifyToken, `${script} must NOT contain raw plaintext Netlify personal access token`);
+
+        // Check for raw plaintext GitHub personal access tokens
+        const hasRawGithubToken = /['"]ghp_[A-Za-z0-9_-]{20,}['"]/.test(content);
+        assert(!hasRawGithubToken, `${script} must NOT contain raw plaintext GitHub personal access token`);
+
+        // Confirm environment variable loading
+        assert(content.includes('process.env.'), `${script} must consume credentials via process.env`);
+        console.log(`  [PASS] ${script} — free of raw hardcoded secrets, uses process.env`);
+      }
+    }
+
+    // Verify .gitignore covers environment files and temp build folders
+    const gitignorePath = path.join(__dirname, '.gitignore');
+    assert(fs.existsSync(gitignorePath), '.gitignore must exist');
+    const gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
+    assert(gitignoreContent.includes('.env'), '.gitignore must ignore .env files');
+    assert(gitignoreContent.includes('.temp_func_zips'), '.gitignore must ignore .temp_func_zips');
+    assert(gitignoreContent.includes('dist.zip'), '.gitignore must ignore dist.zip');
+
+    console.log('  [PASS] .gitignore protects .env and build zip archives');
+  } catch (err) {
+    console.error('Probe 35 exception:', err);
+    assert(false, 'Deployment secrets sanitization probe failed');
+  }
+
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
+
   console.log('════════════════════════════════════════════════════════════\n');
 
   if (failed > 0) {

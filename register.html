@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=100.0">
-<link rel="stylesheet" href="shared.css?v=100.0">
-<link rel="stylesheet" href="glass.css?v=100.0">
+<link rel="stylesheet" href="style.css?v=101.0">
+<link rel="stylesheet" href="shared.css?v=101.0">
+<link rel="stylesheet" href="glass.css?v=101.0">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 
 <style>
@@ -235,10 +235,111 @@ html.dark .success-h { color: #e2efed; }
   .reg-page { grid-template-columns: 1fr; }
   .reg-left { display: none; }
   .reg-right { padding: 40px 24px; }
-  .form-row { grid-template-columns: 1fr; }
-}
+  /* Liquid-Glass Password Strength & Entropy Meter (OWASP ASVS V2.1) */
+  .pw-strength-container {
+    margin-top: 10px;
+    background: rgba(13, 31, 30, 0.03);
+    border: 1px solid rgba(13, 31, 30, 0.08);
+    border-radius: 12px;
+    padding: 12px 14px;
+    transition: all .25s ease;
+  }
+  html.dark .pw-strength-container {
+    background: rgba(12, 28, 25, 0.7);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+  .pw-strength-bars {
+    display: flex;
+    gap: 5px;
+    height: 4px;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 9px;
+  }
+  .pw-strength-segment {
+    flex: 1;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 99px;
+    transition: background .25s ease;
+  }
+  html.dark .pw-strength-segment {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .pw-strength-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11.5px;
+    margin-bottom: 7px;
+    font-weight: 700;
+  }
+  .pw-strength-label {
+    color: #6B8280;
+  }
+  html.dark .pw-strength-label {
+    color: #94a3b8;
+  }
+  .pw-strength-score {
+    font-weight: 800;
+    letter-spacing: .02em;
+    transition: color .2s ease;
+  }
+  .pw-criteria-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px 8px;
+    font-size: 11px;
+    margin-top: 6px;
+    border-top: 1px dashed rgba(13, 31, 30, 0.08);
+    padding-top: 8px;
+  }
+  html.dark .pw-criteria-list {
+    border-top-color: rgba(255, 255, 255, 0.07);
+  }
+  .pw-criterion {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6B8280;
+    font-weight: 600;
+    transition: color .2s ease;
+  }
+  html.dark .pw-criterion {
+    color: #94a3b8;
+  }
+  .pw-criterion.valid {
+    color: #10b981 !important;
+  }
+  .pw-criterion.invalid {
+    color: #6B8280;
+  }
+  html.dark .pw-criterion.invalid {
+    color: #94a3b8;
+  }
+  .pw-criterion-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 900;
+  }
+  .pw-criterion.valid .pw-criterion-icon {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+  }
+  .pw-criterion.invalid .pw-criterion-icon {
+    background: rgba(150, 150, 150, 0.15);
+    color: #888;
+  }
+
   input::-ms-reveal, input::-ms-clear, input::-webkit-contacts-auto-fill-button { display: none !important; width: 0 !important; height: 0 !important; }
 </style>
+
 </head>
 <body>
 <div class="reg-page">
@@ -432,7 +533,28 @@ html.dark .success-h { color: #e2efed; }
             <input class="form-input" type="password" id="password" placeholder="At least 8 characters">
             <button class="pw-toggle" type="button" onclick="togglePw('password', this)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
+          <!-- Liquid-Glass Password Strength & Entropy Meter (OWASP ASVS V2.1) -->
+          <div class="pw-strength-container" id="pwStrengthContainer">
+            <div class="pw-strength-meta">
+              <span class="pw-strength-label">Password Strength:</span>
+              <span class="pw-strength-score" id="pwStrengthScore" style="color:#888;">Enter password</span>
+            </div>
+            <div class="pw-strength-bars">
+              <div class="pw-strength-segment" id="pwBar1"></div>
+              <div class="pw-strength-segment" id="pwBar2"></div>
+              <div class="pw-strength-segment" id="pwBar3"></div>
+              <div class="pw-strength-segment" id="pwBar4"></div>
+            </div>
+            <div class="pw-criteria-list">
+              <div class="pw-criterion invalid" id="critLength"><span class="pw-criterion-icon">✕</span> 8+ characters</div>
+              <div class="pw-criterion invalid" id="critUpper"><span class="pw-criterion-icon">✕</span> Uppercase letter</div>
+              <div class="pw-criterion invalid" id="critLower"><span class="pw-criterion-icon">✕</span> Lowercase letter</div>
+              <div class="pw-criterion invalid" id="critNumber"><span class="pw-criterion-icon">✕</span> Number (0-9)</div>
+              <div class="pw-criterion invalid" id="critSpecial" style="grid-column: span 2;"><span class="pw-criterion-icon">✕</span> Special symbol (!@#$%^&amp;*...)</div>
+            </div>
+          </div>
         </div>
+
         <div class="form-group">
           <label class="form-label">Confirm Password</label>
           <div class="pw-wrap">
@@ -689,8 +811,8 @@ html.dark .success-h { color: #e2efed; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=100.0"></script>
-<script src="app.js?v=100.0"></script>
+<script src="supabase.js?v=101.0"></script>
+<script src="app.js?v=101.0"></script>
 <script>
   // Detect if arriving from OAuth callback
   const regHash = window.location.hash || '';
@@ -911,6 +1033,119 @@ html.dark .success-h { color: #e2efed; }
     }
   }
 
+  /* OWASP ASVS v4.0 V2.1 Password Security & Entropy Engine */
+
+  const COMMON_PASSWORDS = [
+    'password', 'password123', 'password123!', 'collekt', 'collekt123', 'collekt123!',
+    '12345678', '123456789', 'qwerty123', 'admin123', 'welcome123', 'nigeria123',
+    'letmein123', 'iloveyou', 'sunshine', 'princess', 'football'
+  ];
+
+  function evaluatePassword(pw, email = '', name = '') {
+    const result = {
+      length: pw.length >= 8,
+      hasUpper: /[A-Z]/.test(pw),
+      hasLower: /[a-z]/.test(pw),
+      hasNumber: /[0-9]/.test(pw),
+      hasSpecial: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(pw),
+      isNotCommon: true,
+      noUserInfo: true,
+      score: 0,
+      strengthText: 'Enter password',
+      strengthColor: '#888'
+    };
+
+    const cleanPw = pw.toLowerCase().trim();
+    if (COMMON_PASSWORDS.includes(cleanPw)) {
+      result.isNotCommon = false;
+    }
+
+    if (email && email.includes('@')) {
+      const prefix = email.split('@')[0].toLowerCase().trim();
+      if (prefix.length >= 3 && cleanPw.includes(prefix)) {
+        result.noUserInfo = false;
+      }
+    }
+
+    let passedCount = 0;
+    if (result.length) passedCount++;
+    if (result.hasUpper && result.hasLower) passedCount++;
+    if (result.hasNumber) passedCount++;
+    if (result.hasSpecial) passedCount++;
+
+    if (!result.isNotCommon || !result.noUserInfo) {
+      passedCount = Math.min(passedCount, 1);
+    }
+
+    result.score = passedCount;
+    if (pw.length === 0) {
+      result.score = 0;
+      result.strengthText = 'Enter password';
+      result.strengthColor = '#888';
+    } else if (result.score <= 1) {
+      result.strengthText = 'Weak';
+      result.strengthColor = '#ef4444';
+    } else if (result.score === 2) {
+      result.strengthText = 'Fair';
+      result.strengthColor = '#f59e0b';
+    } else if (result.score === 3) {
+      result.strengthText = 'Good';
+      result.strengthColor = '#3b82f6';
+    } else if (result.score >= 4) {
+      result.strengthText = 'Strong';
+      result.strengthColor = '#10b981';
+    }
+
+    result.isValid = result.length && result.hasUpper && result.hasLower && result.hasNumber && result.hasSpecial && result.isNotCommon && result.noUserInfo;
+    return result;
+  }
+
+  function updatePasswordStrengthUI() {
+    const pw = document.getElementById('password')?.value || '';
+    const email = document.getElementById('email')?.value || '';
+    const evalRes = evaluatePassword(pw, email);
+
+    const scoreLabel = document.getElementById('pwStrengthScore');
+    if (scoreLabel) {
+      scoreLabel.textContent = evalRes.strengthText;
+      scoreLabel.style.color = evalRes.strengthColor;
+    }
+
+    for (let i = 1; i <= 4; i++) {
+      const bar = document.getElementById('pwBar' + i);
+      if (bar) {
+        bar.style.background = (i <= evalRes.score && pw.length > 0) ? evalRes.strengthColor : '';
+      }
+    }
+
+    const updateCriterion = (id, valid) => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (valid) {
+          el.className = 'pw-criterion valid';
+          const icon = el.querySelector('.pw-criterion-icon');
+          if (icon) icon.textContent = '✓';
+        } else {
+          el.className = 'pw-criterion invalid';
+          const icon = el.querySelector('.pw-criterion-icon');
+          if (icon) icon.textContent = '✕';
+        }
+      }
+    };
+
+    updateCriterion('critLength', evalRes.length);
+    updateCriterion('critUpper', evalRes.hasUpper);
+    updateCriterion('critLower', evalRes.hasLower);
+    updateCriterion('critNumber', evalRes.hasNumber);
+    updateCriterion('critSpecial', evalRes.hasSpecial);
+  }
+
+  // Attach live input listeners
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('password')?.addEventListener('input', updatePasswordStrengthUI);
+    document.getElementById('email')?.addEventListener('input', updatePasswordStrengthUI);
+  });
+
   function handleStep2Submit() {
     const email  = (document.getElementById('email')?.value || '').trim();
     const pw     = document.getElementById('password')?.value || '';
@@ -937,14 +1172,30 @@ html.dark .success-h { color: #e2efed; }
       if (err) { err.textContent = 'Please enter a valid email address.'; err.style.display = 'block'; }
       return; 
     }
-    if (pw.length < 8) { 
-      if (err) { err.textContent = 'Password must be at least 8 characters long.'; err.style.display = 'block'; }
-      return; 
-    }
-    if (!/(?=.*[a-zA-Z])(?=.*[0-9])/.test(pw)) {
-      if (err) { err.textContent = 'Password must contain both letters and numbers.'; err.style.display = 'block'; }
+
+    const pwEval = evaluatePassword(pw, email);
+    if (!pwEval.isValid) {
+      if (err) {
+        if (!pwEval.length) {
+          err.textContent = 'Password must be at least 8 characters long.';
+        } else if (!pwEval.hasUpper || !pwEval.hasLower) {
+          err.textContent = 'Password must contain both uppercase and lowercase letters.';
+        } else if (!pwEval.hasNumber) {
+          err.textContent = 'Password must contain at least one number (0-9).';
+        } else if (!pwEval.hasSpecial) {
+          err.textContent = 'Password must contain at least one special symbol (!@#$%^&*...).';
+        } else if (!pwEval.isNotCommon) {
+          err.textContent = 'This password is too predictable or common. Please choose a unique password.';
+        } else if (!pwEval.noUserInfo) {
+          err.textContent = 'Password cannot contain your email username.';
+        } else {
+          err.textContent = 'Password does not meet security requirements.';
+        }
+        err.style.display = 'block';
+      }
       return;
     }
+
     if (pw !== cpw) { 
       if (err) { err.textContent = 'Passwords do not match.'; err.style.display = 'block'; }
       return; 

@@ -18,3 +18,5 @@ Thumbs.db
 *.log
 *.tmp
 ~$*
+dist.zip
+.temp_func_zips/
