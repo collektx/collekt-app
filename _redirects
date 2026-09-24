@@ -21,15 +21,21 @@ https://www.collektng.xyz/* https://collektng.com/:splat 301!
 /payment/result /payment-result.html 200
 /payment-result /payment-result.html 200
 
-# Korapay & Payment API Functions
+# Korapay, Paystack & Payment Webhook Functions
 /api/payments/korapay/webhook /.netlify/functions/korapay-webhook 200
 /api/korapay/webhook /.netlify/functions/korapay-webhook 200
+/api/payments/opay/webhook /.netlify/functions/opay-webhook 200
+/api/opay/webhook /.netlify/functions/opay-webhook 200
+/api/payments/paystack/webhook /.netlify/functions/paystack-webhook 200
+/api/paystack/webhook /.netlify/functions/paystack-webhook 200
+/api/payments/paystack/transfer-webhook /.netlify/functions/paystack-transfer-webhook 200
+/api/paystack/transfer-webhook /.netlify/functions/paystack-transfer-webhook 200
+/api/resend/webhook /.netlify/functions/resend-webhook 200
 /api/virtual-account /.netlify/functions/korapay-virtual-account 200
 /api/korapay/virtual-account /.netlify/functions/korapay-virtual-account 200
 /api/payments/initialize /.netlify/functions/paystack-initialize 200
 /api/payments/verify /.netlify/functions/paystack-verify 200
 /api/payments/dva /.netlify/functions/paystack-dva 200
-/api/payments/paystack/webhook /.netlify/functions/paystack-webhook 200
 /api/banks /.netlify/functions/banks 200
 /api/bank/resolve /.netlify/functions/bank-resolve 200
 /api/wallet-transfer /.netlify/functions/wallet-transfer 200

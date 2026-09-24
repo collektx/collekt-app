@@ -1,9 +1,24 @@
 const crypto = require('crypto');
 const { supabase } = require('./lib/supabase-client');
 
+/**
+ * Timing-safe comparison to prevent side-channel timing attacks
+ */
+function timingSafeCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return {
+      statusCode: 405,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Method Not Allowed' })
+    };
   }
 
   try {
@@ -14,7 +29,11 @@ exports.handler = async (event) => {
 
     if (!signature || !webhookSecret) {
       console.error('Webhook rejected: Missing signature or secret key');
-      return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized signature' }) };
+      return {
+        statusCode: 401,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Unauthorized signature' })
+      };
     }
 
     const hash = crypto
@@ -22,9 +41,13 @@ exports.handler = async (event) => {
       .update(event.body || '')
       .digest('hex');
 
-    if (hash !== signature) {
+    if (!timingSafeCompare(hash.toLowerCase(), signature.toLowerCase())) {
       console.error('Webhook signature mismatch');
-      return { statusCode: 401, body: JSON.stringify({ error: 'Invalid HMAC signature' }) };
+      return {
+        statusCode: 401,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Invalid HMAC signature' })
+      };
     }
 
     const payload = JSON.parse(event.body || '{}');
@@ -38,6 +61,39 @@ exports.handler = async (event) => {
       const amountInNaira = data.amount / 100;
       const reference = data.reference;
       const channel = data.channel || 'card';
+
+      // Idempotency: Prevent replay attacks and double crediting
+      if (reference) {
+        const { data: existingTx } = await supabase
+          .from('transactions')
+          .select('id, status')
+          .eq('reference', reference)
+          .maybeSingle();
+
+        if (existingTx && existingTx.status === 'successful') {
+          console.log(`Paystack Webhook: Reference ${reference} already processed (Idempotent)`);
+          return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ received: true, credited: false, duplicate: true })
+          };
+        }
+
+        const { data: existingLedger } = await supabase
+          .from('wallet_ledger')
+          .select('id')
+          .eq('reference', reference)
+          .maybeSingle();
+
+        if (existingLedger) {
+          console.log(`Paystack Webhook: Ledger entry already exists for reference ${reference} (Idempotent)`);
+          return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ received: true, credited: false, duplicate: true })
+          };
+        }
+      }
 
       // Identify user/owner: prioritize metadata.owner_id / metadata.user_id, then dedicated account match, then customer email
       let ownerId = data.metadata?.owner_id || data.metadata?.user_id;
@@ -156,13 +212,31 @@ exports.handler = async (event) => {
         }
       }
 
-      return { statusCode: 200, body: JSON.stringify({ received: true }) };
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ received: true })
+      };
     }
 
     // 4. Handle TRANSFER.SUCCESS (Withdrawals Disbursed)
     if (eventType === 'transfer.success') {
       const reference = data.reference;
       if (reference) {
+        const { data: existingTx } = await supabase
+          .from('transactions')
+          .select('id, status')
+          .eq('reference', reference)
+          .maybeSingle();
+
+        if (existingTx && existingTx.status === 'successful') {
+          return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ received: true, duplicate: true })
+          };
+        }
+
         await supabase
           .from('transactions')
           .update({
@@ -172,7 +246,11 @@ exports.handler = async (event) => {
           })
           .eq('reference', reference);
       }
-      return { statusCode: 200, body: JSON.stringify({ received: true }) };
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ received: true })
+      };
     }
 
     // 5. Handle TRANSFER.FAILED / TRANSFER.REVERSED (Automatic Wallet Refund)
@@ -186,7 +264,7 @@ exports.handler = async (event) => {
         .eq('reference', reference)
         .maybeSingle();
 
-      if (txn && txn.status !== 'reversed' && txn.status !== 'refunded') {
+      if (txn && txn.status !== 'reversed' && txn.status !== 'refunded' && txn.status !== 'failed') {
         const ownerId = txn.owner_id || txn.user_id;
 
         // Refund wallet balance atomically
@@ -209,13 +287,25 @@ exports.handler = async (event) => {
           .eq('reference', reference);
       }
 
-      return { statusCode: 200, body: JSON.stringify({ received: true, refunded: true }) };
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ received: true, refunded: true })
+      };
     }
 
-    return { statusCode: 200, body: JSON.stringify({ received: true, unhandled_event: eventType }) };
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ received: true, unhandled_event: eventType })
+    };
 
   } catch (err) {
     console.error('Webhook handler error:', err);
-    return { statusCode: 500, body: JSON.stringify({ error: 'Internal webhook error' }) };
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Internal webhook error' })
+    };
   }
 };

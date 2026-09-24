@@ -6,6 +6,17 @@
 const crypto = require('crypto');
 const https = require('https');
 
+/**
+ * Timing-safe comparison to prevent side-channel timing attacks
+ */
+function timingSafeCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 class PaymentProvider {
   async initializePayment(params) {
     throw new Error('initializePayment() must be implemented by provider');
@@ -106,7 +117,7 @@ class PaystackProvider extends PaymentProvider {
       .update(rawBody || '')
       .digest('hex');
 
-    return hash === signature;
+    return timingSafeCompare(hash.toLowerCase(), signature.toLowerCase());
   }
 
   /**
@@ -342,7 +353,7 @@ class OpayProvider extends PaymentProvider {
       .update(rawBody || '')
       .digest('hex');
 
-    return hash === signature;
+    return timingSafeCompare(hash.toLowerCase(), signature.toLowerCase());
   }
 
   async initializePayment({ amount, email, reference, callback_url, return_url, metadata = {} }) {
@@ -422,10 +433,10 @@ class KorapayProvider extends PaymentProvider {
   constructor(publicKey, secretKey, webhookSecret, encryptionKey) {
     super();
     this.gateway = 'korapay';
-    this.publicKey = publicKey || process.env.KORAPAY_PUBLIC_KEY || 'pk_live_GDgZcYhPzLZBHh1rr6godHWmHuA5qfNaxdioYM1m';
-    this.secretKey = secretKey || process.env.KORAPAY_SECRET_KEY || Buffer.from('c2tfbGl2ZV8yQm5mUzdxMVNGRkZHanFOTW5uQnFEajhMUlV2eVZTQ3llUWFVblhT', 'base64').toString('utf8');
+    this.publicKey = publicKey || process.env.KORAPAY_PUBLIC_KEY || '';
+    this.secretKey = secretKey || process.env.KORAPAY_SECRET_KEY || '';
     this.webhookSecret = webhookSecret || process.env.KORAPAY_WEBHOOK_SECRET || this.secretKey;
-    this.encryptionKey = encryptionKey || process.env.KORAPAY_ENCRYPTION_KEY || 'uinGDvszNY5CRCZN3fEp3MXdbPGEM2wh';
+    this.encryptionKey = encryptionKey || process.env.KORAPAY_ENCRYPTION_KEY || '';
     this.environment = process.env.KORAPAY_ENVIRONMENT || (this.secretKey.startsWith('sk_live_') || this.publicKey.startsWith('pk_live_') ? 'live' : 'test');
     this.baseUrl = 'https://api.korapay.com/merchant/api/v1';
   }
@@ -504,7 +515,7 @@ class KorapayProvider extends PaymentProvider {
       .update(body || '')
       .digest('hex');
 
-    return hash.toLowerCase() === signature.toLowerCase();
+    return timingSafeCompare(hash.toLowerCase(), signature.toLowerCase());
   }
 
   async initializePayment({ amount, email, reference, callback_url, return_url, channels, metadata = {} }) {

@@ -1,25 +1,65 @@
 const crypto = require('crypto');
 const { supabase } = require('./lib/supabase-client');
 
+/**
+ * Timing-safe comparison to prevent side-channel timing attacks
+ */
+function timingSafeCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return {
+      statusCode: 405,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: '405', message: 'Method Not Allowed' })
+    };
   }
 
   try {
-    const secretKey = process.env.OPAY_SECRET_KEY || '';
-    const signature = event.headers['sha512'] || event.headers['x-opay-signature'] || event.headers['X-Opay-Signature'];
+    const secretKey = process.env.OPAY_SECRET_KEY || process.env.OPAY_WEBHOOK_SECRET;
+    const signature = event.headers['sha512'] || 
+                      event.headers['Sha512'] || 
+                      event.headers['x-opay-signature'] || 
+                      event.headers['X-Opay-Signature'];
 
-    if (secretKey && signature) {
-      const hash = crypto
-        .createHmac('sha512', secretKey)
-        .update(event.body || '')
-        .digest('hex');
+    // 1. Strict Fail-Closed Verification: Signature header is mandatory
+    if (!signature) {
+      console.error('OPay Webhook rejected: Missing signature header');
+      return {
+        statusCode: 401,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: '401', message: 'Unauthorized: Missing signature header' })
+      };
+    }
 
-      if (hash !== signature) {
-        console.error('OPay Webhook signature mismatch');
-        return { statusCode: 401, body: JSON.stringify({ code: '401', message: 'Invalid HMAC signature' }) };
-      }
+    if (!secretKey) {
+      console.error('OPay Webhook rejected: Secret key not configured on server');
+      return {
+        statusCode: 500,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: '500', message: 'Server configuration error: Webhook secret missing' })
+      };
+    }
+
+    // 2. Cryptographic HMAC-SHA512 signature verification (Timing-Attack Safe)
+    const hash = crypto
+      .createHmac('sha512', secretKey)
+      .update(event.body || '')
+      .digest('hex');
+
+    if (!timingSafeCompare(hash.toLowerCase(), signature.toLowerCase())) {
+      console.error('OPay Webhook signature mismatch');
+      return {
+        statusCode: 401,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: '401', message: 'Invalid HMAC signature' })
+      };
     }
 
     const payload = JSON.parse(event.body || '{}');
@@ -30,6 +70,38 @@ exports.handler = async (event) => {
     console.log(`Received OPay webhook event for ref ${reference}, status: ${status}`);
 
     if (status === 'SUCCESS' || status === 'SUCCESSFUL') {
+      // 3. Idempotency Check: Prevent replay attacks and double crediting
+      if (reference) {
+        const { data: existingTx } = await supabase
+          .from('transactions')
+          .select('id, status')
+          .eq('reference', reference)
+          .maybeSingle();
+
+        if (existingTx && existingTx.status === 'successful') {
+          console.log(`OPay Webhook: Reference ${reference} already processed (Idempotent)`);
+          return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: '00000', message: 'SUCCESS', duplicate: true })
+          };
+        }
+
+        const { data: existingLedger } = await supabase
+          .from('wallet_ledger')
+          .select('id')
+          .eq('reference', reference)
+          .maybeSingle();
+
+        if (existingLedger) {
+          console.log(`OPay Webhook: Ledger entry already exists for reference ${reference} (Idempotent)`);
+          return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: '00000', message: 'SUCCESS', duplicate: true })
+          };
+        }
+      }
       const amountInNaira = Number(data.amount || payload.amount || 0) / 100;
       let ownerId = data.metadata?.owner_id || data.metadata?.user_id;
 

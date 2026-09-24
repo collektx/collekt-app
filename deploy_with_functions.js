@@ -129,9 +129,10 @@ async function testDeploy() {
   scanDir(distDir);
   console.log(`Mapped ${Object.keys(filesMap).length} static files.`);
 
-  // 3. Initiate Deploy with static files manifest
+  // 3. Initiate Deploy with static files and functions manifest
   const deployPayload = JSON.stringify({
-    files: filesMap
+    files: filesMap,
+    functions: functionsMap
   });
 
   console.log('Sending deploy manifest to Netlify...');
@@ -148,8 +149,10 @@ async function testDeploy() {
 
   const deployId = initRes.data.id;
   const requiredFiles = initRes.data.required || [];
+  const requiredFuncs = initRes.data.required_functions || [];
   console.log(`Deploy ID: ${deployId}`);
   console.log(`Required files to upload: ${requiredFiles.length}`);
+  console.log(`Required functions to upload: ${requiredFuncs.length}`);
 
   // Upload required files
   for (const fileSha of requiredFiles) {
@@ -161,6 +164,30 @@ async function testDeploy() {
         'Content-Length': buf.length
       }, buf);
       console.log(`Uploaded file: ${filePath} (${putRes.status})`);
+    } else {
+      // Check if it's a function SHA
+      const funcName = Object.keys(functionsMap).find(n => functionsMap[n] === fileSha);
+      if (funcName && functionZips[funcName]) {
+        const zbuf = functionZips[funcName];
+        const putRes = await netlifyReq(`/api/v1/deploys/${deployId}/functions/${funcName}`, 'PUT', {
+          'Content-Type': 'application/octet-stream',
+          'Content-Length': zbuf.length
+        }, zbuf);
+        console.log(`Uploaded function (from required): ${funcName} (${putRes.status})`);
+      }
+    }
+  }
+
+  // Upload required functions if separately listed
+  for (const funcSha of requiredFuncs) {
+    const funcName = Object.keys(functionsMap).find(n => functionsMap[n] === funcSha);
+    if (funcName && functionZips[funcName]) {
+      const zbuf = functionZips[funcName];
+      const putRes = await netlifyReq(`/api/v1/deploys/${deployId}/functions/${funcName}`, 'PUT', {
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': zbuf.length
+      }, zbuf);
+      console.log(`Uploaded function: ${funcName} (${putRes.status})`);
     }
   }
 

@@ -1,6 +1,17 @@
 const crypto = require('crypto');
 const { supabase } = require('./lib/supabase-client');
 
+/**
+ * Timing-safe comparison to prevent side-channel timing attacks
+ */
+function timingSafeCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return {
@@ -12,27 +23,44 @@ exports.handler = async (event) => {
 
   try {
     const rawBody = event.body || '';
-    const secretKey = process.env.KORAPAY_SECRET_KEY || process.env.KORAPAY_WEBHOOK_SECRET || Buffer.from('c2tfbGl2ZV8yQm5mUzdxMVNGRkZHanFOTW5uQnFEajhMUlV2eVZTQ3llUWFVblhT', 'base64').toString('utf8');
+    const secretKey = process.env.KORAPAY_SECRET_KEY || process.env.KORAPAY_WEBHOOK_SECRET;
     const signature = event.headers['x-korapay-signature'] || 
                       event.headers['X-Korapay-Signature'] || 
                       event.headers['x-kora-signature'] || 
                       event.headers['X-Kora-Signature'];
 
-    // 1. Verify HMAC-SHA256 signature if secretKey is configured
-    if (secretKey && signature) {
-      const hash = crypto
-        .createHmac('sha256', secretKey)
-        .update(rawBody)
-        .digest('hex');
+    // 1. Strict Fail-Closed Verification: Signature header is mandatory
+    if (!signature) {
+      console.error('Korapay Webhook rejected: Missing x-korapay-signature header');
+      return {
+        statusCode: 401,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: false, message: 'Unauthorized: Missing webhook signature' })
+      };
+    }
 
-      if (hash !== signature) {
-        console.error('Korapay Webhook signature mismatch');
-        return {
-          statusCode: 401,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: false, message: 'Invalid HMAC signature' })
-        };
-      }
+    if (!secretKey) {
+      console.error('Korapay Webhook rejected: Secret key not configured on server');
+      return {
+        statusCode: 500,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: false, message: 'Server configuration error: Webhook secret missing' })
+      };
+    }
+
+    // 2. Cryptographic HMAC-SHA256 signature verification (Timing-Attack Safe)
+    const hash = crypto
+      .createHmac('sha256', secretKey)
+      .update(rawBody)
+      .digest('hex');
+
+    if (!timingSafeCompare(hash.toLowerCase(), signature.toLowerCase())) {
+      console.error('Korapay Webhook signature mismatch');
+      return {
+        statusCode: 401,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: false, message: 'Invalid HMAC signature' })
+      };
     }
 
     const payload = JSON.parse(rawBody || '{}');
@@ -44,6 +72,38 @@ exports.handler = async (event) => {
     console.log(`Received Korapay webhook [${eventType}] for ref ${reference}, status: ${status}`);
 
     if (eventType === 'charge.success' || status === 'success' || status === 'successful') {
+      // 3. Idempotency Check: Prevent replay attacks and double crediting
+      if (reference) {
+        const { data: existingTx } = await supabase
+          .from('transactions')
+          .select('id, status, owner_id, user_id')
+          .eq('reference', reference)
+          .maybeSingle();
+
+        if (existingTx && existingTx.status === 'successful') {
+          console.log(`Korapay Webhook: Reference ${reference} already processed and successful (Idempotent response)`);
+          return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: true, message: 'Transaction already processed', duplicate: true })
+          };
+        }
+
+        const { data: existingLedger } = await supabase
+          .from('wallet_ledger')
+          .select('id')
+          .eq('reference', reference)
+          .maybeSingle();
+
+        if (existingLedger) {
+          console.log(`Korapay Webhook: Ledger entry already exists for reference ${reference} (Idempotent response)`);
+          return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: true, message: 'Transaction already processed in ledger', duplicate: true })
+          };
+        }
+      }
       const amountInNaira = Number(data.amount_paid || data.amount || payload.amount || 0);
       let ownerId = data.metadata?.owner_id || data.metadata?.user_id;
 
@@ -189,6 +249,20 @@ exports.handler = async (event) => {
       const isTransferFailed = status === 'failed' || status === 'reversed' || eventType.endsWith('.failed') || eventType.endsWith('.reversed');
 
       if (isTransferSuccess && reference) {
+        const { data: existingTx } = await supabase
+          .from('transactions')
+          .select('id, status')
+          .eq('reference', reference)
+          .maybeSingle();
+
+        if (existingTx && existingTx.status === 'successful') {
+          return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: true, message: 'Transfer already marked successful', duplicate: true })
+          };
+        }
+
         console.log(`Korapay Webhook: Transfer ${reference} confirmed successful.`);
         await supabase
           .from('transactions')
@@ -213,7 +287,7 @@ exports.handler = async (event) => {
           .eq('reference', reference)
           .maybeSingle();
 
-        if (origTx && origTx.status !== 'failed') {
+        if (origTx && origTx.status !== 'failed' && origTx.status !== 'reversed' && origTx.status !== 'refunded') {
           const refundOwnerId = origTx.owner_id || origTx.user_id;
           const refundAmt = Number(origTx.amount || data.amount || 0);
 

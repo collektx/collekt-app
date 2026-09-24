@@ -6,18 +6,36 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96end2enh1Z2ZhdmVnZ2V6bmZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NjQzODAsImV4cCI6MjEwMDI0MDM4MH0.EjNb197lvdhbhcsYjBOsS-yDRp2wVFun-zjd2no6yh4'
 );
 
+function timingSafeCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
   try {
-    const signature = req.headers['x-paystack-signature'];
+    const signature = req.headers['x-paystack-signature'] || req.headers['X-Paystack-Signature'];
+    const secretKey = process.env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_WEBHOOK_SECRET;
+
+    if (!signature) {
+      return res.status(401).json({ error: 'Unauthorized: Missing signature header' });
+    }
+
+    if (!secretKey) {
+      return res.status(500).json({ error: 'Server configuration error: Webhook secret missing' });
+    }
+
     const bodyStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
     const hash = crypto
-      .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY || 'sk_test_dummy')
+      .createHmac('sha512', secretKey)
       .update(bodyStr)
       .digest('hex');
 
-    if (hash !== signature && process.env.NODE_ENV === 'production') {
+    if (!timingSafeCompare(hash.toLowerCase(), signature.toLowerCase())) {
       return res.status(401).json({ error: 'Unauthorized signature' });
     }
 

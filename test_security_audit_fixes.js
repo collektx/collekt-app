@@ -1521,6 +1521,340 @@ async function runSecurityAuditProbes() {
     assert(false, 'Step-Up MFA probe failed');
   }
 
+  // -------------------------------------------------------------
+  // PROBE 44: Payment Webhook Fail-Closed Cryptographic Verification
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 44: Payment Webhook Fail-Closed Cryptographic Verification ---');
+  try {
+    const cryptoMod = require('crypto');
+    const korapayHandler = require('./netlify/functions/korapay-webhook').handler;
+    const opayHandler = require('./netlify/functions/opay-webhook').handler;
+    const paystackHandler = require('./netlify/functions/paystack-webhook').handler;
+    const paystackTransferHandler = require('./netlify/functions/paystack-transfer-webhook').handler;
+
+    const testSecret = 'sk_test_audit_mock_secret_key_1234567890';
+    const testPayload = JSON.stringify({
+      event: 'charge.success',
+      data: {
+        amount: 2500000,
+        reference: 'AUDIT-FAILOPEN-TEST-' + Date.now(),
+        customer: { email: 'auditor@collektng.com' }
+      }
+    });
+
+    // 1. KORAPAY: Method validation (GET/PUT must be 405)
+    const koraGetRes = await korapayHandler({ httpMethod: 'GET', headers: {}, body: '' });
+    assert(koraGetRes.statusCode === 405, 'Korapay webhook rejects GET method with HTTP 405');
+
+    // 2. KORAPAY: Unsigned POST request MUST FAIL CLOSED with HTTP 401
+    const origKoraSecret = process.env.KORAPAY_SECRET_KEY;
+    const origKoraWebhookSecret = process.env.KORAPAY_WEBHOOK_SECRET;
+    process.env.KORAPAY_SECRET_KEY = testSecret;
+
+    const koraUnsignedRes = await korapayHandler({
+      httpMethod: 'POST',
+      headers: {}, // No signature header!
+      body: testPayload
+    });
+    assert(koraUnsignedRes.statusCode === 401, 'Korapay unsigned webhook FAILS CLOSED with HTTP 401');
+    const koraUnsignedBody = JSON.parse(koraUnsignedRes.body);
+    assert(koraUnsignedBody.status === false, 'Korapay unsigned response reports status: false');
+    assert(koraUnsignedBody.message.includes('Missing webhook signature'), 'Korapay explains missing signature requirement');
+
+    // 3. KORAPAY: Missing secret key configuration MUST FAIL CLOSED with HTTP 500
+    delete process.env.KORAPAY_SECRET_KEY;
+    delete process.env.KORAPAY_WEBHOOK_SECRET;
+    const koraNoSecretRes = await korapayHandler({
+      httpMethod: 'POST',
+      headers: { 'x-korapay-signature': 'dummy_sig' },
+      body: testPayload
+    });
+    assert(koraNoSecretRes.statusCode === 500, 'Korapay missing server secret FAILS CLOSED with HTTP 500');
+
+    // 4. KORAPAY: Forged / Invalid HMAC signature MUST FAIL with HTTP 401
+    process.env.KORAPAY_SECRET_KEY = testSecret;
+    const koraBadSigRes = await korapayHandler({
+      httpMethod: 'POST',
+      headers: { 'x-korapay-signature': '0000000000000000000000000000000000000000000000000000000000000000' },
+      body: testPayload
+    });
+    assert(koraBadSigRes.statusCode === 401, 'Korapay invalid HMAC signature rejected with HTTP 401');
+
+    // 5. KORAPAY: Correct HMAC-SHA256 signature passes verification
+    const validKoraHash = cryptoMod.createHmac('sha256', testSecret).update(testPayload).digest('hex');
+    const koraValidSigRes = await korapayHandler({
+      httpMethod: 'POST',
+      headers: { 'x-korapay-signature': validKoraHash },
+      body: testPayload
+    });
+    assert(koraValidSigRes.statusCode === 200, 'Korapay valid HMAC-SHA256 signature successfully verified (HTTP 200)');
+
+    // Restore Korapay env
+    if (origKoraSecret) process.env.KORAPAY_SECRET_KEY = origKoraSecret;
+    else delete process.env.KORAPAY_SECRET_KEY;
+    if (origKoraWebhookSecret) process.env.KORAPAY_WEBHOOK_SECRET = origKoraWebhookSecret;
+
+    // 6. OPAY: Method validation (GET must be 405)
+    const opayGetRes = await opayHandler({ httpMethod: 'GET', headers: {}, body: '' });
+    assert(opayGetRes.statusCode === 405, 'OPay webhook rejects GET method with HTTP 405');
+
+    // 7. OPAY: Unsigned POST request MUST FAIL CLOSED with HTTP 401
+    const origOpaySecret = process.env.OPAY_SECRET_KEY;
+    process.env.OPAY_SECRET_KEY = testSecret;
+
+    const opayUnsignedRes = await opayHandler({
+      httpMethod: 'POST',
+      headers: {},
+      body: testPayload
+    });
+    assert(opayUnsignedRes.statusCode === 401, 'OPay unsigned webhook FAILS CLOSED with HTTP 401');
+    const opayUnsignedBody = JSON.parse(opayUnsignedRes.body);
+    assert(opayUnsignedBody.code === '401', 'OPay unsigned response reports code 401');
+
+    // 8. OPAY: Missing secret key configuration MUST FAIL CLOSED with HTTP 500
+    delete process.env.OPAY_SECRET_KEY;
+    delete process.env.OPAY_WEBHOOK_SECRET;
+    const opayNoSecretRes = await opayHandler({
+      httpMethod: 'POST',
+      headers: { 'sha512': 'dummy_sig' },
+      body: testPayload
+    });
+    assert(opayNoSecretRes.statusCode === 500, 'OPay missing server secret FAILS CLOSED with HTTP 500');
+
+    // 9. OPAY: Invalid HMAC-SHA512 rejected with HTTP 401
+    process.env.OPAY_SECRET_KEY = testSecret;
+    const opayBadSigRes = await opayHandler({
+      httpMethod: 'POST',
+      headers: { 'sha512': '00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000' },
+      body: testPayload
+    });
+    assert(opayBadSigRes.statusCode === 401, 'OPay invalid HMAC signature rejected with HTTP 401');
+
+    // 10. OPAY: Valid HMAC-SHA512 passes verification
+    const validOpayHash = cryptoMod.createHmac('sha512', testSecret).update(testPayload).digest('hex');
+    const opayValidSigRes = await opayHandler({
+      httpMethod: 'POST',
+      headers: { 'sha512': validOpayHash },
+      body: testPayload
+    });
+    assert(opayValidSigRes.statusCode === 200, 'OPay valid HMAC-SHA512 signature successfully verified (HTTP 200)');
+
+    if (origOpaySecret) process.env.OPAY_SECRET_KEY = origOpaySecret;
+    else delete process.env.OPAY_SECRET_KEY;
+
+    // 11. PAYSTACK: Unsigned POST rejected with HTTP 401
+    const origPaystackSecret = process.env.PAYSTACK_SECRET_KEY;
+    process.env.PAYSTACK_SECRET_KEY = testSecret;
+
+    const paystackUnsignedRes = await paystackHandler({
+      httpMethod: 'POST',
+      headers: {},
+      body: testPayload
+    });
+    assert(paystackUnsignedRes.statusCode === 401, 'Paystack unsigned webhook FAILS CLOSED with HTTP 401');
+
+    // 12. PAYSTACK: Invalid HMAC-SHA512 rejected with HTTP 401
+    const paystackBadSigRes = await paystackHandler({
+      httpMethod: 'POST',
+      headers: { 'x-paystack-signature': 'invalid_hash' },
+      body: testPayload
+    });
+    assert(paystackBadSigRes.statusCode === 401, 'Paystack invalid HMAC signature rejected with HTTP 401');
+
+    // 13. PAYSTACK TRANSFER: Unsigned POST rejected with HTTP 401
+    const paystackTransferUnsigned = await paystackTransferHandler({
+      httpMethod: 'POST',
+      headers: {},
+      body: testPayload
+    });
+    assert(paystackTransferUnsigned.statusCode === 401, 'Paystack transfer unsigned webhook rejected with HTTP 401');
+
+    if (origPaystackSecret) process.env.PAYSTACK_SECRET_KEY = origPaystackSecret;
+    else delete process.env.PAYSTACK_SECRET_KEY;
+
+    console.log('  [PASS] Fail-closed signature verification active across all payment webhooks');
+    console.log('  [PASS] HTTP 401 returned on unsigned requests (Zero fail-open bypass)');
+    console.log('  [PASS] HTTP 500 returned on unconfigured server secrets');
+    console.log('  [PASS] Cryptographic HMAC-SHA256 and HMAC-SHA512 algorithms verified');
+  } catch (err) {
+    console.error('Probe 44 exception:', err);
+    assert(false, 'Payment webhook cryptographic verification probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 45: Zero Hardcoded Secret Keys & Timing-Safe Code Audit
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 45: Zero Hardcoded Secret Keys & Timing-Safe Audit ---');
+  try {
+    const koraWebhookCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/korapay-webhook.js'), 'utf8');
+    const paymentProviderCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/lib/payment-provider.js'), 'utf8');
+    const opayWebhookCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/opay-webhook.js'), 'utf8');
+    const paystackWebhookCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/paystack-webhook.js'), 'utf8');
+    const paystackTransferCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/paystack-transfer-webhook.js'), 'utf8');
+    const apiPaystackCode = fs.readFileSync(path.join(__dirname, 'api/paystack/webhook.js'), 'utf8');
+
+    // 1. Static Audit: Zero Base64 hardcoded secret keys
+    const base64Fragment = 'c2tfbGl2ZV8';
+    assert(!koraWebhookCode.includes(base64Fragment), 'korapay-webhook.js contains ZERO occurrences of base64 secret key');
+    assert(!paymentProviderCode.includes(base64Fragment), 'payment-provider.js contains ZERO occurrences of base64 secret key');
+
+    // 2. Static Audit: Zero hardcoded live encryption keys
+    const encKey = 'uinGDvszNY5CRCZN3fEp3MXdbPGEM2wh';
+    assert(!paymentProviderCode.includes(encKey), 'payment-provider.js contains ZERO hardcoded live encryption keys');
+
+    // 3. Static Audit: Zero dummy fallback keys or non-production bypass in api/paystack/webhook.js
+    assert(!apiPaystackCode.includes('sk_test_dummy'), 'api/paystack/webhook.js contains ZERO sk_test_dummy fallback keys');
+    assert(!apiPaystackCode.includes("process.env.NODE_ENV === 'production'"), 'api/paystack/webhook.js contains ZERO non-production bypass logic');
+
+    // 4. Static Audit: crypto.timingSafeEqual used across all webhook verifications
+    assert(koraWebhookCode.includes('crypto.timingSafeEqual'), 'korapay-webhook.js utilizes timingSafeEqual');
+    assert(opayWebhookCode.includes('crypto.timingSafeEqual'), 'opay-webhook.js utilizes timingSafeEqual');
+    assert(paystackWebhookCode.includes('crypto.timingSafeEqual'), 'paystack-webhook.js utilizes timingSafeEqual');
+    assert(paystackTransferCode.includes('crypto.timingSafeEqual'), 'paystack-transfer-webhook.js utilizes timingSafeEqual');
+    assert(apiPaystackCode.includes('crypto.timingSafeEqual'), 'api/paystack/webhook.js utilizes timingSafeEqual');
+    assert(paymentProviderCode.includes('crypto.timingSafeEqual'), 'payment-provider.js utilizes timingSafeEqual');
+
+    // 5. Canonical routes in _redirects
+    const redirectsContent = fs.readFileSync(path.join(__dirname, '_redirects'), 'utf8');
+    assert(redirectsContent.includes('/api/payments/korapay/webhook /.netlify/functions/korapay-webhook 200'), 'Canonical /api/payments/korapay/webhook rewrite present');
+    assert(redirectsContent.includes('/api/payments/opay/webhook /.netlify/functions/opay-webhook 200'), 'Canonical /api/payments/opay/webhook rewrite present');
+    assert(redirectsContent.includes('/api/payments/paystack/webhook /.netlify/functions/paystack-webhook 200'), 'Canonical /api/payments/paystack/webhook rewrite present');
+
+    console.log('  [PASS] Hardcoded Base64 live credentials completely eradicated (CWE-798)');
+    console.log('  [PASS] Timing-safe cryptographic comparison enforced across all handlers');
+    console.log('  [PASS] Canonical payment webhook rewrites validated in _redirects');
+  } catch (err) {
+    console.error('Probe 45 exception:', err);
+    assert(false, 'Static audit probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 46: Payment Webhook Replay Attack & Idempotency Defense
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 46: Payment Webhook Replay Attack & Idempotency Defense ---');
+  try {
+    const cryptoMod = require('crypto');
+    const supabaseClientMod = require('./netlify/functions/lib/supabase-client');
+    const korapayHandler = require('./netlify/functions/korapay-webhook').handler;
+    const opayHandler = require('./netlify/functions/opay-webhook').handler;
+    const paystackHandler = require('./netlify/functions/paystack-webhook').handler;
+
+    const testSecret = 'sk_test_replay_defense_secret';
+    process.env.KORAPAY_SECRET_KEY = testSecret;
+    process.env.OPAY_SECRET_KEY = testSecret;
+    process.env.PAYSTACK_SECRET_KEY = testSecret;
+
+    const replayRef = 'AUDIT-REPLAY-TX-' + Date.now();
+
+    // Stub transactions lookup to simulate a pre-existing successful transaction record
+    const originalFrom = supabaseClientMod.supabase.from;
+    supabaseClientMod.supabase.from = function(table) {
+      if (table === 'transactions') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: {
+                  id: replayRef,
+                  reference: replayRef,
+                  status: 'successful',
+                  owner_id: userAId,
+                  user_id: userAId
+                },
+                error: null
+              })
+            })
+          })
+        };
+      }
+      return originalFrom.apply(this, arguments);
+    };
+
+    // Replay payload 1: Korapay charge.success
+    const koraPayload = JSON.stringify({
+      event: 'charge.success',
+      data: {
+        amount_paid: 150000,
+        reference: replayRef,
+        metadata: { owner_id: userAId }
+      }
+    });
+    const koraHash = cryptoMod.createHmac('sha256', testSecret).update(koraPayload).digest('hex');
+    const koraReplayRes = await korapayHandler({
+      httpMethod: 'POST',
+      headers: { 'x-korapay-signature': koraHash },
+      body: koraPayload
+    });
+
+    assert(koraReplayRes.statusCode === 200, 'Korapay replayed transaction returns HTTP 200');
+    const koraReplayBody = JSON.parse(koraReplayRes.body);
+    assert(koraReplayBody.duplicate === true, 'Korapay flags replayed transaction as duplicate: true');
+    assert(koraReplayBody.message.includes('already processed'), 'Korapay message confirms idempotency protection');
+
+    // Replay payload 2: OPay SUCCESS
+    const opayPayload = JSON.stringify({
+      payload: {
+        status: 'SUCCESS',
+        amount: 15000000, // in kobo
+        reference: replayRef,
+        metadata: { owner_id: userAId }
+      }
+    });
+    const opayHash = cryptoMod.createHmac('sha512', testSecret).update(opayPayload).digest('hex');
+    const opayReplayRes = await opayHandler({
+      httpMethod: 'POST',
+      headers: { 'sha512': opayHash },
+      body: opayPayload
+    });
+
+    assert(opayReplayRes.statusCode === 200, 'OPay replayed transaction returns HTTP 200');
+    const opayReplayBody = JSON.parse(opayReplayRes.body);
+    assert(opayReplayBody.duplicate === true, 'OPay flags replayed transaction as duplicate: true');
+
+    // Replay payload 3: Paystack charge.success
+    const paystackPayload = JSON.stringify({
+      event: 'charge.success',
+      data: {
+        amount: 15000000,
+        reference: replayRef,
+        metadata: { owner_id: userAId }
+      }
+    });
+    const paystackHash = cryptoMod.createHmac('sha512', testSecret).update(paystackPayload).digest('hex');
+    const paystackReplayRes = await paystackHandler({
+      httpMethod: 'POST',
+      headers: { 'x-paystack-signature': paystackHash },
+      body: paystackPayload
+    });
+
+    assert(paystackReplayRes.statusCode === 200, 'Paystack replayed transaction returns HTTP 200');
+    const paystackReplayBody = JSON.parse(paystackReplayRes.body);
+    assert(paystackReplayBody.duplicate === true, 'Paystack flags replayed transaction as duplicate: true');
+    assert(paystackReplayBody.credited === false, 'Paystack idempotency ensures credited is false');
+
+    // Restore original supabase.from
+    supabaseClientMod.supabase.from = originalFrom;
+
+    // Verify authentic balance remains 0.00
+    const { data: finalWallet } = await clientUserA
+      .from('wallets')
+      .select('available_balance')
+      .eq('user_id', userAId)
+      .single();
+    assert(Number(finalWallet.available_balance) === 0, 'Authentic wallet balance untouched by replay attacks (₦0.00 intact)');
+
+    delete process.env.KORAPAY_SECRET_KEY;
+    delete process.env.OPAY_SECRET_KEY;
+    delete process.env.PAYSTACK_SECRET_KEY;
+
+    console.log('  [PASS] Replay attack idempotency verified across all payment gateways');
+    console.log('  [PASS] Zero double-crediting occurs on duplicate webhook submissions');
+    console.log('  [PASS] Authentic ₦0.00 database balances preserved');
+  } catch (err) {
+    console.error('Probe 46 exception:', err);
+    assert(false, 'Webhook replay attack defense probe failed');
+  }
+
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
 
 
