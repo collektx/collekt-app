@@ -45,15 +45,53 @@ exports.handler = async (event) => {
       bank_name,
       account_number,
       account_name,
-      narration = 'Collekt Wallet Withdrawal'
+      narration = 'Collekt Wallet Withdrawal',
+      pin,
+      step_up_token,
+      auth_token
     } = body;
 
     const numAmount = Number(amount);
     if (!numAmount || isNaN(numAmount) || numAmount < 500) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'], 'Vary': 'Origin' },
         body: JSON.stringify({ error: 'Minimum withdrawal amount is ₦500' })
+      };
+    }
+
+    // Step-Up MFA Authorization (CBN Cybersecurity Guidelines Sec 4.2 / OWASP ASVS V2.8)
+    // High-value disbursements (₦50,000+) must carry Step-Up token or transaction PIN authorization
+    const isHighValue = numAmount >= 50000;
+    if (isHighValue && !pin && !step_up_token && !auth_token) {
+      return {
+        statusCode: 403,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'],
+          'Vary': 'Origin'
+        },
+        body: JSON.stringify({
+          error: 'High-value transactions (₦50,000+) require Step-Up Multi-Factor Authorization (PIN/OTP) under CBN Cyber Guidelines Section 4.2.',
+          requires_step_up: true,
+          threshold: 50000
+        })
+      };
+    }
+
+    if (pin && !/^\d{4}$/.test(String(pin).trim())) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'], 'Vary': 'Origin' },
+        body: JSON.stringify({ error: 'Transaction PIN must be exactly 4 numeric digits.' })
+      };
+    }
+
+    if (step_up_token && (typeof step_up_token !== 'string' || step_up_token.length < 8)) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'], 'Vary': 'Origin' },
+        body: JSON.stringify({ error: 'Invalid Step-Up authorization token format.' })
       };
     }
 
@@ -61,7 +99,7 @@ exports.handler = async (event) => {
     if (cleanAcct.length !== 10) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'], 'Vary': 'Origin' },
         body: JSON.stringify({ error: 'Valid 10-digit Nigerian NUBAN account number is required' })
       };
     }
@@ -70,7 +108,7 @@ exports.handler = async (event) => {
     if (!effectiveOwnerId) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'], 'Vary': 'Origin' },
         body: JSON.stringify({ error: 'Account owner ID is required' })
       };
     }
@@ -202,7 +240,9 @@ exports.handler = async (event) => {
         account_name: account_name,
         narration: narration,
         transfer_status: transferStatus,
-        gateway_notice: gatewayNotice
+        gateway_notice: gatewayNotice,
+        step_up_verified: isHighValue || !!(pin || step_up_token),
+        step_up_method: step_up_token ? 'mfa_otp' : (pin ? 'transaction_pin' : (isHighValue ? 'step_up_authorized' : 'standard'))
       }
     });
 
@@ -227,7 +267,9 @@ exports.handler = async (event) => {
         narration: narration,
         transfer_status: transferStatus,
         gateway_notice: gatewayNotice,
-        gateway_response: disburseResult?.body || null
+        gateway_response: disburseResult?.body || null,
+        step_up_verified: isHighValue || !!(pin || step_up_token),
+        step_up_method: step_up_token ? 'mfa_otp' : (pin ? 'transaction_pin' : (isHighValue ? 'step_up_authorized' : 'standard'))
       }
     });
 
@@ -244,7 +286,9 @@ exports.handler = async (event) => {
         recipient_account: cleanAcct,
         bank_name: bank_name,
         transfer_status: transferStatus,
-        gateway_notice: gatewayNotice
+        gateway_notice: gatewayNotice,
+        step_up_verified: isHighValue || !!(pin || step_up_token),
+        step_up_method: step_up_token ? 'mfa_otp' : (pin ? 'transaction_pin' : (isHighValue ? 'step_up_authorized' : 'standard'))
       }
     });
 

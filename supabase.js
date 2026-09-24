@@ -2373,7 +2373,10 @@ async function withdrawWalletFunds(params) {
       user_id: params.user_id || user.id,
       owner_id: params.owner_id || user.id || user.owner_id,
       owner_type: params.owner_type || (user.role === 'company' ? 'company' : 'user'),
-      role: params.role || user.role || 'professional'
+      role: params.role || user.role || 'professional',
+      pin: params.pin ? String(params.pin).trim() : undefined,
+      step_up_token: params.step_up_token ? String(params.step_up_token).trim() : undefined,
+      auth_token: params.auth_token ? String(params.auth_token).trim() : undefined
     };
 
     let authHeaderVal = '';

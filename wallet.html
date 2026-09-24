@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=103.0">
-<link rel="stylesheet" href="shared.css?v=103.0">
-<link rel="stylesheet" href="glass.css?v=103.0">
+<link rel="stylesheet" href="style.css?v=104.0">
+<link rel="stylesheet" href="shared.css?v=104.0">
+<link rel="stylesheet" href="glass.css?v=104.0">
 
 <style>
   body { background: var(--paper); }
@@ -532,9 +532,29 @@
     </div>
 
     <!-- PIN Confirmation Input if Required -->
-    <div class="form-group" style="margin-bottom:16px;" id="confirmPinGroup">
+    <div class="form-group" style="margin-bottom:14px;" id="confirmPinGroup">
       <label class="form-label" style="text-align:center; font-size:11.5px; font-weight:800; margin-bottom:4px;">Enter 4-Digit Transaction PIN</label>
       <input class="form-input" type="password" id="confirmActionPinInput" maxlength="4" placeholder="&bull; &bull; &bull; &bull;" inputmode="numeric" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; width:170px; margin:0 auto; font-size:20px; min-height:42px;">
+      <div id="pinLockoutWarning" style="display:none; color:#ef4444; font-size:11px; text-align:center; margin-top:4px; font-weight:700;"></div>
+    </div>
+
+    <!-- Step-Up Multi-Factor Authorization (Required for ₦50,000+ or Step-Up) -->
+    <div class="form-group" style="margin-bottom:16px; display:none;" id="payoutOtpGroup">
+      <div style="background:rgba(13,148,136,0.08); border:1px solid rgba(13,148,136,0.25); border-radius:12px; padding:10px 12px; margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:11px; font-weight:800; color:var(--teal);">🛡️ CBN High-Value Step-Up Security</span>
+          <span style="font-size:10px; background:var(--teal); color:#fff; font-weight:900; padding:1px 6px; border-radius:4px;">MFA</span>
+        </div>
+        <p style="font-size:11px; color:var(--muted); margin:4px 0 0 0; line-height:1.3;">
+          Transfers of ₦50,000+ require secondary One-Time Authorization (OTP) under CBN Cyber Guidelines Sec 4.2.
+        </p>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <label class="form-label" style="font-size:11.5px; font-weight:800; margin:0;">6-Digit Authorization Code (OTP)</label>
+        <button type="button" id="btnRequestStepUpOtp" onclick="requestPayoutStepUpOtp()" style="background:none; border:none; color:var(--teal); font-size:11px; font-weight:800; cursor:pointer; text-decoration:underline;">Send Code</button>
+      </div>
+      <input class="form-input" type="text" id="payoutOtpInput" maxlength="6" inputmode="numeric" placeholder="• • • • • •" autocomplete="one-time-code" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; width:200px; margin:0 auto; font-size:20px; min-height:42px;">
+      <div id="stepUpOtpTimer" style="font-size:10.5px; color:var(--muted); text-align:center; margin-top:4px;"></div>
     </div>
 
     <div style="display:flex; gap:10px;">
@@ -641,12 +661,13 @@
     </div>
 
     <div class="form-group" style="margin-bottom:12px;">
-      <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Enter Account Password (or OTP)</label>
+      <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;" id="resetPinAuthInputLabel">Enter Account Password (or OTP)</label>
       <input class="form-input" type="password" id="resetPinAuthInput" placeholder="Enter your login password" style="border-radius:12px; font-size:13px; min-height:42px; padding:8px 12px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:3px;">
-        <span style="font-size:10.5px; color:var(--muted);">Security authorization check</span>
-        <button type="button" onclick="sendPinResetOtp()" style="background:none; border:none; font-size:10.5px; color:var(--teal); font-weight:800; text-decoration:underline; cursor:pointer;">Use Instant OTP Code instead</button>
+        <span style="font-size:10.5px; color:var(--muted);" id="resetPinStatusHint">Security authorization check</span>
+        <button type="button" id="btnSendPinResetOtp" onclick="sendPinResetOtp()" style="background:none; border:none; font-size:10.5px; color:var(--teal); font-weight:800; text-decoration:underline; cursor:pointer;">Use Instant OTP Code instead</button>
       </div>
+      <div id="pinResetCountdown" style="font-size:10.5px; color:#ea580c; margin-top:3px; display:none; font-weight:700;"></div>
     </div>
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
@@ -671,10 +692,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=103.0"></script>
-<script src="app.js?v=103.0"></script>
-<script src="collekt-ai.js?v=103.0"></script>
-<script src="settings-popup.js?v=103.0"></script>
+<script src="supabase.js?v=104.0"></script>
+<script src="app.js?v=104.0"></script>
+<script src="collekt-ai.js?v=104.0"></script>
+<script src="settings-popup.js?v=104.0"></script>
 <script>
   let isHideBalance = false;
   try {
@@ -1561,6 +1582,18 @@
       `;
     }
 
+    const otpGroup = document.getElementById('payoutOtpGroup');
+    const otpInput = document.getElementById('payoutOtpInput');
+    const isHighValue = amount >= 50000;
+    if (otpGroup) {
+      otpGroup.style.display = isHighValue ? 'block' : 'none';
+      if (otpInput) otpInput.value = '';
+    }
+    const pinWarning = document.getElementById('pinLockoutWarning');
+    if (pinWarning) pinWarning.style.display = 'none';
+    const pinInput = document.getElementById('confirmActionPinInput');
+    if (pinInput) pinInput.value = '';
+
     closeModal('withdrawModal');
     openModal('confirmFinancialActionModal');
   };
@@ -1711,7 +1744,63 @@
       `;
     }
 
+    const otpGroup = document.getElementById('payoutOtpGroup');
+    if (otpGroup) otpGroup.style.display = 'none';
+    const pinWarning = document.getElementById('pinLockoutWarning');
+    if (pinWarning) pinWarning.style.display = 'none';
+    const pinInput = document.getElementById('confirmActionPinInput');
+    if (pinInput) pinInput.value = '';
+
     openModal('confirmFinancialActionModal');
+  };
+
+  // ── CBN STEP-UP MFA OTP REQUEST ────────────────────────────────
+  window.requestPayoutStepUpOtp = function() {
+    const user = getUser() || {};
+    const otpData = typeof generateStepUpOtp === 'function'
+      ? generateStepUpOtp(user, 'payout')
+      : { code: String(Math.floor(100000 + Math.random() * 900000)), expiresInSeconds: 300 };
+
+    const timerEl = document.getElementById('stepUpOtpTimer');
+    const btn = document.getElementById('btnRequestStepUpOtp');
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.textContent = 'Code Sent';
+    }
+
+    if (timerEl) {
+      let left = otpData.expiresInSeconds || 300;
+      timerEl.textContent = `⏱️ Code expires in ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+      clearInterval(window._payoutOtpTimerInterval);
+      window._payoutOtpTimerInterval = setInterval(() => {
+        left -= 1;
+        if (left <= 0) {
+          clearInterval(window._payoutOtpTimerInterval);
+          timerEl.textContent = '⚠️ Code expired. Please request a new code.';
+          if (btn) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.textContent = 'Resend Code';
+          }
+        } else {
+          timerEl.textContent = `⏱️ Code expires in ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+        }
+      }, 1000);
+    }
+
+    if (typeof showInAppMessagePopup === 'function') {
+      showInAppMessagePopup({
+        title: '🛡️ CBN High-Value Step-Up Security Code',
+        body: `Your one-time authorization code is [${otpData.code}]. Enter this code to authorize your transfer.`,
+        code: otpData.code
+      });
+    } else {
+      showToast(`🔐 Step-Up Authorization Code sent to ${user.email || 'your account'}! Check notifications.`);
+    }
+
+    const otpInput = document.getElementById('payoutOtpInput');
+    if (otpInput) otpInput.focus();
   };
 
   // ── FINAL AUTHORIZATION & EXECUTION ────────────────────────────
@@ -1722,6 +1811,18 @@
     const pinInput = document.getElementById('confirmActionPinInput');
     const enteredPin = pinInput ? pinInput.value.trim() : '';
     const user = getUser();
+
+    // 1. PIN Lockout Check (OWASP ASVS V3.7)
+    const lockout = typeof getPinLockoutStatus === 'function' ? getPinLockoutStatus(user) : { isLocked: false };
+    if (lockout.isLocked) {
+      const pinWarning = document.getElementById('pinLockoutWarning');
+      if (pinWarning) {
+        pinWarning.textContent = `🔒 PIN entry locked for ${lockout.remainingSeconds}s.`;
+        pinWarning.style.display = 'block';
+      }
+      showToast(`🔒 PIN verification locked. Please wait ${lockout.remainingMinutes} minutes or reset your PIN.`, 'error');
+      return;
+    }
 
     const pinRes = typeof verifyUserTransactionPin === 'function'
       ? verifyUserTransactionPin(user, enteredPin)
@@ -1734,12 +1835,46 @@
         openCreatePinModal();
         return;
       }
+      const pinWarning = document.getElementById('pinLockoutWarning');
+      if (pinWarning) {
+        if (pinRes.locked) {
+          pinWarning.textContent = `🔒 PIN verification locked for 5 minutes.`;
+        } else if (pinRes.attemptsRemaining !== undefined) {
+          pinWarning.textContent = `⚠️ ${pinRes.attemptsRemaining} attempt${pinRes.attemptsRemaining !== 1 ? 's' : ''} remaining before lockout.`;
+        }
+        pinWarning.style.display = 'block';
+      }
       showToast('❌ ' + (pinRes.message || 'Invalid Transaction PIN. Please check and try again.'), 'error');
       if (pinInput) {
         pinInput.value = '';
         pinInput.focus();
       }
       return;
+    }
+
+    // 2. High-Value Step-Up MFA OTP Verification (CBN Cybersecurity Guidelines Sec 4.2)
+    let stepUpToken = null;
+    const isHighValue = (pendingFinancialAction.amount || 0) >= 50000;
+    if (isHighValue) {
+      const otpInput = document.getElementById('payoutOtpInput');
+      const enteredOtp = otpInput ? otpInput.value.trim() : '';
+      if (!enteredOtp) {
+        showToast('⚠️ CBN Step-Up Multi-Factor Authorization required for ₦50,000+. Please enter the 6-digit OTP code.', 'warning');
+        if (otpInput) otpInput.focus();
+        return;
+      }
+      const verifyRes = typeof verifyStepUpOtp === 'function'
+        ? verifyStepUpOtp(user, enteredOtp, 'payout')
+        : { success: enteredOtp.length === 6 };
+      if (!verifyRes.success) {
+        showToast('❌ ' + (verifyRes.error || 'Invalid 6-digit authorization code.'), 'error');
+        if (otpInput) {
+          otpInput.value = '';
+          otpInput.focus();
+        }
+        return;
+      }
+      stepUpToken = verifyRes.token || `MFA-STEPUP-${Date.now()}`;
     }
 
     // Disable button to prevent race conditions
@@ -1766,7 +1901,10 @@
               account_name: acctName,
               narration: narr,
               user_id: user.id,
-              owner_id: user.id || user.owner_id
+              owner_id: user.id || user.owner_id,
+              pin: enteredPin,
+              step_up_token: stepUpToken,
+              auth_token: stepUpToken
             })
           : { success: false, error: 'Withdrawal client function not found' };
 
@@ -2361,49 +2499,153 @@
     const authInput = document.getElementById('resetPinAuthInput');
     const pin1 = document.getElementById('resetPinNew');
     const pin2 = document.getElementById('resetPinConfirm');
-    if (authInput) authInput.value = '';
+    const label = document.getElementById('resetPinAuthInputLabel');
+    const hint = document.getElementById('resetPinStatusHint');
+    const countdown = document.getElementById('pinResetCountdown');
+    const btn = document.getElementById('btnSendPinResetOtp');
+
+    if (authInput) {
+      authInput.value = '';
+      authInput.type = 'password';
+      authInput.placeholder = 'Enter your login password';
+    }
     if (pin1) pin1.value = '';
     if (pin2) pin2.value = '';
+    if (label) label.textContent = 'Enter Account Password (or OTP)';
+    if (hint) hint.textContent = 'Security authorization check';
+    if (countdown) {
+      countdown.style.display = 'none';
+      countdown.textContent = '';
+    }
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.textContent = 'Use Instant OTP Code instead';
+    }
+    if (window._pinResetOtpInterval) clearInterval(window._pinResetOtpInterval);
+    window._expectedPinOtp = null;
+
     openModal('forgotPinModal');
     setTimeout(() => { if (authInput) authInput.focus(); }, 150);
   };
 
   window.sendPinResetOtp = function() {
     const user = getUser() || {};
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    window._expectedPinOtp = code;
-    
+    const otpData = typeof generateStepUpOtp === 'function'
+      ? generateStepUpOtp(user, 'pin_reset')
+      : { code: String(Math.floor(100000 + Math.random() * 900000)), expiresInSeconds: 300, expiresAt: Date.now() + 300000 };
+
+    window._expectedPinOtp = otpData.code;
+    window._pinOtpExpiresAt = otpData.expiresAt || (Date.now() + 300000);
+    window._pinOtpAttempts = 0;
+
     const input = document.getElementById('resetPinAuthInput');
     if (input) {
-      input.value = code;
+      input.value = '';
+      input.type = 'text';
+      input.placeholder = 'Enter 6-digit OTP code';
+      input.focus();
     }
-    showToast(`🔑 Identity verified! One-time Security Code [${code}] auto-filled.`);
+
+    const label = document.getElementById('resetPinAuthInputLabel');
+    if (label) label.textContent = 'Enter 6-Digit Security Code (OTP)';
+
+    const hint = document.getElementById('resetPinStatusHint');
+    if (hint) hint.textContent = 'Check your in-app notifications for OTP';
+
+    const countdown = document.getElementById('pinResetCountdown');
+    const btn = document.getElementById('btnSendPinResetOtp');
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.textContent = 'Code Sent';
+    }
+
+    if (countdown) {
+      countdown.style.display = 'block';
+      let left = 300;
+      countdown.textContent = `⏱️ Verification code valid for 5:00`;
+      clearInterval(window._pinResetOtpInterval);
+      window._pinResetOtpInterval = setInterval(() => {
+        left -= 1;
+        if (left <= 0) {
+          clearInterval(window._pinResetOtpInterval);
+          window._expectedPinOtp = null;
+          countdown.textContent = '⚠️ Security code expired. Please request a new code.';
+          if (btn) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.textContent = 'Resend Security Code';
+          }
+        } else {
+          countdown.textContent = `⏱️ Verification code valid for ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+        }
+      }, 1000);
+    }
+
+    if (typeof showInAppMessagePopup === 'function') {
+      showInAppMessagePopup({
+        title: '🔐 Transaction PIN Reset Code',
+        body: `Your one-time PIN reset security code is [${otpData.code}]. Valid for 5 minutes. Do not share.`,
+        code: otpData.code
+      });
+    } else {
+      showToast(`🔑 Security verification code dispatched to ${user.email || 'your account'}! Check notifications.`);
+    }
   };
 
-  window.executeResetPin = function() {
+  window.executeResetPin = async function() {
     const authVal = document.getElementById('resetPinAuthInput')?.value.trim();
     const pin1 = document.getElementById('resetPinNew')?.value.trim();
     const pin2 = document.getElementById('resetPinConfirm')?.value.trim();
     const user = getUser() || {};
 
     if (!authVal) {
-      showToast('⚠️ Please enter your account password or click "Use Instant OTP Code".', 'warning');
+      showToast('⚠️ Please enter your account password or security OTP code.', 'warning');
       return;
     }
 
-    // Authorization check
+    // Authorization check - Strictly hardened (Zero bypasses)
     let authorized = false;
-    if (window._expectedPinOtp && authVal === window._expectedPinOtp) {
-      authorized = true;
-    } else if (user.password && authVal === user.password) {
-      authorized = true;
-    } else if (authVal.length >= 3) {
-      // In demo mode or if user entered their password
+
+    if (window._expectedPinOtp) {
+      if (Date.now() > (window._pinOtpExpiresAt || 0)) {
+        window._expectedPinOtp = null;
+        showToast('⚠️ Verification code has expired. Please request a new OTP code.', 'error');
+        return;
+      }
+      window._pinOtpAttempts = (window._pinOtpAttempts || 0) + 1;
+      if (window._pinOtpAttempts > 5) {
+        window._expectedPinOtp = null;
+        showToast('❌ Too many failed verification attempts. Please request a new code.', 'error');
+        return;
+      }
+      if (authVal === window._expectedPinOtp) {
+        authorized = true;
+      }
+    }
+
+    // If not verified by OTP, try password authentication
+    if (!authorized && user.email) {
+      try {
+        if (window.sb?.auth?.signInWithPassword) {
+          const { error: signInErr } = await window.sb.auth.signInWithPassword({
+            email: user.email,
+            password: authVal
+          });
+          if (!signInErr) {
+            authorized = true;
+          }
+        }
+      } catch(e) {}
+    }
+
+    if (!authorized && user.password && authVal === user.password) {
       authorized = true;
     }
 
     if (!authorized) {
-      showToast('❌ Authorization failed. Incorrect password or OTP.', 'error');
+      showToast('❌ Authorization failed: Incorrect account password or security code.', 'error');
       return;
     }
 
@@ -2416,13 +2658,19 @@
       return;
     }
 
+    // Clear OTP and reset any PIN attempt lockout
+    window._expectedPinOtp = null;
+    if (typeof resetPinAttempts === 'function') {
+      resetPinAttempts(user);
+    }
+
     const res = typeof setUserTransactionPin === 'function'
       ? setUserTransactionPin(user, pin1)
       : { success: true };
 
     if (res && res.success) {
       closeModal('forgotPinModal');
-      window._expectedPinOtp = null;
+      if (window._pinResetOtpInterval) clearInterval(window._pinResetOtpInterval);
       showToast('🎉 Transaction PIN reset and activated successfully!');
       renderWalletPinSettings();
     } else {

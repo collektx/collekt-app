@@ -2529,25 +2529,125 @@ function setUserTransactionPin(user, newPin) {
   return { success: true, message: 'Transaction PIN created successfully!' };
 }
 
+const PIN_LOCKOUT_MAX_ATTEMPTS = 5;
+const PIN_LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+
+function getPinStorageKey(user, suffix) {
+  const u = user || (typeof getUser === 'function' ? getUser() : null);
+  const identifier = u ? (u.id || (u.email ? u.email.toLowerCase().trim() : 'guest')) : 'guest';
+  return 'collekt_pin_' + suffix + '_' + identifier;
+}
+
+function getPinLockoutStatus(user) {
+  const u = user || (typeof getUser === 'function' ? getUser() : null);
+  const lockKey = getPinStorageKey(u, 'lockout');
+  const lockoutUntil = parseInt(localStorage.getItem(lockKey) || '0', 10);
+  const now = Date.now();
+  if (lockoutUntil && now < lockoutUntil) {
+    const remainingSeconds = Math.ceil((lockoutUntil - now) / 1000);
+    return {
+      isLocked: true,
+      remainingSeconds: remainingSeconds,
+      remainingMinutes: Math.ceil(remainingSeconds / 60)
+    };
+  }
+  return { isLocked: false, remainingSeconds: 0, remainingMinutes: 0 };
+}
+
+function resetPinAttempts(user) {
+  const u = user || (typeof getUser === 'function' ? getUser() : null);
+  try {
+    localStorage.removeItem(getPinStorageKey(u, 'attempts'));
+    localStorage.removeItem(getPinStorageKey(u, 'lockout'));
+  } catch(e) {}
+}
+
 function verifyUserTransactionPin(user, enteredPin) {
   const u = user || (typeof getUser === 'function' ? getUser() : null);
+  
+  // 1. Check brute force lockout status (OWASP ASVS V3.7)
+  const lockout = getPinLockoutStatus(u);
+  if (lockout.isLocked) {
+    return {
+      success: false,
+      locked: true,
+      remainingSeconds: lockout.remainingSeconds,
+      message: `PIN verification temporarily locked due to excessive failed attempts. Please wait ${lockout.remainingMinutes} minute${lockout.remainingMinutes !== 1 ? 's' : ''} (${lockout.remainingSeconds}s) or reset your PIN.`
+    };
+  }
+
   const actualPin = getUserTransactionPin(u);
   if (!actualPin) {
     return { success: false, no_pin: true, message: 'No Transaction PIN has been set up yet.' };
   }
+
   const inputPin = String(enteredPin || '').trim();
+  const attemptsKey = getPinStorageKey(u, 'attempts');
+  const lockKey = getPinStorageKey(u, 'lockout');
+
   if (inputPin === actualPin) {
+    // Correct PIN: reset failed attempt counters
+    resetPinAttempts(u);
     return { success: true };
   }
-  return { success: false, message: 'Incorrect 4-digit Transaction PIN.' };
+
+  // Incorrect PIN: increment failed attempt counter
+  let currentAttempts = parseInt(localStorage.getItem(attemptsKey) || '0', 10) + 1;
+  localStorage.setItem(attemptsKey, currentAttempts.toString());
+
+  if (currentAttempts >= PIN_LOCKOUT_MAX_ATTEMPTS) {
+    const lockUntil = Date.now() + PIN_LOCKOUT_DURATION_MS;
+    localStorage.setItem(lockKey, lockUntil.toString());
+    return {
+      success: false,
+      locked: true,
+      remainingSeconds: 300,
+      attemptsRemaining: 0,
+      message: 'Maximum PIN attempts exceeded. Transaction PIN locked for 5 minutes for security.'
+    };
+  }
+
+  const remaining = PIN_LOCKOUT_MAX_ATTEMPTS - currentAttempts;
+  return {
+    success: false,
+    locked: false,
+    attemptsRemaining: remaining,
+    message: `Incorrect 4-digit Transaction PIN. ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining before security lockout.`
+  };
 }
 
 function changeUserTransactionPin(user, currentPin, newPin) {
   const u = user || (typeof getUser === 'function' ? getUser() : null);
-  const actualPin = getUserTransactionPin(u);
   
+  // Check lockout
+  const lockout = getPinLockoutStatus(u);
+  if (lockout.isLocked) {
+    return {
+      success: false,
+      locked: true,
+      message: `PIN changes locked. Please wait ${lockout.remainingMinutes} minutes before attempting.`
+    };
+  }
+
+  const actualPin = getUserTransactionPin(u);
   if (actualPin && String(currentPin || '').trim() !== actualPin) {
-    return { success: false, message: 'Current 4-digit PIN is incorrect.' };
+    const attemptsKey = getPinStorageKey(u, 'attempts');
+    const lockKey = getPinStorageKey(u, 'lockout');
+    let currentAttempts = parseInt(localStorage.getItem(attemptsKey) || '0', 10) + 1;
+    localStorage.setItem(attemptsKey, currentAttempts.toString());
+    if (currentAttempts >= PIN_LOCKOUT_MAX_ATTEMPTS) {
+      localStorage.setItem(lockKey, (Date.now() + PIN_LOCKOUT_DURATION_MS).toString());
+      return {
+        success: false,
+        locked: true,
+        message: 'Maximum PIN attempts exceeded. Verification locked for 5 minutes.'
+      };
+    }
+    const remaining = PIN_LOCKOUT_MAX_ATTEMPTS - currentAttempts;
+    return {
+      success: false,
+      message: `Current 4-digit PIN is incorrect. ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining.`
+    };
   }
 
   const pinStr = String(newPin || '').trim();
@@ -2555,7 +2655,85 @@ function changeUserTransactionPin(user, currentPin, newPin) {
     return { success: false, message: 'New PIN must be exactly 4 numeric digits.' };
   }
 
+  resetPinAttempts(u);
   return setUserTransactionPin(u, pinStr);
+}
+
+// ── STEP-UP MFA & HIGH-VALUE TRANSACTION OTP GENERATION & VERIFICATION ──
+let _inMemoryStepUpOtpStore = {};
+
+function generateStepUpOtp(user, actionType = 'payout') {
+  const u = user || (typeof getUser === 'function' ? getUser() : null);
+  const identifier = u ? (u.id || (u.email ? u.email.toLowerCase().trim() : 'guest')) : 'guest';
+  
+  let code = '';
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    code = String(100000 + (array[0] % 900000));
+  } else {
+    code = String(Math.floor(100000 + Math.random() * 900000));
+  }
+
+  const key = `${actionType}_${identifier}`;
+  _inMemoryStepUpOtpStore[key] = {
+    code: code,
+    expiresAt: Date.now() + (5 * 60 * 1000), // 5 minutes validity
+    attempts: 0,
+    maxAttempts: 5,
+    createdAt: Date.now()
+  };
+
+  return {
+    code: code,
+    expiresInSeconds: 300,
+    expiresAt: _inMemoryStepUpOtpStore[key].expiresAt
+  };
+}
+
+function verifyStepUpOtp(user, enteredOtp, actionType = 'payout') {
+  const u = user || (typeof getUser === 'function' ? getUser() : null);
+  const identifier = u ? (u.id || (u.email ? u.email.toLowerCase().trim() : 'guest')) : 'guest';
+  const key = `${actionType}_${identifier}`;
+  const record = _inMemoryStepUpOtpStore[key];
+
+  if (!record) {
+    return { success: false, error: 'No active OTP verification session found. Please request a new code.' };
+  }
+
+  if (Date.now() > record.expiresAt) {
+    delete _inMemoryStepUpOtpStore[key];
+    return { success: false, expired: true, error: 'Authorization code has expired. Please request a new OTP.' };
+  }
+
+  record.attempts += 1;
+  const inputCode = String(enteredOtp || '').trim().replace(/\D/g, '');
+
+  if (inputCode !== record.code) {
+    if (record.attempts >= record.maxAttempts) {
+      delete _inMemoryStepUpOtpStore[key];
+      return { success: false, locked: true, error: 'Maximum OTP verification attempts exceeded. Please request a new code.' };
+    }
+    const rem = record.maxAttempts - record.attempts;
+    return { success: false, error: `Invalid authorization code. ${rem} attempt${rem !== 1 ? 's' : ''} remaining.` };
+  }
+
+  delete _inMemoryStepUpOtpStore[key];
+  const stepUpToken = `MFA-STEPUP-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+  return {
+    success: true,
+    token: stepUpToken,
+    verifiedAt: new Date().toISOString()
+  };
+}
+
+if (typeof window !== 'undefined') {
+  window.getPinLockoutStatus = getPinLockoutStatus;
+  window.resetPinAttempts = resetPinAttempts;
+  window.verifyUserTransactionPin = verifyUserTransactionPin;
+  window.changeUserTransactionPin = changeUserTransactionPin;
+  window.generateStepUpOtp = generateStepUpOtp;
+  window.verifyStepUpOtp = verifyStepUpOtp;
 }
 
 function getDirectoryUsers() {
