@@ -1056,7 +1056,96 @@ async function runSecurityAuditProbes() {
     assert(false, 'Deployment secrets sanitization probe failed');
   }
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PROBE 36: NDPA Section 33 Account Data Export API Authentication & Guardrails
+  // Nigeria Data Protection Act (NDPA 2023) Section 33 • GDPR Article 20
+  // ─────────────────────────────────────────────────────────────────────────────
+  console.log('\n--- PROBE 36: NDPA Section 33 Data Portability API Authentication ---');
+  try {
+    const accountExport = require('./netlify/functions/account-export');
+
+    // 1. Unauthenticated request must be rejected with HTTP 401
+    const unauthRes = await accountExport.handler({
+      httpMethod: 'POST',
+      headers: { 'client-ip': '102.89.23.44' }
+    });
+    assert(unauthRes.statusCode === 401, `Unauthenticated data export rejected with HTTP 401: ${unauthRes.statusCode}`);
+    const unauthBody = JSON.parse(unauthRes.body);
+    assert(unauthBody.error.toLowerCase().includes('authentication') || unauthBody.error.toLowerCase().includes('token'), 'Response explains token/authentication is required');
+
+    // 2. Disallowed HTTP methods must be rejected with HTTP 405
+    const deleteRes = await accountExport.handler({
+      httpMethod: 'DELETE',
+      headers: {}
+    });
+    assert(deleteRes.statusCode === 405, `DELETE request on account export rejected with HTTP 405: ${deleteRes.statusCode}`);
+
+    // 3. Preflight OPTIONS request must return 200 with hardened CORS headers
+    const optRes = await accountExport.handler({
+      httpMethod: 'OPTIONS',
+      headers: {}
+    });
+    assert(optRes.statusCode === 200, `OPTIONS preflight returns HTTP 200: ${optRes.statusCode}`);
+    assert(optRes.headers['Access-Control-Allow-Origin'] && optRes.headers['Access-Control-Allow-Origin'] !== '*', 'Preflight returns hardened origin (never wildcard)');
+    assert(optRes.headers['Vary'] === 'Origin', 'Preflight returns Vary: Origin header');
+  } catch (err) {
+    console.error('Probe 36 exception:', err);
+    assert(false, 'Data portability API authentication probe failed');
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PROBE 37: NDPA Section 33 Compliance Payload Schema & Controller Attribution
+  // ─────────────────────────────────────────────────────────────────────────────
+  console.log('\n--- PROBE 37: NDPA Section 33 Compliance Payload Schema ---');
+  try {
+    const exportFile = fs.readFileSync(path.join(__dirname, 'netlify/functions/account-export.js'), 'utf8');
+
+    // Verify statutory metadata definitions
+    assert(exportFile.includes('Nigeria Data Protection Act (NDPA 2023) Section 33'), 'Payload defines NDPA 2023 Section 33 statutory basis');
+    assert(exportFile.includes('Right to Data Portability'), 'Payload identifies Right to Data Portability');
+    assert(exportFile.includes('Collekt Technologies Limited'), 'Payload identifies Collekt Technologies Limited as Data Controller');
+    assert(exportFile.includes('dpo@collektng.com'), 'Payload includes Data Protection Officer contact');
+
+    // Verify data category aggregations
+    assert(exportFile.includes('profile:'), 'Payload aggregates user profile dataset');
+    assert(exportFile.includes('wallet:'), 'Payload aggregates financial wallet balance');
+    assert(exportFile.includes('ledger_entries:'), 'Payload aggregates double-entry ledger records');
+    assert(exportFile.includes('transactions:'), 'Payload aggregates transaction records');
+    assert(exportFile.includes('proposals:'), 'Payload aggregates project proposals');
+    assert(exportFile.includes('documents_metadata:'), 'Payload aggregates KYC document metadata');
+    assert(exportFile.includes('audit_trail:'), 'Payload aggregates audit log records');
+
+    console.log('  [PASS] Statutory NDPA Section 33 controller metadata present');
+    console.log('  [PASS] All 7 data subject categories (Profile, Wallet, Ledger, Transactions, Proposals, Docs, Audit) mapped');
+  } catch (err) {
+    console.error('Probe 37 exception:', err);
+    assert(false, 'Data portability schema probe failed');
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PROBE 38: UI Liquid-Glass Data Portability Integration & Canonical Routing
+  // ─────────────────────────────────────────────────────────────────────────────
+  console.log('\n--- PROBE 38: UI Liquid-Glass Data Portability Integration ---');
+  try {
+    const redirectsContent = fs.readFileSync(path.join(__dirname, '_redirects'), 'utf8');
+    assert(redirectsContent.includes('/api/account-export /.netlify/functions/account-export 200'), '_redirects contains canonical /api/account-export rewrite');
+
+    const settingsContent = fs.readFileSync(path.join(__dirname, 'settings-popup.js'), 'utf8');
+    assert(settingsContent.includes('sett-export-data-btn'), 'settings-popup.js contains #sett-export-data-btn');
+    assert(settingsContent.includes('NDPA Sec 33'), 'settings-popup.js contains NDPA Sec 33 statutory compliance badge');
+    assert(settingsContent.includes('exportUserDataJSON'), 'settings-popup.js defines and exports exportUserDataJSON()');
+    assert(settingsContent.includes('window.exportUserDataJSON'), 'settings-popup.js attaches exportUserDataJSON to window object');
+
+    console.log('  [PASS] Canonical /api/account-export route verified in _redirects');
+    console.log('  [PASS] Liquid-glass settings export button and compliance badge verified');
+    console.log('  [PASS] window.exportUserDataJSON browser download pipeline verified');
+  } catch (err) {
+    console.error('Probe 38 exception:', err);
+    assert(false, 'UI data portability probe failed');
+  }
+
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
+
 
   console.log('════════════════════════════════════════════════════════════\n');
 

@@ -37,4 +37,6 @@ https://www.collektng.xyz/* https://collektng.com/:splat 301!
 /api/paystack/withdraw /.netlify/functions/paystack-withdraw 200
 /api/ai-copilot /.netlify/functions/ai-copilot 200
 /api/account-delete /.netlify/functions/account-delete 200
+/api/account-export /.netlify/functions/account-export 200
+
 

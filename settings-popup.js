@@ -237,13 +237,13 @@
     box-shadow: 0 0 0 3px rgba(19, 117, 111, 0.15);
   }
   .sett-btn-primary {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: linear-gradient(135deg, #13756F, #0E5A55);
     color: #FFFFFF !important;
     border: 1.5px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 4px 14px rgba(19, 117, 111, 0.28);
   }
   .sett-btn-primary:hover {
-    background: linear-gradient(135deg, #059669, #047857);
+    background: linear-gradient(135deg, #0E5A55, #083D39);
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(19, 117, 111, 0.38);
   }
@@ -654,6 +654,20 @@
               </div>
               <button type="button" class="sett-btn sett-btn-outline" style="display:inline-flex; align-items:center; gap:6px; font-weight:800; cursor:pointer;" onclick="event.stopPropagation(); openWebsiteReviewModal();">
                 <span>✍️</span> Drop Review
+              </button>
+            </div>
+          <!-- 6b. DATA PRIVACY & PORTABILITY (NDPA 2023) -->
+          <div class="settings-section">
+            <div class="settings-section-title">Data Privacy &amp; Portability (NDPA 2023)</div>
+            <div class="settings-row" style="align-items:center;">
+              <div class="settings-row-info">
+                <div class="settings-row-label" style="display:flex; align-items:center; gap:6px;">
+                  Download My Data <span style="font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(19,117,111,0.15); color:#13756F; font-weight:800;">NDPA Sec 33</span>
+                </div>
+                <div class="settings-row-desc">Export a machine-readable JSON portfolio of your profile, wallet history, contracts, and proposals</div>
+              </div>
+              <button type="button" class="sett-btn sett-btn-outline" id="sett-export-data-btn" style="display:inline-flex; align-items:center; gap:6px; font-weight:800; cursor:pointer;" onclick="exportUserDataJSON()">
+                <span id="sett-export-icon">📥</span> <span id="sett-export-text">Export JSON</span>
               </button>
             </div>
           </div>
@@ -1384,8 +1398,88 @@
   window.submitWebsiteReview = submitWebsiteReview;
   window.updateReviewModalUser = updateReviewModalUser;
 
+  /* -- NDPA 2023 SECTION 33: DATA PORTABILITY EXPORT -- */
+  async function exportUserDataJSON() {
+    const btn = document.getElementById('sett-export-data-btn');
+    const icon = document.getElementById('sett-export-icon');
+    const text = document.getElementById('sett-export-text');
+
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+    }
+    if (text) text.textContent = 'Generating Archive...';
+    if (icon) icon.textContent = '⏳';
+
+    try {
+      // 1. Get auth token from Supabase session
+      let token = null;
+      if (window.sb && window.sb.auth) {
+        const { data: sessionData } = await window.sb.auth.getSession();
+        token = sessionData?.session?.access_token;
+      }
+      if (!token) {
+        const rawUser = localStorage.getItem('collekt_user');
+        if (rawUser) {
+          try {
+            const u = JSON.parse(rawUser);
+            token = u.token;
+          } catch(e){}
+        }
+      }
+
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch('/api/account-export', {
+        method: 'POST',
+        headers: headers
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || `HTTP ${res.status}: Failed to export data archive`);
+      }
+
+      const dataBlob = await res.blob();
+      const downloadUrl = window.URL.createObjectURL(dataBlob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `collekt-data-export-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+
+      if (text) text.textContent = 'Exported!';
+      if (icon) icon.textContent = '✅';
+      setTimeout(() => {
+        if (text) text.textContent = 'Export JSON';
+        if (icon) icon.textContent = '📥';
+        if (btn) {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        }
+      }, 3000);
+    } catch (err) {
+      console.error('[NDPA Data Export Error]:', err);
+      alert(`⚠️ Data Export Notice: ${err.message || 'Please check your connection and sign in to export your data.'}`);
+      if (text) text.textContent = 'Export JSON';
+      if (icon) icon.textContent = '📥';
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    }
+  }
+
+  window.exportUserDataJSON = exportUserDataJSON;
+
   /* -- EXPORT PUBLIC API ------------------------------- */
   window.openSettingsModal = openSettingsModal;
   window.closeSettingsModal = closeSettingsModal;
 
 })();
+
