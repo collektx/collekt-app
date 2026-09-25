@@ -50,5 +50,7 @@ https://www.collektng.xyz/* https://collektng.com/:splat 301!
 /api/account-delete /.netlify/functions/account-delete 200
 /api/account-export /.netlify/functions/account-export 200
 /api/verify-turnstile /.netlify/functions/verify-turnstile 200
+/api/health /.netlify/functions/health 200
+/api/status /.netlify/functions/health 200
 
 

@@ -1,6 +1,7 @@
 const { supabase } = require('./lib/supabase-client');
 const { authenticateRequest } = require('./lib/auth-middleware');
 const { corsHeaders: buildCorsHeaders, preflightResponse } = require('./lib/cors');
+const { enforceRateLimit } = require('./lib/rate-limiter');
 
 /**
  * Company Team & RBAC Management Function
@@ -19,6 +20,17 @@ exports.handler = async (event) => {
     const { user, error: authError } = await authenticateRequest(event);
     if (authError || !user) {
       return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Authentication required', details: authError }) };
+    }
+
+    // Rate limit: max 30 team requests per minute per IP/user
+    const rateCheck = enforceRateLimit(event, {
+      action: 'company-team',
+      limit: 30,
+      windowMs: 60 * 1000,
+      customHeaders: corsHeaders
+    });
+    if (!rateCheck.allowed) {
+      return rateCheck.response;
     }
 
     // 1. GET: Fetch Team Members for a Company

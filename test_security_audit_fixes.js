@@ -2152,6 +2152,156 @@ async function runSecurityAuditProbes() {
     assert(false, 'Financial routing and static security audit probe failed');
   }
 
+  // -------------------------------------------------------------
+  // PROBE 51: Automated Health Check & Diagnostic Telemetry API (COBIT 2019 DSS04 / OWASP ASVS V13.4 & V14.4 / COLLEKT-009)
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 51: Automated Health Check & Diagnostic Telemetry API ---');
+  try {
+    const healthHandler = require('./netlify/functions/health').handler;
+    const { resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+
+    // 1. OPTIONS preflight
+    const optRes = await healthHandler({
+      httpMethod: 'OPTIONS',
+      headers: { origin: 'https://collektng.com' }
+    });
+    assert(optRes.statusCode === 204 || optRes.statusCode === 200, 'health OPTIONS preflight returns HTTP 200/204');
+    assert(optRes.headers['Access-Control-Allow-Origin'] === 'https://collektng.com', 'health preflight sets correct CORS origin');
+
+    // 2. Method Not Allowed for POST/PUT/DELETE
+    const postRes = await healthHandler({
+      httpMethod: 'POST',
+      headers: { origin: 'https://collektng.com' }
+    });
+    assert(postRes.statusCode === 405, 'health POST returns HTTP 405 Method Not Allowed');
+
+    // 3. Operational GET request returns HTTP 200 or 503 with standardized telemetry
+    resetRateLimiterStore();
+    const getRes = await healthHandler({
+      httpMethod: 'GET',
+      headers: { origin: 'https://collektng.com' }
+    });
+    assert(getRes.statusCode === 200 || getRes.statusCode === 503, 'health GET returns HTTP 200 (healthy) or 503 (degraded)');
+    const body = JSON.parse(getRes.body);
+    assert(typeof body.status === 'string', 'health body includes status string');
+    assert(body.version === 'v107.0', 'health body includes expected version v107.0');
+    assert(typeof body.response_time_ms === 'number', 'health body includes response_time_ms number');
+    assert(body.checks && typeof body.checks === 'object', 'health body includes checks object');
+    assert(body.checks.database && typeof body.checks.database.status === 'string', 'checks.database has status');
+    assert(body.checks.payment_gateways && typeof body.checks.payment_gateways === 'object', 'checks.payment_gateways has gateway flags');
+    assert(body.system && typeof body.system === 'object', 'health body includes system metrics');
+    assert(typeof body.system.uptime_seconds === 'number', 'system reports uptime_seconds');
+    assert(body.system.memory_mb && typeof body.system.memory_mb.rss === 'number', 'system reports memory_mb.rss');
+
+    // 4. Zero sensitive information leakage (OWASP ASVS V14.4)
+    const rawBody = getRes.body;
+    assert(!rawBody.includes('service_role'), 'Health check never discloses service_role key');
+    assert(!rawBody.includes('postgres://'), 'Health check never discloses postgres URI');
+    assert(!rawBody.includes('password'), 'Health check never discloses password fields');
+
+    // 5. Rate limiting: max 120 reqs/min per IP
+    resetRateLimiterStore();
+    const supabaseClientMod = require('./netlify/functions/lib/supabase-client');
+    const originalFrom = supabaseClientMod.supabase.from;
+    const originalStorage = supabaseClientMod.supabase.storage;
+    supabaseClientMod.supabase.from = () => ({
+      select: () => Promise.resolve({ count: 1, error: null })
+    });
+    supabaseClientMod.supabase.storage = {
+      from: () => ({ list: () => Promise.resolve({ data: [], error: null }) })
+    };
+
+    let throttled = false;
+    for (let i = 0; i < 125; i++) {
+      const probeRes = await healthHandler({
+        httpMethod: 'GET',
+        headers: { 'client-ip': '198.51.100.44', origin: 'https://collektng.com' }
+      });
+      if (probeRes.statusCode === 429) {
+        throttled = true;
+        break;
+      }
+    }
+    assert(throttled === true, 'health check enforces rate limit (HTTP 429) against high-frequency ping spam');
+
+    // 6. Resilient error handling (HTTP 503 fail-closed when database is down)
+    supabaseClientMod.supabase.from = () => ({
+      select: () => Promise.resolve({ error: new Error('Simulated PostgreSQL Connection Drop') })
+    });
+
+    resetRateLimiterStore();
+    const degradedRes = await healthHandler({
+      httpMethod: 'GET',
+      headers: { origin: 'https://collektng.com' }
+    });
+    assert(degradedRes.statusCode === 503, 'health check returns HTTP 503 when primary DB is down');
+    const degradedBody = JSON.parse(degradedRes.body);
+    assert(degradedBody.status === 'degraded', 'health check flags status: degraded on DB error');
+    assert(degradedBody.checks.database.status === 'degraded', 'checks.database flagged as degraded');
+
+    // Restore original DB methods
+    supabaseClientMod.supabase.from = originalFrom;
+    supabaseClientMod.supabase.storage = originalStorage;
+
+    console.log('  [PASS] Diagnostic health endpoint (/api/health) returns structured telemetry');
+    console.log('  [PASS] Zero sensitive secrets/connection URIs leaked in payload (OWASP ASVS V14.4)');
+    console.log('  [PASS] Rate limiting and HTTP 503 fail-closed resilience verified');
+  } catch (err) {
+    console.error('Probe 51 exception:', err);
+    assert(false, 'Automated health check and telemetry probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 52: Disaster Recovery SLA, Ancillary Route Hardening & Balance Preservation
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 52: Disaster Recovery SLA, Ancillary Route Hardening & Balance Preservation ---');
+  try {
+    // 1. Verify DISASTER_RECOVERY_SLA.md existence and core compliance criteria
+    const drPath = path.join(__dirname, 'DISASTER_RECOVERY_SLA.md');
+    assert(fs.existsSync(drPath), 'DISASTER_RECOVERY_SLA.md specification exists');
+    const drContent = fs.readFileSync(drPath, 'utf8');
+    assert(drContent.includes('Recovery Point Objective (RPO)'), 'DR specification defines RPO');
+    assert(drContent.includes('Recovery Time Objective (RTO)'), 'DR specification defines RTO');
+    assert(drContent.includes('15 Minutes') || drContent.includes('15 minutes'), 'RPO SLA target is <= 15 minutes');
+    assert(drContent.includes('30 Minutes') || drContent.includes('30 minutes'), 'RTO SLA target is <= 30 minutes');
+    assert(drContent.includes('COBIT 2019 DSS04'), 'DR specification cites COBIT 2019 DSS04');
+    assert(drContent.includes('ISACA ITAF'), 'DR specification cites ISACA ITAF');
+    assert(drContent.includes('CBN Cybersecurity Framework'), 'DR specification cites CBN Framework Section 4.3');
+    assert(drContent.includes('Runbook A: Instant Deployment Rollback'), 'DR specification contains Runbook A (Rollback)');
+    assert(drContent.includes('Runbook B: PostgreSQL Point-in-Time Recovery'), 'DR specification contains Runbook B (PITR)');
+    assert(drContent.includes('Runbook C: Post-Disaster Financial Ledger Reconciliation'), 'DR specification contains Runbook C (Reconciliation)');
+
+    // 2. Verify _redirects has health check routes
+    const redirectsContent = fs.readFileSync(path.join(__dirname, '_redirects'), 'utf8');
+    assert(redirectsContent.includes('/api/health /.netlify/functions/health 200'), '_redirects includes /api/health rewrite');
+    assert(redirectsContent.includes('/api/status /.netlify/functions/health 200'), '_redirects includes /api/status rewrite');
+
+    // 3. Static audit: company-team.js rate limiting
+    const teamCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/company-team.js'), 'utf8');
+    assert(teamCode.includes('enforceRateLimit'), 'company-team.js includes enforceRateLimit');
+
+    // 4. Static audit: banks.js hardened CORS
+    const banksCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/banks.js'), 'utf8');
+    assert(banksCode.includes('buildCorsHeaders'), 'banks.js uses buildCorsHeaders');
+    assert(banksCode.includes('preflightResponse'), 'banks.js uses preflightResponse');
+
+    // 5. Verify authentic ₦0.00 wallet balance preservation
+    const { data: realWallet } = await clientUserA
+      .from('wallets')
+      .select('available_balance')
+      .eq('user_id', userAId)
+      .single();
+    assert(Number(realWallet.available_balance) === 0, 'Production database wallet balance strictly preserved at ₦0.00');
+
+    console.log('  [PASS] Formal Disaster Recovery SLA and operational runbooks validated');
+    console.log('  [PASS] Canonical health routes in _redirects validated');
+    console.log('  [PASS] Ancillary rate limiting and CORS hardening confirmed');
+    console.log('  [PASS] Authentic ₦0.00 database balances preserved');
+  } catch (err) {
+    console.error('Probe 52 exception:', err);
+    assert(false, 'Disaster Recovery SLA and ancillary hardening probe failed');
+  }
+
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
 
 

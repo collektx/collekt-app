@@ -211,21 +211,15 @@ function categorizeAndSortBanks(rawBanks) {
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': 'https://collektng.com',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS'
-      },
-      body: ''
-    };
+    return preflightResponse(event);
   }
+
+  const cors = buildCorsHeaders(event);
 
   if (event.httpMethod !== 'GET') {
     return {
       statusCode: 405,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://collektng.com' },
+      headers: { 'Content-Type': 'application/json', ...cors },
       body: JSON.stringify({ error: 'Method Not Allowed' })
     };
   }
@@ -266,7 +260,7 @@ exports.handler = async (event) => {
     statusCode: 200,
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': 'https://collektng.com',
+      ...cors,
       'Cache-Control': 'public, max-age=3600, s-maxage=86400'
     },
     body: JSON.stringify({
