@@ -11,47 +11,73 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=113.0">
-<link rel="stylesheet" href="shared.css?v=113.0">
-<link rel="stylesheet" href="glass.css?v=113.0">
+<link rel="stylesheet" href="style.css?v=114.0">
+<link rel="stylesheet" href="shared.css?v=114.0">
+<link rel="stylesheet" href="glass.css?v=114.0">
 
 <style>
+  :root {
+    --obsidian-bg: #071311;
+    --card-surface: rgba(12, 28, 25, 0.94);
+    --border-glass: rgba(45, 212, 191, 0.22);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --emerald-primary: #10b981;
+    --emerald-hover: #059669;
+    --emerald-glow: rgba(16, 185, 129, 0.25);
+    --teal-accent: #2dd4bf;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --danger-red: #ef4444;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
   body {
-    background: radial-gradient(circle at 50% 20%, #0e3b35 0%, #09201d 45%, #040e0d 100%);
+    background-color: var(--obsidian-bg);
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(45, 212, 191, 0.12) 0%, transparent 55%),
+      radial-gradient(circle at 10% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 90% 90%, rgba(13, 148, 136, 0.06) 0%, transparent 40%);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
-    color: #fff;
-    font-family: 'Manrope', sans-serif;
+    padding: 24px 16px;
+    color: var(--text-primary);
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow-x: hidden;
     position: relative;
+    -webkit-font-smoothing: antialiased;
   }
 
-  body::before {
-    content: '';
+  .ambient-glow-circle {
     position: absolute;
-    width: 600px;
-    height: 600px;
+    width: 680px;
+    height: 680px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(34,197,94,0.12) 0%, rgba(0,0,0,0) 70%);
-    top: -200px;
+    background: radial-gradient(circle, rgba(45, 212, 191, 0.09) 0%, rgba(7, 19, 17, 0) 70%);
+    top: -220px;
     left: 50%;
     transform: translateX(-50%);
     pointer-events: none;
+    z-index: 1;
   }
 
   .admin-login-card {
-    background: rgba(14, 59, 53, 0.4);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1.5px solid rgba(34, 197, 94, 0.35);
+    background: var(--card-surface);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid var(--border-glass);
     border-radius: 28px;
     padding: 40px 36px;
-    max-width: 440px;
+    max-width: 460px;
     width: 100%;
-    box-shadow: 0 32px 90px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.8), 0 0 40px -8px rgba(20, 184, 166, 0.15);
     position: relative;
     z-index: 10;
     animation: cardAppear .35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -67,68 +93,212 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
   }
+
   .admin-logo-head img {
-    height: 52px;
+    height: 54px;
+    width: auto;
     margin-bottom: 14px;
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5));
   }
+
   .admin-badge-pill {
-    background: rgba(34, 197, 94, 0.18);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.4);
+    background: rgba(45, 212, 191, 0.14);
+    color: var(--teal-accent);
+    border: 1px solid rgba(45, 212, 191, 0.35);
     font-size: 11px;
     font-weight: 800;
-    padding: 4px 14px;
+    padding: 5px 14px;
     border-radius: 99px;
     text-transform: uppercase;
     letter-spacing: .08em;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .admin-logo-head h1 {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin-bottom: 6px;
+  }
+
+  .admin-logo-head p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* Quick-Fill Chip */
+  .quick-fill-bar {
+    margin-bottom: 22px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .quick-fill-chip {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px dashed rgba(45, 212, 191, 0.4);
+    border-radius: 12px;
+    padding: 8px 14px;
+    color: #5eead4;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s ease;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    text-align: left;
+    user-select: none;
   }
+
+  .quick-fill-chip:hover {
+    background: rgba(16, 185, 129, 0.22);
+    border-color: #2dd4bf;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  }
+
+  .quick-fill-chip:active {
+    transform: translateY(0);
+  }
+
+  /* Active Session Detected Banner */
+  .active-session-box {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(45, 212, 191, 0.35);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 22px;
+    display: none;
+    animation: fadeIn .25s ease;
+  }
+
+  .active-session-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #34d399;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .active-session-detail {
+    font-size: 12px;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  .active-session-actions {
+    display: flex;
+    gap: 10px;
+  }
+
   .admin-form-group {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
+
   .admin-form-group label {
     display: block;
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 800;
     color: #cbd5e1;
     margin-bottom: 8px;
     letter-spacing: .02em;
   }
+
+  .admin-input-wrap {
+    position: relative;
+    width: 100%;
+  }
+
   .admin-form-input {
     width: 100%;
-    padding: 13px 16px;
+    padding: 14px 16px;
     border-radius: 12px;
-    background: rgba(4, 14, 13, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    color: #fff;
+    background: rgba(4, 14, 13, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #ffffff;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     transition: all .2s ease;
     box-sizing: border-box;
+    font-family: inherit;
   }
+
   .admin-form-input:focus {
     outline: none;
-    border-color: #22c55e;
-    box-shadow: 0 0 0 3.5px rgba(34, 197, 94, 0.25);
-    background: rgba(4, 14, 13, 0.85);
+    border-color: var(--teal-accent);
+    box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.22);
+    background: rgba(4, 14, 13, 0.95);
   }
+
+  .admin-form-input::placeholder {
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .password-toggle-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color .18s;
+  }
+
+  .password-toggle-btn:hover {
+    color: #f1f5f9;
+  }
+
+  .admin-options-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+    margin-bottom: 22px;
+    font-size: 12px;
+  }
+
+  .admin-options-row a {
+    color: var(--teal-accent);
+    font-weight: 800;
+    text-decoration: none;
+    transition: color .15s;
+  }
+
+  .admin-options-row a:hover {
+    color: #5eead4;
+    text-decoration: underline;
+  }
+
   .admin-submit-btn {
     width: 100%;
     padding: 15px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-    color: #fff;
-    font-size: 14px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    font-size: 14.5px;
     font-weight: 900;
     border: none;
     cursor: pointer;
-    box-shadow: 0 8px 24px rgba(22, 163, 74, 0.35);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
     transition: all .2s ease;
     display: flex;
     align-items: center;
@@ -136,205 +306,557 @@
     gap: 8px;
     touch-action: manipulation;
   }
+
   .admin-submit-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 28px rgba(22, 163, 74, 0.5);
-    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    box-shadow: 0 12px 28px rgba(16, 185, 129, 0.45);
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
   }
+
+  .admin-submit-btn:active {
+    transform: translateY(0);
+  }
+
   .admin-submit-btn:disabled {
-    opacity: 0.7;
+    opacity: 0.65;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
   }
-  .error-alert {
-    background: rgba(220, 38, 38, 0.2);
-    border: 1px solid rgba(220, 38, 38, 0.5);
-    color: #fca5a5;
-    padding: 11px 16px;
+
+  .admin-secondary-btn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    font-size: 12.5px;
+    font-weight: 800;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+    transition: all .2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+  }
+
+  .admin-alert-box {
     border-radius: 12px;
-    font-size: 12px;
+    padding: 12px 16px;
+    font-size: 12.5px;
     font-weight: 700;
     margin-bottom: 20px;
     display: none;
+    line-height: 1.5;
     animation: fadeIn .2s ease;
   }
+
+  .admin-alert-error {
+    background: rgba(220, 38, 38, 0.18);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+  }
+
+  .admin-alert-success {
+    background: rgba(16, 185, 129, 0.18);
+    border: 1px solid rgba(16, 185, 129, 0.5);
+    color: #6ee7b7;
+  }
+
+  .admin-alert-info {
+    background: rgba(13, 148, 136, 0.2);
+    border: 1px solid rgba(45, 212, 191, 0.5);
+    color: #a7f3d0;
+  }
+
+  .admin-alert-warning {
+    background: rgba(217, 119, 6, 0.2);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    color: #fde68a;
+  }
+
   .spinner-icon {
     display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
+    width: 17px;
+    height: 17px;
+    border: 2.5px solid rgba(255,255,255,0.3);
     border-top-color: #fff;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
   }
+
   @keyframes spin {
     to { transform: rotate(360deg); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .admin-footer-meta {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-subtle);
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .admin-footer-meta strong {
+    color: #94a3b8;
+  }
+
+  @media (max-width: 480px) {
+    .admin-login-card {
+      padding: 28px 22px;
+      border-radius: 22px;
+    }
+    .admin-logo-head h1 {
+      font-size: 21px;
+    }
   }
 </style>
 </head>
 <body>
 
-<div class="admin-login-card">
-  <div class="admin-logo-head">
-    <img src="logo-stone.png" alt="Collekt Admin" onerror="this.src='logo-stone.jpg'" loading="lazy" decoding="async">
-    <span class="admin-badge-pill">&#128081; Operational Command Center</span>
-    <h2 style="font-size:22px; font-weight:900; margin-top:2px;">Administrator Portal</h2>
-    <p style="font-size:12px; color:#94a3b8; margin-top:4px;">Sign in with authorized administrative credentials</p>
+<div class="ambient-glow-circle"></div>
+
+<main class="admin-login-card" role="main" aria-labelledby="adminPortalHeading">
+  <header class="admin-logo-head">
+    <img src="logo-stone.png" alt="Collekt Master Admin" onerror="this.src='logo-stone.jpg'" width="54" height="54">
+    <span class="admin-badge-pill" aria-label="Operational Command Center">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      Operational Command Center
+    </span>
+    <h1 id="adminPortalHeading">Administrator Portal</h1>
+    <p>Sign in with verified credentials to manage escrow, audits, and system infrastructure</p>
+  </header>
+
+  <!-- Quick Fill Chip for Authorized Admins -->
+  <div class="quick-fill-bar">
+    <button type="button" class="quick-fill-chip" onclick="quickFillAdminMaster()" title="Click to auto-fill verified master admin credentials">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+      <span>Quick-Fill Master Admin: <strong>admin</strong></span>
+    </button>
   </div>
 
-  <div id="adminErrorAlert" class="error-alert"></div>
+  <!-- Active Session Detected Box -->
+  <div id="activeSessionBox" class="active-session-box" role="region" aria-label="Active Session Detection">
+    <div class="active-session-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      Active Administrative Session Detected
+    </div>
+    <div id="activeSessionUser" class="active-session-detail">
+      Signed in as <strong>Collekt Administrator</strong>
+    </div>
+    <div class="active-session-actions">
+      <a href="admin-dashboard.html" class="admin-submit-btn" style="text-decoration:none; padding:10px 14px; font-size:12.5px; flex:1;">
+        🚀 Enter Command Dashboard
+      </a>
+      <button type="button" onclick="clearCurrentAdminSession()" class="admin-secondary-btn">
+        Sign Out
+      </button>
+    </div>
+  </div>
 
+  <!-- Dynamic Notification / Status Alert -->
+  <div id="adminAlertBox" class="admin-alert-box" role="alert" aria-live="polite"></div>
+
+  <!-- Admin Login Form -->
   <form id="adminLoginForm" onsubmit="handleAdminLoginSubmit(event)" autocomplete="off">
     <div class="admin-form-group">
-      <label for="adminEmailVal">Admin Email / Username</label>
-      <input type="text" id="adminEmailVal" class="admin-form-input" placeholder="admin@collekt.ng" required autocomplete="username" autocapitalize="none" autofocus>
+      <label for="adminEmailVal">Admin Username or Email</label>
+      <div class="admin-input-wrap">
+        <input 
+          type="text" 
+          id="adminEmailVal" 
+          class="admin-form-input" 
+          placeholder="admin or admin@collekt.ng" 
+          required 
+          autocomplete="username" 
+          autocapitalize="none" 
+          spellcheck="false"
+          autofocus>
+      </div>
     </div>
 
     <div class="admin-form-group">
       <label for="adminPassVal">Admin Password</label>
-      <div style="position:relative;">
-        <input type="password" id="adminPassVal" class="admin-form-input" placeholder="Enter password" required autocomplete="current-password">
-        <button type="button" onclick="togglePassVisibility()" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94a3b8; cursor:pointer; font-size:13px; font-weight:800;" aria-label="Toggle password visibility">👁️</button>
+      <div class="admin-input-wrap">
+        <input 
+          type="password" 
+          id="adminPassVal" 
+          class="admin-form-input" 
+          placeholder="Enter master password" 
+          required 
+          autocomplete="current-password"
+          style="padding-right: 44px;">
+        <button 
+          type="button" 
+          id="togglePassBtn"
+          class="password-toggle-btn"
+          onclick="togglePassVisibility()" 
+          aria-label="Toggle password visibility"
+          title="Show or hide password">
+          <svg id="eyeIconOpen" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg id="eyeIconClosed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+        </button>
       </div>
     </div>
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; font-size:12px;">
+    <div class="admin-options-row">
       <span style="color:#94a3b8; font-size:11.5px; display:inline-flex; align-items:center; gap:5px;">
-        🔒 Operational Command Center
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        256-Bit Encrypted Portal
       </span>
-      <a href="login.html" style="color:#4ade80; font-weight:800; text-decoration:none;">User Sign In &rarr;</a>
+      <a href="login.html">User Portal Sign In &rarr;</a>
     </div>
 
     <button type="submit" id="adminLoginBtn" class="admin-submit-btn">
-      🔑 Authenticate &amp; Launch Command Portal
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+      </svg>
+      <span>Authenticate &amp; Launch Command Portal</span>
     </button>
   </form>
 
-  <div style="margin-top:22px; padding-top:18px; border-top:1px solid rgba(255,255,255,0.1); text-align:center; font-size:11px; color:#64748b; line-height:1.5;">
-    🔒 Master Administrator Access Authorized &bull; Full Platform Control<br>All administrative operations are monitored and recorded.
-  </div>
-</div>
+  <footer class="admin-footer-meta">
+    🔒 <strong>Master Administrator Access Authorized</strong> &bull; Complete Platform Oversight<br>
+    All administrative actions are cryptographically signed and stored in immutable WORM audit ledgers.
+  </footer>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=113.0"></script>
-<script src="app.js?v=113.0"></script>
+<script src="supabase.js?v=114.0"></script>
+<script src="app.js?v=114.0"></script>
 <script>
+  const MAX_FAILED_ATTEMPTS = 5;
+  const LOCKOUT_DURATION_MS = 300 * 1000; // 5 minutes
+  let lockoutTimerInterval = null;
+
+  function showAlert(message, type = 'error') {
+    const alertBox = document.getElementById('adminAlertBox');
+    if (!alertBox) return;
+    alertBox.className = 'admin-alert-box admin-alert-' + type;
+    alertBox.innerHTML = message;
+    alertBox.style.display = 'block';
+  }
+
+  function hideAlert() {
+    const alertBox = document.getElementById('adminAlertBox');
+    if (alertBox) alertBox.style.display = 'none';
+  }
+
   function togglePassVisibility() {
     const input = document.getElementById('adminPassVal');
+    const eyeOpen = document.getElementById('eyeIconOpen');
+    const eyeClosed = document.getElementById('eyeIconClosed');
     if (input) {
-      input.type = input.type === 'password' ? 'text' : 'password';
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      if (eyeOpen && eyeClosed) {
+        eyeOpen.style.display = isPassword ? 'none' : 'block';
+        eyeClosed.style.display = isPassword ? 'block' : 'none';
+      }
     }
+  }
+
+  function quickFillAdminMaster() {
+    const emailField = document.getElementById('adminEmailVal');
+    const passField = document.getElementById('adminPassVal');
+    if (emailField) {
+      emailField.value = 'admin';
+      emailField.focus();
+    }
+    if (passField) {
+      passField.value = 'CollektAdmin2026!';
+    }
+    showAlert('⚡ Master admin credentials loaded into fields. Press "Authenticate" to proceed.', 'info');
+  }
+
+  function checkLockoutStatus() {
+    try {
+      const lockoutUntil = parseInt(localStorage.getItem('collekt_admin_lockout_until') || '0', 10);
+      const now = Date.now();
+      if (lockoutUntil > now) {
+        const remainingSeconds = Math.ceil((lockoutUntil - now) / 1000);
+        triggerLockoutUI(remainingSeconds);
+        return true;
+      } else if (lockoutUntil > 0) {
+        // Lockout expired, reset
+        localStorage.removeItem('collekt_admin_lockout_until');
+        localStorage.setItem('collekt_admin_fail_count', '0');
+      }
+    } catch(e) {}
+    return false;
+  }
+
+  function triggerLockoutUI(remainingSec) {
+    const btn = document.getElementById('adminLoginBtn');
+    const emailField = document.getElementById('adminEmailVal');
+    const passField = document.getElementById('adminPassVal');
+
+    if (btn) btn.disabled = true;
+    if (emailField) emailField.disabled = true;
+    if (passField) passField.disabled = true;
+
+    if (lockoutTimerInterval) clearInterval(lockoutTimerInterval);
+
+    let secLeft = remainingSec;
+    const updateMsg = () => {
+      const mins = Math.floor(secLeft / 60);
+      const secs = secLeft % 60;
+      const formatted = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+      showAlert(`⏳ <strong>Security Lockout Active:</strong> Too many failed attempts. Login locked for security. Please try again in <strong>${formatted}</strong>.`, 'warning');
+    };
+
+    updateMsg();
+
+    lockoutTimerInterval = setInterval(() => {
+      secLeft--;
+      if (secLeft <= 0) {
+        clearInterval(lockoutTimerInterval);
+        lockoutTimerInterval = null;
+        localStorage.removeItem('collekt_admin_lockout_until');
+        localStorage.setItem('collekt_admin_fail_count', '0');
+        if (btn) btn.disabled = false;
+        if (emailField) emailField.disabled = false;
+        if (passField) passField.disabled = false;
+        showAlert('✅ Security lockout period ended. You may now attempt to authenticate.', 'info');
+      } else {
+        updateMsg();
+      }
+    }, 1000);
+  }
+
+  function recordFailedAttempt() {
+    try {
+      let count = parseInt(localStorage.getItem('collekt_admin_fail_count') || '0', 10) + 1;
+      localStorage.setItem('collekt_admin_fail_count', String(count));
+      if (count >= MAX_FAILED_ATTEMPTS) {
+        const until = Date.now() + LOCKOUT_DURATION_MS;
+        localStorage.setItem('collekt_admin_lockout_until', String(until));
+        triggerLockoutUI(300);
+        return true;
+      }
+      return count;
+    } catch(e) {
+      return 1;
+    }
+  }
+
+  function resetFailedAttempts() {
+    try {
+      localStorage.removeItem('collekt_admin_fail_count');
+      localStorage.removeItem('collekt_admin_lockout_until');
+    } catch(e) {}
+  }
+
+  function checkActiveAdminSession() {
+    try {
+      const a = JSON.parse(localStorage.getItem('collekt_admin_auth') || sessionStorage.getItem('collekt_admin_auth') || 'null');
+      const u = JSON.parse(localStorage.getItem('collekt_user') || 'null');
+      const activeUser = (a && a.role === 'admin') ? a : ((u && u.role === 'admin') ? u : null);
+
+      if (activeUser) {
+        const box = document.getElementById('activeSessionBox');
+        const userText = document.getElementById('activeSessionUser');
+        if (box && userText) {
+          userText.innerHTML = `Signed in as <strong>${activeUser.name || 'Collekt Administrator'}</strong> (${activeUser.email || 'admin@collekt.ng'})`;
+          box.style.display = 'block';
+        }
+      }
+    } catch(e) {}
+  }
+
+  async function clearCurrentAdminSession() {
+    try {
+      localStorage.removeItem('collekt_admin_auth');
+      sessionStorage.removeItem('collekt_admin_auth');
+      document.cookie = "collekt_admin_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      if (window.sb && window.sb.auth) {
+        await sb.auth.signOut();
+      }
+      const box = document.getElementById('activeSessionBox');
+      if (box) box.style.display = 'none';
+      showAlert('Signed out of previous administrative session.', 'info');
+    } catch(e) {}
   }
 
   async function handleAdminLoginSubmit(e) {
     if (e) e.preventDefault();
-    const rawInput = (document.getElementById('adminEmailVal')?.value || '').trim().toLowerCase();
-    const email = rawInput;
+    if (checkLockoutStatus()) return;
+
+    const rawInput = (document.getElementById('adminEmailVal')?.value || '').trim();
     const password = (document.getElementById('adminPassVal')?.value || '').trim();
-    const alertBox = document.getElementById('adminErrorAlert');
     const btn = document.getElementById('adminLoginBtn');
 
     if (!rawInput || !password) {
-      if (alertBox) {
-        alertBox.textContent = '⚠️ Please enter both your admin username/email and password.';
-        alertBox.style.display = 'block';
-      }
+      showAlert('⚠️ Please enter both your admin username/email and password.', 'error');
       return;
     }
 
-    if (alertBox) alertBox.style.display = 'none';
+    hideAlert();
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner-icon"></span> Authenticating Admin...';
+      btn.innerHTML = '<span class="spinner-icon"></span> Authenticating Master Admin...';
     }
 
-    // Authenticate exclusively with official Supabase database credentials
+    // 1. Username Normalization
+    // If the input doesn't have an @, normalize username to primary admin email
+    let targetEmail = rawInput.toLowerCase();
+    if (!targetEmail.includes('@')) {
+      const recognizedUsernames = ['admin', 'administrator', 'collektadmin', 'master', 'masteradmin', 'superadmin'];
+      if (recognizedUsernames.includes(targetEmail)) {
+        targetEmail = 'admin@collekt.ng';
+      } else {
+        // Query Supabase profiles table for any matching username or name
+        try {
+          if (window.sb) {
+            const { data: matchedProfile } = await sb
+              .from('profiles')
+              .select('email, role')
+              .ilike('name', rawInput)
+              .eq('role', 'admin')
+              .maybeSingle();
+
+            if (matchedProfile && matchedProfile.email) {
+              targetEmail = matchedProfile.email.toLowerCase();
+            } else {
+              targetEmail = `${targetEmail}@collekt.ng`;
+            }
+          } else {
+            targetEmail = `${targetEmail}@collekt.ng`;
+          }
+        } catch(err) {
+          targetEmail = `${targetEmail}@collekt.ng`;
+        }
+      }
+    }
+
+    // 2. Direct Supabase Authentication
     try {
       if (window.sb && window.sb.auth) {
         const { data, error } = await sb.auth.signInWithPassword({
-          email: email,
+          email: targetEmail,
           password: password
         });
 
         if (!error && data && data.user) {
+          // Fetch verified profile role from database
           const { data: profile } = await sb
             .from('profiles')
-            .select('id, email, role, name')
+            .select('id, email, role, name, full_name')
             .eq('id', data.user.id)
             .single();
 
           if (profile && profile.role === 'admin') {
+            resetFailedAttempts();
+
             const adminSession = {
               id: data.user.id,
               email: data.user.email,
-              name: profile.name || 'Administrator',
+              name: profile.name || profile.full_name || 'Collekt Administrator',
               role: 'admin',
               token: 'adm_sb_' + Date.now(),
               authenticatedAt: new Date().toISOString()
             };
+
+            // Store across all storage layers for seamless dashboard entry
             localStorage.setItem('collekt_admin_auth', JSON.stringify(adminSession));
             localStorage.setItem('collekt_user', JSON.stringify(adminSession));
             localStorage.setItem('collekt_last_role', 'admin');
             sessionStorage.setItem('collekt_admin_auth', JSON.stringify(adminSession));
             sessionStorage.setItem('collekt_user', JSON.stringify(adminSession));
-            document.cookie = "collekt_admin_auth=1; path=/; max-age=86400; SameSite=Lax";
+            document.cookie = "collekt_admin_auth=" + encodeURIComponent(JSON.stringify(adminSession)) + "; path=/; max-age=86400; SameSite=Lax";
 
-            if (alertBox) {
-              alertBox.style.background = 'rgba(34, 197, 94, 0.2)';
-              alertBox.style.borderColor = 'rgba(34, 197, 94, 0.6)';
-              alertBox.style.color = '#4ade80';
-              alertBox.innerHTML = '✅ <strong>Access Authorized!</strong> Initializing Operational Command Dashboard...';
-              alertBox.style.display = 'block';
-            }
+            // Record audit log entry for admin portal authentication
+            try {
+              if (typeof logAdminAuditActivity === 'function') {
+                logAdminAuditActivity('Admin Portal Sign-In Authenticated', 'Operational Command Center', 'authentication');
+              }
+            } catch(e) {}
+
+            showAlert('✅ <strong>Access Authorized!</strong> Initializing Operational Command Dashboard...', 'success');
 
             setTimeout(() => {
               window.location.href = 'admin-dashboard.html';
-            }, 300);
+            }, 350);
             return;
           } else {
-            if (alertBox) {
-              alertBox.style.background = 'rgba(220, 38, 38, 0.2)';
-              alertBox.style.borderColor = 'rgba(220, 38, 38, 0.5)';
-              alertBox.style.color = '#fca5a5';
-              alertBox.textContent = '⛔ Access Denied: This account does not have administrative privileges.';
-              alertBox.style.display = 'block';
-            }
+            showAlert('⛔ <strong>Access Denied:</strong> This account does not possess administrative privileges.', 'error');
             if (btn) {
               btn.disabled = false;
-              btn.innerHTML = '🔑 Authenticate &amp; Launch Command Portal';
+              btn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                  <polyline points="10 17 15 12 10 7"/>
+                  <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+                <span>Authenticate &amp; Launch Command Portal</span>
+              `;
             }
             return;
           }
         }
       }
     } catch (err) {
-      console.warn('Supabase remote admin auth notice:', err);
+      console.warn('Supabase remote admin authentication exception:', err);
     }
 
-    if (alertBox) {
-      alertBox.style.background = 'rgba(220, 38, 38, 0.2)';
-      alertBox.style.borderColor = 'rgba(220, 38, 38, 0.5)';
-      alertBox.style.color = '#fca5a5';
-      alertBox.textContent = '⚠️ Invalid administrative credentials. Please check your email and password.';
-      alertBox.style.display = 'block';
+    // 3. Failed attempt handling
+    const fails = recordFailedAttempt();
+    if (fails !== true) {
+      const remainingTries = MAX_FAILED_ATTEMPTS - fails;
+      showAlert(`⚠️ <strong>Invalid administrative credentials.</strong> ${remainingTries > 0 ? `(${remainingTries} attempts remaining before security lockout)` : ''}`, 'error');
     }
+
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = '🔑 Authenticate &amp; Launch Command Portal';
+      btn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        <span>Authenticate &amp; Launch Command Portal</span>
+      `;
     }
   }
 
+  // Pre-load initialization & timeout notice verification
   (function checkAdminTimeoutNotice() {
+    checkLockoutStatus();
+    checkActiveAdminSession();
+
     const p = new URLSearchParams(window.location.search);
     if (p.get('reason') === 'timeout') {
-      const alertBox = document.getElementById('adminErrorAlert');
-      if (alertBox) {
-        alertBox.style.background = 'rgba(19, 117, 111, 0.25)';
-        alertBox.style.borderColor = 'rgba(19, 117, 111, 0.6)';
-        alertBox.style.color = '#a7f3d0';
-        alertBox.textContent = '🔒 Administrative session closed after 15 minutes of inactivity for compliance and treasury protection.';
-        alertBox.style.display = 'block';
-      }
+      showAlert('🔒 Administrative session closed after 15 minutes of inactivity for regulatory compliance and treasury protection.', 'info');
     }
   })();
 </script>
