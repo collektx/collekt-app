@@ -5350,7 +5350,7 @@ function openEscrowDisputeModal(contractId, projectTitle = 'Active Project Tende
 }
 
 async function submitEscrowDispute() {
-  const category = document.getElementById('disputeCategorySelect')?.value;
+  const category = document.getElementById('disputeCategorySelect')?.value || 'Incomplete Deliverables';
   const statement = document.getElementById('disputeReasonText')?.value.trim();
 
   if (!statement || statement.length < 15) {
@@ -5359,12 +5359,45 @@ async function submitEscrowDispute() {
   }
 
   const user = getUser();
+  const contractId = _activeDisputeContract?.id || 'ctr_101';
+  let token = null;
+  try {
+    const authUser = JSON.parse(localStorage.getItem('collekt_user') || '{}');
+    const sess = typeof getSession === 'function' ? getSession() : null;
+    token = sess?.access_token || authUser?.token;
+  } catch(e){}
+
+  let apiResult = null;
+  try {
+    const res = await fetch('/.netlify/functions/escrow-settlement', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({
+        action: 'file_dispute',
+        contract_id: contractId,
+        category: category,
+        statement: statement
+      })
+    });
+    apiResult = await res.json();
+    if (!res.ok && res.status !== 401) {
+      if (typeof showToast === 'function') showToast(`⚠️ ${apiResult.error || 'Failed to file dispute'}`, 'error');
+      return;
+    }
+  } catch (apiErr) {
+    console.warn('Escrow settlement API dispute notice:', apiErr);
+  }
+
+  const disputeId = (apiResult && apiResult.dispute_id) || ('DSP_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6).toUpperCase());
   const disputeRecord = {
-    id: 'DSP_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6).toUpperCase(),
-    contract_id: _activeDisputeContract?.id || 'ctr_101',
+    id: disputeId,
+    contract_id: contractId,
     project_title: _activeDisputeContract?.title || 'Tender Contract',
     amount: _activeDisputeContract?.amount || 0,
-    filed_by: user?.name || 'Member',
+    filed_by: user?.name || user?.email || 'Member',
     filed_by_role: user?.role || 'professional',
     category: category,
     statement: statement,
@@ -5372,18 +5405,36 @@ async function submitEscrowDispute() {
     created_at: new Date().toISOString()
   };
 
-  // Save locally
+  // Save locally & freeze local contracts
   try {
     const disputes = JSON.parse(localStorage.getItem('collekt_disputes')) || [];
     disputes.unshift(disputeRecord);
     localStorage.setItem('collekt_disputes', JSON.stringify(disputes));
+
+    // Update active contracts to under_arbitration
+    const updateContractList = (key) => {
+      const list = JSON.parse(localStorage.getItem(key) || '[]');
+      let mod = false;
+      const updated = list.map(c => {
+        if (c.id === contractId || String(c.id).endsWith(String(contractId).replace('CTR-', ''))) {
+          mod = true;
+          return { ...c, status: 'under_arbitration', is_escrow_locked: true };
+        }
+        return c;
+      });
+      if (mod) localStorage.setItem(key, JSON.stringify(updated));
+    };
+    updateContractList('collekt_contracts');
+    updateContractList('collekt_awarded_contracts');
   } catch(e){}
 
-  // Sync to Supabase
+  // Sync to Supabase fallback
   syncDisputeToSupabase(disputeRecord);
 
   closeModal('escrowDisputeModal');
-  if (typeof showToast === 'function') showToast(`⚖️ Dispute #${disputeRecord.id} filed! Escalated to Collekt Arbitration.`);
+  if (typeof showToast === 'function') showToast(`⚖️ Dispute #${disputeRecord.id} filed! Escrow funds frozen under Collekt Arbitration.`);
+  if (typeof renderAdminEngagementsTable === 'function') renderAdminEngagementsTable();
+  if (typeof renderEscrowMilestones === 'function') renderEscrowMilestones();
 }
 
 

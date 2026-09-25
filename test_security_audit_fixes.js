@@ -2513,6 +2513,354 @@ async function runSecurityAuditProbes() {
     assert(false, 'Resend webhook verification and corporate payout probe failed');
   }
 
+  // -------------------------------------------------------------
+  // PROBE 56: Escrow State Machine, Milestone Release Gate, Dispute Freeze Lock & Statutory Arbitration (OWASP ASVS V11.1 & V4.1)
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 56: Escrow State Machine, Dispute Freeze Lock & Statutory Arbitration ---');
+  try {
+    const escrowHandler = require('./netlify/functions/escrow-settlement').handler;
+    const { resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+    const supabaseClientMod = require('./netlify/functions/lib/supabase-client');
+
+    const tokenA = (await clientUserA.auth.getSession()).data?.session?.access_token;
+    assert(!!tokenA, 'User A token retrieved for escrow testing');
+
+    // 1. Method Not Allowed on GET
+    const getEscrow = await escrowHandler({
+      httpMethod: 'GET',
+      headers: { origin: 'https://collektng.com' }
+    });
+    assert(getEscrow.statusCode === 405, 'escrow-settlement GET returns HTTP 405 Method Not Allowed');
+
+    // 2. Preflight OPTIONS check
+    const optEscrow = await escrowHandler({
+      httpMethod: 'OPTIONS',
+      headers: { origin: 'https://collektng.com' }
+    });
+    assert(optEscrow.statusCode === 200 || optEscrow.statusCode === 204, 'escrow-settlement OPTIONS preflight returns HTTP 200/204');
+
+    // 3. Unauthenticated request returns HTTP 401
+    const unauthEscrow = await escrowHandler({
+      httpMethod: 'POST',
+      headers: { origin: 'https://collektng.com' },
+      body: JSON.stringify({ action: 'release_milestone', contract_id: 'ctr_test_101', amount: 5000 })
+    });
+    assert(unauthEscrow.statusCode === 401, 'escrow-settlement unauthenticated request rejected with HTTP 401');
+
+    // 4. Missing/invalid contract or amount returns HTTP 400
+    resetRateLimiterStore();
+    const badParamEscrow = await escrowHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({ action: 'release_milestone', contract_id: '', amount: -100 })
+    });
+    assert(badParamEscrow.statusCode === 400, 'escrow-settlement invalid parameters rejected with HTTP 400');
+
+    // 5. High-value milestone release (₦50,000+) without Step-Up MFA returns HTTP 403
+    resetRateLimiterStore();
+    const stepUpEscrow = await escrowHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({ action: 'release_milestone', contract_id: 'ctr_test_101', amount: 75000 })
+    });
+    assert(stepUpEscrow.statusCode === 403, 'High-value milestone release (₦50,000+) without Step-Up returns HTTP 403');
+    const stepUpBody = JSON.parse(stepUpEscrow.body);
+    assert(stepUpBody.requires_step_up === true, 'High-value release flags requires_step_up: true');
+
+    // 6. Mutual Dispute Freeze Lock (Contract under active dispute rejects release with HTTP 409 Conflict)
+    const originalFrom = supabaseClientMod.supabase.from;
+    supabaseClientMod.supabase.from = function(table) {
+      if (table === 'contracts') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: {
+                  id: 'ctr_disputed_999',
+                  company_id: userAId,
+                  company_email: 'client-a@collektng.com',
+                  pro_id: userBId,
+                  amount: 500000,
+                  status: 'under_arbitration',
+                  is_escrow_locked: true
+                },
+                error: null
+              })
+            })
+          })
+        };
+      }
+      if (table === 'disputes') {
+        return {
+          select: () => ({
+            eq: () => ({
+              eq: async () => ({
+                data: [{ id: 'DSP_TEST_999', status: 'under_arbitration' }],
+                error: null
+              })
+            })
+          })
+        };
+      }
+      return originalFrom.apply(this, arguments);
+    };
+
+    resetRateLimiterStore();
+    const frozenRelease = await escrowHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({
+        action: 'release_milestone',
+        contract_id: 'ctr_disputed_999',
+        milestone_name: 'Phase 1 Core',
+        amount: 25000,
+        pin: '1234'
+      })
+    });
+    assert(frozenRelease.statusCode === 409, 'Milestone release during active dispute FAILS with HTTP 409 Conflict (Mutual Lock)');
+    const frozenBody = JSON.parse(frozenRelease.body);
+    assert(frozenBody.locked_under_arbitration === true, 'Response flags locked_under_arbitration: true');
+
+    // Restore supabase.from
+    supabaseClientMod.supabase.from = originalFrom;
+
+    // 7. Non-party attempting to file dispute returns HTTP 403
+    supabaseClientMod.supabase.from = function(table) {
+      if (table === 'contracts') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: {
+                  id: 'ctr_foreign_111',
+                  company_id: '00000000-0000-0000-0000-000000000999',
+                  pro_id: '00000000-0000-0000-0000-000000000888',
+                  amount: 250000
+                },
+                error: null
+              })
+            })
+          })
+        };
+      }
+      return originalFrom.apply(this, arguments);
+    };
+
+    resetRateLimiterStore();
+    const foreignDispute = await escrowHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({
+        action: 'file_dispute',
+        contract_id: 'ctr_foreign_111',
+        category: 'Incomplete Deliverables',
+        statement: 'This contractor did not deliver required solar inverter schematics on time.'
+      })
+    });
+    assert(foreignDispute.statusCode === 403, 'Non-contracting party filing dispute is rejected with HTTP 403 Forbidden');
+
+    // Restore supabase.from
+    supabaseClientMod.supabase.from = originalFrom;
+
+    // 8. Non-admin attempting to arbitrate dispute returns HTTP 403
+    resetRateLimiterStore();
+    const unauthArbitration = await escrowHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({
+        action: 'arbitrate_dispute',
+        dispute_id: 'DSP_TEST_999',
+        resolution: 'full_release',
+        rationale: 'Arbitrator finding based on milestone delivery inspection'
+      })
+    });
+    assert(unauthArbitration.statusCode === 403, 'Non-admin user attempting to arbitrate dispute is rejected with HTTP 403 Forbidden');
+
+    console.log('  [PASS] Escrow release authentication, authorization & Step-Up MFA verified');
+    console.log('  [PASS] Mutual dispute freeze lock strictly enforced during active arbitration (HTTP 409)');
+    console.log('  [PASS] Contracting party authorization enforced on dispute filing (HTTP 403)');
+    console.log('  [PASS] Administrative RBAC verified on dispute settlement arbitration (HTTP 403)');
+  } catch (err) {
+    console.error('Probe 56 exception:', err);
+    assert(false, 'Escrow state machine & dispute freeze probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 57: Escrow Double-Entry Invariant Integrity & Balance Preservation (ISACA ITAF 2208 / COBIT DSS06)
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 57: Escrow Invariant Integrity & Conservation Defense ---');
+  try {
+    const escrowHandler = require('./netlify/functions/escrow-settlement').handler;
+    const { resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+    const supabaseClientMod = require('./netlify/functions/lib/supabase-client');
+
+    const tokenA = (await clientUserA.auth.getSession()).data?.session?.access_token;
+
+    // 1. Invariant Violation in Split Settlement (Sum does not match total disputed amount)
+    const originalFrom = supabaseClientMod.supabase.from;
+    supabaseClientMod.supabase.from = function(table) {
+      if (table === 'profiles') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({ data: { role: 'admin' }, error: null })
+            })
+          })
+        };
+      }
+      if (table === 'disputes') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: {
+                  id: 'DSP_INV_001',
+                  contract_id: 'ctr_inv_001',
+                  amount: 100000,
+                  status: 'under_arbitration'
+                },
+                error: null
+              })
+            })
+          })
+        };
+      }
+      if (table === 'contracts') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: { id: 'ctr_inv_001', amount: 100000 },
+                error: null
+              })
+            })
+          })
+        };
+      }
+      return originalFrom.apply(this, arguments);
+    };
+
+    resetRateLimiterStore();
+    const badSplitRes = await escrowHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({
+        action: 'arbitrate_dispute',
+        dispute_id: 'DSP_INV_001',
+        resolution: 'split',
+        contractor_amount: 60000,
+        client_refund_amount: 30000, // 60k + 30k = 90k != 100k!
+        rationale: 'Testing mathematical split conservation invariant check'
+      })
+    });
+    assert(badSplitRes.statusCode === 400, 'Split arbitration violating mathematical conservation is rejected with HTTP 400');
+    const badSplitBody = JSON.parse(badSplitRes.body);
+    assert(badSplitBody.error.includes('Split sum violation'), 'Error explains exact mathematical split sum invariant violation');
+
+    // 2. Double-Release Idempotency Check
+    supabaseClientMod.supabase.from = function(table) {
+      if (table === 'contracts') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: {
+                  id: 'ctr_dup_101',
+                  company_id: userAId,
+                  company_email: 'client-a@collektng.com',
+                  pro_id: userBId,
+                  amount: 50000,
+                  status: 'active'
+                },
+                error: null
+              })
+            })
+          })
+        };
+      }
+      if (table === 'disputes') {
+        return {
+          select: () => ({
+            eq: () => ({
+              eq: async () => ({ data: [], error: null })
+            })
+          })
+        };
+      }
+      if (table === 'transactions') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: {
+                  id: 'tx_already_paid',
+                  reference: 'ESC-REL-ctr_dup_101-Milestone_1',
+                  status: 'successful'
+                },
+                error: null
+              })
+            })
+          })
+        };
+      }
+      return originalFrom.apply(this, arguments);
+    };
+
+    resetRateLimiterStore();
+    const dupReleaseRes = await escrowHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({
+        action: 'release_milestone',
+        contract_id: 'ctr_dup_101',
+        milestone_name: 'Milestone 1',
+        amount: 25000,
+        pin: '1234'
+      })
+    });
+    assert(dupReleaseRes.statusCode === 409, 'Duplicate milestone release attempt rejected with HTTP 409 (Idempotency protected)');
+    const dupReleaseBody = JSON.parse(dupReleaseRes.body);
+    assert(dupReleaseBody.already_released === true, 'Duplicate release reports already_released: true');
+
+    // Restore supabase.from
+    supabaseClientMod.supabase.from = originalFrom;
+
+    // 3. Static Audit of Canonical Escrow Redirects in _redirects
+    const redirectsContent = fs.readFileSync(path.join(__dirname, '_redirects'), 'utf8');
+    assert(redirectsContent.includes('/api/escrow/settlement /.netlify/functions/escrow-settlement 200'), 'Canonical /api/escrow/settlement rewrite present in _redirects');
+    assert(redirectsContent.includes('/api/escrow-settlement /.netlify/functions/escrow-settlement 200'), 'Canonical /api/escrow-settlement rewrite present in _redirects');
+
+    // 4. Static Audit of wallet.html & app.js Escrow Hardening
+    const walletHtml = fs.readFileSync(path.join(__dirname, 'wallet.html'), 'utf8');
+    assert(walletHtml.includes('Under Arbitration (Locked)'), 'wallet.html displays Under Arbitration lock badge');
+    assert(walletHtml.includes('/.netlify/functions/escrow-settlement'), 'wallet.html dispatches release to serverless escrow-settlement API');
+
+    const appJs = fs.readFileSync(path.join(__dirname, 'app.js'), 'utf8');
+    assert(appJs.includes('/.netlify/functions/escrow-settlement'), 'app.js submitEscrowDispute calls serverless escrow-settlement API');
+    assert(appJs.includes("action: 'file_dispute'"), 'app.js sends file_dispute action');
+
+    const adminHtml = fs.readFileSync(path.join(__dirname, 'admin-dashboard.html'), 'utf8');
+    assert(adminHtml.includes('openArbitrationModal'), 'admin-dashboard.html contains official dispute arbitration modal');
+    assert(adminHtml.includes("action: 'arbitrate_dispute'"), 'admin-dashboard.html dispatches arbitrate_dispute to backend API');
+
+    // 5. Verify authentic ₦0.00 database balance preservation
+    const { data: realWallet } = await clientUserA
+      .from('wallets')
+      .select('available_balance')
+      .eq('user_id', userAId)
+      .single();
+    assert(Number(realWallet.available_balance) === 0, 'Production database wallet balance strictly preserved at ₦0.00');
+
+    console.log('  [PASS] Mathematical conservation strictly enforced on split settlements (HTTP 400)');
+    console.log('  [PASS] Milestone release idempotency verified against double-disbursal (HTTP 409)');
+    console.log('  [PASS] Canonical redirects in _redirects and frontend integrations verified');
+    console.log('  [PASS] Authentic ₦0.00 database balances preserved');
+  } catch (err) {
+    console.error('Probe 57 exception:', err);
+    assert(false, 'Escrow invariant and balance preservation probe failed');
+  }
+
+
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
 
 

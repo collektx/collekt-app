@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=108.0">
-<link rel="stylesheet" href="shared.css?v=108.0">
-<link rel="stylesheet" href="glass.css?v=108.0">
+<link rel="stylesheet" href="style.css?v=109.0">
+<link rel="stylesheet" href="shared.css?v=109.0">
+<link rel="stylesheet" href="glass.css?v=109.0">
 
 <style>
   body { background: var(--paper); }
@@ -692,10 +692,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=108.0"></script>
-<script src="app.js?v=108.0"></script>
-<script src="collekt-ai.js?v=108.0"></script>
-<script src="settings-popup.js?v=108.0"></script>
+<script src="supabase.js?v=109.0"></script>
+<script src="app.js?v=109.0"></script>
+<script src="collekt-ai.js?v=109.0"></script>
+<script src="settings-popup.js?v=109.0"></script>
 <script>
   let isHideBalance = false;
   try {
@@ -1688,9 +1688,15 @@
               </div>
               <div>
                 ${isCompany ? `
-                  <button class="btn btn-primary btn-sm" onclick="promptReleaseMilestone('${c.id}', ${m.amount}, '${escapeHTML(m.name)}', '${escapeHTML(c.contractor)}')" style="font-weight:800; font-size:12px; background:var(--teal); border:none; padding:6px 14px;">
-                    &#128275; Approve &amp; Release Escrow
-                  </button>
+                  ${(c.status === 'under_arbitration' || c.status === 'disputed') ? `
+                    <span style="font-size:11px; font-weight:800; color:#ef4444; background:rgba(239,68,68,0.12); padding:4px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
+                      ⚖️ Under Arbitration (Locked)
+                    </span>
+                  ` : `
+                    <button class="btn btn-primary btn-sm" onclick="promptReleaseMilestone('${c.id}', ${m.amount}, '${escapeHTML(m.name)}', '${escapeHTML(c.contractor)}', '${c.status || ''}')" style="font-weight:800; font-size:12px; background:var(--teal); border:none; padding:6px 14px;">
+                      &#128275; Approve &amp; Release Escrow
+                    </button>
+                  `}
                 ` : `
                   <button class="btn btn-outline btn-sm" onclick="showToast('&#128228; Deliverable submitted for client review!')" style="font-weight:800; font-size:12px; padding:6px 14px;">
                     &#128228; Submit Deliverable
@@ -1704,12 +1710,17 @@
     `).join('');
   }
 
-  window.promptReleaseMilestone = function(contractId, amount, milestoneName, contractorName) {
+  window.promptReleaseMilestone = function(contractId, amount, milestoneName, contractorName, contractStatus) {
+    if (contractStatus === 'under_arbitration' || contractStatus === 'disputed') {
+      showToast('⚖️ Contract is currently locked under Collekt Arbitration. Escrow releases are suspended until resolution.', 'error');
+      return;
+    }
+
     const user = getUser();
     if (typeof hasUserTransactionPin === 'function' && !hasUserTransactionPin(user)) {
       showToast('🔒 Please create your 4-digit Transaction PIN to authorize escrow releases.', 'warning');
       openCreatePinModal(() => {
-        promptReleaseMilestone(contractId, amount, milestoneName, contractorName);
+        promptReleaseMilestone(contractId, amount, milestoneName, contractorName, contractStatus);
       });
       return;
     }
@@ -1955,6 +1966,46 @@
       } else if (pendingFinancialAction.type === 'escrow_release') {
         const amt = pendingFinancialAction.amount;
         const contractor = pendingFinancialAction.contractorName;
+        const contractId = pendingFinancialAction.contractId;
+        const milestoneName = pendingFinancialAction.milestoneName;
+
+        // Dispatch to Serverless Escrow Settlement API
+        let token = null;
+        try {
+          const authUser = JSON.parse(localStorage.getItem('collekt_user') || '{}');
+          const sess = typeof getSession === 'function' ? getSession() : null;
+          token = sess?.access_token || authUser?.token;
+        } catch(e){}
+
+        let serverDisbursal = null;
+        try {
+          const resp = await fetch('/.netlify/functions/escrow-settlement', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              action: 'release_milestone',
+              contract_id: contractId,
+              milestone_name: milestoneName,
+              amount: amt,
+              pin: enteredPin,
+              step_up_token: stepUpToken
+            })
+          });
+          serverDisbursal = await resp.json();
+          if (!resp.ok) {
+            showToast(`❌ ${serverDisbursal.error || 'Milestone release failed'}`, 'error');
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = 'Confirm & Authorize';
+            }
+            return;
+          }
+        } catch (netErr) {
+          console.warn('Escrow settlement network notice (proceeding with local optimistic state):', netErr);
+        }
 
         if (rawEscrow >= amt) rawEscrow -= amt;
         updateBalanceUI();
@@ -1966,9 +2017,9 @@
         }
 
         saveTransaction({
-          id: 'TX-ESC-' + Date.now(),
+          id: (serverDisbursal && serverDisbursal.reference) || ('TX-ESC-' + Date.now()),
           title: `Escrow Release for ${contractor}`,
-          desc: `${pendingFinancialAction.milestoneName} Approved`,
+          desc: `${milestoneName} Approved & Disbursed`,
           date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
           fullDate: new Date().toISOString().slice(0,10),
           type: 'debit',

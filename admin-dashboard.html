@@ -50,9 +50,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=108.0">
-<link rel="stylesheet" href="shared.css?v=108.0">
-<link rel="stylesheet" href="glass.css?v=108.0">
+<link rel="stylesheet" href="style.css?v=109.0">
+<link rel="stylesheet" href="shared.css?v=109.0">
+<link rel="stylesheet" href="glass.css?v=109.0">
 
 <style>
   html, body {
@@ -564,7 +564,7 @@
           <div class="table-responsive" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
             <table class="data-table" style="min-width:700px;">
               <thead class="table-head">
-                <tr><th>Contract Title</th><th>Contractor</th><th>Employer</th><th>Escrow Value</th><th>Override Action</th></tr>
+                <tr><th>Contract Title</th><th>Contractor</th><th>Employer</th><th>Escrow Value</th><th>Status</th><th>Arbitration &amp; Override</th></tr>
               </thead>
               <tbody id="adminEngagementsTableBody">
                 <!-- Live JS populated -->
@@ -1096,8 +1096,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=108.0"></script>
-<script src="app.js?v=108.0"></script>
+<script src="supabase.js?v=109.0"></script>
+<script src="app.js?v=109.0"></script>
 <script>
   async function initAdminDashboard() {
     // 1. Verify Master Admin or live Supabase session
@@ -2649,15 +2649,21 @@
     } catch(e){}
   }
 
-  function renderAdminEngagementsTable() {
+  let _activeArbitrationCase = null;
+
+  async function renderAdminEngagementsTable() {
     const tbody = document.getElementById('adminEngagementsTableBody');
     if (!tbody) return;
 
     let contracts = [];
+    let disputes = [];
     try {
       const awarded = JSON.parse(localStorage.getItem('collekt_awarded_contracts') || '[]');
       const general = JSON.parse(localStorage.getItem('collekt_contracts') || '[]');
       const props = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+      const localDisputes = JSON.parse(localStorage.getItem('collekt_disputes') || '[]');
+      disputes = [...localDisputes];
+
       const awardedProps = props.filter(p => p.status === 'awarded' || p.status === 'accepted').map(p => ({
         id: 'CTR-' + (p.id || '').slice(-6).toUpperCase(),
         title: p.jobTitle || p.projectTitle || 'Awarded Tender Execution',
@@ -2667,11 +2673,23 @@
         status: 'Active Escrow'
       }));
       contracts = [...awarded, ...general, ...awardedProps];
+
+      // Query Supabase contracts & disputes if connected
+      if (window.sb) {
+        try {
+          const { data: dbDisputes } = await sb.from('disputes').select('*').limit(50);
+          if (dbDisputes && dbDisputes.length > 0) {
+            dbDisputes.forEach(d => {
+              if (!disputes.some(x => x.id === d.id)) disputes.push(d);
+            });
+          }
+        } catch(e){}
+      }
     } catch(e){}
 
     if (contracts.length === 0) {
       tbody.innerHTML = `
-        <tr><td colspan="5">
+        <tr><td colspan="6">
           <div class="empty-live-state">
             <div style="font-size:24px; margin-bottom:6px;">🤝</div>
             <div style="font-weight:800; color:var(--ink);">No Active Engagements or Disputes</div>
@@ -2683,18 +2701,326 @@
     }
 
     tbody.innerHTML = contracts.map(c => {
-      const cAmt = typeof formatNaira === 'function' && c.amount ? formatNaira(c.amount) : (c.amount ? `₦${c.amount}` : '₦0');
+      const cAmt = typeof formatNaira === 'function' && c.amount ? formatNaira(c.amount) : (c.amount ? `₦${Number(c.amount).toLocaleString()}` : '₦0');
+      const matchedDispute = disputes.find(d => 
+        d.contract_id === c.id || 
+        d.contract_id === String(c.id).replace('CTR-', '') || 
+        String(c.id).endsWith(String(d.contract_id || ''))
+      );
+
+      const isDisputed = (matchedDispute && matchedDispute.status === 'under_arbitration') || 
+                         c.status === 'under_arbitration' || 
+                         c.status === 'disputed';
+      const isSettled = (matchedDispute && String(matchedDispute.status).startsWith('resolved_')) || 
+                        c.status === 'settled' || 
+                        c.status === 'completed';
+
+      let statusBadge = `<span class="status-badge badge-verified">${escapeHTML(c.status || 'Active Escrow')} 🔒</span>`;
+      let actionCell = `<span style="font-size:11px; color:var(--muted); font-weight:700;">Milestone Pending</span>`;
+
+      if (isDisputed) {
+        statusBadge = `<span class="status-badge" style="background:rgba(239,68,68,0.15); color:#ef4444; font-weight:800; border:1px solid rgba(239,68,68,0.3);">⚖️ Under Arbitration</span>`;
+        const dispId = matchedDispute?.id || ('DSP_' + (c.id || '').replace(/[^a-zA-Z0-9]/g,''));
+        actionCell = `
+          <button class="btn btn-sm" onclick="openArbitrationModal('${c.id}', '${dispId}', ${c.amount || 0}, '${escapeHTML(c.title || 'Contract Execution')}', '${escapeHTML(c.contractor || 'Specialist')}', '${escapeHTML(c.company || 'Enterprise')}')" style="background:#dc2626; color:#fff; border:none; padding:4px 10px; font-size:11px; font-weight:800; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+            ⚖️ Arbitrate Dispute
+          </button>
+        `;
+      } else if (isSettled) {
+        const resType = matchedDispute?.status ? matchedDispute.status.replace('resolved_', '') : 'settled';
+        statusBadge = `<span class="status-badge" style="background:rgba(34,197,94,0.15); color:#16a34a; font-weight:800;">Settled (${resType}) 🤝</span>`;
+        actionCell = `<span style="font-size:11px; color:#16a34a; font-weight:800;">Ruling Applied ✅</span>`;
+      }
+
       return `
         <tr class="tx-row">
           <td style="font-weight:800; color:var(--ink);">${escapeHTML(c.title || 'EPC Execution Contract')}</td>
-          <td>${escapeHTML(c.company || 'Corporate Client')}</td>
           <td>${escapeHTML(c.contractor || c.proName || 'Professional')}</td>
+          <td>${escapeHTML(c.company || 'Corporate Client')}</td>
           <td style="font-weight:900; color:var(--teal);">${escapeHTML(String(cAmt))}</td>
-          <td><span class="status-badge badge-verified">${escapeHTML(c.status || 'Active Escrow')} 🔒</span></td>
+          <td>${statusBadge}</td>
+          <td>${actionCell}</td>
         </tr>
       `;
     }).join('');
   }
+
+  // ── ESCROW DISPUTE ARBITRATION MODAL ─────────────────────────
+  window.openArbitrationModal = function(contractId, disputeId, amount, title, contractor, employer) {
+    _activeArbitrationCase = {
+      contractId,
+      disputeId,
+      amount: Number(amount || 0),
+      title,
+      contractor,
+      employer
+    };
+
+    let modal = document.getElementById('adminArbitrationModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'adminArbitrationModal';
+      modal.className = 'modal-overlay';
+      modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; place-items:center; z-index:9999; padding:20px; backdrop-filter:blur(6px);';
+      modal.innerHTML = `
+        <div style="background:var(--paper); border:1px solid rgba(255,255,255,0.15); border-radius:24px; max-width:540px; width:100%; padding:28px; box-shadow:0 24px 60px rgba(0,0,0,0.5); font-family:'Manrope',sans-serif; position:relative;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="width:44px; height:44px; border-radius:14px; background:rgba(220,38,38,0.15); color:#ef4444; display:grid; place-items:center; font-size:22px;">⚖️</div>
+              <div>
+                <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin:0;" id="arbModalTitle">Escrow Dispute Arbitration</h3>
+                <div style="font-size:12px; color:var(--muted); margin-top:2px;">Arbitration &amp; Mediation Act 2023 Statutory Settlement</div>
+              </div>
+            </div>
+            <button onclick="closeArbitrationModal()" style="background:none; border:none; font-size:24px; color:var(--muted); cursor:pointer; line-height:1;">&times;</button>
+          </div>
+
+          <!-- Disputed Case Summary -->
+          <div style="background:rgba(0,0,0,0.04); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:16px; font-size:12px; display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted);">Dispute Reference:</span> <strong id="arbDisputeRef" style="color:var(--ink);">DSP-000</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted);">Specialist Contractor:</span> <strong id="arbContractorName" style="color:var(--ink);">Specialist</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted);">Corporate Employer:</span> <strong id="arbEmployerName" style="color:var(--ink);">Employer</strong></div>
+            <div style="display:flex; justify-content:space-between; border-top:1px solid var(--line); padding-top:6px;"><span style="font-weight:800; color:var(--ink);">Frozen Escrow Value:</span> <strong id="arbEscrowTotal" style="color:var(--forest); font-size:14px;">₦0</strong></div>
+          </div>
+
+          <!-- Resolution Type Selector -->
+          <div style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:800; color:var(--ink); display:block; margin-bottom:8px;">Arbitration Ruling Award</label>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+              <button type="button" class="btn btn-outline btn-sm arb-type-btn" id="arbTypeRelease" onclick="selectArbitrationType('full_release')" style="font-weight:800; font-size:11px; padding:10px 4px; text-align:center; border:2px solid var(--teal); background:rgba(19,117,111,0.1); color:var(--teal);">
+                Full Release<br><span style="font-size:9.5px; font-weight:600; opacity:0.8;">Specialist 100%</span>
+              </button>
+              <button type="button" class="btn btn-outline btn-sm arb-type-btn" id="arbTypeRefund" onclick="selectArbitrationType('full_refund')" style="font-weight:800; font-size:11px; padding:10px 4px; text-align:center;">
+                Full Refund<br><span style="font-size:9.5px; font-weight:600; opacity:0.8;">Employer 100%</span>
+              </button>
+              <button type="button" class="btn btn-outline btn-sm arb-type-btn" id="arbTypeSplit" onclick="selectArbitrationType('split')" style="font-weight:800; font-size:11px; padding:10px 4px; text-align:center;">
+                Custom Split<br><span style="font-size:9.5px; font-weight:600; opacity:0.8;">Partial Payout</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Split Inputs (Hidden by default) -->
+          <div id="arbSplitInputsGroup" style="display:none; margin-bottom:16px; background:rgba(0,0,0,0.02); border:1px solid var(--line); border-radius:12px; padding:12px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div>
+                <label style="font-size:11px; font-weight:700; color:var(--muted); display:block; margin-bottom:4px;">Contractor Award (₦)</label>
+                <input type="number" id="arbSplitProInput" class="form-input" style="font-size:13px; font-weight:800;" placeholder="0" oninput="recalcArbitrationSplit('pro')">
+              </div>
+              <div>
+                <label style="font-size:11px; font-weight:700; color:var(--muted); display:block; margin-bottom:4px;">Employer Refund (₦)</label>
+                <input type="number" id="arbSplitClientInput" class="form-input" style="font-size:13px; font-weight:800;" placeholder="0" oninput="recalcArbitrationSplit('client')">
+              </div>
+            </div>
+            <div id="arbSplitValidationMsg" style="font-size:11px; font-weight:800; color:var(--teal); margin-top:6px; text-align:right;">Conservation: ₦0 / ₦0</div>
+          </div>
+
+          <!-- Statutory Arbitrator Rationale -->
+          <div style="margin-bottom:18px;">
+            <label style="font-size:12px; font-weight:800; color:var(--ink); display:block; margin-bottom:6px;">Arbitrator Rationale &amp; Evidence Findings</label>
+            <textarea id="arbRationaleInput" class="form-input" rows="3" style="font-size:12px; width:100%;" placeholder="State specific evidence reviewed (waybills, inspection reports, milestone specifications) and basis for ruling..."></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="btn btn-outline" onclick="closeArbitrationModal()" style="flex:1; font-weight:800;">Cancel</button>
+            <button type="button" id="btnSubmitArbitration" class="btn btn-primary" onclick="submitDisputeArbitration()" style="flex:1.5; font-weight:900; background:#dc2626; border:none; box-shadow:0 6px 20px rgba(220,38,38,0.3);">
+              ⚖️ Issue Binding Award
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    // Populate modal fields
+    document.getElementById('arbDisputeRef').textContent = disputeId;
+    document.getElementById('arbContractorName').textContent = contractor;
+    document.getElementById('arbEmployerName').textContent = employer;
+    document.getElementById('arbEscrowTotal').textContent = '₦' + Number(amount).toLocaleString();
+    document.getElementById('arbRationaleInput').value = '';
+    selectArbitrationType('full_release');
+
+    modal.style.display = 'grid';
+  };
+
+  window.closeArbitrationModal = function() {
+    const modal = document.getElementById('adminArbitrationModal');
+    if (modal) modal.style.display = 'none';
+    _activeArbitrationCase = null;
+  };
+
+  let _currentArbitrationType = 'full_release';
+
+  window.selectArbitrationType = function(type) {
+    _currentArbitrationType = type;
+    const btns = document.querySelectorAll('.arb-type-btn');
+    btns.forEach(b => {
+      b.style.border = '1px solid var(--line)';
+      b.style.background = 'transparent';
+      b.style.color = 'var(--ink)';
+    });
+
+    const activeBtn = document.getElementById(type === 'full_release' ? 'arbTypeRelease' : (type === 'full_refund' ? 'arbTypeRefund' : 'arbTypeSplit'));
+    if (activeBtn) {
+      activeBtn.style.border = '2px solid var(--teal)';
+      activeBtn.style.background = 'rgba(19,117,111,0.1)';
+      activeBtn.style.color = 'var(--teal)';
+    }
+
+    const splitGroup = document.getElementById('arbSplitInputsGroup');
+    if (splitGroup) {
+      if (type === 'split') {
+        splitGroup.style.display = 'block';
+        const total = _activeArbitrationCase?.amount || 0;
+        const half = Math.floor(total / 2);
+        const proInput = document.getElementById('arbSplitProInput');
+        const clientInput = document.getElementById('arbSplitClientInput');
+        if (proInput) proInput.value = half;
+        if (clientInput) clientInput.value = total - half;
+        recalcArbitrationSplit('pro');
+      } else {
+        splitGroup.style.display = 'none';
+      }
+    }
+  };
+
+  window.recalcArbitrationSplit = function(source) {
+    if (!_activeArbitrationCase) return;
+    const total = _activeArbitrationCase.amount || 0;
+    const proInput = document.getElementById('arbSplitProInput');
+    const clientInput = document.getElementById('arbSplitClientInput');
+    const msg = document.getElementById('arbSplitValidationMsg');
+
+    let proVal = Number(proInput?.value || 0);
+    let clientVal = Number(clientInput?.value || 0);
+
+    if (source === 'pro') {
+      clientVal = Math.max(0, total - proVal);
+      if (clientInput) clientInput.value = clientVal;
+    } else {
+      proVal = Math.max(0, total - clientVal);
+      if (proInput) proInput.value = proVal;
+    }
+
+    if (msg) {
+      const sum = proVal + clientVal;
+      if (Math.abs(sum - total) < 0.01) {
+        msg.style.color = 'var(--teal)';
+        msg.textContent = `✅ Conservation Valid: ₦${sum.toLocaleString()} = ₦${total.toLocaleString()}`;
+      } else {
+        msg.style.color = '#ef4444';
+        msg.textContent = `⚠️ Invariant Error: ₦${sum.toLocaleString()} ≠ ₦${total.toLocaleString()}`;
+      }
+    }
+  };
+
+  window.submitDisputeArbitration = async function() {
+    if (!_activeArbitrationCase) return;
+
+    const btn = document.getElementById('btnSubmitArbitration');
+    const rationale = document.getElementById('arbRationaleInput')?.value.trim();
+
+    if (!rationale || rationale.length < 10) {
+      showToast('⚠️ Please enter an official rationale (minimum 10 characters).', 'warning');
+      return;
+    }
+
+    const total = _activeArbitrationCase.amount;
+    let proAmount = 0;
+    let clientAmount = 0;
+
+    if (_currentArbitrationType === 'full_release') {
+      proAmount = total;
+      clientAmount = 0;
+    } else if (_currentArbitrationType === 'full_refund') {
+      proAmount = 0;
+      clientAmount = total;
+    } else if (_currentArbitrationType === 'split') {
+      proAmount = Number(document.getElementById('arbSplitProInput')?.value || 0);
+      clientAmount = Number(document.getElementById('arbSplitClientInput')?.value || 0);
+      if (Math.abs((proAmount + clientAmount) - total) > 0.01) {
+        showToast('⚠️ Split amounts must equal the exact total disputed escrow amount.', 'error');
+        return;
+      }
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-icon"></span> Applying Ruling...';
+    }
+
+    let token = null;
+    try {
+      const adminAuth = JSON.parse(localStorage.getItem('collekt_admin_auth') || sessionStorage.getItem('collekt_admin_auth') || '{}');
+      const sess = typeof getSession === 'function' ? getSession() : null;
+      token = sess?.access_token || adminAuth?.token;
+    } catch(e){}
+
+    try {
+      const resp = await fetch('/.netlify/functions/escrow-settlement', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          action: 'arbitrate_dispute',
+          dispute_id: _activeArbitrationCase.disputeId,
+          resolution: _currentArbitrationType,
+          contractor_amount: proAmount,
+          client_refund_amount: clientAmount,
+          rationale: rationale
+        })
+      });
+
+      const resData = await resp.json();
+      if (!resp.ok) {
+        showToast(`❌ Arbitration failed: ${resData.error || 'Server error'}`, 'error');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '⚖️ Issue Binding Award';
+        }
+        return;
+      }
+
+      // Update local storage contracts & disputes
+      try {
+        const localDisputes = JSON.parse(localStorage.getItem('collekt_disputes') || '[]');
+        const updatedDisputes = localDisputes.map(d => {
+          if (d.id === _activeArbitrationCase.disputeId || d.contract_id === _activeArbitrationCase.contractId) {
+            return { ...d, status: 'resolved_' + _currentArbitrationType };
+          }
+          return d;
+        });
+        localStorage.setItem('collekt_disputes', JSON.stringify(updatedDisputes));
+
+        const updateContracts = (key) => {
+          const list = JSON.parse(localStorage.getItem(key) || '[]');
+          const updated = list.map(c => {
+            if (c.id === _activeArbitrationCase.contractId || String(c.id).endsWith(_activeArbitrationCase.contractId.replace('CTR-',''))) {
+              return { ...c, status: 'settled', is_escrow_locked: false };
+            }
+            return c;
+          });
+          localStorage.setItem(key, JSON.stringify(updated));
+        };
+        updateContracts('collekt_contracts');
+        updateContracts('collekt_awarded_contracts');
+      } catch(e){}
+
+      closeArbitrationModal();
+      showToast(`⚖️ Binding Arbitration Ruling Issued! Dispute ${_activeArbitrationCase.disputeId} settled.`);
+      await renderAdminEngagementsTable();
+
+    } catch (err) {
+      console.error('submitDisputeArbitration error:', err);
+      showToast(`❌ Error: ${err.message || 'Execution error'}`, 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '⚖️ Issue Binding Award';
+      }
+    }
+  };
 
   async function renderAdminTxLedger() {
     const tbody = document.getElementById('adminTxLedgerBody');

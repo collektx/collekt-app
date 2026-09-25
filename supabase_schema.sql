@@ -136,6 +136,9 @@ CREATE TABLE IF NOT EXISTS public.disputes (
 );
 
 ALTER TABLE public.disputes ADD COLUMN IF NOT EXISTS contract_id TEXT;
+ALTER TABLE public.disputes ADD COLUMN IF NOT EXISTS resolution_details JSONB DEFAULT NULL;
+ALTER TABLE public.disputes ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ DEFAULT NULL;
+
 
 -- -----------------------------------------------------------------
 -- 6. REVIEWS & RATINGS TABLE
