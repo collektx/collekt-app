@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-console.log('--- SYNCING DIST & BUMPING ASSET CACHE TO v=111.0 ---');
+console.log('--- SYNCING DIST & BUMPING ASSET CACHE TO v=112.0 ---');
 
 const rootDir = __dirname;
 const distDir = path.join(__dirname, 'dist');
@@ -17,10 +17,10 @@ const htmlFiles = fs.readdirSync(rootDir).filter(f => f.endsWith('.html'));
 htmlFiles.forEach(file => {
   const filePath = path.join(rootDir, file);
   let content = fs.readFileSync(filePath, 'utf8');
-  content = content.replace(/\?v=\d+\.\d+/g, '?v=111.0');
+  content = content.replace(/\?v=\d+\.\d+/g, '?v=112.0');
   fs.writeFileSync(filePath, content, 'utf8');
 });
-console.log(`Bumped cache version to ?v=111.0 across ${htmlFiles.length} root HTML files.`);
+console.log(`Bumped cache version to ?v=112.0 across ${htmlFiles.length} root HTML files.`);
 
 // 2. Sync all static files to dist/
 const filesToCopy = [
@@ -40,7 +40,9 @@ const filesToCopy = [
   'sitemap.xml',
   '_redirects',
   '_headers',
-  'netlify.toml'
+  'netlify.toml',
+  'DISASTER_RECOVERY_SLA.md',
+  'FINAL_IT_AUDIT_ASSURANCE_REPORT.md'
 ];
 
 filesToCopy.forEach(f => {
