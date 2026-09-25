@@ -125,28 +125,51 @@ exports.handler = async (event) => {
     }
 
     // Role-based authorization for company wallets
-    if (owner_type === 'company' && user_id && user_id !== effectiveOwnerId) {
-      const { data: membership } = await supabase
-        .from('company_members')
-        .select('role, status')
-        .eq('company_id', effectiveOwnerId)
-        .eq('user_id', user_id)
-        .maybeSingle();
-
-      if (!membership || membership.status !== 'active' || !['owner', 'admin', 'finance'].includes(membership.role)) {
+    let targetEntityId = user.id;
+    if (owner_type === 'company') {
+      const targetCompanyId = owner_id || body.company_id;
+      if (!targetCompanyId) {
         return {
-          statusCode: 403,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
-          body: JSON.stringify({ error: 'Unauthorized: only company owners, admins, or finance officers can authorize withdrawals.' })
+          statusCode: 400,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'], 'Vary': 'Origin' },
+          body: JSON.stringify({ error: 'Company ID (owner_id) is required for company withdrawals.' })
         };
       }
+
+      // Check whether user is company owner or has active finance/admin role
+      const { data: compCheck } = await supabase
+        .from('companies')
+        .select('owner_id')
+        .eq('id', targetCompanyId)
+        .maybeSingle();
+
+      const isDirectOwner = compCheck && compCheck.owner_id === user.id;
+
+      if (!isDirectOwner) {
+        const { data: membership } = await supabase
+          .from('company_members')
+          .select('role, status')
+          .eq('company_id', targetCompanyId)
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (!membership || membership.status !== 'active' || !['owner', 'admin', 'finance'].includes(membership.role)) {
+          return {
+            statusCode: 403,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'] },
+            body: JSON.stringify({ error: 'Unauthorized: only company owners, admins, or finance officers can authorize company withdrawals.' })
+          };
+        }
+      }
+
+      targetEntityId = targetCompanyId;
     }
 
     // Check available wallet balance
     const { data: wallet } = await supabase
       .from('wallets')
       .select('id, available_balance, escrow_balance')
-      .or(`owner_id.eq.${effectiveOwnerId},user_id.eq.${effectiveOwnerId}`)
+      .or(`owner_id.eq.${targetEntityId},user_id.eq.${targetEntityId}`)
       .single();
 
     if (!wallet || Number(wallet.available_balance || 0) < numAmount) {
@@ -161,7 +184,7 @@ exports.handler = async (event) => {
 
     // Atomic debit via stored procedure
     const { data: debitResult, error: debitError } = await supabase.rpc('debit_wallet_atomic', {
-      p_user_id: effectiveOwnerId,
+      p_user_id: targetEntityId,
       p_amount: numAmount
     });
 

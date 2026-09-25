@@ -2335,7 +2335,19 @@ async function resolveBankAccount({ account_number, bank_code }) {
       return { success: false, error: 'Please select a bank' };
     }
 
-    const res = await fetch(`/.netlify/functions/bank-resolve?account_number=${encodeURIComponent(cleanAcct)}&bank_code=${encodeURIComponent(cleanBank)}`);
+    let headers = {};
+    if (typeof window !== 'undefined' && window.sb?.auth) {
+      try {
+        const session = (await window.sb.auth.getSession())?.data?.session;
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+      } catch (e) {}
+    }
+
+    const res = await fetch(`/.netlify/functions/bank-resolve?account_number=${encodeURIComponent(cleanAcct)}&bank_code=${encodeURIComponent(cleanBank)}`, {
+      headers
+    });
     const data = await res.json();
     if (!res.ok || data.status !== 'success') {
       return {

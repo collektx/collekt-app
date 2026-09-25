@@ -9,7 +9,8 @@
 
 const https = require('https');
 
-const DEFAULT_GEMINI_KEY = process.env.GEMINI_API_KEY || Buffer.from('QVEuQWI4Uk42TGROWnk5OHFsNUs3ZmlxWVZRTjV0RkFlc2xrUUNlYWdiQlBtV2pITXVWRkE=', 'base64').toString('utf8');
+// Secure environment configuration: strictly require runtime environment variable
+const DEFAULT_GEMINI_KEY = process.env.GEMINI_API_KEY || '';
 
 const KOLLY_SYSTEM_PROMPT = `
 You are Kolly 🦖, the official intelligent AI Copilot and Mascot for Collekt (collekt.ng).
@@ -203,10 +204,22 @@ function localDraftCompanyMessage(context) {
 }
 
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin || req.headers.Origin || '';
+  const allowedOrigins = [
+    'https://collektng.com',
+    'https://collektng.xyz',
+    'https://main--collektnew.netlify.app',
+    'https://collektnew.netlify.app',
+    'http://localhost:8888',
+    'http://localhost:3000',
+    'http://127.0.0.1:5500'
+  ];
+  const allowOrigin = allowedOrigins.includes(origin) ? origin : 'https://collektng.com';
+
+  res.setHeader('Access-Control-Allow-Origin', allowOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+  res.setHeader('Vary', 'Origin');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -219,7 +232,12 @@ module.exports = async (req, res) => {
 
   try {
     const { action, prompt, job, candidates, user, apiKey, context } = req.body || {};
-    const keyToUse = apiKey || DEFAULT_GEMINI_KEY;
+
+    if (prompt && String(prompt).length > 5000) {
+      return res.status(400).json({ error: 'Prompt exceeds maximum length of 5000 characters' });
+    }
+
+    const keyToUse = (apiKey && String(apiKey).startsWith('AIza')) ? apiKey.trim() : DEFAULT_GEMINI_KEY;
 
     switch (action) {
       case 'generate_company_message':

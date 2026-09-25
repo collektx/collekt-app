@@ -324,9 +324,19 @@ async function generateCompanyCandidateMessage(context = {}) {
 
   // 2. Try Netlify serverless function
   try {
+    let authHeaders = { 'Content-Type': 'application/json' };
+    if (typeof window !== 'undefined' && window.sb?.auth) {
+      try {
+        const session = (await window.sb.auth.getSession())?.data?.session;
+        if (session?.access_token) {
+          authHeaders['Authorization'] = `Bearer ${session.access_token}`;
+        }
+      } catch (e) {}
+    }
+
     const res = await fetch('/.netlify/functions/ai-copilot', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders,
       body: JSON.stringify({
         action: 'generate_company_message',
         prompt: `Draft a message from ${companyName} to ${proName} for opportunity "${oppTitle}". Status: ${status}. Fee: ${fee ? '₦' + Number(fee).toLocaleString() : 'Not specified'}. Intent: ${intent}. ${customInstruction}`,

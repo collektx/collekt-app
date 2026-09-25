@@ -2302,6 +2302,217 @@ async function runSecurityAuditProbes() {
     assert(false, 'Disaster Recovery SLA and ancillary hardening probe failed');
   }
 
+  // -------------------------------------------------------------
+  // PROBE 53: AI Gateway Credential Sanitization, CORS & Auth Enforcement (CWE-798 / OWASP ASVS V14.5 & V4.1)
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 53: AI Gateway Credential Sanitization, CORS & Auth Enforcement ---');
+  try {
+    // 1. Static audit of api/gemini.js
+    const geminiCode = fs.readFileSync(path.join(__dirname, 'api/gemini.js'), 'utf8');
+    assert(!geminiCode.includes('QVEuQWI4Uk42TGROWnk5OHFsNUs3ZmlxWVZRTjV0RkFlc2xrUUNlYWdiQlBtV2pITXVWRkE='), 'api/gemini.js contains ZERO occurrences of hardcoded Base64 API keys (CWE-798)');
+    assert(!geminiCode.includes("res.setHeader('Access-Control-Allow-Origin', '*')"), 'api/gemini.js does not use wildcard CORS origin');
+    assert(geminiCode.includes("DEFAULT_GEMINI_KEY = process.env.GEMINI_API_KEY || ''"), 'api/gemini.js strictly references process.env.GEMINI_API_KEY');
+
+    // 2. Netlify ai-copilot.js authentication check
+    const aiCopilotHandler = require('./netlify/functions/ai-copilot').handler;
+    const { resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+
+    // Unauthenticated call returns HTTP 401
+    const unauthAi = await aiCopilotHandler({
+      httpMethod: 'POST',
+      headers: { origin: 'https://collektng.com' },
+      body: JSON.stringify({ prompt: 'Draft a contract', action: 'draft_escrow' })
+    });
+    assert(unauthAi.statusCode === 401, 'ai-copilot unauthenticated request returns HTTP 401');
+    const unauthBody = JSON.parse(unauthAi.body);
+    assert(unauthBody.error.includes('Authentication required'), 'ai-copilot explains authentication requirement');
+
+    // OPTIONS preflight check
+    const optAi = await aiCopilotHandler({
+      httpMethod: 'OPTIONS',
+      headers: { origin: 'https://collektng.com' }
+    });
+    assert(optAi.statusCode === 200 || optAi.statusCode === 204, 'ai-copilot preflight returns HTTP 200/204');
+
+    // Authenticated call advances past auth check (with mock environment key)
+    resetRateLimiterStore();
+    const tokenA = (await clientUserA.auth.getSession()).data?.session?.access_token;
+    const authAi = await aiCopilotHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({ prompt: 'Hello Kolly', action: 'chat' })
+    });
+    assert(authAi.statusCode !== 401, 'Authenticated user passes ai-copilot authentication guard');
+
+    console.log('  [PASS] Hardcoded Base64 Gemini API key eradicated (CWE-798 / OWASP ASVS V14.5)');
+    console.log('  [PASS] Wildcard CORS eliminated in api/gemini.js');
+    console.log('  [PASS] Mandatory authentication enforced on ai-copilot serverless gateway (HTTP 401)');
+  } catch (err) {
+    console.error('Probe 53 exception:', err);
+    assert(false, 'AI gateway credential and authentication probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 54: NUBAN Bank Resolution Authentication & Name Harvesting Defense (NDPA 2023 Sec 39 / CBN Cyber Guidelines Sec 4.1)
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 54: NUBAN Bank Resolution Authentication & Name Harvesting Defense ---');
+  try {
+    const bankResolveHandler = require('./netlify/functions/bank-resolve').handler;
+    const { resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+
+    // 1. Unauthenticated NUBAN lookup returns HTTP 401
+    const unauthResolve = await bankResolveHandler({
+      httpMethod: 'GET',
+      headers: { origin: 'https://collektng.com' },
+      queryStringParameters: { account_number: '0123456789', bank_code: '058' }
+    });
+    assert(unauthResolve.statusCode === 401, 'bank-resolve unauthenticated query returns HTTP 401');
+    const unauthBody = JSON.parse(unauthResolve.body);
+    assert(unauthBody.error.includes('Authentication required'), 'bank-resolve explains authentication requirement');
+
+    // 2. Missing params return HTTP 400 when authenticated
+    resetRateLimiterStore();
+    const tokenA = (await clientUserA.auth.getSession()).data?.session?.access_token;
+    const badParamResolve = await bankResolveHandler({
+      httpMethod: 'GET',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      queryStringParameters: { account_number: '123', bank_code: '058' }
+    });
+    assert(badParamResolve.statusCode === 400, 'Invalid NUBAN length returns HTTP 400');
+
+    // 3. Static audit of supabase.js resolveBankAccount
+    const sbCode = fs.readFileSync(path.join(__dirname, 'supabase.js'), 'utf8');
+    assert(sbCode.includes("headers['Authorization'] = `Bearer ${session.access_token}`"), 'supabase.js sends Authorization header with bearer token in resolveBankAccount');
+
+    console.log('  [PASS] Unauthenticated NUBAN account name harvesting blocked with HTTP 401 (NDPA 2023 Sec 39)');
+    console.log('  [PASS] 10-digit NUBAN validation strictly enforced');
+    console.log('  [PASS] Client frontend passes Bearer session token');
+  } catch (err) {
+    console.error('Probe 54 exception:', err);
+    assert(false, 'Bank resolution authentication probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 55: Resend Webhook Cryptographic Verification & Corporate Payout RBAC
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 55: Resend Webhook Cryptographic Verification & Corporate Payout RBAC ---');
+  try {
+    const { handler: resendHandler, verifyResendSignature } = require('./netlify/functions/resend-webhook');
+    const { handler: withdrawHandler } = require('./netlify/functions/paystack-withdraw');
+    const { resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+
+    // 1. Resend Webhook: Method Not Allowed on GET
+    const getResend = await resendHandler({
+      httpMethod: 'GET',
+      headers: { origin: 'https://collektng.com' }
+    });
+    assert(getResend.statusCode === 405, 'resend-webhook GET returns HTTP 405 Method Not Allowed');
+
+    // 2. Resend Webhook: Svix signature verification logic
+    const testSecret = 'whsec_dGVzdF9zZWNyZXRfa2V5X2Zvcl9hdWRpdF8yMDI2'; // base64 payload
+    const testPayload = JSON.stringify({ type: 'email.delivered', data: { to: 'engineer@collektng.com', id: 'resend-tx-123' } });
+    const nowTs = Math.floor(Date.now() / 1000).toString();
+    const svixId = 'msg_audit_test_999';
+
+    // Compute legitimate HMAC
+    const cryptoMod = require('crypto');
+    const secretBuf = Buffer.from('dGVzdF9zZWNyZXRfa2V5X2Zvcl9hdWRpdF8yMDI2', 'base64');
+    const validHmac = cryptoMod.createHmac('sha256', secretBuf).update(`${svixId}.${nowTs}.${testPayload}`).digest('base64');
+
+    const validHeaders = {
+      'svix-id': svixId,
+      'svix-timestamp': nowTs,
+      'svix-signature': `v1,${validHmac}`
+    };
+
+    assert(verifyResendSignature(validHeaders, testPayload, testSecret) === true, 'verifyResendSignature accepts valid cryptographic HMAC-SHA256 signature');
+
+    // Tampered payload fails verification
+    const tamperedPayload = JSON.stringify({ type: 'email.bounced', data: { to: 'hacker@malicious.com' } });
+    assert(verifyResendSignature(validHeaders, tamperedPayload, testSecret) === false, 'verifyResendSignature rejects tampered payload (CWE-347)');
+
+    // Replayed expired timestamp (> 300s) fails verification
+    const expiredHeaders = {
+      'svix-id': svixId,
+      'svix-timestamp': (parseInt(nowTs, 10) - 600).toString(),
+      'svix-signature': `v1,${validHmac}`
+    };
+    assert(verifyResendSignature(expiredHeaders, testPayload, testSecret) === false, 'verifyResendSignature rejects replayed timestamp exceeding 5-minute window');
+
+    // Handler with configured secret rejects forged request with HTTP 401
+    const origSecret = process.env.RESEND_WEBHOOK_SECRET;
+    process.env.RESEND_WEBHOOK_SECRET = testSecret;
+
+    resetRateLimiterStore();
+    const forgedResend = await resendHandler({
+      httpMethod: 'POST',
+      headers: { ...validHeaders, 'svix-signature': 'v1,d3Jvbmc=' },
+      body: testPayload
+    });
+    assert(forgedResend.statusCode === 401, 'resend-webhook rejects forged signature with HTTP 401');
+
+    // Handler accepts valid signature
+    resetRateLimiterStore();
+    const validResend = await resendHandler({
+      httpMethod: 'POST',
+      headers: validHeaders,
+      body: testPayload
+    });
+    assert(validResend.statusCode === 200, 'resend-webhook accepts valid Svix signature with HTTP 200');
+
+    // Restore environment
+    if (origSecret) process.env.RESEND_WEBHOOK_SECRET = origSecret;
+    else delete process.env.RESEND_WEBHOOK_SECRET;
+
+    // 3. Corporate Payout RBAC & BOLA in paystack-withdraw.js
+    const tokenA = (await clientUserA.auth.getSession()).data?.session?.access_token;
+
+    // Company withdrawal without owner_id returns HTTP 400
+    resetRateLimiterStore();
+    const noCompanyIdWithdraw = await withdrawHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({
+        amount: 2500,
+        owner_type: 'company',
+        bank_code: '058',
+        account_number: '0123456789'
+      })
+    });
+    assert(noCompanyIdWithdraw.statusCode === 400, 'Company withdrawal without company ID returns HTTP 400');
+
+    // Company withdrawal on unassociated company returns HTTP 403 (unauthorized)
+    resetRateLimiterStore();
+    const unauthCompanyWithdraw = await withdrawHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({
+        amount: 2500,
+        owner_type: 'company',
+        owner_id: '00000000-0000-0000-0000-000000000999',
+        bank_code: '058',
+        account_number: '0123456789'
+      })
+    });
+    assert(unauthCompanyWithdraw.statusCode === 403, 'Unauthorized company withdrawal returns HTTP 403 Forbidden');
+
+    // 4. Verify authentic ₦0.00 database balance preservation
+    const { data: realWallet } = await clientUserA
+      .from('wallets')
+      .select('available_balance')
+      .eq('user_id', userAId)
+      .single();
+    assert(Number(realWallet.available_balance) === 0, 'Production database wallet balance strictly preserved at ₦0.00');
+
+    console.log('  [PASS] Resend Svix HMAC-SHA256 signature verification validated (CWE-347)');
+    console.log('  [PASS] Webhook anti-replay timestamp window (5 min) enforced');
+    console.log('  [PASS] Corporate withdrawal RBAC & BOLA defense verified (HTTP 403)');
+    console.log('  [PASS] Authentic ₦0.00 database balance strictly preserved');
+  } catch (err) {
+    console.error('Probe 55 exception:', err);
+    assert(false, 'Resend webhook verification and corporate payout probe failed');
+  }
+
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
 
 

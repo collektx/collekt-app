@@ -1,6 +1,8 @@
 const https = require('https');
 const { createClient } = require('@supabase/supabase-js');
 const { enforceRateLimit } = require('./lib/rate-limiter');
+const { authenticateRequest } = require('./lib/auth-middleware');
+const { corsHeaders, preflightResponse } = require('./lib/cors');
 
 const supabaseUrl = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder';
@@ -36,39 +38,30 @@ CRITICAL ANTI-FABRICATION & FACTUAL ACCURACY RULES:
 };
 
 exports.handler = async (event) => {
-  const origin = event.headers.origin || event.headers.Origin || '';
-  const allowedOrigins = [
-    'https://collektng.xyz',
-    'https://collektng.com',
-    'https://main--collektnew.netlify.app',
-    'https://collektnew.netlify.app',
-    'http://localhost:8888',
-    'http://localhost:3000',
-    'http://127.0.0.1:5500'
-  ];
-  const allowOrigin = allowedOrigins.includes(origin) ? origin : 'https://collektng.com';
-
-  const headers = {
-    'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json'
-  };
-
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
+  if (event.httpMethod === 'OPTIONS') return preflightResponse(event);
+  const headers = corsHeaders(event);
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
 
   try {
+    const { user: authUser, error: authError } = await authenticateRequest(event);
+    if (authError || !authUser) {
+      return {
+        statusCode: 401,
+        headers,
+        body: JSON.stringify({ error: 'Authentication required to use AI Copilot services', details: authError })
+      };
+    }
+
     const body = JSON.parse(event.body || '{}');
     const prompt = (body.prompt || body.query || '').trim();
     const action = body.action || body.skill || 'chat';
     const context = body.context || '';
-    const user = body.user || null;
+    const user = body.user || { name: authUser.email, id: authUser.id };
 
-    // Abuse throttling: limit 20 AI requests/min per user/IP
+    // Abuse throttling: limit 20 AI requests/min per authenticated user
     const rateCheck = enforceRateLimit(event, {
       action: 'ai-copilot',
-      userId: user?.id || null,
+      userId: authUser.id,
       limit: 20,
       windowMs: 60 * 1000,
       customHeaders: headers

@@ -1,6 +1,7 @@
 const { getPaymentProvider } = require('./lib/payment-provider');
 const { enforceRateLimit } = require('./lib/rate-limiter');
 const { corsHeaders, preflightResponse } = require('./lib/cors');
+const { authenticateRequest } = require('./lib/auth-middleware');
 
 exports.handler = async (event) => {
   const method = event.httpMethod;
@@ -9,11 +10,25 @@ exports.handler = async (event) => {
     return preflightResponse(event);
   }
 
-  // Rate limiting to prevent NUBAN account enumeration (max 60 lookups/min per IP)
+  const headers = corsHeaders(event);
+
+  // Authentication requirement to prevent unauthenticated NUBAN scraping & harvesting (NDPA 2023 Sec 39 / CBN Framework Sec 4.1)
+  const { user, error: authError } = await authenticateRequest(event);
+  if (authError || !user) {
+    return {
+      statusCode: 401,
+      headers,
+      body: JSON.stringify({ error: 'Authentication required for bank account resolution', details: authError })
+    };
+  }
+
+  // Rate limiting to prevent NUBAN account enumeration (max 60 lookups/min per user/IP)
   const rateCheck = enforceRateLimit(event, {
     action: 'bank-resolve',
+    userId: user.id,
     limit: 60,
-    windowMs: 60 * 1000
+    windowMs: 60 * 1000,
+    customHeaders: headers
   });
   if (!rateCheck.allowed) {
     return rateCheck.response;
