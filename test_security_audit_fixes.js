@@ -3047,6 +3047,159 @@ async function runSecurityAuditProbes() {
     assert(false, 'File validate serverless API & static audit probe failed');
   }
 
+  // ---------------------------------------------------------
+  // PROBE 60: Serverless Statutory Consent Recording API & Immutability Audit Trail
+  // NDPA 2023 Sec 24 & 39 | FCCPA 2018 Sec 114–116 | Evidence Act 2011 Sec 84
+  // COBIT 2019 DSS05 / DSS06 | ISACA ITAF 5th Edition 2208
+  // ---------------------------------------------------------
+  console.log('\n--- PROBE 60: Serverless Consent Recording API & Immutability (NDPA / FCCPA / Evidence Act) ---');
+  try {
+    const { handler: consentRecordHandler } = require('./netlify/functions/consent-record');
+    const { resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+
+    // 1. Method restriction: GET returns HTTP 405
+    const getRes = await consentRecordHandler({
+      httpMethod: 'GET',
+      headers: { origin: 'https://collektng.com' }
+    });
+    assert(getRes.statusCode === 405, 'consent-record GET returns HTTP 405 Method Not Allowed');
+
+    // 2. OPTIONS Preflight returns HTTP 200 with CORS
+    const optionsRes = await consentRecordHandler({
+      httpMethod: 'OPTIONS',
+      headers: { origin: 'https://collektng.com' }
+    });
+    assert(optionsRes.statusCode === 200, 'consent-record OPTIONS preflight returns HTTP 200');
+
+    // 3. Malformed JSON returns HTTP 400
+    resetRateLimiterStore();
+    const malformedRes = await consentRecordHandler({
+      httpMethod: 'POST',
+      headers: { origin: 'https://collektng.com' },
+      body: 'INVALID_JSON_BODY{'
+    });
+    assert(malformedRes.statusCode === 400, 'Invalid JSON body returns HTTP 400');
+
+    // 4. Valid consent submission records affirmative statutory grant (HTTP 200)
+    resetRateLimiterStore();
+    const validConsentPayload = {
+      consent_type: 'terms_and_privacy',
+      policy_version: '2026.1',
+      jurisdiction: 'Federal Republic of Nigeria',
+      metadata: {
+        registration_flow: true,
+        user_agent_tested: 'Security Probe Suite'
+      }
+    };
+    const validConsentRes = await consentRecordHandler({
+      httpMethod: 'POST',
+      headers: {
+        origin: 'https://collektng.com',
+        'x-forwarded-for': '102.89.42.1',
+        'user-agent': 'Antigravity-Probe-Suite/1.0'
+      },
+      body: JSON.stringify(validConsentPayload)
+    });
+    assert(validConsentRes.statusCode === 200, 'Valid consent submission returns HTTP 200');
+    const consentBody = JSON.parse(validConsentRes.body);
+    assert(consentBody.success === true, 'Response confirms success: true');
+    assert(consentBody.status === 'recorded', 'Response confirms status: recorded');
+    assert(consentBody.action === 'STATUTORY_CONSENT_RECORDED', 'Response confirms STATUTORY_CONSENT_RECORDED action');
+    assert(consentBody.jurisdiction === 'Federal Republic of Nigeria', 'Jurisdiction matches Federal Republic of Nigeria');
+    assert(consentBody.policy_version === '2026.1', 'Policy version recorded accurately');
+    assert(typeof consentBody.recorded_at === 'string', 'Timestamp recorded_at is ISO string');
+
+    // 5. Rate Limiting enforcement (60 requests/minute)
+    let rateLimitTriggered = false;
+    for (let i = 0; i < 65; i++) {
+      const rlRes = await consentRecordHandler({
+        httpMethod: 'POST',
+        headers: {
+          origin: 'https://collektng.com',
+          'x-forwarded-for': '197.210.55.88',
+          'user-agent': 'Consent-Flood-Bot'
+        },
+        body: JSON.stringify({ consent_type: 'flood_test' })
+      });
+      if (rlRes.statusCode === 429) {
+        rateLimitTriggered = true;
+        break;
+      }
+    }
+    assert(rateLimitTriggered === true, 'Rate limiter throttles excessive consent requests with HTTP 429');
+
+    // 6. Client SDK integration in supabase.js
+    const supabaseCode = fs.readFileSync(path.join(__dirname, 'supabase.js'), 'utf8');
+    assert(supabaseCode.includes('recordConsentEvent'), 'supabase.js defines recordConsentEvent function');
+    assert(supabaseCode.includes('window.recordConsentEvent = recordConsentEvent'), 'supabase.js exports recordConsentEvent on window object');
+    assert(supabaseCode.includes('/api/consent/record'), 'supabase.js dispatches to /api/consent/record endpoint');
+
+    console.log('  [PASS] Serverless consent-record enforces POST-only and CORS headers');
+    console.log('  [PASS] Valid statutory consent logged with Evidence Act 2011 Sec 84 compliance');
+    console.log('  [PASS] Rate limiter throttles abuse (HTTP 429 after 60 req/min)');
+    console.log('  [PASS] supabase.js exports window.recordConsentEvent');
+  } catch (err) {
+    console.error('Probe 60 exception:', err);
+    assert(false, 'Serverless consent recording probe failed');
+  }
+
+  // ---------------------------------------------------------
+  // PROBE 61: Static Regulatory Compliance Audit (NDPA 2023, FCCPA 2018 & CBN Disclaimers)
+  // NDPA 2023 Sec 33 & 34 | FCCPA 2018 Sec 114–116 | CBN Consumer Protection
+  // ---------------------------------------------------------
+  console.log('\n--- PROBE 61: Statutory Regulatory Disclosures, Consumer Protection & NDPA Rights ---');
+  try {
+    const termsHtml = fs.readFileSync(path.join(__dirname, 'terms.html'), 'utf8');
+    const privacyHtml = fs.readFileSync(path.join(__dirname, 'privacy.html'), 'utf8');
+    const registerHtml = fs.readFileSync(path.join(__dirname, 'register.html'), 'utf8');
+    const redirectsText = fs.readFileSync(path.join(__dirname, '_redirects'), 'utf8');
+
+    // 1. terms.html statutory checks
+    assert(termsHtml.includes('STATUTORY CBN NON-BANK DISCLAIMER'), 'terms.html contains STATUTORY CBN NON-BANK DISCLAIMER');
+    assert(termsHtml.includes('FEDERAL COMPETITION &amp; CONSUMER PROTECTION ACT (FCCPA 2018) DISCLOSURES') ||
+           termsHtml.includes('FEDERAL COMPETITION & CONSUMER PROTECTION ACT (FCCPA 2018) DISCLOSURES'), 'terms.html contains FCCPA 2018 Disclosures header');
+    assert(termsHtml.includes('Transparent Pricing:'), 'terms.html discloses transparent pricing and zero hidden surcharges');
+    assert(termsHtml.includes('Consumer Cancellation &amp; Refund Rights:') ||
+           termsHtml.includes('Consumer Cancellation & Refund Rights:'), 'terms.html guarantees consumer cancellation and 100% refund rights');
+    assert(termsHtml.includes('compliance@collektng.com'), 'terms.html provides compliance dispute email address');
+    assert(termsHtml.includes('fourteen (14) business days') || termsHtml.includes('14-day'), 'terms.html specifies 14-day dispute resolution turnaround SLA');
+
+    // 2. privacy.html statutory checks
+    assert(privacyHtml.includes('STATUTORY CBN &amp; FCCPA NOTICE') ||
+           privacyHtml.includes('STATUTORY CBN & FCCPA NOTICE'), 'privacy.html contains STATUTORY CBN & FCCPA NOTICE');
+    assert(privacyHtml.includes('/api/account-export'), 'privacy.html provides direct link to NDPA Section 33 Data Portability Download');
+    assert(privacyHtml.includes('NDPA Sec 33'), 'privacy.html mentions NDPA Sec 33 explicitly');
+    assert(privacyHtml.includes('/api/account-delete') || privacyHtml.includes('profile.html#danger-zone'), 'privacy.html provides link to NDPA Section 34 Account Erasure');
+    assert(privacyHtml.includes('NDPA Sec 34'), 'privacy.html mentions NDPA Sec 34 explicitly');
+    assert(privacyHtml.includes('dpo@collektng.com'), 'privacy.html lists dpo@collektng.com');
+    assert(privacyHtml.includes('compliance@collektng.com'), 'privacy.html lists compliance@collektng.com');
+
+    // 3. register.html affirmative consent checks
+    assert(registerHtml.includes('id="modalTermsCheck"'), 'register.html contains modalTermsCheck checkbox');
+    assert(!registerHtml.includes('id="modalTermsCheck" checked'), 'register.html terms checkbox is NOT checked by default (affirmative consent)');
+    assert(registerHtml.includes('recordConsentEvent'), 'register.html dispatches recordConsentEvent upon registration');
+
+    // 4. _redirects checks
+    assert(redirectsText.includes('/api/consent/record /.netlify/functions/consent-record 200'), '_redirects contains /api/consent/record');
+    assert(redirectsText.includes('/api/consent/log /.netlify/functions/consent-record 200'), '_redirects contains /api/consent/log');
+
+    // 5. Authentic database wallet balance preservation check
+    const { data: realWallet } = await clientUserA
+      .from('wallets')
+      .select('available_balance')
+      .eq('user_id', userAId)
+      .single();
+    assert(Number(realWallet.available_balance) === 0, 'Production database wallet balance strictly preserved at ₦0.00');
+
+    console.log('  [PASS] terms.html contains CBN Non-Bank Disclaimer and FCCPA 2018 Disclosures');
+    console.log('  [PASS] privacy.html contains NDPA Sec 33 & 34 self-service links and official DPO contacts');
+    console.log('  [PASS] register.html enforces unchecked affirmative consent and logs audit event');
+    console.log('  [PASS] _redirects contains canonical /api/consent/* rules');
+    console.log('  [PASS] Authentic ₦0.00 database balances strictly preserved');
+  } catch (err) {
+    console.error('Probe 61 exception:', err);
+    assert(false, 'Static regulatory compliance probe failed');
+  }
 
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
 

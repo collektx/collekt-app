@@ -3726,6 +3726,44 @@ window.getSignedDocumentUrl = getSignedDocumentUrl;
 window.getOrGenerateDocumentViewUrl = getOrGenerateDocumentViewUrl;
 window.validateFileSignature = validateFileSignature;
 
+/**
+ * Record statutory consent audit event (NDPA 2023 / FCCPA 2018 / COBIT 2019)
+ */
+async function recordConsentEvent({ consentType = 'terms_and_privacy', policyVersion = '2026.1', metadata = {} } = {}) {
+  try {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    const session = typeof getSession === 'function' ? getSession() : null;
+    const headers = { 'Content-Type': 'application/json' };
+    if (session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.access_token}`;
+    }
+
+    const payload = {
+      user_id: user?.id || null,
+      consent_type: consentType,
+      policy_version: policyVersion,
+      jurisdiction: 'Federal Republic of Nigeria',
+      metadata: {
+        ...metadata,
+        client_timestamp: new Date().toISOString()
+      }
+    };
+
+    const res = await fetch('/api/consent/record', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    return json;
+  } catch (err) {
+    console.warn('[Consent Audit] Failed to record consent event:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+window.recordConsentEvent = recordConsentEvent;
+
 
 
 

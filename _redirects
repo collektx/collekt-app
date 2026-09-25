@@ -56,6 +56,8 @@ https://www.collektng.xyz/* https://collektng.com/:splat 301!
 /api/escrow-settlement /.netlify/functions/escrow-settlement 200
 /api/file-validate /.netlify/functions/file-validate 200
 /api/files/validate /.netlify/functions/file-validate 200
+/api/consent/record /.netlify/functions/consent-record 200
+/api/consent/log /.netlify/functions/consent-record 200
 
 
 
