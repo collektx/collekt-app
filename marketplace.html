@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=112.0">
-<link rel="stylesheet" href="shared.css?v=112.0">
-<link rel="stylesheet" href="glass.css?v=112.0">
+<link rel="stylesheet" href="style.css?v=113.0">
+<link rel="stylesheet" href="shared.css?v=113.0">
+<link rel="stylesheet" href="glass.css?v=113.0">
 <style>
 /* ═ LIVE MARKETPLACE STYLES ═ */
 html, body {
@@ -247,12 +247,67 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
 
 @media (max-width: 900px) {
   .app-main { margin-left: 0 !important; width: 100vw !important; max-width: 100vw !important; }
-  .mkt-container { padding: 16px 16px 40px; }
+  .mkt-container { padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 16px)) !important; }
   .mkt-hero-banner { padding: 24px 18px; }
   .mkt-hero-title { font-size: 24px; }
   .mkt-search-wrap { grid-template-columns: 1fr; }
   .mkt-search-btn { grid-column: auto; }
   .tenders-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .cats-bar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    gap: 8px !important;
+    padding-bottom: 6px !important;
+    scroll-snap-type: x proximity;
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+  }
+  .cats-bar::-webkit-scrollbar {
+    display: none !important;
+  }
+  .cat-chip {
+    flex-shrink: 0 !important;
+    scroll-snap-align: start;
+    white-space: nowrap !important;
+  }
+  .mkt-container {
+    padding: 14px 12px calc(96px + env(safe-area-inset-bottom, 16px)) 12px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .mkt-hero-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+  .mode-toggle-group {
+    width: 100% !important;
+    display: flex !important;
+  }
+  .mode-toggle-btn {
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 10px 12px !important;
+    font-size: 11.5px !important;
+  }
+  .mkt-hero-banner {
+    padding: 20px 16px !important;
+    border-radius: 18px !important;
+  }
+  .mkt-hero-title {
+    font-size: 22px !important;
+  }
+  .tender-card, .talent-card-v2 {
+    padding: 18px 16px !important;
+    border-radius: 18px !important;
+  }
 }
 </style>
 </head>
@@ -544,10 +599,10 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=112.0"></script>
-<script src="app.js?v=112.0"></script>
-<script src="collekt-ai.js?v=112.0"></script>
-<script src="settings-popup.js?v=112.0"></script>
+<script src="supabase.js?v=113.0"></script>
+<script src="app.js?v=113.0"></script>
+<script src="collekt-ai.js?v=113.0"></script>
+<script src="settings-popup.js?v=113.0"></script>
 <script>
   /* ═════════════════════════════════════════════════════════
      LIVE MARKETPLACE ENGINE v3.0
