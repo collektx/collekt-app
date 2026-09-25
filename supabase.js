@@ -1205,8 +1205,72 @@ if (window.sb && window.sb.auth) {
 ------------------------------------------------------*/
 
 /**
- * Upload any File, Blob, or Uint8Array to Supabase Storage
+ * Binary magic-byte signature and executable quarantine validator
+ * OWASP ASVS V12.1 / CWE-434 / CWE-436 | CBN Cybersecurity Framework Sec 4.1 & 4.2
  */
+async function validateFileSignature(fileOrBlob, declaredExt = '') {
+  if (!fileOrBlob) return { valid: false, error: 'No file provided' };
+  try {
+    const ext = (declaredExt || (fileOrBlob.name ? fileOrBlob.name.split('.').pop() : '')).toLowerCase();
+    let header = [];
+    if (typeof fileOrBlob.slice === 'function') {
+      const slice = fileOrBlob.slice(0, 64);
+      if (typeof slice.arrayBuffer === 'function') {
+        const buf = await slice.arrayBuffer();
+        header = Array.from(new Uint8Array(buf));
+      }
+    } else if (fileOrBlob instanceof Uint8Array || (typeof Buffer !== 'undefined' && Buffer.isBuffer(fileOrBlob))) {
+      header = Array.from(fileOrBlob.slice(0, 64));
+    }
+
+    if (header.length > 0) {
+      // Prohibited Windows PE / MZ: 0x4D 0x5A or 0x5A 0x4D
+      if (header.length >= 2 && ((header[0] === 0x4D && header[1] === 0x5A) || (header[0] === 0x5A && header[1] === 0x4D))) {
+        return { valid: false, error: 'Security Quarantine: Disguised Windows Executable (MZ / PE) header rejected (OWASP ASVS V12.1 / CWE-434).' };
+      }
+      // Prohibited Linux ELF: 0x7F 0x45 0x4C 0x46
+      if (header.length >= 4 && header[0] === 0x7F && header[1] === 0x45 && header[2] === 0x4C && header[3] === 0x46) {
+        return { valid: false, error: 'Security Quarantine: Disguised Linux ELF binary rejected (OWASP ASVS V12.1).' };
+      }
+      // Prohibited Mach-O / Java bytecode
+      if (header.length >= 4 && (
+        (header[0] === 0xFE && header[1] === 0xED && header[2] === 0xFA) ||
+        (header[0] === 0xCA && header[1] === 0xFE && header[2] === 0xBA && header[3] === 0xBE)
+      )) {
+        return { valid: false, error: 'Security Quarantine: Prohibited executable bytecode rejected.' };
+      }
+      // Prohibited Shebang: #! (0x23 0x21)
+      if (header.length >= 2 && header[0] === 0x23 && header[1] === 0x21) {
+        return { valid: false, error: 'Security Quarantine: Prohibited script shebang detected.' };
+      }
+
+      // Check PDF magic bytes
+      if (ext === 'pdf' && header.length >= 4) {
+        if (!(header[0] === 0x25 && header[1] === 0x50 && header[2] === 0x44 && header[3] === 0x46)) {
+          return { valid: false, error: 'Security Quarantine: File header does not match valid %PDF signature.' };
+        }
+      }
+      // Check PNG magic bytes
+      if (ext === 'png' && header.length >= 4) {
+        if (!(header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4E && header[3] === 0x47)) {
+          return { valid: false, error: 'Security Quarantine: File header does not match valid PNG signature.' };
+        }
+      }
+      // Check JPEG magic bytes
+      if ((ext === 'jpg' || ext === 'jpeg') && header.length >= 3) {
+        if (!(header[0] === 0xFF && header[1] === 0xD8 && header[2] === 0xFF)) {
+          return { valid: false, error: 'Security Quarantine: File header does not match valid JPEG signature.' };
+        }
+      }
+    }
+
+    return { valid: true };
+  } catch (err) {
+    console.warn('validateFileSignature check warning:', err);
+    return { valid: true };
+  }
+}
+
 /**
  * Upload any File, Blob, or Uint8Array to Supabase Storage
  */
@@ -1368,6 +1432,13 @@ async function uploadAndSaveUserDocument({ file, documentType, title, relatedEnt
   const rawName = file.name || `${documentType || 'document'}_${Date.now()}.pdf`;
   const cleanName = rawName.replace(/[^a-zA-Z0-9._-]/g, '_');
   const ext = (cleanName.split('.').pop() || 'pdf').toLowerCase();
+
+  // Validate magic bytes & quarantine disguised executables (OWASP ASVS V12.1 / CWE-434)
+  const validation = await validateFileSignature(file, ext);
+  if (!validation.valid) {
+    return { error: { message: validation.error } };
+  }
+
   const filePath = `${userId}/${documentType || 'docs'}/${Date.now()}_${cleanName}`;
   const mimeType = file.type || (ext === 'pdf' ? 'application/pdf' : ext === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/octet-stream');
 
@@ -1484,6 +1555,12 @@ async function uploadAndSaveMediaAsset({ file, dataUrl, assetType = 'avatar', ti
   }
 
   if (!uploadBlob) return { error: { message: 'No image file or Data URL provided' } };
+
+  const assetExt = (rawName.split('.').pop() || 'png').toLowerCase();
+  const validation = await validateFileSignature(uploadBlob, assetExt);
+  if (!validation.valid) {
+    return { error: { message: validation.error } };
+  }
 
   const cleanName = rawName.replace(/[^a-zA-Z0-9._-]/g, '_');
   const filePath = `${userId}/${assetType}/${Date.now()}_${cleanName}`;
@@ -3647,6 +3724,7 @@ window.sendAiMessageFromModal = sendAiMessageFromModal;
 window.executeWalletTransferInSupabase = executeWalletTransferInSupabase;
 window.getSignedDocumentUrl = getSignedDocumentUrl;
 window.getOrGenerateDocumentViewUrl = getOrGenerateDocumentViewUrl;
+window.validateFileSignature = validateFileSignature;
 
 
 

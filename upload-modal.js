@@ -405,6 +405,7 @@
         <div class="upload-formats-text">Supported formats: ${cfg.formats}</div>
         <div class="upload-size-text">Maximum file size: ${cfg.maxMB}MB</div>
       </div>
+      <div id="uploadSecurityAlert" style="display:none; margin-top:12px; padding:12px 14px; background:rgba(239,68,68,0.12); border:1.5px solid rgba(239,68,68,0.4); border-radius:10px; font-size:12px; color:#ef4444; font-weight:700; line-height:1.4;"></div>
 
       ${cfg.previewType === 'avatar' ? `
       <div class="avatar-preview-wrap" id="avatarPreviewWrap">
@@ -596,11 +597,133 @@
     });
   }
 
+  /* -- FILE INTEGRITY & MAGIC-BYTE VALIDATION (OWASP ASVS V12.1 / CWE-434) -- */
+  async function validateFileIntegrity(file, cfg = {}) {
+    if (!file) return { valid: false, error: 'No file provided.' };
+
+    let headerBytes = [];
+    try {
+      if (typeof file.slice === 'function') {
+        const slice = file.slice(0, 64);
+        if (typeof slice.arrayBuffer === 'function') {
+          const buffer = await slice.arrayBuffer();
+          headerBytes = Array.from(new Uint8Array(buffer));
+        }
+      }
+    } catch (e) {
+      console.warn('Binary slice read error:', e);
+    }
+
+    if (headerBytes.length > 0) {
+      // 1. Prohibited Executables:
+      // Windows PE (MZ: 0x4D 0x5A or 0x5A 0x4D)
+      if (headerBytes.length >= 2 && ((headerBytes[0] === 0x4D && headerBytes[1] === 0x5A) || (headerBytes[0] === 0x5A && headerBytes[1] === 0x4D))) {
+        return { valid: false, error: 'Security Alert: Prohibited Windows Executable (MZ / PE) header detected. Executable files are blocked (OWASP ASVS V12.1 / CWE-434).' };
+      }
+      // Linux ELF: 0x7F 0x45 0x4C 0x46
+      if (headerBytes.length >= 4 && headerBytes[0] === 0x7F && headerBytes[1] === 0x45 && headerBytes[2] === 0x4C && headerBytes[3] === 0x46) {
+        return { valid: false, error: 'Security Alert: Prohibited Linux ELF binary header detected. Upload blocked (OWASP ASVS V12.1).' };
+      }
+      // Mach-O / Java bytecode
+      if (headerBytes.length >= 4 && (
+        (headerBytes[0] === 0xFE && headerBytes[1] === 0xED && headerBytes[2] === 0xFA) ||
+        (headerBytes[0] === 0xCA && headerBytes[1] === 0xFE && headerBytes[2] === 0xBA && headerBytes[3] === 0xBE)
+      )) {
+        return { valid: false, error: 'Security Alert: Prohibited Mach-O / Java bytecode header detected. Upload blocked (OWASP ASVS V12.1).' };
+      }
+      // Shell Shebang: #! (0x23 0x21)
+      if (headerBytes.length >= 2 && headerBytes[0] === 0x23 && headerBytes[1] === 0x21) {
+        return { valid: false, error: 'Security Alert: Prohibited Shell Script shebang (#!) detected. Scripts are blocked.' };
+      }
+
+      // 2. Extension vs Magic Byte Correlation
+      const ext = (file.name.split('.').pop() || '').toLowerCase();
+      if (ext === 'pdf') {
+        const isPdf = headerBytes.length >= 4 && headerBytes[0] === 0x25 && headerBytes[1] === 0x50 && headerBytes[2] === 0x44 && headerBytes[3] === 0x46; // %PDF
+        if (!isPdf) {
+          return { valid: false, error: 'Invalid PDF format: File header does not match standard %PDF specification.' };
+        }
+      } else if (ext === 'png') {
+        const isPng = headerBytes.length >= 4 && headerBytes[0] === 0x89 && headerBytes[1] === 0x50 && headerBytes[2] === 0x4E && headerBytes[3] === 0x47;
+        if (!isPng) {
+          return { valid: false, error: 'Invalid PNG image: Header does not match PNG signature.' };
+        }
+      } else if (ext === 'jpg' || ext === 'jpeg') {
+        const isJpg = headerBytes.length >= 3 && headerBytes[0] === 0xFF && headerBytes[1] === 0xD8 && headerBytes[2] === 0xFF;
+        if (!isJpg) {
+          return { valid: false, error: 'Invalid JPEG image: Header does not match standard JPEG signature.' };
+        }
+      } else if (ext === 'webp') {
+        const isWebp = headerBytes.length >= 12 &&
+          headerBytes[0] === 0x52 && headerBytes[1] === 0x49 && headerBytes[2] === 0x46 && headerBytes[3] === 0x46 &&
+          headerBytes[8] === 0x57 && headerBytes[9] === 0x45 && headerBytes[10] === 0x42 && headerBytes[11] === 0x50;
+        if (!isWebp) {
+          return { valid: false, error: 'Invalid WebP image: Header does not match RIFF-WEBP signature.' };
+        }
+      } else if (['docx', 'xlsx', 'pptx'].includes(ext)) {
+        const isZip = headerBytes.length >= 4 && headerBytes[0] === 0x50 && headerBytes[1] === 0x4B;
+        if (!isZip) {
+          return { valid: false, error: `Invalid ${ext.toUpperCase()} document: Archive header (PK) missing.` };
+        }
+      } else if (['doc', 'xls', 'ppt'].includes(ext)) {
+        const isCfb = headerBytes.length >= 4 && headerBytes[0] === 0xD0 && headerBytes[1] === 0xCF && headerBytes[2] === 0x11 && headerBytes[3] === 0xE0;
+        if (!isCfb) {
+          return { valid: false, error: `Invalid ${ext.toUpperCase()} document: Compound binary format header missing.` };
+        }
+      } else if (ext === 'svg') {
+        try {
+          if (typeof file.slice === 'function' && typeof file.slice(0, 8192).text === 'function') {
+            const text = await file.slice(0, 8192).text();
+            if (/<script[\s>]/i.test(text) || /onload\s*=/i.test(text) || /onerror\s*=/i.test(text) || /javascript:/i.test(text) || /<!ENTITY/i.test(text)) {
+              return { valid: false, error: 'Security Alert: Malicious script handler or XML entity detected in SVG file.' };
+            }
+          }
+        } catch (e) {
+          console.warn('SVG text inspection error:', e);
+        }
+      }
+    }
+
+    return { valid: true };
+  }
+
   /* -- HANDLE FILE SELECTED -------------------------- */
-  function _handleFileSelected(file, cfg) {
+  async function _handleFileSelected(file, cfg) {
+    const alertBox = document.getElementById('uploadSecurityAlert');
+    if (alertBox) {
+      alertBox.style.display = 'none';
+      alertBox.textContent = '';
+    }
+
     /* Size check */
     if (file.size > cfg.maxBytes) {
-      alert(`File too large. Maximum size is ${cfg.maxMB}MB.`);
+      if (alertBox) {
+        alertBox.textContent = `File too large. Maximum size is ${cfg.maxMB}MB.`;
+        alertBox.style.display = 'block';
+      } else {
+        alert(`File too large. Maximum size is ${cfg.maxMB}MB.`);
+      }
+      return;
+    }
+
+    // Binary Magic-Byte & Polyglot Integrity Inspection (OWASP ASVS V12.1)
+    const integrity = await validateFileIntegrity(file, cfg);
+    if (!integrity.valid) {
+      _selectedFile = null;
+      _selectedDataURL = null;
+      const submitBtn = document.getElementById('uploadSubmitBtn');
+      if (submitBtn) submitBtn.setAttribute('disabled', 'true');
+      const preview = document.getElementById('cvPreview');
+      if (preview) preview.classList.remove('visible');
+      const avatarImg = document.getElementById('avatarPreview');
+      if (avatarImg) { avatarImg.src = ''; avatarImg.classList.remove('visible'); }
+
+      if (alertBox) {
+        alertBox.innerHTML = `🛡️ <strong>Security Quarantine:</strong> ${integrity.error}`;
+        alertBox.style.display = 'block';
+      } else {
+        alert(integrity.error);
+      }
       return;
     }
 
@@ -642,7 +765,13 @@
   }
 
   /* -- SIMULATE UPLOAD WITH PROGRESS ---------------- */
-  function _simulateUpload(file) {
+  async function _simulateUpload(file) {
+    const integrity = await validateFileIntegrity(file, TYPE_CONFIG[_currentType] || {});
+    if (!integrity.valid) {
+      alert(integrity.error);
+      return;
+    }
+
     const progressWrap = document.getElementById('uploadProgressWrap');
     const fill = document.getElementById('uploadProgressFill');
     const pct = document.getElementById('uploadProgressPct');
@@ -841,5 +970,6 @@
   /* -- EXPORT PUBLIC API ------------------------------- */
   window.openUploadModal = openUploadModal;
   window.closeUploadModal = closeUploadModal;
+  window.validateFileIntegrity = validateFileIntegrity;
 
 })();
