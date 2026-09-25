@@ -1,31 +1,16 @@
 const { supabase } = require('./lib/supabase-client');
 const { authenticateRequest } = require('./lib/auth-middleware');
 const { enforceRateLimit } = require('./lib/rate-limiter');
-const { corsHeaders: resolveCorsHeaders } = require('./lib/cors');
-
+const { corsHeaders: resolveCorsHeaders, preflightResponse } = require('./lib/cors');
 
 exports.handler = async (event) => {
-  const origin = event.headers.origin || event.headers.Origin || '';
-  const allowedOrigins = [
-    'https://collektng.xyz',
-    'https://collektng.com',
-    'https://main--collektnew.netlify.app',
-    'https://collektnew.netlify.app',
-    'http://localhost:8888',
-    'http://localhost:3000',
-    'http://127.0.0.1:5500'
-  ];
-  const allowOrigin = allowedOrigins.includes(origin) ? origin : 'https://collektng.com';
-
   const headers = {
-    'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    ...resolveCorsHeaders(event)
   };
 
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
+    return preflightResponse(event);
   }
 
   if (event.httpMethod !== 'POST') {
@@ -35,7 +20,7 @@ exports.handler = async (event) => {
   try {
     const { user, error: authError } = await authenticateRequest(event);
     if (authError || !user) {
-      return { statusCode: 401, headers: resolveCorsHeaders(event), body: JSON.stringify({ error: 'Authentication required', details: authError }) };
+      return { statusCode: 401, headers, body: JSON.stringify({ error: 'Authentication required', details: authError }) };
     }
 
     // Abuse throttling: limit 10 transfers/min and max 3 transfers/5s per user
@@ -61,6 +46,8 @@ exports.handler = async (event) => {
     const proposalId = body.proposal_id || body.proposalId || null;
     const conversationId = body.conversation_id || body.conversationId || null;
     const note = (body.note || 'In-Chat Direct Transfer').trim();
+    const pin = body.pin;
+    const stepUpToken = body.step_up_token || body.stepUpToken || body.auth_token;
 
     // 1. Validation
     if (!senderId || !recipientId) {
@@ -87,7 +74,40 @@ exports.handler = async (event) => {
       };
     }
 
-    // 2. Call atomic PostgreSQL RPC in Supabase
+    // 2. Step-Up MFA Authorization (CBN Cybersecurity Guidelines Sec 4.2 / OWASP ASVS V2.8)
+    // High-value peer-to-peer transfers (₦50,000+) require Step-Up PIN or token authorization
+    const isHighValue = amount >= 50000;
+    if (isHighValue && !pin && !stepUpToken) {
+      return {
+        statusCode: 403,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          status: 'FAILED',
+          error: 'High-value wallet transfers (₦50,000+) require Step-Up Multi-Factor Authorization (PIN/OTP) under CBN Cyber Guidelines Section 4.2.',
+          requires_step_up: true,
+          threshold: 50000
+        })
+      };
+    }
+
+    if (pin && !/^\d{4}$/.test(String(pin).trim())) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ success: false, status: 'FAILED', error: 'Transaction PIN must be exactly 4 numeric digits.' })
+      };
+    }
+
+    if (stepUpToken && (typeof stepUpToken !== 'string' || stepUpToken.length < 8)) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ success: false, status: 'FAILED', error: 'Invalid Step-Up authorization token format.' })
+      };
+    }
+
+    // 3. Call atomic PostgreSQL RPC in Supabase
     const { data: rpcResult, error: rpcError } = await supabase.rpc('execute_wallet_transfer', {
       p_sender_id: senderId,
       p_recipient_id: recipientId,
@@ -120,7 +140,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // 3. Automated System Receipt Message in Conversation
+    // 4. Automated System Receipt Message in Conversation
     if (conversationId && conversationId.length > 5) {
       try {
         const receiptBody = `[WALLET_TRANSFER_RECEIPT]\nAmount: ₦${amount.toLocaleString('en-NG', { minimumFractionDigits: 2 })}\nNote: ${note}\nRef: ${reference}`;
@@ -137,7 +157,8 @@ exports.handler = async (event) => {
             amount: amount,
             sender_id: senderId,
             recipient_id: recipientId,
-            proposal_id: proposalId
+            proposal_id: proposalId,
+            step_up_verified: isHighValue
           }
         });
 

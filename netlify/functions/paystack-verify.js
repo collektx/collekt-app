@@ -1,10 +1,27 @@
 const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
 const { corsHeaders, preflightResponse } = require('./lib/cors');
+const { enforceRateLimit } = require('./lib/rate-limiter');
 
 exports.handler = async (event) => {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...corsHeaders(event)
+  };
+
   if (event.httpMethod === 'OPTIONS') {
     return preflightResponse(event);
+  }
+
+  // Abuse throttling: limit 60 verify lookups/min per IP to prevent reference scanning
+  const rateCheck = enforceRateLimit(event, {
+    action: 'paystack-verify',
+    limit: 60,
+    windowMs: 60 * 1000,
+    customHeaders: headers
+  });
+  if (!rateCheck.allowed) {
+    return rateCheck.response;
   }
 
   // Support both GET (query param) and POST (body)
@@ -15,7 +32,7 @@ exports.handler = async (event) => {
   if (!reference) {
     return {
       statusCode: 400,
-      headers: corsHeaders(event),
+      headers,
       body: JSON.stringify({ error: 'Transaction reference is required' })
     };
   }
@@ -27,6 +44,34 @@ exports.handler = async (event) => {
       .select('*')
       .eq('reference', reference)
       .maybeSingle();
+
+    // Check if transaction is ALREADY processed & successful in database
+    const isAlreadyCredited = tx && (tx.status === 'successful' || tx.status === 'completed');
+
+    // Also check wallet ledger for existing credit entry with this reference
+    const { data: ledgerEntry } = await supabase
+      .from('wallet_ledger')
+      .select('id')
+      .eq('reference', reference)
+      .maybeSingle();
+
+    if (isAlreadyCredited || ledgerEntry) {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          status: 'successful',
+          verified: true,
+          already_processed: true,
+          reference: reference,
+          amount: tx?.amount || 0,
+          currency: tx?.currency || 'NGN',
+          payment_method: tx?.payment_method || 'card',
+          created_at: tx?.created_at || new Date().toISOString(),
+          message: 'Payment confirmed. Your Collekt wallet has already been credited.'
+        })
+      };
+    }
 
     const gateway = tx?.gateway || (reference.startsWith('OPAY') ? 'opay' : 'korapay');
     const provider = getPaymentProvider(gateway);
@@ -47,7 +92,7 @@ exports.handler = async (event) => {
 
       return {
         statusCode: 200,
-        headers: corsHeaders(event),
+        headers,
         body: JSON.stringify({
           status: verification.status || 'failed',
           verified: false,
@@ -61,7 +106,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // Payment is verified as SUCCESS on Paystack!
+    // Payment is verified as SUCCESS on Gateway!
     const ownerId = tx?.owner_id || tx?.user_id || verification.metadata?.owner_id || verification.metadata?.user_id;
 
     if (!ownerId) {
@@ -107,7 +152,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: corsHeaders(event),
+      headers,
       body: JSON.stringify({
         status: 'successful',
         verified: true,
@@ -127,7 +172,7 @@ exports.handler = async (event) => {
     console.error('paystack-verify error:', err);
     return {
       statusCode: 500,
-      headers: corsHeaders(event),
+      headers,
       body: JSON.stringify({ error: err.message || 'Payment verification failed' })
     };
   }

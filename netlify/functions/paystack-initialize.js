@@ -1,8 +1,14 @@
 const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
 const { corsHeaders, preflightResponse } = require('./lib/cors');
+const { enforceRateLimit } = require('./lib/rate-limiter');
 
 exports.handler = async (event) => {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...corsHeaders(event)
+  };
+
   if (event.httpMethod === 'OPTIONS') {
     return preflightResponse(event);
   }
@@ -10,9 +16,20 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: corsHeaders(event),
+      headers,
       body: JSON.stringify({ error: 'Method Not Allowed' })
     };
+  }
+
+  // Abuse throttling: limit 20 payment initializations/min per IP
+  const rateCheck = enforceRateLimit(event, {
+    action: 'paystack-initialize',
+    limit: 20,
+    windowMs: 60 * 1000,
+    customHeaders: headers
+  });
+  if (!rateCheck.allowed) {
+    return rateCheck.response;
   }
 
   try {

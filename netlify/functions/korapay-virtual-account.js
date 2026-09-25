@@ -2,32 +2,70 @@ const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
 const crypto = require('crypto');
 const { corsHeaders: buildCorsHeaders, preflightResponse } = require('./lib/cors');
+const { authenticateRequest } = require('./lib/auth-middleware');
+const { enforceRateLimit } = require('./lib/rate-limiter');
 
 exports.handler = async (event) => {
   const method = event.httpMethod;
 
   // CORS headers resolved from hardened allowlist (never wildcard)
-  const headers = buildCorsHeaders(event);
+  const headers = {
+    'Content-Type': 'application/json',
+    ...buildCorsHeaders(event)
+  };
 
   if (method === 'OPTIONS') {
     return preflightResponse(event);
   }
 
   try {
+    const { user, error: authError } = await authenticateRequest(event);
+    if (authError || !user) {
+      return {
+        statusCode: 401,
+        headers,
+        body: JSON.stringify({ status: false, error: 'Authentication required to access or provision virtual accounts', details: authError })
+      };
+    }
+
+    // Abuse throttling: limit 30 requests/min per user
+    const rateCheck = enforceRateLimit(event, {
+      action: 'korapay-virtual-account',
+      userId: user.id,
+      limit: 30,
+      windowMs: 60 * 1000,
+      customHeaders: headers
+    });
+    if (!rateCheck.allowed) {
+      return rateCheck.response;
+    }
+
     const koraProvider = getPaymentProvider('korapay');
+
+    // Helper: Verify caller authorization for target user (BOLA / IDOR defense)
+    const checkUserAuthorization = async (targetId) => {
+      if (user.id === targetId) return true;
+      const { data: callerProf } = await supabase.from('profiles').select('role, is_admin').eq('id', user.id).maybeSingle();
+      return !!(callerProf && (callerProf.role === 'admin' || callerProf.is_admin === true));
+    };
 
     // ─────────────────────────────────────────────────────────
     // 1. GET: Query Virtual Account by ownerId / accountReference / transactions
     // ─────────────────────────────────────────────────────────
     if (method === 'GET') {
       const q = event.queryStringParameters || {};
-      const ownerId = q.owner_id || q.user_id || q.userId || q.ownerId;
+      const ownerId = q.owner_id || q.user_id || q.userId || q.ownerId || user.id;
       const accountRef = q.account_reference || q.accountReference || q.ref;
       const accountNumber = q.account_number || q.accountNumber;
       const action = q.action || '';
 
       // Query transactions on Virtual Account
       if (action === 'transactions' && accountNumber) {
+        // Verify account ownership
+        const { data: matchedVba } = await supabase.from('virtual_accounts').select('owner_id').eq('account_number', accountNumber).maybeSingle();
+        if (matchedVba && !(await checkUserAuthorization(matchedVba.owner_id))) {
+          return { statusCode: 403, headers, body: JSON.stringify({ status: false, error: 'Forbidden: You cannot view transactions for another user account.' }) };
+        }
         const txData = await koraProvider.getVirtualAccountTransactions({
           account_number: accountNumber,
           start_date: q.start_date,
@@ -40,6 +78,10 @@ exports.handler = async (event) => {
 
       // Query by account reference directly from Korapay
       if (accountRef) {
+        const { data: matchedVba } = await supabase.from('virtual_accounts').select('owner_id').eq('provider_account_id', accountRef).maybeSingle();
+        if (matchedVba && !(await checkUserAuthorization(matchedVba.owner_id))) {
+          return { statusCode: 403, headers, body: JSON.stringify({ status: false, error: 'Forbidden: You cannot view virtual account details for another user.' }) };
+        }
         const vbaDetails = await koraProvider.getVirtualAccount(accountRef);
         if (vbaDetails) {
           return { statusCode: 200, headers, body: JSON.stringify({ status: true, data: vbaDetails }) };
@@ -53,6 +95,12 @@ exports.handler = async (event) => {
         if (!isUUID) {
           const hash = crypto.createHash('md5').update(String(effectiveOwnerId)).digest('hex');
           effectiveOwnerId = `${hash.substring(0,8)}-${hash.substring(8,12)}-4${hash.substring(13,16)}-a${hash.substring(17,20)}-${hash.substring(20,32)}`;
+        }
+
+        // BOLA / IDOR Verification
+        const authorized = await checkUserAuthorization(effectiveOwnerId);
+        if (!authorized) {
+          return { statusCode: 403, headers, body: JSON.stringify({ status: false, error: 'Forbidden: You cannot view virtual account details for another user.' }) };
         }
 
         const { data: vba } = await supabase
@@ -103,8 +151,18 @@ exports.handler = async (event) => {
       const body = JSON.parse(event.body || '{}');
       const action = body.action || '';
 
-      // Action: Credit Sandbox Virtual Account
+      // Action: Credit Sandbox Virtual Account (Restricted to Admins in Production)
       if (action === 'credit_sandbox') {
+        const { data: callerProf } = await supabase.from('profiles').select('role, is_admin').eq('id', user.id).maybeSingle();
+        const isAdmin = !!(callerProf && (callerProf.role === 'admin' || callerProf.is_admin === true));
+        if (!isAdmin && process.env.NODE_ENV === 'production') {
+          return {
+            statusCode: 403,
+            headers,
+            body: JSON.stringify({ status: false, error: 'Forbidden: Sandbox credit action is restricted to platform administrators.' })
+          };
+        }
+
         const { account_number, amount, currency } = body;
         const result = await koraProvider.creditSandboxVirtualAccount({
           account_number,
@@ -119,20 +177,22 @@ exports.handler = async (event) => {
       }
 
       // Action: Create Permanent Virtual Bank Account
-      const rawOwnerId = body.owner_id || body.user_id || body.ownerId || body.userId;
-      if (!rawOwnerId) {
-        return {
-          statusCode: 400,
-          headers,
-          body: JSON.stringify({ status: false, message: 'owner_id is required' })
-        };
-      }
-
+      const rawOwnerId = body.owner_id || body.user_id || body.ownerId || body.userId || user.id;
       let effectiveOwnerId = rawOwnerId;
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(effectiveOwnerId);
       if (!isUUID) {
         const hash = crypto.createHash('md5').update(String(effectiveOwnerId)).digest('hex');
         effectiveOwnerId = `${hash.substring(0,8)}-${hash.substring(8,12)}-4${hash.substring(13,16)}-a${hash.substring(17,20)}-${hash.substring(20,32)}`;
+      }
+
+      // BOLA / IDOR Verification on account provisioning
+      const authorized = await checkUserAuthorization(effectiveOwnerId);
+      if (!authorized) {
+        return {
+          statusCode: 403,
+          headers,
+          body: JSON.stringify({ status: false, error: 'Forbidden: You cannot provision virtual accounts for another user.' })
+        };
       }
 
       // Check existing in Supabase

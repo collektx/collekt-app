@@ -1,11 +1,42 @@
 const { corsHeaders: buildCorsHeaders, preflightResponse } = require('./lib/cors');
 const { supabase } = require('./lib/supabase-client');
 const { getPaymentProvider } = require('./lib/payment-provider');
+const { authenticateRequest } = require('./lib/auth-middleware');
+const { enforceRateLimit } = require('./lib/rate-limiter');
 
 exports.handler = async (event) => {
   const method = event.httpMethod;
+  const headers = {
+    'Content-Type': 'application/json',
+    ...buildCorsHeaders(event)
+  };
+
+  if (method === 'OPTIONS') {
+    return preflightResponse(event);
+  }
 
   try {
+    const { user, error: authError } = await authenticateRequest(event);
+    if (authError || !user) {
+      return {
+        statusCode: 401,
+        headers,
+        body: JSON.stringify({ error: 'Authentication required to view or provision virtual accounts', details: authError })
+      };
+    }
+
+    // Abuse throttling: max 30 virtual account requests/min per user
+    const rateCheck = enforceRateLimit(event, {
+      action: 'paystack-dva',
+      userId: user.id,
+      limit: 30,
+      windowMs: 60 * 1000,
+      customHeaders: headers
+    });
+    if (!rateCheck.allowed) {
+      return rateCheck.response;
+    }
+
     let body = {};
     let owner_id, user_id, owner_type, email, first_name, last_name, phone, company_name, name, displayName;
 
@@ -26,17 +57,14 @@ exports.handler = async (event) => {
     } else {
       return {
         statusCode: 405,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://collektng.com' },
+        headers,
         body: JSON.stringify({ error: 'Method Not Allowed' })
       };
     }
 
+    // Default to caller ID if not explicitly provided
     if (!owner_id) {
-      return {
-        statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://collektng.com' },
-        body: JSON.stringify({ error: 'Account owner ID is required' })
-      };
+      owner_id = user.id;
     }
 
     // Normalize owner_id to valid UUID format
@@ -45,6 +73,23 @@ exports.handler = async (event) => {
     if (!isUUID) {
       const hash = require('crypto').createHash('md5').update(String(effectiveOwnerId)).digest('hex');
       effectiveOwnerId = `${hash.substring(0,8)}-${hash.substring(8,12)}-4${hash.substring(13,16)}-a${hash.substring(17,20)}-${hash.substring(20,32)}`;
+    }
+
+    // BOLA / IDOR Authorization Guard (OWASP API1:2023 & NDPA 2023)
+    const isSelf = (user.id === effectiveOwnerId || user.id === owner_id);
+    let isAuthorized = isSelf;
+    if (!isAuthorized) {
+      const { data: callerProfile } = await supabase.from('profiles').select('role, is_admin').eq('id', user.id).maybeSingle();
+      if (callerProfile && (callerProfile.role === 'admin' || callerProfile.is_admin === true)) {
+        isAuthorized = true;
+      }
+    }
+    if (!isAuthorized) {
+      return {
+        statusCode: 403,
+        headers,
+        body: JSON.stringify({ error: 'Forbidden: You are not authorized to view or manage virtual accounts for another user.' })
+      };
     }
 
     // 1. Check if Dedicated Virtual Account already exists in database
@@ -69,11 +114,7 @@ exports.handler = async (event) => {
 
       return {
         statusCode: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': 'https://collektng.com',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-        },
+        headers,
         body: JSON.stringify({
           status: 'success',
           virtual_account: {
@@ -93,7 +134,7 @@ exports.handler = async (event) => {
     if (method === 'GET') {
       return {
         statusCode: 404,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://collektng.com' },
+        headers,
         body: JSON.stringify({ status: 'not_found', message: 'No dedicated virtual account provisioned yet' })
       };
     }
@@ -237,11 +278,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'https://collektng.com',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      },
+      headers,
       body: JSON.stringify({
         status: 'success',
         virtual_account: {
@@ -260,7 +297,7 @@ exports.handler = async (event) => {
     console.error('paystack-dva error:', err);
     return {
       statusCode: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://collektng.com' },
+      headers,
       body: JSON.stringify({ error: err.message || 'Virtual account provisioning failed' })
     };
   }

@@ -1855,6 +1855,303 @@ async function runSecurityAuditProbes() {
     assert(false, 'Webhook replay attack defense probe failed');
   }
 
+  // -------------------------------------------------------------
+  // PROBE 47: Virtual Bank Account Authentication & BOLA/IDOR Defense (OWASP API1:2023)
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 47: Virtual Account Authentication & BOLA/IDOR Defense ---');
+  try {
+    const paystackDvaHandler = require('./netlify/functions/paystack-dva').handler;
+    const koraVbaHandler = require('./netlify/functions/korapay-virtual-account').handler;
+    const { resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+
+    const tokenA = (await clientUserA.auth.getSession()).data?.session?.access_token;
+    assert(!!tokenA, 'User A access token retrieved');
+
+    // 1. Paystack DVA: Unauthenticated request returns HTTP 401
+    const dvaNoAuth = await paystackDvaHandler({
+      httpMethod: 'GET',
+      headers: {},
+      queryStringParameters: { owner_id: userAId }
+    });
+    assert(dvaNoAuth.statusCode === 401, 'paystack-dva unauthenticated request rejected with HTTP 401');
+
+    // 2. Paystack DVA: Horizontal IDOR attempt (User A requests User B's DVA) returns HTTP 403
+    resetRateLimiterStore();
+    const dvaIdor = await paystackDvaHandler({
+      httpMethod: 'GET',
+      headers: { Authorization: `Bearer ${tokenA}` },
+      queryStringParameters: { owner_id: userBId }
+    });
+    assert(dvaIdor.statusCode === 403, 'paystack-dva horizontal BOLA/IDOR access rejected with HTTP 403');
+    const dvaIdorBody = JSON.parse(dvaIdor.body);
+    assert(dvaIdorBody.error.includes('Forbidden'), 'paystack-dva explains forbidden cross-user access');
+
+    // 3. Korapay VBA: Unauthenticated request returns HTTP 401
+    const vbaNoAuth = await koraVbaHandler({
+      httpMethod: 'GET',
+      headers: {},
+      queryStringParameters: { owner_id: userAId }
+    });
+    assert(vbaNoAuth.statusCode === 401, 'korapay-virtual-account unauthenticated request rejected with HTTP 401');
+
+    // 4. Korapay VBA: Horizontal IDOR attempt returns HTTP 403
+    resetRateLimiterStore();
+    const vbaIdor = await koraVbaHandler({
+      httpMethod: 'GET',
+      headers: { Authorization: `Bearer ${tokenA}` },
+      queryStringParameters: { owner_id: userBId }
+    });
+    assert(vbaIdor.statusCode === 403, 'korapay-virtual-account horizontal BOLA/IDOR access rejected with HTTP 403');
+
+    // 5. Korapay VBA: Unauthorized sandbox credit action in production returns HTTP 403
+    const origNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    resetRateLimiterStore();
+    const sandboxCreditRes = await koraVbaHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}` },
+      body: JSON.stringify({ action: 'credit_sandbox', account_number: '1234567890', amount: 50000 })
+    });
+    assert(sandboxCreditRes.statusCode === 403, 'korapay credit_sandbox action blocked in production for non-admin (HTTP 403)');
+    if (origNodeEnv) process.env.NODE_ENV = origNodeEnv;
+    else delete process.env.NODE_ENV;
+
+    console.log('  [PASS] Virtual Account BOLA/IDOR vulnerability remediated (OWASP API1:2023)');
+    console.log('  [PASS] Mandatory Bearer authentication enforced across DVA & VBA endpoints');
+    console.log('  [PASS] Sandbox credit backdoors neutralized in production');
+  } catch (err) {
+    console.error('Probe 47 exception:', err);
+    assert(false, 'Virtual account BOLA/IDOR probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 48: Double-Credit Prevention & Reconciliation Idempotency
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 48: Double-Credit Prevention & Reconciliation Idempotency ---');
+  try {
+    const reconcileHandler = require('./netlify/functions/wallet-reconcile').handler;
+    const verifyHandler = require('./netlify/functions/paystack-verify').handler;
+    const supabaseClientMod = require('./netlify/functions/lib/supabase-client');
+    const { resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+
+    const tokenA = (await clientUserA.auth.getSession()).data?.session?.access_token;
+
+    // 1. Reconcile: Unauthenticated request returns HTTP 401
+    const unauthRec = await reconcileHandler({
+      httpMethod: 'POST',
+      headers: {},
+      body: JSON.stringify({ reference: 'REF-TEST-001' })
+    });
+    assert(unauthRec.statusCode === 401, 'wallet-reconcile unauthenticated request returns HTTP 401');
+
+    // 2. Reconcile: Reconciling another user's transaction returns HTTP 403
+    const originalFrom = supabaseClientMod.supabase.from;
+    const mockCompletedRef = 'COL-ALREADY-CREDITED-' + Date.now();
+
+    supabaseClientMod.supabase.from = function(table) {
+      if (table === 'transactions') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: {
+                  id: mockCompletedRef,
+                  reference: mockCompletedRef,
+                  status: 'successful',
+                  owner_id: userBId, // Belongs to User B!
+                  user_id: userBId,
+                  amount: 25000
+                },
+                error: null
+              })
+            })
+          })
+        };
+      }
+      return originalFrom.apply(this, arguments);
+    };
+
+    resetRateLimiterStore();
+    const otherUserRec = await reconcileHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}` },
+      body: JSON.stringify({ reference: mockCompletedRef })
+    });
+    assert(otherUserRec.statusCode === 403, 'wallet-reconcile blocks reconciling another user transaction (HTTP 403)');
+
+    // 3. Reconcile: Idempotency check returns already_reconciled and DOES NOT double-credit
+    supabaseClientMod.supabase.from = function(table) {
+      if (table === 'transactions') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: {
+                  id: mockCompletedRef,
+                  reference: mockCompletedRef,
+                  status: 'successful',
+                  owner_id: userAId, // Belongs to User A
+                  user_id: userAId,
+                  amount: 25000
+                },
+                error: null
+              })
+            })
+          })
+        };
+      }
+      return originalFrom.apply(this, arguments);
+    };
+
+    resetRateLimiterStore();
+    const duplicateRec = await reconcileHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}` },
+      body: JSON.stringify({ reference: mockCompletedRef })
+    });
+    assert(duplicateRec.statusCode === 200, 'wallet-reconcile duplicate request returns HTTP 200');
+    const dupRecBody = JSON.parse(duplicateRec.body);
+    assert(dupRecBody.status === 'already_reconciled', 'wallet-reconcile flags status: already_reconciled');
+    assert(dupRecBody.already_processed === true, 'wallet-reconcile reports already_processed: true');
+    assert(dupRecBody.message.includes('Zero duplicate credit applied'), 'Confirms zero duplicate credit applied');
+
+    // 4. Paystack Verify: Already processed transaction returns already_processed: true
+    resetRateLimiterStore();
+    const duplicateVerify = await verifyHandler({
+      httpMethod: 'GET',
+      headers: { origin: 'https://collektng.com' },
+      queryStringParameters: { reference: mockCompletedRef }
+    });
+    assert(duplicateVerify.statusCode === 200, 'paystack-verify duplicate query returns HTTP 200');
+    const dupVerifyBody = JSON.parse(duplicateVerify.body);
+    assert(dupVerifyBody.already_processed === true, 'paystack-verify reports already_processed: true');
+    assert(dupVerifyBody.message.includes('already been credited'), 'paystack-verify confirms already credited without duplicate call');
+
+    // Restore supabase.from
+    supabaseClientMod.supabase.from = originalFrom;
+
+    console.log('  [PASS] Double-credit prevention verified across reconciliation and verify handlers');
+    console.log('  [PASS] Reconcile endpoint secured with authentication and cross-user authorization');
+  } catch (err) {
+    console.error('Probe 48 exception:', err);
+    assert(false, 'Double-credit prevention probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 49: Peer-to-Peer Wallet Transfer Step-Up MFA (CBN Framework Sec 4.2)
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 49: Wallet Transfer Step-Up MFA & Validation ---');
+  try {
+    const transferHandler = require('./netlify/functions/wallet-transfer').handler;
+    const { resetRateLimiterStore } = require('./netlify/functions/lib/rate-limiter');
+
+    const tokenA = (await clientUserA.auth.getSession()).data?.session?.access_token;
+
+    // 1. Unauthenticated transfer returns HTTP 401
+    const unauthTransfer = await transferHandler({
+      httpMethod: 'POST',
+      headers: {},
+      body: JSON.stringify({ recipient_id: userBId, amount: 5000 })
+    });
+    assert(unauthTransfer.statusCode === 401, 'wallet-transfer unauthenticated request returns HTTP 401');
+
+    // 2. High-Value transfer (₦75,000 >= ₦50,000) WITHOUT PIN or Step-Up token returns HTTP 403
+    resetRateLimiterStore();
+    const highValNoMfa = await transferHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({ recipient_id: userBId, amount: 75000 })
+    });
+    assert(highValNoMfa.statusCode === 403, 'High-value wallet transfer without Step-Up returns HTTP 403');
+    const highValBody = JSON.parse(highValNoMfa.body);
+    assert(highValBody.requires_step_up === true, 'High-value transfer reports requires_step_up: true');
+    assert(highValBody.error.includes('CBN Cyber Guidelines Section 4.2'), 'Rejection cites CBN Cyber Guidelines Section 4.2');
+
+    // 3. High-Value transfer with invalid 3-digit PIN returns HTTP 400
+    resetRateLimiterStore();
+    const invalidPinTransfer = await transferHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({ recipient_id: userBId, amount: 75000, pin: '123' })
+    });
+    assert(invalidPinTransfer.statusCode === 400, 'Invalid PIN format on wallet transfer returns HTTP 400');
+    const invalidPinBody = JSON.parse(invalidPinTransfer.body);
+    assert(invalidPinBody.error.includes('4 numeric digits'), 'PIN error explains 4 numeric digits requirement');
+
+    // 4. Low-Value transfer (₦2,500 < ₦50,000) advances past Step-Up check to RPC execution
+    resetRateLimiterStore();
+    const lowValTransfer = await transferHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({ recipient_id: userBId, amount: 2500 })
+    });
+    // Low value advances past Step-Up (either 400 insufficient funds or 200/500 DB result, but NOT 403 requires_step_up)
+    assert(lowValTransfer.statusCode !== 403, 'Low-value transfer (₦2,500) bypasses Step-Up check');
+
+    // 5. High-Value transfer with valid PIN advances past Step-Up check
+    resetRateLimiterStore();
+    const validPinTransfer = await transferHandler({
+      httpMethod: 'POST',
+      headers: { Authorization: `Bearer ${tokenA}`, origin: 'https://collektng.com' },
+      body: JSON.stringify({ recipient_id: userBId, amount: 75000, pin: '1234' })
+    });
+    assert(validPinTransfer.statusCode !== 403, 'High-value transfer with valid 4-digit PIN passes Step-Up authorization');
+
+    console.log('  [PASS] High-value peer-to-peer transfers (₦50,000+) gated behind Step-Up MFA (HTTP 403)');
+    console.log('  [PASS] CBN Cyber Guidelines Section 4.2 compliant on in-app wallet transfers');
+  } catch (err) {
+    console.error('Probe 49 exception:', err);
+    assert(false, 'Wallet transfer Step-Up MFA probe failed');
+  }
+
+  // -------------------------------------------------------------
+  // PROBE 50: Financial Canonical Routes & Static Security Audit
+  // -------------------------------------------------------------
+  console.log('\n--- PROBE 50: Financial Canonical Routes & Static Security Audit ---');
+  try {
+    const redirectsContent = fs.readFileSync(path.join(__dirname, '_redirects'), 'utf8');
+
+    // 1. Verify canonical routing
+    assert(redirectsContent.includes('/api/wallet-reconcile /.netlify/functions/wallet-reconcile 200'), 'Canonical /api/wallet-reconcile rewrite present in _redirects');
+    assert(redirectsContent.includes('/api/payments/reconcile /.netlify/functions/wallet-reconcile 200'), 'Canonical /api/payments/reconcile rewrite present in _redirects');
+    assert(redirectsContent.includes('/api/payments/initialize /.netlify/functions/paystack-initialize 200'), 'Canonical /api/payments/initialize rewrite present in _redirects');
+    assert(redirectsContent.includes('/api/payments/verify /.netlify/functions/paystack-verify 200'), 'Canonical /api/payments/verify rewrite present in _redirects');
+    assert(redirectsContent.includes('/api/payments/dva /.netlify/functions/paystack-dva 200'), 'Canonical /api/payments/dva rewrite present in _redirects');
+
+    // 2. Static Audit: Rate limiting enforced in newly hardened financial files
+    const dvaCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/paystack-dva.js'), 'utf8');
+    const koraVbaCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/korapay-virtual-account.js'), 'utf8');
+    const recCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/wallet-reconcile.js'), 'utf8');
+    const verifyCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/paystack-verify.js'), 'utf8');
+    const initCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/paystack-initialize.js'), 'utf8');
+    const transferCode = fs.readFileSync(path.join(__dirname, 'netlify/functions/wallet-transfer.js'), 'utf8');
+
+    assert(dvaCode.includes('enforceRateLimit'), 'paystack-dva.js includes enforceRateLimit');
+    assert(dvaCode.includes('authenticateRequest'), 'paystack-dva.js includes authenticateRequest');
+    assert(koraVbaCode.includes('enforceRateLimit'), 'korapay-virtual-account.js includes enforceRateLimit');
+    assert(koraVbaCode.includes('authenticateRequest'), 'korapay-virtual-account.js includes authenticateRequest');
+    assert(recCode.includes('enforceRateLimit'), 'wallet-reconcile.js includes enforceRateLimit');
+    assert(recCode.includes('authenticateRequest'), 'wallet-reconcile.js includes authenticateRequest');
+    assert(verifyCode.includes('enforceRateLimit'), 'paystack-verify.js includes enforceRateLimit');
+    assert(initCode.includes('enforceRateLimit'), 'paystack-initialize.js includes enforceRateLimit');
+    assert(transferCode.includes('requires_step_up'), 'wallet-transfer.js includes requires_step_up');
+
+    // 3. Verify authentic ₦0.00 wallet balance integrity
+    const { data: realWallet } = await clientUserA
+      .from('wallets')
+      .select('available_balance')
+      .eq('user_id', userAId)
+      .single();
+    assert(Number(realWallet.available_balance) === 0, 'Production database wallet balance strictly preserved at ₦0.00');
+
+    console.log('  [PASS] All canonical financial routes validated in _redirects');
+    console.log('  [PASS] Rate limiting and authentication verified across all financial endpoints');
+    console.log('  [PASS] Authentic ₦0.00 database balances preserved');
+  } catch (err) {
+    console.error('Probe 50 exception:', err);
+    assert(false, 'Financial routing and static security audit probe failed');
+  }
+
   console.log(`  PROBE RESULTS: ${passed} PASSED, ${failed} FAILED`);
 
 
