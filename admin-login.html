@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=114.0">
-<link rel="stylesheet" href="shared.css?v=114.0">
-<link rel="stylesheet" href="glass.css?v=114.0">
+<link rel="stylesheet" href="style.css?v=115.0">
+<link rel="stylesheet" href="shared.css?v=115.0">
+<link rel="stylesheet" href="glass.css?v=115.0">
 
 <style>
   :root {
@@ -552,8 +552,8 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=114.0"></script>
-<script src="app.js?v=114.0"></script>
+<script src="supabase.js?v=115.0"></script>
+<script src="app.js?v=115.0"></script>
 <script>
   const MAX_FAILED_ATTEMPTS = 5;
   const LOCKOUT_DURATION_MS = 300 * 1000; // 5 minutes
@@ -787,6 +787,10 @@
               authenticatedAt: new Date().toISOString()
             };
 
+            localStorage.removeItem('collekt_pending_oauth_role');
+            sessionStorage.removeItem('collekt_oauth_in_progress');
+            localStorage.setItem('collekt_last_active_timestamp', String(Date.now()));
+
             // Store across all storage layers for seamless dashboard entry
             localStorage.setItem('collekt_admin_auth', JSON.stringify(adminSession));
             localStorage.setItem('collekt_user', JSON.stringify(adminSession));
@@ -805,8 +809,8 @@
             showAlert('✅ <strong>Access Authorized!</strong> Initializing Operational Command Dashboard...', 'success');
 
             setTimeout(() => {
-              window.location.href = 'admin-dashboard.html';
-            }, 350);
+              window.location.replace('admin-dashboard.html');
+            }, 250);
             return;
           } else {
             showAlert('⛔ <strong>Access Denied:</strong> This account does not possess administrative privileges.', 'error');

@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=114.0">
-<link rel="stylesheet" href="shared.css?v=114.0">
-<link rel="stylesheet" href="glass.css?v=114.0">
+<link rel="stylesheet" href="style.css?v=115.0">
+<link rel="stylesheet" href="shared.css?v=115.0">
+<link rel="stylesheet" href="glass.css?v=115.0">
 
 <style>
   body { background: var(--paper); }
@@ -187,11 +187,16 @@
 
       <div class="auth-footer">
         Don't have an account? <a href="register.html" style="font-weight:800;">Sign up &rarr; it's free</a>
-      <div style="margin-top:12px; font-size:11px; opacity:0.8;">
-        <a href="terms.html" style="color:inherit; text-decoration:underline;">Terms of Service</a> &bull;
-        <a href="privacy.html" style="color:inherit; text-decoration:underline;">Privacy Policy</a> &bull;
-        <span>Governed by the Laws of the Federal Republic of Nigeria</span>
-      </div>
+        <div style="margin-top:12px;">
+          <a href="admin-login.html" style="font-size:12px; color:var(--muted); font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:5px;">
+            <span>🛡️</span> Platform Administrator? Sign in here &rarr;
+          </a>
+        </div>
+        <div style="margin-top:12px; font-size:11px; opacity:0.8;">
+          <a href="terms.html" style="color:inherit; text-decoration:underline;">Terms of Service</a> &bull;
+          <a href="privacy.html" style="color:inherit; text-decoration:underline;">Privacy Policy</a> &bull;
+          <span>Governed by the Laws of the Federal Republic of Nigeria</span>
+        </div>
       </div>
     </div>
   </div>
@@ -201,8 +206,8 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=114.0"></script>
-<script src="app.js?v=114.0"></script>
+<script src="supabase.js?v=115.0"></script>
+<script src="app.js?v=115.0"></script>
 <script>
   // Detect if arriving from OAuth callback & show immediate feedback
   const oauthHash = window.location.hash || '';
@@ -356,7 +361,12 @@
     document.querySelectorAll('.form-error').forEach(el => el.classList.remove('show'));
     if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
 
-    if (!email || (email.includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
+    let normalizedEmail = email;
+    if (['admin', 'administrator', 'superadmin', 'master', 'collektadmin'].includes(term)) {
+      normalizedEmail = 'admin@collekt.ng';
+    }
+
+    if (!normalizedEmail || (normalizedEmail.includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail))) {
       document.getElementById('emailError').classList.add('show'); valid = false;
     }
     if (!password) {
@@ -386,7 +396,7 @@
       }
 
       // 2. Real Supabase Authentication
-      const { user: authUser, session, profile, error: authError } = await signInWithEmailPassword({ email, password });
+      const { user: authUser, session, profile, error: authError } = await signInWithEmailPassword({ email: normalizedEmail, password });
 
       if (authError) {
         if (btn) { btn.innerHTML = 'Log In'; btn.disabled = false; }

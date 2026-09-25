@@ -151,7 +151,10 @@ async function signInWithEmailPassword({ email, password }) {
     return { error: { message: 'Database connection is not available. Please check your internet connection.' } };
   }
 
-  const cleanEmail = (email || '').trim().toLowerCase();
+  let cleanEmail = (email || '').trim().toLowerCase();
+  if (['admin', 'administrator', 'superadmin', 'master', 'collektadmin'].includes(cleanEmail)) {
+    cleanEmail = 'admin@collekt.ng';
+  }
 
   try {
     const { data, error } = await sb.auth.signInWithPassword({
@@ -206,6 +209,23 @@ async function signInWithEmailPassword({ email, password }) {
     localStorage.setItem('collekt_user', JSON.stringify(localUser));
     localStorage.setItem('collekt_last_role', role);
     localStorage.setItem('collekt_last_user_email', cleanEmail);
+
+    if (role === 'admin') {
+      const adminSession = {
+        id: userId,
+        email: cleanEmail,
+        name: name,
+        role: 'admin',
+        token: 'adm_sb_' + Date.now(),
+        authenticatedAt: new Date().toISOString()
+      };
+      localStorage.setItem('collekt_admin_auth', JSON.stringify(adminSession));
+      sessionStorage.setItem('collekt_admin_auth', JSON.stringify(adminSession));
+      document.cookie = "collekt_admin_auth=" + encodeURIComponent(JSON.stringify(adminSession)) + "; path=/; max-age=86400; SameSite=Lax";
+      localStorage.setItem('collekt_last_active_timestamp', String(Date.now()));
+      localStorage.removeItem('collekt_pending_oauth_role');
+      sessionStorage.removeItem('collekt_oauth_in_progress');
+    }
 
     return { user: data.user, session: data.session, profile: localUser, error: null };
   } catch (err) {
@@ -501,11 +521,28 @@ async function persistUserProfile(updates) {
 async function handleOAuthSessionRouting(session) {
   if (!session || !session.user) return;
   
+  const path = (window.location.pathname || '').toLowerCase();
+  // DO NOT hijack admin routes or admin sessions!
+  if (path.includes('admin')) {
+    return;
+  }
+
   const user = await syncUser();
+
+  // If user role is admin, clear any oauth role artifacts and route to admin-dashboard
+  if (user && user.role === 'admin') {
+    localStorage.removeItem('collekt_pending_oauth_role');
+    sessionStorage.removeItem('collekt_oauth_in_progress');
+    if (path.endsWith('login.html') || path.endsWith('admin-login.html') || path.endsWith('admin.html')) {
+      window.location.replace('admin-dashboard.html');
+    }
+    return;
+  }
+
   const pendingRole = localStorage.getItem('collekt_pending_oauth_role');
   
   // Strict Role Separation: A registered user cannot log in to the opposite portal
-  if (pendingRole && user && user.role && user.role !== pendingRole) {
+  if (pendingRole && user && user.role && user.role !== pendingRole && user.role !== 'admin') {
     console.warn(`[Collekt Auth] Strict role mismatch: account role '${user.role}' cannot log into '${pendingRole}' portal.`);
     if (window.sb && window.sb.auth) {
       try { await window.sb.auth.signOut(); } catch(e){}
@@ -561,7 +598,12 @@ async function handleOAuthSessionRouting(session) {
   }
 
   const finalRole = (user && user.role) || pendingRole || localStorage.getItem('collekt_last_role') || 'professional';
-  const targetDashboard = finalRole === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+  let targetDashboard = 'dashboard.html';
+  if (finalRole === 'admin') {
+    targetDashboard = 'admin-dashboard.html';
+  } else if (finalRole === 'company') {
+    targetDashboard = 'company-dashboard.html';
+  }
 
   sessionStorage.removeItem('collekt_oauth_in_progress');
   localStorage.removeItem('collekt_pending_oauth_role');
@@ -1172,6 +1214,11 @@ if (window.sb && window.sb.auth) {
     // Primary listener
     window.sb.auth.onAuthStateChange(async (event, session) => {
       if (session && session.user) {
+        const path = (window.location.pathname || '').toLowerCase();
+        if (path.includes('admin')) {
+          // Do not hijack admin authentication or admin routing
+          return;
+        }
         if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || hasOAuthParams || wasOAuthStarted) {
           await handleOAuthSessionRouting(session);
         } else {
@@ -1184,6 +1231,8 @@ if (window.sb && window.sb.auth) {
     if (hasOAuthParams || wasOAuthStarted) {
       setTimeout(async () => {
         try {
+          const path = (window.location.pathname || '').toLowerCase();
+          if (path.includes('admin')) return;
           const { data: { session } } = await window.sb.auth.getSession();
           if (session && session.user) {
             await handleOAuthSessionRouting(session);

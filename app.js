@@ -4236,7 +4236,8 @@ function dockLiquidGlassNav() {
 function buildLiquidGlassNav(activePageKey) {
   // Only build on dashboard / authenticated app pages
   const path = (window.location.pathname.split('/').pop() || '').toLowerCase();
-  const isAuthPage = path.includes('login') || path.includes('register') || path.includes('signup') || path.includes('admin') || path.includes('brand-identity') || path.includes('pitch-deck');
+  if (path.includes('admin')) return;
+  const isAuthPage = path.includes('login') || path.includes('register') || path.includes('signup') || path.includes('brand-identity') || path.includes('pitch-deck');
   if (isAuthPage && !path.includes('dashboard')) return;
 
   let nav = document.getElementById('liquidGlassNav');
