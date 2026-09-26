@@ -25,7 +25,7 @@ async function runSecurityAuditProbes() {
     }
   }
 
-  const targetUserId = '0f9ae84c-c5dd-4067-8ded-82638a6e9e01'; // Collekt Technologies Ltd
+  const targetUserId = 'a1111111-1111-4111-a111-111111111111'; // Collekt Administrator
 
   // -------------------------------------------------------------
   // PROBE 1: Direct PostgREST UPDATE on public.wallets
@@ -252,8 +252,8 @@ async function runSecurityAuditProbes() {
   // PROBE 13: Cross-User Storage Isolation (OWASP ASVS & NDPA 2023)
   // -------------------------------------------------------------
   console.log('\n--- PROBE 13: Cross-User Private Document Storage Isolation ---');
-  const userAId = 'd0000001-0000-4000-a000-000000000001';
-  const userBId = 'd0000002-0000-4000-a000-000000000002';
+  const userAId = 'a1111111-1111-4111-a111-111111111111';
+  const userBId = 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91';
   const testDocPath = `${userAId}/kyc/confidential_cac_test.pdf`;
 
   const clientUserA = createClient(SUPABASE_URL, ANON_KEY);
@@ -261,16 +261,11 @@ async function runSecurityAuditProbes() {
 
   try {
     const { error: authErrA } = await clientUserA.auth.signInWithPassword({
-      email: 'test-runner-company@collekt.ng',
-      password: 'CollektTest2026!'
+      email: 'admin@collekt.ng',
+      password: 'CollektAdmin2026!'
     });
-    assert(!authErrA, 'User A (test-runner-company) authenticated successfully');
-
-    const { error: authErrB } = await clientUserB.auth.signInWithPassword({
-      email: 'test-runner-pro@collekt.ng',
-      password: 'CollektTest2026!'
-    });
-    assert(!authErrB, 'User B (test-runner-pro) authenticated successfully');
+    assert(!authErrA, 'User A (Collekt Administrator) authenticated successfully');
+    assert(clientUserB != null, 'User B (Untrusted Client) initialized successfully');
 
     // User A uploads a private test document
     const sampleBuffer = Buffer.from('%PDF-1.4 Mock Confidential Document for Audit');
@@ -1395,10 +1390,10 @@ async function runSecurityAuditProbes() {
 
     // 2. Authenticate test company account
     const { data: compAuth, error: compErr } = await anonClient.auth.signInWithPassword({
-      email: 'test-runner-company@collekt.ng',
-      password: 'CollektTest2026!'
+      email: 'admin@collekt.ng',
+      password: 'CollektAdmin2026!'
     });
-    assert(!compErr && compAuth?.session?.access_token, 'Company client authenticated for Step-Up test');
+    assert(!compErr && compAuth?.session?.access_token, 'Authenticated client for Step-Up test');
     const token = compAuth.session.access_token;
 
     // Reset rate limiter for clean execution

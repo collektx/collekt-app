@@ -1087,27 +1087,27 @@ function syncRealUsersToDirectory(realProfiles) {
       if (!rp) return;
       const key = getCanonicalKey(rp);
       if (!key) return;
+      if (['collektng@gmail.com', 'chenpao51@gmail.com', 'grumpyluan@gmail.com', 'smileykori@gmail.com', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com', 'officialthelma@gmail.com', 'admin@collektng.com'].includes(key)) {
+        return;
+      }
       const idKey = rp.id ? String(rp.id).toLowerCase().trim() : '';
       const existing = map.get(key) || (idKey ? map.get(idKey) : null) || {};
 
       const isDave = key === 'ojeoweredave@gmail.com';
-      const isCollektCo = key === 'collektng@gmail.com' || idKey === '0f9ae84c-c5dd-4067-8ded-82638a6e9e01' ||
-                          String(rp.name || '').toLowerCase().includes('collekt') ||
-                          String(rp.company_name || '').toLowerCase().includes('collekt');
 
       const merged = {
         ...existing,
         ...rp,
-        id: isDave ? 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' : (isCollektCo ? '0f9ae84c-c5dd-4067-8ded-82638a6e9e01' : (rp.id || existing.id)),
-        email: isCollektCo ? 'collektng@gmail.com' : (rp.email || existing.email),
-        name: isCollektCo ? 'Collekt Technologies Ltd' : (rp.company_name || rp.full_name || rp.name || existing.name),
-        company_name: isCollektCo ? 'Collekt Technologies Ltd' : (rp.company_name || existing.company_name),
-        role: isCollektCo ? 'company' : (rp.role || existing.role || 'professional'),
-        is_verified: isCollektCo ? true : (rp.is_verified === true || existing.is_verified === true)
+        id: isDave ? 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' : (rp.id || existing.id),
+        email: rp.email || existing.email,
+        name: rp.company_name || rp.full_name || rp.name || existing.name,
+        company_name: rp.company_name || existing.company_name,
+        role: rp.role || existing.role || 'professional',
+        is_verified: rp.is_verified === true || existing.is_verified === true
       };
 
       if (idKey && idKey !== key) map.delete(idKey);
-      map.set(isCollektCo ? 'collektng@gmail.com' : key, merged);
+      map.set(key, merged);
     });
 
     const updated = Array.from(map.values());
@@ -1131,11 +1131,15 @@ function getAllRegisteredUsers() {
     let raw = JSON.parse(localStorage.getItem('collekt_all_users')) || [];
     const deleted = (JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]')).map(x => String(x).toLowerCase().trim());
 
-    // 1. Strict purge of legacy mock / fake accounts - ONLY real users allowed
+    // 1. Strict purge of legacy mock / fake / reset accounts - ONLY authentic users allowed
     const fakeTokens = [
       'bethelvvwire', 'bethel_vwire', 'patakhues', 'tessycelestine', 'tessycelestine9', 
       'chairman of the board', 'chairmanoftheboard', 'adaeze okonkwo', 'kunle adeyemi', 
-      'bashiru musa', 'joshua emeka', 'farouk abubakar', 'chidi nnamdi', 'usr_chairman_of_the_board'
+      'bashiru musa', 'joshua emeka', 'farouk abubakar', 'chidi nnamdi', 'usr_chairman_of_the_board',
+      'chenpao51@gmail.com', 'f69a187c-5848-4d1c-9fb5-bc60b181789f', 'grumpyluan@gmail.com',
+      '814f4be6-cc86-47d3-b746-cd257f456548', 'collektng@gmail.com', '0f9ae84c-c5dd-4067-8ded-82638a6e9e01',
+      'smileykori@gmail.com', 'bethelvwire@gmail.com', 'officialthelma@gmail.com', 'admin@collektng.com',
+      'chen pao', 'grumpy luan'
     ];
 
     raw = raw.filter(u => {
@@ -1146,7 +1150,7 @@ function getAllRegisteredUsers() {
       const id = String(u.id || '').toLowerCase().trim();
 
       // Purge duplicate/typo Collekng accounts without valid canonical ID/email
-      if ((n === 'collekng' || n === 'collektng') && email !== 'collektng@gmail.com' && id !== '0f9ae84c-c5dd-4067-8ded-82638a6e9e01') {
+      if (email === 'collektng@gmail.com' || id === '0f9ae84c-c5dd-4067-8ded-82638a6e9e01' || n === 'collekng' || n === 'collektng') {
         return false;
       }
 
@@ -1206,75 +1210,7 @@ function getAllRegisteredUsers() {
       raw.unshift(daveProfile);
     }
 
-    // 4. Guarantee SINGLE canonical Collekt Technologies Ltd (Company account)
-    const companyProfile = {
-      id: '0f9ae84c-c5dd-4067-8ded-82638a6e9e01',
-      name: 'Collekt Technologies Ltd',
-      company_name: 'Collekt Technologies Ltd',
-      full_name: 'Collekt Technologies Ltd',
-      email: 'collektng@gmail.com',
-      role: 'company',
-      title: 'Energy & EPC Enterprise',
-      location: 'Lagos, Nigeria',
-      about: 'Leading digital energy and infrastructure procurement enterprise powering West African tenders and talent matching.',
-      verified: false,
-      is_verified: false,
-      verification_status: 'none',
-      identity_verified: false,
-      rating: 0.0,
-      review_count: 0,
-      projects_completed: 0,
-      total_earned: 0,
-      success_rate: 0
-    };
-
-    // Remove any duplicates of Collekt company account
-    raw = raw.filter(u => {
-      if (!u) return false;
-      const em = String(u.email || '').toLowerCase().trim();
-      const id = String(u.id || '').toLowerCase().trim();
-      const n = String(u.name || u.company_name || '').toLowerCase().trim();
-      if (em === 'collektng@gmail.com' || id === '0f9ae84c-c5dd-4067-8ded-82638a6e9e01' || n === 'collekng' || n === 'collektng') {
-        return false;
-      }
-      return true;
-    });
-    // Add exactly one canonical Collekt Technologies Ltd
-    raw.push(companyProfile);
-
-    // 5. Guarantee Chen Pao (Professional account)
-    const hasChen = raw.some(u => u && u.email && u.email.toLowerCase() === 'chenpao51@gmail.com');
-    if (!hasChen) {
-      raw.push({
-        id: 'f69a187c-5848-4d1c-9fb5-bc60b181789f',
-        name: 'Chen Pao',
-        email: 'chenpao51@gmail.com',
-        role: 'professional',
-        title: 'Energy Specialist',
-        location: 'Lagos, Nigeria',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none'
-      });
-    }
-
-    // 6. Guarantee Grumpy Luan (Professional account)
-    const hasLuan = raw.some(u => u && u.email && u.email.toLowerCase() === 'grumpyluan@gmail.com');
-    if (!hasLuan) {
-      raw.push({
-        id: '814f4be6-cc86-47d3-b746-cd257f456548',
-        name: 'Grumpy Luan',
-        email: 'grumpyluan@gmail.com',
-        role: 'professional',
-        title: 'Energy Specialist',
-        location: 'Lagos, Nigeria',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none'
-      });
-    }
-
-    // 7. Strict deduplication by unique lowercase email and unique ID
+    // 4. Strict deduplication by unique lowercase email and unique ID
     const seenEmails = new Set();
     const seenIds = new Set();
     const uniqueUsers = [];
