@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=121.0">
-<link rel="stylesheet" href="shared.css?v=121.0">
-<link rel="stylesheet" href="glass.css?v=121.0">
+<link rel="stylesheet" href="style.css?v=122.0">
+<link rel="stylesheet" href="shared.css?v=122.0">
+<link rel="stylesheet" href="glass.css?v=122.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -842,10 +842,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=121.0"></script>
-<script src="app.js?v=121.0"></script>
-<script src="collekt-ai.js?v=121.0"></script>
-<script src="settings-popup.js?v=121.0"></script>
+<script src="supabase.js?v=122.0"></script>
+<script src="app.js?v=122.0"></script>
+<script src="collekt-ai.js?v=122.0"></script>
+<script src="settings-popup.js?v=122.0"></script>
 <script>
   requireAuth();
 
@@ -2434,6 +2434,17 @@
     } else {
       renderContacts();
     }
+
+    // Auto-initiate call if call parameter is present in URL
+    const callParam = (urlParams.get('call') || urlParams.get('action') || '').toLowerCase();
+    if (callParam === 'voice' || callParam === 'video' || callParam === 'call') {
+      setTimeout(() => {
+        if (typeof triggerCall === 'function') {
+          triggerCall(callParam === 'video' ? 'video' : 'voice');
+        }
+      }, 700);
+    }
+
 
     // Pre-fill drafted message if passed in URL
     const targetDraftParam = urlParams.get('draft') || urlParams.get('msg') || urlParams.get('text');

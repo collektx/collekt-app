@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-console.log('--- SYNCING DIST & BUMPING ASSET CACHE TO v=121.0 ---');
+console.log('--- SYNCING DIST & BUMPING ASSET CACHE TO v=122.0 ---');
 
 const rootDir = __dirname;
 const distDir = path.join(__dirname, 'dist');
@@ -17,10 +17,10 @@ const htmlFiles = fs.readdirSync(rootDir).filter(f => f.endsWith('.html'));
 htmlFiles.forEach(file => {
   const filePath = path.join(rootDir, file);
   let content = fs.readFileSync(filePath, 'utf8');
-  content = content.replace(/\?v=\d+\.\d+/g, '?v=121.0');
+  content = content.replace(/\?v=\d+\.\d+/g, '?v=122.0');
   fs.writeFileSync(filePath, content, 'utf8');
 });
-console.log(`Bumped cache version to ?v=121.0 across ${htmlFiles.length} root HTML files.`);
+console.log(`Bumped cache version to ?v=122.0 across ${htmlFiles.length} root HTML files.`);
 
 // 2. Sync all static files to dist/
 const filesToCopy = [
@@ -42,11 +42,12 @@ const filesToCopy = [
   'netlify.toml'
 ];
 
-// Purge any sensitive internal markdown docs or legacy files from dist
-['DISASTER_RECOVERY_SLA.md', 'FINAL_IT_AUDIT_ASSURANCE_REPORT.md', 'chart.js'].forEach(f => {
+// Purge any sensitive internal markdown docs, test files, or legacy files from dist
+['DISASTER_RECOVERY_SLA.md', 'FINAL_IT_AUDIT_ASSURANCE_REPORT.md', 'chart.js', 'test_marketplace_workflow.js', 'test_view_as_profile.js'].forEach(f => {
   const p = path.join(distDir, f);
   if (fs.existsSync(p)) fs.unlinkSync(p);
 });
+
 
 filesToCopy.forEach(f => {
   const src = path.join(rootDir, f);
