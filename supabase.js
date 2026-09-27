@@ -609,7 +609,6 @@ async function handleOAuthSessionRouting(session) {
   localStorage.removeItem('collekt_pending_oauth_role');
 
   // If on an auth page, redirect immediately to target dashboard
-  const path = (window.location.pathname || '').toLowerCase();
   const isAuthPage = path.endsWith('login.html') || 
                      path.endsWith('register.html') || 
                      path.endsWith('auth-callback.html') || 

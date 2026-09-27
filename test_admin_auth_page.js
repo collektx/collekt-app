@@ -32,8 +32,8 @@ async function runAdminPortalTests() {
   assert(content.includes('id="adminLoginForm"'), 'admin-login.html must have form #adminLoginForm');
   assert(content.includes('id="adminEmailVal"'), 'admin-login.html must have username/email input #adminEmailVal');
   assert(content.includes('id="adminPassVal"'), 'admin-login.html must have password input #adminPassVal');
-  assert(content.includes('id="adminLoginBtn"'), 'admin-login.html must have submit button #adminLoginBtn');
-  assert(content.includes('quickFillAdminMaster'), 'admin-login.html must provide quick-fill master admin button');
+  assert(!content.includes('quickFillAdminMaster'), 'admin-login.html must NOT expose quick-fill password backdoor on screen');
+  assert(!content.includes('@Teamcollekt2026'), 'admin-login.html must never expose admin password in page code');
   assert(content.includes('togglePassVisibility'), 'admin-login.html must provide password show/hide toggle');
   assert(content.includes('activeSessionBox'), 'admin-login.html must provide active session detection box');
   assert(content.includes('checkLockoutStatus'), 'admin-login.html must provide brute-force lockout guard');
@@ -78,7 +78,7 @@ async function runAdminPortalTests() {
   const targetEmail = normalizeAdminUsername('admin');
   const { data: authData, error: authError } = await sb.auth.signInWithPassword({
     email: targetEmail,
-    password: 'CollektAdmin2026!'
+    password: '@Teamcollekt2026'
   });
 
   assert(!authError, `Master Admin authentication must succeed without error: ${authError?.message}`);

@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=117.0">
-<link rel="stylesheet" href="shared.css?v=117.0">
-<link rel="stylesheet" href="glass.css?v=117.0">
+<link rel="stylesheet" href="style.css?v=118.0">
+<link rel="stylesheet" href="shared.css?v=118.0">
+<link rel="stylesheet" href="glass.css?v=118.0">
 
 <style>
   :root {
@@ -441,25 +441,6 @@
     <p>Sign in with verified credentials to manage escrow, audits, and system infrastructure</p>
   </header>
 
-  <!-- Master Admin Credentials & Quick-Action Bar -->
-  <div style="background:rgba(16, 185, 129, 0.08); border:1px solid rgba(45, 212, 191, 0.3); border-radius:18px; padding:16px; margin-bottom:22px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
-      <span style="font-size:12px; font-weight:800; color:#5eead4; display:inline-flex; align-items:center; gap:6px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 5a3 3 0 0 1 6 0v3H9V7z"/></svg>
-        Master Administrator Access
-      </span>
-      <button type="button" class="quick-fill-chip" onclick="quickFillAdminMaster()" title="Click to auto-fill verified master admin credentials" style="margin:0; padding:5px 12px; font-size:11.5px;">
-        <span>⚡ Quick-Fill: <strong>admin</strong></span>
-      </button>
-    </div>
-    <div style="font-size:12px; color:#cbd5e1; margin-bottom:12px; line-height:1.5;">
-      Username: <code style="color:#ffffff; font-weight:800; background:rgba(0,0,0,0.4); padding:2px 7px; border-radius:6px;">admin</code> &bull; 
-      Password: <code style="color:#ffffff; font-weight:800; background:rgba(0,0,0,0.4); padding:2px 7px; border-radius:6px;">CollektAdmin2026!</code>
-    </div>
-    <button type="button" onclick="instantMasterAdminLogin()" class="admin-submit-btn" style="background:linear-gradient(135deg, #0d9488 0%, #059669 100%); padding:11px; font-size:13px; border-radius:12px; box-shadow:0 6px 18px rgba(13,148,136,0.35);">
-      🚀 1-Click Launch Admin Command Portal
-    </button>
-  </div>
 
   <!-- Active Session Detected Box -->
   <div id="activeSessionBox" class="active-session-box" role="region" aria-label="Active Session Detection">
@@ -497,9 +478,10 @@
           class="admin-form-input" 
           placeholder="admin or admin@collekt.ng" 
           required 
-          autocomplete="username" 
+          autocomplete="off" 
           autocapitalize="none" 
           spellcheck="false"
+          value=""
           autofocus>
       </div>
     </div>
@@ -511,9 +493,10 @@
           type="password" 
           id="adminPassVal" 
           class="admin-form-input" 
-          placeholder="Enter master password" 
+          placeholder="••••••••••••" 
           required 
-          autocomplete="current-password"
+          autocomplete="new-password"
+          value=""
           style="padding-right: 44px;">
         <button 
           type="button" 
@@ -562,8 +545,8 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=117.0"></script>
-<script src="app.js?v=117.0"></script>
+<script src="supabase.js?v=118.0"></script>
+<script src="app.js?v=118.0"></script>
 <script>
   const MAX_FAILED_ATTEMPTS = 5;
   const LOCKOUT_DURATION_MS = 300 * 1000; // 5 minutes
@@ -596,36 +579,6 @@
     }
   }
 
-  function quickFillAdminMaster() {
-    resetFailedAttempts();
-    if (lockoutTimerInterval) {
-      clearInterval(lockoutTimerInterval);
-      lockoutTimerInterval = null;
-    }
-    localStorage.removeItem('collekt_admin_lockout_until');
-    localStorage.removeItem('collekt_admin_fail_count');
-
-    const btn = document.getElementById('adminLoginBtn');
-    const emailField = document.getElementById('adminEmailVal');
-    const passField = document.getElementById('adminPassVal');
-
-    if (btn) btn.disabled = false;
-    if (emailField) {
-      emailField.disabled = false;
-      emailField.value = 'admin';
-      emailField.focus();
-    }
-    if (passField) {
-      passField.disabled = false;
-      passField.value = 'CollektAdmin2026!';
-    }
-    showAlert('⚡ Master admin credentials loaded and portal unlocked. Click "Authenticate" below to launch command portal.', 'info');
-  }
-
-  function instantMasterAdminLogin() {
-    quickFillAdminMaster();
-    handleAdminLoginSubmit();
-  }
 
   function checkLockoutStatus() {
     try {
@@ -661,17 +614,7 @@
       const secs = secLeft % 60;
       const formatted = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
       showAlert(`
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <div>⏳ <strong>Security Lockout Active:</strong> Too many failed attempts. Login locked for security. Please try again in <strong>${formatted}</strong>.</div>
-          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
-            <button type="button" onclick="quickFillAdminMaster()" style="background:#10b981; color:#041a16; font-weight:800; border-radius:8px; border:none; padding:7px 14px; font-size:12px; cursor:pointer;">
-              🔓 Unlock &amp; Fill Credentials
-            </button>
-            <button type="button" onclick="instantMasterAdminLogin()" style="background:#0e7490; color:#ffffff; font-weight:800; border-radius:8px; border:none; padding:7px 14px; font-size:12px; cursor:pointer;">
-              🚀 1-Click Launch Dashboard
-            </button>
-          </div>
-        </div>
+        <div>⏳ <strong>Security Lockout Active:</strong> Too many failed attempts. Administrative access temporarily suspended. Please wait <strong>${formatted}</strong> before re-attempting.</div>
       `, 'warning');
     };
 
@@ -768,92 +711,105 @@
     }
 
     // 1. Username Normalization
-    // If the input doesn't have an @, normalize username to primary admin email
     let targetEmail = rawInput.toLowerCase();
     if (!targetEmail.includes('@')) {
       const recognizedUsernames = ['admin', 'administrator', 'collektadmin', 'master', 'masteradmin', 'superadmin'];
       if (recognizedUsernames.includes(targetEmail)) {
         targetEmail = 'admin@collekt.ng';
       } else {
-        // Query Supabase profiles table for any matching username or name
-        try {
-          if (window.sb) {
-            const { data: matchedProfile } = await sb
-              .from('profiles')
-              .select('email, role')
-              .ilike('name', rawInput)
-              .eq('role', 'admin')
-              .maybeSingle();
-
-            if (matchedProfile && matchedProfile.email) {
-              targetEmail = matchedProfile.email.toLowerCase();
-            } else {
-              targetEmail = `${targetEmail}@collekt.ng`;
-            }
-          } else {
-            targetEmail = `${targetEmail}@collekt.ng`;
-          }
-        } catch(err) {
-          targetEmail = `${targetEmail}@collekt.ng`;
-        }
+        targetEmail = `${targetEmail}@collekt.ng`;
       }
     }
 
-    // 2. Master Password Normalization & Resilient Authentication
-    const recognizedMasterPass = [
-      'collektadmin2026!',
-      'collektadmin2026',
-      'admin',
-      'admin123',
-      'admin2026',
-      'collekt2026!',
-      'collekt2026',
-      'password',
-      'master',
-      'masteradmin'
-    ];
-
-    let authPass = password;
-    const isMasterAdminEmail = (targetEmail === 'admin@collekt.ng');
-    const isRecognizedMasterPass = recognizedMasterPass.includes(password.toLowerCase());
-    if (isMasterAdminEmail && isRecognizedMasterPass) {
-      authPass = 'CollektAdmin2026!';
-    }
-
+    // 2. Resilient Database Authentication via Supabase
     let isAuthenticated = false;
     let authUser = null;
     let authProfile = null;
+    let isNetworkOffline = false;
 
+    // Mode A: Via Supabase JS Client (if initialized)
     try {
       if (window.sb && window.sb.auth) {
-        const { data, error } = await sb.auth.signInWithPassword({
+        const { data, error } = await window.sb.auth.signInWithPassword({
           email: targetEmail,
-          password: authPass
+          password: password
         });
 
         if (!error && data && data.user) {
-          const { data: profile } = await sb
-            .from('profiles')
-            .select('id, email, role, name, full_name')
-            .eq('id', data.user.id)
-            .single();
+          authUser = data.user;
+          try {
+            const { data: profile } = await window.sb
+              .from('profiles')
+              .select('id, email, role, name, full_name')
+              .eq('id', data.user.id)
+              .maybeSingle();
 
-          if (profile && profile.role === 'admin') {
-            isAuthenticated = true;
-            authUser = data.user;
-            authProfile = profile;
+            if (profile && profile.role === 'admin') {
+              isAuthenticated = true;
+              authProfile = profile;
+            } else if (!profile && targetEmail === 'admin@collekt.ng') {
+              isAuthenticated = true;
+              authProfile = { id: data.user.id, email: targetEmail, role: 'admin', name: 'Collekt Administrator' };
+            }
+          } catch (pErr) {
+            if (targetEmail === 'admin@collekt.ng') {
+              isAuthenticated = true;
+              authProfile = { id: data.user.id, email: targetEmail, role: 'admin', name: 'Collekt Administrator' };
+            }
           }
         }
       }
-    } catch (err) {
-      console.warn('Supabase remote admin authentication exception:', err);
+    } catch (sdkErr) {
+      console.warn('Supabase SDK authentication attempt notice:', sdkErr);
     }
 
-    // Resilient local authorization for verified master administrator credentials
-    if (!isAuthenticated && isMasterAdminEmail && (password === 'CollektAdmin2026!' || isRecognizedMasterPass)) {
-      isAuthenticated = true;
-      authUser = { id: 'a1111111-1111-4111-a111-111111111111', email: 'admin@collekt.ng' };
-      authProfile = { id: 'a1111111-1111-4111-a111-111111111111', email: 'admin@collekt.ng', role: 'admin', name: 'Collekt Administrator' };
+    // Mode B: Direct Supabase REST API Fallback (Guaranteed to work even if CDN script is blocked or delayed)
+    if (!isAuthenticated) {
+      try {
+        const SUPABASE_REST_URL = 'https://ozzwvzxugfaveggeznfa.supabase.co';
+        const SUPABASE_REST_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96end2enh1Z2ZhdmVnZ2V6bmZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NjQzODAsImV4cCI6MjEwMDI0MDM4MH0.EjNb197lvdhbhcsYjBOsS-yDRp2wVFun-zjd2no6yh4';
+
+        const tokenResp = await fetch(`${SUPABASE_REST_URL}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_REST_ANON,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email: targetEmail, password: password })
+        });
+
+        if (tokenResp.ok) {
+          const authData = await tokenResp.json();
+          if (authData && authData.user) {
+            authUser = authData.user;
+            try {
+              const profResp = await fetch(`${SUPABASE_REST_URL}/rest/v1/profiles?id=eq.${authUser.id}&select=id,email,role,name,full_name`, {
+                headers: {
+                  'apikey': SUPABASE_REST_ANON,
+                  'Authorization': `Bearer ${authData.access_token}`
+                }
+              });
+              if (profResp.ok) {
+                const profList = await profResp.json();
+                if (Array.isArray(profList) && profList.length > 0 && profList[0].role === 'admin') {
+                  isAuthenticated = true;
+                  authProfile = profList[0];
+                }
+              }
+            } catch (e) {}
+
+            if (!isAuthenticated && targetEmail === 'admin@collekt.ng') {
+              isAuthenticated = true;
+              authProfile = { id: authUser.id, email: targetEmail, role: 'admin', name: 'Collekt Administrator' };
+            }
+          }
+        }
+      } catch (restErr) {
+        console.warn('Supabase REST authentication fallback notice:', restErr);
+        if (!navigator.onLine) {
+          isNetworkOffline = true;
+        }
+      }
     }
 
     if (isAuthenticated && authUser && authProfile) {
@@ -883,6 +839,10 @@
       sessionStorage.setItem('collekt_user', JSON.stringify(adminSession));
       document.cookie = "collekt_admin_auth=" + encodeURIComponent(JSON.stringify(adminSession)) + "; path=/; max-age=86400; SameSite=Lax";
 
+      // Clear password field immediately
+      const passField = document.getElementById('adminPassVal');
+      if (passField) passField.value = '';
+
       // Record audit log entry for admin portal authentication
       try {
         if (typeof logAdminAuditActivity === 'function') {
@@ -899,10 +859,18 @@
     }
 
     // 3. Failed attempt handling
-    const fails = recordFailedAttempt();
-    if (fails !== true) {
-      const remainingTries = MAX_FAILED_ATTEMPTS - fails;
-      showAlert(`⚠️ <strong>Invalid administrative credentials.</strong> ${remainingTries > 0 ? `(${remainingTries} attempts remaining before security lockout)` : ''}`, 'error');
+    // Clear password input immediately on failure for hygiene
+    const passField = document.getElementById('adminPassVal');
+    if (passField) passField.value = '';
+
+    if (isNetworkOffline) {
+      showAlert('⚠️ Network offline. Please check your internet connection and retry.', 'error');
+    } else {
+      const fails = recordFailedAttempt();
+      if (fails !== true) {
+        const remainingTries = MAX_FAILED_ATTEMPTS - fails;
+        showAlert(`⚠️ <strong>Invalid administrative credentials.</strong> ${remainingTries > 0 ? `(${remainingTries} attempts remaining before security lockout)` : ''}`, 'error');
+      }
     }
 
     if (btn) {
@@ -918,7 +886,22 @@
     }
   }
 
-  // Pre-load initialization & timeout notice verification
+  // Pre-load initialization & input hygiene: never show or prefill any password
+  function enforceInputHygiene() {
+    const p = document.getElementById('adminPassVal');
+    if (p) {
+      p.value = '';
+      p.type = 'password';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', enforceInputHygiene);
+  window.addEventListener('load', () => {
+    enforceInputHygiene();
+    setTimeout(enforceInputHygiene, 100);
+    setTimeout(enforceInputHygiene, 300);
+  });
+
   (function checkAdminTimeoutNotice() {
     const p = new URLSearchParams(window.location.search);
     if (p.get('unlock') === '1' || p.get('clear') === '1' || p.get('reset') === '1' || p.get('admin') === '1') {

@@ -1918,19 +1918,9 @@ function savePaystackPublicKey(key) {
   if (key) localStorage.setItem('collekt_paystack_public_key', key.trim());
 }
 
-function getPaystackSecretKey() {
-  return localStorage.getItem('collekt_paystack_secret_key') || '';
-}
-
-function savePaystackSecretKey(key) {
-  if (key) localStorage.setItem('collekt_paystack_secret_key', key.trim());
-}
-
-async function createLivePaystackDVA(targetUser, secretKey, preferredBankSlug) {
+async function createLivePaystackDVA(targetUser, preferredBankSlug) {
   const user = targetUser || getUser();
   if (!user) return { success: false, message: 'No user found' };
-  const sk = secretKey || getPaystackSecretKey();
-  if (!sk) return { success: false, message: 'No Paystack Secret Key provided' };
 
   const nameParts = (user.name || 'Collekt Member').trim().split(' ');
   const firstName = user.first_name || nameParts[0] || 'Member';
@@ -1947,16 +1937,28 @@ async function createLivePaystackDVA(targetUser, secretKey, preferredBankSlug) {
     'Providus Bank (Paystack DVA)': 'providus-bank',
     'Titan Trust Bank (Paystack DVA)': 'titan-bank'
   };
-  const bankSlug = preferredBankSlug || bankSlugMap[localStorage.getItem('collekt_paystack_bank_partner')] || 'nova-bank';
+  const bankSlug = preferredBankSlug || bankSlugMap[localStorage.getItem('collekt_paystack_bank_partner')] || 'wema-bank';
 
-  // 1. Attempt via Netlify Serverless Backend (Bypasses Browser CORS & Direct Paystack API)
+  // Securely call Netlify serverless backend which holds Paystack Secret Key in environment variables
   try {
-    const fnResp = await fetch('/.netlify/functions/paystack', {
+    let authHeader = '';
+    if (window.sb && window.sb.auth) {
+      try {
+        const { data: sessionData } = await sb.auth.getSession();
+        if (sessionData && sessionData.session && sessionData.session.access_token) {
+          authHeader = 'Bearer ' + sessionData.session.access_token;
+        }
+      } catch(e) {}
+    }
+
+    const fnResp = await fetch('/api/payments/dva', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authHeader ? { 'Authorization': authHeader } : {})
+      },
       body: JSON.stringify({
-        action: 'create_dva',
-        secret_key: sk,
+        user_id: user.id,
         email: email,
         first_name: firstName,
         last_name: lastName,
@@ -1978,80 +1980,15 @@ async function createLivePaystackDVA(targetUser, secretKey, preferredBankSlug) {
 
         setUser(user);
         return { success: true, user: user, data: fnData };
-      } else if (fnData.message) {
-        console.warn('Paystack DVA notice from backend:', fnData);
-        return { success: false, message: fnData.message, details: fnData };
+      } else if (fnData.message || fnData.error) {
+        return { success: false, message: fnData.message || fnData.error, details: fnData };
       }
+    } else {
+      const errData = await fnResp.json().catch(() => ({}));
+      return { success: false, message: errData.error || errData.message || 'Server error provisioning virtual account.' };
     }
   } catch (backendErr) {
-    console.warn('Netlify serverless backend not reached, trying direct API:', backendErr);
-  }
-
-  // 2. Fallback direct API call (if backend proxy not running)
-  try {
-    const custResp = await fetch('https://api.paystack.co/customer', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + sk,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        email: email,
-        first_name: firstName,
-        last_name: lastName,
-        phone: phone
-      })
-    });
-
-    const custData = await custResp.json();
-    let customerCode = (custData.status && custData.data) ? custData.data.customer_code : null;
-
-    if (!customerCode && email) {
-      try {
-        const fetchCust = await fetch(`https://api.paystack.co/customer/${encodeURIComponent(email)}`, {
-          headers: { 'Authorization': 'Bearer ' + sk }
-        });
-        const fetchCustData = await fetchCust.json();
-        if (fetchCustData.status && fetchCustData.data) {
-          customerCode = fetchCustData.data.customer_code;
-        }
-      } catch(e){}
-    }
-
-    if (!customerCode) {
-      return { success: false, message: custData.message || 'Paystack Customer registration failed.' };
-    }
-
-    const dvaResp = await fetch('https://api.paystack.co/dedicated_account', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + sk,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        customer: customerCode,
-        preferred_bank: bankSlug
-      })
-    });
-
-    const dvaData = await dvaResp.json();
-    if (dvaData.status && dvaData.data) {
-      const acct = dvaData.data;
-      if (!user.wallet) user.wallet = {};
-      user.wallet.bank_assigned = true;
-      user.wallet.bank_name = (acct.bank && acct.bank.name) ? acct.bank.name + ' (Paystack Live)' : 'Wema Bank (Paystack Live)';
-      user.wallet.account_number = acct.account_number;
-      user.wallet.account_name = acct.account_name || ('COLLEKT / ' + getDisplayName(user).toUpperCase());
-      user.wallet.paystack_customer_code = customerCode;
-      user.wallet.is_live_paystack = true;
-
-      setUser(user);
-      return { success: true, user: user, data: dvaData };
-    } else {
-      return { success: false, message: dvaData.message || 'Dedicated Account creation declined by Paystack.', details: dvaData };
-    }
-  } catch (err) {
-    return { success: false, message: err.message || 'Paystack connection error' };
+    return { success: false, message: 'Could not connect to payment gateway authority.' };
   }
 }
 
