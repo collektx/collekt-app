@@ -820,7 +820,14 @@ function getAdminUser() {
 
 function getAdminAuditLogs() {
   try {
-    return JSON.parse(localStorage.getItem('collekt_admin_audit_logs')) || [];
+    const list = JSON.parse(localStorage.getItem('collekt_admin_audit_logs')) || [];
+    return list.filter(l => {
+      if (!l) return false;
+      const act = String(l.action || '').toUpperCase();
+      const tgt = String(l.target || '').toUpperCase();
+      return !act.includes('PROBE') && !act.includes('TRIGGER_INTEGRITY') && !act.includes('TEST_') &&
+             !tgt.includes('PROBE') && !tgt.includes('TRIGGER_INTEGRITY') && !tgt.includes('TEST_');
+    });
   } catch(e) {
     return [];
   }
@@ -837,19 +844,26 @@ async function fetchAdminAuditLogs(limit = 100) {
         .limit(limit);
 
       if (!error && data && Array.isArray(data)) {
-        const remoteLogs = data.map(row => {
-          const meta = row.metadata || {};
-          return {
-            id: row.id,
-            action: row.action || 'Admin Action',
-            target: meta.target || row.entity_id || 'System',
-            admin: meta.operator_email || meta.admin_name || 'Super Administrator',
-            category: meta.category || row.entity_type || 'admin',
-            timestamp: row.created_at || new Date().toISOString(),
-            isRemote: true,
-            rawId: row.id
-          };
-        });
+        const remoteLogs = data
+          .filter(row => {
+            const act = String(row.action || '').toUpperCase();
+            const ent = String(row.entity_id || '').toUpperCase();
+            return !act.includes('PROBE') && !act.includes('TRIGGER_INTEGRITY') && !act.includes('TEST_') &&
+                   !ent.includes('PROBE') && !ent.includes('TRIGGER_INTEGRITY');
+          })
+          .map(row => {
+            const meta = row.metadata || {};
+            return {
+              id: row.id,
+              action: row.action || 'Admin Action',
+              target: meta.target || row.entity_id || 'System',
+              admin: meta.operator_email || meta.admin_name || 'Super Administrator',
+              category: meta.category || row.entity_type || 'admin',
+              timestamp: row.created_at || new Date().toISOString(),
+              isRemote: true,
+              rawId: row.id
+            };
+          });
 
         const localLogs = getAdminAuditLogs();
         const combined = [...remoteLogs];
@@ -2628,7 +2642,17 @@ function clearUser() {
 
 function getSavedTransactions() {
   try {
-    return JSON.parse(localStorage.getItem('collekt_transactions') || '[]');
+    const raw = JSON.parse(localStorage.getItem('collekt_transactions') || '[]');
+    return raw.filter(t => {
+      if (!t) return false;
+      const ref = String(t.id || t.reference || '').toUpperCase();
+      const desc = String(t.title || t.note || t.description || '').toUpperCase();
+      const user = String(t.user_id || t.owner_id || t.user || '').toLowerCase();
+      if (ref.includes('TEST') || ref.includes('DEMO') || ref.startsWith('TX_TEST_')) return false;
+      if (desc.includes('TEST') || desc.includes('MOCK') || desc.includes('PROBE')) return false;
+      if (user.startsWith('d0000001-') || user.includes('testuser') || user.includes('mock')) return false;
+      return true;
+    });
   } catch(e) {
     return [];
   }

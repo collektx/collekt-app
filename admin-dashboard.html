@@ -53,9 +53,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=118.0">
-<link rel="stylesheet" href="shared.css?v=118.0">
-<link rel="stylesheet" href="glass.css?v=118.0">
+<link rel="stylesheet" href="style.css?v=119.0">
+<link rel="stylesheet" href="shared.css?v=119.0">
+<link rel="stylesheet" href="glass.css?v=119.0">
 
 <style>
   html, body {
@@ -1099,10 +1099,36 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=118.0"></script>
-<script src="app.js?v=118.0"></script>
+<script src="supabase.js?v=119.0"></script>
+<script src="app.js?v=119.0"></script>
 <script>
   async function initAdminDashboard() {
+    // 0. Sanitize local storage to purge any stale test rows or probe transactions
+    try {
+      const isAuthenticLocal = (t) => {
+        if (!t) return false;
+        const ref = String(t.id || t.reference || '').toUpperCase();
+        const desc = String(t.title || t.note || t.description || '').toUpperCase();
+        const user = String(t.user_id || t.owner_id || t.user || '').toLowerCase();
+        if (ref.includes('TEST') || ref.includes('DEMO') || ref.startsWith('TX_TEST_')) return false;
+        if (desc.includes('TEST') || desc.includes('MOCK') || desc.includes('PROBE')) return false;
+        if (user.startsWith('d0000001-') || user.includes('testuser') || user.includes('mock')) return false;
+        return true;
+      };
+      const rawTxs = JSON.parse(localStorage.getItem('collekt_transactions') || '[]');
+      const cleanTxs = rawTxs.filter(isAuthenticLocal);
+      localStorage.setItem('collekt_transactions', JSON.stringify(cleanTxs));
+
+      const rawAudit = JSON.parse(localStorage.getItem('collekt_admin_audit_logs') || '[]');
+      const cleanAudit = rawAudit.filter(l => {
+        if (!l) return false;
+        const act = String(l.action || '').toUpperCase();
+        const tgt = String(l.target || '').toUpperCase();
+        return !act.includes('PROBE') && !act.includes('TRIGGER_INTEGRITY') && !tgt.includes('PROBE') && !tgt.includes('TRIGGER_INTEGRITY');
+      });
+      localStorage.setItem('collekt_admin_audit_logs', JSON.stringify(cleanAudit));
+    } catch(e) {}
+
     // 1. Verify Master Admin or live Supabase session
     let authData = null;
     try {
@@ -1751,7 +1777,7 @@
     }).join('');
   }
 
-  function renderLiveAnalytics() {
+  async function renderLiveAnalytics() {
     const users = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
     const pros = users.filter(u => (u.role || '').toLowerCase() !== 'company');
     const companies = users.filter(u => (u.role || '').toLowerCase() === 'company');
@@ -1775,11 +1801,33 @@
     const tendersEl = document.getElementById('statActiveTendersCount');
     if (tendersEl) tendersEl.textContent = tenders.length;
 
-    const txs = typeof getSavedTransactions === 'function' ? getSavedTransactions() : [];
+    const isAuthentic = (t) => {
+      if (!t) return false;
+      const ref = String(t.id || t.reference || '').toUpperCase();
+      const desc = String(t.title || t.note || t.description || '').toUpperCase();
+      const user = String(t.user_id || t.owner_id || t.user || '').toLowerCase();
+      if (ref.includes('TEST') || ref.includes('DEMO') || ref.startsWith('TX_TEST_')) return false;
+      if (desc.includes('TEST') || desc.includes('MOCK') || desc.includes('PROBE')) return false;
+      if (user.startsWith('d0000001-') || user.includes('testuser') || user.includes('mock')) return false;
+      return true;
+    };
+
     let gmv = 0;
-    txs.forEach(t => {
-      if (t.amount && typeof t.amount === 'number') gmv += t.amount;
-    });
+    if (window.sb) {
+      try {
+        const { data: dbTxs } = await sb.from('transactions').select('amount, status, reference, owner_id');
+        if (dbTxs && dbTxs.length > 0) {
+          dbTxs.filter(isAuthentic).forEach(t => {
+            if ((t.status === 'successful' || !t.status) && t.amount) gmv += Number(t.amount);
+          });
+        }
+      } catch(e){}
+    } else {
+      const txs = typeof getSavedTransactions === 'function' ? getSavedTransactions() : [];
+      txs.filter(isAuthentic).forEach(t => {
+        if (t.amount && typeof t.amount === 'number' && (t.status === 'successful' || !t.status)) gmv += t.amount;
+      });
+    }
 
     const gmvEl = document.getElementById('statLiveGMV');
     if (gmvEl) gmvEl.textContent = 'NGN ' + gmv.toLocaleString('en-NG', { minimumFractionDigits: 2 });
@@ -2649,7 +2697,7 @@
         title: p.jobTitle || p.projectTitle || 'Awarded Tender Execution',
         company: p.companyName || 'Corporate Employer',
         contractor: p.freelancerName || p.userName || 'Professional Specialist',
-        amount: p.bidAmount || p.amount || 2500000,
+        amount: Number(p.bidAmount || p.amount || 0),
         status: 'Active Escrow'
       }));
       contracts = [...awarded, ...general, ...awardedProps];
@@ -3002,28 +3050,45 @@
     }
   };
 
+  function isAuthenticAdminTx(t) {
+    if (!t) return false;
+    const ref = String(t.id || t.reference || '').toUpperCase();
+    const desc = String(t.title || t.note || t.description || '').toUpperCase();
+    const user = String(t.user_id || t.owner_id || t.user || '').toLowerCase();
+    if (ref.includes('TEST') || ref.includes('DEMO') || ref.startsWith('TX_TEST_')) return false;
+    if (desc.includes('TEST') || desc.includes('MOCK') || desc.includes('PROBE')) return false;
+    if (user.startsWith('d0000001-') || user.includes('testuser') || user.includes('mock')) return false;
+    return true;
+  }
+
   async function renderAdminTxLedger() {
     const tbody = document.getElementById('adminTxLedgerBody');
     if (!tbody) return;
 
-    let txs = typeof getSavedTransactions === 'function' ? getSavedTransactions() : [];
+    let txs = (typeof getSavedTransactions === 'function' ? getSavedTransactions() : []).filter(isAuthenticAdminTx);
 
     // Query Supabase transactions & ledger if connected
     if (window.sb) {
       try {
         const { data: dbTxs, error } = await sb.from('transactions').select('*').order('created_at', { ascending: false }).limit(100);
         if (!error && dbTxs && dbTxs.length > 0) {
-          const formattedDbTxs = dbTxs.map(t => ({
-            id: t.reference || t.id,
-            user_id: t.owner_id || t.user_id,
-            title: t.metadata?.description || `${(t.transaction_type || 'Funding').toUpperCase()} via ${(t.payment_method || 'Paystack').toUpperCase()}`,
-            type: (t.transaction_type === 'deposit' || t.transaction_type === 'funding') ? 'credit' : (t.transaction_type === 'withdrawal' ? 'debit' : (t.transaction_type || 'credit')),
-            method: t.payment_method || 'card',
-            gateway: t.gateway || 'paystack',
-            amount: Number(t.amount || 0),
-            status: t.status || 'successful',
-            date: t.created_at ? new Date(t.created_at).toLocaleDateString() : 'Recent'
-          }));
+          const authenticDbTxs = dbTxs.filter(isAuthenticAdminTx);
+          const formattedDbTxs = authenticDbTxs.map(t => {
+            const rawType = (t.transaction_type || '').toLowerCase();
+            const isCreditType = rawType === 'deposit' || rawType === 'funding' || rawType === 'wallet_funding' || rawType === 'escrow_release' || rawType === 'credit';
+            const isDebitType = rawType === 'withdrawal' || rawType === 'escrow_lock' || rawType === 'debit';
+            return {
+              id: t.reference || t.id,
+              user_id: t.owner_id || t.user_id,
+              title: t.metadata?.description || `${(t.transaction_type || 'Funding').toUpperCase()} via ${(t.payment_method || 'Paystack').toUpperCase()}`,
+              type: isCreditType ? 'credit' : (isDebitType ? 'debit' : (t.transaction_type || 'credit')),
+              method: t.payment_method || 'card',
+              gateway: t.gateway || 'paystack',
+              amount: Number(t.amount || 0),
+              status: t.status || 'successful',
+              date: t.created_at ? new Date(t.created_at).toLocaleDateString() : 'Recent'
+            };
+          });
           // Merge deduplicating by id
           const ids = new Set(formattedDbTxs.map(x => x.id));
           txs = [...formattedDbTxs, ...txs.filter(x => !ids.has(x.id))];
@@ -3035,6 +3100,7 @@
     const typeFilter = document.getElementById('adminTxTypeFilter')?.value || 'all';
 
     let filtered = txs.filter(t => {
+      if (!isAuthenticAdminTx(t)) return false;
       if (typeFilter !== 'all' && t.type !== typeFilter) return false;
       if (search) {
         const ref = String(t.id || '').toLowerCase();
@@ -3066,14 +3132,14 @@
     };
 
     tbody.innerHTML = filtered.map(t => {
-      const isCredit = t.type === 'credit' || t.type === 'deposit';
+      const isCredit = t.type === 'credit' || t.type === 'deposit' || t.type === 'wallet_funding' || t.type === 'escrow_release';
       const rail = (t.method === 'opay') ? 'Paystack OPay' : (t.method === 'bank_transfer' ? 'Virtual NUBAN' : (t.method === 'card' ? 'Paystack Card' : (t.gateway || 'Paystack')));
       return `
         <tr class="tx-row">
           <td style="font-family:monospace; font-weight:800; font-size:12px; color:var(--ink);">${escapeHTML(t.id || 'TX-LOG')}</td>
           <td style="font-size:12px; font-weight:700; color:var(--muted);">${escapeHTML(String(t.user_id || 'Platform User').substring(0, 16))}</td>
           <td style="font-weight:800; color:var(--ink);">${escapeHTML(t.title || t.note || 'Wallet Funding')}</td>
-          <td>${typeBadges[t.type] || typeBadges.credit}</td>
+          <td>${typeBadges[t.type] || (isCredit ? typeBadges.credit : typeBadges.debit)}</td>
           <td><span style="font-size:11px; font-weight:700; color:var(--forest);">${escapeHTML(rail)}</span></td>
           <td style="font-weight:900; color:${isCredit ? 'var(--teal)' : '#ef4444'};">${isCredit ? '+' : '-'} ₦${Number(t.amount || 0).toLocaleString()}</td>
           <td style="font-size:12px; color:var(--muted);">${escapeHTML(t.date || 'Recent')}</td>
