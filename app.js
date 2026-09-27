@@ -7306,5 +7306,938 @@ if (typeof document !== 'undefined') {
   });
 }
 
+// =============================================================================
+// -- COLLEKT GLOBAL CALLING ENGINE (WEBRTC AUDIO & VIDEO, WHATSAPP-STYLE RINGING) --
+// =============================================================================
+
+const CollektCalling = (() => {
+  let activeCall = null;
+  let incomingCallData = null;
+  let peerConnection = null;
+  let localMediaStream = null;
+  let remoteMediaStream = null;
+  let callTimerInterval = null;
+  let callSeconds = 0;
+  let callRingTimer = null;
+  let callTimeoutTimer = null;
+  let pendingIceCandidates = [];
+  let _audioCtx = null;
+  let _callingChannel = null;
+  let _callingChannelReady = false;
+  const _outgoingSignalQueue = [];
+
+  const RTC_CONFIG = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:stun3.l.google.com:19302' },
+      { urls: 'stun:stun4.l.google.com:19302' },
+      { urls: 'stun:global.stun.twilio.com:3478' }
+    ],
+    iceCandidatePoolSize: 10
+  };
+
+  // Cross-tab broadcast channel
+  let broadcastBus = null;
+  try {
+    broadcastBus = new BroadcastChannel('collekt_call_signaling_bus');
+  } catch(e) {}
+
+  // Audio Context & WhatsApp-style Ringtone Synthesizer
+  function getAudioContext() {
+    if (!_audioCtx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) _audioCtx = new AudioCtx();
+    }
+    if (_audioCtx && _audioCtx.state === 'suspended') {
+      _audioCtx.resume().catch(() => {});
+    }
+    return _audioCtx;
+  }
+
+  function setupAudioUnlock() {
+    const unlock = () => {
+      const ctx = getAudioContext();
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+      ['click', 'touchstart', 'keydown'].forEach(evt => {
+        document.removeEventListener(evt, unlock);
+      });
+    };
+    ['click', 'touchstart', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, unlock, { once: true, passive: true });
+    });
+  }
+
+  function startWhatsAppIncomingRing() {
+    stopRingTones();
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+
+    if (navigator.vibrate) {
+      try { navigator.vibrate([400, 250, 400, 250, 600]); } catch(e) {}
+    }
+
+    const playSequence = () => {
+      try {
+        const now = ctx.currentTime;
+        // WhatsApp melodic bell arpeggio: E5 (659.25), G#5 (830.61), B5 (987.77), E6 (1318.51)
+        const playBell = (freq, startTime, duration = 0.35, gainLevel = 0.28) => {
+          const osc = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          osc2.type = 'triangle';
+          osc2.frequency.setValueAtTime(freq * 2, startTime);
+
+          gain.gain.setValueAtTime(0.001, startTime);
+          gain.gain.linearRampToValueAtTime(gainLevel, startTime + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+          osc.connect(gain);
+          osc2.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(startTime);
+          osc2.start(startTime);
+          osc.stop(startTime + duration);
+          osc2.stop(startTime + duration);
+        };
+
+        playBell(659.25, now, 0.3, 0.25);
+        playBell(830.61, now + 0.12, 0.3, 0.25);
+        playBell(987.77, now + 0.24, 0.35, 0.28);
+        playBell(1318.51, now + 0.36, 0.45, 0.32);
+
+        playBell(987.77, now + 0.75, 0.25, 0.22);
+        playBell(1318.51, now + 0.88, 0.45, 0.3);
+
+        if (navigator.vibrate) {
+          try { navigator.vibrate([350, 150, 350]); } catch(e) {}
+        }
+      } catch(e) {}
+    };
+
+    playSequence();
+    callRingTimer = setInterval(playSequence, 2300);
+  }
+
+  function startWhatsAppOutgoingRing() {
+    stopRingTones();
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+
+    const playBeep = () => {
+      try {
+        const now = ctx.currentTime;
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(440, now);
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(480, now);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.12, now + 0.05);
+        gain.gain.setValueAtTime(0.12, now + 1.15);
+        gain.gain.linearRampToValueAtTime(0.0001, now + 1.25);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 1.3);
+        osc2.stop(now + 1.3);
+      } catch(e) {}
+    };
+
+    playBeep();
+    callRingTimer = setInterval(playBeep, 3200);
+  }
+
+  function playTone(type) {
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      if (type === 'connected') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(783.99, now + 0.12);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.15, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.36);
+      } else if (type === 'end' || type === 'declined' || type === 'busy') {
+        const playBeep = (freq, t, dur) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, t);
+          gain.gain.setValueAtTime(0.001, t);
+          gain.gain.linearRampToValueAtTime(0.15, t + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + dur);
+        };
+        playBeep(480, now, 0.1);
+        playBeep(420, now + 0.12, 0.1);
+        playBeep(360, now + 0.24, 0.18);
+      }
+    } catch(e) {}
+  }
+
+  function stopRingTones() {
+    if (callRingTimer) {
+      clearInterval(callRingTimer);
+      callRingTimer = null;
+    }
+  }
+
+  // DOM Elements Injection
+  function ensureCallElementsInDOM() {
+    if (!document.getElementById('incomingCallModal')) {
+      const incModal = document.createElement('div');
+      incModal.id = 'incomingCallModal';
+      incModal.className = 'incoming-call-modal';
+      incModal.innerHTML = `
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="position:relative; width:54px; height:54px; flex-shrink:0;">
+            <div class="call-pulse" style="inset:-6px; animation-duration:1.5s;"></div>
+            <div class="call-pulse p2" style="inset:-12px; animation-duration:1.5s;"></div>
+            <div id="incCallerAvatar" class="msg-avatar" style="width:54px; height:54px; font-size:22px; font-weight:900; background:#0e3b35; border:2.5px solid #22c55e; border-radius:50%; display:grid; place-items:center; color:#fff;">U</div>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div id="incCallTypeBadge" class="call-badge" style="padding:2px 8px; font-size:10px; margin-bottom:4px;">
+              <span style="width:6px; height:6px; border-radius:50%; background:#4ade80;"></span>
+              INCOMING CALL
+            </div>
+            <div id="incCallerName" style="font-size:16px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Caller Name</div>
+            <div id="incCallerRole" style="font-size:11px; color:#a1b5b2; margin-top:2px;">Collekt Verified Member</div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:4px;">
+          <button type="button" class="btn btn-sm" onclick="CollektCalling.declineCall()" style="flex:1; background:#ef4444; color:#fff; font-weight:800; border:none; border-radius:12px; min-height:42px; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
+            <span style="font-size:16px;">🚫</span> Decline
+          </button>
+          <button type="button" class="btn btn-sm" onclick="CollektCalling.acceptCall()" style="flex:1; background:#22c55e; color:#fff; font-weight:900; border:none; border-radius:12px; min-height:42px; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 16px rgba(34,197,94,0.45); cursor:pointer;">
+            <span style="font-size:16px;">📞</span> Accept
+          </button>
+        </div>
+      `;
+      document.body.appendChild(incModal);
+    }
+
+    if (!document.getElementById('callOverlay')) {
+      const overlay = document.createElement('div');
+      overlay.id = 'callOverlay';
+      overlay.className = 'call-overlay';
+      overlay.innerHTML = `
+        <video id="callVideoElement" class="video-container" autoplay playsinline></video>
+        <video id="callLocalVideoPip" class="local-pip-video" autoplay playsinline muted></video>
+        <audio id="collektRemoteAudio" autoplay playsinline style="display:none;"></audio>
+
+        <div class="call-header">
+          <div class="call-badge" id="callBadge">
+            <span style="width:6px; height:6px; border-radius:50%; background:#4ade80;"></span>
+            <span id="callBadgeText">ENCRYPTED CALL</span>
+          </div>
+          <h2 class="call-title" id="callPeerName" style="margin-top:10px;">Peer Name</h2>
+          <div class="call-status" id="callStatusText">
+            <span>Connecting...</span>
+          </div>
+        </div>
+
+        <div class="call-avatar-wrap" id="callAvatarArea">
+          <div class="call-pulse"></div>
+          <div class="call-pulse p2"></div>
+          <div class="call-pulse p3"></div>
+          <div class="call-avatar" id="callPeerAvatar" style="background:#0e3b35;">U</div>
+        </div>
+
+        <div class="call-controls">
+          <button class="call-btn" id="callMuteBtn" title="Mute Microphone" onclick="CollektCalling.toggleMute()">🎙️</button>
+          <button class="call-btn" id="callCamBtn" title="Toggle Camera" onclick="CollektCalling.toggleCam()" style="display:none;">📹</button>
+          <button class="call-btn end-call" title="End Call" onclick="CollektCalling.endCall()">📞</button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+  }
+
+  // Multi-Transport Signaling
+  function getCallingChannel() {
+    if (_callingChannelReady && _callingChannel) return _callingChannel;
+    if (!window.sb || typeof window.sb.channel !== 'function') return null;
+
+    if (!_callingChannel) {
+      _callingChannel = window.sb.channel('collekt_webrtc_calls', {
+        config: { broadcast: { self: false } }
+      });
+
+      _callingChannel
+        .on('broadcast', { event: 'call_packet' }, ({ payload }) => {
+          if (payload) handleIncomingSignal(payload);
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            _callingChannelReady = true;
+            while (_outgoingSignalQueue.length > 0) {
+              const queued = _outgoingSignalQueue.shift();
+              _callingChannel.send({
+                type: 'broadcast',
+                event: 'call_packet',
+                payload: queued
+              }).catch(() => {});
+            }
+          } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+            _callingChannelReady = false;
+          }
+        });
+    }
+    return _callingChannel;
+  }
+
+  function broadcastSignal(payload) {
+    const me = (typeof getUser === 'function' ? getUser() : null) || {};
+    const myCanonical = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null);
+    const packet = {
+      ...payload,
+      senderId: myCanonical || me.id || 'anon',
+      senderEmail: me.email || '',
+      senderUsername: me.username || '',
+      senderName: me.name || me.company_name || 'Collekt Member',
+      senderRole: me.role || 'professional',
+      senderAvatar: (me.name || me.company_name || 'U').charAt(0).toUpperCase(),
+      timestamp: Date.now()
+    };
+
+    if (broadcastBus) {
+      try { broadcastBus.postMessage(packet); } catch(e) {}
+    }
+
+    try {
+      localStorage.setItem('collekt_active_call_signal', JSON.stringify({ ...packet, _nonce: Math.random() }));
+    } catch(e) {}
+
+    const chan = getCallingChannel();
+    if (chan && _callingChannelReady) {
+      chan.send({
+        type: 'broadcast',
+        event: 'call_packet',
+        payload: packet
+      }).catch(() => {});
+    } else {
+      _outgoingSignalQueue.push(packet);
+    }
+  }
+
+  function handleIncomingSignal(packet) {
+    if (!packet) return;
+    const me = (typeof getUser === 'function' ? getUser() : null);
+    if (!me) return;
+
+    const myCanonical = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null);
+    const myIds = [
+      myCanonical,
+      me.id,
+      me.email,
+      me.username
+    ].filter(Boolean).map(s => String(s).toLowerCase().trim());
+
+    const senderId = String(packet.senderId || '').toLowerCase().trim();
+    const senderEmail = String(packet.senderEmail || '').toLowerCase().trim();
+
+    // Ignore self packets
+    if (myIds.includes(senderId) || (senderEmail && myIds.includes(senderEmail))) return;
+
+    // Check if target is me
+    const target = String(packet.targetId || '').toLowerCase().trim();
+    const targetEmail = String(packet.targetEmail || '').toLowerCase().trim();
+    const targetUsername = String(packet.targetUsername || '').toLowerCase().trim();
+
+    const isForMe = myIds.includes(target) || 
+                    (targetEmail && myIds.includes(targetEmail)) || 
+                    (targetUsername && myIds.includes(targetUsername));
+    if (!isForMe) return;
+
+    const ev = packet.event;
+    if (ev === 'call_offer') {
+      if (activeCall) {
+        broadcastSignal({
+          event: 'call_busy',
+          targetId: packet.senderId,
+          targetEmail: packet.senderEmail,
+          callId: packet.callId
+        });
+        return;
+      }
+      onReceiveOffer(packet);
+    } else if (ev === 'call_answered') {
+      onReceiveAnswer(packet);
+    } else if (ev === 'ice_candidate') {
+      onReceiveIceCandidate(packet);
+    } else if (ev === 'call_declined') {
+      onReceiveDeclined(packet);
+    } else if (ev === 'call_busy') {
+      onReceiveBusy(packet);
+    } else if (ev === 'call_ended') {
+      onReceiveEnded(packet);
+    }
+  }
+
+  // Signaling Event Handlers
+  function onReceiveOffer(packet) {
+    ensureCallElementsInDOM();
+    incomingCallData = packet;
+    pendingIceCandidates = [];
+
+    startWhatsAppIncomingRing();
+
+    const modal = document.getElementById('incomingCallModal');
+    if (modal) {
+      const nameEl = document.getElementById('incCallerName');
+      const roleEl = document.getElementById('incCallerRole');
+      const badgeEl = document.getElementById('incCallTypeBadge');
+      const avatarEl = document.getElementById('incCallerAvatar');
+
+      const isVideo = (packet.callType === 'video');
+      if (nameEl) nameEl.textContent = packet.senderName || 'Collekt Member';
+      if (roleEl) roleEl.textContent = packet.senderRole === 'company' ? '🏢 Verified Enterprise' : '👷 Verified Professional Specialist';
+      if (badgeEl) {
+        badgeEl.innerHTML = `<span style="width:6px; height:6px; border-radius:50%; background:#4ade80;"></span> ${isVideo ? 'INCOMING HD VIDEO CALL' : 'INCOMING ENCRYPTED VOICE CALL'}`;
+      }
+      if (avatarEl) {
+        avatarEl.textContent = (packet.senderName || 'U').charAt(0).toUpperCase();
+        avatarEl.style.background = (typeof colorForId === 'function' ? colorForId(packet.senderId) : '#0e3b35');
+      }
+      modal.style.display = 'flex';
+    }
+
+    // Auto timeout if not answered in 45 seconds
+    if (callTimeoutTimer) clearTimeout(callTimeoutTimer);
+    callTimeoutTimer = setTimeout(() => {
+      if (incomingCallData && incomingCallData.callId === packet.callId) {
+        declineCall(false);
+      }
+    }, 45000);
+  }
+
+  async function acceptCall() {
+    stopRingTones();
+    if (callTimeoutTimer) {
+      clearTimeout(callTimeoutTimer);
+      callTimeoutTimer = null;
+    }
+
+    const modal = document.getElementById('incomingCallModal');
+    if (modal) modal.style.display = 'none';
+
+    if (!incomingCallData) return;
+    const packet = incomingCallData;
+    incomingCallData = null;
+
+    playTone('connected');
+
+    const isVideo = (packet.callType === 'video');
+    const callId = packet.callId;
+
+    activeCall = {
+      id: callId,
+      isCaller: false,
+      type: packet.callType,
+      otherId: packet.senderId,
+      otherEmail: packet.senderEmail,
+      otherName: packet.senderName,
+      otherAvatar: packet.senderAvatar || 'U',
+      otherRole: packet.senderRole,
+      startTime: Date.now(),
+      isMuted: false,
+      isVideoOff: false,
+      conversationId: packet.conversationId
+    };
+
+    showOverlay(activeCall, 'Connecting...');
+
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        localMediaStream = await navigator.mediaDevices.getUserMedia({
+          video: isVideo ? { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' } : false,
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
+        const localPip = document.getElementById('callLocalVideoPip');
+        if (localPip && isVideo) {
+          localPip.srcObject = localMediaStream;
+          localPip.style.display = 'block';
+        }
+      }
+    } catch(err) {
+      console.warn('Callee media error:', err);
+    }
+
+    try {
+      if (window.RTCPeerConnection) {
+        peerConnection = new RTCPeerConnection(RTC_CONFIG);
+
+        if (localMediaStream) {
+          localMediaStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localMediaStream);
+          });
+        }
+
+        peerConnection.ontrack = (event) => {
+          remoteMediaStream = event.streams[0];
+          const remoteAudio = document.getElementById('collektRemoteAudio');
+          if (remoteAudio) {
+            remoteAudio.srcObject = remoteMediaStream;
+            remoteAudio.play().catch(()=>{});
+          }
+          if (isVideo) {
+            const remoteVideo = document.getElementById('callVideoElement');
+            if (remoteVideo) {
+              remoteVideo.srcObject = remoteMediaStream;
+              remoteVideo.style.display = 'block';
+              remoteVideo.play().catch(()=>{});
+              const avatarArea = document.getElementById('callAvatarArea');
+              if (avatarArea) avatarArea.style.opacity = '0.2';
+            }
+          }
+        };
+
+        peerConnection.onicecandidate = (event) => {
+          if (event.candidate) {
+            broadcastSignal({
+              event: 'ice_candidate',
+              targetId: packet.senderId,
+              targetEmail: packet.senderEmail,
+              callId: callId,
+              candidate: event.candidate
+            });
+          }
+        };
+
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(packet.sdp));
+
+        // Drain any queued ICE candidates that arrived while ringing
+        while (pendingIceCandidates.length > 0) {
+          const cand = pendingIceCandidates.shift();
+          try { await peerConnection.addIceCandidate(new RTCIceCandidate(cand)); } catch(e){}
+        }
+
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+
+        broadcastSignal({
+          event: 'call_answered',
+          targetId: packet.senderId,
+          targetEmail: packet.senderEmail,
+          callId: callId,
+          sdp: answer
+        });
+
+        startConnectedTimer();
+      }
+    } catch(err) {
+      console.warn('Accept call error:', err);
+    }
+  }
+
+  function declineCall(sendSignal = true) {
+    stopRingTones();
+    if (callTimeoutTimer) {
+      clearTimeout(callTimeoutTimer);
+      callTimeoutTimer = null;
+    }
+    const modal = document.getElementById('incomingCallModal');
+    if (modal) modal.style.display = 'none';
+
+    if (incomingCallData) {
+      if (sendSignal) {
+        broadcastSignal({
+          event: 'call_declined',
+          targetId: incomingCallData.senderId,
+          targetEmail: incomingCallData.senderEmail,
+          callId: incomingCallData.callId
+        });
+      }
+      incomingCallData = null;
+    }
+  }
+
+  async function startCall(opts = {}) {
+    ensureCallElementsInDOM();
+    const type = opts.type || 'voice';
+    const isVideo = (type === 'video');
+    const callId = 'call_' + Date.now();
+
+    activeCall = {
+      id: callId,
+      isCaller: true,
+      type: type,
+      otherId: opts.targetId,
+      otherEmail: opts.targetEmail,
+      otherUsername: opts.targetUsername,
+      otherName: opts.targetName || 'Collekt Member',
+      otherAvatar: opts.targetAvatar || 'U',
+      otherRole: opts.targetRole,
+      startTime: Date.now(),
+      isMuted: false,
+      isVideoOff: false,
+      conversationId: opts.conversationId
+    };
+
+    pendingIceCandidates = [];
+    showOverlay(activeCall, 'Calling...');
+    startWhatsAppOutgoingRing();
+
+    // 45s timeout for no answer
+    if (callTimeoutTimer) clearTimeout(callTimeoutTimer);
+    callTimeoutTimer = setTimeout(() => {
+      if (activeCall && activeCall.id === callId && activeCall.isCaller) {
+        const statusEl = document.getElementById('callStatusText');
+        if (statusEl) statusEl.innerHTML = `<span style="color:#f59e0b;">⏳ No Answer</span>`;
+        playTone('busy');
+        setTimeout(() => endCall(true), 1500);
+      }
+    }, 45000);
+
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        localMediaStream = await navigator.mediaDevices.getUserMedia({
+          video: isVideo ? { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' } : false,
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
+        const localPip = document.getElementById('callLocalVideoPip');
+        if (localPip && isVideo) {
+          localPip.srcObject = localMediaStream;
+          localPip.style.display = 'block';
+        }
+      }
+    } catch(err) {
+      console.warn('Caller getUserMedia notice:', err);
+    }
+
+    try {
+      if (window.RTCPeerConnection) {
+        peerConnection = new RTCPeerConnection(RTC_CONFIG);
+
+        if (localMediaStream) {
+          localMediaStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localMediaStream);
+          });
+        }
+
+        peerConnection.ontrack = (event) => {
+          remoteMediaStream = event.streams[0];
+          const remoteAudio = document.getElementById('collektRemoteAudio');
+          if (remoteAudio) {
+            remoteAudio.srcObject = remoteMediaStream;
+            remoteAudio.play().catch(()=>{});
+          }
+          if (isVideo) {
+            const remoteVideo = document.getElementById('callVideoElement');
+            if (remoteVideo) {
+              remoteVideo.srcObject = remoteMediaStream;
+              remoteVideo.style.display = 'block';
+              remoteVideo.play().catch(()=>{});
+              const avatarArea = document.getElementById('callAvatarArea');
+              if (avatarArea) avatarArea.style.opacity = '0.2';
+            }
+          }
+        };
+
+        peerConnection.onicecandidate = (event) => {
+          if (event.candidate) {
+            broadcastSignal({
+              event: 'ice_candidate',
+              targetId: opts.targetId,
+              targetEmail: opts.targetEmail,
+              callId: callId,
+              candidate: event.candidate
+            });
+          }
+        };
+
+        const offer = await peerConnection.createOffer({
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: isVideo
+        });
+        await peerConnection.setLocalDescription(offer);
+
+        broadcastSignal({
+          event: 'call_offer',
+          targetId: opts.targetId,
+          targetEmail: opts.targetEmail,
+          targetUsername: opts.targetUsername,
+          callId: callId,
+          callType: type,
+          conversationId: opts.conversationId,
+          sdp: offer
+        });
+
+        const statusEl = document.getElementById('callStatusText');
+        if (statusEl) statusEl.textContent = 'Ringing...';
+      }
+    } catch(err) {
+      console.warn('Start call offer setup error:', err);
+    }
+  }
+
+  async function onReceiveAnswer(packet) {
+    if (!activeCall || !activeCall.isCaller) return;
+    stopRingTones();
+    if (callTimeoutTimer) {
+      clearTimeout(callTimeoutTimer);
+      callTimeoutTimer = null;
+    }
+    playTone('connected');
+
+    try {
+      if (peerConnection && packet.sdp) {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(packet.sdp));
+        while (pendingIceCandidates.length > 0) {
+          const cand = pendingIceCandidates.shift();
+          try { await peerConnection.addIceCandidate(new RTCIceCandidate(cand)); } catch(e){}
+        }
+      }
+    } catch(err) {
+      console.warn('Caller setRemoteDescription error:', err);
+    }
+
+    startConnectedTimer();
+  }
+
+  async function onReceiveIceCandidate(packet) {
+    if (!packet || !packet.candidate) return;
+    try {
+      if (peerConnection && peerConnection.remoteDescription) {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(packet.candidate));
+      } else {
+        pendingIceCandidates.push(packet.candidate);
+      }
+    } catch(err) {}
+  }
+
+  function onReceiveDeclined(packet) {
+    stopRingTones();
+    if (callTimeoutTimer) clearTimeout(callTimeoutTimer);
+    playTone('declined');
+    const statusText = document.getElementById('callStatusText');
+    if (statusText) statusText.innerHTML = `<span style="color:#ef4444;">🚫 Call Declined</span>`;
+    setTimeout(() => endCall(false), 1500);
+  }
+
+  function onReceiveBusy(packet) {
+    stopRingTones();
+    if (callTimeoutTimer) clearTimeout(callTimeoutTimer);
+    playTone('busy');
+    const statusText = document.getElementById('callStatusText');
+    if (statusText) statusText.innerHTML = `<span style="color:#f59e0b;">⏳ User Busy on Another Call</span>`;
+    setTimeout(() => endCall(false), 1500);
+  }
+
+  function onReceiveEnded(packet) {
+    endCall(false);
+  }
+
+  function showOverlay(callObj, statusText) {
+    ensureCallElementsInDOM();
+    const overlay = document.getElementById('callOverlay');
+    if (!overlay) return;
+
+    const isVideo = callObj.type === 'video';
+    const badgeText = document.getElementById('callBadgeText');
+    const peerName = document.getElementById('callPeerName');
+    const peerAvatar = document.getElementById('callPeerAvatar');
+    const statusEl = document.getElementById('callStatusText');
+    const camBtn = document.getElementById('callCamBtn');
+
+    if (badgeText) badgeText.textContent = isVideo ? 'HD VIDEO CALL' : 'ENCRYPTED VOICE CALL';
+    if (peerName) peerName.textContent = callObj.otherName || 'Collekt Member';
+    if (peerAvatar) {
+      peerAvatar.textContent = callObj.otherAvatar || 'U';
+      peerAvatar.style.background = (typeof colorForId === 'function' ? colorForId(callObj.otherId) : '#0e3b35');
+    }
+    if (statusEl) statusEl.textContent = statusText || 'Connecting...';
+    if (camBtn) camBtn.style.display = isVideo ? 'grid' : 'none';
+
+    overlay.style.display = 'flex';
+  }
+
+  function startConnectedTimer() {
+    stopRingTones();
+    const statusText = document.getElementById('callStatusText');
+    if (statusText) {
+      statusText.innerHTML = `
+        <span style="color:#4ade80;">● Connected</span>
+        <span style="margin:0 4px; opacity:.4;">|</span>
+        <span id="callDuration">00:00</span>
+      `;
+    }
+
+    callSeconds = 0;
+    clearInterval(callTimerInterval);
+    callTimerInterval = setInterval(() => {
+      callSeconds++;
+      const hrs = Math.floor(callSeconds / 3600);
+      const mins = String(Math.floor((callSeconds % 3600) / 60)).padStart(2, '0');
+      const secs = String(callSeconds % 60).padStart(2, '0');
+      const durationEl = document.getElementById('callDuration');
+      if (durationEl) {
+        durationEl.textContent = hrs > 0 ? `${hrs}:${mins}:${secs}` : `${mins}:${secs}`;
+      }
+    }, 1000);
+  }
+
+  function toggleMute() {
+    if (!activeCall) return;
+    activeCall.isMuted = !activeCall.isMuted;
+    const btn = document.getElementById('callMuteBtn');
+    if (btn) {
+      btn.classList.toggle('active', activeCall.isMuted);
+      btn.innerHTML = activeCall.isMuted ? '🔇' : '🎙️';
+    }
+    if (localMediaStream) {
+      localMediaStream.getAudioTracks().forEach(t => t.enabled = !activeCall.isMuted);
+    }
+  }
+
+  function toggleCam() {
+    if (!activeCall) return;
+    activeCall.isVideoOff = !activeCall.isVideoOff;
+    const btn = document.getElementById('callCamBtn');
+    if (btn) {
+      btn.classList.toggle('active', activeCall.isVideoOff);
+      btn.innerHTML = activeCall.isVideoOff ? '🚫' : '📹';
+    }
+    if (localMediaStream) {
+      localMediaStream.getVideoTracks().forEach(t => t.enabled = !activeCall.isVideoOff);
+    }
+  }
+
+  function endCall(sendEndSignal = true) {
+    stopRingTones();
+    if (callTimeoutTimer) {
+      clearTimeout(callTimeoutTimer);
+      callTimeoutTimer = null;
+    }
+    if (callTimerInterval) {
+      clearInterval(callTimerInterval);
+      callTimerInterval = null;
+    }
+    playTone('end');
+
+    if (sendEndSignal && activeCall) {
+      broadcastSignal({
+        event: 'call_ended',
+        targetId: activeCall.otherId,
+        targetEmail: activeCall.otherEmail,
+        callId: activeCall.id
+      });
+    }
+
+    if (localMediaStream) {
+      localMediaStream.getTracks().forEach(track => track.stop());
+      localMediaStream = null;
+    }
+    if (remoteMediaStream) {
+      remoteMediaStream.getTracks().forEach(track => track.stop());
+      remoteMediaStream = null;
+    }
+    if (peerConnection) {
+      try { peerConnection.close(); } catch(e) {}
+      peerConnection = null;
+    }
+
+    const overlay = document.getElementById('callOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    const incModal = document.getElementById('incomingCallModal');
+    if (incModal) incModal.style.display = 'none';
+
+    if (activeCall && activeCall.conversationId && typeof sendMessage === 'function') {
+      const typeLabel = activeCall.type === 'video' ? '📹 Video call' : '📞 Voice call';
+      const durText = callSeconds > 0 ? `${Math.floor(callSeconds / 60)}m ${callSeconds % 60}s` : 'no answer';
+      try {
+        sendMessage(activeCall.conversationId, `${typeLabel} ended • ${durText}`);
+        if (typeof renderContacts === 'function') renderContacts();
+      } catch(e) {}
+    }
+
+    activeCall = null;
+    incomingCallData = null;
+    pendingIceCandidates = [];
+  }
+
+  function init() {
+    setupAudioUnlock();
+    ensureCallElementsInDOM();
+
+    if (broadcastBus) {
+      broadcastBus.onmessage = (e) => {
+        if (e && e.data) handleIncomingSignal(e.data);
+      };
+    }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'collekt_active_call_signal' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          handleIncomingSignal(parsed);
+        } catch(err) {}
+      }
+    });
+
+    getCallingChannel();
+  }
+
+  return {
+    init,
+    startCall,
+    acceptCall,
+    declineCall,
+    endCall,
+    toggleMute,
+    toggleCam,
+    getActiveCall: () => activeCall,
+    getAudioContext
+  };
+})();
+
+// Auto-initialize CollektCalling when DOM is ready
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      CollektCalling.init();
+    });
+  } else {
+    CollektCalling.init();
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.CollektCalling = CollektCalling;
+}
+
+
 
 
