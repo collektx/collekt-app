@@ -262,7 +262,7 @@ async function runSecurityAuditProbes() {
   try {
     const { error: authErrA } = await clientUserA.auth.signInWithPassword({
       email: 'admin@collekt.ng',
-      password: 'CollektAdmin2026!'
+      password: '@Teamcollekt2026'
     });
     assert(!authErrA, 'User A (Collekt Administrator) authenticated successfully');
     assert(clientUserB != null, 'User B (Untrusted Client) initialized successfully');
@@ -1391,7 +1391,7 @@ async function runSecurityAuditProbes() {
     // 2. Authenticate test company account
     const { data: compAuth, error: compErr } = await anonClient.auth.signInWithPassword({
       email: 'admin@collekt.ng',
-      password: 'CollektAdmin2026!'
+      password: '@Teamcollekt2026'
     });
     assert(!compErr && compAuth?.session?.access_token, 'Authenticated client for Step-Up test');
     const token = compAuth.session.access_token;

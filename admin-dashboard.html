@@ -1430,7 +1430,6 @@
   }
 
   async function testAdminPaystackConnection() {
-    let sk = (document.getElementById('adminPaystackSecretKey')?.value || localStorage.getItem('collekt_paystack_secret_key') || '').trim();
     const pk = (document.getElementById('adminPaystackPublicKey')?.value || localStorage.getItem('collekt_paystack_public_key') || 'pk_live_GDgZcYhPzLZBHh1rr6godHWmHuA5qfNaxdioYM1m').trim();
 
     showToast('⏳ Testing connection with Korapay Live API...');

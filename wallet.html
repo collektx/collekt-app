@@ -703,7 +703,7 @@
   } catch(e) {}
   let rawBalance = 0;
   let rawEscrow = 0;
-  let mockTransactions = [];
+  let liveWalletTransactions = [];
   let pendingFinancialAction = null;
 
   requireAuth();
@@ -2085,7 +2085,7 @@
     const current = getSavedTransactions();
     current.unshift(tx);
     localStorage.setItem(_txKey(), JSON.stringify(current));
-    mockTransactions = current;
+    liveWalletTransactions = current;
     renderTransactions(current);
   }
 
@@ -2094,8 +2094,8 @@
     const ownerId = user.id || user.owner_id;
 
     // First render cached transactions immediately for zero-delay UX
-    mockTransactions = getSavedTransactions();
-    renderTransactions(mockTransactions);
+    liveWalletTransactions = getSavedTransactions();
+    renderTransactions(liveWalletTransactions);
 
     // Fetch live ledger records from Supabase
     if (ownerId && typeof fetchWalletLedger === 'function') {
@@ -2119,7 +2119,7 @@
           };
         });
 
-        mockTransactions = liveTxs;
+        liveWalletTransactions = liveTxs;
         localStorage.setItem(_txKey(), JSON.stringify(liveTxs));
         renderTransactions(liveTxs);
       }
@@ -2216,7 +2216,7 @@
     const start = document.getElementById('startDateFilter')?.value;
     const end = document.getElementById('endDateFilter')?.value;
 
-    let filtered = mockTransactions.filter(tx => {
+    let filtered = liveWalletTransactions.filter(tx => {
       if (cat !== 'all' && tx.category !== cat) return false;
       if (type !== 'all' && tx.type !== type) return false;
       if (start && tx.fullDate < start) return false;
@@ -2229,7 +2229,7 @@
 
   window.downloadCSVReport = function() {
     let csv = 'Transaction,Type,Amount (NGN),Balance Before (NGN),Status,Date\n';
-    const txList = Array.isArray(mockTransactions) ? mockTransactions : [];
+    const txList = Array.isArray(liveWalletTransactions) ? liveWalletTransactions : [];
     txList.forEach(tx => {
       const title = (tx.title || 'Transaction').replace(/"/g, '""');
       const desc = (tx.desc || '').replace(/"/g, '""');
