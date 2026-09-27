@@ -467,7 +467,7 @@ html.dark .bubble.sent { background: #005c4b; color: #e9edef; }
 .wcard-sub { font-size: 12px; opacity: .7; margin-top: 8px; }
 
 /* ── MISC ─────────────────────────────────────────── */
-.page-inner { padding: 32px; max-width: 1400px; }
+.page-inner { padding: 32px; max-width: 1440px; margin: 0 auto; box-sizing: border-box; }
 .content-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
 .card-header { padding: 20px 24px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
 .card-header h3 { font-size: 16px; font-weight: 800; }
@@ -1388,6 +1388,13 @@ html.dark .mobile-bottom-nav {
   }
 }
 
+/* Active chat on mobile hides the floating bottom nav so chat input sits clean */
+body.in-active-chat #liquidGlassNav,
+body.in-active-chat .liquid-glass-nav,
+body.in-active-chat .mobile-bottom-nav {
+  display: none !important;
+}
+
 /* Smartphones & Small Tablets (<= 768px) */
 @media (max-width: 768px) {
   .mobile-bottom-nav {
@@ -1395,7 +1402,11 @@ html.dark .mobile-bottom-nav {
   }
 
   .app-main {
-    padding-bottom: 80px !important;
+    padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body.in-active-chat .app-main {
+    padding-bottom: 0 !important;
   }
 
   .page-inner, .page-inner-msg, .mkt-container {

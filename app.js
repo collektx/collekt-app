@@ -1459,11 +1459,12 @@ function deduplicateMessages(msgs) {
       if (existing.client_msg_id && msg.id && existing.client_msg_id === msg.id) return true;
       
       const sameConv = (existing.conversation_id === msg.conversation_id);
+      const sameSender = (existing.sender_id && msg.sender_id && String(existing.sender_id).toLowerCase().trim() === String(msg.sender_id).toLowerCase().trim());
       const sameBody = String(existing.body || '').trim() === String(msg.body || '').trim();
-      if (sameConv && sameBody) {
+      if (sameBody && (sameConv || sameSender)) {
         const t1 = new Date(existing.created_at || 0).getTime();
         const t2 = new Date(msg.created_at || 0).getTime();
-        if (Math.abs(t1 - t2) < 60000) return true;
+        if (Math.abs(t1 - t2) < 120000) return true; // 2 minutes window
       }
       return false;
     });
@@ -1705,6 +1706,18 @@ function updateLiveUnreadMessageBadges() {
   document.querySelectorAll('.unread-msg-count').forEach(el => {
     el.textContent = count > 0 ? `(${count} unread)` : '';
   });
+
+  // 4. Liquid Glass Navigation Chats Badge (Live authentic unread counter)
+  const liquidBadge = document.getElementById('liquidNavChatsBadge');
+  if (liquidBadge) {
+    if (count > 0) {
+      liquidBadge.textContent = count;
+      liquidBadge.style.display = 'inline-flex';
+    } else {
+      liquidBadge.textContent = '0';
+      liquidBadge.style.display = 'none';
+    }
+  }
 }
 
 function sendMessage(conversationId, body, mediaUrl = null) {
@@ -3866,14 +3879,28 @@ function buildPublicNav() {
   const actions = document.getElementById('navActions');
   if (!actions) return;
   updateThemeButton();
-  actions.innerHTML = `
-    <button class="theme-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">${getThemeIconHTML(document.documentElement.classList.contains('dark'))}</button>
-    <a class="btn btn-ghost btn-sm" href="login.html">Log in</a>
-    <a class="btn btn-amber btn-sm" href="register.html">Sign up</a>
-    <button class="ham" id="ham" aria-label="Open menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-  `;
+  const user = typeof getUser === 'function' ? getUser() : null;
+  const isCompany = !!(user && (user.role === 'company' || localStorage.getItem('collekt_last_role') === 'company'));
+  const dashUrl = isCompany ? 'company-dashboard.html' : 'dashboard.html';
+
+  if (user && (user.id || user.email)) {
+    actions.innerHTML = `
+      <button class="theme-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">${getThemeIconHTML(document.documentElement.classList.contains('dark'))}</button>
+      <a class="btn btn-amber btn-sm" href="${dashUrl}" style="font-weight:800;">Go to Dashboard &rarr;</a>
+      <button class="ham" id="ham" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    `;
+  } else {
+    actions.innerHTML = `
+      <button class="theme-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">${getThemeIconHTML(document.documentElement.classList.contains('dark'))}</button>
+      <a class="btn btn-ghost btn-sm" href="login.html">Log in</a>
+      <a class="btn btn-amber btn-sm" href="register.html">Sign up</a>
+      <button class="ham" id="ham" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    `;
+  }
   updateThemeButton();
   initMobileNav();
 }
@@ -4049,25 +4076,19 @@ function buildSidebar(activePage) {
 // ═══════════════════════════════════════════════════════════
 
 function resolveLiquidNavActiveKey(preferredKey) {
-  if (preferredKey) return preferredKey;
+  if (preferredKey) {
+    if (preferredKey === 'dashboard' || preferredKey === 'overview' || preferredKey === 'updates') return 'home';
+    if (preferredKey === 'projects' || preferredKey === 'proposals' || preferredKey === 'post') return 'marketplace';
+    if (preferredKey === 'messages') return 'chats';
+    return preferredKey;
+  }
   const path = (window.location.pathname.split('/').pop() || '').toLowerCase();
-  const search = window.location.search || '';
-  const hash = window.location.hash || '';
-
-  if (path.includes('message')) {
-    if (search.includes('tab=calls') || hash.includes('calls')) return 'calls';
-    return 'chats';
-  }
-  if (path.includes('marketplace') || path.includes('job') || path.includes('proposal') || path.includes('post')) {
-    return 'tools';
-  }
-  if (path.includes('profile') || path.includes('wallet') || path.includes('upgrade')) {
-    return 'settings';
-  }
-  if (path.includes('dashboard') || path === '' || path.includes('index')) {
-    return 'updates';
-  }
-  return 'chats';
+  if (path.includes('message')) return 'chats';
+  if (path.includes('marketplace') || path.includes('job') || path.includes('proposal') || path.includes('post')) return 'marketplace';
+  if (path.includes('wallet')) return 'wallet';
+  if (path.includes('profile')) return 'profile';
+  if (path.includes('dashboard') || path === '' || path.includes('index')) return 'home';
+  return 'home';
 }
 
 function positionLiquidGlassLens(targetItem, animate = true) {
@@ -4146,40 +4167,45 @@ function buildLiquidGlassNav(activePageKey) {
   const toolsHref = isCompany ? 'my-jobs.html' : 'marketplace.html';
   const profHref = isCompany ? 'company-profile.html' : 'profile.html';
 
+  const unreadCount = typeof getUnreadMessageCount === 'function' ? getUnreadMessageCount() : 0;
+  const chatsBadgeMarkup = (unreadCount > 0)
+    ? `<span class="liquid-nav-badge green-badge" id="liquidNavChatsBadge">${unreadCount}</span>`
+    : `<span class="liquid-nav-badge green-badge" id="liquidNavChatsBadge" style="display:none;">0</span>`;
+
   const navItems = [
     {
-      key: 'updates',
-      label: 'Updates',
+      key: 'home',
+      label: 'Home',
       href: homeHref,
-      svg: `<svg class="liquid-nav-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/><circle cx="18" cy="6" r="2.5" fill="#22c55e" stroke="#081815" stroke-width="1.5"/></svg>`,
+      svg: `<svg class="liquid-nav-svg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
       badge: ''
     },
     {
-      key: 'calls',
-      label: 'Calls',
-      href: 'messages.html?tab=calls',
-      svg: `<svg class="liquid-nav-svg" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
-      badge: ''
-    },
-    {
-      key: 'tools',
-      label: 'Tools',
-      href: toolsHref,
-      svg: `<svg class="liquid-nav-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg>`,
+      key: 'marketplace',
+      label: isCompany ? 'Talent' : 'Market',
+      href: 'marketplace.html',
+      svg: `<svg class="liquid-nav-svg" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,
       badge: ''
     },
     {
       key: 'chats',
-      label: 'Chats',
+      label: 'Messages',
       href: 'messages.html',
       svg: `<svg class="liquid-nav-svg" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>`,
-      badge: `<span class="liquid-nav-badge green-badge" id="liquidNavChatsBadge">27</span>`
+      badge: chatsBadgeMarkup
     },
     {
-      key: 'settings',
-      label: 'Settings',
-      href: 'javascript:void(0)',
-      svg: `<svg class="liquid-nav-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+      key: 'wallet',
+      label: 'Wallet',
+      href: 'wallet.html',
+      svg: `<svg class="liquid-nav-svg" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><circle cx="18" cy="15" r="1.5"/></svg>`,
+      badge: ''
+    },
+    {
+      key: 'profile',
+      label: 'Profile',
+      href: profHref,
+      svg: `<svg class="liquid-nav-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
       badge: ''
     }
   ];
@@ -4324,7 +4350,7 @@ function buildTopbar() {
       <button class="topbar-icon-btn sidebar-toggle-btn" id="sidebarToggle" title="Toggle Navigation Menu" aria-label="Toggle Navigation Menu" onclick="toggleMobileSidebar(event)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
       <div class="topbar-search-wrap" style="flex:1; max-width:480px;">
         <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-        <input class="topbar-search" type="text" placeholder="${isCompany ? 'Search professionals, skills...' : 'Search projects, companies, skills...'}">
+        <input class="topbar-search" type="text" placeholder="${isCompany ? 'Search professionals, skills...' : 'Search projects, companies, skills...'}" onkeydown="if(event.key==='Enter' && this.value.trim()) window.location.href='marketplace.html?q=' + encodeURIComponent(this.value.trim());">
       </div>
     </div>
     <div class="topbar-actions">
@@ -7244,6 +7270,40 @@ if (typeof window !== 'undefined') {
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { CollektSessionManager };
+}
+
+// ═══════════════════════════════════════════════════════════
+// GLOBAL DESKTOP & MOBILE BROWSING KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════
+if (typeof document !== 'undefined') {
+  document.addEventListener('keydown', (e) => {
+    // 1. Escape key closes modals, drawers, and popups
+    if (e.key === 'Escape') {
+      const sidebar = document.getElementById('appSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (sidebar && sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('open');
+      }
+      document.querySelectorAll('.modal.open, .modal-overlay.open, .upload-modal.open, .settings-modal.open').forEach(m => {
+        m.classList.remove('open');
+        m.style.display = 'none';
+      });
+      const notifPanel = document.getElementById('notifPanel');
+      if (notifPanel && notifPanel.classList.contains('open')) notifPanel.classList.remove('open');
+      const profileMenu = document.getElementById('profileMenu');
+      if (profileMenu && profileMenu.classList.contains('open')) profileMenu.classList.remove('open');
+    }
+
+    // 2. '/' shortcut to focus search input (when not actively editing form fields)
+    if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+      const searchInput = document.querySelector('.topbar-search, .mkt-search-input, .msg-search');
+      if (searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    }
+  });
 }
 
 

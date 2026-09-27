@@ -1293,3 +1293,16 @@ html.dark .liquid-nav-item.active .liquid-nav-label {
     height: 40%;
   }
 }
+
+/* ── ULTRA-WIDE DESKTOP ERGONOMICS (1441px+) ──────────── */
+@media (min-width: 1441px) {
+  .page-inner,
+  .mkt-container {
+    max-width: 1440px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .app-main {
+    max-width: 100%;
+  }
+}
