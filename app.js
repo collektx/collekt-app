@@ -15,7 +15,7 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
     if (!Array.isArray(del)) del = [];
     del = del.filter(x => {
       const s = String(x || '').toLowerCase().trim();
-      return !['ojeoweredave@gmail.com', 'admin@collekt.ng', 'collekng', 'collektng', 'collektng@collekt.xyz', 'collektng@gmail.com'].includes(s);
+      return !['ojeoweredave@gmail.com', 'admin@collekt.ng', 'collekng', 'collektng', 'collektng@collektng.com', 'admin@collektng.com', 'collektng@gmail.com'].includes(s);
     });
     localStorage.setItem('collekt_deleted_users', JSON.stringify(del));
 
@@ -1140,7 +1140,7 @@ function syncRealUsersToDirectory(realProfiles) {
       if (!rp) return;
       const key = getCanonicalKey(rp);
       if (!key) return;
-      if (['chenpao51@gmail.com', 'grumpyluan@gmail.com', 'smileykori@gmail.com', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com', 'officialthelma@gmail.com', 'admin@collektng.com'].includes(key)) {
+      if (['chenpao51@gmail.com', 'grumpyluan@gmail.com', 'smileykori@gmail.com', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com', 'officialthelma@gmail.com'].includes(key)) {
         return;
       }
       const idKey = rp.id ? String(rp.id).toLowerCase().trim() : '';
@@ -1191,7 +1191,7 @@ function getAllRegisteredUsers() {
       'bashiru musa', 'joshua emeka', 'farouk abubakar', 'chidi nnamdi', 'usr_chairman_of_the_board',
       'chenpao51@gmail.com', 'f69a187c-5848-4d1c-9fb5-bc60b181789f', 'grumpyluan@gmail.com',
       '814f4be6-cc86-47d3-b746-cd257f456548',
-      'smileykori@gmail.com', 'bethelvwire@gmail.com', 'officialthelma@gmail.com', 'admin@collektng.com',
+      'smileykori@gmail.com', 'bethelvwire@gmail.com', 'officialthelma@gmail.com',
       'chen pao', 'grumpy luan'
     ];
 
