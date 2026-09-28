@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=123.0">
-<link rel="stylesheet" href="shared.css?v=123.0">
-<link rel="stylesheet" href="glass.css?v=123.0">
+<link rel="stylesheet" href="style.css?v=124.0">
+<link rel="stylesheet" href="shared.css?v=124.0">
+<link rel="stylesheet" href="glass.css?v=124.0">
 
 <style>
   body { background: var(--paper); }
@@ -206,8 +206,8 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=123.0"></script>
-<script src="app.js?v=123.0"></script>
+<script src="supabase.js?v=124.0"></script>
+<script src="app.js?v=124.0"></script>
 <script>
   // Detect if arriving from OAuth callback & show immediate feedback
   const oauthHash = window.location.hash || '';
@@ -381,21 +381,7 @@
     }
 
     try {
-      let deletedUsers = [];
-      try {
-        deletedUsers = (JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]')).map(x => String(x).toLowerCase().trim());
-      } catch(e){}
-
-      if (deletedUsers.some(d => d && (term === d || (email && email.split('@')[0] === d)))) {
-        if (errEl) {
-          errEl.textContent = '⛔ This account has been permanently deleted by platform administration.';
-          errEl.style.display = 'block';
-        }
-        if (btn) { btn.innerHTML = 'Log In'; btn.disabled = false; }
-        return;
-      }
-
-      // 2. Real Supabase Authentication
+      // 1. Real Supabase Authentication
       const { user: authUser, session, profile, error: authError } = await signInWithEmailPassword({ email: normalizedEmail, password });
 
       if (authError) {
@@ -414,6 +400,18 @@
       }
 
       if (profile) {
+        // Clear any stale deleted-user markers for this email
+        try {
+          let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
+          if (Array.isArray(del)) {
+            del = del.filter(x => {
+              const s = String(x || '').toLowerCase().trim();
+              return s !== term && s !== normalizedEmail.toLowerCase();
+            });
+            localStorage.setItem('collekt_deleted_users', JSON.stringify(del));
+          }
+        } catch(e) {}
+
         if (profile.suspended === true || profile.status === 'suspended') {
           if (errEl) {
             errEl.textContent = '⛔ Your account has been suspended by Collekt administration. Please contact support@collekt.ng.';

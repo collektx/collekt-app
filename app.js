@@ -10,52 +10,43 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
 // -- STRICT AUTHENTIC SESSIONS ENFORCER & PROTECTED ACCOUNTS GUARDIAN --
 (function enforceStrictAuthenticSessions() {
   try {
-    const BANNED_TOKENS = [
-      'collekng', 'collektng', 'collektng@gmail.com', '0f9ae84c-c5dd-4067-8ded-82638a6e9e01',
-      'bethelvvwire', 'bethel_vwire', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com',
-      'patakhues', 'tessycelestine', 'tessycelestine9',
-      'chairman of the board', 'chairmanoftheboard', 'adaeze okonkwo', 'kunle adeyemi',
-      'bashiru musa', 'joshua emeka', 'farouk abubakar', 'chidi nnamdi', 'usr_chairman_of_the_board',
-      'chenpao51@gmail.com', 'f69a187c-5848-4d1c-9fb5-bc60b181789f', 'grumpyluan@gmail.com',
-      '814f4be6-cc86-47d3-b746-cd257f456548', 'smileykori@gmail.com', 'officialthelma@gmail.com',
-      'admin@collektng.com', 'chen pao', 'grumpy luan'
-    ];
-
-    // 1. Maintain permanent blacklist of deleted/banned accounts (protect Dave Ojeowere & Admin)
+    // 1. Clean up any stale blacklist pollution so legitimate re-registered users are never blocked
     let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
     if (!Array.isArray(del)) del = [];
-    BANNED_TOKENS.forEach(tok => {
-      if (!del.includes(tok)) del.push(tok);
-    });
     del = del.filter(x => {
       const s = String(x || '').toLowerCase().trim();
-      return s !== 'ojeoweredave@gmail.com' && s !== 'usr_dave_ojeowere' && s !== 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' && s !== 'admin@collekt.ng' && s !== 'a1111111-1111-4111-a111-111111111111';
+      return !['ojeoweredave@gmail.com', 'admin@collekt.ng', 'collekng', 'collektng', 'collektng@collekt.xyz', 'collektng@gmail.com'].includes(s);
     });
     localStorage.setItem('collekt_deleted_users', JSON.stringify(del));
 
-    // 2. Kill unauthorized or stale sessions immediately on startup
+    // 2. Validate current session: Only kill legacy mock synthetic sessions (e.g. user_178...)
     let curr = null;
     try { curr = JSON.parse(localStorage.getItem('collekt_user')); } catch(e){}
     if (curr) {
       const cEmail = String(curr.email || '').toLowerCase().trim();
       const cId = String(curr.id || '').toLowerCase().trim();
-      const cName = String(curr.name || curr.company_name || '').toLowerCase().trim();
-      const cUser = String(curr.username || '').toLowerCase().trim();
 
       const isProtected = cEmail === 'ojeoweredave@gmail.com' || cId === 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' || cEmail === 'admin@collekt.ng' || cId === 'a1111111-1111-4111-a111-111111111111';
+      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cId);
 
-      const isBanned = BANNED_TOKENS.some(tok => 
-        cId === tok || cEmail === tok || cName.includes(tok) || cUser === tok || (cEmail && cEmail.includes(tok))
-      );
+      // If user has a valid Supabase UUID, they are an authentic registered user!
+      if (isValidUUID || isProtected) {
+        if (cEmail && del.includes(cEmail)) {
+          del = del.filter(x => String(x).toLowerCase().trim() !== cEmail);
+          localStorage.setItem('collekt_deleted_users', JSON.stringify(del));
+        }
+      }
 
-      const isSyntheticMock = !isProtected && (
+      // Only kill obsolete unauthenticated mock sessions that lack real Supabase UUIDs
+      const isSyntheticMock = !isProtected && !isValidUUID && (
         cId.startsWith('user_') || 
-        (cId.startsWith('usr_') && cId !== 'usr_dave_ojeowere') || 
-        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cId)
+        (cId.startsWith('usr_') && cId !== 'usr_dave_ojeowere')
       );
 
-      if (!isProtected && (isBanned || isSyntheticMock)) {
-        console.warn('⛔ Security Guardian: Terminated unauthorized/stale session for:', cEmail || cName || cId);
+      const isSuspended = curr.suspended === true || curr.status === 'suspended';
+
+      if (isSyntheticMock || isSuspended) {
+        console.warn('⛔ Security Guardian: Terminated synthetic/suspended session for:', cEmail || cId);
         localStorage.removeItem('collekt_user');
         localStorage.removeItem('collekt_last_user_email');
         localStorage.removeItem('collekt_admin_auth');
@@ -64,31 +55,20 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
 
         const p = window.location.pathname.toLowerCase();
         if (p.includes('dashboard') || p.includes('wallet') || p.includes('profile') || p.includes('messages') || p.includes('proposals') || p.includes('my-jobs') || p.includes('post-job') || p.includes('admin')) {
-          window.location.replace('login.html?reason=account_purged');
+          window.location.replace(isSuspended ? 'login.html?suspended=true' : 'login.html');
           return;
         }
       }
     }
 
-    // 3. Purge collekt_all_users directory
+    // 3. Purge collekt_all_users directory of only synthetic mock accounts (keep real UUIDs)
     let dir = JSON.parse(localStorage.getItem('collekt_all_users') || '[]');
     if (!Array.isArray(dir)) dir = [];
     dir = dir.filter(u => {
       if (!u) return false;
-      const uEmail = String(u.email || '').toLowerCase().trim();
       const uId = String(u.id || '').toLowerCase().trim();
-      const uName = String(u.name || u.company_name || '').toLowerCase().trim();
-      const uUser = String(u.username || '').toLowerCase().trim();
-
-      if (uEmail === 'ojeoweredave@gmail.com' || uId === 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91') return true;
-      if (uEmail === 'admin@collekt.ng' || uId === 'a1111111-1111-4111-a111-111111111111') return true;
-
-      const isBanned = BANNED_TOKENS.some(tok => 
-        uId === tok || uEmail === tok || uName.includes(tok) || uUser === tok || (uEmail && uEmail.includes(tok))
-      );
       const isSynthetic = uId.startsWith('user_') || (uId.startsWith('usr_') && uId !== 'usr_dave_ojeowere');
-
-      return !isBanned && !isSynthetic;
+      return !isSynthetic;
     });
 
     // 4. Ensure Dave Ojeowere profile is present and active in collekt_all_users
@@ -1148,9 +1128,9 @@ function syncRealUsersToDirectory(realProfiles) {
       if (!u) return;
       const key = getCanonicalKey(u);
       if (!key) return;
-      const n = String(u.name || u.company_name || '').toLowerCase().trim();
-      // Purge any orphan/typo Collekng accounts unconditionally
-      if (n.includes('collekng') || n.includes('collektng') || key === 'collektng@gmail.com' || key === '0f9ae84c-c5dd-4067-8ded-82638a6e9e01') {
+      const uId = String(u.id || '').toLowerCase().trim();
+      // Skip synthetic mock IDs
+      if (uId.startsWith('user_') || (uId.startsWith('usr_') && uId !== 'usr_dave_ojeowere')) {
         return;
       }
       map.set(key, u);
@@ -1160,7 +1140,7 @@ function syncRealUsersToDirectory(realProfiles) {
       if (!rp) return;
       const key = getCanonicalKey(rp);
       if (!key) return;
-      if (['collektng@gmail.com', 'chenpao51@gmail.com', 'grumpyluan@gmail.com', 'smileykori@gmail.com', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com', 'officialthelma@gmail.com', 'admin@collektng.com'].includes(key)) {
+      if (['chenpao51@gmail.com', 'grumpyluan@gmail.com', 'smileykori@gmail.com', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com', 'officialthelma@gmail.com', 'admin@collektng.com'].includes(key)) {
         return;
       }
       const idKey = rp.id ? String(rp.id).toLowerCase().trim() : '';
@@ -1204,46 +1184,46 @@ function getAllRegisteredUsers() {
     let raw = JSON.parse(localStorage.getItem('collekt_all_users')) || [];
     const deleted = (JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]')).map(x => String(x).toLowerCase().trim());
 
-    // 1. Strict purge of legacy mock / fake / reset accounts - ONLY authentic users allowed
+    // 1. Strict purge of legacy mock / fake unauthenticated accounts - ONLY authentic users allowed
     const fakeTokens = [
       'bethelvvwire', 'bethel_vwire', 'patakhues', 'tessycelestine', 'tessycelestine9', 
       'chairman of the board', 'chairmanoftheboard', 'adaeze okonkwo', 'kunle adeyemi', 
       'bashiru musa', 'joshua emeka', 'farouk abubakar', 'chidi nnamdi', 'usr_chairman_of_the_board',
       'chenpao51@gmail.com', 'f69a187c-5848-4d1c-9fb5-bc60b181789f', 'grumpyluan@gmail.com',
-      '814f4be6-cc86-47d3-b746-cd257f456548', 'collektng@gmail.com', '0f9ae84c-c5dd-4067-8ded-82638a6e9e01',
+      '814f4be6-cc86-47d3-b746-cd257f456548',
       'smileykori@gmail.com', 'bethelvwire@gmail.com', 'officialthelma@gmail.com', 'admin@collektng.com',
       'chen pao', 'grumpy luan'
     ];
 
     raw = raw.filter(u => {
       if (!u) return false;
+      const id = String(u.id || '').toLowerCase().trim();
+      // Keep all valid Supabase UUID profiles
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+        return true;
+      }
+      if (u.email === 'admin@collekt.ng' || id === 'a1111111-1111-4111-a111-111111111111') {
+        return true;
+      }
+
       const n = String(u.name || '').toLowerCase().trim();
       const username = String(u.username || '').toLowerCase().trim();
       const email = String(u.email || '').toLowerCase().trim();
-      const id = String(u.id || '').toLowerCase().trim();
-
-      // Purge duplicate/typo Collekng accounts without valid canonical ID/email
-      if (email === 'collektng@gmail.com' || id === '0f9ae84c-c5dd-4067-8ded-82638a6e9e01' || n === 'collekng' || n === 'collektng') {
-        return false;
-      }
 
       const isFake = fakeTokens.some(token => 
-        id === token || n.includes(token) || username.includes(token) || (email && email.includes(token))
+        id === token || n === token || username === token || email === token
       );
       const isDeleted = deleted.some(d => d && (id === d || email === d || username === d || n === d));
-      return !isFake && !isDeleted;
+      const isMock = id.startsWith('user_') || (id.startsWith('usr_') && id !== 'usr_dave_ojeowere');
+      return !isFake && !isDeleted && !isMock;
     });
 
     // 2. Ensure active user is registered in directory
     const currentUser = getUser();
     if (currentUser && (currentUser.id || currentUser.email)) {
       const cId = String(currentUser.id || '').toLowerCase().trim();
-      const cEmail = String(currentUser.email || '').toLowerCase().trim();
-      const cName = String(currentUser.name || '').toLowerCase().trim();
-      const isCurDeleted = deleted.some(d => d && (cId === d || cEmail === d));
-      const isCurFake = fakeTokens.some(token => cId === token || cName.includes(token) || (cEmail && cEmail.includes(token)));
-
-      if (!isCurDeleted && !isCurFake) {
+      const isValid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cId) || cId === 'a1111111-1111-4111-a111-111111111111' || currentUser.email === 'admin@collekt.ng' || currentUser.email === 'ojeoweredave@gmail.com';
+      if (isValid) {
         const exists = raw.some(u => (currentUser.id && u.id === currentUser.id) || (currentUser.email && u.email && u.email.toLowerCase() === currentUser.email.toLowerCase()));
         if (!exists) {
           raw.push(currentUser);
