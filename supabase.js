@@ -1067,16 +1067,16 @@ async function publishJobToSupabase(jobData) {
   if (!window.sb) return null;
   try {
     const user = typeof getUser === 'function' ? getUser() : null;
-    let companyId = jobData.company_id || user?.id;
+    let companyId = jobData.company_id || user?.id || null;
     if (!companyId || companyId === 'company' || companyId.startsWith('usr_')) {
-      companyId = '0f9ae84c-c5dd-4067-8ded-82638a6e9e01';
+      companyId = (user && user.id && !user.id.startsWith('usr_')) ? user.id : null;
     }
 
     const budgetVal = (jobData.budget != null && !isNaN(jobData.budget) && Number(jobData.budget) > 0) ? Number(jobData.budget) : null;
 
     const payload = {
       company_id: companyId,
-      company_name: jobData.company_name || jobData.companyName || user?.company_name || user?.name || 'Collekt Technologies Ltd',
+      company_name: jobData.company_name || jobData.companyName || user?.company_name || user?.name || 'Verified Client',
       title: jobData.title,
       description: jobData.description || jobData.scope || '',
       category: jobData.category || 'EPC & Engineering',

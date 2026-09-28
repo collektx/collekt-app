@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=122.0">
-<link rel="stylesheet" href="shared.css?v=122.0">
-<link rel="stylesheet" href="glass.css?v=122.0">
+<link rel="stylesheet" href="style.css?v=123.0">
+<link rel="stylesheet" href="shared.css?v=123.0">
+<link rel="stylesheet" href="glass.css?v=123.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -842,10 +842,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=122.0"></script>
-<script src="app.js?v=122.0"></script>
-<script src="collekt-ai.js?v=122.0"></script>
-<script src="settings-popup.js?v=122.0"></script>
+<script src="supabase.js?v=123.0"></script>
+<script src="app.js?v=123.0"></script>
+<script src="collekt-ai.js?v=123.0"></script>
+<script src="settings-popup.js?v=123.0"></script>
 <script>
   requireAuth();
 
@@ -892,23 +892,10 @@
         if (!key || seen.has(key)) return;
         seen.add(key);
 
-        // Guarantee single normalized Collekt Technologies Ltd company account
-        const isCollektCo = emailKey === 'collektng@gmail.com' || idKey === '0f9ae84c-c5dd-4067-8ded-82638a6e9e01' || 
-                            (u.name && (u.name.toLowerCase() === 'collekng' || u.name.toLowerCase() === 'collektng'));
-        if (isCollektCo) {
-          if (seen.has('collekt_company_canonical')) return;
-          seen.add('collekt_company_canonical');
-          others.push({
-            ...u,
-            id: '0f9ae84c-c5dd-4067-8ded-82638a6e9e01',
-            email: 'collektng@gmail.com',
-            name: 'Collekt Technologies Ltd',
-            company_name: 'Collekt Technologies Ltd',
-            full_name: 'Collekt Technologies Ltd',
-            role: 'company'
-          });
-          return;
-        }
+        // Skip deleted/banned accounts
+        const isBanned = emailKey === 'collektng@gmail.com' || 
+                         (u.name && (u.name.toLowerCase().includes('collekng') || u.name.toLowerCase().includes('collektng')));
+        if (isBanned) return;
 
         others.push(u);
       });

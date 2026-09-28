@@ -88,9 +88,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=122.0">
-<link rel="stylesheet" href="shared.css?v=122.0">
-<link rel="stylesheet" href="glass.css?v=122.0">
+<link rel="stylesheet" href="style.css?v=123.0">
+<link rel="stylesheet" href="shared.css?v=123.0">
+<link rel="stylesheet" href="glass.css?v=123.0">
 <style>
 /* -- GLOBAL OVERRIDES ------------------------------- */
 html.dark body { background: #090d0c; }
@@ -1329,9 +1329,9 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=122.0"></script>
-<script src="app.js?v=122.0"></script>
-<script src="settings-popup.js?v=122.0"></script>
+<script src="supabase.js?v=123.0"></script>
+<script src="app.js?v=123.0"></script>
+<script src="settings-popup.js?v=123.0"></script>
 <script>
   // Phone tab switcher & Mascot handler
   let currentPhoneRole = 'professional';
@@ -1428,12 +1428,37 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
       btnEl.disabled = true;
     }
 
-    // 1. Attempt Supabase Auth via signInWithEmailPassword
+    const term = email.toLowerCase().trim();
+    let normalizedEmail = email;
+    if (['admin', 'administrator', 'superadmin', 'master', 'collektadmin'].includes(term)) {
+      normalizedEmail = 'admin@collekt.ng';
+    }
+
+    const deletedUsers = (JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]')).map(x => String(x).toLowerCase().trim());
+    if (deletedUsers.some(d => d && (term === d || (email && email.split('@')[0] === d)))) {
+      showMascotMsg('⛔ This account has been removed by platform administration.', true);
+      if (btnEl) {
+        btnEl.innerHTML = 'Sign In to Workspace &rarr;';
+        btnEl.disabled = false;
+      }
+      return;
+    }
+
+    // 1. Strict Supabase Auth via signInWithEmailPassword
     try {
-      const { user: authUser, session, profile, error: authErr } = await signInWithEmailPassword({ email, password });
+      const { user: authUser, session, profile, error: authErr } = await signInWithEmailPassword({ email: normalizedEmail, password });
       if (!authErr && profile) {
+        if (profile.suspended === true || profile.status === 'suspended') {
+          showMascotMsg('⛔ Account suspended by Collekt administration.', true);
+          if (btnEl) {
+            btnEl.innerHTML = 'Sign In to Workspace &rarr;';
+            btnEl.disabled = false;
+          }
+          return;
+        }
+
         if (typeof setUser === 'function') setUser(profile);
-        localStorage.setItem('collekt_last_user_email', email);
+        localStorage.setItem('collekt_last_user_email', normalizedEmail);
         showMascotMsg('✓ Logged in! Redirecting...', false);
         setTimeout(() => {
           if (profile.role === 'admin') {
@@ -1444,67 +1469,29 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
         }, 300);
         return;
       }
-    } catch(e) {}
 
-    const term = email.toLowerCase().trim();
-    const deletedUsers = (JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]')).map(x => String(x).toLowerCase().trim());
-    if (deletedUsers.some(d => d && (term === d || (email && email.split('@')[0] === d)))) {
-      showMascotMsg('⛔ This account has been deleted by platform administration.', true);
-      return;
-    }
-
-    // 2. Search local registered accounts
-    const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
-    const match = allUsers.find(u => {
-      if (!u) return false;
-      const uEmail = String(u.email || '').toLowerCase().trim();
-      const uUsername = String(u.username || '').toLowerCase().trim();
-      const uId = String(u.id || '').toLowerCase().trim();
-      const uName = String(u.name || '').toLowerCase().trim();
-      return uEmail === term || uUsername === term || uId === term || uName === term || (uEmail && uEmail.split('@')[0] === term);
-    });
-
-    if (match) {
-      if (match.suspended === true || match.status === 'suspended') {
-        showMascotMsg('⛔ Account suspended by Collekt administration.', true);
-        return;
+      // Handle explicit auth error from Supabase
+      let msg = '⚠️ Invalid email or password. Please verify your credentials.';
+      if (authErr && authErr.message) {
+        if (authErr.message.toLowerCase().includes('email not confirmed')) {
+          msg = '⚠️ Email address not confirmed. Please check your email inbox.';
+        }
       }
-      if (typeof setUser === 'function') setUser(match);
-      localStorage.setItem('collekt_last_user_email', email);
-      showMascotMsg('✓ Welcome back, ' + (match.first_name || match.name || 'User') + '! Redirecting...', false);
-      setTimeout(() => {
-        window.location.href = match.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
-      }, 350);
+      showMascotMsg(msg, true);
+      if (btnEl) {
+        btnEl.innerHTML = 'Sign In to Workspace &rarr;';
+        btnEl.disabled = false;
+      }
+      return;
+    } catch(err) {
+      console.error('Mascot auth failure:', err);
+      showMascotMsg('⚠️ Authentication failed. Please verify your email and password.', true);
+      if (btnEl) {
+        btnEl.innerHTML = 'Sign In to Workspace &rarr;';
+        btnEl.disabled = false;
+      }
       return;
     }
-
-    // 3. Fallback instant session creation
-    const finalRole = role || (email.includes('company') || email.includes('corp') ? 'company' : 'professional');
-    const namePart = email.split('@')[0].replace(/[._-]/g, ' ');
-    const freshAccount = {
-      id: 'user_' + Date.now(),
-      name: namePart.charAt(0).toUpperCase() + namePart.slice(1),
-      email: email,
-      role: finalRole,
-      avatar_letter: namePart.charAt(0).toUpperCase(),
-      title: finalRole === 'company' ? 'Energy Enterprise' : 'Energy Specialist',
-      location: 'Nigeria',
-      about: '',
-      skills: [],
-      projects_completed: 0,
-      rating: 0.0,
-      review_count: 0,
-      total_earned: 0,
-      is_verified: false,
-      verification_status: 'unverified'
-    };
-
-    if (typeof setUser === 'function') setUser(freshAccount);
-    localStorage.setItem('collekt_last_user_email', email);
-    showMascotMsg('✓ Account connected! Redirecting...', false);
-    setTimeout(() => {
-      window.location.href = finalRole === 'company' ? 'company-dashboard.html' : 'dashboard.html';
-    }, 350);
   }
 
   // Pre-fill remembered email & Enable Enter key submission on phone inputs

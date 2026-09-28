@@ -7,25 +7,91 @@ const COLLEKT_COMMISSION_RATE = 0.10; // 10% Platform Commission Rate
 const COLLEKT_PROFESSIONAL_SUB_FEE = 15; // $15 / month
 const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
 
-// -- AUTO-RESTORE PROTECTED ACCOUNTS (Dave Oladapo Ojeowere) --
-(function autoRestoreProtectedFounderAccount() {
+// -- STRICT AUTHENTIC SESSIONS ENFORCER & PROTECTED ACCOUNTS GUARDIAN --
+(function enforceStrictAuthenticSessions() {
   try {
-    const protectedIds = ['ojeoweredave@gmail.com', 'ojeoweredave', 'usr_dave_ojeowere', 'dave oladapo ojeowere'];
-    // 1. Remove from deleted blacklist
+    const BANNED_TOKENS = [
+      'collekng', 'collektng', 'collektng@gmail.com', '0f9ae84c-c5dd-4067-8ded-82638a6e9e01',
+      'bethelvvwire', 'bethel_vwire', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com',
+      'patakhues', 'tessycelestine', 'tessycelestine9',
+      'chairman of the board', 'chairmanoftheboard', 'adaeze okonkwo', 'kunle adeyemi',
+      'bashiru musa', 'joshua emeka', 'farouk abubakar', 'chidi nnamdi', 'usr_chairman_of_the_board',
+      'chenpao51@gmail.com', 'f69a187c-5848-4d1c-9fb5-bc60b181789f', 'grumpyluan@gmail.com',
+      '814f4be6-cc86-47d3-b746-cd257f456548', 'smileykori@gmail.com', 'officialthelma@gmail.com',
+      'admin@collektng.com', 'chen pao', 'grumpy luan'
+    ];
+
+    // 1. Maintain permanent blacklist of deleted/banned accounts (protect Dave Ojeowere & Admin)
     let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
-    if (Array.isArray(del) && del.length > 0) {
-      const filtered = del.filter(x => {
-        const s = String(x || '').toLowerCase().trim();
-        return !protectedIds.some(p => s === p || s.includes('ojeoweredave'));
-      });
-      if (filtered.length !== del.length) {
-        localStorage.setItem('collekt_deleted_users', JSON.stringify(filtered));
+    if (!Array.isArray(del)) del = [];
+    BANNED_TOKENS.forEach(tok => {
+      if (!del.includes(tok)) del.push(tok);
+    });
+    del = del.filter(x => {
+      const s = String(x || '').toLowerCase().trim();
+      return s !== 'ojeoweredave@gmail.com' && s !== 'usr_dave_ojeowere' && s !== 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' && s !== 'admin@collekt.ng' && s !== 'a1111111-1111-4111-a111-111111111111';
+    });
+    localStorage.setItem('collekt_deleted_users', JSON.stringify(del));
+
+    // 2. Kill unauthorized or stale sessions immediately on startup
+    let curr = null;
+    try { curr = JSON.parse(localStorage.getItem('collekt_user')); } catch(e){}
+    if (curr) {
+      const cEmail = String(curr.email || '').toLowerCase().trim();
+      const cId = String(curr.id || '').toLowerCase().trim();
+      const cName = String(curr.name || curr.company_name || '').toLowerCase().trim();
+      const cUser = String(curr.username || '').toLowerCase().trim();
+
+      const isProtected = cEmail === 'ojeoweredave@gmail.com' || cId === 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' || cEmail === 'admin@collekt.ng' || cId === 'a1111111-1111-4111-a111-111111111111';
+
+      const isBanned = BANNED_TOKENS.some(tok => 
+        cId === tok || cEmail === tok || cName.includes(tok) || cUser === tok || (cEmail && cEmail.includes(tok))
+      );
+
+      const isSyntheticMock = !isProtected && (
+        cId.startsWith('user_') || 
+        (cId.startsWith('usr_') && cId !== 'usr_dave_ojeowere') || 
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cId)
+      );
+
+      if (!isProtected && (isBanned || isSyntheticMock)) {
+        console.warn('⛔ Security Guardian: Terminated unauthorized/stale session for:', cEmail || cName || cId);
+        localStorage.removeItem('collekt_user');
+        localStorage.removeItem('collekt_last_user_email');
+        localStorage.removeItem('collekt_admin_auth');
+        try { sessionStorage.clear(); } catch(e){}
+        try { document.cookie = "collekt_admin_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"; } catch(e){}
+
+        const p = window.location.pathname.toLowerCase();
+        if (p.includes('dashboard') || p.includes('wallet') || p.includes('profile') || p.includes('messages') || p.includes('proposals') || p.includes('my-jobs') || p.includes('post-job') || p.includes('admin')) {
+          window.location.replace('login.html?reason=account_purged');
+          return;
+        }
       }
     }
 
-    // 2. Ensure Dave Ojeowere profile is present and active in collekt_all_users
+    // 3. Purge collekt_all_users directory
     let dir = JSON.parse(localStorage.getItem('collekt_all_users') || '[]');
     if (!Array.isArray(dir)) dir = [];
+    dir = dir.filter(u => {
+      if (!u) return false;
+      const uEmail = String(u.email || '').toLowerCase().trim();
+      const uId = String(u.id || '').toLowerCase().trim();
+      const uName = String(u.name || u.company_name || '').toLowerCase().trim();
+      const uUser = String(u.username || '').toLowerCase().trim();
+
+      if (uEmail === 'ojeoweredave@gmail.com' || uId === 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91') return true;
+      if (uEmail === 'admin@collekt.ng' || uId === 'a1111111-1111-4111-a111-111111111111') return true;
+
+      const isBanned = BANNED_TOKENS.some(tok => 
+        uId === tok || uEmail === tok || uName.includes(tok) || uUser === tok || (uEmail && uEmail.includes(tok))
+      );
+      const isSynthetic = uId.startsWith('user_') || (uId.startsWith('usr_') && uId !== 'usr_dave_ojeowere');
+
+      return !isBanned && !isSynthetic;
+    });
+
+    // 4. Ensure Dave Ojeowere profile is present and active in collekt_all_users
     let dave = dir.find(u => u && u.email && u.email.toLowerCase().trim() === 'ojeoweredave@gmail.com');
     if (!dave) {
       dave = {
@@ -52,34 +118,26 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
         projects_completed: 0,
         total_earned: 0,
         success_rate: 0,
-        wallet: {
-          balance: 0,
-          escrow_balance: 0,
-          bank_name: '',
-          account_number: '',
-          account_name: '',
-          bank_assigned: false
-        }
+        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
       };
       dir.unshift(dave);
-      localStorage.setItem('collekt_all_users', JSON.stringify(dir));
     } else {
       dave.suspended = false;
       dave.status = 'active';
       if (dave.wallet && (dave.wallet.balance === 2450000 || dave.wallet.balance === 1450000)) {
         dave.wallet.balance = 0;
       }
-      localStorage.setItem('collekt_all_users', JSON.stringify(dir));
     }
+    localStorage.setItem('collekt_all_users', JSON.stringify(dir));
 
-    // 3. Sanitize current user if stale mock balance exists
-    let curr = JSON.parse(localStorage.getItem('collekt_user') || 'null');
+    // 5. Sanitize current user if stale mock balance exists
     if (curr && curr.wallet && (curr.wallet.balance === 2450000 || curr.wallet.balance === 1450000)) {
       curr.wallet.balance = Number(curr.wallet_balance || 0);
       localStorage.setItem('collekt_user', JSON.stringify(curr));
     }
   } catch(e) {}
 })();
+
 
 // -- UNIVERSAL WALLET INITIALIZER (Only uses verified provider accounts, never generates fake NUBANs) --
 function getDedicatedVirtualAccountForUser(user) {
@@ -224,11 +282,12 @@ function getUser() {
     }
 
     // Auto-repair any company account contaminated by legacy code
-    if (u.role === 'professional' && (u.company_name || u.cac || (u.name && u.name.toLowerCase() === 'collektng') || (u.email && u.email.toLowerCase().includes('collektng')))) {
+    if (u.role === 'professional' && (u.company_name || u.cac)) {
       u.role = 'company';
       localStorage.setItem('collekt_last_role', 'company');
       try { localStorage.setItem('collekt_user', JSON.stringify(u)); } catch(e){}
     }
+
 
     // Authoritative role comes strictly from the user's registered account role (u.role)
     const primaryRole = (u.role === 'company' || u.role === 'professional') 
@@ -1090,8 +1149,8 @@ function syncRealUsersToDirectory(realProfiles) {
       const key = getCanonicalKey(u);
       if (!key) return;
       const n = String(u.name || u.company_name || '').toLowerCase().trim();
-      // Purge any orphan/typo Collekng duplicate accounts
-      if ((n === 'collekng' || n === 'collektng') && key !== 'collektng@gmail.com' && key !== '0f9ae84c-c5dd-4067-8ded-82638a6e9e01') {
+      // Purge any orphan/typo Collekng accounts unconditionally
+      if (n.includes('collekng') || n.includes('collektng') || key === 'collektng@gmail.com' || key === '0f9ae84c-c5dd-4067-8ded-82638a6e9e01') {
         return;
       }
       map.set(key, u);
