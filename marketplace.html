@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=125.0">
-<link rel="stylesheet" href="shared.css?v=125.0">
-<link rel="stylesheet" href="glass.css?v=125.0">
+<link rel="stylesheet" href="style.css?v=130.0">
+<link rel="stylesheet" href="shared.css?v=130.0">
+<link rel="stylesheet" href="glass.css?v=130.0">
 <style>
 /* ═ LIVE MARKETPLACE STYLES ═ */
 html, body {
@@ -430,6 +430,16 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
       </div>
     </div>
 
+    <!-- Escrow Payment Schedule (100% Lump Sum vs Milestones) -->
+    <div id="tModalEscrowSection" style="background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:20px;">
+      <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+        <span>🔒</span> Escrow Payment Schedule
+      </div>
+      <div id="tModalMilestonesList" style="display:flex; flex-direction:column; gap:6px;">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+
     <!-- Proposal Form Box (Visible to Professionals) -->
     <div id="tModalProposalSection" style="border-top:1px solid var(--line); padding-top:20px; margin-top:20px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
@@ -442,7 +452,10 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
         <div class="form-group" style="margin-bottom:0;">
           <label class="form-label" style="font-size:12px; font-weight:700;">Proposed Amount (₦)</label>
-          <input class="form-input" type="number" id="propBidAmount" placeholder="e.g. 1500000">
+          <input class="form-input" type="number" id="propBidAmount" placeholder="e.g. 1500000" oninput="updatePropFeePreview()">
+          <div id="propFeeCalculationPill" style="display:none; margin-top:6px; font-size:11px; padding:6px 10px; background:rgba(19,117,111,0.06); border:1px solid rgba(19,117,111,0.2); border-radius:8px; color:var(--ink); line-height:1.4;">
+            Fee (15%): <strong style="color:var(--muted);">-₦0</strong> &bull; Net You Receive: <strong style="color:#16a34a;">₦0</strong>
+          </div>
         </div>
         <div class="form-group" style="margin-bottom:0;">
           <label class="form-label" style="font-size:12px; font-weight:700;">Delivery Timeline (Weeks)</label>
@@ -549,9 +562,16 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
       </div>
     </div>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+    <div style="display:grid; grid-template-columns:110px 1fr 1fr; gap:10px; margin-bottom:12px;">
       <div class="form-group" style="margin-bottom:0;">
-        <label class="form-label" style="font-size:12px; font-weight:800;">Budget / Amount Offered (₦)</label>
+        <label class="form-label" style="font-size:12px; font-weight:800;">Currency</label>
+        <select class="form-input" id="postCurrency" style="font-weight:800;" onchange="const l = document.getElementById('postBudgetLabel'); if(l) l.textContent = this.value === 'USD' ? 'Budget ($)' : 'Budget (₦)';">
+          <option value="NGN">NGN (₦)</option>
+          <option value="USD">USD ($)</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" id="postBudgetLabel" style="font-size:12px; font-weight:800;">Budget / Amount (₦)</label>
         <input class="form-input" type="number" id="postBudget" placeholder="e.g. 2500000 (Leave blank if not specified)">
       </div>
       <div class="form-group" style="margin-bottom:0;">
@@ -599,10 +619,10 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=125.0"></script>
-<script src="app.js?v=125.0"></script>
-<script src="collekt-ai.js?v=125.0"></script>
-<script src="settings-popup.js?v=125.0"></script>
+<script src="supabase.js?v=130.0"></script>
+<script src="app.js?v=130.0"></script>
+<script src="collekt-ai.js?v=130.0"></script>
+<script src="settings-popup.js?v=130.0"></script>
 <script>
   /* ═════════════════════════════════════════════════════════
      LIVE MARKETPLACE ENGINE v3.0
@@ -725,15 +745,22 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
       const shieldBadge = (compProfile && typeof getShieldBadgeHTML === 'function') ? getShieldBadgeHTML(14, compProfile) : '';
 
       const bNum = Number(j.budget || j.professional_fee || 0);
-      const budgetFormatted = (bNum > 0)
-        ? (typeof formatNaira === 'function' ? formatNaira(bNum, true) : '₦' + bNum.toLocaleString())
-        : 'Price not specified';
+      const isUsd = j.currency === 'USD';
+      let budgetFormatted = 'Price not specified';
+      if (bNum > 0) {
+        if (isUsd) {
+          budgetFormatted = typeof formatDualCurrency === 'function' ? formatDualCurrency(bNum, 'USD', j.fx_rate || 1550) : `$${bNum.toLocaleString()} USD`;
+        } else {
+          budgetFormatted = typeof formatNaira === 'function' ? formatNaira(bNum, true) : '₦' + bNum.toLocaleString();
+        }
+      }
       const rateTypeLabel = (bNum > 0 && j.budget_rate_type) ? j.budget_rate_type : 'Professional Fee';
       const skillsHtml = (j.skills && j.skills.length)
         ? j.skills.map(s => `<span class="tender-skill-chip">${escapeHTML(s)}</span>`).join('')
         : `<span class="tender-skill-chip">${escapeHTML(j.category || 'Engineering')}</span>`;
 
       const typeTag = (j.type === 'Job Opening' ? 'Short-Term Job' : j.type) || 'Short-Term Job';
+      const currencyBadge = isUsd ? `<span style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:99px; background:rgba(19,117,111,0.15); color:var(--teal);">🌐 USD Pegged</span>` : '';
 
       // Check if current professional user already collected
       const existingProp = (!isCompany && u) ? userProposals.find(p => String(p.jobId || p.project_id) === String(j.id)) : null;
@@ -776,6 +803,7 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
               <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                 <span style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; padding:3px 8px; border-radius:99px; background:rgba(212,146,11,0.15); color:var(--amber);">${escapeHTML(typeTag)}</span>
                 <span class="tender-cat-tag">${escapeHTML(j.category || 'EPC Project')}</span>
+                ${currencyBadge}
               </div>
               <span class="tender-deadline">⏳ ${escapeHTML(j.deadline || 'Ongoing')}</span>
             </div>
@@ -928,13 +956,69 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     if (document.getElementById('tModalScope')) document.getElementById('tModalScope').textContent = job.scope || job.description;
     if (document.getElementById('tModalBudget')) {
       const bNum = Number(job.budget || job.professional_fee || 0);
-      const bText = bNum > 0 
-        ? (typeof formatNaira === 'function' ? formatNaira(bNum, false) : '₦' + bNum.toLocaleString())
-        : 'Price not specified';
+      const isUsd = job.currency === 'USD';
+      let bText = 'Price not specified';
+      if (bNum > 0) {
+        if (isUsd) {
+          bText = typeof formatDualCurrency === 'function' ? formatDualCurrency(bNum, 'USD', job.fx_rate || 1550) : `$${bNum.toLocaleString()} USD`;
+        } else {
+          bText = typeof formatNaira === 'function' ? formatNaira(bNum, false) : '₦' + bNum.toLocaleString();
+        }
+      }
       const rText = (bNum > 0 && job.budget_rate_type) ? ` (${job.budget_rate_type})` : '';
       document.getElementById('tModalBudget').textContent = bText + rText;
     }
     if (document.getElementById('tModalLocation')) document.getElementById('tModalLocation').textContent = job.location || 'Nigeria';
+
+    // Render Escrow Schedule (Milestones vs 100% Lump Sum)
+    const escrowListEl = document.getElementById('tModalMilestonesList');
+    if (escrowListEl) {
+      const bNum = Number(job.budget || job.professional_fee || 0);
+      const isUsd = job.currency === 'USD';
+      const cur = isUsd ? 'USD' : 'NGN';
+      const isMilestones = job.payment_mode === 'milestones' && Array.isArray(job.milestones) && job.milestones.length > 0;
+      if (isMilestones) {
+        escrowListEl.innerHTML = job.milestones.map((m, idx) => {
+          const mPct = Number(m.percentage) || 0;
+          const mAmt = bNum > 0 ? Math.round(bNum * (mPct / 100)) : 0;
+          let mAmtStr = 'TBD';
+          if (bNum > 0) {
+            mAmtStr = typeof formatCurrency === 'function' ? formatCurrency(mAmt, cur) : (isUsd ? '$' : '₦') + mAmt.toLocaleString();
+            if (isUsd) {
+              const ngnEq = typeof convertFx === 'function' ? convertFx(mAmt, 'USD', 'NGN', job.fx_rate || 1550) : mAmt * 1550;
+              mAmtStr += ` (~₦${ngnEq.toLocaleString()})`;
+            }
+          }
+          return `
+            <div style="background:var(--white); border:1px solid var(--line); border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+              <div>
+                <div style="font-size:13px; font-weight:800; color:var(--ink);">${escapeHTML(m.name || ('Phase ' + (idx + 1)))}</div>
+                <div style="font-size:11px; color:var(--muted); margin-top:2px;">Phase ${idx+1} Deliverable &bull; Release: <strong style="color:var(--forest);">${mPct}%</strong></div>
+              </div>
+              <div style="font-size:13px; font-weight:900; color:var(--forest);">${mAmtStr}</div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        let fullAmtStr = 'Full Project Budget';
+        if (bNum > 0) {
+          fullAmtStr = typeof formatCurrency === 'function' ? formatCurrency(bNum, cur) : (isUsd ? '$' : '₦') + bNum.toLocaleString();
+          if (isUsd) {
+            const ngnEq = typeof convertFx === 'function' ? convertFx(bNum, 'USD', 'NGN', job.fx_rate || 1550) : bNum * 1550;
+            fullAmtStr += ` (~₦${ngnEq.toLocaleString()})`;
+          }
+        }
+        escrowListEl.innerHTML = `
+          <div style="background:var(--white); border:1px solid var(--line); border-radius:10px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:13px; font-weight:800; color:var(--ink);">100% Single Escrow Payout</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">100% of escrow funds are disbursed in full upon final deliverable completion and client approval.</div>
+            </div>
+            <div style="font-size:14px; font-weight:900; color:var(--forest);">${fullAmtStr} (100%)</div>
+          </div>
+        `;
+      }
+    }
 
     // Toggle Proposal form vs Company Preview notice based on user role
     const curUser = typeof getUser === 'function' ? getUser() : null;
@@ -1031,9 +1115,34 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
           submitBtn.innerHTML = '⚡ Collekt This';
         }
       }
+      updatePropFeePreview();
     }
 
     openModal('tenderDetailModal');
+  }
+
+  function updatePropFeePreview() {
+    const input = document.getElementById('propBidAmount');
+    const pill = document.getElementById('propFeeCalculationPill');
+    if (!input || !pill) return;
+    const val = Number(input.value || 0);
+    const cur = _activeTenderJob?.currency || 'NGN';
+    const isUsd = cur === 'USD';
+    const fxRate = _activeTenderJob?.fx_rate || 1550;
+
+    if (val > 0) {
+      const comm = Math.round(val * 0.15);
+      const net = val - comm;
+      pill.style.display = 'block';
+      if (isUsd) {
+        const netNgn = typeof convertFx === 'function' ? convertFx(net, 'USD', 'NGN', fxRate) : net * fxRate;
+        pill.innerHTML = `Collekt Fee (15%): <strong style="color:var(--muted);">-$${comm.toLocaleString()} USD</strong> &bull; Net You Receive: <strong style="color:#16a34a;">$${net.toLocaleString()} USD (~₦${netNgn.toLocaleString()} NGN @ ₦${fxRate.toLocaleString()}/$)</strong>`;
+      } else {
+        pill.innerHTML = `Collekt Fee (15%): <strong style="color:var(--muted);">-₦${comm.toLocaleString()}</strong> &bull; Net You Receive: <strong style="color:#16a34a;">₦${net.toLocaleString()}</strong>`;
+      }
+    } else {
+      pill.style.display = 'none';
+    }
   }
 
   function editActiveModalJob() {
@@ -1088,6 +1197,8 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
       bidAmount: Number(amount) || Number(_activeTenderJob?.budget) || 0,
       proposedAmount: Number(amount) || Number(_activeTenderJob?.budget) || 0,
       budget: Number(_activeTenderJob?.budget) || 0,
+      currency: _activeTenderJob?.currency || 'NGN',
+      fx_rate: _activeTenderJob?.fx_rate || (_activeTenderJob?.currency === 'USD' ? 1550 : null),
       deliveryDays: timeline && !isNaN(parseInt(timeline)) ? parseInt(timeline) : 14,
       timeline: timeline || '2 Weeks',
       pitchText: pitch,
@@ -1169,6 +1280,9 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     }
 
     const budgetVal = (budget !== undefined && budget !== null && budget !== '' && !isNaN(Number(budget)) && Number(budget) > 0) ? Number(budget) : null;
+    const curVal    = document.getElementById('postCurrency')?.value || 'NGN';
+    const fxRate    = curVal === 'USD' ? (window.COLLEKT_DEFAULT_FX_RATE || 1550) : null;
+    const ngnBudget = (curVal === 'USD' && budgetVal) ? (typeof convertFx === 'function' ? convertFx(budgetVal, 'USD', 'NGN', fxRate) : budgetVal * 1550) : budgetVal;
 
     const jobData = {
       id: 'job_' + Date.now(),
@@ -1182,6 +1296,9 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
       company_logo: user.company_logo || '',
       companyVerified: !!(user.identity_verified || user.is_verified || user.verified),
       location: location,
+      currency: curVal,
+      fx_rate: fxRate,
+      ngn_budget: ngnBudget,
       budget: budgetVal,
       professional_fee: budgetVal,
       budget_rate_type: budgetRateType,

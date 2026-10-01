@@ -53,11 +53,36 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=125.0">
-<link rel="stylesheet" href="shared.css?v=125.0">
-<link rel="stylesheet" href="glass.css?v=125.0">
+<link rel="stylesheet" href="style.css?v=130.0">
+<link rel="stylesheet" href="shared.css?v=130.0">
+<link rel="stylesheet" href="glass.css?v=130.0">
 
 <style>
+  /* Corporate Tax Invoice Print Styles */
+  @media print {
+    body * {
+      visibility: hidden !important;
+    }
+    #adminTaxInvoiceModal,
+    #adminTaxInvoiceModal * {
+      visibility: visible !important;
+    }
+    #adminTaxInvoiceModal {
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      height: auto !important;
+      background: #fff !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      display: block !important;
+    }
+    .no-print {
+      display: none !important;
+    }
+  }
+
   html, body {
     height: 100vh;
     margin: 0;
@@ -616,7 +641,7 @@
       <!-- TAB 9: MANAGE SUBSCRIPTIONS -->
       <div class="tab-pane" id="pane-subscriptions">
         <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px;">
-          <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px;">Live Membership Subscriptions (10% Platform Fee Base)</h3>
+          <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px;">Live Membership Subscriptions (15% Platform Fee Base)</h3>
           <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
             <div style="padding:20px; background:var(--paper); border:1px solid var(--line); border-radius:14px; text-align:center;">
               <div style="font-size:11px; font-weight:800; color:var(--muted);">FREE TIER</div>
@@ -1099,8 +1124,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=125.0"></script>
-<script src="app.js?v=125.0"></script>
+<script src="supabase.js?v=130.0"></script>
+<script src="app.js?v=130.0"></script>
 <script>
   async function initAdminDashboard() {
     // 0. Sanitize local storage to purge any stale test rows or probe transactions
@@ -2727,8 +2752,32 @@
       return;
     }
 
+    function calcAdminBusinessDaysElapsed(dateStr) {
+      if (!dateStr) return 0;
+      const start = new Date(dateStr);
+      const end = new Date();
+      if (isNaN(start.getTime())) return 0;
+      let count = 0;
+      let cur = new Date(start);
+      while (cur < end) {
+        cur.setDate(cur.getDate() + 1);
+        const d = cur.getDay();
+        if (d !== 0 && d !== 6) count++;
+      }
+      return count;
+    }
+
     tbody.innerHTML = contracts.map(c => {
-      const cAmt = typeof formatNaira === 'function' && c.amount ? formatNaira(c.amount) : (c.amount ? `₦${Number(c.amount).toLocaleString()}` : '₦0');
+      const cur = c.currency || 'NGN';
+      const fx = c.fx_rate || 1550;
+      const isUsd = cur === 'USD';
+      let cAmt = '';
+      if (isUsd) {
+        cAmt = `$${Number(c.amount || 0).toLocaleString()} USD <span style="font-size:10px; color:#38bdf8; font-weight:700; display:block;">(~₦${Math.round(Number(c.amount || 0) * fx).toLocaleString()} @ ₦${fx.toLocaleString()}/$)</span>`;
+      } else {
+        cAmt = typeof formatNaira === 'function' && c.amount ? formatNaira(c.amount) : (c.amount ? `₦${Number(c.amount).toLocaleString()}` : '₦0');
+      }
+
       const matchedDispute = disputes.find(d => 
         d.contract_id === c.id || 
         d.contract_id === String(c.id).replace('CTR-', '') || 
@@ -2742,6 +2791,16 @@
                         c.status === 'settled' || 
                         c.status === 'completed';
 
+      // Check for deliverables under review and calculate 7 business days SLA
+      let underReviewMilestone = null;
+      if (Array.isArray(c.milestones)) {
+        underReviewMilestone = c.milestones.find(m => m.status === 'Under Review' || m.status === 'Submitted');
+      }
+      const isUnderReview = !!underReviewMilestone || c.status === 'under_review' || c.is_under_review;
+      const submittedDate = underReviewMilestone?.submitted_at || c.deliverable_submitted_at || c.created_at;
+      const bDays = isUnderReview ? calcAdminBusinessDaysElapsed(submittedDate) : 0;
+      const isSlaLapsed = isUnderReview && bDays >= 7;
+
       let statusBadge = `<span class="status-badge badge-verified">${escapeHTML(c.status || 'Active Escrow')} 🔒</span>`;
       let actionCell = `<span style="font-size:11px; color:var(--muted); font-weight:700;">Milestone Pending</span>`;
 
@@ -2749,7 +2808,7 @@
         statusBadge = `<span class="status-badge" style="background:rgba(239,68,68,0.15); color:#ef4444; font-weight:800; border:1px solid rgba(239,68,68,0.3);">⚖️ Under Arbitration</span>`;
         const dispId = matchedDispute?.id || ('DSP_' + (c.id || '').replace(/[^a-zA-Z0-9]/g,''));
         actionCell = `
-          <button class="btn btn-sm" onclick="openArbitrationModal('${c.id}', '${dispId}', ${c.amount || 0}, '${escapeHTML(c.title || 'Contract Execution')}', '${escapeHTML(c.contractor || 'Specialist')}', '${escapeHTML(c.company || 'Enterprise')}')" style="background:#dc2626; color:#fff; border:none; padding:4px 10px; font-size:11px; font-weight:800; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+          <button class="btn btn-sm" onclick="openArbitrationModal('${c.id}', '${dispId}', ${c.amount || 0}, '${escapeHTML(c.title || 'Contract Execution')}', '${escapeHTML(c.contractor || 'Specialist')}', '${escapeHTML(c.company || 'Enterprise')}', '${cur}', ${fx})" style="background:#dc2626; color:#fff; border:none; padding:4px 10px; font-size:11px; font-weight:800; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
             ⚖️ Arbitrate Dispute
           </button>
         `;
@@ -2757,30 +2816,318 @@
         const resType = matchedDispute?.status ? matchedDispute.status.replace('resolved_', '') : 'settled';
         statusBadge = `<span class="status-badge" style="background:rgba(34,197,94,0.15); color:#16a34a; font-weight:800;">Settled (${resType}) 🤝</span>`;
         actionCell = `<span style="font-size:11px; color:#16a34a; font-weight:800;">Ruling Applied ✅</span>`;
+      } else if (isSlaLapsed) {
+        statusBadge = `<span class="status-badge" style="background:rgba(245,158,11,0.15); color:#f59e0b; font-weight:800; border:1px solid rgba(245,158,11,0.3);">⏱️ 7-Day SLA Lapsed</span>`;
+        const mTitle = underReviewMilestone?.name || c.title || 'Milestone Deliverable';
+        const mAmt = underReviewMilestone?.amount || c.amount || 0;
+        actionCell = `
+          <button class="btn btn-sm" onclick="openAdminAutoAcceptModal('${c.id}', '${underReviewMilestone?.id || ''}', ${mAmt}, '${escapeHTML(mTitle)}', '${escapeHTML(c.contractor || c.proName || 'Specialist')}', '${escapeHTML(c.company || 'Enterprise')}', '${submittedDate}', '${cur}', ${fx})" style="background:linear-gradient(135deg,#0E3B35,#13756F); color:#fff; border:none; padding:5px 12px; font-size:11px; font-weight:800; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 4px 12px rgba(14,59,53,0.3);">
+            ⚡ Auto-Accept (7-Day SLA)
+          </button>
+        `;
+      } else if (isUnderReview) {
+        statusBadge = `<span class="status-badge" style="background:rgba(19,117,111,0.15); color:var(--teal); font-weight:800;">⏱️ Under Review (${bDays}/7 Days)</span>`;
+        const mTitle = underReviewMilestone?.name || c.title || 'Milestone Deliverable';
+        const mAmt = underReviewMilestone?.amount || c.amount || 0;
+        actionCell = `
+          <button class="btn btn-sm" onclick="openAdminAutoAcceptModal('${c.id}', '${underReviewMilestone?.id || ''}', ${mAmt}, '${escapeHTML(mTitle)}', '${escapeHTML(c.contractor || c.proName || 'Specialist')}', '${escapeHTML(c.company || 'Enterprise')}', '${submittedDate}', '${cur}', ${fx})" style="background:transparent; border:1px solid var(--teal); color:var(--teal); padding:4px 10px; font-size:11px; font-weight:800; border-radius:6px; cursor:pointer;" title="Admin expedited auto-acceptance">
+            ⚡ Auto-Accept (Admin)
+          </button>
+        `;
       }
+
+      const invBtn = `
+        <button class="btn btn-sm btn-outline" onclick="openAdminTaxInvoiceModal('${c.id}', ${c.amount || 0}, '${escapeHTML(c.title || '')}', '${escapeHTML(c.contractor || c.proName || 'Specialist')}', '${escapeHTML(c.company || 'Enterprise')}', '${cur}', ${fx})" style="border:1px solid rgba(16,185,129,0.5); color:#10b981; padding:4px 8px; font-size:11px; font-weight:800; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06);" title="Inspect FIRS Electronic Tax Invoice">
+          🧾 Tax Invoice
+        </button>
+      `;
 
       return `
         <tr class="tx-row">
           <td style="font-weight:800; color:var(--ink);">${escapeHTML(c.title || 'EPC Execution Contract')}</td>
           <td>${escapeHTML(c.contractor || c.proName || 'Professional')}</td>
           <td>${escapeHTML(c.company || 'Corporate Client')}</td>
-          <td style="font-weight:900; color:var(--teal);">${escapeHTML(String(cAmt))}</td>
+          <td style="font-weight:900; color:var(--teal);">${cAmt}</td>
           <td>${statusBadge}</td>
-          <td>${actionCell}</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              ${actionCell}
+              ${invBtn}
+            </div>
+          </td>
         </tr>
       `;
     }).join('');
   }
 
+  // ── ADMIN TAX INVOICE INSPECTOR MODAL ─────────────────────────
+  let _activeAdminInvoiceData = null;
+
+  window.openAdminTaxInvoiceModal = function(contractId, amount, title, contractor, employer, currency = 'NGN', fxRate = 1550) {
+    const grossAmount = Math.max(0, Number(amount) || 1000000);
+    const taxSchedule = (typeof calculateContractTaxSchedule === 'function')
+      ? calculateContractTaxSchedule(grossAmount, { currency, fxRate })
+      : {
+          grossAmount,
+          vatAmount: Math.round(grossAmount * 0.075),
+          totalInvoicedAmount: Math.round(grossAmount * 1.075),
+          whtAmount: Math.round(grossAmount * 0.05),
+          collektFee: Math.round(grossAmount * 0.15),
+          specialistNetPayout: Math.round(grossAmount * 0.80),
+          firsTotalTax: Math.round(grossAmount * 0.125),
+          currency,
+          fxRate,
+          isUsd: currency === 'USD',
+          ngnEquivalent: currency === 'USD' ? {
+            grossAmount: Math.round(grossAmount * fxRate),
+            vatAmount: Math.round(grossAmount * 0.075 * fxRate),
+            totalInvoicedAmount: Math.round(grossAmount * 1.075 * fxRate),
+            whtAmount: Math.round(grossAmount * 0.05 * fxRate),
+            collektFee: Math.round(grossAmount * 0.15 * fxRate),
+            specialistNetPayout: Math.round(grossAmount * 0.80 * fxRate)
+          } : null
+        };
+
+    const invRef = (typeof generateInvoiceReference === 'function')
+      ? generateInvoiceReference(contractId || 'CTR-E49A', 0)
+      : `COL-INV-20260929-${String(contractId || 'E49A').slice(-4).toUpperCase()}-M1`;
+    const hash = 'FIRS-ADMIN-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+    const dateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    _activeAdminInvoiceData = {
+      invoiceRef: invRef,
+      date: dateStr,
+      projectTitle: title || 'Engineering Engagement',
+      milestoneTitle: 'Contract Scope Deliverables',
+      clientName: employer || 'Corporate Employer',
+      contractorName: contractor || 'Specialist Contractor',
+      taxSchedule,
+      hash,
+      contractId
+    };
+
+    let modal = document.getElementById('adminTaxInvoiceModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'adminTaxInvoiceModal';
+      modal.className = 'modal-overlay';
+      modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; place-items:center; z-index:9999; padding:20px; backdrop-filter:blur(6px);';
+      modal.innerHTML = `
+        <div style="background:var(--white); border:1px solid rgba(255,255,255,0.15); border-radius:24px; max-width:680px; width:100%; max-height:calc(100vh - 40px); overflow-y:auto; padding:28px 24px; box-shadow:0 24px 70px rgba(0,0,0,0.5); font-family:'Manrope',sans-serif; position:relative;">
+          <button class="no-print" onclick="closeAdminTaxInvoiceModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:24px; color:var(--muted); cursor:pointer; line-height:1;">&times;</button>
+
+          <!-- INVOICE HEADER -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--line); padding-bottom:16px; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:24px;">🏛️</span>
+                <span style="font-size:18px; font-weight:900; color:var(--ink); letter-spacing:-0.02em;">COLLEKT TECHNOLOGIES LTD</span>
+              </div>
+              <div style="font-size:11px; color:var(--muted); margin-top:3px; line-height:1.4;">
+                RC: <strong>1928412</strong> &bull; FIRS TIN: <strong>24891029-0001</strong><br>
+                Licensed Technology Marketplace &amp; Escrow Intermediary
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <span style="font-size:10px; background:rgba(19,117,111,0.12); color:var(--teal); border:1px solid rgba(19,117,111,0.25); padding:3px 9px; border-radius:99px; font-weight:800; text-transform:uppercase;">
+                ✓ Official FIRS Audit Copy
+              </span>
+              <div style="font-size:16px; font-weight:900; color:var(--ink); margin-top:6px; font-family:monospace;" id="adminInvRefText">COL-INV-20260929-E49A</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;" id="adminInvDateText">29 Sep 2026</div>
+            </div>
+          </div>
+
+          <!-- DOCUMENT TITLE -->
+          <div style="text-align:center; margin-bottom:18px;">
+            <h3 style="font-size:16px; font-weight:900; color:var(--forest); text-transform:uppercase; letter-spacing:0.04em; margin:0;">
+              FIRS Electronic Tax Invoice &amp; Escrow Settlement Receipt
+            </h3>
+            <div style="font-size:11px; color:var(--muted); margin-top:2px;">
+              Pursuant to the Companies Income Tax Act (CITA), Value Added Tax Act, and Withholding Tax Regulations 2024
+            </div>
+          </div>
+
+          <!-- PARTIES SUMMARY -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:18px;">
+            <div>
+              <div style="font-size:10.5px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Billed To (Corporate Employer)</div>
+              <div style="font-weight:900; font-size:13.5px; color:var(--ink);" id="adminInvClientName">Corporate Client</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">RC: Verified &bull; FIRS TIN: Active</div>
+            </div>
+            <div>
+              <div style="font-size:10.5px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Specialist Contractor</div>
+              <div style="font-weight:900; font-size:13.5px; color:var(--ink);" id="adminInvProName">Professional Specialist</div>
+              <div style="font-size:11px; color:#16a34a; font-weight:800; margin-top:2px;">🛡️ Shield Verified Specialist</div>
+            </div>
+          </div>
+
+          <!-- PROJECT META & FX BENCHMARK -->
+          <div style="background:rgba(14,59,53,0.04); border:1px solid rgba(14,59,53,0.12); border-radius:12px; padding:10px 14px; margin-bottom:18px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:11.5px;">
+            <div><span style="color:var(--muted);">Scope:</span> <strong style="color:var(--ink);" id="adminInvProjectName">Contract Scope</strong></div>
+            <div><span style="color:var(--muted);">Settlement Rail:</span> <strong style="color:var(--forest);">Nova Bank Escrow (NUBAN)</strong></div>
+            <div id="adminInvFxPill" style="display:none; color:#0284c7; font-weight:800;">🔒 Locked FX: 1 USD = ₦1,550 NGN</div>
+          </div>
+
+          <!-- TAX BREAKDOWN TABLE -->
+          <div style="margin-bottom:18px; overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
+              <thead>
+                <tr style="background:var(--paper); border-bottom:2px solid var(--line); color:var(--muted); font-size:11px; text-transform:uppercase;">
+                  <th style="padding:8px 10px;">Item Description</th>
+                  <th style="padding:8px 10px; text-align:center;">Statutory Rate</th>
+                  <th style="padding:8px 10px; text-align:right;">Amount (Base)</th>
+                  <th style="padding:8px 10px; text-align:right;" id="adminInvNgnHeaderCol">NGN Equivalent</th>
+                </tr>
+              </thead>
+              <tbody id="adminInvTableBody"></tbody>
+            </table>
+          </div>
+
+          <!-- STATUTORY FOOTNOTE -->
+          <div style="background:rgba(245,158,11,0.08); border-left:3px solid #f59e0b; border-radius:8px; padding:10px 12px; margin-bottom:20px; font-size:11px; line-height:1.45; color:#92400e;">
+            <strong>FIRS STATUTORY NOTICE:</strong><br>
+            Electronic Tax Invoice generated by Collekt Technologies Ltd pursuant to Section 13 of the VAT Act and FIRS Withholding Tax Regulations 2024. WHT deductions (5%) are remitted for Contractor TIN credit notes. Hash: <code style="font-size:10px; color:#78350f;" id="adminInvHashText">-</code>.
+          </div>
+
+          <!-- ACTIONS -->
+          <div class="no-print" style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+            <button type="button" class="btn btn-outline" style="border-radius:10px; font-size:12px; font-weight:800; padding:8px 14px;" onclick="closeAdminTaxInvoiceModal()">
+              Close
+            </button>
+            <button type="button" class="btn btn-outline" style="border-radius:10px; font-size:12px; font-weight:800; padding:8px 14px;" onclick="copyAdminTaxScheduleText()">
+              📋 Copy Schedule
+            </button>
+            <button type="button" class="btn btn-outline" style="border-radius:10px; font-size:12px; font-weight:800; padding:8px 14px;" onclick="exportAdminTaxInvoiceJson()">
+              📥 Export JSON
+            </button>
+            <button type="button" class="btn btn-primary" style="background:var(--teal); border:none; border-radius:10px; font-size:12px; font-weight:900; padding:8px 18px; color:#fff;" onclick="window.print()">
+              🖨️ Print / Save PDF
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    // Populate data
+    document.getElementById('adminInvRefText').textContent = invRef;
+    document.getElementById('adminInvDateText').textContent = dateStr;
+    document.getElementById('adminInvClientName').textContent = employer || 'Corporate Employer';
+    document.getElementById('adminInvProName').textContent = contractor || 'Specialist Contractor';
+    document.getElementById('adminInvProjectName').textContent = title || 'Engineering Engagement';
+    document.getElementById('adminInvHashText').textContent = hash;
+
+    const isUsd = taxSchedule.currency === 'USD';
+    const sym = isUsd ? '$' : '₦';
+
+    const fxPill = document.getElementById('adminInvFxPill');
+    if (fxPill) {
+      if (isUsd) {
+        fxPill.style.display = 'block';
+        fxPill.textContent = `🔒 Locked FX: 1 USD = ₦${fxRate.toLocaleString()} NGN`;
+      } else {
+        fxPill.style.display = 'none';
+      }
+    }
+
+    const ngnCol = document.getElementById('adminInvNgnHeaderCol');
+    if (ngnCol) ngnCol.style.display = isUsd ? 'table-cell' : 'none';
+
+    const tbody = document.getElementById('adminInvTableBody');
+    if (tbody) {
+      const renderRow = (desc, rate, amt, ngnAmt, isBold = false, color = 'inherit') => `
+        <tr style="border-bottom:1px solid var(--line); ${isBold ? 'font-weight:900; background:rgba(0,0,0,0.02);' : ''}">
+          <td style="padding:10px 10px; color:${color};">${desc}</td>
+          <td style="padding:10px 10px; text-align:center; color:var(--muted);">${rate}</td>
+          <td style="padding:10px 10px; text-align:right; color:${color};">${sym}${Number(amt).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+          ${isUsd ? `<td style="padding:10px 10px; text-align:right; font-weight:700; color:var(--teal);">₦${Number(ngnAmt).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>` : ''}
+        </tr>
+      `;
+
+      tbody.innerHTML = `
+        ${renderRow(`1. Gross Professional Fee (${escapeHTML(title || 'Engagement')})`, 'Base 100%', taxSchedule.grossAmount, taxSchedule.ngnEquivalent?.grossAmount, true, 'var(--ink)')}
+        ${renderRow('2. Value Added Tax (VAT) &mdash; Payable to FIRS', '+7.5%', taxSchedule.vatAmount, taxSchedule.ngnEquivalent?.vatAmount, false, '#0284c7')}
+        ${renderRow('Total Invoiced Amount (Billed to Client)', 'Invoiced', taxSchedule.totalInvoicedAmount, taxSchedule.ngnEquivalent?.totalInvoicedAmount, true, 'var(--forest)')}
+        ${renderRow('3. Withholding Tax (WHT) &mdash; FIRS Credit Note to Contractor TIN', '-5.0%', `(${sym}${Number(taxSchedule.whtAmount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`, `(₦${Number(taxSchedule.ngnEquivalent?.whtAmount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`, false, '#dc2626')}
+        ${renderRow('4. Collekt Escrow &amp; Platform Fee (15%)', '-15.0%', `(${sym}${Number(taxSchedule.collektFee).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`, `(₦${Number(taxSchedule.ngnEquivalent?.collektFee).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`, false, '#ea580c')}
+        ${renderRow('Net Disbursal to Contractor (NUBAN Bank Transfer)', '80.0% Net', taxSchedule.specialistNetPayout, taxSchedule.ngnEquivalent?.specialistNetPayout, true, '#16a34a')}
+      `;
+    }
+
+    modal.style.display = 'grid';
+  };
+
+  window.closeAdminTaxInvoiceModal = function() {
+    const modal = document.getElementById('adminTaxInvoiceModal');
+    if (modal) modal.style.display = 'none';
+  };
+
+  window.copyAdminTaxScheduleText = function() {
+    if (!_activeAdminInvoiceData) return;
+    const { invoiceRef, date, projectTitle, clientName, contractorName, taxSchedule, hash } = _activeAdminInvoiceData;
+    const isUsd = taxSchedule.currency === 'USD';
+    const sym = isUsd ? '$' : '₦';
+
+    const text = `
+=====================================================
+COLLEKT TECHNOLOGIES LTD — FIRS ELECTRONIC TAX INVOICE
+RC: 1928412 | FIRS TIN: 24891029-0001
+Plot 12, Admiralty Way, Lekki Phase 1, Lagos, Nigeria
+=====================================================
+Invoice Ref:    ${invoiceRef}
+Date:           ${date}
+Client:         ${clientName}
+Contractor:     ${contractorName}
+Project:        ${projectTitle}
+Currency:       ${taxSchedule.currency} ${isUsd ? `(FX Locked @ ₦${taxSchedule.fxRate}/$)` : ''}
+
+TAX & SETTLEMENT BREAKDOWN:
+-----------------------------------------------------
+1. Gross Milestone Fee:         ${sym}${taxSchedule.grossAmount.toLocaleString()}
+2. VAT (+7.5% to FIRS):         ${sym}${taxSchedule.vatAmount.toLocaleString()}
+-----------------------------------------------------
+TOTAL INVOICED TO CLIENT:       ${sym}${taxSchedule.totalInvoicedAmount.toLocaleString()}
+-----------------------------------------------------
+3. WHT Deduction (-5.0% FIRS):  -${sym}${taxSchedule.whtAmount.toLocaleString()}
+4. Collekt Service Fee (-15%):   -${sym}${taxSchedule.collektFee.toLocaleString()}
+-----------------------------------------------------
+SPECIALIST NET DISBURSAL (80%):  ${sym}${taxSchedule.specialistNetPayout.toLocaleString()} ${isUsd ? `(~₦${taxSchedule.ngnEquivalent.specialistNetPayout.toLocaleString()} NGN)` : ''}
+-----------------------------------------------------
+FIRS Validation Hash: ${hash}
+Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
+=====================================================
+    `.trim();
+
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('📋 FIRS Tax Schedule copied to clipboard!', 'success');
+    }).catch(() => {
+      showToast('Copied to clipboard', 'info');
+    });
+  };
+
+  window.exportAdminTaxInvoiceJson = function() {
+    if (!_activeAdminInvoiceData) return;
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(_activeAdminInvoiceData, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `${_activeAdminInvoiceData.invoiceRef}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+    showToast('📥 FIRS Tax Invoice JSON exported!', 'success');
+  };
+
   // ── ESCROW DISPUTE ARBITRATION MODAL ─────────────────────────
-  window.openArbitrationModal = function(contractId, disputeId, amount, title, contractor, employer) {
+  window.openArbitrationModal = function(contractId, disputeId, amount, title, contractor, employer, currency = 'NGN', fxRate = 1550) {
     _activeArbitrationCase = {
       contractId,
       disputeId,
       amount: Number(amount || 0),
       title,
       contractor,
-      employer
+      employer,
+      currency,
+      fxRate
     };
 
     let modal = document.getElementById('adminArbitrationModal');
@@ -2860,10 +3207,14 @@
     }
 
     // Populate modal fields
+    const isUsd = currency === 'USD';
+    const sym = isUsd ? '$' : '₦';
     document.getElementById('arbDisputeRef').textContent = disputeId;
     document.getElementById('arbContractorName').textContent = contractor;
     document.getElementById('arbEmployerName').textContent = employer;
-    document.getElementById('arbEscrowTotal').textContent = '₦' + Number(amount).toLocaleString();
+    document.getElementById('arbEscrowTotal').innerHTML = isUsd
+      ? `${sym}${Number(amount).toLocaleString()} USD <span style="font-size:11px; color:#38bdf8; font-weight:700;">(~₦${Math.round(Number(amount) * fxRate).toLocaleString()} @ ₦${fxRate.toLocaleString()}/$)</span>`
+      : `₦${Number(amount).toLocaleString()}`;
     document.getElementById('arbRationaleInput').value = '';
     selectArbitrationType('full_release');
 
@@ -2996,6 +3347,8 @@
           resolution: _currentArbitrationType,
           contractor_amount: proAmount,
           client_refund_amount: clientAmount,
+          currency: _activeArbitrationCase.currency || 'NGN',
+          exchange_rate: _activeArbitrationCase.fxRate || 1550,
           rationale: rationale
         })
       });
@@ -3045,6 +3398,193 @@
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = '⚖️ Issue Binding Award';
+      }
+    }
+  };
+
+  // ── ADMIN 7-DAY SLA AUTO-ACCEPTANCE MODAL ─────────────────────
+  let _activeAutoAcceptTarget = null;
+
+  window.openAdminAutoAcceptModal = function(contractId, milestoneId, amount, milestoneTitle, contractorName, employerName, submittedDate, currency = 'NGN', fxRate = 1550) {
+    const numAmount = Number(amount || 0);
+    const bDays = calcAdminBusinessDaysElapsed(submittedDate);
+    const fee = Math.round(numAmount * 0.15 * 100) / 100;
+    const net = numAmount - fee;
+    const isUsd = currency === 'USD';
+    const sym = isUsd ? '$' : '₦';
+    const ngnEquivNet = Math.round(net * fxRate);
+
+    _activeAutoAcceptTarget = {
+      contractId,
+      milestoneId,
+      amount: numAmount,
+      milestoneTitle: milestoneTitle || 'Deliverable Milestone',
+      contractorName: contractorName || 'Specialist',
+      employerName: employerName || 'Corporate Client',
+      submittedDate,
+      bDays,
+      fee,
+      net,
+      currency,
+      fxRate
+    };
+
+    let modal = document.getElementById('adminAutoAcceptModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'adminAutoAcceptModal';
+      modal.className = 'modal-overlay';
+      modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; place-items:center; z-index:9999; padding:20px; backdrop-filter:blur(6px);';
+      modal.innerHTML = `
+        <div style="background:var(--paper); border:1px solid rgba(255,255,255,0.15); border-radius:24px; max-width:540px; width:100%; padding:28px; box-shadow:0 24px 60px rgba(0,0,0,0.5); font-family:'Manrope',sans-serif; position:relative;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="width:44px; height:44px; border-radius:14px; background:rgba(19,117,111,0.15); color:var(--teal); display:grid; place-items:center; font-size:22px;">⚡</div>
+              <div>
+                <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">7-Day SLA Auto-Acceptance</h3>
+                <div style="font-size:12px; color:var(--muted); margin-top:2px;">Escrow Terms Section 7 Inactivity Disbursal</div>
+              </div>
+            </div>
+            <button onclick="closeAdminAutoAcceptModal()" style="background:none; border:none; font-size:24px; color:var(--muted); cursor:pointer; line-height:1;">&times;</button>
+          </div>
+
+          <!-- Target Case Details -->
+          <div style="background:rgba(0,0,0,0.04); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:16px; font-size:12px; display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted);">Contract Ref:</span> <strong id="autoAcceptContractId" style="color:var(--ink);">-</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted);">Milestone Deliverable:</span> <strong id="autoAcceptMilestoneTitle" style="color:var(--ink);">-</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted);">Specialist:</span> <strong id="autoAcceptContractor" style="color:var(--ink);">-</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted);">Corporate Client:</span> <strong id="autoAcceptEmployer" style="color:var(--ink);">-</strong></div>
+            <div style="display:flex; justify-content:space-between; border-top:1px solid var(--line); padding-top:6px;"><span style="color:var(--muted);">Review Elapsed:</span> <strong id="autoAcceptElapsed" style="color:var(--forest);">-</strong></div>
+          </div>
+
+          <!-- Financial Split Breakdown (15% Commission / 85% Specialist Net) -->
+          <div style="background:rgba(19,117,111,0.05); border:1px solid rgba(19,117,111,0.2); border-radius:14px; padding:14px; margin-bottom:16px; font-size:12px; display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted);">Milestone Escrow Value:</span> <strong id="autoAcceptTotal" style="color:var(--ink); font-weight:800;">₦0</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span style="color:var(--muted);">Collekt Platform Fee (15%):</span> <strong id="autoAcceptFee" style="color:var(--forest); font-weight:800;">₦0</strong></div>
+            <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(19,117,111,0.2); padding-top:6px;"><span style="font-weight:900; color:var(--ink);">Net Specialist Disbursal (85%):</span> <strong id="autoAcceptNet" style="color:var(--teal); font-size:15px; font-weight:900;">₦0</strong></div>
+          </div>
+
+          <!-- Statutory Notice -->
+          <div style="font-size:11px; color:var(--muted); line-height:1.5; margin-bottom:18px; background:rgba(0,0,0,0.02); padding:10px; border-radius:8px; border-left:3px solid var(--teal);">
+            <strong>Statutory Rule:</strong> Corporate clients are granted a strict 7-business-day window to approve deliverables or file a dispute. Without a dispute lodged, Collekt Admin authorization executes settlement to guarantee professional payout under Nova Bank escrow custody.
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="btn btn-outline" onclick="closeAdminAutoAcceptModal()" style="flex:1; font-weight:800;">Cancel</button>
+            <button type="button" id="btnConfirmAutoAccept" class="btn btn-primary" onclick="submitAdminAutoAccept()" style="flex:1.8; font-weight:900; background:linear-gradient(135deg,#0E3B35,#13756F); border:none; box-shadow:0 6px 20px rgba(14,59,53,0.3);">
+              ⚡ Disburse Net Payout
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    document.getElementById('autoAcceptContractId').textContent = contractId;
+    document.getElementById('autoAcceptMilestoneTitle').textContent = _activeAutoAcceptTarget.milestoneTitle;
+    document.getElementById('autoAcceptContractor').textContent = _activeAutoAcceptTarget.contractorName;
+    document.getElementById('autoAcceptEmployer').textContent = _activeAutoAcceptTarget.employerName;
+    document.getElementById('autoAcceptElapsed').textContent = bDays >= 7 
+      ? `⏱️ ${bDays} Business Days (7-Day SLA Lapsed ✅)` 
+      : `⏱️ ${bDays} / 7 Business Days (Admin Expedited)`;
+    document.getElementById('autoAcceptTotal').textContent = `${sym}${numAmount.toLocaleString()}${isUsd ? ' USD' : ''}`;
+    document.getElementById('autoAcceptFee').textContent = `- ${sym}${fee.toLocaleString()}${isUsd ? ' USD' : ''}`;
+    document.getElementById('autoAcceptNet').innerHTML = isUsd
+      ? `$${net.toLocaleString()} USD <span style="font-size:11px; color:#38bdf8; font-weight:700;">(~₦${ngnEquivNet.toLocaleString()} @ ₦${fxRate.toLocaleString()}/$)</span>`
+      : `₦${net.toLocaleString()}`;
+
+    modal.style.display = 'grid';
+  };
+
+  window.closeAdminAutoAcceptModal = function() {
+    const modal = document.getElementById('adminAutoAcceptModal');
+    if (modal) modal.style.display = 'none';
+    _activeAutoAcceptTarget = null;
+  };
+
+  window.submitAdminAutoAccept = async function() {
+    if (!_activeAutoAcceptTarget) return;
+
+    const btn = document.getElementById('btnConfirmAutoAccept');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-icon"></span> Disbursing Escrow...';
+    }
+
+    let token = null;
+    try {
+      const adminAuth = JSON.parse(localStorage.getItem('collekt_admin_auth') || sessionStorage.getItem('collekt_admin_auth') || '{}');
+      const sess = typeof getSession === 'function' ? getSession() : null;
+      token = sess?.access_token || adminAuth?.token;
+    } catch(e){}
+
+    try {
+      const resp = await fetch('/.netlify/functions/escrow-settlement', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          action: 'admin_auto_accept',
+          contract_id: _activeAutoAcceptTarget.contractId,
+          milestone_name: _activeAutoAcceptTarget.milestoneTitle,
+          amount: _activeAutoAcceptTarget.amount,
+          currency: _activeAutoAcceptTarget.currency || 'NGN',
+          exchange_rate: _activeAutoAcceptTarget.fxRate || 1550,
+          sla_reason: _activeAutoAcceptTarget.bDays >= 7 ? '7_business_days_inactivity' : 'admin_expedited_disbursal'
+        })
+      });
+
+      const resData = await resp.json();
+      if (!resp.ok) {
+        showToast(`❌ Auto-accept failed: ${resData.error || 'Server error'}`, 'error');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '⚡ Disburse Net Payout';
+        }
+        return;
+      }
+
+      // Update local storage contracts
+      try {
+        const updateContracts = (key) => {
+          const list = JSON.parse(localStorage.getItem(key) || '[]');
+          const updated = list.map(c => {
+            if (c.id === _activeAutoAcceptTarget.contractId || String(c.id).endsWith(String(_activeAutoAcceptTarget.contractId).replace('CTR-',''))) {
+              if (Array.isArray(c.milestones)) {
+                c.milestones = c.milestones.map(m => {
+                  if (m.id === _activeAutoAcceptTarget.milestoneId || m.name === _activeAutoAcceptTarget.milestoneTitle) {
+                    return { ...m, status: 'Released', auto_accepted: true };
+                  }
+                  return m;
+                });
+              }
+              c.is_under_review = false;
+              c.status = 'settled';
+            }
+            return c;
+          });
+          localStorage.setItem(key, JSON.stringify(updated));
+        };
+        updateContracts('collekt_contracts');
+        updateContracts('collekt_awarded_contracts');
+      } catch(e){}
+
+      closeAdminAutoAcceptModal();
+      const aCur = _activeAutoAcceptTarget.currency || 'NGN';
+      const aSym = aCur === 'USD' ? '$' : '₦';
+      showToast(`⚡ 7-Day SLA Disbursal Complete! ${aSym}${_activeAutoAcceptTarget.net.toLocaleString()}${aCur === 'USD' ? ' USD' : ''} paid to ${_activeAutoAcceptTarget.contractorName} (${aSym}${_activeAutoAcceptTarget.fee.toLocaleString()} platform fee retained).`);
+      await renderAdminEngagementsTable();
+      if (typeof renderAdminTxLedger === 'function') await renderAdminTxLedger();
+
+    } catch (err) {
+      console.error('submitAdminAutoAccept error:', err);
+      showToast(`❌ Error: ${err.message || 'Execution error'}`, 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '⚡ Disburse Net Payout';
       }
     }
   };

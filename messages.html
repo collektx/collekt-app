@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=125.0">
-<link rel="stylesheet" href="shared.css?v=125.0">
-<link rel="stylesheet" href="glass.css?v=125.0">
+<link rel="stylesheet" href="style.css?v=130.0">
+<link rel="stylesheet" href="shared.css?v=130.0">
+<link rel="stylesheet" href="glass.css?v=130.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -102,7 +102,7 @@
   }
   
   /* Message Bubbles & WhatsApp Layout */
-  .bubble-wrap { display: flex; flex-direction: column; max-width: 68%; width: fit-content; min-width: 0; position: relative; margin-bottom: 3px; }
+  .bubble-wrap { display: flex; flex-direction: column; max-width: 65%; width: fit-content; min-width: 0; position: relative; margin-bottom: 3px; }
   .bubble-wrap.received { align-self: flex-start; align-items: flex-start; }
   .bubble-wrap.sent { align-self: flex-end; align-items: flex-end; }
   
@@ -112,7 +112,7 @@
   .bubble {
     display: inline-block;
     position: relative;
-    padding: 4px 8px 4px 8px;
+    padding: 5px 8px 3px 8px;
     border-radius: 7.5px;
     font-size: 13.5px;
     line-height: 18.5px;
@@ -270,6 +270,7 @@
   .msg-reaction-badge { position: absolute; bottom: -8px; right: 8px; background: var(--white); border: 1px solid var(--line); border-radius: 99px; padding: 1px 5px; font-size: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer; }
   html.dark .msg-reaction-badge { background: #0f2220; border-color: rgba(255,255,255,.15); }
   .bubble-wrap.received .msg-reaction-badge { left: 8px; right: auto; }
+  .bubble-wrap:has(.msg-reaction-badge) { margin-bottom: 12px; }
 
   /* Modern WhatsApp Desktop Emoji Picker */
   .emoji-picker-popup {
@@ -842,10 +843,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=125.0"></script>
-<script src="app.js?v=125.0"></script>
-<script src="collekt-ai.js?v=125.0"></script>
-<script src="settings-popup.js?v=125.0"></script>
+<script src="supabase.js?v=130.0"></script>
+<script src="app.js?v=130.0"></script>
+<script src="collekt-ai.js?v=130.0"></script>
+<script src="settings-popup.js?v=130.0"></script>
 <script>
   requireAuth();
 
@@ -2284,6 +2285,61 @@
   window.addEventListener('collekt_messages_updated', () => {
     renderContacts();
   });
+
+  // Listen for read receipts from Supabase → update to blue double swooshes
+  window.addEventListener('collekt_supabase_msg_read', (e) => {
+    const data = e.detail;
+    if (!data || !data.conversation_id) return;
+    const me = getUser();
+    const myCanonical = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null) || me?.id;
+    const readBy = String(data.reader_id || data.user_id || '').toLowerCase();
+
+    // Only update if someone ELSE read our messages
+    if (readBy === String(myCanonical).toLowerCase() || readBy === String(me?.id).toLowerCase()) return;
+
+    const all = getAllMessages();
+    let changed = false;
+    all.forEach(m => {
+      if (m.conversation_id === data.conversation_id &&
+          (String(m.sender_id).toLowerCase() === String(myCanonical).toLowerCase() ||
+           String(m.sender_id).toLowerCase() === String(me?.id).toLowerCase())) {
+        if (m.status !== 'read' && m.status !== 'seen') {
+          m.status = 'read';
+          m.read = true;
+          if (!m.read_by) m.read_by = [];
+          if (!m.read_by.includes(readBy)) m.read_by.push(readBy);
+          changed = true;
+        }
+      }
+    });
+    if (changed) {
+      saveAllMessages(all);
+      renderContacts();
+    }
+  });
+
+  // Listen for message updates from Supabase (e.g. is_read field changes)
+  window.addEventListener('collekt_supabase_msg_updated', (e) => {
+    const msg = e.detail;
+    if (!msg || !msg.id) return;
+    const all = getAllMessages();
+    const idx = all.findIndex(m => m.id === msg.id);
+    if (idx !== -1) {
+      if (msg.is_read && all[idx].status !== 'read') {
+        all[idx].status = 'read';
+        all[idx].read = true;
+      }
+      if (msg.body && msg.body !== all[idx].body) {
+        all[idx].body = msg.body;
+      }
+      if (msg.recalled) {
+        all[idx].recalled = true;
+      }
+      saveAllMessages(all);
+      renderContacts();
+    }
+  });
+
   window.addEventListener('storage', (e) => {
     if (!e.key || e.key === 'collekt_all_messages' || e.key === 'collekt_messages' || e.key === 'collekt_conversations') {
       renderContacts();
@@ -2361,7 +2417,36 @@
           read: newMsg.is_read || newMsg.read || false,
           status: (newMsg.is_read || newMsg.read) ? 'read' : 'delivered'
         };
-        saveAllMessages([...allMsgs, incoming]);
+
+        // Check if this is our own message echoed back (match by body + conversation + time)
+        const me = getUser();
+        const myCanonical = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(me) : null) || me?.id;
+        const senderLower = String(newMsg.sender_id || '').toLowerCase();
+        const isMyEcho = senderLower === String(myCanonical || '').toLowerCase() || senderLower === String(me?.id || '').toLowerCase();
+
+        if (isMyEcho) {
+          // Find and update the optimistic message instead of adding a duplicate
+          const optimisticIdx = allMsgs.findIndex(m =>
+            m.conversation_id === newMsg.conversation_id &&
+            String(m.body || '').trim() === String(newMsg.body || '').trim() &&
+            (String(m.sender_id).toLowerCase() === senderLower || String(m.sender_id).toLowerCase() === String(me?.id || '').toLowerCase()) &&
+            Math.abs(new Date(m.created_at).getTime() - new Date(newMsg.created_at).getTime()) < 120000
+          );
+          if (optimisticIdx !== -1) {
+            // Update in place: replace local ID with server UUID, preserve client_msg_id
+            allMsgs[optimisticIdx].id = newMsg.id;
+            allMsgs[optimisticIdx].client_msg_id = allMsgs[optimisticIdx].client_msg_id || newMsg.id;
+            allMsgs[optimisticIdx].status = 'delivered';
+            allMsgs[optimisticIdx].sender_id = newMsg.sender_id;
+            saveAllMessages(allMsgs);
+          } else {
+            // No optimistic match found — this is a genuinely new message from another tab/device
+            saveAllMessages([...allMsgs, incoming]);
+          }
+        } else {
+          // Message from someone else — always add
+          saveAllMessages([...allMsgs, incoming]);
+        }
 
         const allConvs = getAllConversations();
         let targetConv = allConvs.find(c => c.id === newMsg.conversation_id);
@@ -2468,9 +2553,6 @@
       });
     }
 
-    window.addEventListener('collekt_messages_updated', () => {
-      renderContacts();
-    });
 
     startPolling();
   });

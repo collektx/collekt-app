@@ -46,9 +46,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=125.0">
-<link rel="stylesheet" href="shared.css?v=125.0">
-<link rel="stylesheet" href="glass.css?v=125.0">
+<link rel="stylesheet" href="style.css?v=130.0">
+<link rel="stylesheet" href="shared.css?v=130.0">
+<link rel="stylesheet" href="glass.css?v=130.0">
 
 <style>
   html, body {
@@ -509,6 +509,54 @@
       </div>
     </div>
 
+    <!-- Escrow Payout & Milestone Structure -->
+    <div class="form-group" style="margin-bottom:14px; padding:16px; border-radius:14px; background:var(--paper); border:1.5px solid var(--line);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+        <div>
+          <label class="form-label" style="font-weight:800; font-size:12.5px; margin-bottom:2px; display:flex; align-items:center; gap:6px;">
+            <span>🔒</span> Escrow Payout Schedule
+          </label>
+          <div style="font-size:11px; color:var(--muted);">Release 100% on final approval or configure custom milestone percentages.</div>
+        </div>
+        <div style="display:flex; gap:6px; background:var(--white); padding:3px; border-radius:10px; border:1px solid var(--line);">
+          <button type="button" id="coPayModeLumpBtn" class="btn btn-xs" onclick="setCoPaymentMode('lump_sum')" style="font-weight:800; border-radius:8px; background:var(--forest); color:#fff; border:none; padding:5px 12px; cursor:pointer;">
+            100% on Completion
+          </button>
+          <button type="button" id="coPayModeMilestonesBtn" class="btn btn-xs" onclick="setCoPaymentMode('milestones')" style="font-weight:800; border-radius:8px; background:transparent; color:var(--muted); border:none; padding:5px 12px; cursor:pointer;">
+            Milestone Phases
+          </button>
+        </div>
+      </div>
+
+      <input type="hidden" id="coPostPaymentMode" value="lump_sum">
+
+      <!-- Mode 1: 100% Lump Sum Upon Completion (Default) -->
+      <div id="coLumpSumNoticeBox" style="font-size:11.5px; color:var(--muted); line-height:1.5; padding:10px 12px; border-radius:10px; background:rgba(19,117,111,0.06); border:1px solid rgba(19,117,111,0.18);">
+        <strong style="color:var(--ink);">✓ 100% Single Escrow Release:</strong> 100% of the funds are locked in Nova Bank Escrow and disbursed in full to the professional once the final deliverable is delivered and approved.
+      </div>
+
+      <!-- Mode 2: Custom Milestone Builder (Optional) -->
+      <div id="coMilestoneScheduleBox" style="display:none; margin-top:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:11.5px; font-weight:800; color:var(--ink);">Milestone Phases &amp; Percentages</span>
+          <span id="coMilestoneTotalBadge" style="font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:99px; background:rgba(22,163,74,0.12); color:#16a34a;">
+            ✓ Total: 100%
+          </span>
+        </div>
+
+        <div id="coMilestoneRowsContainer" style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;">
+          <!-- Populated dynamically -->
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <button type="button" class="btn btn-outline btn-xs" onclick="addCoMilestoneRow()" style="font-size:11.5px; font-weight:800; border-style:dashed; padding:6px 14px; cursor:pointer;">
+            + Add Milestone Phase
+          </button>
+          <span style="font-size:10.5px; color:var(--muted);">Total must equal 100%.</span>
+        </div>
+      </div>
+    </div>
+
     <div class="form-group">
       <label class="form-label" style="font-weight:800;">Required Skills &amp; Certifications <span style="font-size:11px; font-weight:600; color:var(--muted);">(Comma separated)</span></label>
       <input class="form-input" type="text" id="projSkills" placeholder="e.g. AutoCAD, Caesar II, API 570, NOGICJDA, BOSIET">
@@ -543,9 +591,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=125.0"></script>
-<script src="app.js?v=125.0"></script>
-<script src="collekt-ai.js?v=125.0"></script>
+<script src="supabase.js?v=130.0"></script>
+<script src="app.js?v=130.0"></script>
+<script src="collekt-ai.js?v=130.0"></script>
 <script>
   requireCompany();
   
@@ -1240,6 +1288,117 @@
     }
   }
 
+  let coCurrentMilestones = [
+    { name: 'Phase 1: Mobilization & Site Analysis', percentage: 40 },
+    { name: 'Phase 2: Technical Execution & Interim Review', percentage: 30 },
+    { name: 'Phase 3: Final Delivery & Sign-Off', percentage: 30 }
+  ];
+
+  function setCoPaymentMode(mode) {
+    const hidden = document.getElementById('coPostPaymentMode');
+    if (hidden) hidden.value = mode;
+
+    const lumpBtn = document.getElementById('coPayModeLumpBtn');
+    const msBtn   = document.getElementById('coPayModeMilestonesBtn');
+    const lumpBox = document.getElementById('coLumpSumNoticeBox');
+    const msBox   = document.getElementById('coMilestoneScheduleBox');
+
+    if (mode === 'milestones') {
+      if (lumpBtn) { lumpBtn.style.background = 'transparent'; lumpBtn.style.color = 'var(--muted)'; }
+      if (msBtn)   { msBtn.style.background = 'var(--forest)'; msBtn.style.color = '#fff'; }
+      if (lumpBox) lumpBox.style.display = 'none';
+      if (msBox)   msBox.style.display = 'block';
+      renderCoMilestoneRows();
+    } else {
+      if (lumpBtn) { lumpBtn.style.background = 'var(--forest)'; lumpBtn.style.color = '#fff'; }
+      if (msBtn)   { msBtn.style.background = 'transparent'; msBtn.style.color = 'var(--muted)'; }
+      if (lumpBox) lumpBox.style.display = 'block';
+      if (msBox)   msBox.style.display = 'none';
+    }
+  }
+
+  function renderCoMilestoneRows() {
+    const container = document.getElementById('coMilestoneRowsContainer');
+    if (!container) return;
+
+    const rawBudget = document.getElementById('projBudget')?.value;
+    const budget = (rawBudget && !isNaN(Number(rawBudget)) && Number(rawBudget) > 0) ? Number(rawBudget) : 0;
+
+    container.innerHTML = coCurrentMilestones.map((m, idx) => {
+      const amountVal = budget > 0 ? Math.round(budget * ((Number(m.percentage) || 0) / 100)) : 0;
+      const amountFormatted = budget > 0 ? ('₦' + amountVal.toLocaleString()) : '—';
+      return `
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:8px; padding:8px 10px; display:grid; grid-template-columns:1fr 75px 100px 26px; gap:6px; align-items:center;">
+          <div>
+            <input class="form-input" style="font-size:11.5px; padding:6px 8px;" type="text" value="${escapeHTML(m.name)}" placeholder="Phase ${idx+1} Deliverable Name" oninput="updateCoMilestoneName(${idx}, this.value)">
+          </div>
+          <div style="position:relative;">
+            <input class="form-input" style="font-size:11.5px; padding:6px 20px 6px 6px; text-align:right;" type="number" min="1" max="100" value="${m.percentage}" placeholder="%" oninput="updateCoMilestonePercent(${idx}, this.value)">
+            <span style="position:absolute; right:6px; top:50%; transform:translateY(-50%); font-size:10px; font-weight:800; color:var(--muted); pointer-events:none;">%</span>
+          </div>
+          <div style="font-size:11.5px; font-weight:800; color:var(--forest); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            ${amountFormatted}
+          </div>
+          <div style="text-align:center;">
+            ${coCurrentMilestones.length > 2 ? `
+              <button type="button" onclick="removeCoMilestoneRow(${idx})" style="background:none; border:none; color:#ef4444; font-size:13px; cursor:pointer; padding:2px;" title="Remove Phase">✕</button>
+            ` : `
+              <span style="opacity:0.25; font-size:12px; cursor:not-allowed;">✕</span>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateCoMilestoneTotal();
+  }
+
+  function addCoMilestoneRow() {
+    const nextIdx = coCurrentMilestones.length + 1;
+    coCurrentMilestones.push({
+      name: `Phase ${nextIdx}: Specific Milestone Scope`,
+      percentage: 0
+    });
+    renderCoMilestoneRows();
+  }
+
+  function removeCoMilestoneRow(idx) {
+    if (coCurrentMilestones.length <= 2) {
+      if (typeof showToast === 'function') showToast('⚠️ Minimum 2 milestones required for phased escrow schedule.', 'warning');
+      return;
+    }
+    coCurrentMilestones.splice(idx, 1);
+    renderCoMilestoneRows();
+  }
+
+  function updateCoMilestoneName(idx, val) {
+    if (coCurrentMilestones[idx]) coCurrentMilestones[idx].name = val;
+  }
+
+  function updateCoMilestonePercent(idx, val) {
+    if (coCurrentMilestones[idx]) coCurrentMilestones[idx].percentage = Number(val) || 0;
+    renderCoMilestoneRows();
+  }
+
+  function updateCoMilestoneTotal() {
+    const sum = coCurrentMilestones.reduce((acc, m) => acc + (Number(m.percentage) || 0), 0);
+    const badge = document.getElementById('coMilestoneTotalBadge');
+    const rawBudget = document.getElementById('projBudget')?.value;
+    const budget = (rawBudget && !isNaN(Number(rawBudget)) && Number(rawBudget) > 0) ? Number(rawBudget) : 0;
+
+    if (badge) {
+      if (sum === 100) {
+        badge.style.background = 'rgba(22,163,74,0.12)';
+        badge.style.color = '#16a34a';
+        badge.innerHTML = `✓ Total: 100% ${budget > 0 ? '(₦' + budget.toLocaleString() + ')' : ''}`;
+      } else {
+        badge.style.background = 'rgba(239,68,68,0.12)';
+        badge.style.color = '#ef4444';
+        badge.innerHTML = `⚠️ Total: ${sum}% (Must equal 100%)`;
+      }
+    }
+  }
+
   function awardContract(proposalId) {
     acceptApplicant(proposalId);
   }
@@ -1258,6 +1417,7 @@
     const skillsStr      = document.getElementById('projSkills')?.value.trim() || '';
     const skills         = skillsStr ? skillsStr.split(',').map(s => s.trim()).filter(Boolean) : [category, type];
     const desc           = document.getElementById('projDesc')?.value.trim() || '';
+    const paymentMode    = document.getElementById('coPostPaymentMode')?.value || 'lump_sum';
 
     if (!title) {
       if (typeof showToast === 'function') showToast('⚠️ Please enter an opportunity title.', 'warning');
@@ -1266,6 +1426,30 @@
     if (!desc) {
       if (typeof showToast === 'function') showToast('⚠️ Please provide a brief description or scope of work.', 'warning');
       return;
+    }
+
+    let jobMilestones = [];
+    if (paymentMode === 'milestones') {
+      const sum = coCurrentMilestones.reduce((acc, m) => acc + (Number(m.percentage) || 0), 0);
+      if (sum !== 100) {
+        if (typeof showToast === 'function') showToast('⚠️ Milestone percentages must total exactly 100% (currently ' + sum + '%). Please adjust.', 'warning');
+        return;
+      }
+      jobMilestones = coCurrentMilestones.map((m, idx) => ({
+        id: 'ms_' + (idx + 1),
+        name: m.name.trim() || (`Phase ${idx + 1}: Deliverables`),
+        percentage: Number(m.percentage) || 0,
+        amount: (budget && budget > 0) ? Math.round(budget * ((Number(m.percentage) || 0) / 100)) : 0,
+        status: 'Funded in Escrow'
+      }));
+    } else {
+      jobMilestones = [{
+        id: 'ms_1',
+        name: '100% Full Project Completion & Approval',
+        percentage: 100,
+        amount: budget,
+        status: 'Funded in Escrow'
+      }];
     }
 
     const btn = document.getElementById('postSubmitBtn');
@@ -1289,6 +1473,8 @@
       skills,
       description: desc,
       scope: desc,
+      payment_mode: paymentMode,
+      milestones: jobMilestones,
       companyName: user.name || user.company_name || 'Verified Corporate Employer',
       company_name: user.name || user.company_name || 'Verified Corporate Employer',
       company_id: user.id || user.email || 'company',
@@ -1325,25 +1511,6 @@
     if (document.getElementById('projDesc')) document.getElementById('projDesc').value = '';
 
     renderDashboardData();
-  }
-
-  async function awardContract(proposalId) {
-    if (window.sb) {
-      try {
-        await sb.from('proposals').update({ status: 'awarded' }).eq('id', proposalId);
-      } catch(e) {}
-    }
-    try {
-      const localProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
-      const idx = localProps.findIndex(p => p.id === proposalId);
-      if (idx !== -1) {
-        localProps[idx].status = 'awarded';
-        localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
-      }
-    } catch(e) {}
-
-    closeModal('applicantsModal');
-    showToast('✅ Contract awarded! Head to Payments to fund the milestone.');
   }
 
   function releaseFunds() {
@@ -1635,7 +1802,7 @@
   </div>
 </div>
 
-<script src="settings-popup.js?v=125.0"></script>
+<script src="settings-popup.js?v=130.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>

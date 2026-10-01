@@ -184,7 +184,7 @@ function generateCollektSmartFallback(prompt, user = null, action = 'chat') {
     return `🧮 **Nigerian Tax & Escrow Fee Reference**\n\n` +
       `• **Withholding Tax (WHT)**: 5% (Individual Vendors / Supplies) or 10% (Corporate Engineering / Technical Services)\n` +
       `• **Value Added Tax (VAT)**: 7.5% remitted to the Federal Inland Revenue Service (FIRS)\n` +
-      `• **Collekt Platform Fee**: 10% on completed milestone values\n\n` +
+      `• **Collekt Platform Fee**: 15% on completed milestone values\n\n` +
       `🧾 Official tax credit notes are linked to the verified corporate TIN upon payout confirmation.`;
   }
 

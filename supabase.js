@@ -2865,6 +2865,60 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
       }
     } catch(e){}
 
+    // Find associated job to resolve payment mode & milestones
+    let matchedJob = null;
+    try {
+      const allJobs = typeof getPostedJobs === 'function' ? getPostedJobs() : JSON.parse(localStorage.getItem('collekt_jobs') || '[]');
+      matchedJob = allJobs.find(j => String(j.id) === String(details?.jobId || details?.project_id || matchedProp?.jobId || matchedProp?.project_id));
+    } catch(e){}
+
+    const totalAmt = Number(details?.amount || matchedProp?.bidAmount || matchedProp?.proposedAmount || matchedJob?.budget || 0);
+    const currency = details?.currency || matchedProp?.currency || matchedJob?.currency || 'NGN';
+    const fxRate = currency === 'USD' ? (details?.fx_rate || matchedProp?.fx_rate || matchedJob?.fx_rate || 1550) : null;
+    const ngnTotalAmt = currency === 'USD' ? (typeof convertFx === 'function' ? convertFx(totalAmt, 'USD', 'NGN', fxRate) : totalAmt * 1550) : totalAmt;
+
+    const payMode = matchedJob?.payment_mode || (matchedJob?.milestones && matchedJob.milestones.length > 1 ? 'milestones' : 'lump_sum');
+    let contractMilestones = [];
+
+    const totalCommission = Math.round(totalAmt * 0.15);
+    const totalNetPayout = totalAmt - totalCommission;
+
+    if (payMode === 'milestones' && Array.isArray(matchedJob?.milestones) && matchedJob.milestones.length > 0) {
+      contractMilestones = matchedJob.milestones.map((m, idx) => {
+        const mAmt = totalAmt > 0 ? Math.round(totalAmt * ((Number(m.percentage) || 0) / 100)) : 0;
+        const mComm = Math.round(mAmt * 0.15);
+        const mNet = mAmt - mComm;
+        const mNgnAmt = currency === 'USD' ? (typeof convertFx === 'function' ? convertFx(mAmt, 'USD', 'NGN', fxRate) : mAmt * 1550) : mAmt;
+        return {
+          id: m.id || ('ms_' + (idx + 1)),
+          name: m.name || (`Phase ${idx + 1}`),
+          percentage: Number(m.percentage) || 0,
+          amount: mAmt,
+          currency: currency,
+          fx_rate: fxRate,
+          ngn_amount: mNgnAmt,
+          commission_rate: 0.15,
+          commission: mComm,
+          net_payout: mNet,
+          status: 'Funded in Escrow'
+        };
+      });
+    } else {
+      contractMilestones = [{
+        id: 'ms_1',
+        name: '100% Full Project Completion & Approval',
+        percentage: 100,
+        amount: totalAmt,
+        currency: currency,
+        fx_rate: fxRate,
+        ngn_amount: ngnTotalAmt,
+        commission_rate: 0.15,
+        commission: totalCommission,
+        net_payout: totalNetPayout,
+        status: 'Funded in Escrow'
+      }];
+    }
+
     const contractId = 'ctr_' + String(proposalId).replace(/^prop_/, '');
     const contractData = {
       id: contractId,
@@ -2872,7 +2926,7 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
       proposalId: proposalId,
       project_id: details?.jobId || details?.project_id || matchedProp?.jobId || matchedProp?.project_id || '',
       jobId: details?.jobId || details?.project_id || matchedProp?.jobId || matchedProp?.project_id || '',
-      jobTitle: details?.jobTitle || details?.title || matchedProp?.jobTitle || 'Tender Contract Execution',
+      jobTitle: details?.jobTitle || details?.title || matchedProp?.jobTitle || matchedJob?.title || 'Tender Contract Execution',
       company_id: user.id || details?.companyId || matchedProp?.companyId || 'company',
       companyId: user.id || details?.companyId || matchedProp?.companyId || 'company',
       companyName: user.company_name || user.name || matchedProp?.companyName || 'Corporate Client',
@@ -2881,9 +2935,18 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
       proId: details?.proId || matchedProp?.userId || matchedProp?.pro_id || '',
       proName: details?.proName || matchedProp?.userName || 'Professional Specialist',
       proEmail: details?.proEmail || matchedProp?.userEmail || '',
-      total_amount: Number(details?.amount || matchedProp?.bidAmount || matchedProp?.proposedAmount || 0),
-      amount: Number(details?.amount || matchedProp?.bidAmount || matchedProp?.proposedAmount || 0),
-      pro_payout_amount: Number(details?.amount || matchedProp?.bidAmount || matchedProp?.proposedAmount || 0),
+      currency: currency,
+      exchange_rate_at_deposit: fxRate,
+      fx_rate: fxRate,
+      ngn_equivalent_total: ngnTotalAmt,
+      total_amount: totalAmt,
+      amount: totalAmt,
+      commission_rate: 0.15,
+      commission_amount: totalCommission,
+      pro_net_amount: totalNetPayout,
+      pro_payout_amount: totalNetPayout,
+      payment_mode: payMode,
+      milestones: contractMilestones,
       timeline: details?.timeline || matchedProp?.timeline || '2 Weeks',
       status: 'ACTIVE', // Acceptance creates ACTIVE engagement, NOT completed
       created_at: nowIso,
@@ -2901,6 +2964,8 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
           pro_id: contractData.pro_id || null,
           total_amount: contractData.total_amount,
           pro_payout_amount: contractData.pro_payout_amount,
+          currency: contractData.currency,
+          exchange_rate_at_deposit: contractData.exchange_rate_at_deposit,
           status: 'ACTIVE',
           created_at: nowIso
         };
@@ -2931,6 +2996,9 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
           title: contractData.jobTitle,
           amount: contractData.total_amount,
           contractor: contractData.proName,
+          client: contractData.companyName,
+          payment_mode: payMode,
+          milestones: contractMilestones,
           status: 'Active Escrow',
           created_at: nowIso
         });

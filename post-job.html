@@ -28,9 +28,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=125.0">
-<link rel="stylesheet" href="shared.css?v=125.0">
-<link rel="stylesheet" href="glass.css?v=125.0">
+<link rel="stylesheet" href="style.css?v=130.0">
+<link rel="stylesheet" href="shared.css?v=130.0">
+<link rel="stylesheet" href="glass.css?v=130.0">
 
 <style>
   body { background: var(--paper); }
@@ -271,9 +271,17 @@
                 </div>
               </div>
 
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+              <div style="display:grid; grid-template-columns:130px 1fr 1fr; gap:12px; margin-bottom:14px;">
                 <div class="form-group">
-                  <label class="form-label" style="font-weight:800;">Budget / Amount Offered (&#8358;)</label>
+                  <label class="form-label" style="font-weight:800;">Currency</label>
+                  <select class="form-input form-select" id="postCurrencySelect" onchange="onPostCurrencyChange()" style="font-weight:800;">
+                    <option value="NGN">NGN (₦)</option>
+                    <option value="USD">USD ($)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" id="postBudgetLabel" style="font-weight:800;">Budget / Amount Offered (₦)</label>
                   <input class="form-input" type="number" id="postBudgetInput" placeholder="e.g. 2500000 (Leave blank if not specified)" oninput="updateLivePreview()">
                 </div>
 
@@ -288,9 +296,69 @@
                 </div>
               </div>
 
-              <div class="form-group">
+              <!-- FX Safeguard dynamic preview pill -->
+              <div id="postFxPreviewPill" style="display:none; margin-top:-6px; margin-bottom:14px; background:rgba(19,117,111,0.08); border:1px solid rgba(19,117,111,0.25); border-radius:10px; padding:8px 12px; font-size:11.5px; color:var(--teal); font-weight:700; align-items:center; justify-content:space-between;">
+                <span>🔒 <strong>FX Safeguard Active:</strong> <span id="postFxConvertedText">~₦0 NGN @ ₦1,550/$</span></span>
+                <span style="font-size:10px; opacity:0.85; background:var(--teal); color:#fff; padding:2px 7px; border-radius:4px;">Locked at Escrow Deposit</span>
+              </div>
+
+              <div class="form-group" style="margin-bottom:16px;">
                 <label class="form-label" style="font-weight:800;">Application / Bid Submission Deadline</label>
                 <input class="form-input" type="text" id="postDeadlineInput" placeholder="e.g. 14 Days, 30 Days" oninput="updateLivePreview()">
+              </div>
+
+              <!-- Escrow Payout & Milestone Structure -->
+              <div class="form-group" style="margin-bottom:0; padding:18px; border-radius:14px; background:var(--paper); border:1.5px solid var(--line);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+                  <div>
+                    <label class="form-label" style="font-weight:800; font-size:13px; margin-bottom:2px; display:flex; align-items:center; gap:6px;">
+                      <span>🔒</span> Escrow Payout Schedule
+                    </label>
+                    <div style="font-size:11.5px; color:var(--muted);">Choose whether funds are released in one lump sum or in custom milestone phases.</div>
+                  </div>
+                  <div style="display:flex; gap:6px; background:var(--white); padding:3px; border-radius:10px; border:1px solid var(--line);">
+                    <button type="button" id="payModeLumpBtn" class="btn btn-xs" onclick="setPaymentMode('lump_sum')" style="font-weight:800; border-radius:8px; background:var(--forest); color:#fff; border:none; padding:6px 14px; cursor:pointer;">
+                      100% on Completion
+                    </button>
+                    <button type="button" id="payModeMilestonesBtn" class="btn btn-xs" onclick="setPaymentMode('milestones')" style="font-weight:800; border-radius:8px; background:transparent; color:var(--muted); border:none; padding:6px 14px; cursor:pointer;">
+                      Milestone Phases
+                    </button>
+                  </div>
+                </div>
+
+                <input type="hidden" id="postPaymentMode" value="lump_sum">
+
+                <!-- Mode 1: 100% Lump Sum Upon Completion (Default) -->
+                <div id="lumpSumNoticeBox" style="font-size:12px; color:var(--muted); line-height:1.55; padding:12px 14px; border-radius:10px; background:rgba(19,117,111,0.06); border:1px solid rgba(19,117,111,0.18);">
+                  <div style="display:flex; align-items:flex-start; gap:8px;">
+                    <span style="font-size:16px; line-height:1;">✅</span>
+                    <div>
+                      <strong style="color:var(--ink);">100% Single Escrow Release:</strong> 
+                      The entire contract sum is deposited into Nova Bank Escrow and held safely in trust. <strong>100% of the funds will be released</strong> to the professional specialist in a single payout once the job is fully delivered and approved by your team.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Mode 2: Custom Milestone Builder (Optional) -->
+                <div id="milestoneScheduleBox" style="display:none; margin-top:12px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span style="font-size:12px; font-weight:800; color:var(--ink);">List Milestone Deliverables &amp; Release Percentages</span>
+                    <span id="milestoneTotalBadge" style="font-size:11px; font-weight:800; padding:4px 10px; border-radius:99px; background:rgba(22,163,74,0.12); color:#16a34a;">
+                      ✓ Total: 100%
+                    </span>
+                  </div>
+
+                  <div id="milestoneRowsContainer" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+                    <!-- Rows rendered dynamically -->
+                  </div>
+
+                  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="addMilestoneRow()" style="font-size:12px; font-weight:800; border-style:dashed; padding:7px 16px; cursor:pointer;">
+                      + Add Milestone Phase
+                    </button>
+                    <span style="font-size:11px; color:var(--muted);">All milestone percentages must equal 100%.</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -357,6 +425,10 @@
                 <div class="tender-skills" id="prevSkills" style="margin-bottom:14px;">
                   <span class="tender-skill-chip">Engineering</span>
                 </div>
+
+                <div id="prevMilestonePill" style="font-size:11px; font-weight:800; color:var(--teal); margin-bottom:12px; display:flex; align-items:center; gap:6px; background:rgba(19,117,111,0.08); padding:6px 12px; border-radius:8px;">
+                  <span>🔒</span> <span id="prevMilestoneTxt">100% Escrow on Completion</span>
+                </div>
               </div>
 
               <div class="tender-footer" style="padding-top:12px;">
@@ -413,6 +485,15 @@
       </div>
     </div>
 
+    <div id="prevModalEscrowSection" style="background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:20px;">
+      <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+        <span>🔒</span> Escrow Payment Schedule
+      </div>
+      <div id="prevModalMilestonesList" style="display:flex; flex-direction:column; gap:8px;">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+
     <div style="border-top:1px solid var(--line); padding-top:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
       <div style="font-size:12px; color:var(--muted);">
         👁️ <strong>Company Preview Mode:</strong> This is how verified professionals see your opportunity in the live marketplace.
@@ -425,10 +506,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=125.0"></script>
-<script src="app.js?v=125.0"></script>
-<script src="collekt-ai.js?v=125.0"></script>
-<script src="settings-popup.js?v=125.0"></script>
+<script src="supabase.js?v=130.0"></script>
+<script src="app.js?v=130.0"></script>
+<script src="collekt-ai.js?v=130.0"></script>
+<script src="settings-popup.js?v=130.0"></script>
 
 <script>
   let editingJobId = null;
@@ -454,6 +535,137 @@
       updateLivePreview();
     }
   });
+
+  let currentMilestones = [
+    { name: 'Phase 1: Initial Engineering FEED & Site Survey', percentage: 40 },
+    { name: 'Phase 2: Execution, Fabrication & Interim Review', percentage: 30 },
+    { name: 'Phase 3: Final Testing, Delivery & Sign-Off', percentage: 30 }
+  ];
+
+  function setPaymentMode(mode) {
+    const hidden = document.getElementById('postPaymentMode');
+    if (hidden) hidden.value = mode;
+
+    const lumpBtn = document.getElementById('payModeLumpBtn');
+    const msBtn   = document.getElementById('payModeMilestonesBtn');
+    const lumpBox = document.getElementById('lumpSumNoticeBox');
+    const msBox   = document.getElementById('milestoneScheduleBox');
+
+    if (mode === 'milestones') {
+      if (lumpBtn) { lumpBtn.style.background = 'transparent'; lumpBtn.style.color = 'var(--muted)'; }
+      if (msBtn)   { msBtn.style.background = 'var(--forest)'; msBtn.style.color = '#fff'; }
+      if (lumpBox) lumpBox.style.display = 'none';
+      if (msBox)   msBox.style.display = 'block';
+      renderMilestoneRows();
+    } else {
+      if (lumpBtn) { lumpBtn.style.background = 'var(--forest)'; lumpBtn.style.color = '#fff'; }
+      if (msBtn)   { msBtn.style.background = 'transparent'; msBtn.style.color = 'var(--muted)'; }
+      if (lumpBox) lumpBox.style.display = 'block';
+      if (msBox)   msBox.style.display = 'none';
+    }
+    updateLivePreview();
+  }
+
+  function onPostCurrencyChange() {
+    const cur = document.getElementById('postCurrencySelect')?.value || 'NGN';
+    const lbl = document.getElementById('postBudgetLabel');
+    if (lbl) lbl.textContent = cur === 'USD' ? 'Budget / Amount Offered ($)' : 'Budget / Amount Offered (₦)';
+    renderMilestoneRows();
+    updateLivePreview();
+  }
+
+  function renderMilestoneRows() {
+    const container = document.getElementById('milestoneRowsContainer');
+    if (!container) return;
+
+    const currency = document.getElementById('postCurrencySelect')?.value || 'NGN';
+    const budgetRaw = document.getElementById('postBudgetInput')?.value;
+    const budget = (budgetRaw && !isNaN(budgetRaw) && Number(budgetRaw) > 0) ? Number(budgetRaw) : 0;
+
+    container.innerHTML = currentMilestones.map((m, idx) => {
+      const amountVal = budget > 0 ? Math.round(budget * ((Number(m.percentage) || 0) / 100)) : 0;
+      const amountFormatted = budget > 0 ? (typeof formatCurrency === 'function' ? formatCurrency(amountVal, currency) : (currency === 'USD' ? '$' : '₦') + amountVal.toLocaleString()) : '—';
+      return `
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:10px; padding:10px 12px; display:grid; grid-template-columns:1fr 85px 110px 30px; gap:8px; align-items:center;">
+          <div>
+            <input class="form-input" style="font-size:12px; padding:7px 10px;" type="text" value="${escapeHTML(m.name)}" placeholder="Phase ${idx+1} Deliverable Name" oninput="updateMilestoneName(${idx}, this.value)">
+          </div>
+          <div style="position:relative;">
+            <input class="form-input" style="font-size:12px; padding:7px 22px 7px 8px; text-align:right;" type="number" min="1" max="100" value="${m.percentage}" placeholder="%" oninput="updateMilestonePercent(${idx}, this.value)">
+            <span style="position:absolute; right:7px; top:50%; transform:translateY(-50%); font-size:11px; font-weight:800; color:var(--muted); pointer-events:none;">%</span>
+          </div>
+          <div style="font-size:12px; font-weight:800; color:var(--forest); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${amountFormatted}">
+            ${amountFormatted}
+          </div>
+          <div style="text-align:center;">
+            ${currentMilestones.length > 2 ? `
+              <button type="button" onclick="removeMilestoneRow(${idx})" style="background:none; border:none; color:#ef4444; font-size:14px; cursor:pointer; padding:2px 6px;" title="Remove Phase">✕</button>
+            ` : `
+              <span style="opacity:0.25; font-size:13px; cursor:not-allowed;">✕</span>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateMilestoneTotal();
+  }
+
+  function addMilestoneRow() {
+    const nextIdx = currentMilestones.length + 1;
+    currentMilestones.push({
+      name: `Phase ${nextIdx}: Specific Scope Deliverable`,
+      percentage: 0
+    });
+    renderMilestoneRows();
+    updateLivePreview();
+  }
+
+  function removeMilestoneRow(idx) {
+    if (currentMilestones.length <= 2) {
+      if (typeof showToast === 'function') showToast('⚠️ Minimum 2 milestones required for phased escrow schedule.', 'warning');
+      return;
+    }
+    currentMilestones.splice(idx, 1);
+    renderMilestoneRows();
+    updateLivePreview();
+  }
+
+  function updateMilestoneName(idx, val) {
+    if (currentMilestones[idx]) {
+      currentMilestones[idx].name = val;
+    }
+    updateLivePreview();
+  }
+
+  function updateMilestonePercent(idx, val) {
+    if (currentMilestones[idx]) {
+      currentMilestones[idx].percentage = Number(val) || 0;
+    }
+    renderMilestoneRows();
+    updateLivePreview();
+  }
+
+  function updateMilestoneTotal() {
+    const sum = currentMilestones.reduce((acc, m) => acc + (Number(m.percentage) || 0), 0);
+    const badge = document.getElementById('milestoneTotalBadge');
+    const currency = document.getElementById('postCurrencySelect')?.value || 'NGN';
+    const budgetRaw = document.getElementById('postBudgetInput')?.value;
+    const budget = (budgetRaw && !isNaN(budgetRaw) && Number(budgetRaw) > 0) ? Number(budgetRaw) : 0;
+
+    if (badge) {
+      if (sum === 100) {
+        badge.style.background = 'rgba(22,163,74,0.12)';
+        badge.style.color = '#16a34a';
+        const formattedTotal = typeof formatCurrency === 'function' ? formatCurrency(budget, currency) : (currency === 'USD' ? '$' : '₦') + budget.toLocaleString();
+        badge.innerHTML = `✓ Total: 100% ${budget > 0 ? '(' + formattedTotal + ')' : ''}`;
+      } else {
+        badge.style.background = 'rgba(239,68,68,0.12)';
+        badge.style.color = '#ef4444';
+        badge.innerHTML = `⚠️ Total: ${sum}% (Must equal 100%)`;
+      }
+    }
+  }
 
   async function loadJobForEditing(jobId) {
     editingJobId = jobId;
@@ -486,7 +698,10 @@
 
     if (document.getElementById('postSectorInput')) document.getElementById('postSectorInput').value = job.category || 'EPC & Engineering';
     if (document.getElementById('postExpInput')) document.getElementById('postExpInput').value = job.experience || 'Any Experience Level';
-    if (document.getElementById('postLocInput')) document.getElementById('postLocInput').value = job.location || 'Nigeria';
+    if (document.getElementById('postCurrencySelect')) {
+      document.getElementById('postCurrencySelect').value = job.currency || 'NGN';
+      onPostCurrencyChange();
+    }
     if (document.getElementById('postBudgetInput')) document.getElementById('postBudgetInput').value = (job.budget && Number(job.budget) > 0) ? job.budget : '';
     if (document.getElementById('postRateTypeInput')) document.getElementById('postRateTypeInput').value = job.budget_rate_type || 'Total Contract Budget';
     if (document.getElementById('postDurationInput')) document.getElementById('postDurationInput').value = job.duration || '';
@@ -495,6 +710,17 @@
       document.getElementById('postSkillsInput').value = Array.isArray(job.skills) ? job.skills.join(', ') : (job.skills || '');
     }
     if (document.getElementById('postDescInput')) document.getElementById('postDescInput').value = job.description || job.scope || '';
+
+    // Load payment mode & milestones
+    if (job.payment_mode === 'milestones' && Array.isArray(job.milestones) && job.milestones.length > 0) {
+      currentMilestones = job.milestones.map(m => ({
+        name: m.name || 'Milestone Phase',
+        percentage: Number(m.percentage) || 0
+      }));
+      setPaymentMode('milestones');
+    } else {
+      setPaymentMode('lump_sum');
+    }
 
     const submitBtn = document.getElementById('submitJobBtn');
     if (submitBtn) {
@@ -527,6 +753,7 @@
     const deadline  = document.getElementById('postDeadlineInput')?.value.trim();
     const skillsStr = document.getElementById('postSkillsInput')?.value.trim() || '';
     const desc      = document.getElementById('postDescInput')?.value.trim();
+    const payMode   = document.getElementById('postPaymentMode')?.value || 'lump_sum';
 
     const prevTitleEl = document.getElementById('prevTitle');
     if (prevTitleEl) {
@@ -553,13 +780,31 @@
     const prevDeadlineEl = document.getElementById('prevDeadlineTag');
     if (prevDeadlineEl) prevDeadlineEl.innerHTML = deadline ? `&#9203; ${escapeHTML(deadline)}` : '&#9203; Ongoing';
 
+    const currency = document.getElementById('postCurrencySelect')?.value || 'NGN';
+    const fxPill = document.getElementById('postFxPreviewPill');
+    const fxTxt = document.getElementById('postFxConvertedText');
+    const numBudget = (budget && !isNaN(budget) && Number(budget) > 0) ? Number(budget) : 0;
+
+    if (currency === 'USD') {
+      const ngnEquivalent = typeof convertFx === 'function' ? convertFx(numBudget, 'USD', 'NGN') : numBudget * 1550;
+      if (fxPill) fxPill.style.display = 'flex';
+      if (fxTxt) fxTxt.textContent = `$${numBudget.toLocaleString()} USD = ~₦${ngnEquivalent.toLocaleString()} NGN (@ ₦1,550/$)`;
+    } else {
+      if (fxPill) fxPill.style.display = 'none';
+    }
+
     const prevRateEl = document.getElementById('prevRateType');
-    if (prevRateEl) prevRateEl.textContent = 'Budget / Amount Offered';
+    if (prevRateEl) prevRateEl.textContent = currency === 'USD' ? 'Budget / Amount (USD)' : 'Budget / Amount Offered';
 
     const prevBudgetEl = document.getElementById('prevBudget');
     if (prevBudgetEl) {
-      if (budget && !isNaN(budget) && Number(budget) > 0) {
-        const formatted = (typeof formatNaira === 'function') ? formatNaira(Number(budget), true) : ('₦' + Number(budget).toLocaleString());
+      if (numBudget > 0) {
+        let formatted = '';
+        if (currency === 'USD') {
+          formatted = typeof formatDualCurrency === 'function' ? formatDualCurrency(numBudget, 'USD') : `$${numBudget.toLocaleString()} (~₦${(numBudget * 1550).toLocaleString()})`;
+        } else {
+          formatted = (typeof formatNaira === 'function') ? formatNaira(numBudget, true) : ('₦' + numBudget.toLocaleString());
+        }
         prevBudgetEl.textContent = formatted;
         prevBudgetEl.style.color = 'var(--forest)';
       } else {
@@ -586,6 +831,23 @@
     if (skillsContainer) {
       skillsContainer.innerHTML = skills.slice(0, 4).map(s => `<span class="tender-skill-chip">${escapeHTML(s)}</span>`).join('');
     }
+
+    // Update milestone preview pill
+    const prevMsTxt = document.getElementById('prevMilestoneTxt');
+    if (prevMsTxt) {
+      if (payMode === 'milestones') {
+        const validMs = currentMilestones.filter(m => Number(m.percentage) > 0);
+        const pcts = validMs.map(m => m.percentage + '%').join(' + ');
+        prevMsTxt.textContent = `${currentMilestones.length} Phased Milestones (${pcts || 'Custom %'})`;
+      } else {
+        prevMsTxt.textContent = '100% Escrow on Completion & Approval';
+      }
+    }
+
+    // Refresh dynamic amounts in milestone builder if open
+    if (payMode === 'milestones') {
+      updateMilestoneTotal();
+    }
   }
 
   function openLiveCardFullPreview() {
@@ -593,10 +855,12 @@
     const type      = document.getElementById('postTypeHidden')?.value || 'Short-Term Job';
     const sector    = document.getElementById('postSectorInput')?.value || 'EPC & Engineering';
     const loc       = document.getElementById('postLocInput')?.value || 'Nigeria';
+    const currency  = document.getElementById('postCurrencySelect')?.value || 'NGN';
     const budget    = document.getElementById('postBudgetInput')?.value;
     const rateType  = document.getElementById('postRateTypeInput')?.value || 'Total Contract Budget';
     const deadline  = document.getElementById('postDeadlineInput')?.value.trim() || 'Ongoing';
     const desc      = document.getElementById('postDescInput')?.value.trim() || 'Full deliverables and project specifications will be listed here.';
+    const payMode   = document.getElementById('postPaymentMode')?.value || 'lump_sum';
 
     const user = typeof getUser === 'function' ? getUser() : {};
     const compName = user?.company_name || user?.name || 'Company Account';
@@ -619,7 +883,12 @@
     }
     if (document.getElementById('prevModalBudget')) {
       if (budget && !isNaN(budget) && Number(budget) > 0) {
-        const formatted = (typeof formatNaira === 'function') ? formatNaira(Number(budget), false) : ('₦' + Number(budget).toLocaleString());
+        let formatted = '';
+        if (currency === 'USD') {
+          formatted = typeof formatDualCurrency === 'function' ? formatDualCurrency(Number(budget), 'USD') : `$${Number(budget).toLocaleString()} (~₦${(Number(budget)*1550).toLocaleString()})`;
+        } else {
+          formatted = (typeof formatNaira === 'function') ? formatNaira(Number(budget), false) : ('₦' + Number(budget).toLocaleString());
+        }
         document.getElementById('prevModalBudget').textContent = `${formatted} (${rateType})`;
       } else {
         document.getElementById('prevModalBudget').textContent = 'Price not specified';
@@ -627,6 +896,38 @@
     }
     if (document.getElementById('prevModalLocation')) {
       document.getElementById('prevModalLocation').textContent = loc;
+    }
+
+    // Populate escrow schedule in preview modal
+    const escrowList = document.getElementById('prevModalMilestonesList');
+    if (escrowList) {
+      const numBudget = (budget && !isNaN(budget) && Number(budget) > 0) ? Number(budget) : 0;
+      if (payMode === 'milestones') {
+        escrowList.innerHTML = currentMilestones.map((m, idx) => {
+          const amt = numBudget > 0 ? Math.round(numBudget * ((Number(m.percentage) || 0) / 100)) : 0;
+          const amtStr = numBudget > 0 ? (typeof formatCurrency === 'function' ? formatCurrency(amt, currency) : (currency === 'USD' ? '$' : '₦') + amt.toLocaleString()) : 'TBD';
+          return `
+            <div style="background:var(--white); border:1px solid var(--line); border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+              <div>
+                <div style="font-size:13px; font-weight:800; color:var(--ink);">${escapeHTML(m.name)}</div>
+                <div style="font-size:11px; color:var(--muted); margin-top:2px;">Phase ${idx+1} Deliverable &bull; Release: <strong style="color:var(--forest);">${m.percentage}%</strong></div>
+              </div>
+              <div style="font-size:13px; font-weight:900; color:var(--forest);">${amtStr}</div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        const amtStr = numBudget > 0 ? (typeof formatCurrency === 'function' ? formatCurrency(numBudget, currency) : (currency === 'USD' ? '$' : '₦') + numBudget.toLocaleString()) : 'Full Contract Budget';
+        escrowList.innerHTML = `
+          <div style="background:var(--white); border:1px solid var(--line); border-radius:10px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:13px; font-weight:800; color:var(--ink);">100% Single Escrow Payout</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">Released upon final project deliverable approval by corporate client.</div>
+            </div>
+            <div style="font-size:14px; font-weight:900; color:var(--forest);">${amtStr} (100%)</div>
+          </div>
+        `;
+      }
     }
 
     openModal('opportunityPreviewModal');
@@ -638,18 +939,56 @@
     const category       = document.getElementById('postSectorInput')?.value || 'EPC & Engineering';
     const experience     = document.getElementById('postExpInput')?.value || 'Any Experience Level';
     const location       = document.getElementById('postLocInput')?.value || 'Nigeria';
+    const currency       = document.getElementById('postCurrencySelect')?.value || 'NGN';
     const budgetRaw      = document.getElementById('postBudgetInput')?.value;
     const budget         = (budgetRaw && !isNaN(budgetRaw) && Number(budgetRaw) > 0) ? Number(budgetRaw) : 0;
+    const fxRate         = currency === 'USD' ? (window.COLLEKT_DEFAULT_FX_RATE || 1550) : null;
+    const ngnBudget      = currency === 'USD' ? (typeof convertFx === 'function' ? convertFx(budget, 'USD', 'NGN', fxRate) : budget * 1550) : budget;
     const budgetRateType = document.getElementById('postRateTypeInput')?.value || 'Total Contract Budget';
     const duration       = document.getElementById('postDurationInput')?.value.trim() || 'Flexible';
     const deadline       = document.getElementById('postDeadlineInput')?.value.trim() || 'Ongoing';
     const skillsStr      = document.getElementById('postSkillsInput')?.value.trim() || '';
     const skills         = skillsStr ? skillsStr.split(',').map(s => s.trim()).filter(Boolean) : [category, type];
     const desc           = document.getElementById('postDescInput')?.value.trim();
+    const paymentMode    = document.getElementById('postPaymentMode')?.value || 'lump_sum';
 
     if (!title || !desc) {
       if (typeof showToast === 'function') showToast('⚠️ Please enter opportunity title and description / scope.', 'warning');
       return;
+    }
+
+    let jobMilestones = [];
+    if (paymentMode === 'milestones') {
+      const sum = currentMilestones.reduce((acc, m) => acc + (Number(m.percentage) || 0), 0);
+      if (sum !== 100) {
+        if (typeof showToast === 'function') showToast('⚠️ Milestone percentages must total exactly 100% (currently ' + sum + '%). Please adjust.', 'warning');
+        return;
+      }
+      jobMilestones = currentMilestones.map((m, idx) => {
+        const mAmt = budget > 0 ? Math.round(budget * ((Number(m.percentage) || 0) / 100)) : 0;
+        return {
+          id: 'ms_' + (idx + 1),
+          name: m.name.trim() || (`Phase ${idx + 1}: Deliverables`),
+          percentage: Number(m.percentage) || 0,
+          amount: mAmt,
+          currency: currency,
+          fx_rate: fxRate,
+          ngn_amount: currency === 'USD' ? (typeof convertFx === 'function' ? convertFx(mAmt, 'USD', 'NGN', fxRate) : mAmt * 1550) : mAmt,
+          status: 'Funded in Escrow'
+        };
+      });
+    } else {
+      // 100% Lump Sum Upon Completion & Approval
+      jobMilestones = [{
+        id: 'ms_1',
+        name: '100% Full Project Completion & Approval',
+        percentage: 100,
+        amount: budget,
+        currency: currency,
+        fx_rate: fxRate,
+        ngn_amount: ngnBudget,
+        status: 'Funded in Escrow'
+      }];
     }
 
     const btn = document.getElementById('submitJobBtn');
@@ -663,6 +1002,9 @@
       category: category,
       experience: experience,
       location: location,
+      currency: currency,
+      fx_rate: fxRate,
+      ngn_budget: ngnBudget,
       budget: budget,
       professional_fee: budget,
       budget_rate_type: budgetRateType,
@@ -671,6 +1013,8 @@
       skills: skills,
       description: desc,
       scope: desc,
+      payment_mode: paymentMode,
+      milestones: jobMilestones,
       companyName: user.name || user.company_name || 'Verified Corporate Employer',
       company_name: user.name || user.company_name || 'Verified Corporate Employer',
       company_id: user.id || user.email || 'company',

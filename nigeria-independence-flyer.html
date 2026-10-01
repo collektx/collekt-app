@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Nigeria Independence Day | October 1st Master Campaign</title>
+  <meta name="description" content="Celebrating Nigeria's 66th Independence Day with world-class graphic campaign flyers, luxury aesthetics, and inspiring national pride.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #071311;
+      --bg-card: rgba(12, 28, 25, 0.88);
+      --green-primary: #008751;
+      --green-emerald: #10B981;
+      --green-glow: #2DD4BF;
+      --gold-primary: #D4AF37;
+      --gold-light: #FBBF24;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(45, 212, 191, 0.25);
+      --text-main: #FFFFFF;
+      --text-muted: #94A3B8;
+      --font-display: 'Playfair Display', serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
+        linear-gradient(180deg, #050d0c 0%, #071311 100%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #particles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* Header Section */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      padding: 8px 18px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--green-glow);
+      margin-bottom: 16px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0, 135, 81, 0.15);
+    }
+
+    .badge-flag {
+      display: inline-flex;
+      border-radius: 3px;
+      overflow: hidden;
+      width: 20px;
+      height: 14px;
+      box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    }
+    .badge-flag span { flex: 1; height: 100%; }
+    .badge-flag span:nth-child(1) { background: #008751; }
+    .badge-flag span:nth-child(2) { background: #FFFFFF; }
+    .badge-flag span:nth-child(3) { background: #008751; }
+
+    .main-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 900;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #FFFFFF 30%, #E2E8F0 60%, var(--gold-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Edition Toggle Switch */
+    .edition-switch-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .edition-switch {
+      background: rgba(12, 28, 25, 0.95);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9999px;
+      padding: 6px;
+      display: flex;
+      gap: 6px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .switch-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 10px 22px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .switch-btn.active {
+      background: linear-gradient(135deg, #008751, #0c5737);
+      color: #FFFFFF;
+      box-shadow: 0 4px 15px rgba(0, 135, 81, 0.4);
+    }
+
+    .switch-btn:hover:not(.active) {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Main Showcase Grid */
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .showcase-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 3D Flyer Card Showcase */
+    .card-perspective-box {
+      perspective: 1200px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .flyer-card {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7),
+                  0 0 40px rgba(16, 185, 129, 0.15);
+      transition: transform 0.2s ease-out, box-shadow 0.3s ease;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+
+    .flyer-card:hover {
+      box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.8),
+                  0 0 50px rgba(45, 212, 191, 0.25);
+    }
+
+    .flyer-img-container {
+      position: relative;
+      width: 100%;
+      padding-top: 133.33%; /* 3:4 aspect ratio */
+      overflow: hidden;
+    }
+
+    .flyer-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .flyer-card:hover .flyer-img {
+      transform: scale(1.02);
+    }
+
+    .card-floating-badge {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: rgba(7, 19, 17, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--gold-light);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 5;
+    }
+
+    .card-footer-controls {
+      display: flex;
+      gap: 12px;
+      padding: 18px 20px;
+      background: rgba(10, 24, 21, 0.95);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green-primary), #0d6e44);
+      color: #FFFFFF;
+      border: 1px solid rgba(45, 212, 191, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #00995c, var(--green-primary));
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 135, 81, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: #E2E8F0;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #FFFFFF;
+      transform: translateY(-2px);
+    }
+
+    /* Campaign Insights & Copywriting Studio */
+    .details-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 28px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel-badge {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: var(--gold-light);
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .copy-box {
+      background: rgba(5, 13, 11, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .copy-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--green-glow);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .copy-text {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: #E2E8F0;
+      white-space: pre-line;
+    }
+
+    .btn-copy {
+      background: rgba(45, 212, 191, 0.12);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      color: var(--green-glow);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-copy:hover {
+      background: rgba(45, 212, 191, 0.25);
+      color: #FFFFFF;
+    }
+
+    /* Audio Fanfare & Celebration Bar */
+    .celebration-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 20px 28px;
+      background: linear-gradient(135deg, rgba(0, 135, 81, 0.2), rgba(212, 175, 55, 0.15));
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      border-radius: 20px;
+      margin-top: 36px;
+    }
+
+    .celebration-info h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .celebration-info p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .celebration-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-audio {
+      background: #FFFFFF;
+      color: #071311;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 10px 20px;
+      border-radius: 9999px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .btn-audio:hover {
+      transform: scale(1.04);
+      background: #F8FAFC;
+    }
+
+    .btn-confetti {
+      background: rgba(16, 185, 129, 0.2);
+      color: #FFFFFF;
+      border: 1px solid rgba(45, 212, 191, 0.4);
+      padding: 10px 20px;
+      border-radius: 9999px;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-confetti:hover {
+      background: rgba(16, 185, 129, 0.35);
+      transform: scale(1.04);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #0C1D1A;
+      border: 1px solid var(--green-glow);
+      color: #FFFFFF;
+      padding: 12px 22px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particles-canvas"></canvas>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="badge-pill">
+        <div class="badge-flag">
+          <span></span><span></span><span></span>
+        </div>
+        Federal Republic of Nigeria • October 1st
+      </div>
+      <h1 class="main-title">Happy Independence Day, Nigeria!</h1>
+      <p class="subtitle">
+        Commemorating 66 Years of Nationhood, Boundless Culture, Relentless Grit, and Global Innovation.
+      </p>
+    </header>
+
+    <!-- Edition Switch -->
+    <div class="edition-switch-wrapper">
+      <div class="edition-switch">
+        <button id="switch-regal" class="switch-btn active" onclick="switchEdition('regal')">
+          👑 Regal Heritage Edition
+        </button>
+        <button id="switch-tech" class="switch-btn" onclick="switchEdition('tech')">
+          ⚡ Velvet Tech Edition
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Showcase -->
+    <div class="showcase-grid">
+      
+      <!-- Interactive Flyer Card with Parallax Tilt -->
+      <div class="card-perspective-box">
+        <div class="flyer-card" id="flyerCard">
+          <div class="card-floating-badge" id="cardBadge">
+            <span id="badgeIcon">🌟</span> <span id="badgeTitle">Haute Couture Daylight</span>
+          </div>
+
+          <div class="flyer-img-container">
+            <img 
+              id="flyerImage" 
+              class="flyer-img" 
+              src="assets/campaigns/nigeria_independence_regal.jpg" 
+              alt="Nigeria Independence Day Flyer Design"
+            >
+          </div>
+
+          <div class="card-footer-controls">
+            <a id="downloadBtn" href="assets/campaigns/nigeria_independence_regal.jpg" download="Nigeria_Independence_Flyer_HD.jpg" class="btn-action btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Download HD Flyer
+            </a>
+            <button onclick="triggerConfettiBurst(event)" class="btn-action btn-secondary">
+              🎉 Burst Joy
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Campaign Strategy & Copywriting Studio -->
+      <div class="details-panel">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h2 class="panel-title">
+              <span>✍️</span> Ready-to-Publish Copy Kit
+            </h2>
+            <span class="panel-badge">Plug & Play</span>
+          </div>
+
+          <!-- Social Copy 1 -->
+          <div class="copy-box">
+            <div class="copy-label">
+              <span>Instagram / Facebook / Threads</span>
+              <button class="btn-copy" onclick="copyText('copy-social')">Copy</button>
+            </div>
+            <div class="copy-text" id="copy-social">66 Years of Grace, Grit, and Glory. 🇳🇬✨
+
+From the bustling streets of Lagos to the rolling hills of Jos, across the Niger and the Benue — our heartbeat remains one: resilient, radiant, and relentlessly ambitious.
+
+Today, we celebrate the land that raised us, the heritage that grounds us, and the audacious dreams shaping our tomorrow.
+
+Happy Independence Day to every Nigerian across the globe! 🦅💚🤍💚
+#NigeriaAt66 #HappyIndependenceDay #ProudlyNigerian #GiantOfAfrica #October1st</div>
+          </div>
+
+          <!-- Corporate Copy 2 -->
+          <div class="copy-box">
+            <div class="copy-label">
+              <span>LinkedIn / Corporate / Executive</span>
+              <button class="btn-copy" onclick="copyText('copy-corporate')">Copy</button>
+            </div>
+            <div class="copy-text" id="copy-corporate">Honoring Our Roots, Powering Our Shared Future. Happy Independence Day, Nigeria! 🇳🇬
+
+At the intersection of rich cultural heritage and bold technological innovation, Nigeria stands as a testament to what happens when human ingenuity refuses to be confined by limits.
+
+As we commemorate 66 years of nationhood, we salute the entrepreneurs, builders, creators, and everyday heroes working tirelessly to engineer a prosperous future.
+
+Wishing our team, clients, and partners a peaceful and inspiring Independence Day celebration. Forward together. 🚀
+
+#NigeriaIndependenceDay #Innovation #EconomicGrowth #Leadership #AfricaRising</div>
+          </div>
+
+          <!-- Short Copy 3 -->
+          <div class="copy-box">
+            <div class="copy-label">
+              <span>X (Twitter) & WhatsApp Status</span>
+              <button class="btn-copy" onclick="copyText('copy-short')">Copy</button>
+            </div>
+            <div class="copy-text" id="copy-short">Green is our strength. White is our peace. Gold is our future. 🇳🇬🔥
+
+Happy 66th Independence Day to 200+ million dreamers and doers making magic happen every single day!
+
+Drop your green heart if you're proud today! 💚🤍💚 #NigeriaAt66 #IndependenceDay</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Celebration & Anthem Audio Bar -->
+    <div class="celebration-bar">
+      <div class="celebration-info">
+        <h4>🎺 Independence Anthem Fanfare</h4>
+        <p>Synthesized celebratory brass chord progression with celebratory green & gold confetti.</p>
+      </div>
+      <div class="celebration-actions">
+        <button class="btn-audio" onclick="playAnthemFanfare()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          Play Fanfare
+        </button>
+        <button class="btn-confetti" onclick="triggerConfettiBurst(event)">
+          ✨ Release Confetti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">
+    <span>✅</span>
+    <span id="toastMessage">Caption copied to clipboard!</span>
+  </div>
+
+  <script>
+    // Data for Editions
+    const editions = {
+      regal: {
+        src: 'assets/campaigns/nigeria_independence_regal.jpg',
+        badge: 'Haute Couture Daylight',
+        icon: '👑',
+        downloadName: 'Nigeria_Independence_Regal_Edition_HD.jpg'
+      },
+      tech: {
+        src: 'assets/campaigns/nigeria_independence_tech.jpg',
+        badge: 'Velvet Tech Glassmorphism',
+        icon: '⚡',
+        downloadName: 'Nigeria_Independence_Tech_Edition_HD.jpg'
+      }
+    };
+
+    let currentEdition = 'regal';
+
+    function switchEdition(editionKey) {
+      if (currentEdition === editionKey) return;
+      currentEdition = editionKey;
+
+      const data = editions[editionKey];
+      const img = document.getElementById('flyerImage');
+      const badgeTitle = document.getElementById('badgeTitle');
+      const badgeIcon = document.getElementById('badgeIcon');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const btnRegal = document.getElementById('switch-regal');
+      const btnTech = document.getElementById('switch-tech');
+
+      // Visual crossfade
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src = data.src;
+        badgeTitle.textContent = data.badge;
+        badgeIcon.textContent = data.icon;
+        downloadBtn.href = data.src;
+        downloadBtn.download = data.downloadName;
+        img.style.opacity = '1';
+      }, 200);
+
+      if (editionKey === 'regal') {
+        btnRegal.classList.add('active');
+        btnTech.classList.remove('active');
+      } else {
+        btnTech.classList.add('active');
+        btnRegal.classList.remove('active');
+      }
+
+      triggerConfettiBurst();
+    }
+
+    // 3D Parallax Tilt for Flyer Card
+    const card = document.getElementById('flyerCard');
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -10;
+      const rotateY = ((x - centerX) / centerX) * 10;
+
+      card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    });
+
+    // Copy Text to Clipboard
+    function copyText(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Caption copied to clipboard! Ready to post.");
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Web Audio API: Nigerian Independence Triumphant Fanfare
+    let audioCtx = null;
+    function playAnthemFanfare() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      // Ceremonial fanfare chord progression (Roots in F major fanfare: F - A - C - F)
+      const now = audioCtx.currentTime;
+      const notes = [
+        { freq: 349.23, time: 0, dur: 0.25 },     // F4
+        { freq: 440.00, time: 0.22, dur: 0.25 },   // A4
+        { freq: 523.25, time: 0.44, dur: 0.35 },   // C5
+        { freq: 698.46, time: 0.75, dur: 0.8 },    // F5 high triumph
+        { freq: 523.25, time: 0.75, dur: 0.8 },    // C5 harmony
+        { freq: 440.00, time: 0.75, dur: 0.8 }     // A4 harmony
+      ];
+
+      notes.forEach(({ freq, time, dur }) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'triangle'; // Brass-like warmth
+        osc.frequency.setValueAtTime(freq, now + time);
+
+        // Envelope
+        gain.gain.setValueAtTime(0, now + time);
+        gain.gain.linearRampToValueAtTime(0.18, now + time + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + time + dur);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now + time);
+        osc.stop(now + time + dur + 0.1);
+      });
+
+      triggerConfettiBurst();
+      showToast("🎺 Celebrating 66 Years of Independence!");
+    }
+
+    // Confetti and Particle System
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    const colors = ['#008751', '#10B981', '#FFFFFF', '#D4AF37', '#FBBF24', '#2DD4BF'];
+
+    class ConfettiPiece {
+      constructor(x, y) {
+        this.x = x || Math.random() * width;
+        this.y = y || -20;
+        this.size = Math.random() * 8 + 4;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.speedY = Math.random() * 3 + 1.5;
+        this.speedX = (Math.random() - 0.5) * 4;
+        this.rotation = Math.random() * 360;
+        this.rotationSpeed = (Math.random() - 0.5) * 8;
+        this.opacity = 1;
+      }
+
+      update() {
+        this.y += this.speedY;
+        this.x += this.speedX;
+        this.rotation += this.rotationSpeed;
+        if (this.y > height) {
+          this.y = -10;
+          this.x = Math.random() * width;
+        }
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate((this.rotation * Math.PI) / 180);
+        ctx.fillStyle = this.color;
+        ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size * 0.6);
+        ctx.restore();
+      }
+    }
+
+    // Initial ambient floating particles
+    for (let i = 0; i < 45; i++) {
+      particles.push(new ConfettiPiece());
+    }
+
+    function triggerConfettiBurst(e) {
+      const originX = e ? e.clientX : width / 2;
+      const originY = e ? e.clientY : height / 2;
+
+      for (let i = 0; i < 50; i++) {
+        const p = new ConfettiPiece(originX, originY);
+        p.speedY = (Math.random() - 0.8) * 8;
+        p.speedX = (Math.random() - 0.5) * 10;
+        particles.push(p);
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach((p, idx) => {
+        p.update();
+        p.draw();
+        // Trim excess burst particles over time
+        if (particles.length > 50 && p.y > height) {
+          particles.splice(idx, 1);
+        }
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>

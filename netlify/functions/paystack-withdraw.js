@@ -3,6 +3,7 @@ const { getPaymentProvider } = require('./lib/payment-provider');
 const { authenticateRequest } = require('./lib/auth-middleware');
 const { enforceRateLimit } = require('./lib/rate-limiter');
 const { corsHeaders: resolveCorsHeaders } = require('./lib/cors');
+const { verifyNubanNameMatch } = require('./lib/nuban-name-matcher');
 
 
 exports.handler = async (event) => {
@@ -60,10 +61,26 @@ exports.handler = async (event) => {
       };
     }
 
+    // 1. Mandatory 4-Digit Transaction PIN for all disbursements (OWASP ASVS V3.7 / Anti-ATO defense)
+    if (!pin && !step_up_token && !auth_token) {
+      return {
+        statusCode: 403,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'],
+          'Vary': 'Origin'
+        },
+        body: JSON.stringify({
+          error: 'Transaction PIN is mandatory for all withdrawal disbursements.',
+          requires_pin: true
+        })
+      };
+    }
+
     // Step-Up MFA Authorization (CBN Cybersecurity Guidelines Sec 4.2 / OWASP ASVS V2.8)
     // High-value disbursements (₦50,000+) must carry Step-Up token or transaction PIN authorization
     const isHighValue = numAmount >= 50000;
-    if (isHighValue && !pin && !step_up_token && !auth_token) {
+    if (isHighValue && !step_up_token && !auth_token && !pin) {
       return {
         statusCode: 403,
         headers: {
@@ -113,8 +130,13 @@ exports.handler = async (event) => {
       };
     }
 
-    // Role-based authorization: explicitly reject viewer or non-finance roles
-    const { data: profileData } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    // Role-based authorization & verified profile fetching
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('id, email, full_name, role')
+      .eq('id', user.id)
+      .maybeSingle();
+
     const callerRole = (profileData?.role || '').toLowerCase().trim();
     if (callerRole && ['viewer', 'member', 'read-only'].includes(callerRole)) {
       return {
@@ -126,6 +148,7 @@ exports.handler = async (event) => {
 
     // Role-based authorization for company wallets
     let targetEntityId = user.id;
+    let companyRecord = null;
     if (owner_type === 'company') {
       const targetCompanyId = owner_id || body.company_id;
       if (!targetCompanyId) {
@@ -139,10 +162,11 @@ exports.handler = async (event) => {
       // Check whether user is company owner or has active finance/admin role
       const { data: compCheck } = await supabase
         .from('companies')
-        .select('owner_id')
+        .select('name, owner_id')
         .eq('id', targetCompanyId)
         .maybeSingle();
 
+      companyRecord = compCheck;
       const isDirectOwner = compCheck && compCheck.owner_id === user.id;
 
       if (!isDirectOwner) {
@@ -163,6 +187,68 @@ exports.handler = async (event) => {
       }
 
       targetEntityId = targetCompanyId;
+    }
+
+    // ── NUBAN NAME MATCHING FRAUD VERIFICATION (CBN AML/CFT & Anti-Takeover) ──
+    const isCompany = owner_type === 'company';
+    const profileNameToMatch = isCompany
+      ? (companyRecord?.name || '')
+      : (profileData?.full_name || '');
+    const directorNameToMatch = isCompany ? (profileData?.full_name || '') : undefined;
+
+    let effectiveAccountName = String(account_name || '').trim();
+
+    // If account_name missing or short, resolve dynamically from provider to prevent client bypass
+    if (!effectiveAccountName || effectiveAccountName.length < 3) {
+      try {
+        const koraProvider = getPaymentProvider('korapay');
+        const res = await koraProvider.resolveAccount({ account_number: cleanAcct, bank_code: bank_code });
+        effectiveAccountName = (res?.account_name || res?.accountName || '').toUpperCase().trim();
+      } catch (e) {
+        console.warn('Backend bank resolve fallback notice:', e.message);
+      }
+    }
+
+    if (profileNameToMatch && effectiveAccountName) {
+      const nameMatch = verifyNubanNameMatch(profileNameToMatch, effectiveAccountName, {
+        isCompany,
+        directorName: directorNameToMatch
+      });
+
+      if (!nameMatch.isMatch) {
+        try {
+          await supabase.from('audit_logs').insert({
+            actor_id: user.id,
+            action: 'blocked_third_party_withdrawal_attempt',
+            entity_type: 'wallet',
+            metadata: {
+              profile_name: profileNameToMatch,
+              attempted_account_name: effectiveAccountName,
+              account_number: cleanAcct,
+              bank_code: bank_code,
+              amount: numAmount,
+              reason: 'NAME_MISMATCH_FRAUD_PREVENTION',
+              match_score: nameMatch.score
+            }
+          });
+        } catch (logErr) {
+          console.warn('Audit log write error:', logErr.message);
+        }
+
+        return {
+          statusCode: 403,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': headers['Access-Control-Allow-Origin'],
+            'Vary': 'Origin'
+          },
+          body: JSON.stringify({
+            error: `Fraud Prevention Block: The destination bank account name ("${effectiveAccountName}") does not match your verified Collekt identity ("${profileNameToMatch}"). Disbursements to third-party accounts are strictly prohibited under CBN AML/CFT regulations.`,
+            code: 'NAME_MISMATCH_FRAUD_PREVENTION',
+            match_score: nameMatch.score
+          })
+        };
+      }
     }
 
     // Check available wallet balance
@@ -205,16 +291,8 @@ exports.handler = async (event) => {
     const reference = `COL-WDW-${timestamp}-${randomSuffix}`;
 
     // 4. Fetch user email for Korapay disbursement customer metadata
-    let userEmail = 'member@collektng.com';
-    const { data: userProfile } = await supabase
-      .from('profiles')
-      .select('email, full_name')
-      .eq('id', effectiveOwnerId)
-      .maybeSingle();
+    const userEmail = profileData?.email || 'member@collektng.com';
 
-    if (userProfile && userProfile.email) {
-      userEmail = userProfile.email;
-    }
 
     // 5. Execute Live Automated Disbursement via Korapay API
     let disburseResult = null;

@@ -72,15 +72,16 @@ exports.handler = async (event, context) => {
 
   try {
     // ══════════════════════════════════════════════════════════════
-    // ACTION 1: RELEASE MILESTONE
+    // ACTION 1: RELEASE MILESTONE / ADMIN 7-DAY SLA AUTO-ACCEPT
     // ══════════════════════════════════════════════════════════════
-    if (action === 'release_milestone') {
+    if (action === 'release_milestone' || action === 'admin_auto_accept') {
       const {
         contract_id,
         milestone_name = 'Deliverable Phase',
         amount,
         pin,
-        step_up_token
+        step_up_token,
+        sla_reason = '7_business_days_inactivity'
       } = body;
 
       const numAmount = Number(amount);
@@ -92,8 +93,30 @@ exports.handler = async (event, context) => {
         };
       }
 
-      // Step-Up MFA check for high-value milestone releases (₦50,000+) under CBN Guidelines
-      if (numAmount >= 50000 && !pin && !step_up_token) {
+      // Check administrative caller status
+      let isAdminCaller = false;
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (userProfile && userProfile.role === 'admin') {
+        isAdminCaller = true;
+      } else if (user.email === 'admin@collekt.ng' || user.id === 'a1111111-1111-4111-a111-111111111111') {
+        isAdminCaller = true;
+      }
+
+      if (action === 'admin_auto_accept' && !isAdminCaller) {
+        return {
+          statusCode: 403,
+          headers: corsHeaders(event),
+          body: JSON.stringify({ error: 'Administrative privilege required to execute 7-day SLA auto-acceptance.' })
+        };
+      }
+
+      // Step-Up MFA check for high-value milestone releases (₦50,000+) under CBN Guidelines (bypassed for authorized Admin)
+      if (numAmount >= 50000 && !pin && !step_up_token && !isAdminCaller) {
         return {
           statusCode: 403,
           headers: corsHeaders(event),
@@ -127,12 +150,12 @@ exports.handler = async (event, context) => {
         };
       }
 
-      // Check caller authorization: must be company/employer owner or authorized user
+      // Check caller authorization: must be company/employer owner, authorized member, or Collekt Master Admin (7-day SLA)
       const isClientOwner = contract.company_id === user.id ||
                             contract.company_email === user.email ||
                             (contract.metadata && contract.metadata.client_id === user.id);
 
-      if (!isClientOwner) {
+      if (!isClientOwner && !isAdminCaller) {
         // Also check company_members if corporate entity
         let isAuthorizedMember = false;
         if (contract.company_id) {
@@ -152,7 +175,7 @@ exports.handler = async (event, context) => {
           return {
             statusCode: 403,
             headers: corsHeaders(event),
-            body: JSON.stringify({ error: 'Unauthorized: only the employer/client can approve escrow milestone releases.' })
+            body: JSON.stringify({ error: 'Unauthorized: only the employer/client or Collekt Admin (7-Day SLA) can approve escrow milestone releases.' })
           };
         }
       }
@@ -230,7 +253,7 @@ exports.handler = async (event, context) => {
       }
 
       // Calculate platform fee and net contractor disbursal
-      const commissionRate = 0.10; // 10% Collekt platform service fee
+      const commissionRate = 0.15; // 15% Collekt platform service fee
       const commission = Math.round(numAmount * commissionRate);
       const netPayout = numAmount - commission;
 
@@ -281,6 +304,7 @@ exports.handler = async (event, context) => {
 
       // 3. Record Double-Entry Transactions
       const txTimestamp = new Date().toISOString();
+      const isAutoAccepted = (action === 'admin_auto_accept' || (isAdminCaller && !isClientOwner));
       await supabase.from('transactions').insert([
         {
           reference: milestoneReleaseRef,
@@ -294,7 +318,12 @@ exports.handler = async (event, context) => {
             milestone_name: milestone_name,
             gross_amount: numAmount,
             commission: commission,
-            category: 'milestone_payout'
+            currency: contract.currency || 'NGN',
+            exchange_rate: contract.exchange_rate_at_deposit || (contract.currency === 'USD' ? 1550 : null),
+            ngn_equivalent_net: contract.currency === 'USD' ? Math.round(netPayout * (contract.exchange_rate_at_deposit || 1550)) : netPayout,
+            category: isAutoAccepted ? 'admin_auto_accept_7day_sla' : 'milestone_payout',
+            auto_accepted_by_admin: isAutoAccepted,
+            sla_reason: isAutoAccepted ? sla_reason : undefined
           }
         },
         {
@@ -307,7 +336,10 @@ exports.handler = async (event, context) => {
           metadata: {
             contract_id: contract_id,
             milestone_name: milestone_name,
-            category: 'escrow_release'
+            currency: contract.currency || 'NGN',
+            exchange_rate: contract.exchange_rate_at_deposit || (contract.currency === 'USD' ? 1550 : null),
+            category: isAutoAccepted ? 'admin_auto_accept_escrow_debit' : 'escrow_release',
+            auto_accepted_by_admin: isAutoAccepted
           }
         }
       ]);
@@ -317,13 +349,17 @@ exports.handler = async (event, context) => {
         headers: corsHeaders(event),
         body: JSON.stringify({
           success: true,
-          status: 'released',
+          status: isAutoAccepted ? 'admin_auto_accepted' : 'released',
           contract_id: contract_id,
           milestone_name: milestone_name,
           gross_amount: numAmount,
           commission: commission,
           net_disbursal: netPayout,
-          reference: milestoneReleaseRef
+          currency: contract.currency || 'NGN',
+          exchange_rate: contract.exchange_rate_at_deposit || (contract.currency === 'USD' ? 1550 : null),
+          ngn_equivalent_net: contract.currency === 'USD' ? Math.round(netPayout * (contract.exchange_rate_at_deposit || 1550)) : netPayout,
+          reference: milestoneReleaseRef,
+          auto_accepted_by_admin: isAutoAccepted
         })
       };
     }
@@ -559,7 +595,7 @@ exports.handler = async (event, context) => {
       }
 
       // Commission on contractor portion
-      const commissionRate = 0.10;
+      const commissionRate = 0.15; // 15% Collekt platform service fee
       const commission = Math.round(finalContractorPayout * commissionRate);
       const netContractorDisbursal = finalContractorPayout - commission;
 
@@ -622,6 +658,8 @@ exports.handler = async (event, context) => {
             net_contractor_disbursal: netContractorDisbursal,
             client_refund: finalClientRefund,
             platform_commission: commission,
+            currency: contract?.currency || 'NGN',
+            exchange_rate: contract?.exchange_rate_at_deposit || 1550,
             rationale: rationale.trim(),
             resolved_at: new Date().toISOString()
           }

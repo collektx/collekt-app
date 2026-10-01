@@ -12,9 +12,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=125.0">
-<link rel="stylesheet" href="shared.css?v=125.0">
-<link rel="stylesheet" href="glass.css?v=125.0">
+<link rel="stylesheet" href="style.css?v=130.0">
+<link rel="stylesheet" href="shared.css?v=130.0">
+<link rel="stylesheet" href="glass.css?v=130.0">
 
 <style>
   :root {
@@ -254,7 +254,7 @@
         <a class="toc-link" href="#sec-4">4. Licensure (COREN &amp; NOGICD)</a>
         <a class="toc-link" href="#sec-5">5. Identity &amp; Shield Verification</a>
         <a class="toc-link" href="#sec-6">6. Tenders, Projects &amp; Bidding</a>
-        <a class="toc-link" href="#sec-7">7. Escrow, Fees &amp; Payments</a>
+        <a class="toc-link" href="#sec-7">7. Escrow, Fees &amp; AML Security</a>
         <a class="toc-link" href="#sec-8">8. Kolly AI Safe Harbor &amp; Disclaimers</a>
         <a class="toc-link" href="#sec-9">9. Health, Safety &amp; Environment (HSE)</a>
         <a class="toc-link" href="#sec-10">10. Strict Limitation of Liability</a>
@@ -340,13 +340,19 @@
     <h2 id="sec-7">7. Escrow Payments, Milestone Approvals &amp; Platform Fees</h2>
     <p>Collekt provides guaranteed milestone escrow protection to ensure fair execution for both parties:</p>
     <ul>
-      <li><strong>Milestone Funding:</strong> Prior to work initiation, Corporate Clients deposit the agreed milestone funds into escrow via Korapay and Paystack payment rails or dedicated virtual NUBAN settlement accounts. Funds remain in escrow custody until work is reviewed.</li>
-      <li><strong>Milestone Sign-Off:</strong> Once the Professional completes deliverables, the Corporate Client has seven (7) business days to review and either approve release or request technical revisions based on the agreed project scope. Failure to respond within fourteen (14) days without raising a formal dispute authorizes Collekt to release escrowed milestone funds to the Professional.</li>
+      <li><strong>Milestone Sign-Off &amp; 7-Day Inactivity Auto-Acceptance:</strong> Once the Professional completes deliverables, the Corporate Client has seven (7) business days to inspect deliverables and either approve milestone escrow release or request technical revisions based on agreed specifications. Failure by the Corporate Client to respond within seven (7) business days without raising a formal dispute authorizes Collekt Administrators to auto-accept the deliverable and disburse the escrowed funds to the Professional (less standard 15% platform service fee).</li>
       <li><strong>Platform Fee Schedule (PRD Standard):</strong>
         <ul>
           <li><strong>Professional Plus Membership:</strong> $15 (or NGN equivalent) per month.</li>
           <li><strong>Company Enterprise Membership:</strong> $50 (or NGN equivalent) per month.</li>
-          <li><strong>Platform Commission:</strong> Collekt deducts a 10% platform service commission on completed contract disbursements to maintain marketplace security, escrow custody, and AI matching infrastructure.</li>
+          <li><strong>Platform Commission:</strong> Collekt deducts a 15% platform service commission on completed contract disbursements to maintain marketplace security, escrow custody, and AI matching infrastructure.</li>
+        </ul>
+      </li>
+      <li><strong>Multi-Currency Escrow &amp; FX Volatility Safeguard:</strong>
+        <ul>
+          <li><strong>Supported Tender Currencies:</strong> Tenders may be published, quoted, funded, and awarded in either Nigerian Naira (NGN - ₦) or United States Dollars (USD - $).</li>
+          <li><strong>Locked Exchange Rate at Escrow Deposit:</strong> For USD-denominated contracts, the exchange rate to NGN is immutably locked at the precise moment of client escrow deposit (benchmark standard: 1 USD = ₦1,550 NGN). This locked benchmark rate shields Specialists from subsequent currency devaluation or volatility during execution.</li>
+          <li><strong>Dual-Currency Settlement &amp; 15% Platform Commission:</strong> The standard 15% Collekt platform fee and 85% specialist net payout are computed strictly in the tender's base currency. For specialists withdrawing to Nigerian NUBAN bank accounts, funds disburse in NGN at the locked contract exchange rate without hidden currency spread markups.</li>
         </ul>
       </li>
       <li><strong>Chargebacks &amp; Payment Disputes:</strong> Attempting fraudulent bank reversals or unauthorized chargebacks on funded escrow milestones constitutes a material breach of this Agreement and may lead to debt recovery actions, credit bureau reporting, and legal proceedings under the <strong>Dishonoured Cheques (Offences) Act</strong> and relevant commercial statutes.</li>
@@ -355,9 +361,34 @@
       <strong>FEDERAL COMPETITION &amp; CONSUMER PROTECTION ACT (FCCPA 2018) DISCLOSURES:</strong><br>
       Pursuant to Sections 114–116 of the FCCPA 2018:
       <ul style="margin:8px 0 0 16px; padding:0; list-style-type:disc;">
-        <li><strong>Transparent Pricing:</strong> All fees are transparently disclosed prior to payment authorization. Collekt deducts a fixed 10% platform service commission on completed milestone disbursements. Zero hidden fees, non-consensual surcharges, or unsolicited recurring debits.</li>
+        <li><strong>Transparent Pricing:</strong> All fees are transparently disclosed prior to payment authorization. Collekt deducts a fixed 15% platform service commission on completed milestone disbursements. Zero hidden fees, non-consensual surcharges, or unsolicited recurring debits.</li>
         <li><strong>Consumer Cancellation &amp; Refund Rights:</strong> Clients retain the unconditional statutory right to cancel a funded milestone prior to contractor commencement or deliverable submission, receiving a 100% refund of the unreleased escrow balance without penalty.</li>
         <li><strong>Dispute Resolution SLA:</strong> Consumer dispute grievances submitted to <a href="mailto:compliance@collektng.com" style="color:#fbbf24; text-decoration:underline;">compliance@collektng.com</a> receive formal acknowledgment within 24 hours and a mediated resolution proposal within fourteen (14) business days.</li>
+      </ul>
+    </div>
+
+    <!-- Section 7.5 -->
+    <div style="background:rgba(16,185,129,0.08); border-left:4px solid #10b981; border-radius:10px; padding:14px 18px; margin:16px 0; font-size:13px; line-height:1.6; color:#d1fae5;">
+      <strong style="color:#34d399;">SECTION 7.5 &mdash; ANTI-MONEY LAUNDERING (AML), FRAUD PREVENTION &amp; THIRD-PARTY WITHDRAWAL RESTRICTIONS:</strong><br>
+      Pursuant to the <strong>Money Laundering (Prevention and Prohibition) Act 2022</strong>, the <strong>Central Bank of Nigeria (CBN) Anti-Money Laundering and Countering the Financing of Terrorism (AML/CFT) Regulations 2022</strong>, and the <strong>CBN Consumer Protection Framework</strong>:
+      <ul style="margin:8px 0 0 16px; padding:0; list-style-type:disc; color:#ecfdf5;">
+        <li><strong>Mandatory 1-to-1 NUBAN Account Name Matching:</strong> All wallet withdrawals and escrow payouts must be disbursed strictly to a verified Nigerian commercial bank or neobank account bearing the exact legal name matching the User's verified profile identity (or registered corporate name). Disbursements to third-party accounts, proxy accounts, or unverified recipient names are strictly prohibited and automatically blocked by our automated NUBAN identity matching engine.</li>
+        <li><strong>Mandatory 4-Digit Transaction PIN:</strong> All financial disbursements require two-factor authorization via the User's confidential 4-digit Transaction PIN. Automated brute-force lockout mechanisms lock PIN verification for five (5) minutes following five (5) consecutive failed attempts.</li>
+        <li><strong>CBN Step-Up Multi-Factor Authorization (MFA OTP):</strong> In compliance with Section 4.2 of the CBN Cybersecurity Guidelines, disbursements of fifty thousand Naira (₦50,000) and above, or withdrawals following destination account modifications, require secondary time-bound One-Time Password (OTP) authorization.</li>
+        <li><strong>Suspicious Transaction Reporting:</strong> Collekt reserves the statutory right to flag, freeze, and report repeated attempts to withdraw funds to unauthorized third-party accounts or suspected money-mule accounts to the Nigerian Financial Intelligence Unit (NFIU) and law enforcement authorities.</li>
+      </ul>
+    </div>
+
+    <!-- Section 7.6 -->
+    <div style="background:rgba(14,165,233,0.08); border-left:4px solid #0284c7; border-radius:10px; padding:14px 18px; margin:16px 0; font-size:13px; line-height:1.6; color:#e0f2fe;">
+      <strong style="color:#38bdf8;">SECTION 7.6 &mdash; CORPORATE INVOICING, WITHHOLDING TAX (WHT: 5%) &amp; VALUE ADDED TAX (VAT: 7.5%) COMPLIANCE:</strong><br>
+      Pursuant to the <strong>Companies Income Tax Act (CITA) Cap C21 LFN 2004</strong>, the <strong>Value Added Tax (VAT) Act Cap V1 LFN 2004 (as amended by Finance Acts)</strong>, and the <strong>Withholding Tax Regulations 2024</strong> promulgated by the Federal Inland Revenue Service (FIRS):
+      <ul style="margin:8px 0 0 16px; padding:0; list-style-type:disc; color:#f0f9ff;">
+        <li><strong>FIRS Electronic Tax Invoicing:</strong> For every milestone disbursement or corporate project engagement on Collekt, an audit-ready, serialized Electronic Tax Invoice and Settlement Receipt (Format: <code>COL-INV-YYYYMMDD-XXXX-MX</code>) is generated. Invoices feature Collekt Technologies Ltd's corporate incorporation (RC 1928412), FIRS Tax Identification Number (TIN: 24891029-0001), Client CAC/TIN, Specialist verified identity/TIN, and automated cryptographic verification hashes.</li>
+        <li><strong>Value Added Tax (VAT 7.5%):</strong> In accordance with Section 13 of the VAT Act, corporate technical, engineering, and consulting services are subject to 7.5% VAT payable by the Corporate Client. The VAT amount is explicitly itemized on the client invoice for proper statutory reporting and remittance to the FIRS.</li>
+        <li><strong>Withholding Tax (WHT 5.0%):</strong> Pursuant to the Withholding Tax Regulations 2024 for technical, consulting, and specialized professional services, a 5.0% Withholding Tax is deducted at source from the gross professional fee. Corporate Clients and Collekt acknowledge that this deduction serves as an advance tax payment credited directly to the Specialist Contractor's FIRS Tax Identification Number (TIN) via an official FIRS Credit Note.</li>
+        <li><strong>Collekt Platform Service Fee (15.0%) &amp; Specialist Net Disbursal (80.0%):</strong> The gross agreed fee is distributed as follows: 15% platform service commission retained by Collekt, 5% WHT deducted for FIRS contractor credit note, leaving an 80% net take-home disbursal directly released to the Specialist's verified NUBAN bank account.</li>
+        <li><strong>Dual-Currency Accounting Records:</strong> For contracts denominated in United States Dollars (USD), tax schedules maintain statutory dual-currency reporting displaying both USD base amounts and Nigerian Naira (NGN) equivalents calculated at the contract's immutable locked exchange benchmark rate (1 USD = ₦1,550 NGN), ensuring compliance with Nigerian corporate accounting audits and tax filings.</li>
       </ul>
     </div>
 
@@ -490,6 +521,6 @@
   </div><!-- /.policy-card -->
 </main>
 
-<script src="app.js?v=125.0"></script>
+<script src="app.js?v=130.0"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 ------------------------------------------------------*/
 
 // -- PLATFORM FEE & SUBSCRIPTION PRICING CONSTANTS --
-const COLLEKT_COMMISSION_RATE = 0.10; // 10% Platform Commission Rate
+const COLLEKT_COMMISSION_RATE = 0.15; // 15% Platform Commission Rate
 const COLLEKT_PROFESSIONAL_SUB_FEE = 15; // $15 / month
 const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
 
@@ -602,7 +602,9 @@ async function checkOAuthCallback() {
     }
   }
 }
-document.addEventListener('DOMContentLoaded', checkOAuthCallback);
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', checkOAuthCallback);
+}
 
 
 // -- REAL LINKEDIN OAUTH & ACCOUNT LINKING ENGINE --
@@ -1500,7 +1502,7 @@ function deduplicateMessages(msgs) {
       const sameConv = (existing.conversation_id === msg.conversation_id);
       const sameSender = (existing.sender_id && msg.sender_id && String(existing.sender_id).toLowerCase().trim() === String(msg.sender_id).toLowerCase().trim());
       const sameBody = String(existing.body || '').trim() === String(msg.body || '').trim();
-      if (sameBody && (sameConv || sameSender)) {
+      if (sameBody && sameConv && sameSender) {
         const t1 = new Date(existing.created_at || 0).getTime();
         const t2 = new Date(msg.created_at || 0).getTime();
         if (Math.abs(t1 - t2) < 120000) return true; // 2 minutes window
@@ -1808,16 +1810,8 @@ function sendMessage(conversationId, body, mediaUrl = null) {
   updateLiveUnreadMessageBadges();
   try { window.dispatchEvent(new Event('collekt_messages_updated')); } catch(e){}
 
-  // Delivered transition (2 grey swooshes)
-  setTimeout(() => {
-    const all = getAllMessages();
-    const target = all.find(m => m.id === clientMsgId || m.client_msg_id === clientMsgId);
-    if (target && target.status === 'sent') {
-      target.status = 'delivered';
-      saveAllMessages(all);
-      try { window.dispatchEvent(new Event('collekt_messages_updated')); } catch(e){}
-    }
-  }, 400);
+
+  // Note: 'delivered' status is set when Supabase confirms the message insert (below)
 
   // Live Supabase Persistence
   if (window.sb && typeof sendSupabaseMessage === 'function') {
@@ -1843,7 +1837,9 @@ function sendMessage(conversationId, body, mediaUrl = null) {
             const existingIdx = curAll.findIndex(m => m.id === clientMsgId || m.client_msg_id === clientMsgId);
             if (existingIdx !== -1) {
               curAll[existingIdx].id = sbMsg.id;
+              curAll[existingIdx].client_msg_id = clientMsgId; // Preserve original for dedup
               curAll[existingIdx].status = 'delivered';
+              curAll[existingIdx].sender_id = sbMsg.sender_id || curAll[existingIdx].sender_id; // Sync canonical ID
               saveAllMessages(curAll);
             }
             try { window.dispatchEvent(new Event('collekt_messages_updated')); } catch(e){}
@@ -2674,6 +2670,262 @@ if (typeof window !== 'undefined') {
   window.generateStepUpOtp = generateStepUpOtp;
   window.verifyStepUpOtp = verifyStepUpOtp;
 }
+
+// ── NUBAN ACCOUNT NAME MATCHING & AML FRAUD PREVENTION ──────
+const NIGERIAN_NAME_HONORIFICS = new Set([
+  'MR', 'MRS', 'MS', 'MISS', 'DR', 'DOCTOR', 'ENGR', 'ENGINEER', 'CHIEF',
+  'ALHAJI', 'HAJIA', 'PASTOR', 'REV', 'REVEREND', 'BARR', 'BARRISTER',
+  'ARC', 'ARCHITECT', 'PROF', 'PROFESSOR', 'HON', 'HONORABLE', 'PRINCE', 'PRINCESS', 'OTUNBA'
+]);
+
+const CORPORATE_NAME_SUFFIXES = new Set([
+  'LTD', 'LIMITED', 'PLC', 'ENTERPRISE', 'ENTERPRISES', 'VENTURES', 'NIG',
+  'NIGERIA', 'SERVICES', 'GLOBAL', 'INTL', 'INTERNATIONAL', 'CORP',
+  'CORPORATION', 'LLC', 'CO', 'COMPANY', 'TECH', 'TECHNOLOGIES', 'HOLDINGS', 'GROUP'
+]);
+
+function cleanNameTokens(nameStr, isCompany = false) {
+  if (!nameStr || typeof nameStr !== 'string') return [];
+  const cleaned = nameStr
+    .toUpperCase()
+    .replace(/[^A-Z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const rawTokens = cleaned.split(' ').filter(t => t.length > 0);
+  const filtered = [];
+
+  for (const token of rawTokens) {
+    if (NIGERIAN_NAME_HONORIFICS.has(token)) continue;
+    if (isCompany && CORPORATE_NAME_SUFFIXES.has(token)) continue;
+    if (token.length >= 2 || rawTokens.length === 1) {
+      filtered.push(token);
+    }
+  }
+
+  return filtered;
+}
+
+function computeLevenshteinDistance(a, b) {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+
+  const row = [];
+  for (let i = 0; i <= b.length; i++) row[i] = i;
+
+  for (let i = 1; i <= a.length; i++) {
+    let prev = i;
+    for (let j = 1; j <= b.length; j++) {
+      let val;
+      if (a.charAt(i - 1) === b.charAt(j - 1)) {
+        val = row[j - 1];
+      } else {
+        val = Math.min(row[j - 1] + 1, prev + 1, row[j] + 1);
+      }
+      row[j - 1] = prev;
+      prev = val;
+    }
+    row[b.length] = prev;
+  }
+  return row[b.length];
+}
+
+function areTokensFuzzyMatch(t1, t2) {
+  if (t1 === t2) return true;
+  if (t1.length >= 4 && t2.length >= 4) {
+    if (t1.startsWith(t2) || t2.startsWith(t1)) return true;
+    const dist = computeLevenshteinDistance(t1, t2);
+    if (dist <= 1 && Math.min(t1.length, t2.length) >= 5) return true;
+  }
+  return false;
+}
+
+function verifyNubanNameMatch(profileName, bankAccountName, options = {}) {
+  const isCompany = !!options.isCompany;
+  const userTokens = cleanNameTokens(profileName, isCompany);
+  const bankTokens = cleanNameTokens(bankAccountName, isCompany);
+
+  if (!userTokens.length || !bankTokens.length) {
+    return {
+      isMatch: false,
+      confidence: 'mismatch',
+      score: 0,
+      matchedTokens: [],
+      userTokens,
+      bankTokens,
+      message: 'Unable to evaluate name match: profile or bank account name is empty.'
+    };
+  }
+
+  const matchedTokens = [];
+  const matchedBankIndices = new Set();
+
+  for (const uTok of userTokens) {
+    for (let bIdx = 0; bIdx < bankTokens.length; bIdx++) {
+      if (matchedBankIndices.has(bIdx)) continue;
+      const bTok = bankTokens[bIdx];
+      if (areTokensFuzzyMatch(uTok, bTok)) {
+        matchedTokens.push({ userToken: uTok, bankToken: bTok });
+        matchedBankIndices.add(bIdx);
+        break;
+      }
+    }
+  }
+
+  const matchCount = matchedTokens.length;
+  const minRequiredTokens = Math.min(userTokens.length, bankTokens.length);
+
+  let isMatch = false;
+  let confidence = 'mismatch';
+  let score = 0;
+
+  if (minRequiredTokens === 1) {
+    if (matchCount >= 1) {
+      isMatch = true;
+      confidence = 'high';
+      score = 90;
+    }
+  } else if (minRequiredTokens === 2) {
+    if (matchCount >= 2) {
+      isMatch = true;
+      confidence = 'exact';
+      score = 100;
+    } else if (matchCount === 1) {
+      if (isCompany) {
+        isMatch = true;
+        confidence = 'partial';
+        score = 70;
+      } else {
+        isMatch = false;
+        confidence = 'partial';
+        score = 45;
+      }
+    }
+  } else {
+    // 3 or more tokens
+    if (matchCount >= 2) {
+      isMatch = true;
+      confidence = matchCount >= 3 ? 'exact' : 'high';
+      score = Math.min(100, Math.round((matchCount / minRequiredTokens) * 100));
+    } else if (matchCount === 1) {
+      isMatch = false;
+      confidence = 'partial';
+      score = 35;
+    }
+  }
+
+  if (!isMatch && options.directorName) {
+    const directorRes = verifyNubanNameMatch(options.directorName, bankAccountName, { isCompany: false });
+    if (directorRes.isMatch) {
+      return {
+        ...directorRes,
+        matchedViaDirector: true,
+        message: `Matched via verified company director identity (${options.directorName}).`
+      };
+    }
+  }
+
+  let message = '';
+  if (isMatch) {
+    message = `Name match verified (${confidence.toUpperCase()}, ${score}% match). Destination account belongs to verified user.`;
+  } else {
+    message = `Name mismatch detected. Bank account name "${bankAccountName}" does not match profile name "${profileName}". Under CBN AML/CFT regulations, third-party withdrawals are prohibited.`;
+  }
+
+  return {
+    isMatch,
+    confidence,
+    score,
+    matchedTokens: matchedTokens.map(m => m.userToken),
+    userTokens,
+    bankTokens,
+    message
+  };
+}
+
+if (typeof window !== 'undefined') {
+  window.verifyNubanNameMatch = verifyNubanNameMatch;
+  window.cleanNameTokens = cleanNameTokens;
+}
+
+// ── CORPORATE INVOICING & FIRS TAX COMPLIANCE ENGINE (WHT 5% & VAT 7.5%) ──
+const NIGERIAN_TAX_RATES = {
+  WHT_RATE: 0.05,        // 5% Withholding Tax on technical/engineering consulting services
+  VAT_RATE: 0.075,       // 7.5% Value Added Tax
+  COLLEKT_FEE_RATE: 0.15 // 15% Platform service fee
+};
+
+function calculateContractTaxSchedule(grossAmount, options = {}) {
+  const gross = Math.max(0, Number(grossAmount) || 0);
+  const currency = options.currency === 'USD' ? 'USD' : 'NGN';
+  const fxRate = Number(options.fxRate) || (typeof COLLEKT_DEFAULT_FX_RATE !== 'undefined' ? COLLEKT_DEFAULT_FX_RATE : 1550);
+
+  // 1. VAT (7.5%) charged to client on gross services:
+  const vatAmount = Math.round(gross * NIGERIAN_TAX_RATES.VAT_RATE * 100) / 100;
+  // 2. Total Invoiced Amount payable by Employer = Gross + VAT:
+  const totalInvoicedAmount = Math.round((gross + vatAmount) * 100) / 100;
+  // 3. Withholding Tax (WHT 5%) withheld for FIRS remittance with credit note to contractor's TIN:
+  const whtAmount = Math.round(gross * NIGERIAN_TAX_RATES.WHT_RATE * 100) / 100;
+  // 4. Collekt Escrow & Platform Commission (15%):
+  const collektFee = Math.round(gross * NIGERIAN_TAX_RATES.COLLEKT_FEE_RATE * 100) / 100;
+  // 5. Net Take-Home Disbursal to Specialist = Gross - WHT - Collekt Fee (80% net):
+  const specialistNetPayout = Math.max(0, Math.round((gross - whtAmount - collektFee) * 100) / 100);
+  // 6. Total Statutory Remittance to FIRS (VAT + WHT):
+  const firsTotalTax = Math.round((vatAmount + whtAmount) * 100) / 100;
+
+  // Dual Currency equivalent if USD
+  const isUsd = currency === 'USD';
+  const ngnEquivalent = isUsd ? {
+    grossAmount: Math.round(gross * fxRate),
+    vatAmount: Math.round(vatAmount * fxRate),
+    totalInvoicedAmount: Math.round(totalInvoicedAmount * fxRate),
+    whtAmount: Math.round(whtAmount * fxRate),
+    collektFee: Math.round(collektFee * fxRate),
+    specialistNetPayout: Math.round(specialistNetPayout * fxRate),
+    firsTotalTax: Math.round(firsTotalTax * fxRate)
+  } : null;
+
+  return {
+    grossAmount: gross,
+    vatAmount: vatAmount,
+    vatRatePercent: 7.5,
+    totalInvoicedAmount: totalInvoicedAmount,
+    whtAmount: whtAmount,
+    whtRatePercent: 5.0,
+    collektFee: collektFee,
+    collektFeePercent: 15.0,
+    specialistNetPayout: specialistNetPayout,
+    firsTotalTax: firsTotalTax,
+    currency: currency,
+    fxRate: fxRate,
+    isUsd: isUsd,
+    ngnEquivalent: ngnEquivalent
+  };
+}
+
+function generateInvoiceReference(contractId, milestoneIndex) {
+  const d = new Date();
+  const dateStr = d.getFullYear() +
+    String(d.getMonth() + 1).padStart(2, '0') +
+    String(d.getDate()).padStart(2, '0');
+  const base = String(contractId || 'CTR').replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() || 'E49A';
+  const mSuffix = milestoneIndex !== undefined && milestoneIndex !== null ? `M${milestoneIndex + 1}` : 'FULL';
+  return `COL-INV-${dateStr}-${base}-${mSuffix}`;
+}
+
+if (typeof window !== 'undefined') {
+  window.NIGERIAN_TAX_RATES = NIGERIAN_TAX_RATES;
+  window.calculateContractTaxSchedule = calculateContractTaxSchedule;
+  window.generateInvoiceReference = generateInvoiceReference;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports.NIGERIAN_TAX_RATES = NIGERIAN_TAX_RATES;
+  module.exports.calculateContractTaxSchedule = calculateContractTaxSchedule;
+  module.exports.generateInvoiceReference = generateInvoiceReference;
+}
+
+
 
 function getDirectoryUsers() {
   return typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
@@ -3573,7 +3825,7 @@ const ENGAGEMENT_STATES = ['Requested', 'Responded', 'Negotiation', 'Accepted', 
 
 function createPrdEngagementTransaction(engagementObj) {
   const projectVal = parseFloat(engagementObj.project_value || 2000000);
-  const commRate = COLLEKT_COMMISSION_RATE; // 10%
+  const commRate = COLLEKT_COMMISSION_RATE; // 15%
   const commVal = projectVal * commRate;
 
   return {
@@ -3582,7 +3834,7 @@ function createPrdEngagementTransaction(engagementObj) {
     professional_name: engagementObj.professional_name || 'Professional Specialist',
     opportunity_title: engagementObj.opportunity_title || 'Engineering Assignment',
     project_value: projectVal,
-    commission_rate: '10%',
+    commission_rate: '15%',
     commission_amount: commVal,
     status: engagementObj.status || 'Active',
     start_date: engagementObj.start_date || new Date().toLocaleDateString('en-GB'),
@@ -3662,22 +3914,59 @@ function initModals() {
   });
 }
 
-// -- CURRENCY FORMATTING -------------------------------
+// -- MULTI-CURRENCY & FX UTILITIES (GAP 4) ───────────────────────
+const COLLEKT_DEFAULT_FX_RATE = 1550; // Indicative benchmark: 1 USD = ₦1,550 NGN
+
+function formatCurrency(amount, currency = 'NGN', compact = false) {
+  if (amount == null || isNaN(amount)) {
+    return currency === 'USD' ? '$0' : '₦0';
+  }
+  const num = Number(amount);
+  const sym = currency === 'USD' ? '$' : '₦';
+  const locale = currency === 'USD' ? 'en-US' : 'en-NG';
+  if (compact) {
+    if (num >= 1_000_000_000) return sym + (num / 1_000_000_000).toFixed(1) + 'B';
+    if (num >= 1_000_000) return sym + (num / 1_000_000).toFixed(num % 1_000_000 === 0 ? 0 : 1) + 'M';
+    if (num >= 1_000) return sym + (num / 1_000).toFixed(num % 1_000 === 0 ? 0 : 1) + 'K';
+    return sym + num.toLocaleString(locale);
+  }
+  return sym + num.toLocaleString(locale);
+}
+
+function convertFx(amount, fromCurrency, toCurrency, rate = COLLEKT_DEFAULT_FX_RATE) {
+  const num = Number(amount || 0);
+  if (fromCurrency === toCurrency) return num;
+  if (fromCurrency === 'USD' && toCurrency === 'NGN') {
+    return Math.round(num * rate);
+  }
+  if (fromCurrency === 'NGN' && toCurrency === 'USD') {
+    return Math.round((num / rate) * 100) / 100;
+  }
+  return num;
+}
+
+function formatDualCurrency(amount, currency = 'NGN', rate = COLLEKT_DEFAULT_FX_RATE) {
+  const num = Number(amount || 0);
+  if (currency === 'USD') {
+    const ngn = convertFx(num, 'USD', 'NGN', rate);
+    return `${formatCurrency(num, 'USD')} (~${formatCurrency(ngn, 'NGN', true)} @ ₦${rate.toLocaleString()}/$)`;
+  }
+  return formatCurrency(num, 'NGN');
+}
+
 /**
- * formatNaira(amount, abbreviated)
- * formatNaira(1850000)       ? "&#x20A6;1,850,000"
- * formatNaira(1850000, true) ? "&#x20A6;1.9M"
- * formatNaira(850000, true)  ? "&#x20A6;850K"
+ * formatNaira(amount, abbreviated) - Universal backward compatible alias
  */
 function formatNaira(amount, abbreviated) {
-  if (amount == null || isNaN(amount)) return '&#x20A6;0';
-  const n = Number(amount);
-  if (abbreviated) {
-    if (n >= 1_000_000) return '&#x20A6;' + (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + 'M';
-    if (n >= 1_000)    return '&#x20A6;' + (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + 'K';
-    return '&#x20A6;' + n.toLocaleString('en-NG');
-  }
-  return '&#x20A6;' + n.toLocaleString('en-NG');
+  return formatCurrency(amount, 'NGN', abbreviated);
+}
+
+if (typeof window !== 'undefined') {
+  window.COLLEKT_DEFAULT_FX_RATE = COLLEKT_DEFAULT_FX_RATE;
+  window.formatCurrency = formatCurrency;
+  window.convertFx = convertFx;
+  window.formatDualCurrency = formatDualCurrency;
+  window.formatNaira = formatNaira;
 }
 
 // -- TOAST UTILITY -------------------------------------
@@ -6180,8 +6469,8 @@ async function processAiCopilotQuery(query, explicitSkill = null) {
 <strong>Gross Contract Amount</strong>: ₦3,500,000.00<br><br>
 &bull; <strong>Withholding Tax (WHT @ 10% for Corporate Technical Services)</strong>: -₦350,000.00<br>
 &bull; <strong>Value Added Tax (VAT @ 7.5% remitted to FIRS)</strong>: +₦262,500.00 (charged to client)<br>
-&bull; <strong>Collekt Escrow &amp; Platform Fee (10%)</strong>: -₦350,000.00<br><br>
-💵 <strong>Net Payout to Vendor</strong>: <strong>₦2,800,000.00</strong><br>
+&bull; <strong>Collekt Escrow &amp; Platform Fee (15%)</strong>: -₦525,000.00<br><br>
+💵 <strong>Net Payout to Vendor</strong>: <strong>₦2,625,000.00</strong><br>
 🧾 <strong>Total Invoiced to Client</strong>: <strong>₦3,762,500.00</strong><br>
 💡 <em>Compliance Note</em>: WHT credit notes are issued directly to vendor's FIRS Tax Identification Number (TIN).`;
   }
@@ -6199,7 +6488,7 @@ Overall Trust Score: <strong>96 / 100 &bull; EXCELLENT</strong> 🛡️<br><br>
 
   // Fallback PRD knowledge
   if (q.includes('price') || q.includes('subscription') || q.includes('fee') || q.includes('cost')) {
-    return `💰 <strong>Collekt Membership &amp; Pricing (PRD Specification)</strong>:<br>&bull; <strong>Professional Plus</strong>: $15 / month<br>&bull; <strong>Company Business</strong>: $50 / month<br>&bull; <strong>Platform Commission Fee</strong>: 10% on completed project engagements.`;
+    return `💰 <strong>Collekt Membership &amp; Pricing (PRD Specification)</strong>:<br>&bull; <strong>Professional Plus</strong>: $15 / month<br>&bull; <strong>Company Business</strong>: $50 / month<br>&bull; <strong>Platform Commission Fee</strong>: 15% on completed project engagements.`;
   }
 
   if (q.includes('verify') || q.includes('verification') || q.includes('shield') || q.includes('nin') || q.includes('cac')) {
@@ -6989,7 +7278,7 @@ function openLegalQuickView(type = 'terms') {
         <li><strong>Technology Marketplace Intermediary:</strong> Collekt Technologies Ltd operates strictly as a neutral technology marketplace, software venue, and escrow intermediary. Collekt is not an employer, general contractor, or engineering firm.</li>
         <li><strong>Milestone Escrow Security:</strong> Project funds are deposited via Korapay and Paystack payment rails into protected escrow custody and disbursed only upon verified milestone approval or 14-day lapse without dispute.</li>
         <li><strong>Automated NUBAN Payouts:</strong> Freelance professionals receive verified NIBSS instant bank transfers directly to their designated Nigerian commercial bank accounts.</li>
-        <li><strong>Platform Fees:</strong> Transparent 10% platform commission on completed project milestones, alongside optional Pro ($15/mo) and Enterprise ($50/mo) memberships.</li>
+        <li><strong>Platform Fees:</strong> Transparent 15% platform commission on completed project milestones, alongside optional Pro ($15/mo) and Enterprise ($50/mo) memberships.</li>
         <li><strong>COREN &amp; CAC Licensure:</strong> Engineers warrant valid COREN registration; corporate entities warrant valid CAC incorporation under CAMA 2020.</li>
         <li><strong>Workplace HSE Safe Harbor:</strong> Worksites, field safety, and physical compliance remain the exclusive duty of clients and executing contractors.</li>
         <li><strong>Limitation of Liability:</strong> Aggregate liability is strictly capped at platform commissions received (max NGN 50,000).</li>
@@ -7308,7 +7597,7 @@ if (typeof window !== 'undefined') {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { CollektSessionManager };
+  module.exports.CollektSessionManager = CollektSessionManager;
 }
 
 // ═══════════════════════════════════════════════════════════

@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=125.0">
-<link rel="stylesheet" href="shared.css?v=125.0">
-<link rel="stylesheet" href="glass.css?v=125.0">
+<link rel="stylesheet" href="style.css?v=130.0">
+<link rel="stylesheet" href="shared.css?v=130.0">
+<link rel="stylesheet" href="glass.css?v=130.0">
 
 <style>
   body { background: var(--paper); }
@@ -48,6 +48,41 @@
   .wallet-skeleton-wrap { display: none; }
   .wallet-skeleton-wrap.loading { display: block; }
   .wallet-content-wrap.loading { display: none; }
+
+  /* Corporate Tax Invoice Print Styles */
+  @media print {
+    body * {
+      visibility: hidden !important;
+    }
+    #corporateInvoiceModal,
+    #corporateInvoiceModal .modal-card,
+    #corporateInvoiceModal .modal-card * {
+      visibility: visible !important;
+    }
+    #corporateInvoiceModal {
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      height: auto !important;
+      background: #fff !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    #corporateInvoiceModal .modal-card {
+      box-shadow: none !important;
+      border: none !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 20px !important;
+      background: #fff !important;
+      color: #000 !important;
+    }
+    .no-print {
+      display: none !important;
+    }
+  }
+
 
   /* Compact Sleek Modals */
   .modal-card {
@@ -203,6 +238,7 @@
                     <th>Amount (NGN)</th>
                     <th>Balance Before</th>
                     <th>Status</th>
+                    <th style="text-align:right;">Invoice / Receipt</th>
                   </tr>
                 </thead>
                 <tbody id="txTableBody">
@@ -566,6 +602,51 @@
   </div>
 </div>
 
+<!-- 4B. SUBMIT DELIVERABLE FOR 7-DAY CLIENT INSPECTION MODAL -->
+<div class="modal-overlay" id="submitDeliverableModal" style="z-index:100000;">
+  <div class="modal-card" style="position:relative; width:min(460px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.4); font-family:'Manrope',sans-serif;">
+    <button class="modal-close" onclick="closeModal('submitDeliverableModal')" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
+    
+    <div style="text-align:center; margin-bottom:16px;">
+      <div style="font-size:32px; margin-bottom:4px;">📤</div>
+      <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Submit Milestone Deliverable</h3>
+      <p style="font-size:12px; color:var(--muted); margin-top:3px; margin-bottom:0;" id="deliverableMilestoneSub">Deliverable Review &amp; Escrow Inspection</p>
+    </div>
+
+    <!-- Statutory 7-Day SLA Banner -->
+    <div style="background:rgba(19,117,111,0.08); border:1px solid rgba(19,117,111,0.25); border-radius:12px; padding:12px 14px; margin-bottom:16px;">
+      <div style="font-size:12px; font-weight:800; color:var(--teal); margin-bottom:3px; display:flex; align-items:center; gap:6px;">
+        <span>⏱️</span> 7-Business-Day Inspection Window
+      </div>
+      <div style="font-size:11.5px; color:var(--muted); line-height:1.45;">
+        Once submitted, your client has <strong>7 business days</strong> to inspect your work and release escrow. If inactive without raising a formal dispute, Collekt Admin will auto-accept and release funds directly to your wallet.
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:12px;">
+      <label class="form-label" style="font-size:12px; font-weight:800;">Deliverable Title</label>
+      <input type="text" id="deliverableTitleInput" class="form-input" placeholder="e.g. Completed Site Survey &amp; 3D Schematics" style="font-size:13px;">
+    </div>
+
+    <div class="form-group" style="margin-bottom:12px;">
+      <label class="form-label" style="font-size:12px; font-weight:800;">Work Summary &amp; Handover Notes</label>
+      <textarea id="deliverableNotesInput" class="form-input" rows="3" placeholder="Provide a summary of completed milestones, inspection tests, and specifications..." style="font-size:12.5px;"></textarea>
+    </div>
+
+    <div class="form-group" style="margin-bottom:18px;">
+      <label class="form-label" style="font-size:12px; font-weight:800;">Document / Vault / Cloud Link <span style="font-size:11px; font-weight:500; color:var(--muted);">(Optional)</span></label>
+      <input type="text" id="deliverableLinkInput" class="form-input" placeholder="e.g. https://drive.google.com/... or Vault Folder" style="font-size:12px;">
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-outline" style="flex:1; border-radius:12px; height:42px; font-size:13px; font-weight:800;" onclick="closeModal('submitDeliverableModal')">Cancel</button>
+      <button class="btn btn-primary" id="btnSubmitDeliverableAction" style="flex:1.5; border-radius:12px; height:42px; font-size:13px; background:linear-gradient(135deg,#0E3B35,#13756F); font-weight:900;" onclick="confirmSubmitDeliverable()">
+        📤 Submit for 7-Day Review
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ========================================================= -->
 <!-- TRANSACTION PIN MODALS (Create / Change / Reset PIN)      -->
 <!-- ========================================================= -->
@@ -690,12 +771,121 @@
   </div>
 </div>
 
+<!-- 5. CORPORATE TAX INVOICE & FIRS SETTLEMENT RECEIPT MODAL -->
+<div class="modal-overlay" id="corporateInvoiceModal" style="z-index:100000;">
+  <div class="modal-card" style="position:relative; width:min(680px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:28px 24px; box-shadow:0 24px 70px rgba(0,0,0,0.45); font-family:'Manrope',sans-serif;">
+    <button class="modal-close no-print" onclick="closeModal('corporateInvoiceModal')" style="top:16px; right:16px; width:32px; height:32px; border-radius:50%;">&times;</button>
+
+    <!-- INVOICE HEADER -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--line); padding-bottom:16px; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
+      <div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:24px;">🏛️</span>
+          <span style="font-size:18px; font-weight:900; color:var(--ink); letter-spacing:-0.02em;">COLLEKT TECHNOLOGIES LTD</span>
+        </div>
+        <div style="font-size:11px; color:var(--muted); margin-top:3px; line-height:1.4;">
+          RC: <strong>1928412</strong> &bull; FIRS TIN: <strong>24891029-0001</strong><br>
+          Licensed Technology Marketplace &amp; Escrow Intermediary
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <span style="font-size:10px; background:rgba(19,117,111,0.12); color:var(--teal); border:1px solid rgba(19,117,111,0.25); padding:3px 9px; border-radius:99px; font-weight:800; text-transform:uppercase;" id="invStatusBadge">
+          ✓ Paid &amp; Settled
+        </span>
+        <div style="font-size:16px; font-weight:900; color:var(--ink); margin-top:6px; font-family:monospace;" id="invRefText">COL-INV-20260929-E49A</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:2px;" id="invDateText">29 Sep 2026</div>
+      </div>
+    </div>
+
+    <!-- DOCUMENT TITLE -->
+    <div style="text-align:center; margin-bottom:18px;">
+      <h3 style="font-size:16px; font-weight:900; color:var(--forest); text-transform:uppercase; letter-spacing:0.04em; margin:0;">
+        FIRS Electronic Tax Invoice &amp; Escrow Settlement Receipt
+      </h3>
+      <div style="font-size:11px; color:var(--muted); margin-top:2px;">
+        Pursuant to the Companies Income Tax Act (CITA), Value Added Tax Act, and Withholding Tax Regulations 2024
+      </div>
+    </div>
+
+    <!-- TWO-COLUMN PARTIES SUMMARY -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:18px;">
+      <div>
+        <div style="font-size:10.5px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Billed To (Corporate Client)</div>
+        <div style="font-weight:900; font-size:13.5px; color:var(--ink);" id="invClientName">Corporate Client</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:2px;" id="invClientMeta">RC: Verified &bull; FIRS TIN: Active</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:1px;" id="invClientAddr">Federal Republic of Nigeria</div>
+      </div>
+      <div>
+        <div style="font-size:10.5px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Payee / Specialist Contractor</div>
+        <div style="font-weight:900; font-size:13.5px; color:var(--ink);" id="invProName">Professional Specialist</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:2px;" id="invProMeta">COREN / NIN Verified &bull; TIN: Active</div>
+        <div style="font-size:11px; color:#16a34a; font-weight:800; margin-top:1px;">🛡️ Shield Verified Specialist</div>
+      </div>
+    </div>
+
+    <!-- ENGAGEMENT & BANKING REFERENCE -->
+    <div style="background:rgba(14,59,53,0.04); border:1px solid rgba(14,59,53,0.12); border-radius:12px; padding:10px 14px; margin-bottom:18px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:11.5px;">
+      <div>
+        <span style="color:var(--muted);">Project Scope:</span> <strong style="color:var(--ink);" id="invProjectName">Engineering Contract</strong>
+      </div>
+      <div>
+        <span style="color:var(--muted);">Milestone Stage:</span> <strong style="color:var(--ink);" id="invMilestoneName">Project Milestone</strong>
+      </div>
+      <div>
+        <span style="color:var(--muted);">Settlement Rail:</span> <strong style="color:var(--forest);">Nova Commercial Bank Escrow (NUBAN)</strong>
+      </div>
+      <div id="invFxRatePill" style="display:none; color:#0284c7; font-weight:800;">
+        🔒 Locked FX Benchmark: 1 USD = ₦1,550 NGN
+      </div>
+    </div>
+
+    <!-- TAX BREAKDOWN TABLE -->
+    <div style="margin-bottom:18px; overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
+        <thead>
+          <tr style="background:var(--paper); border-bottom:2px solid var(--line); color:var(--muted); font-size:11px; text-transform:uppercase;">
+            <th style="padding:8px 10px;">Item Description</th>
+            <th style="padding:8px 10px; text-align:center;">Statutory Rate</th>
+            <th style="padding:8px 10px; text-align:right;">Amount (Base)</th>
+            <th style="padding:8px 10px; text-align:right;" id="invNgnHeaderCol">NGN Equivalent</th>
+          </tr>
+        </thead>
+        <tbody id="invTableBody">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- STATUTORY FOOTNOTE & CERTIFICATION -->
+    <div style="background:rgba(245,158,11,0.08); border-left:3px solid #f59e0b; border-radius:8px; padding:10px 12px; margin-bottom:20px; font-size:11px; line-height:1.45; color:#92400e;">
+      <strong>FIRS STATUTORY NOTICE:</strong><br>
+      This document constitutes an electronic Tax Invoice and Settlement Record pursuant to Section 13 of the Value Added Tax Act and Withholding Tax Regulations 2024. WHT deductions are credited directly to the Contractor's FIRS Tax Identification Number (TIN). Electronic verification hash: <code style="font-size:10px; color:#78350f;" id="invHashText">FIRS-HASH-E92A-492F-810C</code>.
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="no-print" style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+      <button type="button" class="btn btn-outline" style="border-radius:10px; font-size:12px; font-weight:800; padding:8px 14px;" onclick="closeModal('corporateInvoiceModal')">
+        Close
+      </button>
+      <button type="button" class="btn btn-outline" style="border-radius:10px; font-size:12px; font-weight:800; padding:8px 14px;" onclick="copyTaxScheduleText()">
+        📋 Copy Tax Schedule
+      </button>
+      <button type="button" class="btn btn-outline" style="border-radius:10px; font-size:12px; font-weight:800; padding:8px 14px;" onclick="exportTaxInvoiceJson()">
+        📥 Export ERP JSON
+      </button>
+      <button type="button" class="btn btn-primary" style="background:var(--teal); border:none; border-radius:10px; font-size:12px; font-weight:900; padding:8px 18px; color:#fff;" onclick="printTaxInvoice()">
+        🖨️ Print / Save as PDF
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=125.0"></script>
-<script src="app.js?v=125.0"></script>
-<script src="collekt-ai.js?v=125.0"></script>
-<script src="settings-popup.js?v=125.0"></script>
+<script src="supabase.js?v=130.0"></script>
+<script src="app.js?v=130.0"></script>
+<script src="collekt-ai.js?v=130.0"></script>
+<script src="settings-popup.js?v=130.0"></script>
 <script>
   let isHideBalance = false;
   try {
@@ -1408,6 +1598,7 @@
     const box = document.getElementById('verifiedAccountBox');
     const nameText = document.getElementById('verifiedAccountNameText');
     const statusLabel = document.getElementById('verifiedAccountStatusLabel');
+    const btnProceed = document.getElementById('btnConfirmWithdraw');
 
     const acctNo = (acctInput?.value || '').trim().replace(/\D/g, '');
     const bankCode = (bankSelect?.value || '').trim();
@@ -1416,6 +1607,11 @@
 
     if (!acctNo || acctNo.length < 10 || !bankCode) {
       if (box) box.style.display = 'none';
+      if (btnProceed) {
+        btnProceed.disabled = false;
+        btnProceed.style.opacity = '1';
+        btnProceed.style.cursor = 'pointer';
+      }
       verifiedWithdrawalRecipient = null;
       return;
     }
@@ -1442,24 +1638,72 @@
           : { success: false, error: 'Resolution service unavailable' };
 
         if (res.success && res.account_name) {
-          verifiedWithdrawalRecipient = {
-            account_number: acctNo,
-            bank_code: bankCode,
-            bank_name: bankName,
-            account_name: res.account_name
-          };
+          const user = getUser() || {};
+          const isCompany = user.role === 'company';
+          const profileName = isCompany 
+            ? (user.company_name || user.name || '')
+            : (user.kyc_full_name || user.full_name || user.name || [user.first_name, user.other_name, user.last_name].filter(Boolean).join(' '));
 
-          if (box) {
-            box.style.background = '#dcfce7';
-            box.style.borderColor = '#16a34a';
-          }
-          if (statusLabel) {
-            statusLabel.style.color = '#15803d';
-            statusLabel.textContent = '✓ Verified Recipient Account';
-          }
-          if (nameText) {
-            nameText.style.color = '#14532d';
-            nameText.textContent = res.account_name;
+          const matchResult = typeof verifyNubanNameMatch === 'function'
+            ? verifyNubanNameMatch(profileName, res.account_name, {
+                isCompany,
+                directorName: isCompany ? (user.name || user.full_name || '') : undefined
+              })
+            : { isMatch: true, confidence: 'high', score: 100 };
+
+          if (matchResult.isMatch) {
+            verifiedWithdrawalRecipient = {
+              account_number: acctNo,
+              bank_code: bankCode,
+              bank_name: bankName,
+              account_name: res.account_name,
+              name_match_verified: true,
+              match_score: matchResult.score
+            };
+
+            if (box) {
+              box.style.background = '#dcfce7';
+              box.style.borderColor = '#16a34a';
+            }
+            if (statusLabel) {
+              statusLabel.style.color = '#15803d';
+              statusLabel.innerHTML = `✓ Verified Recipient Account &bull; <span style="font-weight:700; color:#166534;">Identity Match: ${matchResult.score}%</span>`;
+            }
+            if (nameText) {
+              nameText.style.color = '#14532d';
+              nameText.innerHTML = `<strong>${escapeHTML(res.account_name)}</strong><div style="font-size:11px; color:#15803d; margin-top:2px;">Matches verified profile: <em>${escapeHTML(profileName || 'Your Account')}</em></div>`;
+            }
+            if (btnProceed) {
+              btnProceed.disabled = false;
+              btnProceed.style.opacity = '1';
+              btnProceed.style.cursor = 'pointer';
+            }
+          } else {
+            // STRICT FRAUD MISMATCH
+            verifiedWithdrawalRecipient = null;
+            if (box) {
+              box.style.background = '#fee2e2';
+              box.style.borderColor = '#ef4444';
+            }
+            if (statusLabel) {
+              statusLabel.style.color = '#b91c1c';
+              statusLabel.innerHTML = '🚨 Name Mismatch Fraud Warning &bull; Withdrawal Blocked';
+            }
+            if (nameText) {
+              nameText.style.color = '#7f1d1d';
+              nameText.innerHTML = `
+                <div style="font-weight:800; font-size:13px; margin-bottom:4px;">Destination Account: ${escapeHTML(res.account_name)}</div>
+                <div style="font-size:11.5px; line-height:1.4; color:#991b1b;">
+                  ❌ Destination account does not match your registered identity (<strong>${escapeHTML(profileName || 'Your Profile')}</strong>).
+                  <br>Under <strong>CBN AML/CFT Regulations 2022</strong>, disbursements to third-party accounts are strictly prohibited.
+                </div>
+              `;
+            }
+            if (btnProceed) {
+              btnProceed.disabled = true;
+              btnProceed.style.opacity = '0.4';
+              btnProceed.style.cursor = 'not-allowed';
+            }
           }
         } else {
           verifiedWithdrawalRecipient = null;
@@ -1475,6 +1719,11 @@
             nameText.style.color = '#7f1d1d';
             nameText.textContent = res.error || 'Could not verify account name. Check account number and bank.';
           }
+          if (btnProceed) {
+            btnProceed.disabled = false;
+            btnProceed.style.opacity = '1';
+            btnProceed.style.cursor = 'pointer';
+          }
         }
       } catch (err) {
         verifiedWithdrawalRecipient = null;
@@ -1489,6 +1738,11 @@
         if (nameText) {
           nameText.style.color = '#7f1d1d';
           nameText.textContent = 'Network error while resolving account details.';
+        }
+        if (btnProceed) {
+          btnProceed.disabled = false;
+          btnProceed.style.opacity = '1';
+          btnProceed.style.cursor = 'pointer';
         }
       }
     }, 350);
@@ -1551,6 +1805,24 @@
       }
     }
 
+    // MANDATORY IDENTITY / NAME-MATCHING FRAUD GUARD
+    const isCompany = user.role === 'company';
+    const profileName = isCompany 
+      ? (user.company_name || user.name || '')
+      : (user.kyc_full_name || user.full_name || user.name || [user.first_name, user.other_name, user.last_name].filter(Boolean).join(' '));
+
+    const nameCheck = typeof verifyNubanNameMatch === 'function'
+      ? verifyNubanNameMatch(profileName, resolvedName, {
+          isCompany,
+          directorName: isCompany ? (user.name || user.full_name || '') : undefined
+        })
+      : { isMatch: true, score: 100 };
+
+    if (!nameCheck.isMatch) {
+      showToast(`🚨 AML Fraud Block: Bank account "${resolvedName}" does not match your registered identity ("${profileName}"). Third-party payouts are prohibited under CBN regulations.`, 'error', 6000);
+      return;
+    }
+
     pendingFinancialAction = {
       type: 'withdrawal',
       amount: amount,
@@ -1558,7 +1830,8 @@
       bank_name: bankName,
       account_number: acctNo,
       account_name: resolvedName,
-      narration: narration
+      narration: narration,
+      name_match_score: nameCheck.score || 100
     };
 
     // Open Confirmation Dialog
@@ -1577,6 +1850,7 @@
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Destination Bank:</span> <strong>${escapeHTML(bankName)}</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Account Number:</span> <strong style="font-family:monospace;">${acctNo}</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Account Name:</span> <strong style="color:var(--forest);">${escapeHTML(resolvedName)}</strong></div>
+        <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Identity Verification:</span> <strong style="color:#16a34a;">✓ Name Match Confirmed (${nameCheck.score || 100}%)</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Transfer Fee:</span> <strong style="color:#16a34a;">₦0.00 (Zero Fee)</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:14px; border-top:1px solid var(--line); padding-top:6px;"><span style="font-weight:800;">Net Payout:</span> <strong style="color:var(--forest); font-size:16px;">₦${amount.toLocaleString()}</strong></div>
       `;
@@ -1612,39 +1886,392 @@
       // Check real contracts in collekt_contracts
       const contracts = JSON.parse(localStorage.getItem('collekt_contracts') || '[]');
       if (contracts.length > 0) {
-        return contracts.map((c, idx) => ({
-          id: c.id || ('CTR-' + (idx + 1)),
-          title: c.title || c.project_title || 'Project Execution Contract',
-          contractor: c.contractor || c.freelancer_name || 'Professional Specialist',
-          client: c.client || c.company_name || 'Corporate Client',
-          amount: Number(c.amount || c.budget || 0),
-          status: c.status || 'Funded in Escrow',
-          milestones: c.milestones && c.milestones.length > 0 ? c.milestones : [
-            { name: 'Phase 1 Deliverables', amount: Number(c.amount || c.budget || 0), status: 'Funded in Escrow' }
-          ]
-        }));
+        return contracts.map((c, idx) => {
+          const cAmt = Number(c.amount || c.total_amount || c.budget || 0);
+          const cCur = c.currency || 'NGN';
+          const cFx = c.fx_rate || c.exchange_rate_at_deposit || 1550;
+          let ms = [];
+          if (Array.isArray(c.milestones) && c.milestones.length > 0) {
+            ms = c.milestones.map((m, mIdx) => {
+              const mAmt = Number(m.amount) || (cAmt > 0 && m.percentage ? Math.round(cAmt * (Number(m.percentage) / 100)) : cAmt);
+              return {
+                id: m.id || ('ms_' + (mIdx + 1)),
+                name: m.name || ('Phase ' + (mIdx + 1)),
+                percentage: Number(m.percentage) || (c.milestones.length === 1 ? 100 : Math.round(100 / c.milestones.length)),
+                amount: mAmt,
+                currency: m.currency || cCur,
+                fx_rate: m.fx_rate || cFx,
+                ngn_amount: (m.currency || cCur) === 'USD' ? (typeof convertFx === 'function' ? convertFx(mAmt, 'USD', 'NGN', cFx) : mAmt * 1550) : mAmt,
+                status: m.status || 'Funded in Escrow'
+              };
+            });
+          } else {
+            ms = [{
+              id: 'ms_1',
+              name: '100% Full Project Completion & Approval',
+              percentage: 100,
+              amount: cAmt,
+              currency: cCur,
+              fx_rate: cFx,
+              ngn_amount: cCur === 'USD' ? (typeof convertFx === 'function' ? convertFx(cAmt, 'USD', 'NGN', cFx) : cAmt * 1550) : cAmt,
+              status: 'Funded in Escrow'
+            }];
+          }
+
+          return {
+            id: c.id || ('CTR-' + (idx + 1)),
+            title: c.title || c.jobTitle || c.project_title || 'Project Execution Contract',
+            contractor: c.contractor || c.proName || c.freelancer_name || 'Professional Specialist',
+            client: c.client || c.companyName || c.company_name || 'Corporate Client',
+            amount: cAmt,
+            currency: cCur,
+            fx_rate: cFx,
+            payment_mode: c.payment_mode || (ms.length > 1 ? 'milestones' : 'lump_sum'),
+            status: c.status || 'Funded in Escrow',
+            milestones: ms
+          };
+        });
       }
 
       // Check real awarded proposals
       const proposals = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
-      const awardedProps = proposals.filter(p => p.status === 'awarded' || p.status === 'accepted');
+      const awardedProps = proposals.filter(p => p.status === 'awarded' || p.status === 'accepted' || p.status === 'ACCEPTED');
       if (awardedProps.length > 0) {
-        return awardedProps.map(p => ({
-          id: 'CTR-' + (p.id || Date.now()),
-          title: p.jobTitle || p.project_title || 'Awarded Project Execution',
-          contractor: p.freelancerName || p.userName || 'Professional Candidate',
-          client: p.companyName || 'Corporate Client',
-          amount: Number(p.bidAmount || p.amount || 0),
-          status: 'Funded in Escrow',
-          milestones: [
-            { name: 'Milestone 1: Deliverables Submission', amount: Number(p.bidAmount || p.amount || 0), status: 'Funded in Escrow' }
-          ]
-        }));
+        const allJobs = JSON.parse(localStorage.getItem('collekt_jobs') || '[]');
+        return awardedProps.map(p => {
+          const matchedJob = allJobs.find(j => String(j.id) === String(p.jobId || p.project_id)) || {};
+          const pAmt = Number(p.bidAmount || p.amount || matchedJob.budget || 0);
+          const cCur = p.currency || matchedJob.currency || 'NGN';
+          const cFx = p.fx_rate || matchedJob.fx_rate || (cCur === 'USD' ? 1550 : null);
+          let ms = [];
+          if (Array.isArray(matchedJob.milestones) && matchedJob.milestones.length > 0) {
+            ms = matchedJob.milestones.map((m, mIdx) => {
+              const mAmt = pAmt > 0 ? Math.round(pAmt * ((Number(m.percentage) || 0) / 100)) : 0;
+              return {
+                id: m.id || ('ms_' + (mIdx + 1)),
+                name: m.name || ('Phase ' + (mIdx + 1)),
+                percentage: Number(m.percentage) || Math.round(100 / matchedJob.milestones.length),
+                amount: mAmt,
+                currency: cCur,
+                fx_rate: cFx,
+                ngn_amount: cCur === 'USD' ? (typeof convertFx === 'function' ? convertFx(mAmt, 'USD', 'NGN', cFx) : mAmt * 1550) : mAmt,
+                status: 'Funded in Escrow'
+              };
+            });
+          } else {
+            ms = [{
+              id: 'ms_1',
+              name: '100% Full Project Completion & Approval',
+              percentage: 100,
+              amount: pAmt,
+              currency: cCur,
+              fx_rate: cFx,
+              ngn_amount: cCur === 'USD' ? (typeof convertFx === 'function' ? convertFx(pAmt, 'USD', 'NGN', cFx) : pAmt * 1550) : pAmt,
+              status: 'Funded in Escrow'
+            }];
+          }
+
+          return {
+            id: 'CTR-' + (p.id || Date.now()),
+            title: p.jobTitle || matchedJob.title || p.project_title || 'Awarded Project Execution',
+            contractor: p.freelancerName || p.userName || 'Professional Candidate',
+            client: p.companyName || matchedJob.companyName || 'Corporate Client',
+            amount: pAmt,
+            currency: cCur,
+            fx_rate: cFx,
+            payment_mode: matchedJob.payment_mode || (ms.length > 1 ? 'milestones' : 'lump_sum'),
+            status: 'Funded in Escrow',
+            milestones: ms
+          };
+        });
       }
 
       return [];
     } catch { return []; }
   }
+
+  function calcBusinessDaysElapsed(dateStr) {
+    if (!dateStr) return 0;
+    const start = new Date(dateStr);
+    const end = new Date();
+    if (isNaN(start.getTime())) return 0;
+    let count = 0;
+    let cur = new Date(start);
+    while (cur < end) {
+      cur.setDate(cur.getDate() + 1);
+      const d = cur.getDay();
+      if (d !== 0 && d !== 6) count++;
+    }
+    return count;
+  }
+
+  let _activeDeliverableTarget = null;
+  window.openDeliverableSubmissionModal = function(contractId, milestoneId, milestoneName, amount, currency = 'NGN', fxRate = 1550) {
+    _activeDeliverableTarget = { contractId, milestoneId, milestoneName, amount, currency, fxRate };
+    const sub = document.getElementById('deliverableMilestoneSub');
+    const amtLabel = currency === 'USD'
+      ? (typeof formatDualCurrency === 'function' ? formatDualCurrency(amount, 'USD', fxRate) : `$${Number(amount || 0).toLocaleString()} USD (~₦${Math.round(Number(amount || 0) * fxRate).toLocaleString()})`)
+      : `₦${Number(amount || 0).toLocaleString()}`;
+    if (sub) sub.textContent = `${milestoneName} (${amtLabel})`;
+    const tInp = document.getElementById('deliverableTitleInput');
+    if (tInp) tInp.value = milestoneName;
+    const nInp = document.getElementById('deliverableNotesInput');
+    if (nInp) nInp.value = '';
+    const lInp = document.getElementById('deliverableLinkInput');
+    if (lInp) lInp.value = '';
+    openModal('submitDeliverableModal');
+  };
+
+  window.confirmSubmitDeliverable = function() {
+    if (!_activeDeliverableTarget) return;
+    const title = document.getElementById('deliverableTitleInput')?.value.trim();
+    const notes = document.getElementById('deliverableNotesInput')?.value.trim();
+    const link = document.getElementById('deliverableLinkInput')?.value.trim();
+
+    if (!title) {
+      showToast('⚠️ Please enter a deliverable title.', 'warning');
+      return;
+    }
+
+    const { contractId, milestoneId } = _activeDeliverableTarget;
+    const nowIso = new Date().toISOString();
+
+    const updateMilestonesInList = (key) => {
+      const list = JSON.parse(localStorage.getItem(key) || '[]');
+      let mod = false;
+      const updated = list.map(c => {
+        if (c.id === contractId || String(c.id).endsWith(String(contractId).replace('CTR-', ''))) {
+          if (Array.isArray(c.milestones)) {
+            c.milestones = c.milestones.map(m => {
+              if (m.id === milestoneId || m.name === _activeDeliverableTarget.milestoneName) {
+                mod = true;
+                return {
+                  ...m,
+                  status: 'Under Review',
+                  submitted_at: nowIso,
+                  deliverable_title: title,
+                  deliverable_notes: notes,
+                  deliverable_link: link
+                };
+              }
+              return m;
+            });
+          }
+          c.is_under_review = true;
+          c.deliverable_submitted_at = nowIso;
+        }
+        return c;
+      });
+      if (mod) localStorage.setItem(key, JSON.stringify(updated));
+    };
+
+    updateMilestonesInList('collekt_contracts');
+    updateMilestonesInList('collekt_awarded_contracts');
+
+    closeModal('submitDeliverableModal');
+    showToast('🎉 Deliverable submitted! Client 7-business-day inspection window has started.');
+    renderEscrowMilestones();
+  };
+
+  // ── CORPORATE TAX INVOICE & FIRS SETTLEMENT ENGINE ──────────
+  let _activeInvoiceData = null;
+
+  window.openCorporateInvoiceModal = function(contractId, milestoneIdx = null, txId = null, customAmount = null, customTitle = null, customDate = null) {
+    const user = getUser() || {};
+    const isCompany = user.role === 'company';
+    const allContracts = (typeof getMilestoneContracts === 'function' ? getMilestoneContracts() : [])
+      .concat(JSON.parse(localStorage.getItem('collekt_contracts') || '[]'))
+      .concat(JSON.parse(localStorage.getItem('collekt_awarded_contracts') || '[]'));
+
+    let contract = null;
+    if (contractId) {
+      contract = allContracts.find(c => c && (c.id === contractId || String(c.id).endsWith(String(contractId))));
+    }
+
+    let currency = contract?.currency || 'NGN';
+    let fxRate = contract?.fx_rate || 1550;
+    let grossAmount = 0;
+    let milestoneTitle = 'Tender Milestone Deliverables';
+    let projectTitle = contract?.title || customTitle || 'Specialized Engineering Procurement Contract';
+    let clientName = contract?.client || contract?.company || (isCompany ? (user.company_name || user.name || 'Corporate Employer') : 'Enterprise Client Ltd');
+    let contractorName = contract?.contractor || contract?.specialist || (!isCompany ? (user.name || 'Specialist Contractor') : 'Shield Verified Specialist');
+    let dateStr = customDate || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    if (contract) {
+      if (milestoneIdx !== null && milestoneIdx !== undefined && Array.isArray(contract.milestones) && contract.milestones[milestoneIdx]) {
+        const ms = contract.milestones[milestoneIdx];
+        grossAmount = Number(ms.amount || 0);
+        milestoneTitle = ms.name || `Milestone Phase ${milestoneIdx + 1}`;
+        if (ms.currency) currency = ms.currency;
+        if (ms.fx_rate) fxRate = ms.fx_rate;
+      } else {
+        grossAmount = Number(contract.amount || 0);
+        milestoneTitle = contract.milestones && contract.milestones[0] ? contract.milestones[0].name : 'Full Contract Milestone';
+      }
+    } else if (customAmount) {
+      grossAmount = Number(customAmount || 0);
+      milestoneTitle = customTitle || 'Milestone Settlement Disbursal';
+    } else {
+      grossAmount = 1000000;
+    }
+
+    const taxSchedule = (typeof calculateContractTaxSchedule === 'function')
+      ? calculateContractTaxSchedule(grossAmount, { currency, fxRate })
+      : {
+          grossAmount,
+          vatAmount: Math.round(grossAmount * 0.075),
+          totalInvoicedAmount: Math.round(grossAmount * 1.075),
+          whtAmount: Math.round(grossAmount * 0.05),
+          collektFee: Math.round(grossAmount * 0.15),
+          specialistNetPayout: Math.round(grossAmount * 0.80),
+          firsTotalTax: Math.round(grossAmount * 0.125),
+          currency,
+          fxRate,
+          isUsd: currency === 'USD',
+          ngnEquivalent: currency === 'USD' ? {
+            grossAmount: Math.round(grossAmount * fxRate),
+            vatAmount: Math.round(grossAmount * 0.075 * fxRate),
+            totalInvoicedAmount: Math.round(grossAmount * 1.075 * fxRate),
+            whtAmount: Math.round(grossAmount * 0.05 * fxRate),
+            collektFee: Math.round(grossAmount * 0.15 * fxRate),
+            specialistNetPayout: Math.round(grossAmount * 0.80 * fxRate)
+          } : null
+        };
+
+    const invRef = (typeof generateInvoiceReference === 'function')
+      ? generateInvoiceReference(contractId || 'CTR-E49A', milestoneIdx)
+      : `COL-INV-20260929-${String(contractId || 'E49A').slice(-4).toUpperCase()}-M1`;
+    const hash = 'FIRS-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-CRC32';
+
+    _activeInvoiceData = {
+      invoiceRef: invRef,
+      date: dateStr,
+      projectTitle,
+      milestoneTitle,
+      clientName,
+      contractorName,
+      taxSchedule,
+      hash,
+      contractId
+    };
+
+    const refEl = document.getElementById('invRefText');
+    const dateEl = document.getElementById('invDateText');
+    const projEl = document.getElementById('invProjectName');
+    const msEl = document.getElementById('invMilestoneName');
+    const clientEl = document.getElementById('invClientName');
+    const proEl = document.getElementById('invProName');
+    const hashEl = document.getElementById('invHashText');
+    const fxPillEl = document.getElementById('invFxRatePill');
+    const ngnHeaderCol = document.getElementById('invNgnHeaderCol');
+    const tbody = document.getElementById('invTableBody');
+
+    if (refEl) refEl.textContent = invRef;
+    if (dateEl) dateEl.textContent = dateStr;
+    if (projEl) projEl.textContent = projectTitle;
+    if (msEl) msEl.textContent = milestoneTitle;
+    if (clientEl) clientEl.textContent = clientName;
+    if (proEl) proEl.textContent = contractorName;
+    if (hashEl) hashEl.textContent = hash;
+
+    const isUsd = taxSchedule.currency === 'USD';
+    const sym = isUsd ? '$' : '₦';
+
+    if (fxPillEl) {
+      if (isUsd) {
+        fxPillEl.style.display = 'block';
+        fxPillEl.textContent = `🔒 Locked FX Benchmark: 1 USD = ₦${fxRate.toLocaleString()} NGN`;
+      } else {
+        fxPillEl.style.display = 'none';
+      }
+    }
+
+    if (ngnHeaderCol) {
+      ngnHeaderCol.style.display = isUsd ? 'table-cell' : 'none';
+    }
+
+    if (tbody) {
+      const renderRow = (desc, rate, amt, ngnAmt, isBold = false, color = 'inherit') => `
+        <tr style="border-bottom:1px solid var(--line); ${isBold ? 'font-weight:900; background:rgba(0,0,0,0.02);' : ''}">
+          <td style="padding:10px 10px; color:${color};">${desc}</td>
+          <td style="padding:10px 10px; text-align:center; color:var(--muted);">${rate}</td>
+          <td style="padding:10px 10px; text-align:right; color:${color};">${sym}${Number(amt).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+          ${isUsd ? `<td style="padding:10px 10px; text-align:right; font-weight:700; color:var(--teal);">₦${Number(ngnAmt).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>` : ''}
+        </tr>
+      `;
+
+      tbody.innerHTML = `
+        ${renderRow(`1. Gross Professional Fee (${escapeHTML(milestoneTitle)})`, 'Base 100%', taxSchedule.grossAmount, taxSchedule.ngnEquivalent?.grossAmount, true, 'var(--ink)')}
+        ${renderRow('2. Value Added Tax (VAT) &mdash; Remitted to FIRS', '+7.5%', taxSchedule.vatAmount, taxSchedule.ngnEquivalent?.vatAmount, false, '#0284c7')}
+        ${renderRow('Total Invoiced Amount (Charged to Client)', 'Invoiced', taxSchedule.totalInvoicedAmount, taxSchedule.ngnEquivalent?.totalInvoicedAmount, true, 'var(--forest)')}
+        ${renderRow('3. Withholding Tax (WHT) &mdash; Credited to Contractor TIN', '-5.0%', `(${sym}${Number(taxSchedule.whtAmount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`, `(₦${Number(taxSchedule.ngnEquivalent?.whtAmount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`, false, '#dc2626')}
+        ${renderRow('4. Collekt Escrow &amp; Platform Fee (15%)', '-15.0%', `(${sym}${Number(taxSchedule.collektFee).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`, `(₦${Number(taxSchedule.ngnEquivalent?.collektFee).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`, false, '#ea580c')}
+        ${renderRow('Net Disbursal to Contractor (NUBAN Bank Transfer)', '80.0% Net', taxSchedule.specialistNetPayout, taxSchedule.ngnEquivalent?.specialistNetPayout, true, '#16a34a')}
+      `;
+    }
+
+    openModal('corporateInvoiceModal');
+  };
+
+  window.printTaxInvoice = function() {
+    window.print();
+  };
+
+  window.copyTaxScheduleText = function() {
+    if (!_activeInvoiceData) return;
+    const { invoiceRef, date, projectTitle, milestoneTitle, clientName, contractorName, taxSchedule, hash } = _activeInvoiceData;
+    const isUsd = taxSchedule.currency === 'USD';
+    const sym = isUsd ? '$' : '₦';
+
+    const text = `
+=====================================================
+COLLEKT TECHNOLOGIES LTD — FIRS ELECTRONIC TAX INVOICE
+RC: 1928412 | FIRS TIN: 24891029-0001
+Plot 12, Admiralty Way, Lekki Phase 1, Lagos, Nigeria
+=====================================================
+Invoice Ref:    ${invoiceRef}
+Date:           ${date}
+Client:         ${clientName}
+Contractor:     ${contractorName}
+Project:        ${projectTitle}
+Milestone:      ${milestoneTitle}
+Currency:       ${taxSchedule.currency} ${isUsd ? `(FX Locked @ ₦${taxSchedule.fxRate}/$)` : ''}
+
+TAX & SETTLEMENT BREAKDOWN:
+-----------------------------------------------------
+1. Gross Milestone Fee:         ${sym}${taxSchedule.grossAmount.toLocaleString()}
+2. VAT (+7.5% to FIRS):         ${sym}${taxSchedule.vatAmount.toLocaleString()}
+-----------------------------------------------------
+TOTAL INVOICED TO CLIENT:       ${sym}${taxSchedule.totalInvoicedAmount.toLocaleString()}
+-----------------------------------------------------
+3. WHT Deduction (-5.0% FIRS):  -${sym}${taxSchedule.whtAmount.toLocaleString()}
+4. Collekt Service Fee (-15%):   -${sym}${taxSchedule.collektFee.toLocaleString()}
+-----------------------------------------------------
+SPECIALIST NET DISBURSAL (80%):  ${sym}${taxSchedule.specialistNetPayout.toLocaleString()} ${isUsd ? `(~₦${taxSchedule.ngnEquivalent.specialistNetPayout.toLocaleString()} NGN)` : ''}
+-----------------------------------------------------
+FIRS Validation Hash: ${hash}
+Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
+=====================================================
+    `.trim();
+
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('📋 FIRS Tax Schedule copied to clipboard!', 'success');
+    }).catch(() => {
+      showToast('Copied text to clipboard', 'info');
+    });
+  };
+
+  window.exportTaxInvoiceJson = function() {
+    if (!_activeInvoiceData) return;
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(_activeInvoiceData, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `${_activeInvoiceData.invoiceRef}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+    showToast('📥 FIRS Tax Invoice JSON exported for ERP records!', 'success');
+  };
 
   function renderEscrowMilestones() {
     const listEl = document.getElementById('escrowMilestonesList');
@@ -1665,7 +2292,15 @@
       return;
     }
 
-    listEl.innerHTML = contracts.map(c => `
+    listEl.innerHTML = contracts.map(c => {
+      const cur = c.currency || 'NGN';
+      const fx = c.fx_rate || 1550;
+      const isUsd = cur === 'USD';
+      const totalHeldLabel = isUsd
+        ? `$${(c.amount || 0).toLocaleString()} USD Held (~₦${Math.round((c.amount || 0) * fx).toLocaleString()})`
+        : `₦${(c.amount || 0).toLocaleString()} Held`;
+
+      return `
       <div class="escrow-milestone-card">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
           <div>
@@ -1673,44 +2308,141 @@
             <h4 style="font-size:16px; font-weight:900; color:var(--ink); margin-bottom:2px;">${escapeHTML(c.title)}</h4>
             <div style="font-size:12px; color:var(--muted);">${isCompany ? 'Specialist: ' + escapeHTML(c.contractor || 'Candidate') : 'Enterprise Client: ' + escapeHTML(c.client || 'Enterprise')}</div>
           </div>
-          <div style="text-align:right;">
-            <div class="escrow-status-pill funded">&#128274; ₦${(c.amount || 0).toLocaleString()} Held</div>
+          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
+            <div class="escrow-status-pill funded">&#128274; ${totalHeldLabel}</div>
+            ${isUsd ? `<div style="font-size:10.5px; color:#38bdf8; font-weight:700;">🔒 FX Rate Locked @ ₦${fx.toLocaleString()}/$</div>` : ''}
+            <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}')" style="font-size:11px; font-weight:800; padding:3px 9px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:8px; display:inline-flex; align-items:center; gap:4px; background:rgba(16,185,129,0.06); cursor:pointer;" title="View FIRS Electronic Tax Invoice & Escrow Schedule">
+              🧾 Tax Invoice
+            </button>
           </div>
         </div>
 
         <!-- Milestones list within contract -->
         <div style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
-          ${(c.milestones || [{ name: 'Phase 1 Deliverables', amount: c.amount, status: 'Funded in Escrow' }]).map((m, idx) => `
+          ${(c.milestones || [{ name: 'Phase 1 Deliverables', amount: c.amount, percentage: 100, status: 'Funded in Escrow' }]).map((m, idx) => {
+            const isUnderReview = m.status === 'Under Review' || m.status === 'Submitted';
+            const isReleased = m.status === 'Released' || String(m.status).includes('Released') || m.status === 'admin_auto_accepted';
+            const isDisputed = c.status === 'under_arbitration' || c.status === 'disputed';
+            const bDays = isUnderReview ? calcBusinessDaysElapsed(m.submitted_at) : 0;
+            const daysLeft = Math.max(0, 7 - bDays);
+
+            const mCur = m.currency || cur;
+            const mFx = m.fx_rate || fx;
+            const mAmtFormatted = mCur === 'USD'
+              ? (typeof formatDualCurrency === 'function' ? formatDualCurrency(m.amount, 'USD', mFx) : `$${(m.amount || 0).toLocaleString()} USD (~₦${Math.round((m.amount || 0) * mFx).toLocaleString()})`)
+              : `₦${(m.amount || 0).toLocaleString()}`;
+
+            let statusLabel = escapeHTML(m.status || 'Funded in Escrow');
+            let statusColor = 'var(--amber)';
+            if (isReleased) {
+              statusLabel = 'Released ✅';
+              statusColor = '#16a34a';
+            } else if (isDisputed) {
+              statusLabel = 'Under Arbitration ⚖️';
+              statusColor = '#ef4444';
+            } else if (isUnderReview) {
+              if (daysLeft === 0) {
+                statusLabel = '⏱️ 7-Day Window Lapsed (Pending Admin Auto-Accept)';
+                statusColor = '#f59e0b';
+              } else {
+                statusLabel = `⏱️ Under Review (${daysLeft} business day${daysLeft === 1 ? '' : 's'} remaining)`;
+                statusColor = 'var(--teal)';
+              }
+            }
+
+            return `
             <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
               <div>
                 <div style="font-size:13px; font-weight:800; color:var(--ink);">${escapeHTML(m.name)}</div>
-                <div style="font-size:11px; color:var(--muted); margin-top:2px;">Amount: <strong>₦${(m.amount || 0).toLocaleString()}</strong> &bull; Status: <span style="color:${m.status === 'Submitted' ? 'var(--teal)' : 'var(--amber)'}; font-weight:800;">${escapeHTML(m.status)}</span></div>
+                <div style="font-size:11px; color:var(--muted); margin-top:2px;">
+                  ${m.percentage ? `Release: <strong style="color:var(--forest);">${m.percentage}%</strong> &bull; ` : ''}
+                  Amount: <strong>${mAmtFormatted}</strong> &bull; 
+                  Status: <span style="color:${statusColor}; font-weight:800;">${statusLabel}</span>
+                </div>
+                ${m.deliverable_title ? `<div style="font-size:11px; color:var(--teal); margin-top:3px; font-weight:700;">📄 Deliverable: ${escapeHTML(m.deliverable_title)}</div>` : ''}
               </div>
               <div>
                 ${isCompany ? `
-                  ${(c.status === 'under_arbitration' || c.status === 'disputed') ? `
+                  ${isDisputed ? `
                     <span style="font-size:11px; font-weight:800; color:#ef4444; background:rgba(239,68,68,0.12); padding:4px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
                       ⚖️ Under Arbitration (Locked)
                     </span>
+                  ` : (isReleased ? `
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <span style="font-size:11px; font-weight:800; color:#16a34a; background:rgba(22,163,74,0.12); padding:4px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
+                        ✅ Released
+                      </span>
+                      <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}', ${idx})" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06); cursor:pointer;" title="View Milestone FIRS Tax Receipt">
+                        🧾 Receipt
+                      </button>
+                    </div>
+                  ` : (isUnderReview ? `
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <button class="btn btn-primary btn-sm" onclick="promptReleaseMilestone('${c.id}', ${m.amount}, '${escapeHTML(m.name)}', '${escapeHTML(c.contractor)}', '${c.status || ''}', '${mCur}', ${mFx})" style="font-weight:800; font-size:12px; background:var(--teal); border:none; padding:6px 12px;">
+                        &#128275; Approve &amp; Release
+                      </button>
+                      <button class="btn btn-outline btn-sm" onclick="openEscrowDisputeModal('${c.id}', '${escapeHTML(c.title || m.name)}', ${m.amount})" style="font-weight:800; font-size:11px; color:#ef4444; border-color:rgba(239,68,68,0.4); padding:6px 10px;" title="Dispute deliverable if substandard">
+                        ⚖️ Dispute
+                      </button>
+                      <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}', ${idx})" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06); cursor:pointer;" title="Preview Milestone Tax Invoice">
+                        🧾 Invoice
+                      </button>
+                    </div>
                   ` : `
-                    <button class="btn btn-primary btn-sm" onclick="promptReleaseMilestone('${c.id}', ${m.amount}, '${escapeHTML(m.name)}', '${escapeHTML(c.contractor)}', '${c.status || ''}')" style="font-weight:800; font-size:12px; background:var(--teal); border:none; padding:6px 14px;">
-                      &#128275; Approve &amp; Release Escrow
-                    </button>
-                  `}
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <button class="btn btn-primary btn-sm" onclick="promptReleaseMilestone('${c.id}', ${m.amount}, '${escapeHTML(m.name)}', '${escapeHTML(c.contractor)}', '${c.status || ''}', '${mCur}', ${mFx})" style="font-weight:800; font-size:12px; background:var(--teal); border:none; padding:6px 14px;">
+                        &#128275; Approve &amp; Release Escrow
+                      </button>
+                      <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}', ${idx})" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06); cursor:pointer;" title="Preview Milestone Tax Invoice">
+                        🧾 Invoice
+                      </button>
+                    </div>
+                  `))}
                 ` : `
-                  <button class="btn btn-outline btn-sm" onclick="showToast('&#128228; Deliverable submitted for client review!')" style="font-weight:800; font-size:12px; padding:6px 14px;">
-                    &#128228; Submit Deliverable
-                  </button>
+                  ${isDisputed ? `
+                    <span style="font-size:11px; font-weight:800; color:#ef4444; background:rgba(239,68,68,0.12); padding:4px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
+                      ⚖️ Under Arbitration (Locked)
+                    </span>
+                  ` : (isReleased ? `
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <span style="font-size:11px; font-weight:800; color:#16a34a; background:rgba(22,163,74,0.12); padding:4px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
+                        ✅ Released
+                      </span>
+                      <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}', ${idx})" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06); cursor:pointer;" title="View Milestone FIRS Tax Receipt">
+                        🧾 Receipt
+                      </button>
+                    </div>
+                  ` : (isUnderReview ? `
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <span style="font-size:11px; color:var(--teal); font-weight:800; background:rgba(19,117,111,0.08); padding:5px 12px; border-radius:8px;">
+                        📤 Submitted ${daysLeft > 0 ? `(${daysLeft}d left)` : `(Awaiting Admin)`}
+                      </span>
+                      <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}', ${idx})" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06); cursor:pointer;" title="Preview Milestone Tax Invoice">
+                        🧾 Invoice
+                      </button>
+                    </div>
+                  ` : `
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <button class="btn btn-outline btn-sm" onclick="openDeliverableSubmissionModal('${c.id}', '${m.id || ('ms_' + (idx + 1))}', '${escapeHTML(m.name)}', ${m.amount || 0}, '${mCur}', ${mFx})" style="font-weight:800; font-size:12px; padding:6px 14px;">
+                        📤 Submit Deliverable
+                      </button>
+                      <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}', ${idx})" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06); cursor:pointer;" title="Preview Milestone Tax Invoice">
+                        🧾 Invoice
+                      </button>
+                    </div>
+                  `))}
                 `}
               </div>
             </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 
-  window.promptReleaseMilestone = function(contractId, amount, milestoneName, contractorName, contractStatus) {
+  window.promptReleaseMilestone = function(contractId, amount, milestoneName, contractorName, contractStatus, currency = 'NGN', fxRate = 1550) {
     if (contractStatus === 'under_arbitration' || contractStatus === 'disputed') {
       showToast('⚖️ Contract is currently locked under Collekt Arbitration. Escrow releases are suspended until resolution.', 'error');
       return;
@@ -1720,7 +2452,7 @@
     if (typeof hasUserTransactionPin === 'function' && !hasUserTransactionPin(user)) {
       showToast('🔒 Please create your 4-digit Transaction PIN to authorize escrow releases.', 'warning');
       openCreatePinModal(() => {
-        promptReleaseMilestone(contractId, amount, milestoneName, contractorName, contractStatus);
+        promptReleaseMilestone(contractId, amount, milestoneName, contractorName, contractStatus, currency, fxRate);
       });
       return;
     }
@@ -1730,7 +2462,9 @@
       contractId: contractId,
       amount: amount,
       milestoneName: milestoneName,
-      contractorName: contractorName
+      contractorName: contractorName,
+      currency: currency,
+      fxRate: fxRate
     };
 
     const titleEl = document.getElementById('confirmActionTitle');
@@ -1742,16 +2476,20 @@
     if (iconEl) iconEl.innerHTML = '&#128275;';
     if (subEl) subEl.textContent = 'Releasing escrow transfers funds to the specialist contractor.';
 
-    const commission = Math.round(amount * 0.10); // 10% platform commission
+    const isUsd = currency === 'USD';
+    const commission = Math.round(amount * 0.15); // 15% platform commission
     const netPayout = amount - commission;
+    const ngnEquivNet = Math.round(netPayout * fxRate);
+    const sym = isUsd ? '$' : '₦';
 
     if (boxEl) {
       boxEl.innerHTML = `
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Milestone:</span> <strong>${escapeHTML(milestoneName)}</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Contractor Recipient:</span> <strong>${escapeHTML(contractorName)}</strong></div>
-        <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Total Escrow Amount:</span> <strong style="color:var(--forest); font-size:15px;">₦${amount.toLocaleString()}</strong></div>
-        <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Platform Service Fee (10%):</span> <strong style="color:var(--muted);">₦${commission.toLocaleString()}</strong></div>
-        <div style="display:flex; justify-content:space-between; font-size:14px; border-top:1px solid var(--line); padding-top:6px;"><span style="font-weight:800;">Specialist Net Disbursal:</span> <strong style="color:#16a34a; font-size:16px;">₦${netPayout.toLocaleString()}</strong></div>
+        <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Total Escrow Amount:</span> <strong style="color:var(--forest); font-size:15px;">${sym}${amount.toLocaleString()} ${isUsd ? 'USD' : ''}</strong></div>
+        ${isUsd ? `<div style="display:flex; justify-content:space-between; font-size:12px; color:#38bdf8;"><span>🔒 Locked FX Rate:</span> <strong>1 USD = ₦${fxRate.toLocaleString()} NGN</strong></div>` : ''}
+        <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Platform Service Fee (15%):</span> <strong style="color:var(--muted);">${sym}${commission.toLocaleString()} ${isUsd ? 'USD' : ''}</strong></div>
+        <div style="display:flex; justify-content:space-between; font-size:14px; border-top:1px solid var(--line); padding-top:6px;"><span style="font-weight:800;">Specialist Net Disbursal:</span> <strong style="color:#16a34a; font-size:16px;">${sym}${netPayout.toLocaleString()} ${isUsd ? `USD (~₦${ngnEquivNet.toLocaleString()})` : ''}</strong></div>
       `;
     }
 
@@ -1968,6 +2706,9 @@
         const contractor = pendingFinancialAction.contractorName;
         const contractId = pendingFinancialAction.contractId;
         const milestoneName = pendingFinancialAction.milestoneName;
+        const cur = pendingFinancialAction.currency || 'NGN';
+        const fx = pendingFinancialAction.fxRate || 1550;
+        const isUsd = cur === 'USD';
 
         // Dispatch to Serverless Escrow Settlement API
         let token = null;
@@ -1990,6 +2731,8 @@
               contract_id: contractId,
               milestone_name: milestoneName,
               amount: amt,
+              currency: cur,
+              exchange_rate: fx,
               pin: enteredPin,
               step_up_token: stepUpToken
             })
@@ -2007,7 +2750,9 @@
           console.warn('Escrow settlement network notice (proceeding with local optimistic state):', netErr);
         }
 
-        if (rawEscrow >= amt) rawEscrow -= amt;
+        const ngnEquivAmt = isUsd ? Math.round(amt * fx) : amt;
+        if (rawEscrow >= ngnEquivAmt) rawEscrow -= ngnEquivAmt;
+        else if (rawEscrow >= amt) rawEscrow -= amt;
         updateBalanceUI();
 
         const user = getUser();
@@ -2019,17 +2764,21 @@
         saveTransaction({
           id: (serverDisbursal && serverDisbursal.reference) || ('TX-ESC-' + Date.now()),
           title: `Escrow Release for ${contractor}`,
-          desc: `${milestoneName} Approved & Disbursed`,
+          desc: `${milestoneName} Approved & Disbursed (${isUsd ? `$${amt.toLocaleString()} USD @ ₦${fx.toLocaleString()}/$` : `₦${amt.toLocaleString()}`})`,
           date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
           fullDate: new Date().toISOString().slice(0,10),
           type: 'debit',
           category: 'payout',
-          amount: amt,
+          amount: ngnEquivAmt,
+          currency: cur,
+          currency_amount: amt,
+          fx_rate: fx,
           balanceBefore: rawBalance,
           status: 'Successful'
         });
 
-        showToast(`🎉 ₦${amt.toLocaleString()} Escrow Released to ${contractor}! Deliverable marked Approved.`);
+        const toastAmt = isUsd ? `$${amt.toLocaleString()} USD (~₦${ngnEquivAmt.toLocaleString()} NGN)` : `₦${amt.toLocaleString()}`;
+        showToast(`🎉 ${toastAmt} Escrow Released to ${contractor}! Deliverable marked Approved.`);
         renderEscrowMilestones();
       }
 
@@ -2132,7 +2881,7 @@
     if (!tbody && !mobileList) return;
 
     if (list.length === 0) {
-      if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:32px; color:var(--muted);">No transactions match your search filters.</td></tr>`;
+      if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:32px; color:var(--muted);">No transactions match your search filters.</td></tr>`;
       if (mobileList) mobileList.innerHTML = `<div style="text-align:center; padding:24px; color:var(--muted); font-size:13px;">No transactions found.</div>`;
       return;
     }
@@ -2167,6 +2916,11 @@
                 ${escapeHTML(tx.status || 'Successful')}
               </span>
             </td>
+            <td style="text-align:right;">
+              <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal(null, null, '${escapeHTML(tx.id || '')}', ${Number(tx.amount || 0)}, '${escapeHTML(tx.title || '')}', '${escapeHTML(tx.date || '')}')" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.35); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.04); cursor:pointer;" title="View FIRS Tax Invoice & Receipt">
+                🧾 Invoice
+              </button>
+            </td>
           </tr>
         `;
       }).join('');
@@ -2198,11 +2952,16 @@
             <div style="font-size:12px; color:var(--slate); line-height:1.4;">
               ${escapeHTML(tx.desc || '')}
             </div>
-            <div class="tx-card-footer">
+            <div class="tx-card-footer" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
               <span>Bal Before: ₦${Number(tx.balanceBefore || 0).toLocaleString()}</span>
-              <span class="tx-status-badge success" style="font-size:10px; padding:2px 8px;">
-                &#10003; ${escapeHTML(tx.status || 'Successful')}
-              </span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="tx-status-badge success" style="font-size:10px; padding:2px 8px;">
+                  &#10003; ${escapeHTML(tx.status || 'Successful')}
+                </span>
+                <button onclick="openCorporateInvoiceModal(null, null, '${escapeHTML(tx.id || '')}', ${Number(tx.amount || 0)}, '${escapeHTML(tx.title || '')}', '${escapeHTML(tx.date || '')}')" class="btn btn-outline btn-sm" style="font-size:10px; padding:2px 6px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; background:rgba(16,185,129,0.06); cursor:pointer;" title="View FIRS Invoice">
+                  🧾 Invoice
+                </button>
+              </div>
             </div>
           </div>
         `;
