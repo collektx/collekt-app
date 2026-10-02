@@ -53,9 +53,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=133.0">
-<link rel="stylesheet" href="shared.css?v=133.0">
-<link rel="stylesheet" href="glass.css?v=133.0">
+<link rel="stylesheet" href="style.css?v=134.0">
+<link rel="stylesheet" href="shared.css?v=134.0">
+<link rel="stylesheet" href="glass.css?v=134.0">
 
 <style>
   /* Corporate Tax Invoice Print Styles */
@@ -1124,8 +1124,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=133.0"></script>
-<script src="app.js?v=133.0"></script>
+<script src="supabase.js?v=134.0"></script>
+<script src="app.js?v=134.0"></script>
 <script>
   async function initAdminDashboard() {
     // 0. Sanitize local storage to purge any stale test rows or probe transactions
@@ -1210,22 +1210,70 @@
       nameEl.textContent = `${name} (${email})`;
     }
 
-    // 2. Safe remote user sync if Supabase is connected
-    if (window.sb && typeof sb.from === 'function') {
-      try {
-        const resetEmails = ['chenpao51@gmail.com', 'grumpyluan@gmail.com', 'smileykori@gmail.com', 'bethelvwire@gmail.com', 'collektng@gmail.com', 'admin@collektng.com', 'officialthelma@gmail.com'];
-        const { data: remoteProfiles, error } = await sb.from('profiles').select('*');
-        if (!error && remoteProfiles && remoteProfiles.length > 0) {
-          remoteProfiles.forEach(p => {
-            const em = (p && p.email ? p.email.toLowerCase().trim() : '');
-            if (em && !resetEmails.includes(em) && !em.startsWith('test-runner-')) {
-              if (typeof registerUserInDirectory === 'function') registerUserInDirectory(p);
-            }
-          });
+    // 2. Safe resilient remote user sync from Supabase database
+    try {
+      let remoteList = [];
+      const testTokens = ['chenpao51@gmail.com', 'grumpyluan@gmail.com', 'bethelvwire', 'officialthelma@gmail.com'];
+
+      // Tier 1: Call secure Postgres RPC get_admin_directory()
+      if (window.sb && typeof sb.rpc === 'function') {
+        try {
+          const { data: rpcUsers, error: rpcErr } = await sb.rpc('get_admin_directory');
+          if (!rpcErr && Array.isArray(rpcUsers) && rpcUsers.length > 0) {
+            remoteList = rpcUsers;
+          }
+        } catch(e) {
+          console.warn('Admin RPC directory sync notice:', e);
         }
-      } catch(e) {
-        console.warn('Admin remote sync notice:', e);
       }
+
+      // Tier 2: Call Netlify serverless admin-directory endpoint
+      if (remoteList.length === 0) {
+        try {
+          const res = await fetch('/.netlify/functions/admin-directory');
+          if (res.ok) {
+            const json = await res.json();
+            if (json && Array.isArray(json.users) && json.users.length > 0) {
+              remoteList = json.users;
+            }
+          }
+        } catch(e) {
+          console.warn('Admin serverless directory sync notice:', e);
+        }
+      }
+
+      // Tier 3: Direct Supabase profiles table query
+      if (remoteList.length === 0 && window.sb && typeof sb.from === 'function') {
+        try {
+          const { data: remoteProfiles, error } = await sb.from('profiles').select('*');
+          if (!error && Array.isArray(remoteProfiles) && remoteProfiles.length > 0) {
+            remoteList = remoteProfiles;
+          }
+        } catch(e) {}
+      }
+
+      // Tier 4: Direct Supabase public_profiles view query
+      if (remoteList.length === 0 && window.sb && typeof sb.from === 'function') {
+        try {
+          const { data: pubProfiles, error: pubErr } = await sb.from('public_profiles').select('*');
+          if (!pubErr && Array.isArray(pubProfiles) && pubProfiles.length > 0) {
+            remoteList = pubProfiles;
+          }
+        } catch(e) {}
+      }
+
+      if (remoteList.length > 0) {
+        remoteList.forEach(p => {
+          if (!p) return;
+          const em = (p.email ? p.email.toLowerCase().trim() : '');
+          const id = (p.id ? String(p.id).toLowerCase().trim() : '');
+          if (!testTokens.some(t => em.includes(t)) && !id.startsWith('test-runner-') && !em.startsWith('test-runner-')) {
+            if (typeof registerUserInDirectory === 'function') registerUserInDirectory(p);
+          }
+        });
+      }
+    } catch(e) {
+      console.warn('Admin remote sync notice:', e);
     }
 
     try {

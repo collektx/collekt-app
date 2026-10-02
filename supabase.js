@@ -616,7 +616,26 @@ async function handleOAuthSessionRouting(session) {
 async function fetchRealRegisteredUsers() {
   if (!window.sb) return typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
   try {
-    const { data, error } = await sb.from('public_profiles').select('*').order('created_at', { ascending: true });
+    let data = null;
+    let error = null;
+
+    // 1. Try secure Postgres RPC get_admin_directory()
+    try {
+      if (typeof sb.rpc === 'function') {
+        const rpcRes = await sb.rpc('get_admin_directory');
+        if (!rpcRes.error && Array.isArray(rpcRes.data) && rpcRes.data.length > 0) {
+          data = rpcRes.data;
+        }
+      }
+    } catch(e) {}
+
+    // 2. Fallback to public_profiles view
+    if (!data || data.length === 0) {
+      const pubRes = await sb.from('public_profiles').select('*').order('created_at', { ascending: true });
+      data = pubRes.data;
+      error = pubRes.error;
+    }
+
     if (error) throw error;
     if (Array.isArray(data) && data.length > 0) {
       const realUsers = data.map(p => {
@@ -629,7 +648,7 @@ async function fetchRealRegisteredUsers() {
           role: p.role || (isCo ? 'company' : 'professional'),
           name: dispName,
           company_name: isCo ? (p.company_name || dispName) : '',
-          avatar_letter: dispName.charAt(0).toUpperCase(),
+          avatar_letter: (dispName || 'U').charAt(0).toUpperCase(),
           verified: p.is_verified === true,
           is_verified: p.is_verified === true
         };

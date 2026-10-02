@@ -95,10 +95,9 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
       return true;
     });
 
-    // 4. Ensure Dave Ojeowere profile is present and active in collekt_all_users
-    let dave = dir.find(u => u && u.email && u.email.toLowerCase().trim() === 'ojeoweredave@gmail.com');
-    if (!dave) {
-      dave = {
+    // 4. Ensure all authentic Supabase registered user accounts are present and active in collekt_all_users
+    const authenticBaseUsers = [
+      {
         id: 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
         name: 'Dave Oladapo Ojeowere',
         first_name: 'Dave',
@@ -109,6 +108,8 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
         role: 'professional',
         title: 'Senior Proposal Manager & Technical Specialist',
         location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
         bio: 'Senior Proposal Manager and Technical Commercial Specialist with extensive experience delivering multi-million dollar EPC & IOC bids across West Africa.',
         skills: ['Proposal Management', 'EPC Tendering', 'COREN Compliance', 'Commercial Valuation', 'IOC Contracting'],
         verified: false,
@@ -123,15 +124,154 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
         total_earned: 0,
         success_rate: 0,
         wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
-      };
-      dir.unshift(dave);
-    } else {
-      dave.suspended = false;
-      dave.status = 'active';
-      if (dave.wallet && (dave.wallet.balance === 2450000 || dave.wallet.balance === 1450000)) {
-        dave.wallet.balance = 0;
+      },
+      {
+        id: '467c002d-124e-4a05-a62f-1cd7b11f666c',
+        name: 'Collekt NG',
+        company_name: 'Collekt NG',
+        email: 'collektng@gmail.com',
+        role: 'company',
+        title: 'Oil & Gas Operator',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        status: 'active',
+        suspended: false,
+        rating: 0.0,
+        review_count: 0,
+        projects_completed: 0,
+        total_earned: 0,
+        created_at: '2026-10-02T10:20:10.960856+00:00',
+        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
+      },
+      {
+        id: 'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
+        name: 'Tessy Celestine',
+        email: 'tessycelestine9@gmail.com',
+        role: 'professional',
+        title: 'Energy Specialist',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        status: 'active',
+        suspended: false,
+        rating: 0.0,
+        review_count: 0,
+        projects_completed: 0,
+        total_earned: 0,
+        created_at: '2026-10-01T16:41:32.309344+00:00',
+        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
+      },
+      {
+        id: '63b0edc5-1e8d-46b9-9ae8-d1800b817ee6',
+        name: 'Mike Chimezie',
+        email: 'dave.ojeowere@gmail.com',
+        role: 'professional',
+        title: 'Energy Specialist',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        status: 'active',
+        suspended: false,
+        rating: 0.0,
+        review_count: 0,
+        projects_completed: 0,
+        total_earned: 0,
+        created_at: '2026-10-01T13:28:13.24169+00:00',
+        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
+      },
+      {
+        id: 'c0788c56-6cde-40d0-90c8-541c8d3cf76c',
+        name: 'Dave Ojeowere',
+        email: 'errandsire@gmail.com',
+        role: 'professional',
+        title: 'Energy Specialist',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        status: 'active',
+        suspended: false,
+        rating: 0.0,
+        review_count: 0,
+        projects_completed: 0,
+        total_earned: 0,
+        created_at: '2026-10-01T09:22:10.051217+00:00',
+        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
+      },
+      {
+        id: 'd1bcafac-9da0-4912-90da-467c8dc00d92',
+        name: 'Dave “Kori” Ojeowere',
+        email: 'smileykori@gmail.com',
+        role: 'professional',
+        title: 'Energy Specialist',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        status: 'active',
+        suspended: false,
+        rating: 0.0,
+        review_count: 0,
+        projects_completed: 0,
+        total_earned: 0,
+        created_at: '2026-10-01T09:18:58.135512+00:00',
+        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
+      },
+      {
+        id: 'a1111111-1111-4111-a111-111111111111',
+        name: 'Collekt Administrator',
+        email: 'admin@collekt.ng',
+        role: 'admin',
+        title: 'Master System Administrator',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: true,
+        is_verified: true,
+        verification_status: 'verified',
+        status: 'active',
+        suspended: false,
+        rating: 5.0,
+        review_count: 0,
+        projects_completed: 0,
+        total_earned: 0,
+        created_at: '2026-09-09T22:12:39.961309+00:00',
+        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
       }
-    }
+    ];
+
+    authenticBaseUsers.forEach(bu => {
+      const idx = dir.findIndex(u => (bu.id && u.id === bu.id) || (bu.email && u.email && u.email.toLowerCase() === bu.email.toLowerCase()));
+      if (idx === -1) {
+        dir.push(bu);
+      } else {
+        dir[idx] = { ...bu, ...dir[idx] };
+        dir[idx].suspended = false;
+        dir[idx].status = 'active';
+        if (dir[idx].wallet && (dir[idx].wallet.balance === 2450000 || dir[idx].wallet.balance === 1450000)) {
+          dir[idx].wallet.balance = 0;
+        }
+      }
+    });
     localStorage.setItem('collekt_all_users', JSON.stringify(dir));
     localStorage.setItem('collekt_directory_clean_v3', 'true');
 
@@ -1217,12 +1357,21 @@ function syncRealUsersToDirectory(realProfiles) {
 
 function getAllRegisteredUsers() {
   try {
-    // Ensure ojeoweredave@gmail.com is unblacklisted
+    // Ensure all authentic accounts are unblacklisted
     try {
+      const protectedAuthentic = [
+        'ojeoweredave@gmail.com', 'usr_dave_ojeowere', 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
+        'collektng@gmail.com', '467c002d-124e-4a05-a62f-1cd7b11f666c',
+        'tessycelestine9@gmail.com', 'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
+        'dave.ojeowere@gmail.com', '63b0edc5-1e8d-46b9-9ae8-d1800b817ee6',
+        'errandsire@gmail.com', 'c0788c56-6cde-40d0-90c8-541c8d3cf76c',
+        'smileykori@gmail.com', 'd1bcafac-9da0-4912-90da-467c8dc00d92',
+        'admin@collekt.ng', 'a1111111-1111-4111-a111-111111111111'
+      ];
       let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
       del = del.filter(x => {
         const s = String(x).toLowerCase().trim();
-        return s !== 'ojeoweredave@gmail.com' && s !== 'usr_dave_ojeowere' && s !== 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91';
+        return !protectedAuthentic.includes(s);
       });
       localStorage.setItem('collekt_deleted_users', JSON.stringify(del));
     } catch(e){}
@@ -1285,37 +1434,133 @@ function getAllRegisteredUsers() {
       }
     }
 
-    // 3. Guarantee canonical Dave Oladapo Ojeowere account with real Supabase UUID
-    const daveIdx = raw.findIndex(u => u && u.email && u.email.toLowerCase() === 'ojeoweredave@gmail.com');
-    const daveProfile = {
-      id: 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
-      name: 'Dave Oladapo Ojeowere',
-      first_name: 'Dave',
-      last_name: 'Ojeowere',
-      other_name: 'Oladapo',
-      username: 'ojeoweredave',
-      email: 'ojeoweredave@gmail.com',
-      role: 'professional',
-      title: 'Senior Proposal Manager & Technical Specialist',
-      location: 'Lagos, Nigeria',
-      bio: 'Senior Proposal Manager and Technical Commercial Specialist with extensive experience delivering multi-million dollar EPC & IOC bids across West Africa.',
-      skills: ['Proposal Management', 'EPC Tendering', 'COREN Compliance', 'Commercial Valuation', 'IOC Contracting'],
-      verified: false,
-      is_verified: false,
-      verification_status: 'none',
-      identity_verified: false,
-      rating: 0.0,
-      review_count: 0,
-      projects_completed: 0,
-      total_earned: 0,
-      success_rate: 0
-    };
+    // 3. Guarantee canonical authentic Supabase accounts in directory
+    const authenticBaseUsers = [
+      {
+        id: 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
+        name: 'Dave Oladapo Ojeowere',
+        first_name: 'Dave',
+        last_name: 'Ojeowere',
+        other_name: 'Oladapo',
+        username: 'ojeoweredave',
+        email: 'ojeoweredave@gmail.com',
+        role: 'professional',
+        title: 'Senior Proposal Manager & Technical Specialist',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        bio: 'Senior Proposal Manager and Technical Commercial Specialist with extensive experience delivering multi-million dollar EPC & IOC bids across West Africa.',
+        skills: ['Proposal Management', 'EPC Tendering', 'COREN Compliance', 'Commercial Valuation', 'IOC Contracting'],
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        identity_verified: false,
+        rating: 0.0,
+        review_count: 0,
+        projects_completed: 0,
+        total_earned: 0,
+        success_rate: 0
+      },
+      {
+        id: '467c002d-124e-4a05-a62f-1cd7b11f666c',
+        name: 'Collekt NG',
+        company_name: 'Collekt NG',
+        email: 'collektng@gmail.com',
+        role: 'company',
+        title: 'Oil & Gas Operator',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        created_at: '2026-10-02T10:20:10.960856+00:00'
+      },
+      {
+        id: 'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
+        name: 'Tessy Celestine',
+        email: 'tessycelestine9@gmail.com',
+        role: 'professional',
+        title: 'Energy Specialist',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        created_at: '2026-10-01T16:41:32.309344+00:00'
+      },
+      {
+        id: '63b0edc5-1e8d-46b9-9ae8-d1800b817ee6',
+        name: 'Mike Chimezie',
+        email: 'dave.ojeowere@gmail.com',
+        role: 'professional',
+        title: 'Energy Specialist',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        created_at: '2026-10-01T13:28:13.24169+00:00'
+      },
+      {
+        id: 'c0788c56-6cde-40d0-90c8-541c8d3cf76c',
+        name: 'Dave Ojeowere',
+        email: 'errandsire@gmail.com',
+        role: 'professional',
+        title: 'Energy Specialist',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        created_at: '2026-10-01T09:22:10.051217+00:00'
+      },
+      {
+        id: 'd1bcafac-9da0-4912-90da-467c8dc00d92',
+        name: 'Dave “Kori” Ojeowere',
+        email: 'smileykori@gmail.com',
+        role: 'professional',
+        title: 'Energy Specialist',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        created_at: '2026-10-01T09:18:58.135512+00:00'
+      },
+      {
+        id: 'a1111111-1111-4111-a111-111111111111',
+        name: 'Collekt Administrator',
+        email: 'admin@collekt.ng',
+        role: 'admin',
+        title: 'Master System Administrator',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: true,
+        is_verified: true,
+        verification_status: 'verified',
+        created_at: '2026-09-09T22:12:39.961309+00:00'
+      }
+    ];
 
-    if (daveIdx >= 0) {
-      raw[daveIdx] = { ...daveProfile, ...raw[daveIdx], id: 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' };
-    } else {
-      raw.unshift(daveProfile);
-    }
+    authenticBaseUsers.forEach(bu => {
+      const idx = raw.findIndex(u => (bu.id && u.id === bu.id) || (bu.email && u.email && u.email.toLowerCase() === bu.email.toLowerCase()));
+      if (idx >= 0) {
+        raw[idx] = { ...bu, ...raw[idx] };
+      } else {
+        raw.push(bu);
+      }
+    });
 
     // 4. Strict deduplication by unique lowercase email and unique ID
     const seenEmails = new Set();
