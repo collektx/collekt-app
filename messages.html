@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=134.0">
-<link rel="stylesheet" href="shared.css?v=134.0">
-<link rel="stylesheet" href="glass.css?v=134.0">
+<link rel="stylesheet" href="style.css?v=135.0">
+<link rel="stylesheet" href="shared.css?v=135.0">
+<link rel="stylesheet" href="glass.css?v=135.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -874,10 +874,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=134.0"></script>
-<script src="app.js?v=134.0"></script>
-<script src="collekt-ai.js?v=134.0"></script>
-<script src="settings-popup.js?v=134.0"></script>
+<script src="supabase.js?v=135.0"></script>
+<script src="app.js?v=135.0"></script>
+<script src="collekt-ai.js?v=135.0"></script>
+<script src="settings-popup.js?v=135.0"></script>
 <script>
   requireAuth();
 
@@ -905,55 +905,27 @@
   function renderContacts() {
     const list = document.getElementById('msgList');
     if (!list) return;
-    const convs = getMyConversations().sort((a, b) => new Date(b.last_at) - new Date(a.last_at));
+    let convs = getMyConversations().sort((a, b) => new Date(b.last_at) - new Date(a.last_at));
     const me = getUser();
 
+    // If activeConvId is currently selected (e.g. user just started a new chat draft), ensure it is visible in the list while active
+    if (activeConvId && !convs.some(c => c.id === activeConvId)) {
+      const allConvs = getAllConversations();
+      const draftConv = allConvs.find(c => c.id === activeConvId);
+      if (draftConv) {
+        convs.unshift(draftConv);
+      }
+    }
+
     if (convs.length === 0) {
-      const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
-      const seen = new Set();
-      const others = [];
-
-      allUsers.forEach(u => {
-        if (!u || !me) return;
-        if (me.id && u.id === me.id) return;
-        if (me.email && u.email && u.email.toLowerCase() === me.email.toLowerCase()) return;
-
-        const emailKey = (u.email || '').toLowerCase().trim();
-        const idKey = (u.id || '').toLowerCase().trim();
-        const key = emailKey || idKey;
-        if (!key || seen.has(key)) return;
-        seen.add(key);
-
-        others.push(u);
-      });
-
       list.innerHTML = `
-        <div style="padding:20px 14px; text-align:center;">
-          <div style="font-size:32px; margin-bottom:8px;">💬</div>
-          <div style="font-size:14px; font-weight:900; color:var(--ink); margin-bottom:4px;">No Active Conversations Yet</div>
-          <p style="font-size:11.5px; color:var(--muted); line-height:1.4; margin-bottom:14px;">Select an active member below to start messaging instantly:</p>
-          
-          <div style="display:flex; flex-direction:column; gap:8px; text-align:left; margin-bottom:14px;">
-            ${others.map(u => {
-              const bg = typeof colorForId === 'function' ? colorForId(u.id || u.email) : '#0e3b35';
-              const name = (u.role === 'company' ? (u.company_name || u.full_name || u.name) : (u.name || u.full_name || u.company_name)) || u.email;
-              const roleTag = u.role === 'company' ? '🏢 Enterprise' : '👷 Professional';
-              return `
-                <div onclick="startConversationWith('${u.id || u.email}')" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--white); cursor:pointer; transition:all .15s;" onmouseover="this.style.borderColor='var(--teal)'; this.style.background='var(--paper)'" onmouseout="this.style.borderColor='var(--line)'; this.style.background='var(--white)'">
-                  <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-                    <div style="width:32px; height:32px; border-radius:50%; background:${bg}; color:#fff; display:grid; place-items:center; font-size:12px; font-weight:900; flex-shrink:0;">${name.charAt(0).toUpperCase()}</div>
-                    <div style="min-width:0;">
-                      <div style="font-size:12.5px; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(name)}</div>
-                      <div style="font-size:10px; color:#22c55e; font-weight:700; display:flex; align-items:center; gap:3px;"><span style="width:5px; height:5px; border-radius:50%; background:#22c55e; display:inline-block;"></span> Active &bull; ${roleTag}</div>
-                    </div>
-                  </div>
-                  <button class="btn btn-primary btn-xs" style="font-size:10px; padding:4px 8px; border-radius:6px; font-weight:800;">💬 Chat</button>
-                </div>
-              `;
-            }).join('')}
-          </div>
-
-          <button onclick="openNewConversationModal()" class="btn btn-outline btn-sm" style="font-size:11.5px; width:100%; justify-content:center; font-weight:800;">✏️ Search All Accounts</button>
+        <div style="padding:48px 18px; text-align:center;">
+          <div style="width:52px; height:52px; border-radius:50%; background:var(--paper); display:grid; place-items:center; margin:0 auto 14px; font-size:24px; border:1px solid var(--line);">💬</div>
+          <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:6px;">No conversations yet</div>
+          <p style="font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:18px;">When you start a chat or receive messages, your conversations will appear here.</p>
+          <button onclick="openNewConversationModal()" class="btn btn-primary btn-sm" style="font-size:12px; font-weight:800; padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:6px;">
+            <span>✏️</span> New Message
+          </button>
         </div>
       `;
       renderEmptyChatPane();
@@ -1192,14 +1164,6 @@
         </div>
       </div>
       <div class="chat-actions" style="display:flex; align-items:center; gap:8px;">
-        ${isCompanySender ? `
-        <button class="btn btn-outline btn-sm" onclick="openChatAiDraftModal()" style="font-weight:800; font-size:12px; display:inline-flex; align-items:center; gap:5px; border-radius:10px; min-height:36px; padding:0 12px; background:var(--paper); border:1.5px solid var(--line);" title="Draft a contextual, zero-fabrication message using AI">
-          <span>✨</span> AI Draft
-        </button>
-        <button class="btn btn-primary btn-sm" onclick="openChatTransferModal()" style="font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f); color:#fff; display:flex; align-items:center; gap:6px; padding:0 14px; border-radius:10px; min-height:36px; box-shadow:0 4px 12px rgba(14,59,53,0.25);" title="Transfer money directly to recipient wallet">
-          <span style="font-size:14px;">💸</span> Transfer to Wallet
-        </button>
-        ` : ''}
         <button class="chat-action-btn" title="Voice Call" onclick="triggerCall('voice')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         </button>
@@ -2519,6 +2483,21 @@
     const urlParams = new URLSearchParams(window.location.search);
     const targetConvParam = urlParams.get('conv') || urlParams.get('c') || urlParams.get('conversation');
     const targetUserParam = urlParams.get('user') || urlParams.get('id') || urlParams.get('start') || urlParams.get('u') || urlParams.get('to') || urlParams.get('with') || urlParams.get('username') || urlParams.get('email');
+
+    // Clean up empty ghost conversations from localStorage where no messages ever existed
+    try {
+      const allMsgs = getAllMessages();
+      let allConvs = getAllConversations();
+      const cleanedConvs = allConvs.filter(c => {
+        if (!c || !Array.isArray(c.participants)) return false;
+        const hasMsgs = allMsgs.some(m => m.conversation_id === c.id);
+        const hasPreview = Boolean(c.last_message && String(c.last_message).trim().length > 0);
+        return hasMsgs || hasPreview;
+      });
+      if (cleanedConvs.length !== allConvs.length) {
+        saveAllConversations(cleanedConvs);
+      }
+    } catch(e){}
 
     // Load conversations
     const myConvs = getMyConversations();

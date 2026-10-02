@@ -53,9 +53,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=134.0">
-<link rel="stylesheet" href="shared.css?v=134.0">
-<link rel="stylesheet" href="glass.css?v=134.0">
+<link rel="stylesheet" href="style.css?v=135.0">
+<link rel="stylesheet" href="shared.css?v=135.0">
+<link rel="stylesheet" href="glass.css?v=135.0">
 
 <style>
   /* Corporate Tax Invoice Print Styles */
@@ -1124,8 +1124,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=134.0"></script>
-<script src="app.js?v=134.0"></script>
+<script src="supabase.js?v=135.0"></script>
+<script src="app.js?v=135.0"></script>
 <script>
   async function initAdminDashboard() {
     // 0. Sanitize local storage to purge any stale test rows or probe transactions
@@ -2319,10 +2319,6 @@
     if (u.email) {
       try { userUploads = { ...userUploads, ...(JSON.parse(localStorage.getItem('collekt_uploads_' + u.email)) || {}) }; } catch(e){}
     }
-    try {
-      const defUploads = JSON.parse(localStorage.getItem('collekt_uploads_default')) || {};
-      userUploads = { ...defUploads, ...userUploads };
-    } catch(e){}
 
     const categories = ['cv', 'certifications', 'documents', 'company-docs', 'portfolio'];
     categories.forEach(cat => {
@@ -2356,35 +2352,23 @@
     }
     if (u.certifications && u.certifications.length) {
       u.certifications.forEach(c => {
-        const cName = typeof c === 'string' ? c : (c.name || 'COREN_Engineering_Certificate.pdf');
-        if (!userDocs.some(d => d.name === cName)) {
+        const cName = typeof c === 'string' ? c : (c.name || c.title || '');
+        if (cName && !userDocs.some(d => d.name === cName)) {
           userDocs.push({
             name: cName,
             category: 'Engineering Certification',
-            size: 300000,
+            size: c.size || 300000,
+            dataURL: c.dataURL || null,
             type: 'application/pdf'
           });
         }
       });
     }
 
-    // 3. Fallback standard documents if no custom attachment
-    if (userDocs.length === 0) {
-      const isCo = (u.role || '').toLowerCase() === 'company';
-      userDocs = [
-        {
-          name: isCo ? `${(u.name || 'Company').replace(/\s+/g,'_')}_CAC_Incorporation_RC2026.pdf` : `${(u.name || 'Candidate').replace(/\s+/g,'_')}_COREN_License_2026.pdf`,
-          category: isCo ? 'CAC Corporate License' : 'COREN Professional License',
-          size: 520000,
-          type: 'application/pdf'
-        },
-        {
-          name: isCo ? `${(u.name || 'Company').replace(/\s+/g,'_')}_Tax_Identification_TIN.pdf` : `${(u.name || 'Candidate').replace(/\s+/g,'_')}_NIN_Identity_Card.pdf`,
-          category: isCo ? 'Corporate TIN Tax Certificate' : 'NIN Identity Verification',
-          size: 280000,
-          type: 'application/pdf'
-        }
-      ];
+    // Dynamic modal subtitle
+    const subTitleEl = document.getElementById('docModalSubTitle');
+    if (subTitleEl) {
+      subTitleEl.textContent = `Reviewing verification application submitted by ${u.email || u.name}`;
     }
 
     const isVerified = (u.verified !== false && u.verification_status !== 'unverified' && u.verification_status !== 'rejected');
@@ -2427,9 +2411,18 @@
         <div>
           <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
             <span>Attached Verification Credentials (${userDocs.length})</span>
-            <span style="color:var(--teal); font-weight:900;">100% Watermark Protected</span>
+            ${userDocs.length > 0 ? `<span style="color:var(--teal); font-weight:900;">100% Watermark Protected</span>` : ''}
           </div>
 
+          ${userDocs.length === 0 ? `
+            <div style="background:var(--white); border:1.5px dashed var(--line); border-radius:12px; padding:32px 16px; text-align:center;">
+              <div style="font-size:32px; margin-bottom:8px;">📂</div>
+              <div style="font-size:14px; font-weight:900; color:var(--ink);">No Verification Documents Uploaded Yet</div>
+              <div style="font-size:12px; color:var(--muted); margin-top:4px; max-width:340px; margin-left:auto; margin-right:auto; line-height:1.5;">
+                This member has not yet submitted any identity cards, licenses, or verification credentials.
+              </div>
+            </div>
+          ` : `
           <div style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; padding-right:4px;">
             ${userDocs.map(d => `
               <div style="background:var(--white); border:1px solid var(--line); border-radius:12px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
@@ -2446,6 +2439,7 @@
               </div>
             `).join('')}
           </div>
+          `}
         </div>
 
       </div>
@@ -2527,18 +2521,33 @@
       return;
     }
 
-    queue.innerHTML = pendingPros.map(p => `
+    queue.innerHTML = pendingPros.map(p => {
+      let pDocsCount = 0;
+      try {
+        const uUploads = JSON.parse(localStorage.getItem('collekt_uploads_' + p.id) || localStorage.getItem('collekt_uploads_' + p.email) || '{}');
+        for (const k in uUploads) {
+          if (Array.isArray(uUploads[k])) pDocsCount += uUploads[k].length;
+        }
+      } catch(e){}
+      if (p.cv || p.cv_name) pDocsCount++;
+      if (Array.isArray(p.certifications)) pDocsCount += p.certifications.length;
+
+      const credStatusText = pDocsCount > 0 ? `${pDocsCount} Verification Document${pDocsCount === 1 ? '' : 's'} Uploaded` : 'No Documents Uploaded Yet';
+      const credStatusColor = pDocsCount > 0 ? '#15803d' : 'var(--muted)';
+
+      return `
       <div class="v-card">
         <div>
           <div style="font-size:15px; font-weight:900; color:var(--ink);">${escapeHTML(p.name)}</div>
-          <div style="font-size:12px; color:var(--muted); margin-top:2px;">${escapeHTML(p.email)} &bull; COREN / NIN Credentials Submitted</div>
+          <div style="font-size:12px; color:${credStatusColor}; font-weight:700; margin-top:2px;">${escapeHTML(p.email)} &bull; ${credStatusText}</div>
         </div>
         <div style="display:flex; gap:8px;">
           <button class="btn btn-outline btn-sm" onclick="inspectProCredentials('${p.id}')">👁️ Inspect Profile &amp; Docs</button>
           <button class="btn btn-primary btn-sm" onclick="approveLiveUserVerification('${p.id}')">✅ Grant Shield 🛡️</button>
         </div>
       </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   function renderAdminCoVerifyQueue() {
@@ -2559,18 +2568,32 @@
       return;
     }
 
-    queue.innerHTML = pendingCos.map(c => `
+    queue.innerHTML = pendingCos.map(c => {
+      let cDocsCount = 0;
+      try {
+        const uUploads = JSON.parse(localStorage.getItem('collekt_uploads_' + c.id) || localStorage.getItem('collekt_uploads_' + c.email) || '{}');
+        for (const k in uUploads) {
+          if (Array.isArray(uUploads[k])) cDocsCount += uUploads[k].length;
+        }
+      } catch(e){}
+      if (c.cac_document || c.cac_file) cDocsCount++;
+
+      const credStatusText = cDocsCount > 0 ? `${cDocsCount} Corporate Document${cDocsCount === 1 ? '' : 's'} Uploaded` : (c.cac ? `CAC RC: ${escapeHTML(c.cac)}` : 'No Documents Uploaded Yet');
+      const credStatusColor = cDocsCount > 0 ? '#15803d' : 'var(--muted)';
+
+      return `
       <div class="v-card">
         <div>
-          <div style="font-size:15px; font-weight:900; color:var(--ink);">${escapeHTML(c.name)}</div>
-          <div style="font-size:12px; color:var(--muted); margin-top:2px;">${escapeHTML(c.email)} &bull; CAC / TIN Corporate Documents</div>
+          <div style="font-size:15px; font-weight:900; color:var(--ink);">${escapeHTML(c.name || c.company_name)}</div>
+          <div style="font-size:12px; color:${credStatusColor}; font-weight:700; margin-top:2px;">${escapeHTML(c.email)} &bull; ${credStatusText}</div>
         </div>
         <div style="display:flex; gap:8px;">
           <button class="btn btn-outline btn-sm" onclick="inspectProCredentials('${c.id}')">👁️ Inspect CAC Docs</button>
           <button class="btn btn-primary btn-sm" onclick="approveLiveUserVerification('${c.id}')">✅ Approve Enterprise 🛡️</button>
         </div>
       </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   async function approveLiveUserVerification(userId) {

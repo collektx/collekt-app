@@ -1858,12 +1858,20 @@ function getMyConversations() {
     .filter(Boolean)
     .map(x => String(x).toLowerCase().trim());
 
+  const allMsgs = getAllMessages();
+
   return getAllConversations().filter(c => {
     if (!c || !Array.isArray(c.participants)) return false;
-    return c.participants.some(p => {
+    const isParticipant = c.participants.some(p => {
       const pNorm = String(p || '').toLowerCase().trim();
       return myIds.includes(pNorm);
     });
+    if (!isParticipant) return false;
+
+    // Filter out uninitiated ghost conversations where no messages were ever sent or received
+    const hasMsgs = allMsgs.some(m => m.conversation_id === c.id);
+    const hasPreview = Boolean(c.last_message && String(c.last_message).trim().length > 0);
+    return hasMsgs || hasPreview;
   });
 }
 
@@ -6812,13 +6820,42 @@ window.matchTalentWithKolly = async function(job, candidates) {
   } catch(e) {
     console.warn('matchTalentWithKolly API error:', e);
   }
-  return candidates.map(c => ({
-    candidate_id: c.id,
-    candidate_name: c.name || c.full_name || 'Candidate',
-    candidate_title: c.title || 'Engineer',
-    match_score: (c.verified || c.is_verified) ? 95 : 84,
-    match_reason: (c.verified || c.is_verified) ? 'Shield Verified • Aligned Engineering Discipline' : 'Relevant Engineering Background'
-  }));
+  // Deterministic local matching based on actual candidate skills, location, and role
+  const jobTitle = ((job && job.title) || '').toLowerCase();
+  const jobSkills = Array.isArray(job && job.skills) ? job.skills.map(s => String(s).toLowerCase()) : [];
+  const jobLoc = ((job && job.location) || '').toLowerCase();
+
+  return candidates.map(c => {
+    const cTitle = (c.title || '').toLowerCase();
+    const cSkills = Array.isArray(c.skills) ? c.skills.map(s => String(s).toLowerCase()) : [];
+    const cLoc = (c.location || '').toLowerCase();
+
+    let matchedSkills = [];
+    if (jobSkills.length > 0 && cSkills.length > 0) {
+      matchedSkills = jobSkills.filter(js => cSkills.some(cs => cs.includes(js) || js.includes(cs)));
+    }
+
+    let score = 50;
+    if (matchedSkills.length > 0) score += Math.min(30, matchedSkills.length * 10);
+    if (jobTitle && cTitle && jobTitle.split(' ').some(w => w.length > 3 && cTitle.includes(w))) score += 10;
+    if (c.verified || c.is_verified) score += 5;
+    if (jobLoc && cLoc && (jobLoc.includes(cLoc) || cLoc.includes(jobLoc))) score += 5;
+
+    const finalScore = Math.min(98, Math.max(40, score));
+    const reasons = [];
+    if (matchedSkills.length > 0) reasons.push(`Matches skills: ${matchedSkills.slice(0, 3).join(', ')}`);
+    if (c.verified || c.is_verified) reasons.push('Shield Verified 🛡️');
+    if (jobLoc && cLoc && (jobLoc.includes(cLoc) || cLoc.includes(jobLoc))) reasons.push(`Location: ${c.location}`);
+    if (!reasons.length) reasons.push('Professional discipline alignment');
+
+    return {
+      candidate_id: c.id,
+      candidate_name: c.name || c.full_name || 'Candidate',
+      candidate_title: c.title || 'Engineer',
+      match_score: finalScore,
+      match_reason: reasons.join(' • ')
+    };
+  });
 };
 
 window.draftJobScopeWithKolly = async function(prompt, discipline = '', budget = '') {

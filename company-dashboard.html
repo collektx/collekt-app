@@ -46,9 +46,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=134.0">
-<link rel="stylesheet" href="shared.css?v=134.0">
-<link rel="stylesheet" href="glass.css?v=134.0">
+<link rel="stylesheet" href="style.css?v=135.0">
+<link rel="stylesheet" href="shared.css?v=135.0">
+<link rel="stylesheet" href="glass.css?v=135.0">
 
 <style>
   html, body {
@@ -591,9 +591,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=134.0"></script>
-<script src="app.js?v=134.0"></script>
-<script src="collekt-ai.js?v=134.0"></script>
+<script src="supabase.js?v=135.0"></script>
+<script src="app.js?v=135.0"></script>
+<script src="collekt-ai.js?v=135.0"></script>
 <script>
   requireCompany();
   
@@ -951,24 +951,32 @@
       const ratingVal = (p.rating != null && Number(p.rating) > 0) ? Number(p.rating).toFixed(1) : '0.0';
       const reviewsStr = p.review_count ? `(${p.review_count} reviews)` : '(0 reviews)';
       const verifiedBadge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(14, p) : '';
-      const matchScore = p.match_score || (p.verified ? 96 : 85);
-      const matchReason = p.match_reason || (p.verified ? 'Verified Shield • Engineering Alignment' : 'Qualified Technical Specialist');
+      const matchScore = (p.match_score != null && Number(p.match_score) > 0) ? Math.round(Number(p.match_score)) : null;
+      const matchReason = p.match_reason || '';
 
       return `
         <div class="talent-card">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            ${matchScore ? `
             <span style="font-size:10px; font-weight:800; color:var(--teal); background:rgba(19,117,111,0.1); padding:2px 8px; border-radius:99px;">
               ⚡ ${matchScore}% Kolly Match
-            </span>
+            </span>` : `
+            <span style="font-size:10px; font-weight:700; color:var(--muted); background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:99px;">
+              ${escapeHTML(p.industry || p.sector || 'Specialist')}
+            </span>`}
             <span style="font-size:11px; color:var(--muted);">${p.years_experience ? p.years_experience + 'y exp' : 'Specialist'}</span>
           </div>
           <div class="talent-avatar" style="background:${bg}; overflow:hidden;">${avatarContent}</div>
           <div class="talent-name" style="font-weight:800; display:inline-flex; align-items:center;">${escapeHTML(p.name || p.username || 'Professional')}${verifiedBadge}</div>
           <div class="talent-title">${escapeHTML(p.title || 'Energy Specialist')}</div>
           <div class="talent-rating">★ ${ratingVal} <span style="font-size:11px; color:var(--muted);">${reviewsStr}</span></div>
+          ${matchReason ? `
           <div style="font-size:11px; color:var(--muted); margin:4px 0 8px 0; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;" title="${escapeHTML(matchReason)}">
             🦖 <em>${escapeHTML(matchReason)}</em>
-          </div>
+          </div>` : (p.bio ? `
+          <div style="font-size:11px; color:var(--muted); margin:4px 0 8px 0; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;" title="${escapeHTML(p.bio)}">
+            ${escapeHTML(p.bio)}
+          </div>` : '')}
           <div class="talent-tags">${skillsTags}</div>
           <div style="display:flex; gap:6px; margin-top:8px;">
             <a href="public-profile.html?id=${p.id || p.email}" class="btn btn-outline btn-sm" style="flex:1; min-height:34px; font-size:12px; justify-content:center; text-decoration:none; display:inline-flex; align-items:center;">Profile</a>
@@ -980,9 +988,13 @@
   }
 
   async function runKollyTalentMatchDashboard() {
-    if (typeof showToast === 'function') showToast('🦖 Kolly AI is matching candidates against your posted jobs...');
     const jobs = typeof getPostedJobs === 'function' ? getPostedJobs() : [];
-    const activeJob = jobs[0] || { title: 'Senior EPC Engineer', skills: ['AutoCAD', 'Engineering', 'Safety'] };
+    if (!jobs || jobs.length === 0) {
+      if (typeof showToast === 'function') showToast('⚠️ Please post a job or project opportunity first before matching candidates.', 'warning');
+      return;
+    }
+    if (typeof showToast === 'function') showToast('🦖 Kolly AI is matching candidates against your posted jobs...');
+    const activeJob = jobs[0];
     const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
     const pros = allUsers.filter(u => u && (u.role === 'professional' || (!u.role && u.role !== 'company')));
 
@@ -1800,7 +1812,7 @@
   </div>
 </div>
 
-<script src="settings-popup.js?v=134.0"></script>
+<script src="settings-popup.js?v=135.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>
