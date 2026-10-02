@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=136.0">
-<link rel="stylesheet" href="shared.css?v=136.0">
-<link rel="stylesheet" href="glass.css?v=136.0">
+<link rel="stylesheet" href="style.css?v=137.0">
+<link rel="stylesheet" href="shared.css?v=137.0">
+<link rel="stylesheet" href="glass.css?v=137.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -593,27 +593,6 @@
   .call-btn.active { background: #fff; color: #071210; }
   .call-btn.end-call { width: 62px; height: 62px; background: #ef4444; color: #fff; font-size: 24px; box-shadow: 0 8px 24px rgba(239,68,68,.5); }
   .call-btn.end-call:hover { background: #dc2626; transform: scale(1.08); }
-
-  /* Voice & Video Note Recording Modal */
-  .media-rec-modal { position: fixed; inset: 0; z-index: 10001; background: rgba(7, 18, 16, 0.88); backdrop-filter: blur(10px); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 24px; color: #fff; animation: fadeIn .2s ease; }
-  .media-rec-modal.open { display: flex; }
-  .media-rec-card { background: #0f2220; border: 1px solid rgba(255,255,255,0.12); border-radius: 24px; padding: 32px 28px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; gap: 16px; position: relative; }
-  .media-rec-title { font-size: 20px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; }
-  .media-rec-timer { font-size: 32px; font-weight: 900; font-family: monospace; color: var(--amber); letter-spacing: .05em; }
-  .wave-bars { display: flex; align-items: center; justify-content: center; gap: 4px; height: 40px; margin: 8px 0; }
-  .wave-bar { width: 5px; height: 12px; background: var(--teal); border-radius: 99px; animation: wavePulse 1s ease-in-out infinite alternate; }
-  .wave-bar:nth-child(2) { animation-delay: .15s; }
-  .wave-bar:nth-child(3) { animation-delay: .3s; }
-  .wave-bar:nth-child(4) { animation-delay: .45s; }
-  .wave-bar:nth-child(5) { animation-delay: .6s; }
-  .wave-bar:nth-child(6) { animation-delay: .75s; }
-  @keyframes wavePulse { 0% { height: 8px; background: var(--teal); } 100% { height: 36px; background: var(--amber); } }
-
-  .rec-video-preview { width: 220px; height: 220px; border-radius: 50%; object-fit: cover; border: 3px solid var(--amber); background: #000; box-shadow: 0 8px 30px rgba(0,0,0,0.4); margin: 8px 0; }
-
-  /* Media Note Bubbles */
-  .voice-note-card { display: flex; flex-direction: column; gap: 6px; min-width: 240px; }
-  .video-note-card { display: flex; flex-direction: column; gap: 6px; max-width: 280px; }
   .mobile-back-btn { display: none !important; }
 
   @media (max-width: 768px) {
@@ -864,10 +843,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=136.0"></script>
-<script src="app.js?v=136.0"></script>
-<script src="collekt-ai.js?v=136.0"></script>
-<script src="settings-popup.js?v=136.0"></script>
+<script src="supabase.js?v=137.0"></script>
+<script src="app.js?v=137.0"></script>
+<script src="collekt-ai.js?v=137.0"></script>
+<script src="settings-popup.js?v=137.0"></script>
 <script>
   requireAuth();
 
@@ -1135,8 +1114,6 @@
     const me = getUser();
     const roleLabel = other.role === 'company' ? 'Company' : 'Professional';
     const badge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(16, other) : '';
-
-    const isCompanySender = me && (me.role === 'company' || me.user_type === 'company');
 
     document.getElementById('chatHeader').innerHTML = `
       ${window.innerWidth <= 768 ? `<button class="mobile-back-btn" onclick="goBackToList()" aria-label="Back to conversations">&larr; Conversations</button>` : ''}
@@ -1567,158 +1544,7 @@
     input.value = '';
   }
 
-  /* ═ VOICE & VIDEO NOTE RECORDING ENGINE ═ */
-  let mediaNoteRecorder = null;
-  let mediaNoteChunks = [];
-  let mediaNoteTimer = null;
-  let mediaNoteSeconds = 0;
-  let mediaNoteType = 'voice'; // 'voice' | 'video'
-  let mediaNoteStream = null;
-
-  async function startVoiceNoteRecording() {
-    if (!activeConvId) {
-      if (typeof showToast === 'function') showToast('⚠️ Please select a conversation first');
-      return;
-    }
-    mediaNoteType = 'voice';
-    mediaNoteSeconds = 0;
-    mediaNoteChunks = [];
-    updateRecTimerDisplay();
-
-    if (document.getElementById('recModalTitle')) document.getElementById('recModalTitle').innerHTML = '🎙️ Voice Note Recorder';
-    if (document.getElementById('recSubText')) document.getElementById('recSubText').textContent = 'Ready to record. Click "Start Recording" when ready...';
-    if (document.getElementById('recWaveform')) document.getElementById('recWaveform').style.display = 'flex';
-    if (document.getElementById('recVideoPreview')) document.getElementById('recVideoPreview').style.display = 'none';
-
-    if (document.getElementById('recActionsReady')) document.getElementById('recActionsReady').style.display = 'flex';
-    if (document.getElementById('recActionsRecording')) document.getElementById('recActionsRecording').style.display = 'none';
-
-    const modal = document.getElementById('mediaNoteRecorderModal');
-    if (modal) modal.classList.add('open');
-
-    try {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        mediaNoteStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      }
-    } catch(e) {
-      console.warn('Mic access notice:', e);
-    }
-  }
-
-  async function startVideoNoteRecording() {
-    if (!activeConvId) {
-      if (typeof showToast === 'function') showToast('⚠️ Please select a conversation first');
-      return;
-    }
-    mediaNoteType = 'video';
-    mediaNoteSeconds = 0;
-    mediaNoteChunks = [];
-    updateRecTimerDisplay();
-
-    if (document.getElementById('recModalTitle')) document.getElementById('recModalTitle').innerHTML = '📹 Video Note Recorder';
-    if (document.getElementById('recSubText')) document.getElementById('recSubText').textContent = 'Position your camera. Click "Start Recording" when ready...';
-    if (document.getElementById('recWaveform')) document.getElementById('recWaveform').style.display = 'none';
-    const vidPrev = document.getElementById('recVideoPreview');
-    if (vidPrev) vidPrev.style.display = 'block';
-
-    if (document.getElementById('recActionsReady')) document.getElementById('recActionsReady').style.display = 'flex';
-    if (document.getElementById('recActionsRecording')) document.getElementById('recActionsRecording').style.display = 'none';
-
-    const modal = document.getElementById('mediaNoteRecorderModal');
-    if (modal) modal.classList.add('open');
-
-    try {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        mediaNoteStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-        if (vidPrev) vidPrev.srcObject = mediaNoteStream;
-      }
-    } catch(e) {
-      console.warn('Camera access notice:', e);
-    }
-  }
-
-  async function beginMediaNoteRecording() {
-    if (document.getElementById('recActionsReady')) document.getElementById('recActionsReady').style.display = 'none';
-    if (document.getElementById('recActionsRecording')) document.getElementById('recActionsRecording').style.display = 'flex';
-    if (document.getElementById('recSubText')) document.getElementById('recSubText').textContent = '🔴 Recording in progress... Click Stop & Send when finished.';
-
-    mediaNoteChunks = [];
-    mediaNoteSeconds = 0;
-    updateRecTimerDisplay();
-
-    try {
-      if (mediaNoteStream && window.MediaRecorder) {
-        const mime = mediaNoteType === 'video' ? 'video/webm' : 'audio/webm';
-        mediaNoteRecorder = new MediaRecorder(mediaNoteStream, { mimeType: MediaRecorder.isTypeSupported(mime) ? mime : '' });
-        mediaNoteRecorder.ondataavailable = e => {
-          if (e.data && e.data.size > 0) mediaNoteChunks.push(e.data);
-        };
-        mediaNoteRecorder.start(100);
-      }
-    } catch(err) {
-      console.warn('Recorder start notice:', err);
-    }
-
-    clearInterval(mediaNoteTimer);
-    mediaNoteTimer = setInterval(() => {
-      mediaNoteSeconds++;
-      updateRecTimerDisplay();
-    }, 1000);
-  }
-
-  function updateRecTimerDisplay() {
-    const m = String(Math.floor(mediaNoteSeconds / 60)).padStart(2, '0');
-    const s = String(mediaNoteSeconds % 60).padStart(2, '0');
-    const disp = document.getElementById('recTimerDisplay');
-    if (disp) disp.textContent = `${m}:${s}`;
-  }
-
-  function cancelMediaNoteRecording() {
-    stopStreamTracks();
-    clearInterval(mediaNoteTimer);
-    const modal = document.getElementById('mediaNoteRecorderModal');
-    if (modal) modal.classList.remove('open');
-  }
-
-  async function stopAndSendMediaNote() {
-    clearInterval(mediaNoteTimer);
-    const modal = document.getElementById('mediaNoteRecorderModal');
-    if (modal) modal.classList.remove('open');
-
-    let mediaDataURL = '';
-
-    if (mediaNoteRecorder && mediaNoteRecorder.state !== 'inactive') {
-      await new Promise(resolve => {
-        mediaNoteRecorder.onstop = resolve;
-        try { mediaNoteRecorder.stop(); } catch(e){ resolve(); }
-      });
-      const mimeType = mediaNoteType === 'video' ? 'video/webm' : 'audio/webm';
-      const blob = new Blob(mediaNoteChunks, { type: mimeType });
-      mediaDataURL = await blobToDataURL(blob);
-    }
-
-    stopStreamTracks();
-
-    // High quality dataURL generator fallback if permissions restricted
-    if (!mediaDataURL || mediaDataURL.length < 50) {
-      mediaDataURL = generateFallbackMediaDataURL(mediaNoteType);
-    }
-
-    const durationStr = `${Math.floor(mediaNoteSeconds / 60)}:${String(mediaNoteSeconds % 60).padStart(2, '0')}`;
-    const tag = mediaNoteType === 'video' ? '[VIDEO_NOTE]' : '[VOICE_NOTE]';
-    const label = mediaNoteType === 'video' ? '📹 Video Note' : '🎙️ Voice Note';
-
-    const fullMsgBody = `${label} (${durationStr}) ${tag} ${mediaDataURL}`;
-
-    if (activeConvId && typeof sendMessage === 'function') {
-      _shouldScrollToBottom = true;
-      sendMessage(activeConvId, fullMsgBody);
-      renderContacts();
-      if (typeof showToast === 'function') showToast(`✅ ${label} sent!`);
-    }
-  }
-
-  /* ═ AUDIO & VIDEO PLAYER CONTROLLERS ═ */
+  /* ═ AUDIO & VIDEO PLAYER CONTROLLERS (LEGACY COMPATIBILITY) ═ */
   function toggleAudioPlayback(audioId, btnEl) {
     const audio = document.getElementById(audioId);
     if (!audio) return;
