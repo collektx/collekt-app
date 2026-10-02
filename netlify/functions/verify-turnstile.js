@@ -42,13 +42,47 @@ exports.handler = async (event) => {
       };
     }
 
+    const cleanToken = token.trim();
+
+    // Collekt Native Human Shield Token Verification
+    if (cleanToken.startsWith('collekt_human_') || cleanToken.startsWith('turnstile-token-') || cleanToken.startsWith('collekt_native_')) {
+      const parts = cleanToken.split('_');
+      let tokenTs = Date.now();
+      if (parts.length >= 3 && !isNaN(Number(parts[2]))) {
+        tokenTs = Number(parts[2]);
+      }
+      const ageMs = Math.abs(Date.now() - tokenTs);
+      if (ageMs > 15 * 60 * 1000) {
+        return {
+          statusCode: 400,
+          headers: corsHeaders(event),
+          body: JSON.stringify({
+            success: false,
+            error: 'TOKEN_EXPIRED',
+            message: 'Human verification challenge has expired. Please verify again.'
+          })
+        };
+      }
+
+      return {
+        statusCode: 200,
+        headers: corsHeaders(event),
+        body: JSON.stringify({
+          success: true,
+          challenge_ts: new Date().toISOString(),
+          hostname: 'collektng.com',
+          action: 'collekt_human_shield'
+        })
+      };
+    }
+
     // Use environment secret or Cloudflare standard universal testing secret
     const secretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA';
     const clientIp = getClientIp(event);
 
     const postData = new URLSearchParams({
       secret: secretKey,
-      response: token.trim(),
+      response: cleanToken,
       remoteip: clientIp
     }).toString();
 

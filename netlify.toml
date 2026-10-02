@@ -197,6 +197,41 @@
   status = 200
 
 [[redirects]]
+  from = "/api/verify-turnstile"
+  to = "/.netlify/functions/verify-turnstile"
+  status = 200
+
+[[redirects]]
+  from = "/api/health"
+  to = "/.netlify/functions/health"
+  status = 200
+
+[[redirects]]
+  from = "/api/status"
+  to = "/.netlify/functions/health"
+  status = 200
+
+[[redirects]]
+  from = "/api/escrow/settlement"
+  to = "/.netlify/functions/escrow-settlement"
+  status = 200
+
+[[redirects]]
+  from = "/api/escrow-settlement"
+  to = "/.netlify/functions/escrow-settlement"
+  status = 200
+
+[[redirects]]
+  from = "/api/file-validate"
+  to = "/.netlify/functions/file-validate"
+  status = 200
+
+[[redirects]]
+  from = "/api/consent/record"
+  to = "/.netlify/functions/consent-record"
+  status = 200
+
+[[redirects]]
   from = "/payment/result"
   to = "/payment-result.html"
   status = 200

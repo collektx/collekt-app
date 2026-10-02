@@ -28,9 +28,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=130.0">
-<link rel="stylesheet" href="shared.css?v=130.0">
-<link rel="stylesheet" href="glass.css?v=130.0">
+<link rel="stylesheet" href="style.css?v=133.0">
+<link rel="stylesheet" href="shared.css?v=133.0">
+<link rel="stylesheet" href="glass.css?v=133.0">
 
 <style>
   body { background: var(--paper); }
@@ -398,47 +398,62 @@
           <div class="preview-card fade-in">
             <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
               <span>Live Marketplace Preview</span>
-              <span style="background:#dcfce7; color:#16a34a; padding:2px 8px; border-radius:99px; font-size:10px; font-weight:900;">PREVIEW</span>
+              <span id="prevStatusBadge" style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:99px; font-size:10px; font-weight:900;">DRAFT PREVIEW</span>
             </div>
 
-            <div class="tender-card" style="box-shadow:none; border-color:var(--line); padding:20px; background:var(--paper);">
-              <div>
-                <div class="tender-badge-row" style="margin-bottom:10px;">
-                  <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                    <span id="prevTypeTag" style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; padding:3px 8px; border-radius:99px; background:rgba(212,146,11,0.15); color:var(--amber);">Short-Term Job</span>
-                    <span id="prevSectorTag" class="tender-cat-tag">EPC &amp; Engineering</span>
+            <!-- Empty State Placeholder (Clean state when form is untouched) -->
+            <div id="prevEmptyPlaceholder" style="background:var(--paper, rgba(255,255,255,0.03)); border:2px dashed var(--line, rgba(255,255,255,0.12)); border-radius:16px; padding:44px 20px; text-align:center;">
+              <div style="font-size:36px; margin-bottom:12px; opacity:0.7;">📝</div>
+              <div style="font-size:14px; font-weight:800; color:var(--ink); margin-bottom:6px;">Clean Slate &mdash; No Active Draft</div>
+              <p style="font-size:12.5px; color:var(--muted); line-height:1.5; max-width:300px; margin:0 auto;">
+                Start typing your opportunity title and scope on the left. Your live marketplace preview card will appear right here as you draft.
+              </p>
+            </div>
+
+            <!-- Active Preview Card (rendered dynamically as user types) -->
+            <div id="prevCardContainer" style="display:none;">
+              <div class="tender-card" style="box-shadow:none; border-color:var(--line); padding:20px; background:var(--paper); position:relative;">
+                <div style="position:absolute; top:12px; right:12px; background:rgba(212,146,11,0.12); border:1px solid rgba(212,146,11,0.3); color:var(--amber); font-size:9px; font-weight:900; padding:2px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:0.04em;">
+                  UNPUBLISHED DRAFT
+                </div>
+                <div>
+                  <div class="tender-badge-row" style="margin-bottom:10px;">
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                      <span id="prevTypeTag" style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; padding:3px 8px; border-radius:99px; background:rgba(212,146,11,0.15); color:var(--amber);">Short-Term Job</span>
+                      <span id="prevSectorTag" class="tender-cat-tag">EPC &amp; Engineering</span>
+                    </div>
+                    <span id="prevDeadlineTag" class="tender-deadline">&#9203; 14 Days</span>
                   </div>
-                  <span id="prevDeadlineTag" class="tender-deadline">&#9203; 14 Days</span>
+
+                  <div class="tender-title" id="prevTitle" style="font-size:16px; color:var(--ink); font-weight:800;">Opportunity Title</div>
+                  
+                  <div class="tender-company-line" style="font-size:12px; margin-bottom:10px;">
+                    <span id="prevCompany">Company Account</span>
+                    <span id="prevLocation">&bull; Lagos State</span>
+                  </div>
+
+                  <div class="tender-scope" id="prevScope" style="font-size:12px; line-height:1.5; color:var(--ink); margin-bottom:12px;">
+                    Scope of work and deliverables.
+                  </div>
+                  
+                  <div class="tender-skills" id="prevSkills" style="margin-bottom:14px;">
+                    <span class="tender-skill-chip">Engineering</span>
+                  </div>
+
+                  <div id="prevMilestonePill" style="font-size:11px; font-weight:800; color:var(--teal); margin-bottom:12px; display:flex; align-items:center; gap:6px; background:rgba(19,117,111,0.08); padding:6px 12px; border-radius:8px;">
+                    <span>🔒</span> <span id="prevMilestoneTxt">100% Escrow on Completion</span>
+                  </div>
                 </div>
 
-                <div class="tender-title" id="prevTitle" style="font-size:16px; color:var(--muted); font-style:italic;">Opportunity Title will appear here as you type</div>
-                
-                <div class="tender-company-line" style="font-size:12px; margin-bottom:10px;">
-                  <span id="prevCompany">Company Account</span>
-                  <span id="prevLocation">&bull; Lagos State</span>
+                <div class="tender-footer" style="padding-top:12px;">
+                  <div class="tender-budget">
+                    <span class="tender-budget-lbl" id="prevRateType">Professional Fee</span>
+                    <span class="tender-budget-val" id="prevBudget" style="font-size:16px; font-weight:900;">Price not specified</span>
+                  </div>
+                  <button type="button" class="btn btn-primary btn-sm" onclick="openLiveCardFullPreview()" style="font-weight:800; font-size:12px; cursor:pointer;">
+                    👁️ Preview
+                  </button>
                 </div>
-
-                <div class="tender-scope" id="prevScope" style="font-size:12px; line-height:1.5; color:var(--muted); margin-bottom:12px; font-style:italic;">
-                  Scope of work and deliverables will appear here as you type.
-                </div>
-                
-                <div class="tender-skills" id="prevSkills" style="margin-bottom:14px;">
-                  <span class="tender-skill-chip">Engineering</span>
-                </div>
-
-                <div id="prevMilestonePill" style="font-size:11px; font-weight:800; color:var(--teal); margin-bottom:12px; display:flex; align-items:center; gap:6px; background:rgba(19,117,111,0.08); padding:6px 12px; border-radius:8px;">
-                  <span>🔒</span> <span id="prevMilestoneTxt">100% Escrow on Completion</span>
-                </div>
-              </div>
-
-              <div class="tender-footer" style="padding-top:12px;">
-                <div class="tender-budget">
-                  <span class="tender-budget-lbl" id="prevRateType">Professional Fee</span>
-                  <span class="tender-budget-val" id="prevBudget" style="font-size:16px; font-weight:900;">Price not specified</span>
-                </div>
-                <button type="button" class="btn btn-primary btn-sm" onclick="openLiveCardFullPreview()" style="font-weight:800; font-size:12px; cursor:pointer;">
-                  👁️ Preview
-                </button>
               </div>
             </div>
 
@@ -506,10 +521,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=130.0"></script>
-<script src="app.js?v=130.0"></script>
-<script src="collekt-ai.js?v=130.0"></script>
-<script src="settings-popup.js?v=130.0"></script>
+<script src="supabase.js?v=133.0"></script>
+<script src="app.js?v=133.0"></script>
+<script src="collekt-ai.js?v=133.0"></script>
+<script src="settings-popup.js?v=133.0"></script>
 
 <script>
   let editingJobId = null;
@@ -754,6 +769,20 @@
     const skillsStr = document.getElementById('postSkillsInput')?.value.trim() || '';
     const desc      = document.getElementById('postDescInput')?.value.trim();
     const payMode   = document.getElementById('postPaymentMode')?.value || 'lump_sum';
+
+    const emptyPlaceholder = document.getElementById('prevEmptyPlaceholder');
+    const cardContainer = document.getElementById('prevCardContainer');
+    const hasDraftContent = Boolean(title || desc || (budget && Number(budget) > 0));
+
+    if (emptyPlaceholder && cardContainer) {
+      if (hasDraftContent) {
+        emptyPlaceholder.style.display = 'none';
+        cardContainer.style.display = 'block';
+      } else {
+        emptyPlaceholder.style.display = 'block';
+        cardContainer.style.display = 'none';
+      }
+    }
 
     const prevTitleEl = document.getElementById('prevTitle');
     if (prevTitleEl) {

@@ -61,14 +61,38 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
       }
     }
 
-    // 3. Purge collekt_all_users directory of only synthetic mock accounts (keep real UUIDs)
+    // 3. Strict Purge of collekt_all_users directory: ZERO mock / fake / unauthenticated accounts
     let dir = JSON.parse(localStorage.getItem('collekt_all_users') || '[]');
     if (!Array.isArray(dir)) dir = [];
+
+    const knownFakeTokens = [
+      'adaeze okonkwo', 'kunle adeyemi', 'bashiru musa', 'joshua emeka',
+      'farouk abubakar', 'chidi nnamdi', 'chen pao', 'chenpao51@gmail.com',
+      'grumpy luan', 'grumpyluan@gmail.com', 'bethel vwire', 'bethelvwire',
+      'bethelvvwire', 'bethel_vwire', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com',
+      'officialthelma@gmail.com', 'patakhues', 'chairman of the board', 'chairmanoftheboard',
+      'usr_chairman_of_the_board', 'f69a187c-5848-4d1c-9fb5-bc60b181789f',
+      '814f4be6-cc86-47d3-b746-cd257f456548'
+    ];
+
     dir = dir.filter(u => {
       if (!u) return false;
       const uId = String(u.id || '').toLowerCase().trim();
-      const isSynthetic = uId.startsWith('user_') || (uId.startsWith('usr_') && uId !== 'usr_dave_ojeowere');
-      return !isSynthetic;
+      const uName = String(u.name || u.company_name || '').toLowerCase().trim();
+      const uEmail = String(u.email || '').toLowerCase().trim();
+      const uUsername = String(u.username || '').toLowerCase().trim();
+
+      // Check if synthetic mock ID
+      if (uId.startsWith('user_') || (uId.startsWith('usr_') && uId !== 'usr_dave_ojeowere')) return false;
+
+      // Check known fake tokens
+      const isFake = knownFakeTokens.some(tok => 
+        uId === tok || uName === tok || uEmail === tok || uUsername === tok ||
+        uName.includes(tok) || (uEmail && uEmail.includes(tok))
+      );
+      if (isFake) return false;
+
+      return true;
     });
 
     // 4. Ensure Dave Ojeowere profile is present and active in collekt_all_users
@@ -109,6 +133,7 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
       }
     }
     localStorage.setItem('collekt_all_users', JSON.stringify(dir));
+    localStorage.setItem('collekt_directory_clean_v3', 'true');
 
     // 5. Sanitize current user if stale mock balance exists
     if (curr && curr.wallet && (curr.wallet.balance === 2450000 || curr.wallet.balance === 1450000)) {
@@ -1117,38 +1142,43 @@ function syncRealUsersToDirectory(realProfiles) {
   if (!Array.isArray(realProfiles) || realProfiles.length === 0) return;
   try {
     const raw = JSON.parse(localStorage.getItem('collekt_all_users') || '[]');
-    const map = new Map();
-
-    const getCanonicalKey = (u) => {
-      if (!u) return '';
-      const email = String(u.email || '').toLowerCase().trim();
-      if (email) return email;
-      return String(u.id || '').toLowerCase().trim();
-    };
-
+    const rawMap = new Map();
     raw.forEach(u => {
       if (!u) return;
-      const key = getCanonicalKey(u);
-      if (!key) return;
-      const uId = String(u.id || '').toLowerCase().trim();
-      // Skip synthetic mock IDs
-      if (uId.startsWith('user_') || (uId.startsWith('usr_') && uId !== 'usr_dave_ojeowere')) {
-        return;
-      }
-      map.set(key, u);
+      const uid = String(u.id || '').toLowerCase().trim();
+      const em = String(u.email || '').toLowerCase().trim();
+      if (uid) rawMap.set(uid, u);
+      if (em) rawMap.set(em, u);
     });
 
+    const knownFakeTokens = [
+      'adaeze okonkwo', 'kunle adeyemi', 'bashiru musa', 'joshua emeka',
+      'farouk abubakar', 'chidi nnamdi', 'chen pao', 'chenpao51@gmail.com',
+      'grumpy luan', 'grumpyluan@gmail.com', 'bethel vwire', 'bethelvwire',
+      'bethelvvwire', 'bethel_vwire', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com',
+      'officialthelma@gmail.com', 'patakhues', 'chairman of the board', 'chairmanoftheboard',
+      'usr_chairman_of_the_board', 'f69a187c-5848-4d1c-9fb5-bc60b181789f',
+      '814f4be6-cc86-47d3-b746-cd257f456548'
+    ];
+
+    const map = new Map();
+
+    // 1. Authoritative seed strictly from Supabase registered realProfiles
     realProfiles.forEach(rp => {
       if (!rp) return;
-      const key = getCanonicalKey(rp);
-      if (!key) return;
-      if (['chenpao51@gmail.com', 'grumpyluan@gmail.com', 'smileykori@gmail.com', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com', 'officialthelma@gmail.com'].includes(key)) {
-        return;
-      }
-      const idKey = rp.id ? String(rp.id).toLowerCase().trim() : '';
-      const existing = map.get(key) || (idKey ? map.get(idKey) : null) || {};
+      const rpId = String(rp.id || '').toLowerCase().trim();
+      const rpEmail = String(rp.email || '').toLowerCase().trim();
+      const rpName = String(rp.name || rp.company_name || rp.full_name || '').toLowerCase().trim();
 
-      const isDave = key === 'ojeoweredave@gmail.com';
+      // Reject any synthetic or known fake tokens
+      if (rpId.startsWith('user_') || (rpId.startsWith('usr_') && rpId !== 'usr_dave_ojeowere')) return;
+      const isFake = knownFakeTokens.some(tok => 
+        rpId === tok || rpName === tok || rpEmail === tok || rpName.includes(tok) || (rpEmail && rpEmail.includes(tok))
+      );
+      if (isFake) return;
+
+      const existing = (rpId ? rawMap.get(rpId) : null) || (rpEmail ? rawMap.get(rpEmail) : null) || {};
+      const isDave = rpEmail === 'ojeoweredave@gmail.com' || rpId === 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91';
 
       const merged = {
         ...existing,
@@ -1161,12 +1191,26 @@ function syncRealUsersToDirectory(realProfiles) {
         is_verified: rp.is_verified === true || existing.is_verified === true
       };
 
-      if (idKey && idKey !== key) map.delete(idKey);
-      map.set(key, merged);
+      map.set(rpId || rpEmail, merged);
     });
+
+    // 2. Ensure current authenticated user is preserved if active
+    const curr = typeof getUser === 'function' ? getUser() : null;
+    if (curr && (curr.id || curr.email)) {
+      const cId = String(curr.id || '').toLowerCase().trim();
+      const cEmail = String(curr.email || '').toLowerCase().trim();
+      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cId);
+      if (isValidUUID || cEmail === 'admin@collekt.ng') {
+        const key = cId || cEmail;
+        if (!map.has(key)) {
+          map.set(key, curr);
+        }
+      }
+    }
 
     const updated = Array.from(map.values());
     localStorage.setItem('collekt_all_users', JSON.stringify(updated));
+    localStorage.setItem('collekt_directory_clean_v3', 'true');
     try { window.dispatchEvent(new Event('collekt_users_updated')); } catch(e){}
   } catch(e){}
 }
@@ -1188,36 +1232,44 @@ function getAllRegisteredUsers() {
 
     // 1. Strict purge of legacy mock / fake unauthenticated accounts - ONLY authentic users allowed
     const fakeTokens = [
-      'bethelvvwire', 'bethel_vwire', 'patakhues', 'tessycelestine', 'tessycelestine9', 
-      'chairman of the board', 'chairmanoftheboard', 'adaeze okonkwo', 'kunle adeyemi', 
-      'bashiru musa', 'joshua emeka', 'farouk abubakar', 'chidi nnamdi', 'usr_chairman_of_the_board',
-      'chenpao51@gmail.com', 'f69a187c-5848-4d1c-9fb5-bc60b181789f', 'grumpyluan@gmail.com',
-      '814f4be6-cc86-47d3-b746-cd257f456548',
-      'smileykori@gmail.com', 'bethelvwire@gmail.com', 'officialthelma@gmail.com',
-      'chen pao', 'grumpy luan'
+      'adaeze okonkwo', 'kunle adeyemi', 'bashiru musa', 'joshua emeka',
+      'farouk abubakar', 'chidi nnamdi', 'chen pao', 'chenpao51@gmail.com',
+      'grumpy luan', 'grumpyluan@gmail.com', 'bethel vwire', 'bethelvwire',
+      'bethelvvwire', 'bethel_vwire', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com',
+      'officialthelma@gmail.com', 'patakhues', 'chairman of the board', 'chairmanoftheboard',
+      'usr_chairman_of_the_board', 'f69a187c-5848-4d1c-9fb5-bc60b181789f',
+      '814f4be6-cc86-47d3-b746-cd257f456548'
     ];
 
     raw = raw.filter(u => {
       if (!u) return false;
       const id = String(u.id || '').toLowerCase().trim();
-      // Keep all valid Supabase UUID profiles
-      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-        return true;
-      }
-      if (u.email === 'admin@collekt.ng' || id === 'a1111111-1111-4111-a111-111111111111') {
-        return true;
-      }
-
       const n = String(u.name || '').toLowerCase().trim();
       const username = String(u.username || '').toLowerCase().trim();
       const email = String(u.email || '').toLowerCase().trim();
 
+      // Check fake tokens first
       const isFake = fakeTokens.some(token => 
-        id === token || n === token || username === token || email === token
+        id === token || n === token || username === token || email === token ||
+        n.includes(token) || (email && email.includes(token))
       );
+      if (isFake) return false;
+
+      // Check deleted
       const isDeleted = deleted.some(d => d && (id === d || email === d || username === d || n === d));
+      if (isDeleted) return false;
+
+      // Check synthetic mock IDs
       const isMock = id.startsWith('user_') || (id.startsWith('usr_') && id !== 'usr_dave_ojeowere');
-      return !isFake && !isDeleted && !isMock;
+      if (isMock) return false;
+
+      // Must have valid UUID format or admin
+      const isValidId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ||
+                        id === 'a1111111-1111-4111-a111-111111111111' ||
+                        id === 'usr_dave_ojeowere' ||
+                        email === 'admin@collekt.ng' ||
+                        email === 'ojeoweredave@gmail.com';
+      return isValidId;
     });
 
     // 2. Ensure active user is registered in directory
@@ -1281,7 +1333,7 @@ function getAllRegisteredUsers() {
     });
     raw = uniqueUsers;
 
-    // 8. Clean wallets without mock account numbers
+    // Clean wallets without mock account numbers
     raw.forEach(u => {
       if (!u.wallet) u.wallet = { balance: 0, escrow_balance: 0 };
       if (u.wallet.account_number && (
@@ -7846,6 +7898,7 @@ const CollektCalling = (() => {
       const incModal = document.createElement('div');
       incModal.id = 'incomingCallModal';
       incModal.className = 'incoming-call-modal';
+      incModal.style.display = 'none';
       incModal.innerHTML = `
         <div style="display:flex; align-items:center; gap:14px;">
           <div style="position:relative; width:54px; height:54px; flex-shrink:0;">
@@ -7879,6 +7932,7 @@ const CollektCalling = (() => {
       const overlay = document.createElement('div');
       overlay.id = 'callOverlay';
       overlay.className = 'call-overlay';
+      overlay.style.display = 'none';
       overlay.innerHTML = `
         <video id="callVideoElement" class="video-container" autoplay playsinline></video>
         <video id="callLocalVideoPip" class="local-pip-video" autoplay playsinline muted></video>
@@ -7903,8 +7957,9 @@ const CollektCalling = (() => {
         </div>
 
         <div class="call-controls">
-          <button class="call-btn" id="callMuteBtn" title="Mute Microphone" onclick="CollektCalling.toggleMute()">🎙️</button>
+          <button class="call-btn" id="callSpeakerBtn" title="Speaker" onclick="CollektCalling.toggleSpeaker()">🔊</button>
           <button class="call-btn" id="callCamBtn" title="Toggle Camera" onclick="CollektCalling.toggleCam()" style="display:none;">📹</button>
+          <button class="call-btn" id="callMuteBtn" title="Mute Microphone" onclick="CollektCalling.toggleMute()">🎙️</button>
           <button class="call-btn end-call" title="End Call" onclick="CollektCalling.endCall()">📞</button>
         </div>
       `;
@@ -8408,6 +8463,7 @@ const CollektCalling = (() => {
     if (statusEl) statusEl.textContent = statusText || 'Connecting...';
     if (camBtn) camBtn.style.display = isVideo ? 'grid' : 'none';
 
+    overlay.classList.add('active');
     overlay.style.display = 'flex';
   }
 
@@ -8462,6 +8518,20 @@ const CollektCalling = (() => {
     }
   }
 
+  let isSpeakerActive = true;
+  function toggleSpeaker() {
+    isSpeakerActive = !isSpeakerActive;
+    const btn = document.getElementById('callSpeakerBtn');
+    if (btn) {
+      btn.classList.toggle('active', !isSpeakerActive);
+      btn.innerHTML = isSpeakerActive ? '🔊' : '🔈';
+    }
+    const audio = document.getElementById('collektRemoteAudio');
+    if (audio) {
+      audio.volume = isSpeakerActive ? 1.0 : 0.25;
+    }
+  }
+
   function endCall(sendEndSignal = true) {
     stopRingTones();
     if (callTimeoutTimer) {
@@ -8497,7 +8567,10 @@ const CollektCalling = (() => {
     }
 
     const overlay = document.getElementById('callOverlay');
-    if (overlay) overlay.style.display = 'none';
+    if (overlay) {
+      overlay.classList.remove('active');
+      overlay.style.display = 'none';
+    }
 
     const incModal = document.getElementById('incomingCallModal');
     if (incModal) incModal.style.display = 'none';
@@ -8546,6 +8619,7 @@ const CollektCalling = (() => {
     endCall,
     toggleMute,
     toggleCam,
+    toggleSpeaker,
     getActiveCall: () => activeCall,
     getAudioContext
   };

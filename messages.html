@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=130.0">
-<link rel="stylesheet" href="shared.css?v=130.0">
-<link rel="stylesheet" href="glass.css?v=130.0">
+<link rel="stylesheet" href="style.css?v=133.0">
+<link rel="stylesheet" href="shared.css?v=133.0">
+<link rel="stylesheet" href="glass.css?v=133.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -112,7 +112,7 @@
   .bubble {
     display: inline-block;
     position: relative;
-    padding: 5px 8px 3px 8px;
+    padding: 4px 8px 4px 8px;
     border-radius: 7.5px;
     font-size: 13.5px;
     line-height: 18.5px;
@@ -544,24 +544,55 @@
     box-shadow: 0 8px 30px rgba(0,0,0,0.6);
     display: none;
   }
-  /* Call Overlay & Animation */
-  .call-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(7, 18, 16, 0.94); backdrop-filter: blur(12px); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 24px; color: #fff; animation: fadeIn .25s ease-out; }
-  .call-header { text-align: center; z-index: 2; }
-  .call-title { font-size: 22px; font-weight: 900; margin-bottom: 6px; color: #fff; }
-  .call-status { font-size: 14px; color: rgba(255,255,255,.7); display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; }
-  .call-avatar-wrap { position: relative; width: 140px; height: 140px; border-radius: 50%; display: grid; place-items: center; margin: auto; z-index: 2; }
-  .call-avatar { width: 120px; height: 120px; border-radius: 50%; display: grid; place-items: center; font-size: 44px; font-weight: 900; color: #fff; box-shadow: 0 12px 36px rgba(0,0,0,.4); z-index: 2; position: relative; border: 3px solid rgba(255,255,255,.2); }
-  .call-pulse { position: absolute; inset: -10px; border-radius: 50%; border: 2px solid var(--teal-mid); opacity: 0; animation: pulseRing 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
-  .call-pulse.p2 { animation-delay: .6s; }
-  @keyframes pulseRing { 0% { transform: scale(.8); opacity: .8; } 100% { transform: scale(1.6); opacity: 0; } }
+  /* WhatsApp Style Call Overlay & Animation */
+  .call-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: radial-gradient(circle at 50% 30%, #0d2823 0%, #071513 65%, #030a09 100%);
+    backdrop-filter: blur(20px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 60px 24px 50px;
+    color: #fff;
+    animation: fadeIn .25s ease-out;
+  }
+  .call-overlay.active { display: flex !important; }
+  .call-header { text-align: center; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .call-title { font-size: 26px; font-weight: 800; margin: 0; color: #ffffff; letter-spacing: -0.02em; }
+  .call-status { font-size: 15px; color: rgba(255,255,255,.7); display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; }
+  .call-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: rgba(34, 197, 94, .18); border: 1px solid rgba(34, 197, 94, .35); color: #4ade80; border-radius: 99px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+  
+  /* WhatsApp Pulse Rings */
+  .call-avatar-wrap { position: relative; width: 150px; height: 150px; border-radius: 50%; display: grid; place-items: center; margin: auto; z-index: 2; }
+  .call-avatar { width: 124px; height: 124px; border-radius: 50%; display: grid; place-items: center; font-size: 46px; font-weight: 900; color: #fff; box-shadow: 0 16px 40px rgba(0,0,0,.5); z-index: 2; position: relative; border: 3px solid rgba(255,255,255,.2); }
+  .call-pulse { position: absolute; inset: -12px; border-radius: 50%; border: 2px solid rgba(45, 212, 191, 0.5); opacity: 0; animation: waPulseRing 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+  .call-pulse.p2 { animation-delay: .7s; }
+  .call-pulse.p3 { animation-delay: 1.4s; }
+  @keyframes waPulseRing { 0% { transform: scale(.85); opacity: .8; } 100% { transform: scale(1.7); opacity: 0; } }
+  
   .video-container { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 0; background: #000; z-index: 1; display: none; }
-  .call-controls { display: flex; align-items: center; gap: 20px; z-index: 2; margin-bottom: 20px; }
-  .call-btn { width: 56px; height: 56px; border-radius: 50%; border: none; background: rgba(255,255,255,.15); color: #fff; font-size: 20px; cursor: pointer; display: grid; place-items: center; transition: all .2s; backdrop-filter: blur(8px); }
+  
+  /* WhatsApp Floating Bottom Controls Dock */
+  .call-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 2;
+    background: rgba(18, 36, 32, 0.85);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 40px;
+    padding: 10px 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .call-btn { width: 52px; height: 52px; border-radius: 50%; border: none; background: rgba(255,255,255,.14); color: #fff; font-size: 20px; cursor: pointer; display: grid; place-items: center; transition: all .2s; }
   .call-btn:hover { background: rgba(255,255,255,.28); transform: scale(1.08); }
   .call-btn.active { background: #fff; color: #071210; }
-  .call-btn.end-call { width: 68px; height: 68px; background: #ef4444; color: #fff; font-size: 24px; box-shadow: 0 8px 24px rgba(239,68,68,.4); }
-  .call-btn.end-call:hover { background: #dc2626; transform: scale(1.1); }
-  .call-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: rgba(22, 163, 74, .25); border: 1px solid rgba(22, 163, 74, .4); color: #4ade80; border-radius: 99px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+  .call-btn.end-call { width: 62px; height: 62px; background: #ef4444; color: #fff; font-size: 24px; box-shadow: 0 8px 24px rgba(239,68,68,.5); }
+  .call-btn.end-call:hover { background: #dc2626; transform: scale(1.08); }
 
   /* Voice & Video Note Recording Modal */
   .media-rec-modal { position: fixed; inset: 0; z-index: 10001; background: rgba(7, 18, 16, 0.88); backdrop-filter: blur(10px); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 24px; color: #fff; animation: fadeIn .2s ease; }
@@ -843,10 +874,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=130.0"></script>
-<script src="app.js?v=130.0"></script>
-<script src="collekt-ai.js?v=130.0"></script>
-<script src="settings-popup.js?v=130.0"></script>
+<script src="supabase.js?v=133.0"></script>
+<script src="app.js?v=133.0"></script>
+<script src="collekt-ai.js?v=133.0"></script>
+<script src="settings-popup.js?v=133.0"></script>
 <script>
   requireAuth();
 

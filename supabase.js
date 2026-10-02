@@ -540,20 +540,8 @@ async function handleOAuthSessionRouting(session) {
   }
 
   const pendingRole = localStorage.getItem('collekt_pending_oauth_role');
-  
-  // Strict Role Separation: A registered user cannot log in to the opposite portal
-  if (pendingRole && user && user.role && user.role !== pendingRole && user.role !== 'admin') {
-    console.warn(`[Collekt Auth] Strict role mismatch: account role '${user.role}' cannot log into '${pendingRole}' portal.`);
-    if (window.sb && window.sb.auth) {
-      try { await window.sb.auth.signOut(); } catch(e){}
-    }
-    localStorage.removeItem('collekt_user');
-    sessionStorage.removeItem('collekt_oauth_in_progress');
-    localStorage.removeItem('collekt_pending_oauth_role');
-    
-    window.location.replace(`login.html?error=role_mismatch&expected=${encodeURIComponent(pendingRole)}&actual=${encodeURIComponent(user.role)}`);
-    return;
-  }
+  localStorage.removeItem('collekt_pending_oauth_role');
+  sessionStorage.removeItem('collekt_oauth_in_progress');
   
   // Check if returning from a LinkedIn account connection flow
   const isLinkingLinkedIn = (new URLSearchParams(window.location.search)).get('link_identity') === 'linkedin' ||

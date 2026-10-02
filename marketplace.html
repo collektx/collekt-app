@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=130.0">
-<link rel="stylesheet" href="shared.css?v=130.0">
-<link rel="stylesheet" href="glass.css?v=130.0">
+<link rel="stylesheet" href="style.css?v=133.0">
+<link rel="stylesheet" href="shared.css?v=133.0">
+<link rel="stylesheet" href="glass.css?v=133.0">
 <style>
 /* ═ LIVE MARKETPLACE STYLES ═ */
 html, body {
@@ -619,10 +619,10 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=130.0"></script>
-<script src="app.js?v=130.0"></script>
-<script src="collekt-ai.js?v=130.0"></script>
-<script src="settings-popup.js?v=130.0"></script>
+<script src="supabase.js?v=133.0"></script>
+<script src="app.js?v=133.0"></script>
+<script src="collekt-ai.js?v=133.0"></script>
+<script src="settings-popup.js?v=133.0"></script>
 <script>
   /* ═════════════════════════════════════════════════════════
      LIVE MARKETPLACE ENGINE v3.0
@@ -632,10 +632,15 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
   let _mktActiveCategory = 'All';
   let _activeTenderJob = null;
 
-  function setMarketplaceMode(mode) {
+  async function setMarketplaceMode(mode) {
     _mktMode = mode;
     document.getElementById('btnModeTenders').classList.toggle('active', mode === 'tenders');
     document.getElementById('btnModeTalent').classList.toggle('active', mode === 'talent');
+    if (mode === 'talent' && typeof fetchRealRegisteredUsers === 'function') {
+      try {
+        await fetchRealRegisteredUsers();
+      } catch(e){}
+    }
     applyMktFilters();
   }
 
@@ -1337,12 +1342,11 @@ html.dark .talent-card-v2 { background: #0f2220; border-color: rgba(255,255,255,
     try { if (typeof buildSidebar === 'function') buildSidebar('marketplace'); } catch(e){}
     try { if (typeof buildTopbar === 'function') buildTopbar(); } catch(e){}
 
-    // Fetch live opportunities directly from Supabase
-    if (typeof fetchLiveJobsFromSupabase === 'function') {
-      try {
-        await fetchLiveJobsFromSupabase();
-      } catch(e){}
-    }
+    // Fetch live opportunities and verified registered users directly from Supabase
+    try {
+      if (typeof fetchLiveJobsFromSupabase === 'function') await fetchLiveJobsFromSupabase();
+      if (typeof fetchRealRegisteredUsers === 'function') await fetchRealRegisteredUsers();
+    } catch(e){}
 
     applyMktFilters();
 

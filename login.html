@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=130.0">
-<link rel="stylesheet" href="shared.css?v=130.0">
-<link rel="stylesheet" href="glass.css?v=130.0">
+<link rel="stylesheet" href="style.css?v=133.0">
+<link rel="stylesheet" href="shared.css?v=133.0">
+<link rel="stylesheet" href="glass.css?v=133.0">
 
 <style>
   body { background: var(--paper); }
@@ -206,8 +206,8 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=130.0"></script>
-<script src="app.js?v=130.0"></script>
+<script src="supabase.js?v=133.0"></script>
+<script src="app.js?v=133.0"></script>
 <script>
   // Detect if arriving from OAuth callback & show immediate feedback
   const oauthHash = window.location.hash || '';
@@ -275,26 +275,28 @@
       }
       setLoginRoleTab(loginRole);
     } else if (p.get('error') === 'role_mismatch') {
-      const exp = p.get('expected') || 'portal';
-      const act = p.get('actual') || 'other';
-      const expTitle = exp === 'company' ? 'Company' : 'Professional';
+      const act = p.get('actual') || 'professional';
       const actTitle = act === 'company' ? 'Company' : 'Professional';
+      setLoginRoleTab(act);
+      // If user session is already authenticated, route directly to their dashboard
+      const currentUser = typeof getUser === 'function' ? getUser() : null;
+      if (currentUser && currentUser.role) {
+        const dest = currentUser.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+        window.location.replace(dest);
+        return;
+      }
       const errEl = document.getElementById('loginError');
       if (errEl) {
         errEl.innerHTML = `
-          <div style="background:#fef2f2; border:1.5px solid #ef4444; color:#991b1b; padding:14px 16px; border-radius:12px; font-size:13px; line-height:1.5; text-align:left; margin-bottom:14px; box-shadow:0 4px 12px rgba(239,68,68,0.15);">
-            <div style="font-weight:900; font-size:14px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-              <span>⛔</span> Access Denied &mdash; Strict Role Mismatch
+          <div style="background:rgba(19,117,111,0.08); border:1.5px solid rgba(19,117,111,0.4); color:var(--teal, #0E3B35); padding:12px 14px; border-radius:12px; font-size:13px; line-height:1.5; text-align:left; margin-bottom:14px;">
+            <div style="font-weight:900; font-size:13px; margin-bottom:2px; display:flex; align-items:center; gap:6px;">
+              <span>🏢</span> Switched to ${actTitle} Portal
             </div>
-            This account is registered as a <strong>${actTitle}</strong>. You cannot sign in through the <strong>${expTitle}</strong> portal.<br>
-            <div style="margin-top:8px; font-size:12px; font-weight:700; color:#7f1d1d;">
-              &rarr; Please click the <strong>${actTitle}</strong> tab above to sign in.
-            </div>
+            You are signing into your <strong>${actTitle}</strong> account workspace.
           </div>
         `;
         errEl.style.display = 'block';
       }
-      setLoginRoleTab(act);
     } else {
       setLoginRoleTab(loginRole);
     }

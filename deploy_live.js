@@ -28,7 +28,8 @@ console.log('--- DEPLOYING TO NETLIFY PRODUCTION ---');
 console.log('Site ID:', SITE_ID);
 console.log('Zip file size:', (fs.statSync(ZIP_PATH).size / (1024 * 1024)).toFixed(2), 'MB');
 
-const zipBuffer = fs.readFileSync(ZIP_PATH);
+const stat = fs.statSync(ZIP_PATH);
+const fileSize = stat.size;
 
 const req = https.request({
   hostname: 'api.netlify.com',
@@ -37,7 +38,7 @@ const req = https.request({
   headers: {
     'Authorization': `Bearer ${NETLIFY_AUTH_TOKEN}`,
     'Content-Type': 'application/zip',
-    'Content-Length': zipBuffer.length
+    'Content-Length': fileSize
   }
 }, (res) => {
   let responseData = '';
@@ -65,5 +66,22 @@ req.on('error', (err) => {
   console.error('Request error:', err);
 });
 
-req.write(zipBuffer);
-req.end();
+console.log(`Starting upload: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
+
+const readStream = fs.createReadStream(ZIP_PATH, { highWaterMark: 64 * 1024 });
+let uploaded = 0;
+
+readStream.on('data', (chunk) => {
+  uploaded += chunk.length;
+  const pct = Math.round((uploaded / fileSize) * 100);
+  process.stdout.write(`\rUploading: ${(uploaded / 1024 / 1024).toFixed(2)} / ${(fileSize / 1024 / 1024).toFixed(2)} MB [${pct}%]`);
+  if (!req.write(chunk)) {
+    readStream.pause();
+    req.once('drain', () => readStream.resume());
+  }
+});
+
+readStream.on('end', () => {
+  console.log('\nAll data sent to Netlify API. Finalizing request...');
+  req.end();
+});

@@ -46,9 +46,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=130.0">
-<link rel="stylesheet" href="shared.css?v=130.0">
-<link rel="stylesheet" href="glass.css?v=130.0">
+<link rel="stylesheet" href="style.css?v=133.0">
+<link rel="stylesheet" href="shared.css?v=133.0">
+<link rel="stylesheet" href="glass.css?v=133.0">
 
 <style>
   html, body {
@@ -591,9 +591,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=130.0"></script>
-<script src="app.js?v=130.0"></script>
-<script src="collekt-ai.js?v=130.0"></script>
+<script src="supabase.js?v=133.0"></script>
+<script src="app.js?v=133.0"></script>
+<script src="collekt-ai.js?v=133.0"></script>
 <script>
   requireCompany();
   
@@ -911,19 +911,17 @@
       }
     }
 
-    // 2. Merge with Local Directory (guarantees instant visibility for newly registered professionals)
-    if (typeof getAllRegisteredUsers === 'function') {
+    // 2. If Supabase query returned results, only merge local non-sensitive details for those exact verified IDs
+    if (pros.length > 0 && typeof getAllRegisteredUsers === 'function') {
       const allUsers = getAllRegisteredUsers();
-      const localPros = allUsers.filter(u => u && (u.role === 'professional' || (!u.role && u.role !== 'company')));
-      
-      localPros.forEach(lp => {
-        const idx = pros.findIndex(p => (lp.id && p.id === lp.id) || (lp.email && p.email && p.email.toLowerCase() === lp.email.toLowerCase()));
-        if (idx === -1) {
-          pros.push(lp);
-        } else {
-          pros[idx] = { ...pros[idx], ...lp };
-        }
+      pros = pros.map(p => {
+        const local = allUsers.find(lp => lp && lp.id && lp.id === p.id);
+        return local ? { ...local, ...p } : p;
       });
+    } else if (pros.length === 0 && typeof getAllRegisteredUsers === 'function') {
+      // Offline fallback: strictly filtered verified registered users
+      const allUsers = getAllRegisteredUsers();
+      pros = allUsers.filter(u => u && u.name && !u.suspended && u.status !== 'suspended' && (u.role === 'professional' || (!u.role && u.role !== 'company')));
     }
 
     if (!pros || pros.length === 0) {
@@ -1802,7 +1800,7 @@
   </div>
 </div>
 
-<script src="settings-popup.js?v=130.0"></script>
+<script src="settings-popup.js?v=133.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>
