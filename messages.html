@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=135.0">
-<link rel="stylesheet" href="shared.css?v=135.0">
-<link rel="stylesheet" href="glass.css?v=135.0">
+<link rel="stylesheet" href="style.css?v=136.0">
+<link rel="stylesheet" href="shared.css?v=136.0">
+<link rel="stylesheet" href="glass.css?v=136.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -676,29 +676,19 @@
             </button>
 
             <div class="wa-attach-popup" id="waAttachPopup">
-              <button class="wa-attach-item wa-attach-item-transfer" onclick="openChatTransferModal(); closeWaAttachMenu();">
-                <div class="wa-attach-icon" style="background:#0e3b35;">💸</div>
-                <span>Transfer to Wallet</span>
-              </button>
-              <button class="wa-attach-item" onclick="document.getElementById('chatFileInput').click(); closeWaAttachMenu();">
+              <button class="wa-attach-item" onclick="document.getElementById('chatDocFileInput').click(); closeWaAttachMenu();">
                 <div class="wa-attach-icon" style="background:#7f66ff;">📄</div>
                 <span>Document</span>
               </button>
-              <button class="wa-attach-item" onclick="document.getElementById('chatFileInput').click(); closeWaAttachMenu();">
+              <button class="wa-attach-item" onclick="document.getElementById('chatMediaFileInput').click(); closeWaAttachMenu();">
                 <div class="wa-attach-icon" style="background:#007bfc;">🖼️</div>
                 <span>Photos &amp; videos</span>
-              </button>
-              <button class="wa-attach-item" onclick="startVideoNoteRecording(); closeWaAttachMenu();">
-                <div class="wa-attach-icon" style="background:#ff2e74;">📷</div>
-                <span>Camera &amp; Video Note</span>
-              </button>
-              <button class="wa-attach-item" onclick="startVoiceNoteRecording(); closeWaAttachMenu();">
-                <div class="wa-attach-icon" style="background:#029d00;">🎙️</div>
-                <span>Voice Note</span>
               </button>
             </div>
 
             <input type="file" id="chatFileInput" style="display:none;" onchange="handleChatFileUpload(this)">
+            <input type="file" id="chatDocFileInput" style="display:none;" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip" onchange="handleChatFileUpload(this)">
+            <input type="file" id="chatMediaFileInput" style="display:none;" accept="image/*,video/*" onchange="handleChatFileUpload(this)">
 
             <button class="attach-btn" id="emojiBtn" title="Emoji Picker" onclick="toggleEmojiPicker(event)">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
@@ -874,10 +864,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=135.0"></script>
-<script src="app.js?v=135.0"></script>
-<script src="collekt-ai.js?v=135.0"></script>
-<script src="settings-popup.js?v=135.0"></script>
+<script src="supabase.js?v=136.0"></script>
+<script src="app.js?v=136.0"></script>
+<script src="collekt-ai.js?v=136.0"></script>
+<script src="settings-popup.js?v=136.0"></script>
 <script>
   requireAuth();
 
@@ -1368,12 +1358,6 @@
     if (e) e.stopPropagation();
     const popup = document.getElementById('waAttachPopup');
     if (popup) {
-      const me = getUser();
-      const isCompany = me && (me.role === 'company' || me.user_type === 'company');
-      const transferItem = popup.querySelector('.wa-attach-item-transfer');
-      if (transferItem) {
-        transferItem.style.display = isCompany ? 'flex' : 'none';
-      }
       popup.classList.toggle('open');
     }
   }

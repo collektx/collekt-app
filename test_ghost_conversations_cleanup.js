@@ -24,6 +24,19 @@ assert.ok(messagesHtml.includes('No conversations yet'), 'renderContacts must sh
 assert.ok(messagesHtml.includes('openNewConversationModal()'), 'renderContacts must offer explicit "New Message" button');
 console.log('✅ Test 2 Passed: Empty inbox displays clean empty state without leaking uncontacted directory members');
 
+// 2b. Verify waAttachPopup doesn't contain Transfer to Wallet, Camera & Video Note, or Voice Note
+const waAttachStart = messagesHtml.indexOf('id="waAttachPopup"');
+const waAttachEnd = messagesHtml.indexOf('id="chatFileInput"');
+assert.ok(waAttachStart !== -1 && waAttachEnd !== -1, 'waAttachPopup and chatFileInput must exist');
+const waAttachInner = messagesHtml.slice(waAttachStart, waAttachEnd);
+assert.ok(!waAttachInner.includes('Transfer to Wallet'), 'wa-attach-popup must NOT contain Transfer to Wallet');
+assert.ok(!waAttachInner.includes('Camera & Video Note') && !waAttachInner.includes('Camera &amp; Video Note'), 'wa-attach-popup must NOT contain Camera & Video Note');
+assert.ok(!waAttachInner.includes('Voice Note'), 'wa-attach-popup must NOT contain Voice Note');
+assert.ok(waAttachInner.includes('Document'), 'wa-attach-popup must retain Document');
+assert.ok(waAttachInner.includes('Photos &amp; videos') || waAttachInner.includes('Photos & videos'), 'wa-attach-popup must retain Photos & videos');
+console.log('✅ Test 2b Passed: wa-attach-popup only contains Document and Photos & videos (unmarked items)');
+
+
 // 3. Test getMyConversations() logic with ghost conversations
 const appJs = fs.readFileSync(path.join(__dirname, 'app.js'), 'utf8');
 
