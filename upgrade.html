@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=140.0">
-<link rel="stylesheet" href="shared.css?v=140.0">
-<link rel="stylesheet" href="glass.css?v=140.0">
+<link rel="stylesheet" href="style.css?v=141.0">
+<link rel="stylesheet" href="shared.css?v=141.0">
+<link rel="stylesheet" href="glass.css?v=141.0">
 
 <style>
   body {
@@ -562,9 +562,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=140.0"></script>
-<script src="app.js?v=140.0"></script>
-<script src="settings-popup.js?v=140.0"></script>
+<script src="supabase.js?v=141.0"></script>
+<script src="app.js?v=141.0"></script>
+<script src="settings-popup.js?v=141.0"></script>
 
 <script>
   let activeRole = 'professional';
@@ -802,25 +802,25 @@
       const name = document.getElementById('cardHolderName')?.value.trim() || '';
 
       if (!name) {
-        alert('Please enter the cardholder name.');
+        if (typeof showToast === 'function') showToast('⚠️ Please enter the cardholder name.', 'warning');
         return;
       }
       if (cardNum.length < 12) {
-        alert('Please enter a valid 16-digit card number.');
+        if (typeof showToast === 'function') showToast('⚠️ Please enter a valid 16-digit card number.', 'warning');
         return;
       }
       if (!/^\d{2}\/\d{2}$/.test(expiry)) {
-        alert('Please enter a valid card expiry date (MM/YY).');
+        if (typeof showToast === 'function') showToast('⚠️ Please enter a valid card expiry date (MM/YY).', 'warning');
         return;
       }
       if (cvv.length < 3) {
-        alert('Please enter a valid 3-digit CVV.');
+        if (typeof showToast === 'function') showToast('⚠️ Please enter a valid 3-digit CVV.', 'warning');
         return;
       }
     } else {
       const pin = document.getElementById('walletPinInput')?.value.trim() || '';
       if (pin.length !== 4) {
-        alert('Please enter your 4-digit Wallet Transaction PIN.');
+        if (typeof showToast === 'function') showToast('⚠️ Please enter your 4-digit Wallet Transaction PIN.', 'warning');
         return;
       }
     }

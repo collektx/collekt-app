@@ -53,9 +53,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=140.0">
-<link rel="stylesheet" href="shared.css?v=140.0">
-<link rel="stylesheet" href="glass.css?v=140.0">
+<link rel="stylesheet" href="style.css?v=141.0">
+<link rel="stylesheet" href="shared.css?v=141.0">
+<link rel="stylesheet" href="glass.css?v=141.0">
 
 <style>
   /* Corporate Tax Invoice Print Styles */
@@ -1124,8 +1124,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=140.0"></script>
-<script src="app.js?v=140.0"></script>
+<script src="supabase.js?v=141.0"></script>
+<script src="app.js?v=141.0"></script>
 <script>
   async function initAdminDashboard() {
     // 0. Sanitize local storage to purge any stale test rows or probe transactions
@@ -1589,7 +1589,7 @@
     if (successCount > 0) {
       showToast(`🎉 Issued ${successCount} Live Dedicated NUBAN Accounts!`);
     } else if (lastError) {
-      alert(`Payment Gateway Notice:\n\n${lastError}\n\nNote: Dedicated Accounts are securely generated on the Netlify backend.`);
+      showToast(`⚠️ Payment Gateway Notice: ${lastError}`, 'warning');
     } else {
       showToast('⚠️ Could not issue accounts. Check gateway service logs.', 'warning');
     }
@@ -2768,7 +2768,7 @@
       const pitch = p.pitchText || p.coverLetter || p.message || 'Standard technical bidding specifications submitted.';
       const bid = p.bidAmount ? (typeof formatNaira === 'function' ? formatNaira(p.bidAmount) : `₦${p.bidAmount}`) : 'Negotiable';
 
-      alert(`📋 PROPOSAL DETAILS:\n\nProject: ${title}\nBidder: ${bidder}\nProposed Amount: ${bid}\nStatus: ${p.status || 'submitted'}\n\nTechnical Pitch:\n"${pitch}"`);
+      showToast(`📋 ${bidder}: "${title}" (${bid}) - ${p.status || 'submitted'}`, 'info');
     } catch(e){}
   }
 

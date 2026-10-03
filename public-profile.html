@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=140.0">
-<link rel="stylesheet" href="shared.css?v=140.0">
-<link rel="stylesheet" href="glass.css?v=140.0">
+<link rel="stylesheet" href="style.css?v=141.0">
+<link rel="stylesheet" href="shared.css?v=141.0">
+<link rel="stylesheet" href="glass.css?v=141.0">
 <style>
 /* ═ PAGE ═ */
 body { background: var(--paper); }
@@ -653,9 +653,9 @@ body { background: var(--paper); }
       </div>
       <div class="pub-footer-col">
         <h4>Legal</h4>
-        <a href="javascript:void(0)" onclick="alert('Privacy Policy: Collekt platform guidelines')">Privacy Policy</a>
-        <a href="javascript:void(0)" onclick="alert('Terms of Service: Collekt user agreement')">Terms of Service</a>
-        <a href="javascript:void(0)" onclick="alert('Contact Us: Support at support@collekt.ng')">Contact Us</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+        <a href="mailto:support@collekt.ng">Contact Us</a>
       </div>
     </div>
     <div class="pub-footer-bottom">
@@ -666,9 +666,9 @@ body { background: var(--paper); }
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=140.0"></script>
-<script src="app.js?v=140.0"></script>
-<script src="settings-popup.js?v=140.0"></script>
+<script src="supabase.js?v=141.0"></script>
+<script src="app.js?v=141.0"></script>
+<script src="settings-popup.js?v=141.0"></script>
 <script>
   /* ═ TAB SWITCHER ═ */
   function switchPubTab(tab, el) {
@@ -1204,8 +1204,8 @@ body { background: var(--paper); }
       leaveBtn.onclick = function() {
         if (typeof openReviewSubmissionModal === 'function') {
           openReviewSubmissionModal(targetId, targetName, isCompany ? "Completed Tender Contract" : "Completed Project");
-        } else {
-          alert('Leave Review for ' + targetName);
+        } else if (typeof showToast === 'function') {
+          showToast('⭐ Review submissions are available upon completed milestone delivery with ' + targetName, 'info');
         }
       };
     }
