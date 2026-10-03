@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=137.0">
-<link rel="stylesheet" href="shared.css?v=137.0">
-<link rel="stylesheet" href="glass.css?v=137.0">
+<link rel="stylesheet" href="style.css?v=138.0">
+<link rel="stylesheet" href="shared.css?v=138.0">
+<link rel="stylesheet" href="glass.css?v=138.0">
 <style>
 /* ═ PAGE ═ */
 body { background: var(--paper); }
@@ -449,8 +449,6 @@ body { background: var(--paper); }
       <div class="profile-cta-btns">
         <a href="login.html" class="btn-connect" id="connectBtn">🤝 Connect</a>
         <a href="login.html" class="btn-message-ghost" id="messageBtn">💬 Message</a>
-        <a href="login.html" class="btn-message-ghost" id="callVoiceBtn" title="Direct Audio Call via Collekt" style="padding:0 14px;">📞 Call</a>
-        <a href="login.html" class="btn-message-ghost" id="callVideoBtn" title="Direct Video Call via Collekt" style="padding:0 14px;">📹 Video</a>
       </div>
 
     </div>
@@ -668,9 +666,9 @@ body { background: var(--paper); }
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=137.0"></script>
-<script src="app.js?v=137.0"></script>
-<script src="settings-popup.js?v=137.0"></script>
+<script src="supabase.js?v=138.0"></script>
+<script src="app.js?v=138.0"></script>
+<script src="settings-popup.js?v=138.0"></script>
 <script>
   /* ═ TAB SWITCHER ═ */
   function switchPubTab(tab, el) {
@@ -1188,8 +1186,6 @@ body { background: var(--paper); }
     var hireBtn = document.getElementById("hireBtn");
     var connectBtn = document.getElementById("connectBtn");
     var messageBtn = document.getElementById("messageBtn");
-    var callVoiceBtn = document.getElementById("callVoiceBtn");
-    var callVideoBtn = document.getElementById("callVideoBtn");
     var targetLink = "messages.html?user=" + encodeURIComponent(prof.id || prof.email);
 
     if (hireBtn) {
@@ -1198,8 +1194,6 @@ body { background: var(--paper); }
     }
     if (connectBtn) connectBtn.href = targetLink;
     if (messageBtn) messageBtn.href = targetLink;
-    if (callVoiceBtn) callVoiceBtn.href = targetLink + "&call=voice";
-    if (callVideoBtn) callVideoBtn.href = targetLink + "&call=video";
 
 
     var leaveBtn = document.getElementById("leaveReviewBtn");

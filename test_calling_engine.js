@@ -30,24 +30,24 @@ assert(glassCss.includes('.call-btn.end-call'), 'glass.css defines .call-btn.end
 
 console.log('✅ PASS: Static audit of glass.css calling styling verified');
 
-// 3. Static Audit of messages.html Integration
+// 3. Static Audit of messages.html Integration (Calls cleanly removed per UX requirement)
 const messagesHtml = fs.readFileSync(path.join(__dirname, 'messages.html'), 'utf8');
 
-assert(messagesHtml.includes('window.CollektCalling.startCall'), 'messages.html delegates to CollektCalling.startCall');
-assert(messagesHtml.includes('window.CollektCalling.acceptCall'), 'messages.html delegates to CollektCalling.acceptCall');
-assert(messagesHtml.includes('window.CollektCalling.declineCall'), 'messages.html delegates to CollektCalling.declineCall');
-assert(messagesHtml.includes("urlParams.get('call')"), 'messages.html supports ?call= auto-initiation');
+assert(!messagesHtml.includes('title="Voice Call"'), 'messages.html has cleanly removed Voice Call button');
+assert(!messagesHtml.includes('title="Video Call"'), 'messages.html has cleanly removed Video Call button');
+assert(!messagesHtml.includes('id="incomingCallModal"'), 'messages.html has cleanly removed incomingCallModal');
+assert(!messagesHtml.includes("callParam === 'voice'"), 'messages.html has removed ?call= auto-initiation');
 
-console.log('✅ PASS: Static audit of messages.html calling bridge verified');
+console.log('✅ PASS: messages.html calling triggers cleanly removed');
 
-// 3b. Static Audit of public-profile.html Calling Links
+// 3b. Static Audit of public-profile.html Calling Links (Direct calling buttons cleanly removed)
 const publicProfileHtml = fs.readFileSync(path.join(__dirname, 'public-profile.html'), 'utf8');
-assert(publicProfileHtml.includes('id="callVoiceBtn"'), 'public-profile.html has callVoiceBtn');
-assert(publicProfileHtml.includes('id="callVideoBtn"'), 'public-profile.html has callVideoBtn');
-assert(publicProfileHtml.includes('&call=voice'), 'public-profile.html binds direct voice call link');
-assert(publicProfileHtml.includes('&call=video'), 'public-profile.html binds direct video call link');
+assert(!publicProfileHtml.includes('id="callVoiceBtn"'), 'public-profile.html has removed callVoiceBtn');
+assert(!publicProfileHtml.includes('id="callVideoBtn"'), 'public-profile.html has removed callVideoBtn');
+assert(!publicProfileHtml.includes('&call=voice'), 'public-profile.html has removed direct voice call link');
+assert(!publicProfileHtml.includes('&call=video'), 'public-profile.html has removed direct video call link');
 
-console.log('✅ PASS: Static audit of public-profile.html calling buttons verified');
+console.log('✅ PASS: public-profile.html calling buttons cleanly removed');
 
 
 // 4. Unit Testing Calling Signaling & Mock Runtime

@@ -13,10 +13,10 @@ assert.ok(chatActionsMatch, 'chat-actions div must be present in messages.html')
 const chatActionsInner = chatActionsMatch[1];
 assert.ok(!chatActionsInner.includes('AI Draft'), 'chat-actions header must NOT contain "AI Draft" button');
 assert.ok(!chatActionsInner.includes('Transfer to Wallet'), 'chat-actions header must NOT contain "Transfer to Wallet" button');
-assert.ok(chatActionsInner.includes('Voice Call'), 'chat-actions must retain Voice Call');
-assert.ok(chatActionsInner.includes('Video Call'), 'chat-actions must retain Video Call');
+assert.ok(!chatActionsInner.includes('Voice Call'), 'chat-actions must NOT contain Voice Call');
+assert.ok(!chatActionsInner.includes('Video Call'), 'chat-actions must NOT contain Video Call');
 assert.ok(chatActionsInner.includes('Delete Entire Conversation'), 'chat-actions must retain Delete Entire Conversation');
-console.log('✅ Test 1 Passed: Chat header cleanly stripped of "AI Draft" and "Transfer to Wallet" buttons');
+console.log('✅ Test 1 Passed: Chat header cleanly stripped of "AI Draft", "Transfer to Wallet", and call buttons');
 
 // 2. Verify renderContacts empty-state does not dump directory users
 assert.ok(!messagesHtml.includes('Select an active member below to start messaging instantly:'), 'renderContacts must NOT dump directory members on empty state');

@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=137.0">
-<link rel="stylesheet" href="shared.css?v=137.0">
-<link rel="stylesheet" href="glass.css?v=137.0">
+<link rel="stylesheet" href="style.css?v=138.0">
+<link rel="stylesheet" href="shared.css?v=138.0">
+<link rel="stylesheet" href="glass.css?v=138.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -505,94 +505,6 @@
   .attach-btn:hover { color: #111b21; background: rgba(0,0,0,0.05); }
   html.dark .attach-btn:hover { color: #e9edef; background: rgba(255,255,255,0.08); }
 
-    /* Incoming Call Modal Overlay */
-  .incoming-call-modal {
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    z-index: 10005;
-    background: rgba(14, 59, 53, 0.96);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1.5px solid rgba(212, 146, 11, 0.4);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 20px 24px;
-    color: #fff;
-    max-width: 360px;
-    width: calc(100vw - 48px);
-    display: none;
-    flex-direction: column;
-    gap: 14px;
-    animation: slideInDown .3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  @keyframes slideInDown {
-    0% { transform: translateY(-30px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
-  }
-  .local-pip-video {
-    position: absolute;
-    bottom: 110px;
-    right: 24px;
-    width: 140px;
-    height: 190px;
-    border-radius: 14px;
-    object-fit: cover;
-    border: 2px solid var(--amber);
-    background: #000;
-    z-index: 5;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-    display: none;
-  }
-  /* WhatsApp Style Call Overlay & Animation */
-  .call-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    background: radial-gradient(circle at 50% 30%, #0d2823 0%, #071513 65%, #030a09 100%);
-    backdrop-filter: blur(20px);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding: 60px 24px 50px;
-    color: #fff;
-    animation: fadeIn .25s ease-out;
-  }
-  .call-overlay.active { display: flex !important; }
-  .call-header { text-align: center; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-  .call-title { font-size: 26px; font-weight: 800; margin: 0; color: #ffffff; letter-spacing: -0.02em; }
-  .call-status { font-size: 15px; color: rgba(255,255,255,.7); display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; }
-  .call-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: rgba(34, 197, 94, .18); border: 1px solid rgba(34, 197, 94, .35); color: #4ade80; border-radius: 99px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
-  
-  /* WhatsApp Pulse Rings */
-  .call-avatar-wrap { position: relative; width: 150px; height: 150px; border-radius: 50%; display: grid; place-items: center; margin: auto; z-index: 2; }
-  .call-avatar { width: 124px; height: 124px; border-radius: 50%; display: grid; place-items: center; font-size: 46px; font-weight: 900; color: #fff; box-shadow: 0 16px 40px rgba(0,0,0,.5); z-index: 2; position: relative; border: 3px solid rgba(255,255,255,.2); }
-  .call-pulse { position: absolute; inset: -12px; border-radius: 50%; border: 2px solid rgba(45, 212, 191, 0.5); opacity: 0; animation: waPulseRing 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
-  .call-pulse.p2 { animation-delay: .7s; }
-  .call-pulse.p3 { animation-delay: 1.4s; }
-  @keyframes waPulseRing { 0% { transform: scale(.85); opacity: .8; } 100% { transform: scale(1.7); opacity: 0; } }
-  
-  .video-container { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 0; background: #000; z-index: 1; display: none; }
-  
-  /* WhatsApp Floating Bottom Controls Dock */
-  .call-controls {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    z-index: 2;
-    background: rgba(18, 36, 32, 0.85);
-    backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 40px;
-    padding: 10px 20px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  }
-  .call-btn { width: 52px; height: 52px; border-radius: 50%; border: none; background: rgba(255,255,255,.14); color: #fff; font-size: 20px; cursor: pointer; display: grid; place-items: center; transition: all .2s; }
-  .call-btn:hover { background: rgba(255,255,255,.28); transform: scale(1.08); }
-  .call-btn.active { background: #fff; color: #071210; }
-  .call-btn.end-call { width: 62px; height: 62px; background: #ef4444; color: #fff; font-size: 24px; box-shadow: 0 8px 24px rgba(239,68,68,.5); }
-  .call-btn.end-call:hover { background: #dc2626; transform: scale(1.08); }
   .mobile-back-btn { display: none !important; }
 
   @media (max-width: 768px) {
@@ -738,32 +650,7 @@
   </div>
 </div>
 
-<!-- INCOMING CALL MODAL -->
-<div id="incomingCallModal" class="incoming-call-modal">
-  <div style="display:flex; align-items:center; gap:12px;">
-    <div style="position:relative; width:52px; height:52px; flex-shrink:0;">
-      <div class="call-pulse" style="inset:-6px; animation-duration:1.5s;"></div>
-      <div id="incCallerAvatar" class="msg-avatar" style="width:52px; height:52px; font-size:20px; font-weight:900; background:#0e3b35; border:2px solid #4ade80;">U</div>
-    </div>
-    <div style="flex:1; min-width:0;">
-      <div id="incCallTypeBadge" class="call-badge" style="padding:2px 8px; font-size:10px; margin-bottom:4px;">
-        <span style="width:6px; height:6px; border-radius:50%; background:#4ade80;"></span>
-        INCOMING CALL
-      </div>
-      <div id="incCallerName" style="font-size:15px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Caller Name</div>
-      <div id="incCallerRole" style="font-size:11px; color:#a1b5b2; margin-top:1px;">Registered Collekt User</div>
-    </div>
-  </div>
 
-  <div style="display:flex; gap:10px; margin-top:6px;">
-    <button type="button" class="btn btn-sm" onclick="declineIncomingCall()" style="flex:1; background:#ef4444; color:#fff; font-weight:800; border:none; border-radius:10px; min-height:38px; display:flex; align-items:center; justify-content:center; gap:6px;">
-      <span>🚫</span> Decline
-    </button>
-    <button type="button" class="btn btn-sm" onclick="acceptIncomingCall()" style="flex:1; background:#22c55e; color:#fff; font-weight:900; border:none; border-radius:10px; min-height:38px; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 14px rgba(34,197,94,0.4);">
-      <span>📞</span> Accept
-    </button>
-  </div>
-</div>
 
 <!-- IN-CHAT WALLET TRANSFER MODAL -->
 <div class="modal-overlay" id="chatTransferModal" style="display:none; position:fixed; inset:0; z-index:9900; background:rgba(4,14,13,0.78); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px;">
@@ -843,10 +730,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=137.0"></script>
-<script src="app.js?v=137.0"></script>
-<script src="collekt-ai.js?v=137.0"></script>
-<script src="settings-popup.js?v=137.0"></script>
+<script src="supabase.js?v=138.0"></script>
+<script src="app.js?v=138.0"></script>
+<script src="collekt-ai.js?v=138.0"></script>
+<script src="settings-popup.js?v=138.0"></script>
 <script>
   requireAuth();
 
@@ -1131,12 +1018,6 @@
         </div>
       </div>
       <div class="chat-actions" style="display:flex; align-items:center; gap:8px;">
-        <button class="chat-action-btn" title="Voice Call" onclick="triggerCall('voice')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        </button>
-        <button class="chat-action-btn" title="Video Call" onclick="triggerCall('video')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-        </button>
         <button class="chat-action-btn" title="Delete Entire Conversation" onclick="confirmDeleteEntireConversation('${conv.id}')" style="color:#dc2626;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         </button>
@@ -1622,98 +1503,7 @@
   window.toggleVideoPlayback = toggleVideoPlayback;
 
 
-  function stopStreamTracks() {
-    if (mediaNoteStream) {
-      mediaNoteStream.getTracks().forEach(t => t.stop());
-      mediaNoteStream = null;
-    }
-    const vidPrev = document.getElementById('recVideoPreview');
-    if (vidPrev) vidPrev.srcObject = null;
-  }
 
-  function blobToDataURL(blob) {
-    return new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result || '');
-      reader.onerror = () => resolve('');
-      reader.readAsDataURL(blob);
-    });
-  }
-
-  function generateFallbackMediaDataURL(type) {
-    if (type === 'video') {
-      const canvas = document.createElement('canvas');
-      canvas.width = 240; canvas.height = 240;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#0E3B35'; ctx.fillRect(0,0,240,240);
-      ctx.fillStyle = '#13756F'; ctx.beginPath(); ctx.arc(120,120,80,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#ffffff'; ctx.font = '900 18px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('📹 VIDEO NOTE', 120, 115);
-      ctx.font = '600 12px sans-serif'; ctx.fillText('Collekt Live Record', 120, 145);
-      return canvas.toDataURL('image/png');
-    } else {
-      return 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
-    }
-  }
-
-  // =============================================================================
-  // -- REALTIME AUDIO & VIDEO CALLING (BRIDGED TO COLLEKT CALLING ENGINE) --
-  // =============================================================================
-
-  function triggerCall(type) {
-    if (!activeConvId) {
-      if (typeof showToast === 'function') showToast('Please select a conversation to start a call.', 'warning');
-      return;
-    }
-    const convs = getMyConversations();
-    const conv = convs.find(c => c.id === activeConvId);
-    if (!conv) return;
-    const other = getOtherParticipant(conv);
-    if (!other) {
-      if (typeof showToast === 'function') showToast('Recipient not found.', 'warning');
-      return;
-    }
-
-    if (window.CollektCalling) {
-      window.CollektCalling.startCall({
-        type: type,
-        targetId: other.id || other.email,
-        targetEmail: other.email,
-        targetUsername: other.username,
-        targetName: other.name || other.company_name || 'Collekt Member',
-        targetAvatar: other.avatar_letter || (other.name || 'U').charAt(0).toUpperCase(),
-        targetRole: other.role,
-        conversationId: activeConvId
-      });
-    }
-  }
-
-  function acceptIncomingCall() {
-    if (window.CollektCalling) window.CollektCalling.acceptCall();
-  }
-
-  function declineIncomingCall() {
-    if (window.CollektCalling) window.CollektCalling.declineCall();
-  }
-
-  function toggleCallMute() {
-    if (window.CollektCalling) window.CollektCalling.toggleMute();
-  }
-
-  function toggleCallCam() {
-    if (window.CollektCalling) window.CollektCalling.toggleCam();
-  }
-
-  function endCall() {
-    if (window.CollektCalling) window.CollektCalling.endCall();
-  }
-
-  window.triggerCall = triggerCall;
-  window.acceptIncomingCall = acceptIncomingCall;
-  window.declineIncomingCall = declineIncomingCall;
-  window.toggleCallMute = toggleCallMute;
-  window.toggleCallCam = toggleCallCam;
-  window.endCall = endCall;
 
 
 
@@ -2322,15 +2112,7 @@
       renderContacts();
     }
 
-    // Auto-initiate call if call parameter is present in URL
-    const callParam = (urlParams.get('call') || urlParams.get('action') || '').toLowerCase();
-    if (callParam === 'voice' || callParam === 'video' || callParam === 'call') {
-      setTimeout(() => {
-        if (typeof triggerCall === 'function') {
-          triggerCall(callParam === 'video' ? 'video' : 'voice');
-        }
-      }, 700);
-    }
+
 
 
     // Pre-fill drafted message if passed in URL
