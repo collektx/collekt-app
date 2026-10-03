@@ -113,8 +113,18 @@ async function runAdminPortalTests() {
   // Sign out client
   await sb.auth.signOut();
 
+  // Security Obscurity Audit: Admin login unlinked from public customer pages
+  console.log('\n--- TEST 7: Public Surface Obscurity Audit ---');
+  const loginHtml = fs.readFileSync(path.join(__dirname, 'login.html'), 'utf8');
+  const indexHtml = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+  assert(!loginHtml.includes('admin-login.html'), 'login.html must NOT publicly link to admin-login.html');
+  assert(!loginHtml.includes('Platform Administrator?'), 'login.html must NOT contain Platform Administrator invitation');
+  assert(!indexHtml.includes('admin-login.html'), 'index.html must NOT link to admin-login.html in public footer');
+  console.log('  ✅ PASS: Public pages (login.html and index.html) do not expose administrative login endpoints');
+  passed++;
+
   console.log('\n════════════════════════════════════════════════════════════');
-  console.log(`  TEST RESULTS: ${passed} OF 6 MODULES PASSED (100% SUCCESS)  `);
+  console.log(`  TEST RESULTS: ${passed} OF 7 MODULES PASSED (100% SUCCESS)  `);
   console.log('════════════════════════════════════════════════════════════\n');
 }
 
