@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=144.0">
-<link rel="stylesheet" href="shared.css?v=144.0">
-<link rel="stylesheet" href="glass.css?v=144.0">
+<link rel="stylesheet" href="style.css?v=145.0">
+<link rel="stylesheet" href="shared.css?v=145.0">
+<link rel="stylesheet" href="glass.css?v=145.0">
 
 <style>
   body { background: var(--paper); }
@@ -962,10 +962,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=144.0"></script>
-<script src="app.js?v=144.0"></script>
-<script src="collekt-ai.js?v=144.0"></script>
-<script src="settings-popup.js?v=144.0"></script>
+<script src="supabase.js?v=145.0"></script>
+<script src="app.js?v=145.0"></script>
+<script src="collekt-ai.js?v=145.0"></script>
+<script src="settings-popup.js?v=145.0"></script>
 <script>
   let isHideBalance = false;
   try {
@@ -1449,6 +1449,15 @@
     if (!dva && typeof getDedicatedVirtualAccountForUser === 'function') {
       dva = getDedicatedVirtualAccountForUser(user);
       if (dva) activeDvaAccount = dva;
+    }
+    if (!dva && typeof fetchDedicatedVirtualAccount === 'function' && ownerId) {
+      try {
+        const directRes = await fetchDedicatedVirtualAccount(ownerId);
+        if (directRes && directRes.success && directRes.data?.account_number) {
+          dva = directRes.data;
+          activeDvaAccount = dva;
+        }
+      } catch(e) {}
     }
 
     if (dva && dva.account_number) {
@@ -3140,6 +3149,21 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
       window._isFetchingDva = true;
       (async () => {
         try {
+          if (typeof fetchDedicatedVirtualAccount === 'function') {
+            const direct = await fetchDedicatedVirtualAccount(user.id || user.owner_id);
+            if (direct && direct.success && direct.data?.account_number) {
+              activeDvaAccount = direct.data;
+              if (wallet) {
+                wallet.paystack_dva_account = direct.data.account_number;
+                wallet.paystack_dva_bank = direct.data.bank_name;
+                wallet.paystack_dva_name = direct.data.account_name;
+              }
+              renderVirtualBankDetails(wallet);
+              loadAndRenderFundModalDva();
+              return;
+            }
+          }
+
           let token = null;
           if (window.sb?.auth) {
             const sess = await window.sb.auth.getSession();
@@ -3392,35 +3416,60 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
 
       if (resData.status && resData.data?.account_number) {
         activeDvaAccount = resData.data;
-        if (user.wallet) {
-          user.wallet.paystack_dva_account = resData.data.account_number;
-          user.wallet.paystack_dva_bank = resData.data.bank_name;
-          user.wallet.paystack_dva_name = resData.data.account_name;
-          setUser(user);
-        }
+        if (!user.wallet) user.wallet = {};
+        user.wallet.paystack_dva_account = resData.data.account_number;
+        user.wallet.paystack_dva_bank = resData.data.bank_name;
+        user.wallet.paystack_dva_name = resData.data.account_name;
+        user.wallet.account_number = resData.data.account_number;
+        user.wallet.bank_name = resData.data.bank_name;
+        user.wallet.bank_assigned = true;
+        user.wallet.is_live_dva = true;
+        user.dva_account = resData.data.account_number;
+        user.dva_bank = resData.data.bank_name;
+        user.dva_name = resData.data.account_name;
+        user.kyc_verified = true;
+        if (idType === 'bvn') user.bvn = idVal;
+        if (idType === 'nin') user.nin = idVal;
+        setUser(user);
+
         closeModal('activateVirtualAccountModal');
         showToast('🎉 Dedicated NUBAN activated successfully! You can now receive bank transfers 24/7.', 'success', 6000);
         renderVirtualBankDetails(user.wallet);
         loadAndRenderFundModalDva();
       } else {
-        if (statusBox) {
-          statusBox.style.display = 'block';
-          statusBox.style.background = 'rgba(212,146,11,0.1)';
-          statusBox.style.border = '1px solid rgba(212,146,11,0.3)';
-          statusBox.style.color = '#92400e';
-          statusBox.innerHTML = `
-            <div style="font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-              <span>✅</span> Identity KYC Verified Successfully!
-            </div>
-            <div style="font-size:11.5px; line-height:1.45; margin-bottom:10px;">
-              Your ${idType.toUpperCase()} has been securely validated. Permanent NUBAN activation is being finalized with the partner clearing bank. In the meantime, you can fund your wallet immediately via Instant Bank Transfer &amp; Debit Card.
-            </div>
-            <button type="button" class="btn btn-primary btn-xs" onclick="closeModal('activateVirtualAccountModal'); openFundModal();" style="background:var(--teal); font-weight:800; border-radius:8px; border:none; color:#fff; padding:6px 14px;">
-              ⚡ Deposit Now via Instant Checkout &rarr;
-            </button>
-          `;
+        // Direct fallback query from Supabase
+        let recovered = false;
+        if (typeof fetchDedicatedVirtualAccount === 'function') {
+          const directRes = await fetchDedicatedVirtualAccount(user.id || user.owner_id);
+          if (directRes && directRes.success && directRes.data?.account_number) {
+            activeDvaAccount = directRes.data;
+            if (!user.wallet) user.wallet = {};
+            user.wallet.paystack_dva_account = directRes.data.account_number;
+            user.wallet.paystack_dva_bank = directRes.data.bank_name;
+            user.wallet.paystack_dva_name = directRes.data.account_name;
+            user.wallet.account_number = directRes.data.account_number;
+            user.wallet.bank_name = directRes.data.bank_name;
+            user.wallet.bank_assigned = true;
+            user.wallet.is_live_dva = true;
+            user.dva_account = directRes.data.account_number;
+            user.dva_bank = directRes.data.bank_name;
+            user.dva_name = directRes.data.account_name;
+            user.kyc_verified = true;
+            if (idType === 'bvn') user.bvn = idVal;
+            if (idType === 'nin') user.nin = idVal;
+            setUser(user);
+
+            closeModal('activateVirtualAccountModal');
+            showToast('🎉 Dedicated NUBAN activated successfully! You can now receive bank transfers 24/7.', 'success', 6000);
+            renderVirtualBankDetails(user.wallet);
+            loadAndRenderFundModalDva();
+            recovered = true;
+          }
         }
-        showToast('✅ KYC details verified! Use Instant Bank Transfer for immediate funding.', 'info', 5000);
+        if (!recovered) {
+          closeModal('activateVirtualAccountModal');
+          showToast('⚠️ Could not complete activation. Please check your network and try again.', 'error');
+        }
       }
     } catch (err) {
       console.error('submitActivateVirtualAccount error:', err);

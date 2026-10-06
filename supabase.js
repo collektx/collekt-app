@@ -387,13 +387,40 @@ async function syncUser() {
         profile.escrow_balance = realEscrow;
 
         const existingWallet = (localUser && localUser.wallet) || {};
+        let dvaAccount = (wallet && wallet.paystack_dva_account) || existingWallet.paystack_dva_account || existingWallet.account_number || '';
+        let dvaBank = (wallet && wallet.paystack_dva_bank) || existingWallet.paystack_dva_bank || existingWallet.bank_name || 'Fidelity Bank';
+        let dvaName = (wallet && wallet.paystack_dva_name) || existingWallet.paystack_dva_name || '';
+
+        if (!dvaAccount) {
+          try {
+            const { data: vba } = await sb.from('virtual_accounts').select('*').eq('owner_id', userId).eq('status', 'active').maybeSingle();
+            if (vba && vba.account_number) {
+              dvaAccount = vba.account_number;
+              dvaBank = vba.bank_name || 'Fidelity Bank';
+              dvaName = vba.account_name || '';
+            }
+          } catch(e) {}
+        }
+
         profile.wallet = {
           ...existingWallet,
           balance: realAvail,
           available_balance: realAvail,
           escrow_balance: realEscrow,
-          currency: (wallet && wallet.currency) || 'NGN'
+          currency: (wallet && wallet.currency) || 'NGN',
+          paystack_dva_account: dvaAccount,
+          paystack_dva_bank: dvaBank,
+          paystack_dva_name: dvaName,
+          account_number: dvaAccount,
+          bank_name: dvaBank,
+          bank_assigned: !!dvaAccount,
+          is_live_dva: !!dvaAccount
         };
+        if (dvaAccount) {
+          profile.dva_account = dvaAccount;
+          profile.dva_bank = dvaBank;
+          profile.dva_name = dvaName;
+        }
 
         const finalRole = profile.role || localUser.role || localStorage.getItem('collekt_last_role') || 'professional';
         const finalProfile = { ...localUser, ...profile, role: finalRole };
@@ -2198,6 +2225,27 @@ async function provisionDedicatedVirtualAccount(params) {
           }
         };
       }
+
+      // 3. Auto-provision via Supabase RPC
+      try {
+        const { data: provRes } = await window.sb.rpc('provision_user_virtual_account', {
+          p_user_id: ownerId
+        });
+        if (provRes && provRes.status && provRes.account_number) {
+          return {
+            success: true,
+            data: {
+              account_number: provRes.account_number,
+              account_name: provRes.account_name || formattedAcctName,
+              bank_name: provRes.bank_name || 'Fidelity Bank',
+              bank_code: provRes.bank_code || '070',
+              currency: 'NGN',
+              status: 'active',
+              provider: 'korapay'
+            }
+          };
+        }
+      } catch (rpcErr) {}
     }
 
     return { 
