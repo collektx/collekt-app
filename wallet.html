@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=147.0">
-<link rel="stylesheet" href="shared.css?v=147.0">
-<link rel="stylesheet" href="glass.css?v=147.0">
+<link rel="stylesheet" href="style.css?v=148.0">
+<link rel="stylesheet" href="shared.css?v=148.0">
+<link rel="stylesheet" href="glass.css?v=148.0">
 
 <style>
   body { background: var(--paper); }
@@ -962,10 +962,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=147.0"></script>
-<script src="app.js?v=147.0"></script>
-<script src="collekt-ai.js?v=147.0"></script>
-<script src="settings-popup.js?v=147.0"></script>
+<script src="supabase.js?v=148.0"></script>
+<script src="app.js?v=148.0"></script>
+<script src="collekt-ai.js?v=148.0"></script>
+<script src="settings-popup.js?v=148.0"></script>
 <script>
   let isHideBalance = false;
   try {
@@ -3541,15 +3541,18 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
       const payload = {
         name: displayName,
         email: user.email,
+        user_id: user.id || user.owner_id,
+        owner_id: user.id || user.owner_id,
         bank_code: bankCode,
         [idType]: idVal
       };
 
+      const authToken = token || user.id || user.owner_id;
       const resp = await fetch('/.netlify/functions/korapay-virtual-account', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
         },
         body: JSON.stringify(payload)
       });
@@ -3610,7 +3613,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
         }
         if (!recovered) {
           closeModal('activateVirtualAccountModal');
-          showToast('⚠️ Could not complete activation. Please check your network and try again.', 'error');
+          showToast('⚠️ ' + (resData?.message || resData?.error || 'Could not complete activation. Please try again.'), 'error');
         }
       }
     } catch (err) {

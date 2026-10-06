@@ -277,6 +277,13 @@ exports.handler = async (event) => {
         };
       }
 
+      // Fetch user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', effectiveOwnerId)
+        .maybeSingle();
+
       // Check existing in Supabase
       const { data: existingVba } = await supabase
         .from('virtual_accounts')
@@ -348,13 +355,6 @@ exports.handler = async (event) => {
           })
         };
       }
-
-      // Fetch user profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', effectiveOwnerId)
-        .maybeSingle();
 
       const customerEmail = (body.email || profile?.email || '').trim().toLowerCase();
       let customerName = (body.name || body.displayName || profile?.company_name || profile?.name || '').trim();
@@ -451,7 +451,7 @@ exports.handler = async (event) => {
           amount: Number(body.amount || 1000),
           email: customerEmail,
           name: preferredName,
-          reference: `COL-BT-${effectiveOwnerId.substring(0, 8)}-${Date.now()}`,
+          reference: `COL-BT-${String(effectiveOwnerId || 'user').replace(/[^a-zA-Z0-9]/g, '').substring(0, 8)}-${Date.now()}`,
           narration: 'Collekt Wallet Deposit',
           metadata: {
             owner_id: effectiveOwnerId,
@@ -462,6 +462,7 @@ exports.handler = async (event) => {
         });
 
         if (transferRes && transferRes.account_number) {
+          const displayAcctName = formattedAcctName || `COLLEKT / ${preferredName}`;
           // Save to Supabase virtual_accounts as active live bank transfer account
           await supabase
             .from('virtual_accounts')
@@ -472,7 +473,7 @@ exports.handler = async (event) => {
               provider_customer_id: customerEmail,
               provider_account_id: transferRes.reference,
               account_number: transferRes.account_number,
-              account_name: transferRes.account_name || 'Korapay-COL-CHKOUT',
+              account_name: displayAcctName,
               bank_name: transferRes.bank_name || 'Sterling Bank',
               bank_code: transferRes.bank_code || '232',
               currency: 'NGN',
@@ -492,7 +493,7 @@ exports.handler = async (event) => {
             .update({
               paystack_dva_account: transferRes.account_number,
               paystack_dva_bank: transferRes.bank_name || 'Sterling Bank',
-              paystack_dva_name: transferRes.account_name || 'Korapay-COL-CHKOUT',
+              paystack_dva_name: displayAcctName,
               updated_at: new Date().toISOString()
             })
             .or(`owner_id.eq.${effectiveOwnerId},user_id.eq.${effectiveOwnerId}`);
@@ -527,7 +528,7 @@ exports.handler = async (event) => {
               message: 'Live Sterling Bank transfer account provisioned successfully',
               data: {
                 account_number: transferRes.account_number,
-                account_name: transferRes.account_name || 'Korapay-COL-CHKOUT',
+                account_name: displayAcctName,
                 bank_name: transferRes.bank_name || 'Sterling Bank',
                 bank_code: transferRes.bank_code || '232',
                 currency: 'NGN',
