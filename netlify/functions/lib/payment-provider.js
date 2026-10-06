@@ -754,6 +754,56 @@ class KorapayProvider extends PaymentProvider {
   }
 
   /**
+   * Create Instant Live Bank Transfer Virtual Account (Pay-in)
+   * Real, working Nigerian NUBAN generated dynamically via Korapay live pay-ins rail
+   */
+  async createBankTransferCharge({ amount, email, name, reference, narration = 'Collekt Wallet Deposit', metadata = {} }) {
+    if (!amount || Number(amount) < 100) throw new Error('Minimum funding amount is NGN 100');
+    if (!email) throw new Error('Customer email is required');
+
+    const cleanRef = reference || `COL-BT-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanName = String(name || cleanEmail.split('@')[0] || 'Collekt Member').replace(/[^a-zA-Z0-9\s]/g, ' ').trim();
+
+    const payload = {
+      amount: Number(amount),
+      currency: 'NGN',
+      reference: cleanRef,
+      narration: narration,
+      customer: {
+        name: cleanName,
+        email: cleanEmail
+      }
+    };
+
+    if (metadata && Object.keys(metadata).length > 0) {
+      payload.metadata = metadata;
+    }
+
+    const res = await this._request('POST', '/charges/bank-transfer', payload);
+    if (!res.body || !res.body.status) {
+      throw new Error(res.body?.message || 'Failed to initiate Korapay live bank transfer');
+    }
+
+    const data = res.body.data || {};
+    const acct = data.bank_account || {};
+    return {
+      status: true,
+      reference: data.reference || cleanRef,
+      payment_reference: data.payment_reference,
+      account_number: acct.account_number,
+      account_name: acct.account_name || 'Korapay-COL-CHKOUT',
+      bank_name: acct.bank_name || 'Sterling Bank',
+      bank_code: acct.bank_code || '232',
+      amount_expected: data.amount_expected || data.amount,
+      fee: data.fee || 0,
+      vat: data.vat || 0,
+      expiry_date_in_utc: acct.expiry_date_in_utc,
+      customer: data.customer
+    };
+  }
+
+  /**
    * Credit Sandbox Virtual Bank Account (Testing only)
    */
   async creditSandboxVirtualAccount({ account_number, amount, currency = 'NGN' }) {

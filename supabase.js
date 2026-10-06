@@ -2226,26 +2226,6 @@ async function provisionDedicatedVirtualAccount(params) {
         };
       }
 
-      // 3. Auto-provision via Supabase RPC
-      try {
-        const { data: provRes } = await window.sb.rpc('provision_user_virtual_account', {
-          p_user_id: ownerId
-        });
-        if (provRes && provRes.status && provRes.account_number) {
-          return {
-            success: true,
-            data: {
-              account_number: provRes.account_number,
-              account_name: provRes.account_name || formattedAcctName,
-              bank_name: provRes.bank_name || 'Fidelity Bank',
-              bank_code: provRes.bank_code || '070',
-              currency: 'NGN',
-              status: 'active',
-              provider: 'korapay'
-            }
-          };
-        }
-      } catch (rpcErr) {}
     }
 
     return { 

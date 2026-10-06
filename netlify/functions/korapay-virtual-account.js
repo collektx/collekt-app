@@ -156,22 +156,6 @@ exports.handler = async (event) => {
           };
         }
 
-        // Auto-provision authentic CBN-compliant virtual account via Supabase RPC
-        const { data: provData } = await supabase.rpc('provision_user_virtual_account', {
-          p_user_id: effectiveOwnerId
-        });
-
-        if (provData && provData.status && provData.account_number) {
-          return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-              status: true,
-              data: provData
-            })
-          };
-        }
-
         return {
           statusCode: 404,
           headers,
@@ -215,6 +199,62 @@ exports.handler = async (event) => {
           statusCode: 200,
           headers,
           body: JSON.stringify(result)
+        };
+      }
+
+      // Action: Generate Live Nigerian Bank Transfer Virtual Account (Pay-in)
+      if (action === 'bank_transfer') {
+        const { amount, email, name, narration } = body;
+        const customerEmail = (email || user.email || '').trim().toLowerCase();
+        let customerName = (name || user.user_metadata?.name || user.email?.split('@')[0] || 'Collekt Member').trim();
+
+        const transferRes = await koraProvider.createBankTransferCharge({
+          amount: Number(amount || 1000),
+          email: customerEmail,
+          name: customerName,
+          reference: `COL-BT-${user.id.substring(0, 8)}-${Date.now()}`,
+          narration: narration || 'Collekt Wallet Deposit',
+          metadata: {
+            owner_id: user.id,
+            user_id: user.id,
+            gateway: 'korapay',
+            channel: 'bank_transfer'
+          }
+        });
+
+        // Insert pending transaction in Supabase transactions table
+        try {
+          await supabase.from('transactions').insert({
+            owner_id: user.id,
+            user_id: user.id,
+            amount: transferRes.amount_expected,
+            currency: 'NGN',
+            type: 'deposit',
+            category: 'funding',
+            status: 'pending',
+            reference: transferRes.reference,
+            description: `Live Bank Transfer via ${transferRes.bank_name} (${transferRes.account_number})`,
+            metadata: {
+              gateway: 'korapay',
+              account_number: transferRes.account_number,
+              bank_name: transferRes.bank_name,
+              bank_code: transferRes.bank_code,
+              account_name: transferRes.account_name,
+              expiry_date: transferRes.expiry_date_in_utc
+            }
+          });
+        } catch(txErr) {
+          console.warn('Pending transaction recording note:', txErr.message);
+        }
+
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({
+            status: true,
+            message: 'Live bank transfer account generated successfully',
+            data: transferRes
+          })
         };
       }
 
@@ -404,36 +444,114 @@ exports.handler = async (event) => {
         };
       }
 
-      // Seamless Fallback: Provision authentic CBN-compliant dedicated account via Supabase RPC
-      const { data: provData, error: provErr } = await supabase.rpc('provision_user_virtual_account', {
-        p_user_id: effectiveOwnerId
-      });
+      // If dedicated virtual accounts are not yet enabled by Korapay Support on the merchant account:
+      // Instantly generate a REAL, LIVE Sterling Bank transfer account so the user can fund their wallet immediately!
+      try {
+        const transferRes = await koraProvider.createBankTransferCharge({
+          amount: Number(body.amount || 1000),
+          email: customerEmail,
+          name: preferredName,
+          reference: `COL-BT-${effectiveOwnerId.substring(0, 8)}-${Date.now()}`,
+          narration: 'Collekt Wallet Deposit',
+          metadata: {
+            owner_id: effectiveOwnerId,
+            user_id: effectiveOwnerId,
+            gateway: 'korapay',
+            channel: 'bank_transfer'
+          }
+        });
 
-      if (provData && provData.status && provData.account_number) {
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({
-            status: true,
-            message: 'Virtual bank account created successfully',
-            data: {
-              account_number: provData.account_number,
-              account_name: provData.account_name || formattedAcctName,
-              bank_name: provData.bank_name || 'Fidelity Bank',
-              bank_code: provData.bank_code || bankCode,
+        if (transferRes && transferRes.account_number) {
+          // Save to Supabase virtual_accounts as active live bank transfer account
+          await supabase
+            .from('virtual_accounts')
+            .insert({
+              owner_id: effectiveOwnerId,
+              user_id: effectiveOwnerId,
+              provider: 'korapay',
+              provider_customer_id: customerEmail,
+              provider_account_id: transferRes.reference,
+              account_number: transferRes.account_number,
+              account_name: transferRes.account_name || 'Korapay-COL-CHKOUT',
+              bank_name: transferRes.bank_name || 'Sterling Bank',
+              bank_code: transferRes.bank_code || '232',
               currency: 'NGN',
-              account_reference: provData.account_reference || accountRef,
               status: 'active',
-              provider: 'korapay'
-            }
-          })
-        };
-        return {
-          statusCode: 500,
-          headers,
-          body: JSON.stringify({ status: false, message: 'Could not provision virtual bank account. Please try again.' })
-        };
+              metadata: {
+                provisioned_at: new Date().toISOString(),
+                customer_email: customerEmail,
+                provider: 'korapay',
+                type: 'live_bank_transfer_rail',
+                reference: transferRes.reference
+              }
+            });
+
+          // Sync to wallets table
+          await supabase
+            .from('wallets')
+            .update({
+              paystack_dva_account: transferRes.account_number,
+              paystack_dva_bank: transferRes.bank_name || 'Sterling Bank',
+              paystack_dva_name: transferRes.account_name || 'Korapay-COL-CHKOUT',
+              updated_at: new Date().toISOString()
+            })
+            .or(`owner_id.eq.${effectiveOwnerId},user_id.eq.${effectiveOwnerId}`);
+
+          // Record pending transaction for automated webhook matching
+          try {
+            await supabase.from('transactions').insert({
+              owner_id: effectiveOwnerId,
+              user_id: effectiveOwnerId,
+              amount: transferRes.amount_expected,
+              currency: 'NGN',
+              type: 'deposit',
+              category: 'funding',
+              status: 'pending',
+              reference: transferRes.reference,
+              description: `Live Bank Transfer via ${transferRes.bank_name} (${transferRes.account_number})`,
+              metadata: {
+                gateway: 'korapay',
+                account_number: transferRes.account_number,
+                bank_name: transferRes.bank_name,
+                bank_code: transferRes.bank_code,
+                account_name: transferRes.account_name
+              }
+            });
+          } catch (tErr) {}
+
+          return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+              status: true,
+              message: 'Live Sterling Bank transfer account provisioned successfully',
+              data: {
+                account_number: transferRes.account_number,
+                account_name: transferRes.account_name || 'Korapay-COL-CHKOUT',
+                bank_name: transferRes.bank_name || 'Sterling Bank',
+                bank_code: transferRes.bank_code || '232',
+                currency: 'NGN',
+                account_reference: transferRes.reference,
+                status: 'active',
+                provider: 'korapay',
+                is_live_rail: true,
+                amount_expected: transferRes.amount_expected
+              }
+            })
+          };
+        }
+      } catch (railErr) {
+        console.error('Korapay live bank transfer generation failed:', railErr);
       }
+
+      return {
+        statusCode: 502,
+        headers,
+        body: JSON.stringify({
+          status: false,
+          message: 'Unable to connect to banking partner clearing rail. Please try again shortly.'
+        })
+      };
     }
 
     return {
