@@ -6,6 +6,30 @@
 const crypto = require('crypto');
 const https = require('https');
 
+// Ensure local .env variables are loaded in local/test environments if needed
+if (typeof process !== 'undefined' && !process.env.KORAPAY_SECRET_KEY && typeof require !== 'undefined') {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const envPaths = [
+      path.resolve(__dirname, '../../.env'),
+      path.resolve(process.cwd(), '.env')
+    ];
+    for (const ep of envPaths) {
+      if (fs.existsSync(ep)) {
+        const envContent = fs.readFileSync(ep, 'utf8');
+        envContent.split('\n').forEach(line => {
+          const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+          if (match && !process.env[match[1]]) {
+            process.env[match[1]] = (match[2] || '').trim().replace(/^['"]|['"]$/g, '');
+          }
+        });
+        break;
+      }
+    }
+  } catch (_) {}
+}
+
 /**
  * Timing-safe comparison to prevent side-channel timing attacks
  */
@@ -437,7 +461,7 @@ class KorapayProvider extends PaymentProvider {
     this.secretKey = secretKey || process.env.KORAPAY_SECRET_KEY || process.env.KORA_SECRET_KEY || '';
     this.webhookSecret = webhookSecret || process.env.KORAPAY_WEBHOOK_SECRET || process.env.KORA_WEBHOOK_SECRET || this.secretKey;
     this.encryptionKey = encryptionKey || process.env.KORAPAY_ENCRYPTION_KEY || process.env.KORA_ENCRYPTION_KEY || '';
-    this.environment = process.env.KORAPAY_ENVIRONMENT || (this.secretKey.startsWith('sk_live_') || this.publicKey.startsWith('pk_live_') ? 'live' : 'test');
+    this.environment = process.env.KORAPAY_ENVIRONMENT || ((this.secretKey && this.secretKey.startsWith('sk_live_')) || (this.publicKey && this.publicKey.startsWith('pk_live_')) ? 'live' : 'test');
     this.baseUrl = 'https://api.korapay.com/merchant/api/v1';
   }
 

@@ -2010,11 +2010,13 @@ async function initializeWalletFunding({ amount, email, payment_method = 'card',
       });
 
       const parsed = await safeParseJsonResponse(res);
-      if (parsed.ok && parsed.data && (parsed.data.authorization_url || parsed.data.checkout_url || parsed.data.status === 'success')) {
-        return { success: true, data: parsed.data };
+      const resPayload = parsed.data || {};
+      const checkoutUrl = resPayload.authorization_url || resPayload.checkout_url || resPayload.data?.authorization_url || resPayload.data?.checkout_url;
+      if (checkoutUrl) {
+        return { success: true, data: { ...resPayload, authorization_url: checkoutUrl, checkout_url: checkoutUrl } };
       }
-      if (parsed.data && parsed.data.error) {
-        return { success: false, error: parsed.data.error };
+      if (resPayload.error || resPayload.message) {
+        return { success: false, error: resPayload.error || resPayload.message };
       }
     } catch (netErr) {
       console.warn('Serverless payment init note:', netErr.message);

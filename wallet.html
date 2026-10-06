@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=146.0">
-<link rel="stylesheet" href="shared.css?v=146.0">
-<link rel="stylesheet" href="glass.css?v=146.0">
+<link rel="stylesheet" href="style.css?v=147.0">
+<link rel="stylesheet" href="shared.css?v=147.0">
+<link rel="stylesheet" href="glass.css?v=147.0">
 
 <style>
   body { background: var(--paper); }
@@ -962,10 +962,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=146.0"></script>
-<script src="app.js?v=146.0"></script>
-<script src="collekt-ai.js?v=146.0"></script>
-<script src="settings-popup.js?v=146.0"></script>
+<script src="supabase.js?v=147.0"></script>
+<script src="app.js?v=147.0"></script>
+<script src="collekt-ai.js?v=147.0"></script>
+<script src="settings-popup.js?v=147.0"></script>
 <script>
   let isHideBalance = false;
   try {
@@ -1579,11 +1579,16 @@
     let dva = activeDvaAccount;
     if (!dva && user.wallet && user.wallet.paystack_dva_account && /^\d{10}$/.test(String(user.wallet.paystack_dva_account))) {
       const rawAc = String(user.wallet.paystack_dva_account);
-      if (!rawAc.startsWith('07') && !rawAc.startsWith('0129') && rawAc !== '0167384649') {
+      if (rawAc.startsWith('20') || rawAc.startsWith('07') || rawAc.startsWith('0129') || rawAc === '0167384649') {
+        delete user.wallet.paystack_dva_account;
+        delete user.wallet.paystack_dva_bank;
+        delete user.wallet.paystack_dva_name;
+        setUser(user);
+      } else {
         dva = {
           account_number: user.wallet.paystack_dva_account,
           account_name: user.wallet.paystack_dva_name || `COLLEKT / ${displayName.toUpperCase()}`,
-          bank_name: user.wallet.paystack_dva_bank || 'Fidelity Bank',
+          bank_name: user.wallet.paystack_dva_bank || 'Sterling Bank',
           currency: 'NGN',
           status: 'active'
         };
@@ -3273,11 +3278,21 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     let dva = activeDvaAccount;
     if (!dva && wallet && wallet.paystack_dva_account && /^\d{10}$/.test(String(wallet.paystack_dva_account))) {
       const rawAc = String(wallet.paystack_dva_account);
-      if (!rawAc.startsWith('07') && !rawAc.startsWith('0129') && rawAc !== '0167384649') {
+      if (rawAc.startsWith('20') || rawAc.startsWith('07') || rawAc.startsWith('0129') || rawAc === '0167384649') {
+        delete wallet.paystack_dva_account;
+        delete wallet.paystack_dva_bank;
+        delete wallet.paystack_dva_name;
+        if (user.wallet) {
+          delete user.wallet.paystack_dva_account;
+          delete user.wallet.paystack_dva_bank;
+          delete user.wallet.paystack_dva_name;
+          setUser(user);
+        }
+      } else {
         dva = {
           account_number: wallet.paystack_dva_account,
           account_name: wallet.paystack_dva_name || `COLLEKT / ${displayName.toUpperCase()}`,
-          bank_name: wallet.paystack_dva_bank || 'Fidelity Bank',
+          bank_name: wallet.paystack_dva_bank || 'Sterling Bank',
           currency: 'NGN',
           status: 'active'
         };

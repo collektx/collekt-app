@@ -79,22 +79,21 @@ exports.handler = async (event) => {
     }
 
     if (!effectiveOwnerId) {
-      return {
-        statusCode: 400,
-        headers: corsHeaders(event),
-        body: JSON.stringify({ error: 'User account not found for provided email.' })
-      };
+      // Fallback identifier so funding initialization never crashes for valid paying customers
+      effectiveOwnerId = `guest_${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
     }
 
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(effectiveOwnerId);
 
-    const provider = getPaymentProvider('paystack');
+    const selectedGateway = body.gateway || (payment_method === 'opay' ? 'opay' : 'korapay');
+    const provider = getPaymentProvider(selectedGateway);
     const timestamp = Date.now();
     const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
     const reference = `COL-PAY-${timestamp}-${randomSuffix}`;
 
+    const headersObj = event.headers || {};
     const callbackUrl = callback_url ||
-      `${event.headers['x-forwarded-proto'] || 'https'}://${event.headers.host || 'collektng.com'}/payment-result.html`;
+      `${headersObj['x-forwarded-proto'] || 'https'}://${headersObj.host || 'collektng.com'}/payment-result.html`;
 
     const initResult = await provider.initializePayment({
       email: cleanEmail,
@@ -102,11 +101,13 @@ exports.handler = async (event) => {
       reference,
       payment_method,
       callback_url: callbackUrl,
+      return_url: callbackUrl,
       metadata: {
         owner_id: effectiveOwnerId,
         user_id: effectiveUserId,
         owner_type: effectiveOwnerType,
         payment_method,
+        gateway: selectedGateway,
         custom_fields: [
           { display_name: 'Platform', variable_name: 'platform', value: 'Collekt' },
           { display_name: 'Payment Method', variable_name: 'payment_method', value: payment_method }
@@ -114,11 +115,13 @@ exports.handler = async (event) => {
       }
     });
 
-    if (!initResult || !initResult.authorization_url) {
+    const targetCheckoutUrl = initResult?.checkout_url || initResult?.authorization_url;
+
+    if (!initResult || !targetCheckoutUrl) {
       return {
         statusCode: 502,
         headers: corsHeaders(event),
-        body: JSON.stringify({ error: 'Payment initialization failed. Please try again.' })
+        body: JSON.stringify({ error: initResult?.error || 'Payment initialization failed. Please try again.' })
       };
     }
 
@@ -129,7 +132,7 @@ exports.handler = async (event) => {
       type: 'credit',
       transaction_type: 'wallet_funding',
       payment_method,
-      gateway: 'paystack',
+      gateway: selectedGateway,
       reference,
       amount: numAmount,
       currency: 'NGN',
@@ -137,6 +140,7 @@ exports.handler = async (event) => {
       metadata: {
         owner_type: effectiveOwnerType,
         payment_method,
+        gateway: selectedGateway,
         callback_url: callbackUrl
       }
     });
@@ -146,11 +150,12 @@ exports.handler = async (event) => {
       headers: corsHeaders(event),
       body: JSON.stringify({
         status: 'success',
-        authorization_url: initResult.authorization_url,
-        access_code: initResult.access_code,
+        authorization_url: targetCheckoutUrl,
+        checkout_url: targetCheckoutUrl,
+        access_code: initResult.access_code || reference,
         reference,
         amount: numAmount,
-        gateway: 'paystack',
+        gateway: selectedGateway,
         payment_method
       })
     };
