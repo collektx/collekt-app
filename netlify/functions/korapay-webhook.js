@@ -23,7 +23,7 @@ exports.handler = async (event) => {
 
   try {
     const rawBody = event.body || '';
-    const secretKey = process.env.KORAPAY_SECRET_KEY || process.env.KORAPAY_WEBHOOK_SECRET;
+    const secretKey = process.env.KORAPAY_SECRET_KEY || process.env.KORA_SECRET_KEY || process.env.KORAPAY_WEBHOOK_SECRET || process.env.KORA_WEBHOOK_SECRET;
     const signature = event.headers['x-korapay-signature'] || 
                       event.headers['X-Korapay-Signature'] || 
                       event.headers['x-kora-signature'] || 

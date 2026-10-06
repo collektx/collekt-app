@@ -89,9 +89,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=141.0">
-<link rel="stylesheet" href="shared.css?v=141.0">
-<link rel="stylesheet" href="glass.css?v=141.0">
+<link rel="stylesheet" href="style.css?v=143.0">
+<link rel="stylesheet" href="shared.css?v=143.0">
+<link rel="stylesheet" href="glass.css?v=143.0">
 <style>
 /* -- GLOBAL OVERRIDES ------------------------------- */
 html.dark body { background: #090d0c; }
@@ -754,8 +754,8 @@ html.dark .sec-h2 { color: #e2efed; }
   <a class='dlink' href='/marketplace'>Marketplace</a>
   <a href="#how-it-works" class="dlink">How it Works</a>
   <a href="#testimonials" class="dlink">Reviews</a>
-  <a class='dlink' href='/professional-login'>Professional Login</a>
-  <a class='dlink' href='/company-login'>Company Login</a>
+  <a class='dlink' href='/login'>Professional Login</a>
+  <a class='dlink' href='/login?role=company'>Company Login</a>
   <a class='btn btn-amber' href='/register'>Get Started &rarr;</a>
 </div>
 
@@ -772,8 +772,8 @@ html.dark .sec-h2 { color: #e2efed; }
       </h1>
       <p class="hero-sub-v2">Collekt connects Nigeria's top engineers, EPC contractors and bid specialists with oil & gas companies, construction firms and government agencies posting real opportunities.</p>
       <div class="hero-cta-row">
-        <a class='btn btn-amber' href='/professional-register' style='min-height:52px; font-size:15px; padding:0 28px; box-shadow:0 8px 24px rgba(212,146,11,.35);'>👷 Join as a Professional &rarr;</a>
-        <a class='btn btn-ghost' href='/company-register' style='min-height:52px; font-size:15px; padding:0 26px; border:1px solid rgba(255,255,255,0.3); color:#fff;'>🏢 Post a Tender / Enterprise</a>
+        <a class='btn btn-amber' href='/register' style='min-height:52px; font-size:15px; padding:0 28px; box-shadow:0 8px 24px rgba(212,146,11,.35);'>👷 Join as a Professional &rarr;</a>
+        <a class='btn btn-ghost' href='/register?role=company' style='min-height:52px; font-size:15px; padding:0 26px; border:1px solid rgba(255,255,255,0.3); color:#fff;'>🏢 Post a Tender / Enterprise</a>
       </div>
       <div class="hero-social-proof">
         <div class="avatars-stack">
@@ -1329,9 +1329,9 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=141.0"></script>
-<script src="app.js?v=141.0"></script>
-<script src="settings-popup.js?v=141.0"></script>
+<script src="supabase.js?v=143.0"></script>
+<script src="app.js?v=143.0"></script>
+<script src="settings-popup.js?v=143.0"></script>
 <script>
   // Phone tab switcher & Mascot handler
   let currentPhoneRole = 'professional';

@@ -3,6 +3,10 @@ https://collektng.xyz/* https://collektng.com/:splat 301!
 https://www.collektng.xyz/* https://collektng.com/:splat 301!
 
 /signup /register.html 301
+/professional-register /register.html 301
+/company-register /register.html?role=company 301
+/professional-login /login.html 301
+/company-login /login.html?role=company 301
 /register /register.html 200
 /login /login.html 200
 /dashboard /dashboard.html 200
