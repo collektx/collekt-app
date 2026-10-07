@@ -1394,6 +1394,23 @@ html.dark .success-h { color: #e2efed; }
       }).catch(e => console.warn('[Consent] Async recording note:', e));
     }
 
+    // Automated welcome email trigger via Resend (Kolly@collektng.com)
+    try {
+      fetch('/api/send-welcome-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          name: name,
+          firstName: isCompany ? (rep_first_name || 'Partner') : (first_name || name.split(' ')[0] || 'there'),
+          role: selectedRole,
+          companyName: isCompany ? name : ''
+        })
+      }).catch(e => console.warn('[Welcome Email] Non-blocking dispatch notice:', e));
+    } catch(emailErr) {
+      console.warn('[Welcome Email] Dispatch exception:', emailErr);
+    }
+
     // Ensure newly registered account is never flagged in deletedUsers
     try {
       let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
