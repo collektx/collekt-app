@@ -197,6 +197,16 @@
   status = 200
 
 [[redirects]]
+  from = "/api/auth-otp"
+  to = "/.netlify/functions/auth-otp"
+  status = 200
+
+[[redirects]]
+  from = "/api/auth/otp"
+  to = "/.netlify/functions/auth-otp"
+  status = 200
+
+[[redirects]]
   from = "/api/verify-turnstile"
   to = "/.netlify/functions/verify-turnstile"
   status = 200
