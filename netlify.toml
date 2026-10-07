@@ -171,6 +171,12 @@
   to = "/.netlify/functions/korapay-webhook"
   status = 200
 
+# Automated Resend Welcome Email Function
+[[redirects]]
+  from = "/api/send-welcome-email"
+  to = "/.netlify/functions/send-welcome-email"
+  status = 200
+
 [[redirects]]
   from = "/api/resend/webhook"
   to = "/.netlify/functions/resend-webhook"
@@ -321,4 +327,3 @@
   from = "/terms"
   to = "/terms.html"
   status = 200
-
