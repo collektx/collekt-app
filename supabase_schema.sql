@@ -559,4 +559,26 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.verify_audit_log_immutability() TO anon, authenticated, service_role;
 
+-- -----------------------------------------------------------------
+-- 21. AUTH OTP VERIFICATION TABLE & COLUMNS
+-- -----------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.auth_otps (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text NOT NULL,
+  code_hash text NOT NULL,
+  expires_at timestamptz NOT NULL,
+  verified boolean DEFAULT false,
+  attempts int DEFAULT 0,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_auth_otps_email ON public.auth_otps(email, expires_at);
+ALTER TABLE public.auth_otps ENABLE ROW LEVEL SECURITY;
+GRANT ALL ON public.auth_otps TO service_role;
+
+ALTER TABLE public.profiles 
+  ADD COLUMN IF NOT EXISTS email_verified boolean DEFAULT false,
+  ADD COLUMN IF NOT EXISTS otp_verified boolean DEFAULT false,
+  ADD COLUMN IF NOT EXISTS otp_verified_at timestamptz;
+
 

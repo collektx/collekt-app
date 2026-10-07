@@ -115,6 +115,8 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
       escrow_balance: wallet ? Number(wallet.escrow_balance || 0) : 0,
       is_verified: false,
       verification_status: 'none',
+      email_verified: false,
+      otp_verified: false,
       terms_accepted: true,
       terms_accepted_at: userMetadata.terms_accepted_at || new Date().toISOString(),
       terms_version: userMetadata.terms_version || '2026.1',

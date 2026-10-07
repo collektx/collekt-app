@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=150.0">
-<link rel="stylesheet" href="shared.css?v=150.0">
-<link rel="stylesheet" href="glass.css?v=150.0">
+<link rel="stylesheet" href="style.css?v=151.0">
+<link rel="stylesheet" href="shared.css?v=151.0">
+<link rel="stylesheet" href="glass.css?v=151.0">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -807,12 +807,94 @@ html.dark .success-h { color: #e2efed; }
   </div>
 </div>
 
+<!-- EMAIL OTP VERIFICATION MODAL POPUP -->
+<div id="emailOtpModal" class="modal-overlay" style="display:none; position:fixed; inset:0; z-index:100001; background:rgba(4,14,13,0.95); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); align-items:center; justify-content:center; padding:16px;">
+  <div class="modal-card" style="max-width:460px; width:100%; border-radius:20px; padding:32px 24px; background:var(--white, #0c1d1a); border:1.5px solid var(--line, rgba(20,184,166,0.25)); position:relative; font-family:'Plus Jakarta Sans','Manrope',sans-serif; display:flex; flex-direction:column; box-shadow:0 24px 70px rgba(0,0,0,0.6); animation:fadeSlideIn .35s ease; text-align:center;">
+    
+    <!-- Lock / Security Badge -->
+    <div style="width:52px; height:52px; border-radius:50%; background:rgba(20,184,166,0.12); border:1.5px solid rgba(20,184,166,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:24px;">
+      🔐
+    </div>
+
+    <div style="display:inline-block; margin:0 auto 8px; font-size:10px; font-weight:800; color:var(--amber, #D4920B); background:rgba(212,146,11,0.14); border:1px solid rgba(212,146,11,0.3); padding:3px 12px; border-radius:99px; text-transform:uppercase; letter-spacing:0.06em;">
+      Security Verification
+    </div>
+
+    <h2 style="font-size:22px; font-weight:900; color:var(--ink, #fff); margin-bottom:8px; letter-spacing:-0.02em;">
+      Check Your Email
+    </h2>
+
+    <p style="font-size:13px; color:var(--muted, #94a3b8); line-height:1.55; margin-bottom:22px;">
+      We've sent a 6-digit verification code to<br>
+      <strong id="otpDisplayEmail" style="color:var(--teal, #2dd4bf); word-break:break-all;">your email</strong>.<br>
+      Enter it below to access your dashboard.
+    </p>
+
+    <!-- OTP Input Boxes (6 digits) -->
+    <div style="display:flex; justify-content:center; gap:8px; margin-bottom:18px;" id="otpInputGroup">
+      <input type="text" maxlength="1" inputmode="numeric" class="otp-box" data-idx="0" autocomplete="one-time-code">
+      <input type="text" maxlength="1" inputmode="numeric" class="otp-box" data-idx="1">
+      <input type="text" maxlength="1" inputmode="numeric" class="otp-box" data-idx="2">
+      <input type="text" maxlength="1" inputmode="numeric" class="otp-box" data-idx="3">
+      <input type="text" maxlength="1" inputmode="numeric" class="otp-box" data-idx="4">
+      <input type="text" maxlength="1" inputmode="numeric" class="otp-box" data-idx="5">
+    </div>
+
+    <!-- Error & Success Status Messages -->
+    <div id="otpStatusError" style="display:none; color:#ef4444; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:10px 14px; font-size:12.5px; font-weight:600; margin-bottom:14px; text-align:center;"></div>
+    <div id="otpStatusSuccess" style="display:none; color:#10b981; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:10px; padding:10px 14px; font-size:12.5px; font-weight:600; margin-bottom:14px; text-align:center;"></div>
+
+    <!-- Submit Button -->
+    <button type="button" id="submitOtpBtn" onclick="verifyOtpAndProceed()" style="width:100%; padding:14px; background:var(--forest, #0E3B35); border:1.5px solid rgba(20,184,166,0.3); color:#fff; border-radius:12px; font-size:14.5px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 16px rgba(14,59,53,0.3); transition:all .2s;">
+      <span>Verify &amp; Access Dashboard &rarr;</span>
+    </button>
+
+    <!-- Resend & Cooldown Footer -->
+    <div style="margin-top:18px; font-size:13px; color:var(--muted, #94a3b8); display:flex; justify-content:center; align-items:center; gap:6px;">
+      <span>Didn't get the code?</span>
+      <button type="button" id="resendOtpBtn" onclick="resendRegistrationOtp()" style="background:none; border:none; color:var(--teal, #2dd4bf); font-weight:800; cursor:pointer; padding:0; text-decoration:underline;">
+        Resend Code
+      </button>
+      <span id="resendCountdown" style="color:var(--muted, #94a3b8); font-size:12px; display:none;"></span>
+    </div>
+
+    <div style="margin-top:14px; font-size:11.5px; color:var(--muted, #64748b);">
+      ⏱ Code expires in 10 minutes &bull; Protected by NDPA 2023
+    </div>
+  </div>
+</div>
+
 <style>
   @keyframes spin { to { transform: rotate(360deg); } }
+  .otp-box {
+    width: 48px;
+    height: 56px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    color: var(--ink, #fff);
+    outline: none;
+    transition: all .2s;
+  }
+  .otp-box:focus {
+    border-color: var(--teal, #14b8a6);
+    background: rgba(20, 184, 166, 0.08);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+  }
+  @media (max-width: 480px) {
+    .otp-box {
+      width: 40px;
+      height: 50px;
+      font-size: 20px;
+    }
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=150.0"></script>
-<script src="app.js?v=150.0"></script>
+<script src="supabase.js?v=151.0"></script>
+<script src="app.js?v=151.0"></script>
 <script>
   // Detect if arriving from OAuth callback
   const regHash = window.location.hash || '';
@@ -1394,23 +1476,6 @@ html.dark .success-h { color: #e2efed; }
       }).catch(e => console.warn('[Consent] Async recording note:', e));
     }
 
-    // Automated welcome email trigger via Resend (Kolly@collektng.com)
-    try {
-      fetch('/api/send-welcome-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email,
-          name: name,
-          firstName: isCompany ? (rep_first_name || 'Partner') : (first_name || name.split(' ')[0] || 'there'),
-          role: selectedRole,
-          companyName: isCompany ? name : ''
-        })
-      }).catch(e => console.warn('[Welcome Email] Non-blocking dispatch notice:', e));
-    } catch(emailErr) {
-      console.warn('[Welcome Email] Dispatch exception:', emailErr);
-    }
-
     // Ensure newly registered account is never flagged in deletedUsers
     try {
       let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
@@ -1423,18 +1488,271 @@ html.dark .success-h { color: #e2efed; }
       }
     } catch(e) {}
 
-    if (typeof setUser === 'function' && profile) {
-      setUser(profile);
-    }
-
-    if (typeof showToast === 'function') {
-      showToast('🎉 Account created! Directing to your dashboard...');
-    }
-
+    // Hold redirect! Require OTP verification before granting dashboard access.
     const targetDashboard = selectedRole === 'company' ? 'company-dashboard.html' : 'dashboard.html';
-    setTimeout(() => {
-      window.location.replace(targetDashboard);
-    }, 400);
+    window._pendingRegistration = {
+      email,
+      name,
+      role: selectedRole,
+      profile,
+      targetDashboard
+    };
+
+    // Open OTP Verification Modal and trigger email dispatch via /api/auth-otp
+    openEmailOtpModal(email, name, selectedRole);
+  }
+
+  /* -----------------------------------------------------
+     OTP VERIFICATION ENGINE: Resend Email OTP
+  ------------------------------------------------------*/
+  let otpCooldownTimer = null;
+  let otpSecondsRemaining = 0;
+
+  function openEmailOtpModal(email, name, role) {
+    const modal = document.getElementById('emailOtpModal');
+    const emailDisplay = document.getElementById('otpDisplayEmail');
+    const errBox = document.getElementById('otpStatusError');
+    const succBox = document.getElementById('otpStatusSuccess');
+    const submitBtn = document.getElementById('submitOtpBtn');
+
+    if (emailDisplay) emailDisplay.textContent = email;
+    if (errBox) errBox.style.display = 'none';
+    if (succBox) succBox.style.display = 'none';
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>Verify &amp; Access Dashboard &rarr;</span>';
+    }
+
+    // Clear boxes
+    const boxes = document.querySelectorAll('.otp-box');
+    boxes.forEach(b => b.value = '');
+
+    if (modal) {
+      modal.style.display = 'flex';
+      setupOtpInputHandlers();
+      setTimeout(() => {
+        if (boxes[0]) boxes[0].focus();
+      }, 100);
+    }
+
+    // Trigger OTP send via Netlify Serverless endpoint
+    fetch('/api/auth-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'send_otp',
+        email,
+        name,
+        role
+      })
+    }).then(res => res.json()).then(data => {
+      if (!data.success && errBox) {
+        errBox.textContent = data.error || 'Notice: Could not send verification code immediately. Try "Resend Code".';
+        errBox.style.display = 'block';
+      }
+    }).catch(e => {
+      console.warn('[auth-otp] Send dispatch note:', e.message);
+    });
+
+    startOtpCooldown(60);
+  }
+
+  function setupOtpInputHandlers() {
+    const boxes = document.querySelectorAll('.otp-box');
+    boxes.forEach((box, index) => {
+      box.oninput = function() {
+        const val = this.value.replace(/\D/g, '');
+        this.value = val ? val[0] : '';
+        if (this.value && index < boxes.length - 1) {
+          boxes[index + 1].focus();
+        }
+      };
+
+      box.onkeydown = function(e) {
+        if (e.key === 'Backspace' && !this.value && index > 0) {
+          boxes[index - 1].focus();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          verifyOtpAndProceed();
+        }
+      };
+
+      box.onpaste = function(e) {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+        if (text) {
+          for (let i = 0; i < boxes.length; i++) {
+            boxes[i].value = text[i] || '';
+          }
+          const focusTarget = Math.min(text.length, boxes.length - 1);
+          boxes[focusTarget].focus();
+        }
+      };
+    });
+  }
+
+  function startOtpCooldown(seconds = 60) {
+    otpSecondsRemaining = seconds;
+    const resendBtn = document.getElementById('resendOtpBtn');
+    const timerSpan = document.getElementById('resendCountdown');
+    if (!resendBtn) return;
+
+    resendBtn.disabled = true;
+    resendBtn.style.opacity = '0.5';
+    resendBtn.style.cursor = 'not-allowed';
+    if (timerSpan) {
+      timerSpan.textContent = `(${otpSecondsRemaining}s)`;
+      timerSpan.style.display = 'inline';
+    }
+
+    if (otpCooldownTimer) clearInterval(otpCooldownTimer);
+    otpCooldownTimer = setInterval(() => {
+      otpSecondsRemaining--;
+      if (timerSpan) {
+        timerSpan.textContent = `(${otpSecondsRemaining}s)`;
+      }
+      if (otpSecondsRemaining <= 0) {
+        clearInterval(otpCooldownTimer);
+        resendBtn.disabled = false;
+        resendBtn.style.opacity = '1';
+        resendBtn.style.cursor = 'pointer';
+        if (timerSpan) timerSpan.style.display = 'none';
+      }
+    }, 1000);
+  }
+
+  async function resendRegistrationOtp() {
+    if (otpSecondsRemaining > 0) return;
+    const ctx = window._pendingRegistration;
+    if (!ctx || !ctx.email) return;
+
+    const errBox = document.getElementById('otpStatusError');
+    const succBox = document.getElementById('otpStatusSuccess');
+    if (errBox) errBox.style.display = 'none';
+    if (succBox) succBox.style.display = 'none';
+
+    const resendBtn = document.getElementById('resendOtpBtn');
+    if (resendBtn) resendBtn.textContent = 'Sending...';
+
+    try {
+      const res = await fetch('/api/auth-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'resend_otp',
+          email: ctx.email,
+          name: ctx.name,
+          role: ctx.role
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data && data.success) {
+        if (succBox) {
+          succBox.textContent = '✓ A fresh 6-digit code has been sent to your email.';
+          succBox.style.display = 'block';
+        }
+        startOtpCooldown(60);
+      } else {
+        if (errBox) {
+          errBox.textContent = data.error || 'Could not send verification code. Please try again.';
+          errBox.style.display = 'block';
+        }
+      }
+    } catch (e) {
+      if (errBox) {
+        errBox.textContent = 'Network error while resending code. Please check your connection.';
+        errBox.style.display = 'block';
+      }
+    } finally {
+      if (resendBtn) resendBtn.textContent = 'Resend Code';
+    }
+  }
+
+  async function verifyOtpAndProceed() {
+    const ctx = window._pendingRegistration;
+    if (!ctx || !ctx.email) return;
+
+    const errBox = document.getElementById('otpStatusError');
+    const succBox = document.getElementById('otpStatusSuccess');
+    if (errBox) errBox.style.display = 'none';
+    if (succBox) succBox.style.display = 'none';
+
+    const boxes = document.querySelectorAll('.otp-box');
+    let code = '';
+    boxes.forEach(b => code += (b.value || '').trim());
+
+    if (code.length !== 6 || !/^\d{6}$/.test(code)) {
+      if (errBox) {
+        errBox.textContent = 'Please enter all 6 digits of your verification code.';
+        errBox.style.display = 'block';
+      }
+      return;
+    }
+
+    const submitBtn = document.getElementById('submitOtpBtn');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Verifying code... ⏳</span>';
+    }
+
+    try {
+      const res = await fetch('/api/auth-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'verify_otp',
+          email: ctx.email,
+          code: code,
+          name: ctx.name,
+          role: ctx.role
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data || !data.success) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Verify &amp; Access Dashboard &rarr;</span>';
+        }
+        if (errBox) {
+          errBox.textContent = (data && data.error) || 'Invalid or expired verification code. Please try again.';
+          errBox.style.display = 'block';
+        }
+        return;
+      }
+
+      // Successful OTP Verification
+      if (succBox) {
+        succBox.textContent = '✓ Email verified! Preparing your dashboard...';
+        succBox.style.display = 'block';
+      }
+
+      if (ctx.profile) {
+        ctx.profile.email_verified = true;
+        ctx.profile.otp_verified = true;
+        if (typeof setUser === 'function') {
+          setUser(ctx.profile);
+        }
+      }
+
+      if (typeof showToast === 'function') {
+        showToast('🎉 Account verified! Welcome to Collekt.');
+      }
+
+      setTimeout(() => {
+        window.location.replace(ctx.targetDashboard);
+      }, 700);
+
+    } catch (e) {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Verify &amp; Access Dashboard &rarr;</span>';
+      }
+      if (errBox) {
+        errBox.textContent = 'Network error while verifying code. Please check your connection.';
+        errBox.style.display = 'block';
+      }
+    }
   }
 
   function goToDashboardDirect() {
