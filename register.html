@@ -1409,69 +1409,41 @@ html.dark .success-h { color: #e2efed; }
       consent_ip_device: navigator.userAgent || 'Web Browser'
     };
 
-    const { user: authUser, session, profile, error: authErr } = await signUpWithEmailPassword({
+    // Check if account already exists before prompting OTP
+    if (window.sb) {
+      try {
+        const { data: existingProf } = await window.sb.from('profiles').select('id').eq('email', email.toLowerCase().trim()).maybeSingle();
+        if (existingProf) {
+          if (confirmBtn) {
+            confirmBtn.innerHTML = '<span>Accept &amp; Create Account &rarr;</span>';
+            confirmBtn.disabled = false;
+          }
+          closeLegalModal();
+          const err = document.getElementById('formError');
+          if (err) {
+            err.textContent = 'An account with this email already exists. Please log in instead.';
+            err.style.display = 'block';
+          }
+          return;
+        }
+      } catch(checkErr) {}
+    }
+
+    // Reset legal modal button and close legal modal
+    if (confirmBtn) {
+      confirmBtn.innerHTML = '<span>Accept &amp; Create Account &rarr;</span>';
+      confirmBtn.disabled = false;
+    }
+    closeLegalModal();
+
+    // Store pending registration data in memory (DO NOT create account or login yet!)
+    window.pendingRegistrationData = {
       email,
       password: pw,
       role: selectedRole,
-      metadata
-    });
-
-    if (authErr) {
-      if (confirmBtn) {
-        confirmBtn.innerHTML = '<span>Accept &amp; Create Account &rarr;</span>';
-        confirmBtn.disabled = false;
-      }
-      closeLegalModal();
-      const err = document.getElementById('formError');
-      if (err) {
-        let msg = authErr.message || 'Registration failed. Please check your details.';
-        if (msg.toLowerCase().includes('already registered')) {
-          msg = 'An account with this email already exists. Please log in instead.';
-        }
-        err.textContent = msg;
-        err.style.display = 'block';
-      }
-      return;
-    }
-
-    closeLegalModal();
-
-    if (typeof window.recordConsentEvent === 'function') {
-      window.recordConsentEvent({
-        consentType: 'registration_terms_and_privacy',
-        policyVersion: '2026.1',
-        metadata: {
-          user_id: authUser?.id || null,
-          email: email,
-          role: selectedRole,
-          ndpa_accepted: true,
-          fccpa_acknowledged: true,
-          cbn_disclaimer_acknowledged: true
-        }
-      }).catch(e => console.warn('[Consent] Async recording note:', e));
-    }
-
-    // Ensure newly registered account is never flagged in deletedUsers
-    try {
-      let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
-      if (Array.isArray(del)) {
-        del = del.filter(x => {
-          const s = String(x || '').toLowerCase().trim();
-          return s !== email.toLowerCase().trim() && s !== email.split('@')[0].toLowerCase().trim();
-        });
-        localStorage.setItem('collekt_deleted_users', JSON.stringify(del));
-      }
-    } catch(e) {}
-
-    // Store pending registration data for OTP verification
-    window.pendingRegistrationData = {
-      authUser,
-      session,
-      profile,
-      email,
+      metadata,
       name,
       firstName: isCompany ? (rep_first_name || 'Partner') : (first_name || name.split(' ')[0] || 'there'),
-      role: selectedRole,
       companyName: isCompany ? name : '',
       targetDashboard: selectedRole === 'company' ? 'company-dashboard.html' : 'dashboard.html'
     };
@@ -1667,7 +1639,74 @@ html.dark .success-h { color: #e2efed; }
         
         if (btn) {
           btn.style.background = '#10b981';
-          btn.innerHTML = '<span>✓ Code Verified!</span>';
+          btn.innerHTML = '<span>✓ Code Verified! Finalizing account...</span>';
+        }
+
+        // Finalize Supabase account registration now that email ownership is verified
+        const { user: authUser, session, profile, error: authErr } = await signUpWithEmailPassword({
+          email: data.email,
+          password: data.password,
+          role: data.role,
+          metadata: {
+            ...data.metadata,
+            email_verified: true,
+            email_verified_at: new Date().toISOString()
+          }
+        });
+
+        if (authErr) {
+          console.error('[Registration error after OTP]:', authErr);
+          let errMsg = authErr.message || 'Registration failed. Please try again.';
+          if (errMsg.toLowerCase().includes('already registered')) {
+            errMsg = 'An account with this email already exists. Please log in.';
+          }
+          showOtpError(errMsg);
+          if (btn) {
+            btn.style.background = 'var(--amber, #f59e0b)';
+            btn.innerHTML = '<span>Verify &amp; Enter Dashboard &rarr;</span>';
+            btn.disabled = false;
+          }
+          return;
+        }
+
+        // Record consent event
+        if (typeof window.recordConsentEvent === 'function') {
+          window.recordConsentEvent({
+            consentType: 'registration_terms_and_privacy',
+            policyVersion: '2026.1',
+            metadata: {
+              user_id: authUser?.id || null,
+              email: data.email,
+              role: data.role,
+              ndpa_accepted: true,
+              fccpa_acknowledged: true,
+              cbn_disclaimer_acknowledged: true
+            }
+          }).catch(e => console.warn('[Consent] Async recording note:', e));
+        }
+
+        // Ensure newly registered account is never flagged in deletedUsers
+        try {
+          let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
+          if (Array.isArray(del)) {
+            del = del.filter(x => {
+              const s = String(x || '').toLowerCase().trim();
+              return s !== data.email.toLowerCase().trim() && s !== data.email.split('@')[0].toLowerCase().trim();
+            });
+            localStorage.setItem('collekt_deleted_users', JSON.stringify(del));
+          }
+        } catch(e) {}
+
+        // Ensure profile object in localStorage has email_verified
+        const finalProfile = {
+          ...(profile || {}),
+          email_verified: true,
+          is_verified: true,
+          verification_status: 'email_verified'
+        };
+        localStorage.setItem('collekt_user', JSON.stringify(finalProfile));
+        if (typeof setUser === 'function') {
+          setUser(finalProfile);
         }
 
         // Deliver automated welcome email upon successful OTP verification
@@ -1685,12 +1724,8 @@ html.dark .success-h { color: #e2efed; }
           }).catch(e => console.warn('[Welcome Email] Non-blocking dispatch notice:', e));
         } catch(e) {}
 
-        if (typeof setUser === 'function' && data.profile) {
-          setUser({ ...data.profile, is_verified: true, verification_status: 'email_verified' });
-        }
-
         if (typeof showToast === 'function') {
-          showToast('🎉 Email verified! Redirecting to your dashboard...');
+          showToast('🎉 Email verified! Directing to your dashboard...');
         }
 
         setTimeout(() => {

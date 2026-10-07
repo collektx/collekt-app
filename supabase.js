@@ -115,8 +115,6 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
       escrow_balance: wallet ? Number(wallet.escrow_balance || 0) : 0,
       is_verified: false,
       verification_status: 'none',
-      email_verified: false,
-      otp_verified: false,
       terms_accepted: true,
       terms_accepted_at: userMetadata.terms_accepted_at || new Date().toISOString(),
       terms_version: userMetadata.terms_version || '2026.1',
@@ -553,6 +551,15 @@ async function handleOAuthSessionRouting(session) {
   const path = (window.location.pathname || '').toLowerCase();
   // DO NOT hijack admin routes or admin sessions!
   if (path.includes('admin')) {
+    return;
+  }
+
+  // DO NOT hijack standard registration on register.html unless OAuth was explicitly initiated!
+  const hasOAuthParams = (window.location.hash || '').includes('access_token=') || 
+                         (window.location.hash || '').includes('refresh_token=') || 
+                         (window.location.search || '').includes('code=');
+  const wasOAuthStarted = sessionStorage.getItem('collekt_oauth_in_progress') === 'true';
+  if (path.endsWith('register.html') && !hasOAuthParams && !wasOAuthStarted) {
     return;
   }
 
