@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Service Week 2026 | Collekt Master Campaign Flyer</title>
+  <meta name="description" content="Celebrate Customer Service Week with Collekt's signature luxury campaign flyer. High-resolution, realistic editorial aesthetic, multi-format social & print export.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Cabinet+Grotesk:wght@800;900&display=swap" rel="stylesheet">
+  
+  <!-- html2canvas for 1-click High-Res Client-Side Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #071311;
+      --bg-surface: #0a1b18;
+      --bg-card: rgba(12, 28, 25, 0.90);
+      --teal-primary: #13756f;
+      --teal-glow: #2dd4bf;
+      --emerald-dark: #064e3b;
+      --emerald-accent: #10b981;
+      --gold-primary: #d4af37;
+      --gold-light: #fbbf24;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-teal: rgba(45, 212, 191, 0.25);
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(19, 117, 111, 0.16) 0%, transparent 40%),
+        radial-gradient(circle at 90% 85%, rgba(212, 175, 55, 0.10) 0%, transparent 45%),
+        linear-gradient(180deg, #050d0c 0%, #071311 100%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient animated dust particles */
+    #ambientCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .app-wrapper {
+      position: relative;
+      z-index: 2;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px 24px 80px;
+    }
+
+    /* Studio Navigation Bar */
+    .studio-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 36px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .brand-icon-shield {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0e3b35 0%, #13756f 100%);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 8px 20px rgba(19, 117, 111, 0.35);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand-tag {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--teal-glow);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-pill {
+      background: rgba(45, 212, 191, 0.12);
+      border: 1px solid var(--border-teal);
+      color: var(--teal-glow);
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Main Studio Workspace Grid */
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 1fr 480px;
+      gap: 40px;
+      align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+      .studio-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── LEFT: FLYER CANVAS PREVIEW ── */
+    .canvas-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Aspect Ratio Switcher Bar */
+    .ratio-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(12, 28, 25, 0.7);
+      backdrop-filter: blur(16px);
+      padding: 6px;
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 24px;
+    }
+
+    .ratio-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .ratio-btn.active {
+      background: var(--teal-primary);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(19, 117, 111, 0.35);
+    }
+
+    .ratio-btn:hover:not(.active) {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* ── MASTER FLYER ARTBOARD CONTAINER ── */
+    .artboard-container {
+      perspective: 1200px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .flyer-artboard {
+      position: relative;
+      width: 100%;
+      max-width: 540px;
+      background: #06110f;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 
+        0 30px 80px -15px rgba(0, 0, 0, 0.8),
+        0 0 50px rgba(19, 117, 111, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+    }
+
+    /* Dynamic Aspect Ratios */
+    .flyer-artboard[data-ratio="1-1"] {
+      max-width: 560px;
+      aspect-ratio: 1 / 1;
+    }
+
+    .flyer-artboard[data-ratio="4-5"] {
+      max-width: 520px;
+      aspect-ratio: 4 / 5;
+    }
+
+    .flyer-artboard[data-ratio="9-16"] {
+      max-width: 440px;
+      aspect-ratio: 9 / 16;
+    }
+
+    /* Background Photography Layer */
+    .artboard-photo-wrap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .artboard-bg-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      transition: transform 0.6s ease, filter 0.4s ease;
+      filter: brightness(0.92) contrast(1.05);
+    }
+
+    /* Cinematic Gradient Grading Overlays */
+    .artboard-vignette {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(180deg, 
+          rgba(6, 17, 15, 0.88) 0%, 
+          rgba(6, 17, 15, 0.25) 30%, 
+          rgba(6, 17, 15, 0.35) 55%, 
+          rgba(5, 14, 12, 0.95) 85%, 
+          #040a09 100%),
+        radial-gradient(circle at 50% 50%, transparent 40%, rgba(4, 10, 9, 0.7) 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* Dynamic Color Tone Filters */
+    .artboard-color-grade {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      mix-blend-mode: overlay;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .grade-emerald {
+      background: radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.38) 100%);
+      opacity: 0.30;
+    }
+
+    .grade-teal {
+      background: radial-gradient(circle at 80% 20%, rgba(45, 212, 191, 0.22) 0%, rgba(15, 76, 92, 0.38) 100%);
+      opacity: 0.30;
+    }
+
+    .grade-neutral {
+      background: transparent;
+      opacity: 0;
+    }
+
+    /* ── GRAPHIC FLYER CONTENT LAYER ── */
+    .artboard-content {
+      position: relative;
+      z-index: 3;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 34px 34px 28px;
+    }
+
+    /* Header Tier */
+    .flyer-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .flyer-logo-lockup {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .flyer-logo-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(12px);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .flyer-logo-text {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    .flyer-logo-sub {
+      font-size: 9.5px;
+      font-weight: 800;
+      color: var(--teal-glow);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    /* Top-Right Stone Logo Badge */
+    .flyer-stone-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(6, 17, 15, 0.88);
+      border: 1px solid rgba(45, 212, 191, 0.40);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: 6px 14px 6px 10px;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(45, 212, 191, 0.2);
+    }
+
+    .flyer-stone-logo-img {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.7));
+    }
+
+    .flyer-stone-badge-meta {
+      display: flex;
+      flex-direction: column;
+      text-align: right;
+      line-height: 1.15;
+    }
+
+    .stone-badge-title {
+      font-size: 10.5px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      color: var(--teal-glow);
+      text-transform: uppercase;
+    }
+
+    .stone-badge-subtitle {
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      color: var(--gold-light);
+      text-transform: uppercase;
+    }
+
+    .flyer-csw-badge {
+      display: none;
+    }
+
+    /* Center / Hero Typography Tier */
+    .flyer-hero-text {
+      margin-top: auto;
+      margin-bottom: 24px;
+    }
+
+    .flyer-super-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--teal-glow);
+      margin-bottom: 8px;
+      background: rgba(7, 19, 17, 0.6);
+      padding: 4px 12px;
+      border-radius: 8px;
+      border-left: 3px solid var(--teal-glow);
+      backdrop-filter: blur(8px);
+    }
+
+    .flyer-main-title {
+      font-family: var(--font-display);
+      font-size: 38px;
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+      color: #fff;
+      margin-bottom: 12px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .flyer-main-title span.gold-highlight {
+      background: linear-gradient(135deg, #fef08a 0%, #fbbf24 50%, #d4af37 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-style: italic;
+    }
+
+    .flyer-body-copy {
+      font-size: 13.5px;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.88);
+      font-weight: 500;
+      max-width: 440px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+      margin-bottom: 16px;
+    }
+
+    /* Trust Pillars Strip */
+    .flyer-pillars-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .pillar-tag {
+      background: rgba(12, 28, 25, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .pillar-tag svg {
+      color: var(--teal-glow);
+    }
+
+    /* Footer / Signature Brand Tier */
+    .flyer-footer {
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11.5px;
+    }
+
+    .footer-brand-url {
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .footer-brand-url span.dot {
+      color: var(--teal-glow);
+    }
+
+    .footer-signature-quote {
+      color: var(--gold-light);
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-size: 10.5px;
+    }
+
+    /* ── RIGHT: CONTROLS & EXPORT PANEL ── */
+    .controls-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .panel-section-title {
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--teal-glow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    /* Visual Edition Picker */
+    .edition-selector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .edition-card {
+      border: 2px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .edition-card.active {
+      border-color: var(--teal-glow);
+      box-shadow: 0 0 20px rgba(45, 212, 191, 0.25);
+    }
+
+    .edition-card-img {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .edition-card-label {
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .edition-card-badge {
+      font-size: 9px;
+      background: rgba(45, 212, 191, 0.18);
+      color: var(--teal-glow);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 800;
+    }
+
+    /* Color Grade Picker */
+    .grade-selector-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .grade-swatch-btn {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.04);
+      color: #e2e8f0;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .grade-swatch-btn.active {
+      border-color: var(--teal-glow);
+      background: rgba(19, 117, 111, 0.25);
+      color: #fff;
+    }
+
+    /* Live Text Customizer Fields */
+    .custom-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .custom-label {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .custom-input, .custom-textarea {
+      width: 100%;
+      background: rgba(7, 19, 17, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      transition: border-color 0.2s ease;
+    }
+
+    .custom-input:focus, .custom-textarea:focus {
+      outline: none;
+      border-color: var(--teal-glow);
+    }
+
+    .custom-textarea {
+      resize: vertical;
+      min-height: 70px;
+      line-height: 1.45;
+    }
+
+    /* Primary Export Actions */
+    .export-actions-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-action-primary {
+      background: linear-gradient(135deg, #0e3b35 0%, #13756f 50%, #10b981 100%);
+      border: none;
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(19, 117, 111, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .btn-action-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(19, 117, 111, 0.55);
+    }
+
+    .btn-action-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Social Caption Box */
+    .caption-box {
+      background: rgba(7, 19, 17, 0.7);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #cbd5e1;
+      position: relative;
+    }
+
+    .caption-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .btn-copy-caption {
+      background: var(--teal-primary);
+      border: none;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* Toast Notification */
+    .toast-pill {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0f2d27;
+      border: 1px solid var(--teal-glow);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(15px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast-pill.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    /* Print Formatting */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .studio-header, .ratio-bar, .controls-panel, #ambientCanvas, .toast-pill {
+        display: none !important;
+      }
+      .app-wrapper {
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+      .studio-grid {
+        display: block !important;
+      }
+      .flyer-artboard {
+        box-shadow: none !important;
+        border: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="ambientCanvas"></canvas>
+
+  <div class="app-wrapper">
+    
+    <!-- Studio Header -->
+    <header class="studio-header">
+      <a href="index.html" class="brand-group">
+        <div class="brand-icon-shield">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">Collekt</div>
+          <span class="brand-tag">Campaign Design Studio</span>
+        </div>
+      </a>
+
+      <div class="header-links">
+        <div class="badge-pill">
+          <span>✨</span> Customer Service Week 2026
+        </div>
+        <a href="wallet.html" class="btn-ghost">Back to App &rarr;</a>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="studio-grid">
+      
+      <!-- ── LEFT: FLYER ARTBOARD PREVIEW ── -->
+      <section class="canvas-section">
+        
+        <!-- Aspect Ratio Controls -->
+        <div class="ratio-bar">
+          <button class="ratio-btn active" onclick="setAspectRatio('1-1', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            1:1 Square (Instagram / LinkedIn)
+          </button>
+          <button class="ratio-btn" onclick="setAspectRatio('4-5', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/></svg>
+            4:5 Portrait (Poster)
+          </button>
+          <button class="ratio-btn" onclick="setAspectRatio('9-16', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg>
+            9:16 Story (WhatsApp / Status)
+          </button>
+        </div>
+
+        <!-- The Artboard -->
+        <div class="artboard-container">
+          <div class="flyer-artboard" id="masterFlyerArtboard" data-ratio="1-1">
+            
+            <!-- Real Editorial Photograph Layer -->
+            <div class="artboard-photo-wrap">
+              <img src="customer-service-week-hero.jpg" alt="Collekt Customer Support Team" class="artboard-bg-img" id="artboardImage" crossorigin="anonymous">
+            </div>
+
+            <!-- Cinematic Vignette & Shadow Grading -->
+            <div class="artboard-vignette"></div>
+
+            <!-- Color Grade Overlay -->
+            <div class="artboard-color-grade grade-emerald" id="artboardColorGrade"></div>
+
+            <!-- Artboard Typography & Branding Layer -->
+            <div class="artboard-content">
+              
+              <!-- Top Header -->
+              <div class="flyer-topbar">
+                <div class="flyer-logo-lockup">
+                  <div class="flyer-logo-mark">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="flyer-logo-text">Collekt</div>
+                    <div class="flyer-logo-sub">Fintech &amp; Freelance Escrow</div>
+                  </div>
+                </div>
+
+                <div class="flyer-topbar-right">
+                  <div class="flyer-stone-badge">
+                    <img src="logo-stone-v2-removebg.png" alt="Collekt Stone Logo" class="flyer-stone-logo-img">
+                    <div class="flyer-stone-badge-meta">
+                      <span class="stone-badge-title">CS WEEK 2026</span>
+                      <span class="stone-badge-subtitle">OFFICIAL CAMPAIGN</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main Hero Copy -->
+              <div class="flyer-hero-text">
+                <div class="flyer-super-title" id="previewSuperTitle">
+                  <span>Heartbeat of Collekt</span>
+                </div>
+
+                <h1 class="flyer-main-title" id="previewMainTitle">
+                  Above &amp; Beyond, <br>
+                  <span class="gold-highlight">Every Single Interaction.</span>
+                </h1>
+
+                <p class="flyer-body-copy" id="previewBodyCopy">
+                  To the visionaries hiring with trust, the talent delivering mastery, and our relentless frontline heroes ensuring your milestones and payments stay seamless 24/7 &mdash; thank you for making Collekt your home.
+                </p>
+
+                <!-- Value Pillars -->
+                <div class="flyer-pillars-row">
+                  <div class="pillar-tag">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    100% Escrow Protection
+                  </div>
+                  <div class="pillar-tag">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Instant NUBAN Settlements
+                  </div>
+                  <div class="pillar-tag">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    24/7 Dedicated Support
+                  </div>
+                </div>
+              </div>
+
+              <!-- Footer Signature -->
+              <div class="flyer-footer">
+                <div class="footer-brand-url">
+                  <span>collektng.com</span>
+                  <span class="dot">&bull;</span>
+                  <span>@collektng</span>
+                </div>
+                <div class="footer-signature-quote">
+                  Driven By Care &bull; Powered By Trust
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ── RIGHT: CONTROLS & EXPORT PANEL ── -->
+      <aside class="controls-panel">
+        
+        <!-- 1. Visual Edition Selector -->
+        <div>
+          <div class="panel-section-title">
+            <span>📷</span> 1. Select Visual Edition
+          </div>
+          <div class="edition-selector-grid">
+            <div class="edition-card active" onclick="switchVisualEdition('hero', this)">
+              <img src="customer-service-week-hero.jpg" alt="Team Collaboration" class="edition-card-img">
+              <div class="edition-card-label">
+                <span>Team Collaboration</span>
+                <span class="edition-card-badge">Cool 8K</span>
+              </div>
+            </div>
+            <div class="edition-card" onclick="switchVisualEdition('portrait', this)">
+              <img src="customer-service-week-portrait.jpg" alt="Lead Specialist" class="edition-card-img">
+              <div class="edition-card-label">
+                <span>Lead Specialist</span>
+                <span class="edition-card-badge">Cool 8K</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Lighting & Color Grading -->
+        <div>
+          <div class="panel-section-title">
+            <span>🎨</span> 2. Color Mood &amp; Lighting (Cool &amp; Crisp)
+          </div>
+          <div class="grade-selector-row">
+            <button class="grade-swatch-btn active" onclick="setColorGrade('grade-emerald', this)">
+              Cool Emerald
+            </button>
+            <button class="grade-swatch-btn" onclick="setColorGrade('grade-teal', this)">
+              Crystal Teal
+            </button>
+            <button class="grade-swatch-btn" onclick="setColorGrade('grade-neutral', this)">
+              True Neutral 8K
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Live Custom Text Editor -->
+        <div>
+          <div class="panel-section-title">
+            <span>✍️</span> 3. Customize Text Content
+          </div>
+          
+          <div class="custom-input-group">
+            <label class="custom-label">Subtitle Ribbon</label>
+            <input type="text" class="custom-input" id="inputSuperTitle" value="Heartbeat of Collekt" oninput="updateLiveText()">
+          </div>
+
+          <div class="custom-input-group">
+            <label class="custom-label">Headline (HTML Allowed)</label>
+            <input type="text" class="custom-input" id="inputMainTitle" value="Above &amp; Beyond, <br><span class='gold-highlight'>Every Single Interaction.</span>" oninput="updateLiveText()">
+          </div>
+
+          <div class="custom-input-group">
+            <label class="custom-label">Message Body</label>
+            <textarea class="custom-textarea" id="inputBodyCopy" oninput="updateLiveText()">To the visionaries hiring with trust, the talent delivering mastery, and our relentless frontline heroes ensuring your milestones and payments stay seamless 24/7 &mdash; thank you for making Collekt your home.</textarea>
+          </div>
+        </div>
+
+        <!-- 4. Export & Download Actions -->
+        <div>
+          <div class="panel-section-title">
+            <span>🚀</span> 4. 8K Master Production Export
+          </div>
+          <div class="export-actions-stack">
+            <button class="btn-action-primary" id="btnDownloadPng" onclick="downloadHighResPng()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download 8K Master Flyer (PNG)
+            </button>
+
+            <button class="btn-action-secondary" onclick="downloadRawPhoto()" style="background:rgba(45,212,191,0.12); color:var(--teal-glow); border-color:rgba(45,212,191,0.35);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Download 8K Raw Photo (No Text)
+            </button>
+            
+            <button class="btn-action-secondary" onclick="window.print()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Print / Save as PDF Flyer
+            </button>
+          </div>
+        </div>
+
+        <!-- 5. Ready-to-Post Social Caption -->
+        <div>
+          <div class="panel-section-title">
+            <span>📱</span> 5. Pre-Crafted Social Caption
+          </div>
+          <div class="caption-box">
+            <div class="caption-header">
+              <span style="font-weight:800; font-size:11px; color:var(--teal-glow);">LinkedIn / Instagram Caption:</span>
+              <button class="btn-copy-caption" onclick="copySocialCaption()">📋 Copy Caption</button>
+            </div>
+            <div id="socialCaptionText">
+"At Collekt, technology powers our escrow, but humanity drives our mission. 💚
+
+This Customer Service Week, we celebrate the real heroes:
+✨ Our clients who trust us with their visionary projects
+✨ Our verified Nigerian freelancers and agencies delivering mastery
+✨ And our relentless frontline support team ensuring every milestone, withdrawal, and conversation flows without friction.
+
+Above and beyond, every single interaction. Happy Customer Service Week! 🌟
+
+#CustomerServiceWeek2026 #Collekt #CustomerServiceWeek #FintechNigeria #FreelanceNigeria #HumanFirst #EscrowYouCanTrust"
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-pill" id="toastPill">
+    <span>✅</span>
+    <span id="toastMsg">Action completed successfully!</span>
+  </div>
+
+  <script>
+    // ── 1. ASPECT RATIO SWITCHER ──
+    function setAspectRatio(ratio, btn) {
+      const artboard = document.getElementById('masterFlyerArtboard');
+      artboard.setAttribute('data-ratio', ratio);
+      
+      document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      showToast(`Switched layout to ${ratio === '1-1' ? '1:1 Square' : ratio === '4-5' ? '4:5 Poster' : '9:16 Story'}`);
+    }
+
+    // ── 2. VISUAL EDITION SWITCHER ──
+    const editions = {
+      hero: 'customer-service-week-hero.jpg',
+      portrait: 'customer-service-week-portrait.jpg'
+    };
+
+    function switchVisualEdition(editionKey, el) {
+      const img = document.getElementById('artboardImage');
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src = editions[editionKey];
+        img.style.opacity = '1';
+      }, 180);
+
+      document.querySelectorAll('.edition-card').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+
+      showToast(`Selected ${editionKey === 'hero' ? 'Team Collaboration' : 'Lead Specialist'} Edition`);
+    }
+
+    // ── 3. COLOR MOOD SWITCHER ──
+    function setColorGrade(gradeClass, btn) {
+      const gradeEl = document.getElementById('artboardColorGrade');
+      gradeEl.className = `artboard-color-grade ${gradeClass}`;
+      
+      document.querySelectorAll('.grade-swatch-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // ── 4. LIVE TEXT CUSTOMIZATION ──
+    function updateLiveText() {
+      const superVal = document.getElementById('inputSuperTitle').value;
+      const titleVal = document.getElementById('inputMainTitle').value;
+      const bodyVal = document.getElementById('inputBodyCopy').value;
+
+      document.getElementById('previewSuperTitle').innerHTML = `<span>${superVal}</span>`;
+      document.getElementById('previewMainTitle').innerHTML = titleVal;
+      document.getElementById('previewBodyCopy').innerHTML = bodyVal;
+    }
+
+    // ── 5. CANVAS UTILITIES (RoundRect & Text Wrap) ──
+    function canvasRoundRect(ctx, x, y, w, h, r) {
+      if (typeof ctx.roundRect === 'function') {
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, r);
+        return;
+      }
+      if (w < 2 * r) r = w / 2;
+      if (h < 2 * r) r = h / 2;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function canvasWrapText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = text.split(' ');
+      let line = '';
+      let curY = y;
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          ctx.fillText(line, x, curY);
+          line = words[n] + ' ';
+          curY += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, curY);
+      return curY + lineHeight;
+    }
+
+    // ── 6. DIRECT RAW 8K PHOTOGRAPH DOWNLOAD ──
+    function downloadRawPhoto() {
+      const currentSrc = document.getElementById('artboardImage').getAttribute('src');
+      const isPortrait = currentSrc.includes('portrait');
+      const filename = isPortrait ? 'Collekt_CSW_Lead_Specialist_8K.jpg' : 'Collekt_CSW_Team_Collaboration_8K.jpg';
+      
+      const link = document.createElement('a');
+      link.href = currentSrc;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('📸 Raw 8K Photograph downloaded successfully!');
+    }
+
+    // ── 7. MASTER 8K RESOLUTION FLYER CANVAS ENGINE ──
+    async function downloadHighResPng() {
+      const btn = document.getElementById('btnDownloadPng');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span style="display:inline-block; animation:spin 1s linear infinite;">⏳</span> Generating 8K Master Flyer...`;
+
+      try {
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+
+        const artboard = document.getElementById('masterFlyerArtboard');
+        const ratio = artboard.getAttribute('data-ratio') || '1-1';
+
+        // Set Ultra-Resolution Canvas Dimensions (True 8K/4K Master standard)
+        let targetW = 3840;
+        let targetH = 3840;
+        if (ratio === '4-5') {
+          targetW = 3072;
+          targetH = 3840;
+        } else if (ratio === '9-16') {
+          targetW = 2160;
+          targetH = 3840;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = targetW;
+        canvas.height = targetH;
+        const ctx = canvas.getContext('2d');
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        // 1. Dark Velvet Obsidian Background
+        ctx.fillStyle = '#06110f';
+        ctx.fillRect(0, 0, targetW, targetH);
+
+        // 2. Preload and Draw Crisp 8K Background Image
+        const currentImgSrc = document.getElementById('artboardImage').src;
+        const bgImg = new Image();
+        bgImg.crossOrigin = 'anonymous';
+        await new Promise((resolve) => {
+          if (bgImg.complete) return resolve();
+          bgImg.onload = resolve;
+          bgImg.onerror = () => resolve();
+          bgImg.src = currentImgSrc;
+        });
+
+        if (bgImg.width) {
+          const scale = Math.max(targetW / bgImg.width, targetH / bgImg.height);
+          const drawW = bgImg.width * scale;
+          const drawH = bgImg.height * scale;
+          const drawX = (targetW - drawW) / 2;
+          const drawY = 0;
+          ctx.drawImage(bgImg, drawX, drawY, drawW, drawH);
+        }
+
+        // 3. Draw Cool Obsidian Gradient Vignette (Zero Warm Tint)
+        const linGrad = ctx.createLinearGradient(0, 0, 0, targetH);
+        linGrad.addColorStop(0, 'rgba(6, 17, 15, 0.88)');
+        linGrad.addColorStop(0.24, 'rgba(6, 17, 15, 0.18)');
+        linGrad.addColorStop(0.55, 'rgba(6, 17, 15, 0.28)');
+        linGrad.addColorStop(0.82, 'rgba(5, 14, 12, 0.94)');
+        linGrad.addColorStop(1, '#040a09');
+        ctx.fillStyle = linGrad;
+        ctx.fillRect(0, 0, targetW, targetH);
+
+        // Cool Grade Tint
+        const activeGrade = document.getElementById('artboardColorGrade').className;
+        if (activeGrade.includes('grade-emerald')) {
+          const emGrad = ctx.createRadialGradient(targetW * 0.2, targetH * 0.2, 50, targetW * 0.5, targetH * 0.5, targetW * 0.8);
+          emGrad.addColorStop(0, 'rgba(16, 185, 129, 0.10)');
+          emGrad.addColorStop(1, 'rgba(6, 78, 59, 0.20)');
+          ctx.fillStyle = emGrad;
+          ctx.fillRect(0, 0, targetW, targetH);
+        } else if (activeGrade.includes('grade-teal')) {
+          const tealGrad = ctx.createRadialGradient(targetW * 0.8, targetH * 0.2, 50, targetW * 0.5, targetH * 0.5, targetW * 0.8);
+          tealGrad.addColorStop(0, 'rgba(45, 212, 191, 0.12)');
+          tealGrad.addColorStop(1, 'rgba(15, 76, 92, 0.22)');
+          ctx.fillStyle = tealGrad;
+          ctx.fillRect(0, 0, targetW, targetH);
+        }
+
+        // Edge Vignette
+        const radVig = ctx.createRadialGradient(targetW / 2, targetH / 2, targetW * 0.35, targetW / 2, targetH / 2, targetW * 0.72);
+        radVig.addColorStop(0, 'transparent');
+        radVig.addColorStop(1, 'rgba(4, 10, 9, 0.65)');
+        ctx.fillStyle = radVig;
+        ctx.fillRect(0, 0, targetW, targetH);
+
+        // 4. Dimensions & Layout Coordinates
+        const padX = targetW * 0.075;
+        const padTop = targetH * 0.055;
+        const padBot = targetH * 0.05;
+
+        // 5. Draw Top-Left Brand Logo & Wordmark
+        ctx.save();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.lineWidth = 4;
+        canvasRoundRect(ctx, padX, padTop, 120, 120, 30);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = '#2dd4bf';
+        ctx.lineWidth = 9;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        const sx = padX + 60, sy = padTop + 35;
+        ctx.moveTo(sx, sy + 55);
+        ctx.bezierCurveTo(sx + 35, sy + 38, sx + 35, sy + 15, sx + 35, sy + 15);
+        ctx.lineTo(sx, sy);
+        ctx.lineTo(sx - 35, sy + 15);
+        ctx.bezierCurveTo(sx - 35, sy + 15, sx - 35, sy + 38, sx, sy + 55);
+        ctx.stroke();
+
+        ctx.font = '900 68px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('Collekt', padX + 150, padTop + 68);
+
+        ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = '#2dd4bf';
+        ctx.fillText('FINTECH & FREELANCE ESCROW', padX + 150, padTop + 105);
+        ctx.restore();
+
+        // 6. Draw Top-Right: THE COLLEKT STONE LOGO!
+        const stoneImg = new Image();
+        stoneImg.crossOrigin = 'anonymous';
+        await new Promise((resolve) => {
+          if (stoneImg.complete) return resolve();
+          stoneImg.onload = resolve;
+          stoneImg.onerror = () => resolve();
+          stoneImg.src = 'logo-stone-v2-removebg.png';
+        });
+
+        if (stoneImg.width) {
+          ctx.save();
+          const stoneBadgeW = Math.max(340, targetW * 0.26);
+          const stoneBadgeH = 120;
+          const stoneBadgeX = targetW - padX - stoneBadgeW;
+          const stoneBadgeY = padTop;
+
+          ctx.fillStyle = 'rgba(6, 17, 15, 0.90)';
+          ctx.strokeStyle = 'rgba(45, 212, 191, 0.40)';
+          ctx.lineWidth = 4;
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+          ctx.shadowBlur = 30;
+          canvasRoundRect(ctx, stoneBadgeX, stoneBadgeY, stoneBadgeW, stoneBadgeH, 30);
+          ctx.fill();
+          ctx.stroke();
+          ctx.shadowColor = 'transparent';
+
+          const stoneImgW = 160;
+          const stoneImgH = (stoneImg.height / stoneImg.width) * stoneImgW;
+          ctx.drawImage(stoneImg, stoneBadgeX + 22, stoneBadgeY + (stoneBadgeH - stoneImgH) / 2, stoneImgW, stoneImgH);
+
+          ctx.font = '900 28px "Plus Jakarta Sans", sans-serif';
+          ctx.fillStyle = '#2dd4bf';
+          ctx.textAlign = 'right';
+          ctx.fillText('CS WEEK 2026', stoneBadgeX + stoneBadgeW - 28, stoneBadgeY + 54);
+
+          ctx.font = '800 21px "Plus Jakarta Sans", sans-serif';
+          ctx.fillStyle = '#fbbf24';
+          ctx.fillText('OFFICIAL CAMPAIGN', stoneBadgeX + stoneBadgeW - 28, stoneBadgeY + 92);
+          ctx.textAlign = 'left';
+          ctx.restore();
+        }
+
+        // 7. Hero Typography Content
+        const contentStartY = targetH * (ratio === '9-16' ? 0.45 : 0.48);
+
+        // Subtitle Ribbon
+        const superText = (document.getElementById('inputSuperTitle').value || 'Heartbeat of Collekt').toUpperCase();
+        ctx.save();
+        ctx.font = '900 32px "Plus Jakarta Sans", sans-serif';
+        const superMetrics = ctx.measureText(superText);
+        const superPillW = superMetrics.width + 80;
+        const superPillH = 68;
+
+        ctx.fillStyle = 'rgba(7, 19, 17, 0.88)';
+        canvasRoundRect(ctx, padX, contentStartY, superPillW, superPillH, 16);
+        ctx.fill();
+
+        ctx.fillStyle = '#2dd4bf';
+        canvasRoundRect(ctx, padX, contentStartY, 12, superPillH, 6);
+        ctx.fill();
+
+        ctx.fillStyle = '#2dd4bf';
+        ctx.fillText(superText, padX + 36, contentStartY + 46);
+        ctx.restore();
+
+        // Headline
+        let curY = contentStartY + 170;
+        ctx.save();
+        ctx.font = '900 96px "Playfair Display", Georgia, serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+        ctx.shadowBlur = 25;
+        ctx.shadowOffsetY = 6;
+        ctx.fillText('Above & Beyond,', padX, curY);
+
+        curY += 120;
+        const goldGrad = ctx.createLinearGradient(padX, curY - 80, padX + 1200, curY);
+        goldGrad.addColorStop(0, '#fef08a');
+        goldGrad.addColorStop(0.5, '#fbbf24');
+        goldGrad.addColorStop(1, '#d4af37');
+        ctx.fillStyle = goldGrad;
+        ctx.font = 'italic 900 96px "Playfair Display", Georgia, serif';
+        ctx.fillText('Every Single Interaction.', padX, curY);
+        ctx.restore();
+
+        // Message Body Copy
+        curY += 75;
+        const bodyText = document.getElementById('inputBodyCopy').value || 
+          'To the visionaries hiring with trust, the talent delivering mastery, and our relentless frontline heroes ensuring your milestones and payments stay seamless 24/7 — thank you for making Collekt your home.';
+
+        ctx.save();
+        ctx.font = '500 38px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+        ctx.shadowBlur = 15;
+        const maxBodyW = targetW - (padX * 2);
+        curY = canvasWrapText(ctx, bodyText, padX, curY, maxBodyW, 60);
+        ctx.restore();
+
+        // 8. Trust Value Pillars Strip
+        curY += 60;
+        const pillars = [
+          { icon: '🛡️', text: '100% Escrow Protection' },
+          { icon: '⚡', text: 'Instant NUBAN Settlements' },
+          { icon: '🕒', text: '24/7 Dedicated Support' }
+        ];
+
+        let pillX = padX;
+        ctx.save();
+        ctx.font = '800 28px "Plus Jakarta Sans", sans-serif';
+        for (const p of pillars) {
+          const pText = `${p.icon}  ${p.text}`;
+          const m = ctx.measureText(pText);
+          const pW = m.width + 50;
+          const pH = 66;
+
+          if (pillX + pW > targetW - padX) {
+            pillX = padX;
+            curY += 80;
+          }
+
+          ctx.fillStyle = 'rgba(14, 59, 53, 0.88)';
+          ctx.strokeStyle = 'rgba(45, 212, 191, 0.40)';
+          ctx.lineWidth = 3;
+          canvasRoundRect(ctx, pillX, curY, pW, pH, 99);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(pText, pillX + 25, curY + 44);
+          pillX += pW + 20;
+        }
+        ctx.restore();
+
+        // 9. Footer Signature
+        const footerY = targetH - padBot;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(padX, footerY - 50);
+        ctx.lineTo(targetW - padX, footerY - 50);
+        ctx.stroke();
+
+        ctx.font = '800 32px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('collektng.com   •   @collektng', padX, footerY);
+
+        ctx.textAlign = 'right';
+        ctx.font = '900 28px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText('DRIVEN BY CARE  •  POWERED BY TRUST', targetW - padX, footerY);
+        ctx.restore();
+
+        // 10. Direct Export Trigger
+        canvas.toBlob((blob) => {
+          if (!blob) throw new Error('Blob creation failed');
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = `Collekt_Customer_Service_Week_2026_8K_${ratio}.png`;
+          link.href = url;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(url), 2500);
+
+          showToast('🎉 Master 8K Flyer downloaded successfully!');
+        }, 'image/png');
+
+      } catch (err) {
+        console.error('8K Canvas export error, falling back:', err);
+        // Fallback: html2canvas
+        try {
+          const artboard = document.getElementById('masterFlyerArtboard');
+          const canvas = await html2canvas(artboard, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: '#071311',
+            logging: false
+          });
+          const link = document.createElement('a');
+          link.download = `Collekt_CSW_Flyer.png`;
+          link.href = canvas.toDataURL('image/png', 1.0);
+          link.click();
+          showToast('🎉 High-Res Flyer downloaded successfully!');
+        } catch (fallbackErr) {
+          console.error('Fallback error:', fallbackErr);
+          showToast('⚠️ Direct download ready — please use "Download 8K Raw Photo" or Print to PDF.', 'error');
+        }
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+    // ── 6. COPY SOCIAL CAPTION ──
+    function copySocialCaption() {
+      const text = document.getElementById('socialCaptionText').innerText.trim();
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Social caption copied to clipboard!');
+      }).catch(() => {
+        showToast('📋 Caption ready to copy!');
+      });
+    }
+
+    // ── 7. TOAST NOTIFICATION ──
+    let toastTimer = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toastPill');
+      const text = document.getElementById('toastMsg');
+      text.textContent = msg;
+      toast.classList.add('visible');
+      
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 3500);
+    }
+
+    // ── 8. SUBTLE AMBIENT PARTICLES CANVAS ──
+    (function initAmbient() {
+      const canvas = document.getElementById('ambientCanvas');
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = window.innerWidth;
+      let h = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      });
+
+      const particles = Array.from({ length: 28 }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 1.5 + 0.5,
+        speedX: (Math.random() - 0.5) * 0.3,
+        speedY: (Math.random() - 0.5) * 0.3,
+        opacity: Math.random() * 0.4 + 0.1
+      }));
+
+      function render() {
+        ctx.clearRect(0, 0, w, h);
+        particles.forEach(p => {
+          p.x += p.speedX;
+          p.y += p.speedY;
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h;
+          if (p.y > h) p.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(45, 212, 191, ${p.opacity})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(render);
+      }
+      render();
+    })();
+  </script>
+</body>
+</html>
