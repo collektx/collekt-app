@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collekt | We're Hiring — Official Recruitment Flyer Showcase</title>
+  <link rel="icon" type="image/png" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=151.0">
+  <link rel="stylesheet" href="shared.css?v=151.0">
+  <link rel="stylesheet" href="glass.css?v=151.0">
+  <style>
+    :root {
+      --bg-canvas: #071311;
+      --card-bg: rgba(12, 29, 26, 0.92);
+      --card-border: rgba(45, 212, 191, 0.15);
+      --emerald-glow: #10B981;
+      --teal-accent: #14B8A6;
+      --gold-accent: #F59E0B;
+    }
+    body {
+      background: var(--bg-canvas);
+      color: #F0FDF4;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .hero-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+    .top-brand {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .brand-logo-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+    .brand-logo-img {
+      height: 44px;
+      width: auto;
+      border-radius: 8px;
+    }
+    .brand-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.2);
+      color: #34D399;
+      padding: 3px 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .hero-title {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      margin: 0 0 12px;
+      background: linear-gradient(135deg, #FFF 40%, #A7F3D0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+      font-size: 16px;
+      color: #94A3B8;
+      max-width: 680px;
+      line-height: 1.6;
+      margin: 0 0 36px;
+    }
+    .flyer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 32px;
+      margin-bottom: 50px;
+    }
+    .flyer-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+    .flyer-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(52, 211, 153, 0.4);
+    }
+    .card-badge-header {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.25);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .card-badge-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #E2E8F0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-res-tag {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(20, 184, 166, 0.2);
+      color: #2DD4BF;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .flyer-img-wrap {
+      position: relative;
+      width: 100%;
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .flyer-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .flyer-img:hover {
+      transform: scale(1.02);
+    }
+    .card-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+      justify-content: space-between;
+    }
+    .role-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .role-tag {
+      font-size: 11.5px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #CBD5E1;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+    .btn-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #10B981, #059669);
+      color: #FFF;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 14px 20px;
+      border-radius: 14px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .btn-download:hover {
+      background: linear-gradient(135deg, #34D399, #10B981);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+      transform: translateY(-1px);
+    }
+    .btn-download-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #E2E8F0;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 11px 16px;
+      border-radius: 12px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s ease;
+      cursor: pointer;
+    }
+    .btn-download-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #FFF;
+    }
+    .copy-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 32px;
+      margin-top: 40px;
+    }
+    .section-head {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0 0 8px;
+      color: #FFF;
+    }
+    .section-desc {
+      font-size: 14.5px;
+      color: #94A3B8;
+      margin: 0 0 24px;
+    }
+    .copy-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      position: relative;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #E2E8F0;
+      white-space: pre-wrap;
+    }
+    .btn-copy {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34D399;
+      font-weight: 700;
+      font-size: 12.5px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-copy:hover {
+      background: #10B981;
+      color: #FFF;
+    }
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #10B981;
+      color: #FFF;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @media (max-width: 768px) {
+      .hero-title { font-size: 28px; }
+      .flyer-grid { grid-template-columns: 1fr; }
+      .copy-section { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero-container">
+    <!-- Brand Topbar -->
+    <div class="top-brand">
+      <a href="index.html" class="brand-logo-group">
+        <img src="logo-stone-v2-removebg.png" alt="Collekt Logo" class="brand-logo-img">
+        <div class="brand-title">
+          COLLEKT
+          <span class="brand-badge">RECRUITMENT</span>
+        </div>
+      </a>
+      <a href="index.html" class="btn-download-secondary">
+        &larr; Back to Platform
+      </a>
+    </div>
+
+    <!-- Header -->
+    <div class="header-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+      Talent Acquisition Campaign 2026
+    </div>
+    <h1 class="hero-title">Collekt We're Hiring — Official Flyers</h1>
+    <p class="hero-subtitle">
+      Professional high-resolution flyers featuring Nigerian female engineers, verified project infrastructure badges, and all onboarding positions. Download your preferred flyer below or copy the pre-written campaign captions.
+    </p>
+
+    <!-- Flyer Grid -->
+    <div class="flyer-grid">
+      
+      <!-- Option 1: Executive & Authoritative -->
+      <div class="flyer-card">
+        <div class="card-badge-header">
+          <div class="card-badge-title">
+            <span>Option A: Executive Leader</span>
+          </div>
+          <span class="card-res-tag">Ultra 8K Resolution</span>
+        </div>
+        <div class="flyer-img-wrap">
+          <img src="collekt-hiring-flyer-executive.jpg" alt="Collekt Hiring Flyer Option A" class="flyer-img" id="flyerA">
+        </div>
+        <div class="card-body">
+          <div>
+            <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px; color: #FFF;">Authoritative & Empowering Design</div>
+            <p style="color: #94A3B8; font-size: 13.5px; line-height: 1.5; margin: 0 0 14px;">
+              Features a commanding, professional female engineer in construction hard hat and high-vis vest, with stone logo in the top-right and clear pill badges for all 6 roles.
+            </p>
+            <div class="role-tags">
+              <span class="role-tag">📈 BizDev Manager</span>
+              <span class="role-tag">📣 Marketing Strategist</span>
+              <span class="role-tag">👥 Community Lead</span>
+              <span class="role-tag">🛡️ Verification Officers</span>
+              <span class="role-tag">💻 Web/Product Dev</span>
+              <span class="role-tag">📋 Operations Lead</span>
+            </div>
+          </div>
+          <div style="margin-top: 20px;">
+            <a href="collekt-hiring-flyer-executive.jpg" download="Collekt_Hiring_Flyer_Option_A.jpg" class="btn-download" onclick="triggerDownload(event, 'collekt-hiring-flyer-executive.jpg', 'Collekt_Hiring_Flyer_Executive.jpg')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download Flyer (Option A)
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option 2: Dynamic & Welcoming -->
+      <div class="flyer-card">
+        <div class="card-badge-header">
+          <div class="card-badge-title">
+            <span>Option B: Dynamic & Charismatic</span>
+          </div>
+          <span class="card-res-tag">Ultra 8K Resolution</span>
+        </div>
+        <div class="flyer-img-wrap">
+          <img src="collekt-hiring-flyer-warm.jpg" alt="Collekt Hiring Flyer Option B" class="flyer-img" id="flyerB">
+        </div>
+        <div class="card-body">
+          <div>
+            <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px; color: #FFF;">Warm & Engaging Specialist Design</div>
+            <p style="color: #94A3B8; font-size: 13.5px; line-height: 1.5; margin: 0 0 14px;">
+              Features an inspiring, smiling female engineer set against a modern renewable energy and infrastructure backdrop, creating an approachable and energetic invitation to join.
+            </p>
+            <div class="role-tags">
+              <span class="role-tag">📈 BizDev Manager</span>
+              <span class="role-tag">📣 Marketing Strategist</span>
+              <span class="role-tag">👥 Community Lead</span>
+              <span class="role-tag">🛡️ Verification Officers</span>
+              <span class="role-tag">💻 Web/Product Dev</span>
+              <span class="role-tag">📋 Operations Lead</span>
+            </div>
+          </div>
+          <div style="margin-top: 20px;">
+            <a href="collekt-hiring-flyer-warm.jpg" download="Collekt_Hiring_Flyer_Option_B.jpg" class="btn-download" onclick="triggerDownload(event, 'collekt-hiring-flyer-warm.jpg', 'Collekt_Hiring_Flyer_Dynamic.jpg')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download Flyer (Option B)
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ready-to-Post Campaign Write-Up -->
+    <div class="copy-section">
+      <h2 class="section-head">📢 Social Media Announcement Write-Up</h2>
+      <p class="section-desc">Copy and paste this official announcement across LinkedIn, Instagram, X (Twitter), and WhatsApp communities.</p>
+
+      <div class="copy-box" id="socialCopyText">🚀 WE’RE HIRING: Join the team building Nigeria’s #1 Energy & Infrastructure Marketplace! 🇳🇬⚡
+
+At Collekt (collektng.com), we are bridging Nigeria’s top engineering talent with high-value tenders, EPC contracts, and renewable infrastructure projects with guaranteed milestone escrow payments.
+
+We are expanding our team and actively hiring passionate professionals across the following positions:
+
+🔹 Business Development Manager
+🔹 Marketing Strategist
+🔹 Community & Social Media Lead
+🔹 Professional Verification Officers (Engineering & EPC)
+🔹 Web / Product Developer
+🔹 Operations & Partnerships Lead
+
+✨ Why Collekt?
+• Work on national infrastructure and clean energy digital transformation.
+• Transparent, high-growth environment.
+• Competitive compensation and career growth.
+
+🔗 Apply Now or Get Verified:
+Visit: https://collektng.com/register.html
+Send your CV / Portfolio to: careers@collektng.com (or Kolly@collektng.com)
+
+#Collekt #WeAreHiring #NigeriaJobs #EngineeringJobs #EnergyJobs #OilAndGas #RenewableEnergy #TechJobsNigeria #LagosJobs</div>
+      
+      <button class="btn-copy" onclick="copySocialText()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Write-Up
+      </button>
+    </div>
+
+  </div>
+
+  <div class="toast-msg" id="toastMsg">✓ Copied to clipboard!</div>
+
+  <script>
+    function triggerDownload(e, url, filename) {
+      // Force direct download using blob fetch for highest reliability across all browsers
+      e.preventDefault();
+      fetch(url)
+        .then(resp => resp.blob())
+        .then(blob => {
+          const blobUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = blobUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(blobUrl);
+          showToast('📥 Downloading ' + filename + '...');
+        })
+        .catch(() => {
+          // Fallback to direct navigation
+          window.location.href = url;
+        });
+    }
+
+    function copySocialText() {
+      const text = document.getElementById('socialCopyText').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('✓ Write-up copied to clipboard!');
+      });
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toastMsg');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => {
+        t.classList.remove('show');
+      }, 2500);
+    }
+  </script>
+</body>
+</html>

@@ -44,6 +44,8 @@ const filesToCopy = [
   'customer-service-week-portrait.jpg',
   'collekt-csw-team-8k.jpg',
   'collekt-csw-lead-8k.jpg',
+  'collekt-hiring-flyer-executive.jpg',
+  'collekt-hiring-flyer-warm.jpg',
   'logo-stone-v2-removebg.png',
   'logo-stone.png',
   'logo-stone-cropped.png',

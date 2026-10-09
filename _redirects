@@ -34,9 +34,6 @@ https://www.collektng.xyz/* https://collektng.com/:splat 301!
 /api/paystack/webhook /.netlify/functions/paystack-webhook 200
 /api/payments/paystack/transfer-webhook /.netlify/functions/paystack-transfer-webhook 200
 /api/paystack/transfer-webhook /.netlify/functions/paystack-transfer-webhook 200
-/api/send-welcome-email /.netlify/functions/send-welcome-email 200
-/api/send-otp /.netlify/functions/send-otp 200
-/api/verify-otp /.netlify/functions/verify-otp 200
 /api/resend/webhook /.netlify/functions/resend-webhook 200
 /api/virtual-account /.netlify/functions/korapay-virtual-account 200
 /api/korapay/virtual-account /.netlify/functions/korapay-virtual-account 200
@@ -67,3 +64,5 @@ https://www.collektng.xyz/* https://collektng.com/:splat 301!
 /api/consent/log /.netlify/functions/consent-record 200
 /api/admin-directory /.netlify/functions/admin-directory 200
 /api/admin/directory /.netlify/functions/admin-directory 200
+/api/auth-otp /.netlify/functions/auth-otp 200
+/api/auth/otp /.netlify/functions/auth-otp 200

@@ -115,6 +115,8 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
       escrow_balance: wallet ? Number(wallet.escrow_balance || 0) : 0,
       is_verified: false,
       verification_status: 'none',
+      email_verified: false,
+      otp_verified: false,
       terms_accepted: true,
       terms_accepted_at: userMetadata.terms_accepted_at || new Date().toISOString(),
       terms_version: userMetadata.terms_version || '2026.1',
@@ -554,15 +556,6 @@ async function handleOAuthSessionRouting(session) {
     return;
   }
 
-  // DO NOT hijack standard registration on register.html unless OAuth was explicitly initiated!
-  const hasOAuthParams = (window.location.hash || '').includes('access_token=') || 
-                         (window.location.hash || '').includes('refresh_token=') || 
-                         (window.location.search || '').includes('code=');
-  const wasOAuthStarted = sessionStorage.getItem('collekt_oauth_in_progress') === 'true';
-  if (path.endsWith('register.html') && !hasOAuthParams && !wasOAuthStarted) {
-    return;
-  }
-
   const user = await syncUser();
 
   // If user role is admin, clear any oauth role artifacts and route to admin-dashboard
@@ -629,6 +622,18 @@ async function handleOAuthSessionRouting(session) {
     targetDashboard = 'company-dashboard.html';
   }
 
+  // Check OTP exemption (Admin & LinkedIn) or verified status
+  const isLinkedIn = (user && user.linkedin_linked) || 
+                     (session?.user?.identities?.some(i => i.provider === 'linkedin_oidc' || i.provider === 'linkedin')) ||
+                     (session?.user?.app_metadata?.provider === 'linkedin_oidc' || session?.user?.app_metadata?.provider === 'linkedin');
+  const isOtpVerified = (user && user.otp_verified === true) || finalRole === 'admin' || isLinkedIn;
+
+  // On register.html or auth-callback.html, hold redirect if OTP is pending
+  if (!isOtpVerified && (path.endsWith('register.html') || path.endsWith('auth-callback.html'))) {
+    console.log('🔒 Holding dashboard redirect: OTP verification required before dashboard access.');
+    return;
+  }
+
   sessionStorage.removeItem('collekt_oauth_in_progress');
   localStorage.removeItem('collekt_pending_oauth_role');
 
@@ -640,6 +645,9 @@ async function handleOAuthSessionRouting(session) {
                      path.endsWith('index.html');
 
   if (isAuthPage) {
+    if (!isOtpVerified && (path.endsWith('register.html') || path.endsWith('auth-callback.html'))) {
+      return;
+    }
     // Replace URL to prevent back-button loops into OAuth hash
     window.location.replace(targetDashboard);
   }

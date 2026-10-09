@@ -3341,12 +3341,23 @@ function requireAuth() {
     window.location.replace('login.html?suspended=1');
     return false;
   }
+
+  // Strict OTP verification guard: unverified non-admin users cannot access protected pages
+  const isLinkedIn = user.linkedin_linked === true || user.provider === 'linkedin' || user.provider === 'linkedin_oidc';
+  if (user.role !== 'admin' && !isLinkedIn && user.otp_verified !== true) {
+    console.warn('🔒 Unverified account: redirecting to complete verification');
+    window.location.replace('register.html?verify_pending=true');
+    return false;
+  }
+
   return true;
 }
 
 function redirectIfAuthed() {
   const user = getUser();
   if (!user) return;
+  const isLinkedIn = user.linkedin_linked === true || user.provider === 'linkedin' || user.provider === 'linkedin_oidc';
+  if (user.role !== 'admin' && !isLinkedIn && user.otp_verified !== true) return;
   window.location.replace(user.role === 'company' ? 'company-dashboard.html' : 'dashboard.html');
 }
 
