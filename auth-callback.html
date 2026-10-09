@@ -434,18 +434,36 @@
             }
 
             // OTP Verified! Welcome email dispatched by backend!
-            succBox.textContent = '✓ Email verified! Preparing your dashboard...';
-            succBox.style.display = 'block';
+            if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.innerHTML = '<span>✓ Verified! Entering Dashboard in 2s...</span>';
+            }
+            if (succBox) {
+              succBox.innerHTML = '🎉 <strong>Code Verified!</strong> Welcome email sent to your inbox. Loading dashboard in <strong>2s</strong>...';
+              succBox.style.display = 'block';
+            }
 
             if (profile) {
               profile.email_verified = true;
               profile.otp_verified = true;
               if (typeof setUser === 'function') setUser(profile);
             }
+            try {
+              let u = JSON.parse(localStorage.getItem('collekt_user') || '{}');
+              u.otp_verified = true;
+              u.email_verified = true;
+              localStorage.setItem('collekt_user', JSON.stringify(u));
+              if (typeof saveRegisteredUser === 'function') saveRegisteredUser(u);
+            } catch(e) {}
+
+            setTimeout(() => {
+              if (submitBtn) submitBtn.innerHTML = '<span>✓ Verified! Entering Dashboard in 1s...</span>';
+              if (succBox) succBox.innerHTML = '🎉 <strong>Code Verified!</strong> Welcome email sent to your inbox. Loading dashboard in <strong>1s</strong>...';
+            }, 1000);
 
             setTimeout(async () => {
               await handleOAuthSessionRouting(session);
-            }, 700);
+            }, 2000);
 
           } catch(e) {
             submitBtn.disabled = false;

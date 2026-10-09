@@ -1721,9 +1721,13 @@ html.dark .success-h { color: #e2efed; }
         return;
       }
 
-      // Successful OTP Verification
+      // Successful OTP Verification: Enforce 2-second countdown wait before granting dashboard access
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>✓ Verified! Entering Dashboard in 2s...</span>';
+      }
       if (succBox) {
-        succBox.textContent = '✓ Email verified! Preparing your dashboard...';
+        succBox.innerHTML = '🎉 <strong>Code Verified!</strong> Welcome email sent to your inbox. Loading dashboard in <strong>2s</strong>...';
         succBox.style.display = 'block';
       }
 
@@ -1734,14 +1738,28 @@ html.dark .success-h { color: #e2efed; }
           setUser(ctx.profile);
         }
       }
+      try {
+        let u = JSON.parse(localStorage.getItem('collekt_user') || '{}');
+        u.otp_verified = true;
+        u.email_verified = true;
+        localStorage.setItem('collekt_user', JSON.stringify(u));
+        if (typeof saveRegisteredUser === 'function') {
+          saveRegisteredUser(u);
+        }
+      } catch(e) {}
 
       if (typeof showToast === 'function') {
         showToast('🎉 Account verified! Welcome to Collekt.');
       }
 
       setTimeout(() => {
+        if (submitBtn) submitBtn.innerHTML = '<span>✓ Verified! Entering Dashboard in 1s...</span>';
+        if (succBox) succBox.innerHTML = '🎉 <strong>Code Verified!</strong> Welcome email sent to your inbox. Loading dashboard in <strong>1s</strong>...';
+      }, 1000);
+
+      setTimeout(() => {
         window.location.replace(ctx.targetDashboard);
-      }, 700);
+      }, 2000);
 
     } catch (e) {
       if (submitBtn) {
