@@ -171,8 +171,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=151.0"></script>
-  <script src="app.js?v=151.0"></script>
+  <script src="supabase.js?v=152.0"></script>
+  <script src="app.js?v=152.0"></script>
   <script>
     function escapeHTML(str) {
       if (!str) return '';
@@ -209,17 +209,39 @@
                                         sessionStorage.getItem('collekt_linking_linkedin_target');
 
               const provider = session.user.app_metadata?.provider || '';
-              const isLinkedIn = isLinkingLinkedIn || provider === 'linkedin_oidc' || provider === 'linkedin';
+              const isGoogle = provider === 'google' || 
+                               session.user.identities?.some(i => i.provider === 'google') ||
+                               session.user.app_metadata?.providers?.includes('google');
+              const isOAuth = isLinkedIn || isGoogle;
 
-              // EXCLUDED: LinkedIn registration and sign-in bypasses OTP completely
-              if (isLinkedIn) {
+              // OAuth (LinkedIn or Google): verified by identity provider
+              if (isOAuth) {
                 document.getElementById('statusTitle').textContent = isLinkingLinkedIn ? 'LinkedIn Account Connected!' : 'Success!';
                 document.getElementById('statusDesc').textContent = isLinkingLinkedIn ? 'Verifying real LinkedIn credentials and returning to your profile...' : 'Loading your dashboard...';
+
+                // Ensure user profile in DB and localStorage has otp_verified = true
+                try {
+                  await window.sb.from('profiles').update({
+                    otp_verified: true,
+                    email_verified: true,
+                    updated_at: new Date().toISOString()
+                  }).eq('id', session.user.id);
+                } catch(e) {}
+
+                try {
+                  let u = JSON.parse(localStorage.getItem('collekt_user') || '{}');
+                  u.otp_verified = true;
+                  u.email_verified = true;
+                  if (isGoogle) u.provider = 'google';
+                  localStorage.setItem('collekt_user', JSON.stringify(u));
+                  if (typeof saveRegisteredUser === 'function') saveRegisteredUser(u);
+                } catch(e) {}
+
                 await handleOAuthSessionRouting(session);
                 return;
               }
 
-              // Google OAuth verification check:
+              // Non-OAuth fallback verification check:
               let isOtpVerified = false;
               let profile = null;
               try {
@@ -238,7 +260,7 @@
                 return;
               }
 
-              // NEW GOOGLE SIGNUP / UNVERIFIED GOOGLE USER -> REQUIRE OTP!
+              // Fallback OTP screen if ever required
               renderGoogleOtpScreen(session, profile);
               return;
             }

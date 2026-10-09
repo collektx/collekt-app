@@ -424,10 +424,37 @@ async function syncUser() {
           profile.dva_name = dvaName;
         }
 
+        const oauthProvider = session.user.app_metadata?.provider || '';
+        const isGoogleUser = oauthProvider === 'google' || 
+                             session.user.identities?.some(i => i.provider === 'google') ||
+                             session.user.app_metadata?.providers?.includes('google');
+        const isLinkedInUser = (localUser && localUser.linkedin_linked) || 
+                               oauthProvider === 'linkedin_oidc' || 
+                               oauthProvider === 'linkedin' || 
+                               session.user.identities?.some(i => i.provider === 'linkedin_oidc' || i.provider === 'linkedin');
+        const isOAuthUser = isGoogleUser || isLinkedInUser;
+
         const finalRole = profile.role || localUser.role || localStorage.getItem('collekt_last_role') || 'professional';
         const finalProfile = { ...localUser, ...profile, role: finalRole };
 
-        // Ensure clean unverified profile state for all users
+        if (isOAuthUser) {
+          finalProfile.otp_verified = true;
+          finalProfile.email_verified = true;
+          if (isGoogleUser) finalProfile.provider = 'google';
+          if (isLinkedInUser) finalProfile.provider = 'linkedin';
+
+          if (!profile.otp_verified || !profile.email_verified) {
+            try {
+              await sb.from('profiles').update({
+                otp_verified: true,
+                email_verified: true,
+                updated_at: new Date().toISOString()
+              }).eq('id', userId);
+            } catch(e) {}
+          }
+        }
+
+        // Ensure clean unverified profile state for non-identities
         if (finalProfile.avatar && typeof finalProfile.avatar === 'string' && (finalProfile.avatar.includes('googleusercontent.com') || finalProfile.avatar.includes('licdn.com'))) {
           finalProfile.oauth_avatar = finalProfile.avatar;
           finalProfile.avatar = null;
@@ -447,6 +474,16 @@ async function syncUser() {
         localStorage.setItem('collekt_last_user_email', finalProfile.email);
         return finalProfile;
       } else {
+        const oauthProvider = session.user.app_metadata?.provider || '';
+        const isGoogleUser = oauthProvider === 'google' || 
+                             session.user.identities?.some(i => i.provider === 'google') ||
+                             session.user.app_metadata?.providers?.includes('google');
+        const isLinkedInUser = (localUser && localUser.linkedin_linked) || 
+                               oauthProvider === 'linkedin_oidc' || 
+                               oauthProvider === 'linkedin' || 
+                               session.user.identities?.some(i => i.provider === 'linkedin_oidc' || i.provider === 'linkedin');
+        const isOAuthUser = isGoogleUser || isLinkedInUser;
+
         const role = localStorage.getItem('collekt_pending_oauth_role') || localUser.role || 'professional';
         const name = session.user.user_metadata?.name || session.user.user_metadata?.full_name || session.user.email.split('@')[0];
         const newProfile = {
@@ -460,6 +497,9 @@ async function syncUser() {
           oauth_avatar: session.user.user_metadata?.avatar_url || null,
           is_verified: false,
           verification_status: 'none',
+          otp_verified: isOAuthUser,
+          email_verified: isOAuthUser,
+          provider: isGoogleUser ? 'google' : (isLinkedInUser ? 'linkedin' : undefined),
           wallet_balance: 0,
           escrow_balance: 0,
           terms_accepted: true,
@@ -486,6 +526,8 @@ async function syncUser() {
             avatar: null,
             is_verified: false,
             verification_status: 'none',
+            otp_verified: isOAuthUser,
+            email_verified: isOAuthUser,
             terms_accepted: true,
             terms_accepted_at: newProfile.terms_accepted_at,
             terms_version: newProfile.terms_version,
@@ -622,30 +664,29 @@ async function handleOAuthSessionRouting(session) {
     targetDashboard = 'company-dashboard.html';
   }
 
-  // Check OTP exemption (Admin & LinkedIn) or verified status
+  // Check OTP exemption (Admin, LinkedIn, & Google) or verified status
   const isLinkedIn = (user && user.linkedin_linked) || 
                      (session?.user?.identities?.some(i => i.provider === 'linkedin_oidc' || i.provider === 'linkedin')) ||
                      (session?.user?.app_metadata?.provider === 'linkedin_oidc' || session?.user?.app_metadata?.provider === 'linkedin');
-  const isOtpVerified = (user && user.otp_verified === true) || finalRole === 'admin' || isLinkedIn;
+  const isGoogle = (user && (user.provider === 'google' || user.oauth_provider === 'google')) ||
+                   (session?.user?.identities?.some(i => i.provider === 'google')) ||
+                   (session?.user?.app_metadata?.provider === 'google') ||
+                   (session?.user?.app_metadata?.providers?.includes('google'));
+  const isOAuthVerified = isLinkedIn || isGoogle;
+  const isOtpVerified = (user && user.otp_verified === true) || finalRole === 'admin' || isOAuthVerified;
 
-  // On register.html or auth-callback.html, hold redirect if OTP is pending
-  if (!isOtpVerified && (path.endsWith('register.html') || path.endsWith('auth-callback.html'))) {
-    console.log('🔒 Holding dashboard redirect: OTP verification required before dashboard access.');
-    return;
-  }
-
+  // Always clear oauth state flag now that session is identified
   sessionStorage.removeItem('collekt_oauth_in_progress');
   localStorage.removeItem('collekt_pending_oauth_role');
 
-  // If on an auth page, redirect immediately to target dashboard
-  const isAuthPage = path.endsWith('login.html') || 
-                     path.endsWith('register.html') || 
-                     path.endsWith('auth-callback.html') || 
-                     path === '/' || 
-                     path.endsWith('index.html');
+  const isAuthPage = path.endsWith('login.html') || path.endsWith('/login') || path === '/login' ||
+                     path.endsWith('register.html') || path.endsWith('/register') || path === '/register' ||
+                     path.endsWith('auth-callback.html') || path.endsWith('/auth-callback') || path === '/auth-callback' ||
+                     path === '/' || path.endsWith('index.html');
 
   if (isAuthPage) {
-    if (!isOtpVerified && (path.endsWith('register.html') || path.endsWith('auth-callback.html'))) {
+    if (!isOtpVerified && (path.includes('register') || path.includes('auth-callback'))) {
+      console.log('🔒 Holding dashboard redirect: OTP verification required before dashboard access.');
       return;
     }
     // Replace URL to prevent back-button loops into OAuth hash
