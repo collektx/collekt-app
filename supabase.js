@@ -63,6 +63,11 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
   };
 
   try {
+    try {
+      sessionStorage.setItem('collekt_awaiting_otp', 'true');
+      sessionStorage.removeItem('collekt_just_verified');
+    } catch(e) {}
+
     const { data, error } = await sb.auth.signUp({
       email: cleanEmail,
       password: password,
@@ -96,6 +101,7 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
     } catch(e) {}
 
     const localUser = {
+      ...(profile || {}),
       id: authUser.id,
       email: cleanEmail,
       name: userMetadata.name,
@@ -121,12 +127,13 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
       terms_accepted_at: userMetadata.terms_accepted_at || new Date().toISOString(),
       terms_version: userMetadata.terms_version || '2026.1',
       recaptcha_verified: !!userMetadata.recaptcha_verified,
-      created_at: new Date().toISOString(),
-      ...(profile || {})
+      created_at: new Date().toISOString()
     };
 
     try {
       await sb.from('profiles').update({
+        otp_verified: false,
+        email_verified: false,
         terms_accepted: true,
         terms_accepted_at: localUser.terms_accepted_at,
         terms_version: localUser.terms_version,
@@ -438,16 +445,20 @@ async function syncUser() {
         const finalRole = (localUser && localUser.role) || (profile && profile.role) || localStorage.getItem('collekt_last_role') || 'professional';
         const finalProfile = { ...localUser, ...profile, role: finalRole };
 
+        const isAwaitingOtp = (sessionStorage.getItem('collekt_awaiting_otp') === 'true') && !isOAuthUser;
+
         // CRITICAL: NEVER allow verified flags to regress to false once verified locally or in DB!
-        const isAlreadyOtpVerified = (profile && profile.otp_verified === true) || 
+        const isAlreadyOtpVerified = !isAwaitingOtp && (
+                                     (profile && profile.otp_verified === true) || 
                                      (localUser && localUser.otp_verified === true) || 
                                      (sessionStorage.getItem('collekt_just_verified') === 'true') ||
-                                     isOAuthUser;
+                                     isOAuthUser);
 
-        const isAlreadyEmailVerified = (profile && profile.email_verified === true) || 
+        const isAlreadyEmailVerified = !isAwaitingOtp && (
+                                       (profile && profile.email_verified === true) || 
                                        (localUser && localUser.email_verified === true) || 
                                        (sessionStorage.getItem('collekt_just_verified') === 'true') ||
-                                       isOAuthUser;
+                                       isOAuthUser);
 
         finalProfile.otp_verified = isAlreadyOtpVerified;
         finalProfile.email_verified = isAlreadyEmailVerified;
@@ -687,10 +698,12 @@ async function handleOAuthSessionRouting(session) {
                    (session?.user?.app_metadata?.provider === 'google') ||
                    (session?.user?.app_metadata?.providers?.includes('google'));
   const isOAuthVerified = isLinkedIn || isGoogle;
-  const isOtpVerified = (user && user.otp_verified === true) || 
+  const isAwaitingOtp = (sessionStorage.getItem('collekt_awaiting_otp') === 'true') && !isOAuthVerified;
+  const isOtpVerified = !isAwaitingOtp && (
+                        (user && user.otp_verified === true) || 
                         (sessionStorage.getItem('collekt_just_verified') === 'true') || 
                         finalRole === 'admin' || 
-                        isOAuthVerified;
+                        isOAuthVerified);
 
   // Always clear oauth state flag now that session is identified
   sessionStorage.removeItem('collekt_oauth_in_progress');
