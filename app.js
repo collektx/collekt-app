@@ -7,9 +7,89 @@ const COLLEKT_COMMISSION_RATE = 0.15; // 15% Platform Commission Rate
 const COLLEKT_PROFESSIONAL_SUB_FEE = 15; // $15 / month
 const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
 
-// -- STRICT AUTHENTIC SESSIONS ENFORCER & PROTECTED ACCOUNTS GUARDIAN --
+// -- STRICT AUTHENTIC SESSIONS ENFORCER & CLEAN-SLATE GUARDIAN --
 (function enforceStrictAuthenticSessions() {
   try {
+    const DELETED_OLD_UUIDS = [
+      'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
+      '467c002d-124e-4a05-a62f-1cd7b11f666c',
+      'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
+      '63b0edc5-1e8d-46b9-9ae8-d1800b817ee6',
+      'c0788c56-6cde-40d0-90c8-541c8d3cf76c',
+      'd1bcafac-9da0-4912-90da-467c8dc00d92',
+      'f69a187c-5848-4d1c-9fb5-bc60b181789f',
+      '814f4be6-cc86-47d3-b746-cd257f456548'
+    ];
+
+    // 0. One-time Clean-Slate Migration (v157): Purge all pre-reset (Sep/early Oct 2026) ghost data from browser localStorage
+    if (localStorage.getItem('collekt_clean_reset_v157') !== 'true') {
+      const staleKeysToPurge = [
+        'collekt_proposals',
+        'collekt_posted_jobs',
+        'collekt_posted_projects',
+        'collekt_contracts',
+        'collekt_awarded_contracts',
+        'collekt_engagements',
+        'collekt_transactions',
+        'collekt_conversations',
+        'collekt_all_messages',
+        'collekt_custom_quals',
+        'collekt_user_cv',
+        'collekt_user_avatar',
+        'collekt_company_logo',
+        'collekt_uploads_default',
+        'collekt_all_users'
+      ];
+      staleKeysToPurge.forEach(k => {
+        try { localStorage.removeItem(k); } catch(e){}
+      });
+
+      // Remove all legacy collekt_uploads_* keys from deleted/prior accounts
+      try {
+        const allStorageKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('collekt_uploads_')) {
+            allStorageKeys.push(k);
+          }
+        }
+        allStorageKeys.forEach(k => localStorage.removeItem(k));
+      } catch(e){}
+
+      // Sanitize active collekt_user if contaminated by old hardcoded profile attributes
+      try {
+        const rawCurr = JSON.parse(localStorage.getItem('collekt_user'));
+        if (rawCurr) {
+          if (rawCurr.id === 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' && String(rawCurr.email || '').toLowerCase() === 'ojeoweredave@gmail.com') {
+            rawCurr.id = '8ed300fd-151c-4975-a56f-d1ebe071d347';
+          }
+          if (rawCurr.other_name === 'Oladapo' || rawCurr.name === 'Dave Oladapo Ojeowere') {
+            rawCurr.other_name = '';
+            rawCurr.name = 'Dave Ojeowere';
+            rawCurr.first_name = 'Dave';
+            rawCurr.last_name = 'Ojeowere';
+          }
+          if (rawCurr.title === 'Senior Proposal Manager & Technical Specialist') {
+            rawCurr.title = '';
+          }
+          if (rawCurr.bio && rawCurr.bio.includes('Senior Proposal Manager and Technical Commercial Specialist')) {
+            rawCurr.bio = '';
+          }
+          if (Array.isArray(rawCurr.skills) && rawCurr.skills.includes('Proposal Management') && rawCurr.skills.includes('EPC Tendering')) {
+            rawCurr.skills = [];
+          }
+          rawCurr.avatar = null;
+          rawCurr.avatar_uploaded = false;
+          rawCurr.cv_name = '';
+          rawCurr.cv_data = null;
+          rawCurr.cv_size = 0;
+          localStorage.setItem('collekt_user', JSON.stringify(rawCurr));
+        }
+      } catch(e){}
+
+      localStorage.setItem('collekt_clean_reset_v157', 'true');
+    }
+
     // 1. Clean up any stale blacklist pollution so legitimate re-registered users are never blocked
     let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
     if (!Array.isArray(del)) del = [];
@@ -24,10 +104,14 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
     try { curr = JSON.parse(localStorage.getItem('collekt_user')); } catch(e){}
     if (curr) {
       const cEmail = String(curr.email || '').toLowerCase().trim();
+      if (curr.id === 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' && cEmail === 'ojeoweredave@gmail.com') {
+        curr.id = '8ed300fd-151c-4975-a56f-d1ebe071d347';
+        localStorage.setItem('collekt_user', JSON.stringify(curr));
+      }
       const cId = String(curr.id || '').toLowerCase().trim();
 
-      const isProtected = cEmail === 'ojeoweredave@gmail.com' || cId === 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' || cEmail === 'admin@collekt.ng' || cId === 'a1111111-1111-4111-a111-111111111111';
-      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cId);
+      const isProtected = cEmail === 'admin@collekt.ng' || cId === 'a1111111-1111-4111-a111-111111111111';
+      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cId) && !DELETED_OLD_UUIDS.includes(cId);
 
       // If user has a valid Supabase UUID, they are an authentic registered user!
       if (isValidUUID || isProtected) {
@@ -40,7 +124,8 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
       // Only kill obsolete unauthenticated mock sessions that lack real Supabase UUIDs
       const isSyntheticMock = !isProtected && !isValidUUID && (
         cId.startsWith('user_') || 
-        (cId.startsWith('usr_') && cId !== 'usr_dave_ojeowere')
+        cId.startsWith('usr_') ||
+        DELETED_OLD_UUIDS.includes(cId)
       );
 
       const isSuspended = curr.suspended === true || curr.status === 'suspended';
@@ -61,7 +146,7 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
       }
     }
 
-    // 3. Strict Purge of collekt_all_users directory: ZERO mock / fake / unauthenticated accounts
+    // 3. Strict Purge of collekt_all_users directory: ZERO mock / fake / deleted accounts
     let dir = JSON.parse(localStorage.getItem('collekt_all_users') || '[]');
     if (!Array.isArray(dir)) dir = [];
 
@@ -71,8 +156,7 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
       'grumpy luan', 'grumpyluan@gmail.com', 'bethel vwire', 'bethelvwire',
       'bethelvvwire', 'bethel_vwire', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com',
       'officialthelma@gmail.com', 'patakhues', 'chairman of the board', 'chairmanoftheboard',
-      'usr_chairman_of_the_board', 'f69a187c-5848-4d1c-9fb5-bc60b181789f',
-      '814f4be6-cc86-47d3-b746-cd257f456548'
+      'usr_chairman_of_the_board', ...DELETED_OLD_UUIDS
     ];
 
     dir = dir.filter(u => {
@@ -82,8 +166,8 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
       const uEmail = String(u.email || '').toLowerCase().trim();
       const uUsername = String(u.username || '').toLowerCase().trim();
 
-      // Check if synthetic mock ID
-      if (uId.startsWith('user_') || (uId.startsWith('usr_') && uId !== 'usr_dave_ojeowere')) return false;
+      // Check if synthetic mock ID or deleted UUID
+      if (uId.startsWith('user_') || uId.startsWith('usr_') || DELETED_OLD_UUIDS.includes(uId)) return false;
 
       // Check known fake tokens
       const isFake = knownFakeTokens.some(tok => 
@@ -95,147 +179,8 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
       return true;
     });
 
-    // 4. Ensure all authentic Supabase registered user accounts are present and active in collekt_all_users
+    // 4. Ensure Master System Administrator is present in collekt_all_users (all other users sync live from Supabase)
     const authenticBaseUsers = [
-      {
-        id: 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
-        name: 'Dave Oladapo Ojeowere',
-        first_name: 'Dave',
-        last_name: 'Ojeowere',
-        other_name: 'Oladapo',
-        username: 'ojeoweredave',
-        email: 'ojeoweredave@gmail.com',
-        role: 'professional',
-        title: 'Senior Proposal Manager & Technical Specialist',
-        location: 'Lagos, Nigeria',
-        country: 'Nigeria',
-        state: 'Lagos',
-        bio: 'Senior Proposal Manager and Technical Commercial Specialist with extensive experience delivering multi-million dollar EPC & IOC bids across West Africa.',
-        skills: ['Proposal Management', 'EPC Tendering', 'COREN Compliance', 'Commercial Valuation', 'IOC Contracting'],
-        verified: false,
-        is_verified: false,
-        verification_status: 'none',
-        identity_verified: false,
-        status: 'active',
-        suspended: false,
-        rating: 0.0,
-        review_count: 0,
-        projects_completed: 0,
-        total_earned: 0,
-        success_rate: 0,
-        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
-      },
-      {
-        id: '467c002d-124e-4a05-a62f-1cd7b11f666c',
-        name: 'Collekt NG',
-        company_name: 'Collekt NG',
-        email: 'collektng@gmail.com',
-        role: 'company',
-        title: 'Oil & Gas Operator',
-        sector: 'Oil & Gas (Upstream/Midstream)',
-        location: 'Lagos, Nigeria',
-        country: 'Nigeria',
-        state: 'Lagos',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none',
-        status: 'active',
-        suspended: false,
-        rating: 0.0,
-        review_count: 0,
-        projects_completed: 0,
-        total_earned: 0,
-        created_at: '2026-10-02T10:20:10.960856+00:00',
-        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
-      },
-      {
-        id: 'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
-        name: 'Tessy Celestine',
-        email: 'tessycelestine9@gmail.com',
-        role: 'professional',
-        title: 'Energy Specialist',
-        sector: 'Oil & Gas (Upstream/Midstream)',
-        location: 'Lagos, Nigeria',
-        country: 'Nigeria',
-        state: 'Lagos',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none',
-        status: 'active',
-        suspended: false,
-        rating: 0.0,
-        review_count: 0,
-        projects_completed: 0,
-        total_earned: 0,
-        created_at: '2026-10-01T16:41:32.309344+00:00',
-        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
-      },
-      {
-        id: '63b0edc5-1e8d-46b9-9ae8-d1800b817ee6',
-        name: 'Mike Chimezie',
-        email: 'dave.ojeowere@gmail.com',
-        role: 'professional',
-        title: 'Energy Specialist',
-        sector: 'Oil & Gas (Upstream/Midstream)',
-        location: 'Lagos, Nigeria',
-        country: 'Nigeria',
-        state: 'Lagos',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none',
-        status: 'active',
-        suspended: false,
-        rating: 0.0,
-        review_count: 0,
-        projects_completed: 0,
-        total_earned: 0,
-        created_at: '2026-10-01T13:28:13.24169+00:00',
-        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
-      },
-      {
-        id: 'c0788c56-6cde-40d0-90c8-541c8d3cf76c',
-        name: 'Dave Ojeowere',
-        email: 'errandsire@gmail.com',
-        role: 'professional',
-        title: 'Energy Specialist',
-        sector: 'Oil & Gas (Upstream/Midstream)',
-        location: 'Lagos, Nigeria',
-        country: 'Nigeria',
-        state: 'Lagos',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none',
-        status: 'active',
-        suspended: false,
-        rating: 0.0,
-        review_count: 0,
-        projects_completed: 0,
-        total_earned: 0,
-        created_at: '2026-10-01T09:22:10.051217+00:00',
-        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
-      },
-      {
-        id: 'd1bcafac-9da0-4912-90da-467c8dc00d92',
-        name: 'Dave “Kori” Ojeowere',
-        email: 'smileykori@gmail.com',
-        role: 'professional',
-        title: 'Energy Specialist',
-        sector: 'Oil & Gas (Upstream/Midstream)',
-        location: 'Lagos, Nigeria',
-        country: 'Nigeria',
-        state: 'Lagos',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none',
-        status: 'active',
-        suspended: false,
-        rating: 0.0,
-        review_count: 0,
-        projects_completed: 0,
-        total_earned: 0,
-        created_at: '2026-10-01T09:18:58.135512+00:00',
-        wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
-      },
       {
         id: 'a1111111-1111-4111-a111-111111111111',
         name: 'Collekt Administrator',
@@ -267,9 +212,6 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
         dir[idx] = { ...bu, ...dir[idx] };
         dir[idx].suspended = false;
         dir[idx].status = 'active';
-        if (dir[idx].wallet && (dir[idx].wallet.balance === 2450000 || dir[idx].wallet.balance === 1450000)) {
-          dir[idx].wallet.balance = 0;
-        }
       }
     });
     localStorage.setItem('collekt_all_users', JSON.stringify(dir));
@@ -452,15 +394,9 @@ function getUser() {
       ? u.role 
       : (localStorage.getItem('collekt_last_role') === 'company' ? 'company' : 'professional');
 
-    // Merge saved directory profile attributes — but NEVER let directory override role
+    // Merge saved directory profile attributes ONLY if directory entry has the exact same UUID
     const rawDir = JSON.parse(localStorage.getItem('collekt_all_users')) || [];
-    const dirUser = rawDir.find(x => (x && x.id && x.id === u.id) || (x && x.email && u.email && x.email.toLowerCase() === u.email.toLowerCase()));
-
-    if (dirUser && (dirUser.other_name === 'Chukwuemeka' || (dirUser.name && dirUser.name.includes('Chukwuemeka')))) {
-      if (dirUser.other_name === 'Chukwuemeka') dirUser.other_name = 'Oladapo';
-      if (dirUser.name) dirUser.name = dirUser.name.replace(/Chukwuemeka/g, 'Oladapo');
-      try { localStorage.setItem('collekt_all_users', JSON.stringify(rawDir)); } catch(e){}
-    }
+    const dirUser = rawDir.find(x => x && x.id && u.id && x.id === u.id);
 
     let merged = dirUser ? { ...dirUser, ...u, role: primaryRole } : { ...u, role: primaryRole };
 
@@ -1304,14 +1240,24 @@ function syncRealUsersToDirectory(realProfiles) {
       if (em) rawMap.set(em, u);
     });
 
+    const DELETED_OLD_UUIDS = [
+      'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
+      '467c002d-124e-4a05-a62f-1cd7b11f666c',
+      'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
+      '63b0edc5-1e8d-46b9-9ae8-d1800b817ee6',
+      'c0788c56-6cde-40d0-90c8-541c8d3cf76c',
+      'd1bcafac-9da0-4912-90da-467c8dc00d92',
+      'f69a187c-5848-4d1c-9fb5-bc60b181789f',
+      '814f4be6-cc86-47d3-b746-cd257f456548'
+    ];
+
     const knownFakeTokens = [
       'adaeze okonkwo', 'kunle adeyemi', 'bashiru musa', 'joshua emeka',
       'farouk abubakar', 'chidi nnamdi', 'chen pao', 'chenpao51@gmail.com',
       'grumpy luan', 'grumpyluan@gmail.com', 'bethel vwire', 'bethelvwire',
       'bethelvvwire', 'bethel_vwire', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com',
       'officialthelma@gmail.com', 'patakhues', 'chairman of the board', 'chairmanoftheboard',
-      'usr_chairman_of_the_board', 'f69a187c-5848-4d1c-9fb5-bc60b181789f',
-      '814f4be6-cc86-47d3-b746-cd257f456548'
+      'usr_chairman_of_the_board', ...DELETED_OLD_UUIDS
     ];
 
     const map = new Map();
@@ -1323,20 +1269,20 @@ function syncRealUsersToDirectory(realProfiles) {
       const rpEmail = String(rp.email || '').toLowerCase().trim();
       const rpName = String(rp.name || rp.company_name || rp.full_name || '').toLowerCase().trim();
 
-      // Reject any synthetic or known fake tokens
-      if (rpId.startsWith('user_') || (rpId.startsWith('usr_') && rpId !== 'usr_dave_ojeowere')) return;
+      // Reject any synthetic or known fake/deleted tokens
+      if (rpId.startsWith('user_') || rpId.startsWith('usr_') || DELETED_OLD_UUIDS.includes(rpId)) return;
       const isFake = knownFakeTokens.some(tok => 
         rpId === tok || rpName === tok || rpEmail === tok || rpName.includes(tok) || (rpEmail && rpEmail.includes(tok))
       );
       if (isFake) return;
 
-      const existing = (rpId ? rawMap.get(rpId) : null) || (rpEmail ? rawMap.get(rpEmail) : null) || {};
-      const isDave = rpEmail === 'ojeoweredave@gmail.com' || rpId === 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91';
+      // Only merge existing local entry if it has the EXACT same UUID
+      const existing = (rpId ? rawMap.get(rpId) : null) || {};
 
       const merged = {
         ...existing,
         ...rp,
-        id: isDave ? 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' : (rp.id || existing.id),
+        id: rp.id || existing.id,
         email: rp.email || existing.email,
         name: rp.company_name || rp.full_name || rp.name || existing.name,
         company_name: rp.company_name || existing.company_name,
@@ -1352,7 +1298,7 @@ function syncRealUsersToDirectory(realProfiles) {
     if (curr && (curr.id || curr.email)) {
       const cId = String(curr.id || '').toLowerCase().trim();
       const cEmail = String(curr.email || '').toLowerCase().trim();
-      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cId);
+      const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cId) && !DELETED_OLD_UUIDS.includes(cId);
       if (isValidUUID || cEmail === 'admin@collekt.ng') {
         const key = cId || cEmail;
         if (!map.has(key)) {
@@ -1370,37 +1316,28 @@ function syncRealUsersToDirectory(realProfiles) {
 
 function getAllRegisteredUsers() {
   try {
-    // Ensure all authentic accounts are unblacklisted
-    try {
-      const protectedAuthentic = [
-        'ojeoweredave@gmail.com', 'usr_dave_ojeowere', 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
-        'collektng@gmail.com', '467c002d-124e-4a05-a62f-1cd7b11f666c',
-        'tessycelestine9@gmail.com', 'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
-        'dave.ojeowere@gmail.com', '63b0edc5-1e8d-46b9-9ae8-d1800b817ee6',
-        'errandsire@gmail.com', 'c0788c56-6cde-40d0-90c8-541c8d3cf76c',
-        'smileykori@gmail.com', 'd1bcafac-9da0-4912-90da-467c8dc00d92',
-        'admin@collekt.ng', 'a1111111-1111-4111-a111-111111111111'
-      ];
-      let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
-      del = del.filter(x => {
-        const s = String(x).toLowerCase().trim();
-        return !protectedAuthentic.includes(s);
-      });
-      localStorage.setItem('collekt_deleted_users', JSON.stringify(del));
-    } catch(e){}
+    const DELETED_OLD_UUIDS = [
+      'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
+      '467c002d-124e-4a05-a62f-1cd7b11f666c',
+      'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
+      '63b0edc5-1e8d-46b9-9ae8-d1800b817ee6',
+      'c0788c56-6cde-40d0-90c8-541c8d3cf76c',
+      'd1bcafac-9da0-4912-90da-467c8dc00d92',
+      'f69a187c-5848-4d1c-9fb5-bc60b181789f',
+      '814f4be6-cc86-47d3-b746-cd257f456548'
+    ];
 
     let raw = JSON.parse(localStorage.getItem('collekt_all_users')) || [];
     const deleted = (JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]')).map(x => String(x).toLowerCase().trim());
 
-    // 1. Strict purge of legacy mock / fake unauthenticated accounts - ONLY authentic users allowed
+    // 1. Strict purge of legacy mock / fake / deleted accounts - ONLY authentic users allowed
     const fakeTokens = [
       'adaeze okonkwo', 'kunle adeyemi', 'bashiru musa', 'joshua emeka',
       'farouk abubakar', 'chidi nnamdi', 'chen pao', 'chenpao51@gmail.com',
       'grumpy luan', 'grumpyluan@gmail.com', 'bethel vwire', 'bethelvwire',
       'bethelvvwire', 'bethel_vwire', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com',
       'officialthelma@gmail.com', 'patakhues', 'chairman of the board', 'chairmanoftheboard',
-      'usr_chairman_of_the_board', 'f69a187c-5848-4d1c-9fb5-bc60b181789f',
-      '814f4be6-cc86-47d3-b746-cd257f456548'
+      'usr_chairman_of_the_board', ...DELETED_OLD_UUIDS
     ];
 
     raw = raw.filter(u => {
@@ -1410,7 +1347,7 @@ function getAllRegisteredUsers() {
       const username = String(u.username || '').toLowerCase().trim();
       const email = String(u.email || '').toLowerCase().trim();
 
-      // Check fake tokens first
+      // Check fake/deleted tokens first
       const isFake = fakeTokens.some(token => 
         id === token || n === token || username === token || email === token ||
         n.includes(token) || (email && email.includes(token))
@@ -1422,15 +1359,13 @@ function getAllRegisteredUsers() {
       if (isDeleted) return false;
 
       // Check synthetic mock IDs
-      const isMock = id.startsWith('user_') || (id.startsWith('usr_') && id !== 'usr_dave_ojeowere');
+      const isMock = id.startsWith('user_') || id.startsWith('usr_') || DELETED_OLD_UUIDS.includes(id);
       if (isMock) return false;
 
       // Must have valid UUID format or admin
       const isValidId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ||
                         id === 'a1111111-1111-4111-a111-111111111111' ||
-                        id === 'usr_dave_ojeowere' ||
-                        email === 'admin@collekt.ng' ||
-                        email === 'ojeoweredave@gmail.com';
+                        email === 'admin@collekt.ng';
       return isValidId;
     });
 
@@ -1438,7 +1373,7 @@ function getAllRegisteredUsers() {
     const currentUser = getUser();
     if (currentUser && (currentUser.id || currentUser.email)) {
       const cId = String(currentUser.id || '').toLowerCase().trim();
-      const isValid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cId) || cId === 'a1111111-1111-4111-a111-111111111111' || currentUser.email === 'admin@collekt.ng' || currentUser.email === 'ojeoweredave@gmail.com';
+      const isValid = (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cId) && !DELETED_OLD_UUIDS.includes(cId)) || cId === 'a1111111-1111-4111-a111-111111111111' || currentUser.email === 'admin@collekt.ng';
       if (isValid) {
         const exists = raw.some(u => (currentUser.id && u.id === currentUser.id) || (currentUser.email && u.email && u.email.toLowerCase() === currentUser.email.toLowerCase()));
         if (!exists) {
@@ -1447,109 +1382,8 @@ function getAllRegisteredUsers() {
       }
     }
 
-    // 3. Guarantee canonical authentic Supabase accounts in directory
+    // 3. Guarantee Master System Administrator in directory
     const authenticBaseUsers = [
-      {
-        id: 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
-        name: 'Dave Oladapo Ojeowere',
-        first_name: 'Dave',
-        last_name: 'Ojeowere',
-        other_name: 'Oladapo',
-        username: 'ojeoweredave',
-        email: 'ojeoweredave@gmail.com',
-        role: 'professional',
-        title: 'Senior Proposal Manager & Technical Specialist',
-        location: 'Lagos, Nigeria',
-        country: 'Nigeria',
-        state: 'Lagos',
-        bio: 'Senior Proposal Manager and Technical Commercial Specialist with extensive experience delivering multi-million dollar EPC & IOC bids across West Africa.',
-        skills: ['Proposal Management', 'EPC Tendering', 'COREN Compliance', 'Commercial Valuation', 'IOC Contracting'],
-        verified: false,
-        is_verified: false,
-        verification_status: 'none',
-        identity_verified: false,
-        rating: 0.0,
-        review_count: 0,
-        projects_completed: 0,
-        total_earned: 0,
-        success_rate: 0
-      },
-      {
-        id: '467c002d-124e-4a05-a62f-1cd7b11f666c',
-        name: 'Collekt NG',
-        company_name: 'Collekt NG',
-        email: 'collektng@gmail.com',
-        role: 'company',
-        title: 'Oil & Gas Operator',
-        sector: 'Oil & Gas (Upstream/Midstream)',
-        location: 'Lagos, Nigeria',
-        country: 'Nigeria',
-        state: 'Lagos',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none',
-        created_at: '2026-10-02T10:20:10.960856+00:00'
-      },
-      {
-        id: 'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
-        name: 'Tessy Celestine',
-        email: 'tessycelestine9@gmail.com',
-        role: 'professional',
-        title: 'Energy Specialist',
-        sector: 'Oil & Gas (Upstream/Midstream)',
-        location: 'Lagos, Nigeria',
-        country: 'Nigeria',
-        state: 'Lagos',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none',
-        created_at: '2026-10-01T16:41:32.309344+00:00'
-      },
-      {
-        id: '63b0edc5-1e8d-46b9-9ae8-d1800b817ee6',
-        name: 'Mike Chimezie',
-        email: 'dave.ojeowere@gmail.com',
-        role: 'professional',
-        title: 'Energy Specialist',
-        sector: 'Oil & Gas (Upstream/Midstream)',
-        location: 'Lagos, Nigeria',
-        country: 'Nigeria',
-        state: 'Lagos',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none',
-        created_at: '2026-10-01T13:28:13.24169+00:00'
-      },
-      {
-        id: 'c0788c56-6cde-40d0-90c8-541c8d3cf76c',
-        name: 'Dave Ojeowere',
-        email: 'errandsire@gmail.com',
-        role: 'professional',
-        title: 'Energy Specialist',
-        sector: 'Oil & Gas (Upstream/Midstream)',
-        location: 'Lagos, Nigeria',
-        country: 'Nigeria',
-        state: 'Lagos',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none',
-        created_at: '2026-10-01T09:22:10.051217+00:00'
-      },
-      {
-        id: 'd1bcafac-9da0-4912-90da-467c8dc00d92',
-        name: 'Dave “Kori” Ojeowere',
-        email: 'smileykori@gmail.com',
-        role: 'professional',
-        title: 'Energy Specialist',
-        sector: 'Oil & Gas (Upstream/Midstream)',
-        location: 'Lagos, Nigeria',
-        country: 'Nigeria',
-        state: 'Lagos',
-        verified: false,
-        is_verified: false,
-        verification_status: 'none',
-        created_at: '2026-10-01T09:18:58.135512+00:00'
-      },
       {
         id: 'a1111111-1111-4111-a111-111111111111',
         name: 'Collekt Administrator',
@@ -5203,35 +5037,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function _uploadsKey() {
   const u = getUser();
-  if (u && (u.id || u.email)) {
-    return 'collekt_uploads_' + (u.id || u.email);
+  if (u && u.id) {
+    return 'collekt_uploads_' + u.id;
+  }
+  if (u && u.email) {
+    return 'collekt_uploads_' + u.email;
   }
   return 'collekt_uploads_default';
 }
 
 function _getAllUploads() {
   const u = getUser();
+  if (!u || (!u.id && !u.email)) return {};
   let merged = {};
-  try {
-    const def = JSON.parse(localStorage.getItem('collekt_uploads_default')) || {};
-    merged = { ...merged, ...def };
-  } catch(e){}
-  if (u && u.email) {
-    try {
-      const emUploads = JSON.parse(localStorage.getItem('collekt_uploads_' + u.email)) || {};
-      for (const cat in emUploads) {
-        if (Array.isArray(emUploads[cat]) && emUploads[cat].length) {
-          merged[cat] = emUploads[cat];
-        }
-      }
-    } catch(e){}
-  }
-  if (u && u.id) {
+  if (u.id) {
     try {
       const idUploads = JSON.parse(localStorage.getItem('collekt_uploads_' + u.id)) || {};
       for (const cat in idUploads) {
         if (Array.isArray(idUploads[cat]) && idUploads[cat].length) {
           merged[cat] = idUploads[cat];
+        }
+      }
+    } catch(e){}
+  } else if (u.email) {
+    try {
+      const emUploads = JSON.parse(localStorage.getItem('collekt_uploads_' + u.email)) || {};
+      for (const cat in emUploads) {
+        if (Array.isArray(emUploads[cat]) && emUploads[cat].length) {
+          merged[cat] = emUploads[cat];
         }
       }
     } catch(e){}
@@ -5467,14 +5300,23 @@ function getUserProposals() {
   if (!u) return [];
   try {
     const all = JSON.parse(localStorage.getItem('collekt_proposals')) || [];
-    const uId = String(u.id || '').toLowerCase();
-    const uEmail = String(u.email || '').toLowerCase();
+    const uId = String(u.id || '').toLowerCase().trim();
+    const uEmail = String(u.email || '').toLowerCase().trim();
+    if (!uId && !uEmail) return [];
+    const resetCutoff = new Date('2026-10-10T00:00:00Z').getTime();
     return all.filter(p => {
-      const pUserId = String(p.userId || p.freelancer_id || '').toLowerCase();
-      const pUserEmail = String(p.userEmail || p.email || '').toLowerCase();
-      const pCompanyId = String(p.companyId || p.company_id || '').toLowerCase();
-      const pCompanyEmail = String(p.companyEmail || '').toLowerCase();
-      return pUserId === uId || pUserEmail === uEmail || pCompanyId === uId || pCompanyEmail === uEmail;
+      if (!p) return false;
+      const rawDate = p.created_at || p.timestamp;
+      if (rawDate && new Date(rawDate).getTime() < resetCutoff) return false;
+      const pUserId = String(p.userId || p.pro_id || p.freelancer_id || '').toLowerCase().trim();
+      const pUserEmail = String(p.userEmail || p.email || '').toLowerCase().trim();
+      const pCompanyId = String(p.companyId || p.company_id || '').toLowerCase().trim();
+      const pCompanyEmail = String(p.companyEmail || '').toLowerCase().trim();
+      if (uId) {
+        if (pUserId) return pUserId === uId || (pCompanyId && pCompanyId === uId);
+        if (pCompanyId) return pCompanyId === uId;
+      }
+      return (uEmail && pUserEmail === uEmail) || (uEmail && pCompanyEmail === uEmail);
     });
   } catch { return []; }
 }
@@ -5513,14 +5355,22 @@ function getUserContracts() {
   if (!u) return [];
   try {
     const all = JSON.parse(localStorage.getItem('collekt_contracts')) || [];
-    const uId = String(u.id || '').toLowerCase();
-    const uEmail = String(u.email || '').toLowerCase();
+    const uId = String(u.id || '').toLowerCase().trim();
+    const uEmail = String(u.email || '').toLowerCase().trim();
+    if (!uId && !uEmail) return [];
+    const resetCutoff = new Date('2026-10-10T00:00:00Z').getTime();
     return all.filter(c => {
-      const cProId = String(c.proId || c.freelancer_id || c.user_id || '').toLowerCase();
-      const cProEmail = String(c.proEmail || c.email || '').toLowerCase();
-      const cCompId = String(c.companyId || c.company_id || '').toLowerCase();
-      const cCompEmail = String(c.companyEmail || '').toLowerCase();
-      return cProId === uId || cProEmail === uEmail || cCompId === uId || cCompEmail === uEmail;
+      if (!c) return false;
+      const rawDate = c.created_at || c.timestamp;
+      if (rawDate && new Date(rawDate).getTime() < resetCutoff) return false;
+      const cProId = String(c.proId || c.pro_id || c.freelancer_id || c.user_id || '').toLowerCase().trim();
+      const cProEmail = String(c.proEmail || c.email || '').toLowerCase().trim();
+      const cCompId = String(c.companyId || c.company_id || '').toLowerCase().trim();
+      const cCompEmail = String(c.companyEmail || '').toLowerCase().trim();
+      if (uId) {
+        if (cProId || cCompId) return cProId === uId || cCompId === uId;
+      }
+      return (uEmail && cProEmail === uEmail) || (uEmail && cCompEmail === uEmail);
     });
   } catch { return []; }
 }

@@ -5,22 +5,22 @@
 
 /* ── DARK MODE TOKENS & TYPOGRAPHY ───────────────── */
 html.dark {
-  --ink: #F8FAFC;
-  --forest: #0E3B35;
-  --forest-mid: #144e45;
+  --ink: #E6ECEB;
+  --forest: #0b1312;
+  --forest-mid: #111c1a;
   --teal: #14B8A6;
   --teal-mid: #2DD4BF;
-  --teal-lt: rgba(45, 212, 191, 0.12);
-  --amber: #F59E0B;
-  --amber-lt: rgba(245, 158, 11, 0.14);
-  --slate: #CBD5E1;
-  --muted: #849694;
-  --line: rgba(255, 255, 255, 0.075);
-  --paper: #090d0c;
-  --white: #101716;
+  --teal-lt: rgba(45, 212, 191, 0.10);
+  --amber: #D99B26;
+  --amber-lt: rgba(217, 155, 38, 0.12);
+  --slate: #B8C7C5;
+  --muted: #7E928F;
+  --line: rgba(255, 255, 255, 0.055);
+  --paper: #080d0c;
+  --white: #0e1514;
 }
 
-html.dark body { background: #090d0c; color: #E2E8F0; }
+html.dark body { background: #080d0c; color: #DCE5E4; }
 
 /* Global typography in dark mode */
 html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6,
@@ -28,17 +28,17 @@ html.dark strong, html.dark b, html.dark th, html.dark .section-heading,
 html.dark .modal-title, html.dark .card-title, html.dark .form-title,
 html.dark .sbal-amount, html.dark .stat-value, html.dark .gig-title,
 html.dark .pm-name, html.dark .am-val, html.dark .sbank-val {
-  color: #FFFFFF !important;
+  color: #F1F5F4 !important;
 }
 
 html.dark p, html.dark li, html.dark dd, html.dark .card-body,
 html.dark .tx-row td, html.dark .data-table td, html.dark .bubble.received {
-  color: #CBD5E1 !important;
+  color: #C2D0CE !important;
 }
 
 html.dark label, html.dark .form-label, html.dark .interests-label,
 html.dark .prog-label, html.dark .chk span, html.dark label span {
-  color: #F8FAFC !important;
+  color: #E2ECEA !important;
 }
 
 html.dark .text-muted, html.dark .section-subheading, html.dark .stat-label,
@@ -47,45 +47,45 @@ html.dark .sbal-title-wrap, html.dark .sbank-lbl, html.dark .notif-item-time,
 html.dark .profile-menu-header .pm-email, html.dark .empty-state,
 html.dark .u-role, html.dark .sidebar-section-label, html.dark small,
 html.dark .am-label, html.dark .table-head th {
-  color: #849694 !important;
+  color: #7E928F !important;
 }
 
 /* Card, container, and surface dark styling */
-html.dark .card, html.dark .form-card { background: #101716; border-color: rgba(255,255,255,.075); color: #E2E8F0; box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
-html.dark .app-sidebar { background: #0a0f0e; border-color: rgba(255,255,255,.07); }
-html.dark .sidebar-nav-item { color: rgba(255,255,255,.70); }
-html.dark .sidebar-nav-item:hover, html.dark .sidebar-nav-item.active { background: rgba(255,255,255,.06); color: #fff; }
-html.dark .app-topbar { background: #0d1312; border-color: rgba(255,255,255,.07); }
-html.dark .topbar-search { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.09); color: #fff; }
-html.dark .topbar-search::placeholder { color: rgba(255,255,255,.40); }
-html.dark .stat-card { background: #101716; border-color: rgba(255,255,255,.075); box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
-html.dark .tx-row { border-color: rgba(255,255,255,.05); }
-html.dark .tx-row:hover { background: rgba(255,255,255,.03); }
-html.dark .table-head th { background: #121a19; border-color: rgba(255,255,255,.07); color: #849694; }
-html.dark .msg-sidebar { background: #101716; border-color: rgba(255,255,255,.07); }
-html.dark .msg-item { border-color: rgba(255,255,255,.05); }
-html.dark .msg-item:hover { background: rgba(255,255,255,.03); }
-html.dark .msg-item.active { background: rgba(19,117,111,.15); border-left-color: var(--teal-mid); }
-html.dark .chat-area { background: #090d0c; }
-html.dark .bubble.received { background: #101716; border-color: rgba(255,255,255,.07); color: #F1F5F9; }
-html.dark .chat-input-bar { background: #101716; border-color: rgba(255,255,255,.07); }
-html.dark .chat-input-bar input { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.09); color: #fff; }
-html.dark .gig-card { background: #101716; border-color: rgba(255,255,255,.075); box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
-html.dark .form-input, html.dark select.form-input, html.dark textarea.form-input { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.09); color: #FFFFFF !important; }
-html.dark .form-input:focus, html.dark select.form-input:focus, html.dark textarea.form-input:focus { background: rgba(255,255,255,.08); border-color: var(--teal-mid); }
-html.dark .form-select, html.dark select { background-color: #101716; color: #FFFFFF !important; }
-html.dark option, html.dark optgroup { background-color: #0d1413; color: #F1F5F9; }
-html.dark .modal-card { background: #101716; border-color: rgba(255,255,255,.075); color: #F1F5F9; box-shadow: 0 24px 64px rgba(0,0,0,0.65); }
-html.dark .notif-panel, html.dark .profile-menu { background: #101716; border-color: rgba(255,255,255,.075); box-shadow: 0 16px 40px rgba(0,0,0,0.50); }
-html.dark .notif-item:hover, html.dark .profile-menu-item:hover { background: rgba(255,255,255,.04); }
-html.dark .pill-btn { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.08); color: #CBD5E1; }
+html.dark .card, html.dark .form-card { background: #0e1514; border-color: rgba(255,255,255,.055); color: #DCE5E4; box-shadow: 0 4px 18px rgba(0,0,0,0.28); }
+html.dark .app-sidebar { background: #070b0a; border-color: rgba(255,255,255,.05); }
+html.dark .sidebar-nav-item { color: rgba(255,255,255,.68); }
+html.dark .sidebar-nav-item:hover, html.dark .sidebar-nav-item.active { background: rgba(255,255,255,.05); color: #F1F5F4; }
+html.dark .app-topbar { background: #0a100f; border-color: rgba(255,255,255,.055); }
+html.dark .topbar-search { background: #111918; border-color: rgba(255,255,255,.07); color: #F1F5F4; }
+html.dark .topbar-search::placeholder { color: #6E827F; }
+html.dark .stat-card { background: #0e1514; border-color: rgba(255,255,255,.055); box-shadow: 0 4px 18px rgba(0,0,0,0.28); }
+html.dark .tx-row { border-color: rgba(255,255,255,.045); }
+html.dark .tx-row:hover { background: rgba(255,255,255,.025); }
+html.dark .table-head th { background: #111918; border-color: rgba(255,255,255,.055); color: #7E928F; }
+html.dark .msg-sidebar { background: #0e1514; border-color: rgba(255,255,255,.055); }
+html.dark .msg-item { border-color: rgba(255,255,255,.045); }
+html.dark .msg-item:hover { background: rgba(255,255,255,.025); }
+html.dark .msg-item.active { background: rgba(19,117,111,.14); border-left-color: var(--teal-mid); }
+html.dark .chat-area { background: #080d0c; }
+html.dark .bubble.received { background: #0e1514; border-color: rgba(255,255,255,.06); color: #E6ECEB; }
+html.dark .chat-input-bar { background: #0e1514; border-color: rgba(255,255,255,.055); }
+html.dark .chat-input-bar input { background: #111918; border-color: rgba(255,255,255,.07); color: #F1F5F4; }
+html.dark .gig-card { background: #0e1514; border-color: rgba(255,255,255,.055); box-shadow: 0 4px 18px rgba(0,0,0,0.28); }
+html.dark .form-input, html.dark select.form-input, html.dark textarea.form-input { background: #111918; border-color: rgba(255,255,255,.07); color: #F1F5F4 !important; }
+html.dark .form-input:focus, html.dark select.form-input:focus, html.dark textarea.form-input:focus { background: #141e1c; border-color: rgba(45,212,191,.45); }
+html.dark .form-select, html.dark select { background-color: #111918; color: #F1F5F4 !important; }
+html.dark option, html.dark optgroup { background-color: #0d1413; color: #E6ECEB; }
+html.dark .modal-card { background: #0e1514; border-color: rgba(255,255,255,.065); color: #E6ECEB; box-shadow: 0 24px 64px rgba(0,0,0,0.65); }
+html.dark .notif-panel, html.dark .profile-menu { background: #0e1514; border-color: rgba(255,255,255,.065); box-shadow: 0 16px 40px rgba(0,0,0,0.50); }
+html.dark .notif-item:hover, html.dark .profile-menu-item:hover { background: rgba(255,255,255,.035); }
+html.dark .pill-btn { background: #111918; border-color: rgba(255,255,255,.065); color: #B8C7C5; }
 html.dark .pill-btn.active { background: var(--teal); border-color: var(--teal); color: #fff; }
-html.dark .project-row { background: #101716; border-color: rgba(255,255,255,.06); color: #F1F5F9; }
-html.dark .content-card, html.dark .upload-modal-card, html.dark .settings-card { background: #101716; border-color: rgba(255,255,255,.075); color: #F1F5F9; box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
-html.dark .card-header, html.dark .notif-head, html.dark .profile-menu-header { border-color: rgba(255,255,255,.06); }
-html.dark .pm-name, html.dark .notif-head h4, html.dark .card-header h3 { color: #FFFFFF; }
-html.dark .notif-item-text, html.dark .profile-menu-item { color: #E2E8F0; }
-html.dark .notif-item-text strong { color: #fff; }
+html.dark .project-row { background: #0e1514; border-color: rgba(255,255,255,.055); color: #E6ECEB; }
+html.dark .content-card, html.dark .upload-modal-card, html.dark .settings-card { background: #0e1514; border-color: rgba(255,255,255,.055); color: #E6ECEB; box-shadow: 0 4px 18px rgba(0,0,0,0.28); }
+html.dark .card-header, html.dark .notif-head, html.dark .profile-menu-header { border-color: rgba(255,255,255,.055); }
+html.dark .pm-name, html.dark .notif-head h4, html.dark .card-header h3 { color: #F1F5F4; }
+html.dark .notif-item-text, html.dark .profile-menu-item { color: #DCE5E4; }
+html.dark .notif-item-text strong { color: #F1F5F4; }
 
 
 /* ── TRANSPARENT SHIELD VERIFICATION BADGE ────────── */
@@ -475,7 +475,7 @@ html.dark .bubble.sent { background: #005c4b; color: #e9edef; }
 .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
 .empty-state .e-icon { font-size: 48px; margin-bottom: 12px; }
 .profile-strength-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; width: 100%; box-sizing: border-box; }
-html.dark .profile-strength-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+html.dark .profile-strength-card { background: #0e1514; border-color: rgba(255,255,255,.055); }
 .profile-strength-bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 10px 0; }
 .profile-strength-fill { height: 100%; background: linear-gradient(to right, var(--teal), var(--teal-mid)); border-radius: 99px; transition: width .6s ease; }
 .check-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 4px; font-size: 12px; font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.04); min-width: 0; box-sizing: border-box; border-radius: 6px; transition: background .15s ease; }
@@ -618,7 +618,7 @@ html.dark .check-item { border-bottom-color: rgba(255,255,255,.04); }
   display: flex; gap: 24px; border-bottom: 1.5px solid var(--line);
   margin-bottom: 28px; padding-bottom: 0;
 }
-html.dark .wallet-tab-strip { border-color: rgba(255,255,255,.09); }
+html.dark .wallet-tab-strip { border-color: rgba(255,255,255,.06); }
 .wallet-tab-btn {
   background: none; border: none; padding: 12px 4px 14px;
   font-size: 14px; font-weight: 700; color: var(--muted);
@@ -626,11 +626,11 @@ html.dark .wallet-tab-strip { border-color: rgba(255,255,255,.09); }
   font-family: inherit;
 }
 .wallet-tab-btn:hover { color: var(--ink); }
-html.dark .wallet-tab-btn:hover { color: #fff; }
+html.dark .wallet-tab-btn:hover { color: #F1F5F4; }
 .wallet-tab-btn.active {
   color: var(--ink); font-weight: 800;
 }
-html.dark .wallet-tab-btn.active { color: #fff; }
+html.dark .wallet-tab-btn.active { color: #F1F5F4; }
 .wallet-tab-btn.active::after {
   content: ''; position: absolute; bottom: -1.5px; left: 0; right: 0;
   height: 3px; background: #10b981; border-radius: 99px;
@@ -648,7 +648,7 @@ html.dark .wallet-tab-btn.active { color: #fff; }
   display: flex; flex-direction: column; justify-content: space-between;
   box-shadow: 0 2px 10px rgba(0,0,0,.02); position: relative;
 }
-html.dark .shuttlers-balance-card { background: #0f2220; border-color: rgba(255,255,255,.09); }
+html.dark .shuttlers-balance-card { background: #0e1514; border-color: rgba(255,255,255,.06); }
 
 .sbal-header {
   display: flex; justify-content: space-between; align-items: center;
@@ -661,21 +661,21 @@ html.dark .shuttlers-balance-card { background: #0f2220; border-color: rgba(255,
   transition: color .15s;
 }
 .sbal-eye-btn:hover { color: var(--ink); }
-html.dark .sbal-eye-btn:hover { color: #fff; }
+html.dark .sbal-eye-btn:hover { color: #F1F5F4; }
 
 .sbal-badge {
   background: var(--paper); border: 1px solid var(--line);
   border-radius: 8px; padding: 4px 10px; font-size: 12px; font-weight: 700;
   color: var(--ink); display: flex; align-items: center; gap: 4px;
 }
-html.dark .sbal-badge { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); color: #e2efed; }
+html.dark .sbal-badge { background: #111918; border-color: rgba(255,255,255,.07); color: #E2ECEA; }
 
 .sbal-amount {
   font-size: 32px; font-weight: 900; color: var(--ink);
   letter-spacing: -.02em; margin-bottom: 24px; min-height: 44px;
   display: flex; align-items: center;
 }
-html.dark .sbal-amount { color: #fff; }
+html.dark .sbal-amount { color: #F1F5F4; }
 
 .btn-black-fund {
   background: #0d1716; color: #fff; border: none;
@@ -690,19 +690,19 @@ html.dark .sbal-amount { color: #fff; }
   border-radius: var(--r-lg); padding: 28px;
   display: flex; flex-direction: column; justify-content: space-between;
 }
-html.dark .shuttlers-bank-card { background: #0f2220; border-color: rgba(255,255,255,.09); }
+html.dark .shuttlers-bank-card { background: #0e1514; border-color: rgba(255,255,255,.06); }
 
 .sbank-field { margin-bottom: 16px; }
 .sbank-label { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px; text-transform: capitalize; }
 .sbank-val { font-size: 16px; font-weight: 900; color: var(--ink); display: flex; align-items: center; gap: 8px; }
-html.dark .sbank-val { color: #fff; }
+html.dark .sbank-val { color: #F1F5F4; }
 .sbank-copy-btn {
   background: none; border: none; cursor: pointer; color: var(--muted);
   font-size: 14px; display: inline-grid; place-items: center; padding: 4px;
   transition: color .15s; border-radius: 4px;
 }
 .sbank-copy-btn:hover { color: var(--teal); background: var(--paper); }
-html.dark .sbank-copy-btn:hover { background: rgba(255,255,255,.08); }
+html.dark .sbank-copy-btn:hover { background: rgba(255,255,255,.06); }
 
 .sbank-notice {
   font-size: 12px; color: var(--muted); line-height: 1.6;
@@ -713,7 +713,7 @@ html.dark .sbank-copy-btn:hover { background: rgba(255,255,255,.08); }
   background: var(--white); border: 1px solid var(--line);
   border-radius: var(--r-lg); padding: 24px;
 }
-html.dark .wallet-history-section { background: #0f2220; border-color: rgba(255,255,255,.09); }
+html.dark .wallet-history-section { background: #0e1514; border-color: rgba(255,255,255,.06); }
 
 .whistory-head {
   display: flex; justify-content: space-between; align-items: center;
@@ -1175,9 +1175,11 @@ html.dark .quick-skill-chip:hover {
 }
 
 html.dark .card-glass {
-  background: rgba(15, 34, 32, 0.85) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35) !important;
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255, 255, 255, 0.055) !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.30) !important;
 }
 
 /* Button Pulse & Hover Lifts */
@@ -1365,7 +1367,7 @@ html.dark .mobile-bottom-nav {
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
   }
 
   .app-topbar {
@@ -1473,7 +1475,7 @@ body.in-active-chat .mobile-bottom-nav {
 /* Extra Small Devices (<= 480px) */
 @media (max-width: 480px) {
   html, body {
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
     width: 100% !important;
     max-width: 100vw !important;
   }
@@ -1506,185 +1508,224 @@ body.in-active-chat .mobile-bottom-nav {
 
 
 /* ═════════════════════════════════════════════════════════
-   GLASSMORPHISM ENHANCEMENT LAYER
+   GLASSMORPHISM ENHANCEMENT LAYER (Velvet Matte Obsidian Dark Mode)
    — Visual-only: no layout, structure, or functionality changed —
    ═════════════════════════════════════════════════════════ */
 
-/* ── Topbar — frosted glass ─────────────────────────────── */
+/* ── Topbar — frosted glass in light, matte obsidian in dark ── */
 .app-topbar {
-  background: rgba(255, 255, 255, 0.82) !important;
-  backdrop-filter: blur(18px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(16px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
   border-bottom: 1px solid rgba(19, 117, 111, 0.12) !important;
-  box-shadow: 0 2px 20px rgba(14, 59, 53, 0.07) !important;
+  box-shadow: 0 2px 16px rgba(14, 59, 53, 0.05) !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 45 !important;
 }
 html.dark .app-topbar {
-  background: rgba(7, 18, 16, 0.80) !important;
-  border-bottom-color: rgba(255, 255, 255, 0.07) !important;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.30) !important;
+  background: rgba(10, 16, 15, 0.94) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.055) !important;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.32) !important;
 }
 
-/* ── Sidebar — rich dark glass ───────────────────────────── */
+/* ── Sidebar — rich forest in light, deep matte obsidian in dark ── */
 .app-sidebar {
-  background: rgba(10, 33, 29, 0.97) !important;
-  backdrop-filter: blur(24px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
-  box-shadow: 4px 0 40px rgba(0, 0, 0, 0.22) !important;
+  background: rgba(10, 33, 29, 0.98) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 4px 0 32px rgba(0, 0, 0, 0.20) !important;
+}
+html.dark .app-sidebar {
+  background: #070b0a !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 4px 0 28px rgba(0, 0, 0, 0.38) !important;
 }
 
-/* ── Notification & Profile panels — floating glass ─────── */
+/* ── Notification & Profile panels ──────────────────────── */
 .notif-panel,
 .profile-menu {
-  background: rgba(255, 255, 255, 0.90) !important;
-  backdrop-filter: blur(20px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
   border: 1px solid rgba(19, 117, 111, 0.14) !important;
   box-shadow: 0 16px 48px rgba(14, 59, 53, 0.16) !important;
 }
 html.dark .notif-panel,
 html.dark .profile-menu {
-  background: rgba(10, 28, 26, 0.90) !important;
-  border-color: rgba(255, 255, 255, 0.09) !important;
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255, 255, 255, 0.065) !important;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.52) !important;
 }
 
-/* ── Modals — glass sheet ────────────────────────────────── */
+/* ── Modals ─────────────────────────────────────────────── */
 .modal-card {
-  background: rgba(255, 255, 255, 0.92) !important;
-  backdrop-filter: blur(22px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
   border: 1px solid rgba(19, 117, 111, 0.14) !important;
   box-shadow: 0 24px 72px rgba(14, 59, 53, 0.22) !important;
 }
 html.dark .modal-card {
-  background: rgba(10, 28, 26, 0.90) !important;
-  border-color: rgba(255, 255, 255, 0.09) !important;
-  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.45) !important;
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255, 255, 255, 0.065) !important;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.55) !important;
 }
 
-/* ── Stat cards — frosted surface ───────────────────────── */
+/* ── Stat cards ─────────────────────────────────────────── */
 .stat-card {
-  background: rgba(255, 255, 255, 0.80) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
   border: 1px solid rgba(19, 117, 111, 0.11) !important;
-  box-shadow: 0 4px 24px rgba(14, 59, 53, 0.07) !important;
+  box-shadow: 0 4px 20px rgba(14, 59, 53, 0.06) !important;
 }
 .stat-card:hover {
-  background: rgba(255, 255, 255, 0.95) !important;
-  box-shadow: 0 10px 36px rgba(14, 59, 53, 0.13) !important;
-  border-color: rgba(19, 117, 111, 0.24) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  box-shadow: 0 10px 30px rgba(14, 59, 53, 0.11) !important;
+  border-color: rgba(19, 117, 111, 0.22) !important;
 }
 html.dark .stat-card {
-  background: rgba(15, 34, 32, 0.80) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.30) !important;
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255, 255, 255, 0.055) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28) !important;
+}
+html.dark .stat-card:hover {
+  background: #121b19 !important;
+  border-color: rgba(45, 212, 191, 0.18) !important;
 }
 
-/* ── Content & wallet cards — glass surface ─────────────── */
+/* ── Content & wallet cards ─────────────────────────────── */
 .content-card,
 .shuttlers-balance-card,
 .shuttlers-bank-card,
 .wallet-history-section {
-  background: rgba(255, 255, 255, 0.82) !important;
-  backdrop-filter: blur(14px) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
+  background: rgba(255, 255, 255, 0.90) !important;
   border: 1px solid rgba(19, 117, 111, 0.12) !important;
-  box-shadow: 0 6px 32px rgba(14, 59, 53, 0.08) !important;
+  box-shadow: 0 6px 28px rgba(14, 59, 53, 0.07) !important;
 }
 html.dark .content-card,
 html.dark .shuttlers-balance-card,
 html.dark .shuttlers-bank-card,
 html.dark .wallet-history-section {
-  background: rgba(15, 34, 32, 0.80) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.28) !important;
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255, 255, 255, 0.055) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.28) !important;
 }
 
-/* ── Gig cards — subtle glass ───────────────────────────── */
+/* ── Gig cards ──────────────────────────────────────────── */
 .gig-card {
-  background: rgba(255, 255, 255, 0.84) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
+  background: rgba(255, 255, 255, 0.90) !important;
   border: 1px solid rgba(19, 117, 111, 0.10) !important;
   box-shadow: 0 4px 18px rgba(14, 59, 53, 0.06) !important;
 }
 .gig-card:hover {
-  background: rgba(255, 255, 255, 0.97) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
   border-color: rgba(19, 117, 111, 0.22) !important;
-  box-shadow: 0 12px 36px rgba(14, 59, 53, 0.14) !important;
+  box-shadow: 0 12px 32px rgba(14, 59, 53, 0.12) !important;
 }
 html.dark .gig-card {
-  background: rgba(15, 34, 32, 0.82) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255, 255, 255, 0.055) !important;
+}
+html.dark .gig-card:hover {
+  background: #121b19 !important;
+  border-color: rgba(45, 212, 191, 0.18) !important;
 }
 
-/* ── AI chat window — glass panel ───────────────────────── */
+/* ── AI chat window ─────────────────────────────────────── */
 .collekt-ai-chat-window {
-  background: rgba(255, 255, 255, 0.88) !important;
-  backdrop-filter: blur(24px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
   border: 1.5px solid rgba(19, 117, 111, 0.18) !important;
-  box-shadow: 0 28px 80px rgba(14, 59, 53, 0.30) !important;
+  box-shadow: 0 28px 80px rgba(14, 59, 53, 0.28) !important;
+}
+html.dark .collekt-ai-chat-window {
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
 }
 
-/* ── Mobile bottom nav — glass bar ─────────────────────── */
+/* ── Mobile bottom nav ──────────────────────────────────── */
 .mobile-bottom-nav {
-  background: rgba(10, 33, 29, 0.90) !important;
-  backdrop-filter: blur(22px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.10) !important;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.22) !important;
+  background: rgba(10, 20, 18, 0.96) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.32) !important;
 }
 
-/* ── Form inputs — glass inset feel ────────────────────── */
+/* ── Form inputs ────────────────────────────────────────── */
 .form-input,
 .whistory-filter-input {
-  background: rgba(244, 248, 247, 0.80) !important;
-  backdrop-filter: blur(6px) !important;
-  -webkit-backdrop-filter: blur(6px) !important;
+  background: rgba(244, 248, 247, 0.90) !important;
   border: 1.5px solid rgba(19, 117, 111, 0.15) !important;
   transition: border-color .2s, box-shadow .2s, background .2s !important;
 }
 .form-input:focus,
 .whistory-filter-input:focus {
-  background: rgba(255, 255, 255, 0.96) !important;
+  background: #ffffff !important;
   border-color: rgba(26, 158, 150, 0.60) !important;
-  box-shadow: 0 0 0 4px rgba(26, 158, 150, 0.10) !important;
+  box-shadow: 0 0 0 3px rgba(26, 158, 150, 0.10) !important;
 }
 html.dark .form-input,
 html.dark .whistory-filter-input {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(255, 255, 255, 0.10) !important;
+  background: #111918 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+html.dark .form-input:focus,
+html.dark .whistory-filter-input:focus {
+  background: #141e1c !important;
+  border-color: rgba(45, 212, 191, 0.45) !important;
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.10) !important;
 }
 
-/* ── Sbal badge — glass chip ────────────────────────────── */
+/* ── Sbal badge ─────────────────────────────────────────── */
 .sbal-badge {
-  background: rgba(244, 248, 247, 0.80) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
+  background: rgba(244, 248, 247, 0.90) !important;
   border: 1px solid rgba(19, 117, 111, 0.16) !important;
 }
 html.dark .sbal-badge {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(255, 255, 255, 0.10) !important;
+  background: #111918 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
 }
 
-/* ── Project rows — glass rows ──────────────────────────── */
+/* ── Project rows ───────────────────────────────────────── */
 .project-row {
-  background: rgba(255, 255, 255, 0.78) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
   border: 1px solid rgba(19, 117, 111, 0.10) !important;
 }
 .project-row:hover {
   box-shadow: 0 6px 24px rgba(14, 59, 53, 0.10) !important;
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
   border-color: rgba(19, 117, 111, 0.22) !important;
 }
 html.dark .project-row {
-  background: rgba(15, 34, 32, 0.80) !important;
-  border-color: rgba(255, 255, 255, 0.07) !important;
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255, 255, 255, 0.055) !important;
+}
+html.dark .project-row:hover {
+  background: #121b19 !important;
+  border-color: rgba(45, 212, 191, 0.18) !important;
 }
 
 
@@ -1701,7 +1742,7 @@ html.dark .project-row {
 html, body {
   width: 100%;
   max-width: 100vw;
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -1726,9 +1767,9 @@ img, picture, video, canvas, svg, iframe {
   border-collapse: collapse;
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/* ─────────────────────────────────────────────────────────────────
    BREAKPOINT 1: MOBILE SCREENS (< 640px) - iPhone SE, iPhone 14/15
-   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+   ───────────────────────────────────────────────────────────────── */
 @media (max-width: 639px) {
   /* Safe Area Support */
   :root {
@@ -1803,7 +1844,7 @@ img, picture, video, canvas, svg, iframe {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
     box-sizing: border-box !important;
   }
 
@@ -1814,7 +1855,7 @@ img, picture, video, canvas, svg, iframe {
     min-width: 0 !important;
     padding-bottom: calc(96px + env(safe-area-inset-bottom, 16px)) !important;
     box-sizing: border-box !important;
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
   }
 
   .app-topbar {
@@ -2122,8 +2163,8 @@ html.dark .sbal-escrow-badge {
   transition: transform 0.18s, box-shadow 0.18s;
 }
 html.dark .tx-card-mobile {
-  background: #0f2220;
-  border-color: rgba(255, 255, 255, 0.08);
+  background: #0e1514;
+  border-color: rgba(255, 255, 255, 0.06);
 }
 .tx-card-mobile:active {
   transform: scale(0.99);
@@ -2186,10 +2227,10 @@ html.dark .tx-card-mobile {
   margin-top: 2px;
 }
 html.dark .tx-card-footer {
-  border-top-color: rgba(255, 255, 255, 0.08);
+  border-top-color: rgba(255, 255, 255, 0.06);
 }
 
-/* â”€â”€ Escrow Milestone Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Escrow Milestone Cards ──────────────────────────── */
 .escrow-milestone-card {
   background: var(--white);
   border: 1.5px solid var(--line);
@@ -2203,8 +2244,8 @@ html.dark .tx-card-footer {
   transition: all 0.2s ease;
 }
 html.dark .escrow-milestone-card {
-  background: #0f2220;
-  border-color: rgba(255, 255, 255, 0.10);
+  background: #0e1514;
+  border-color: rgba(255, 255, 255, 0.065);
 }
 .escrow-milestone-card:hover {
   border-color: var(--teal);

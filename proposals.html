@@ -29,9 +29,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=156.0">
-<link rel="stylesheet" href="shared.css?v=156.0">
-<link rel="stylesheet" href="glass.css?v=156.0">
+<link rel="stylesheet" href="style.css?v=157.0">
+<link rel="stylesheet" href="shared.css?v=157.0">
+<link rel="stylesheet" href="glass.css?v=157.0">
 <style>
 html, body {
   background: var(--paper);
@@ -255,10 +255,10 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=156.0"></script>
-<script src="app.js?v=156.0"></script>
-<script src="collekt-ai.js?v=156.0"></script>
-<script src="settings-popup.js?v=156.0"></script>
+<script src="supabase.js?v=157.0"></script>
+<script src="app.js?v=157.0"></script>
+<script src="collekt-ai.js?v=157.0"></script>
+<script src="settings-popup.js?v=157.0"></script>
 <script>
   /* ═════════════════════════════════════════════════════════
      COLLEKTIONS PAGE ENGINE v1.0
@@ -274,23 +274,16 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
   }
 
   function getMyProposalsList() {
-    let localProps = [];
-    try {
-      localProps = JSON.parse(localStorage.getItem('collekt_proposals')) || [];
-    } catch(e){}
-
-    const me = typeof getUser === 'function' ? getUser() : null;
-    if (me) {
-      localProps = localProps.filter(p => !p.userId || p.userId === me.id || p.userEmail === me.email);
+    if (typeof getUserProposals === 'function') {
+      const list = getUserProposals();
+      const seen = new Set();
+      return list.filter(p => {
+        if (!p || !p.id || seen.has(p.id)) return false;
+        seen.add(p.id);
+        return true;
+      });
     }
-
-    // Deduplicate
-    const seen = new Set();
-    return localProps.filter(p => {
-      if (seen.has(p.id)) return false;
-      seen.add(p.id);
-      return true;
-    });
+    return [];
   }
 
   function isProposalCompleted(p) {
@@ -321,51 +314,8 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
   }
 
   async function fetchLiveProposalsForUser() {
-    const me = typeof getUser === 'function' ? getUser() : null;
-    if (!me || !window.sb) return;
-
-    try {
-      let q = sb.from('proposals').select('*, projects:project_id(id, title, category, budget, company_id, location)');
-      if (me.id) {
-        q = q.or(`user_id.eq.${me.id},pro_id.eq.${me.id}`);
-      }
-      const { data, error } = await q.order('created_at', { ascending: false });
-
-      if (!error && Array.isArray(data)) {
-        let localProps = [];
-        try { localProps = JSON.parse(localStorage.getItem('collekt_proposals')) || []; } catch(e){}
-
-        data.forEach(sp => {
-          const proj = sp.projects || {};
-          const existingIdx = localProps.findIndex(lp => lp.id === sp.id || String(lp.jobId) === String(sp.project_id));
-          const unified = {
-            id: sp.id,
-            jobId: sp.project_id,
-            project_id: sp.project_id,
-            jobTitle: proj.title || 'Marketplace Opportunity',
-            companyId: sp.company_id || proj.company_id || '',
-            companyName: 'Corporate Client',
-            userId: me.id,
-            userEmail: me.email,
-            bidAmount: Number(sp.bid_amount || sp.proposed_amount || 0),
-            proposedAmount: Number(sp.bid_amount || sp.proposed_amount || 0),
-            timeline: sp.delivery_days ? (sp.delivery_days + ' Days') : '2 Weeks',
-            pitchText: sp.pitch_statement || sp.cover_letter || 'Collected via Marketplace',
-            status: String(sp.status || 'PENDING').toUpperCase(),
-            created_at: sp.created_at
-          };
-
-          if (existingIdx >= 0) {
-            localProps[existingIdx] = { ...localProps[existingIdx], ...unified };
-          } else {
-            localProps.push(unified);
-          }
-        });
-
-        localStorage.setItem('collekt_proposals', JSON.stringify(localProps));
-      }
-    } catch(err) {
-      console.warn('fetchLiveProposalsForUser notice:', err);
+    if (typeof syncUserProposalsFromSupabase === 'function') {
+      await syncUserProposalsFromSupabase();
     }
   }
 

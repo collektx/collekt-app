@@ -81,16 +81,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=156.0">
-<link rel="stylesheet" href="shared.css?v=156.0">
-<link rel="stylesheet" href="glass.css?v=156.0">
+<link rel="stylesheet" href="style.css?v=157.0">
+<link rel="stylesheet" href="shared.css?v=157.0">
+<link rel="stylesheet" href="glass.css?v=157.0">
 
 <style>
   body { background: var(--paper); }
   .rec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .rec-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; transition: transform .2s, box-shadow .2s; }
   .rec-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); }
-  html.dark .rec-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+  html.dark .rec-card { background: #0e1514; border-color: rgba(255,255,255,.06); }
   .rec-badge { display: inline-block; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 99px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .06em; }
   .badge-new { background: #dbeafe; color: #1d4ed8; }
   .badge-urgent { background: #fee2e2; color: #dc2626; }
@@ -102,7 +102,7 @@
   .rec-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
   .rec-tag { font-size: 10px; padding: 3px 8px; border-radius: 4px; background: var(--teal-lt); color: var(--teal); font-weight: 700; }
   .profile-strength-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; }
-  html.dark .profile-strength-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+  html.dark .profile-strength-card { background: #0e1514; border-color: rgba(255,255,255,.06); }
   .activity-status { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
   .dash-welcome { background: linear-gradient(to right, var(--forest), var(--teal)); color: #fff; border-radius: var(--r-lg); padding: 28px 32px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; }
   .dash-welcome h1 { font-size: 24px; font-weight: 900; margin-bottom: 6px; }
@@ -121,10 +121,10 @@
   .proposals-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
   .proposals-filters { display: flex; gap: 8px; flex-wrap: wrap; }
   .proposals-filters select { padding: 8px 12px; font-size: 13px; font-weight: 700; border: 1.5px solid var(--line); border-radius: var(--r); background: var(--white); color: var(--ink); cursor: pointer; font-family: 'Manrope', sans-serif; }
-  html.dark .proposals-filters select { background: #0f2220; border-color: rgba(255,255,255,.08); color: #e2efed; }
+  html.dark .proposals-filters select { background: #0e1514; border-color: rgba(255,255,255,.06); color: #e2efed; }
   .proposal-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; margin-bottom: 12px; transition: transform .15s, box-shadow .15s; }
   .proposal-card:hover { transform: translateY(-2px); box-shadow: var(--sh-md); }
-  html.dark .proposal-card { background: #0f2220; border-color: rgba(255,255,255,.08); }
+  html.dark .proposal-card { background: #0e1514; border-color: rgba(255,255,255,.06); }
   .proposal-status { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 99px; text-transform: uppercase; letter-spacing: .04em; }
   .status-pending { background: #fef9c3; color: #ca8a04; }
   .status-accepted { background: #dcfce7; color: #16a34a; }
@@ -274,10 +274,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=156.0"></script>
-<script src="app.js?v=156.0"></script>
-<script src="collekt-ai.js?v=156.0"></script>
-<script src="settings-popup.js?v=156.0"></script>
+<script src="supabase.js?v=157.0"></script>
+<script src="app.js?v=157.0"></script>
+<script src="collekt-ai.js?v=157.0"></script>
+<script src="settings-popup.js?v=157.0"></script>
 <script>
   requireAuth();
 
@@ -434,8 +434,8 @@
       `;
       // dark mode support for empty state
       if (document.documentElement.classList.contains('dark')) {
-        grid.firstElementChild.style.background = '#0f2220';
-        grid.firstElementChild.style.borderColor = 'rgba(255,255,255,.08)';
+        grid.firstElementChild.style.background = '#0e1514';
+        grid.firstElementChild.style.borderColor = 'rgba(255,255,255,.06)';
       }
     } else {
       grid.style.display = 'grid'; // restore grid
@@ -486,8 +486,8 @@
         </div>
       `;
       if (document.documentElement.classList.contains('dark') && container.firstElementChild) {
-        container.firstElementChild.style.background = '#0f2220';
-        container.firstElementChild.style.borderColor = 'rgba(255,255,255,.08)';
+        container.firstElementChild.style.background = '#0e1514';
+        container.firstElementChild.style.borderColor = 'rgba(255,255,255,.06)';
       }
       return;
     }
@@ -533,7 +533,7 @@
     buildTopbar();
     
     if (user) {
-      document.getElementById('welcomeName').textContent = getDisplayName(user).split(' ')[0];
+      document.getElementById('welcomeName').textContent = getDisplayName(user);
       const welcomeBadge = document.getElementById('welcomeBadge');
       if (welcomeBadge) welcomeBadge.innerHTML = getShieldBadgeHTML(22, user);
     }
@@ -561,6 +561,10 @@
       const welcomeBadge = document.getElementById('welcomeBadge');
       if (welcomeBadge) welcomeBadge.innerHTML = getShieldBadgeHTML(22, updatedUser);
     }
+    renderProfileStrength();
+    renderMyDocs();
+    renderRecentActivity();
+    renderOpportunities();
     loadProWalletAndDVA();
   });
 
