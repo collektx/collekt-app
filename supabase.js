@@ -425,33 +425,47 @@ async function syncUser() {
         }
 
         const oauthProvider = session.user.app_metadata?.provider || '';
-        const isGoogleUser = oauthProvider === 'google' || 
+        const isGoogleUser = (localUser && (localUser.provider === 'google' || localUser.oauth_provider === 'google')) ||
+                             oauthProvider === 'google' || 
                              session.user.identities?.some(i => i.provider === 'google') ||
                              session.user.app_metadata?.providers?.includes('google');
-        const isLinkedInUser = (localUser && localUser.linkedin_linked) || 
+        const isLinkedInUser = (localUser && (localUser.linkedin_linked || localUser.provider === 'linkedin')) || 
                                oauthProvider === 'linkedin_oidc' || 
                                oauthProvider === 'linkedin' || 
                                session.user.identities?.some(i => i.provider === 'linkedin_oidc' || i.provider === 'linkedin');
         const isOAuthUser = isGoogleUser || isLinkedInUser;
 
-        const finalRole = profile.role || localUser.role || localStorage.getItem('collekt_last_role') || 'professional';
+        const finalRole = (localUser && localUser.role) || (profile && profile.role) || localStorage.getItem('collekt_last_role') || 'professional';
         const finalProfile = { ...localUser, ...profile, role: finalRole };
 
+        // CRITICAL: NEVER allow verified flags to regress to false once verified locally or in DB!
+        const isAlreadyOtpVerified = (profile && profile.otp_verified === true) || 
+                                     (localUser && localUser.otp_verified === true) || 
+                                     (sessionStorage.getItem('collekt_just_verified') === 'true') ||
+                                     isOAuthUser;
+
+        const isAlreadyEmailVerified = (profile && profile.email_verified === true) || 
+                                       (localUser && localUser.email_verified === true) || 
+                                       (sessionStorage.getItem('collekt_just_verified') === 'true') ||
+                                       isOAuthUser;
+
+        finalProfile.otp_verified = isAlreadyOtpVerified;
+        finalProfile.email_verified = isAlreadyEmailVerified;
+
         if (isOAuthUser) {
-          finalProfile.otp_verified = true;
-          finalProfile.email_verified = true;
           if (isGoogleUser) finalProfile.provider = 'google';
           if (isLinkedInUser) finalProfile.provider = 'linkedin';
+        }
 
-          if (!profile.otp_verified || !profile.email_verified) {
-            try {
-              await sb.from('profiles').update({
-                otp_verified: true,
-                email_verified: true,
-                updated_at: new Date().toISOString()
-              }).eq('id', userId);
-            } catch(e) {}
-          }
+        // Keep Supabase DB in sync if local state is verified but DB is pending
+        if (isAlreadyOtpVerified && profile && (!profile.otp_verified || !profile.email_verified)) {
+          try {
+            sb.from('profiles').update({
+              otp_verified: true,
+              email_verified: true,
+              updated_at: new Date().toISOString()
+            }).eq('id', userId).then(() => {});
+          } catch(e) {}
         }
 
         // Ensure clean unverified profile state for non-identities
@@ -497,9 +511,9 @@ async function syncUser() {
           oauth_avatar: session.user.user_metadata?.avatar_url || null,
           is_verified: false,
           verification_status: 'none',
-          otp_verified: isOAuthUser,
-          email_verified: isOAuthUser,
-          provider: isGoogleUser ? 'google' : (isLinkedInUser ? 'linkedin' : undefined),
+          otp_verified: isOAuthUser || (localUser && localUser.otp_verified === true) || (sessionStorage.getItem('collekt_just_verified') === 'true'),
+          email_verified: isOAuthUser || (localUser && localUser.email_verified === true) || (sessionStorage.getItem('collekt_just_verified') === 'true'),
+          provider: isGoogleUser ? 'google' : (isLinkedInUser ? 'linkedin' : ((localUser && localUser.provider) || undefined)),
           wallet_balance: 0,
           escrow_balance: 0,
           terms_accepted: true,
@@ -673,7 +687,10 @@ async function handleOAuthSessionRouting(session) {
                    (session?.user?.app_metadata?.provider === 'google') ||
                    (session?.user?.app_metadata?.providers?.includes('google'));
   const isOAuthVerified = isLinkedIn || isGoogle;
-  const isOtpVerified = (user && user.otp_verified === true) || finalRole === 'admin' || isOAuthVerified;
+  const isOtpVerified = (user && user.otp_verified === true) || 
+                        (sessionStorage.getItem('collekt_just_verified') === 'true') || 
+                        finalRole === 'admin' || 
+                        isOAuthVerified;
 
   // Always clear oauth state flag now that session is identified
   sessionStorage.removeItem('collekt_oauth_in_progress');
@@ -688,6 +705,10 @@ async function handleOAuthSessionRouting(session) {
     if (!isOtpVerified && (path.includes('register') || path.includes('auth-callback'))) {
       console.log('🔒 Holding dashboard redirect: OTP verification required before dashboard access.');
       return;
+    }
+    const currentFile = (window.location.pathname || '').split('/').pop().toLowerCase();
+    if (currentFile === targetDashboard.toLowerCase()) {
+      return; // Already on target dashboard, do not reload/replace
     }
     // Replace URL to prevent back-button loops into OAuth hash
     window.location.replace(targetDashboard);

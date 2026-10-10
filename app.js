@@ -414,13 +414,26 @@ function getUser() {
 
     // Check if user has been deleted by admin (exempting protected Dave Ojeowere account)
     const uEmail = String(u.email || '').toLowerCase().trim();
-    if (uEmail !== 'ojeoweredave@gmail.com') {
-      const deleted = (JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]')).map(x => String(x).toLowerCase().trim());
-      const uId = String(u.id || '').toLowerCase().trim();
-      const uUser = String(u.username || '').toLowerCase().trim();
-      const uName = String(u.name || '').toLowerCase().trim();
+    const uId = String(u.id || '').toLowerCase().trim();
+    const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uId);
 
-      if (deleted.some(d => d && (uId === d || uEmail === d || uUser === d || uName === d))) {
+    if (isValidUUID) {
+      // Authentic registered Supabase user: clean any stale deletion markers so active session is never dropped
+      try {
+        let del = JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]');
+        if (Array.isArray(del) && del.length > 0) {
+          const cleanDel = del.filter(x => {
+            const s = String(x || '').toLowerCase().trim();
+            return s !== uEmail && s !== uId;
+          });
+          if (cleanDel.length !== del.length) {
+            localStorage.setItem('collekt_deleted_users', JSON.stringify(cleanDel));
+          }
+        }
+      } catch(e){}
+    } else if (uEmail !== 'ojeoweredave@gmail.com') {
+      const deleted = (JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]')).map(x => String(x).toLowerCase().trim());
+      if (deleted.some(d => d && (uId === d || uEmail === d))) {
         localStorage.removeItem('collekt_user');
         return null;
       }
@@ -3332,6 +3345,18 @@ function requireAuth() {
 
   const user = getUser();
   if (!user) {
+    let hasSbToken = false;
+    try {
+      for (let k in localStorage) {
+        if (k.startsWith('sb-') && k.endsWith('-auth-token')) {
+          hasSbToken = true;
+          break;
+        }
+      }
+    } catch(e){}
+    if (hasSbToken) {
+      return true;
+    }
     window.location.replace('login.html');
     return false;
   }
@@ -3345,7 +3370,8 @@ function requireAuth() {
   // Strict OTP verification guard: unverified non-admin users cannot access protected pages
   const isLinkedIn = user.linkedin_linked === true || user.provider === 'linkedin' || user.provider === 'linkedin_oidc';
   const isGoogle = user.provider === 'google' || user.oauth_provider === 'google' || user.auth_provider === 'google' || (user.app_metadata && user.app_metadata.provider === 'google');
-  if (user.role !== 'admin' && !isLinkedIn && !isGoogle && user.otp_verified !== true) {
+  const isJustVerified = sessionStorage.getItem('collekt_just_verified') === 'true';
+  if (user.role !== 'admin' && !isLinkedIn && !isGoogle && user.otp_verified !== true && !isJustVerified) {
     console.warn('🔒 Unverified account: redirecting to complete verification');
     window.location.replace('register.html?verify_pending=true');
     return false;
@@ -3359,7 +3385,8 @@ function redirectIfAuthed() {
   if (!user) return;
   const isLinkedIn = user.linkedin_linked === true || user.provider === 'linkedin' || user.provider === 'linkedin_oidc';
   const isGoogle = user.provider === 'google' || user.oauth_provider === 'google' || user.auth_provider === 'google' || (user.app_metadata && user.app_metadata.provider === 'google');
-  if (user.role !== 'admin' && !isLinkedIn && !isGoogle && user.otp_verified !== true) return;
+  const isJustVerified = sessionStorage.getItem('collekt_just_verified') === 'true';
+  if (user.role !== 'admin' && !isLinkedIn && !isGoogle && user.otp_verified !== true && !isJustVerified) return;
   window.location.replace(user.role === 'company' ? 'company-dashboard.html' : 'dashboard.html');
 }
 

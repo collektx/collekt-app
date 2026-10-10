@@ -556,19 +556,21 @@ exports.handler = async (event) => {
       const lastName = name ? name.split(' ').slice(1).join(' ') : '';
 
       try {
-        const { error: rpcErr } = await supabase.rpc('verify_user_otp', { p_email: email });
-        if (rpcErr) {
-          console.warn('[auth-otp] verify_user_otp RPC notice, attempting direct update:', rpcErr.message);
-          await supabase
-            .from('profiles')
-            .update({
-              email_verified: true,
-              otp_verified: true,
-              otp_verified_at: nowIso,
-              updated_at: nowIso
-            })
-            .eq('email', email);
-        }
+        await supabase.rpc('verify_user_otp', { p_email: email });
+      } catch (rpcErr) {
+        console.warn('[auth-otp] verify_user_otp RPC notice:', rpcErr.message);
+      }
+
+      try {
+        await supabase
+          .from('profiles')
+          .update({
+            email_verified: true,
+            otp_verified: true,
+            otp_verified_at: nowIso,
+            updated_at: nowIso
+          })
+          .ilike('email', email);
       } catch (profErr) {
         console.warn('[auth-otp] Profile update notice:', profErr.message);
       }

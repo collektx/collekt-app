@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=152.0">
-<link rel="stylesheet" href="shared.css?v=152.0">
-<link rel="stylesheet" href="glass.css?v=152.0">
+<link rel="stylesheet" href="style.css?v=153.0">
+<link rel="stylesheet" href="shared.css?v=153.0">
+<link rel="stylesheet" href="glass.css?v=153.0">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -962,8 +962,8 @@ html.dark .success-h { color: #e2efed; }
   }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=152.0"></script>
-<script src="app.js?v=152.0"></script>
+<script src="supabase.js?v=153.0"></script>
+<script src="app.js?v=153.0"></script>
 <script>
   // Detect if arriving from OAuth callback
   const regHash = window.location.hash || '';
@@ -1816,12 +1816,28 @@ html.dark .success-h { color: #e2efed; }
         }
       }
       try {
+        sessionStorage.setItem('collekt_just_verified', 'true');
         let u = JSON.parse(localStorage.getItem('collekt_user') || '{}');
         u.otp_verified = true;
         u.email_verified = true;
         localStorage.setItem('collekt_user', JSON.stringify(u));
         if (typeof saveRegisteredUser === 'function') {
           saveRegisteredUser(u);
+        }
+      } catch(e) {}
+
+      // Persist directly to Supabase from authenticated client as well
+      try {
+        const uid = (ctx.profile && ctx.profile.id) || (getUser && getUser()?.id);
+        if (window.sb && uid) {
+          window.sb.from('profiles').update({
+            otp_verified: true,
+            email_verified: true,
+            updated_at: new Date().toISOString()
+          }).eq('id', uid).then(() => {});
+        }
+        if (window.sb && ctx.email && typeof window.sb.rpc === 'function') {
+          window.sb.rpc('verify_user_otp', { p_email: ctx.email }).then(() => {});
         }
       } catch(e) {}
 
@@ -1888,6 +1904,14 @@ html.dark .success-h { color: #e2efed; }
       const isLinkedIn = currUser.linkedin_linked === true || currUser.provider === 'linkedin' || currUser.provider === 'linkedin_oidc';
       const isGoogle = currUser.provider === 'google' || currUser.oauth_provider === 'google';
       const isOAuth = isLinkedIn || isGoogle;
+      const isVerified = currUser.otp_verified === true || sessionStorage.getItem('collekt_just_verified') === 'true';
+
+      if (isVerified || isOAuth || currUser.role === 'admin') {
+        const targetDashboard = currUser.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+        window.location.replace(targetDashboard);
+        return;
+      }
+
       if (currUser.otp_verified !== true && currUser.role !== 'admin' && !isOAuth && currUser.email) {
         const email = currUser.email;
         const name = currUser.name || currUser.company_name || email.split('@')[0];
