@@ -8,14 +8,14 @@ const { enforceRateLimit } = require('./lib/rate-limiter');
  * Dispatch an email using Resend API
  */
 async function sendResendEmail({ to, subject, html, text }) {
-  const defaultKey = Buffer.from('cmVfNm9CSmFwNEJfSEtmblJ1Z2tIbnJRcmJOa2Y4aXBhNWJN', 'base64').toString('utf8');
-  const apiKey = (process.env.RESEND_API_KEY || defaultKey).trim();
+  const apiKey = (process.env.RESEND_API_KEY || '').trim();
   if (!apiKey) {
     console.warn('[auth-otp] RESEND_API_KEY is not configured in environment');
     return { ok: false, error: 'RESEND_API_KEY missing' };
   }
 
   const fromSender = process.env.RESEND_FROM || 'Kolly from Collekt <Kolly@collektng.com>';
+  const replyToAddress = process.env.RESEND_REPLY_TO || 'Kolly@collektng.com';
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
@@ -27,13 +27,44 @@ async function sendResendEmail({ to, subject, html, text }) {
       body: JSON.stringify({
         from: fromSender,
         to: Array.isArray(to) ? to : [to],
+        reply_to: replyToAddress,
         subject: subject,
         html: html,
-        text: text
+        text: text,
+        headers: {
+          'X-Entity-Ref-ID': crypto.randomUUID()
+        }
       })
     });
 
-    const resJson = await res.json().catch(() => ({}));
+    let resJson = await res.json().catch(() => ({}));
+    if (res.status === 429) {
+      await new Promise(r => setTimeout(r, 650));
+      const rateRetry = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: fromSender,
+          to: Array.isArray(to) ? to : [to],
+          reply_to: replyToAddress,
+          subject: subject,
+          html: html,
+          text: text,
+          headers: {
+            'X-Entity-Ref-ID': crypto.randomUUID()
+          }
+        })
+      });
+      const rateRetryJson = await rateRetry.json().catch(() => ({}));
+      if (rateRetry.ok) {
+        return { ok: true, status: rateRetry.status, data: rateRetryJson };
+      }
+      resJson = rateRetryJson;
+    }
+
     if (!res.ok) {
       console.warn('[auth-otp] Resend API error response:', res.status, resJson);
       // If custom domain has an issue, try fallback to onboarding@resend.dev
@@ -50,7 +81,10 @@ async function sendResendEmail({ to, subject, html, text }) {
             to: Array.isArray(to) ? to : [to],
             subject: subject,
             html: html,
-            text: text
+            text: text,
+            headers: {
+              'X-Entity-Ref-ID': crypto.randomUUID()
+            }
           })
         });
         const retryJson = await retryRes.json().catch(() => ({}));
@@ -189,123 +223,89 @@ function getOtpEmailContent({ code, firstName }) {
  * Generate Welcome Email Template (Sent AFTER OTP is verified)
  */
 function getWelcomeEmailContent({ firstName, role }) {
-  const greetingName = firstName || 'there';
+  const greetingName = firstName || 'Collektor';
   const isCompany = role === 'company';
   const targetDashboardUrl = isCompany ? 'https://collektng.com/company-dashboard.html' : 'https://collektng.com/dashboard.html';
+  const subject = `Welcome to Collekt, ${greetingName}! 🇳🇬 (Account Verified)`;
 
-  const text = `Welcome to Collekt! 🇳🇬\n\nHi ${greetingName},\n\nI'm Kolly from Collekt. We're excited to have you join Nigeria's dedicated project and tender infrastructure for energy, EPC, and engineering!\n\nHere is what you can do right away:\n- Browse High-Value Tenders: Discover curated contracts across oil & gas, renewables, EPC, and heavy infrastructure.\n- Build Your Verified Reputation: Showcase your credentials, past project delivery, and verified shield status.\n- Guaranteed Milestone Payments: Work confidently with escrow-secured contracts and instant NUBAN payouts.\n\nAccess your account here:\n${targetDashboardUrl}\n\nIf you ever have any questions or need help with your profile or posting tenders, feel free to reply directly to this email at Kolly@collektng.com.\n\nBest regards,\nKolly from Collekt\nCollekt Technologies Ltd. Lagos, Nigeria`;
+  const text = `Welcome to Collekt! 🇳🇬\n\nHi ${greetingName},\n\nWelcome to the Collekt Family! I'm Kolly from Collekt, and your account email has now been verified.\n\nCollekt is built specifically for verified Nigerian energy, EPC, engineering, and project specialists and companies.\n\nHere is what you can do right away:\n- Explore Verified Tenders & Projects: Discover curated engineering, EPC, oil & gas, and infrastructure opportunities in the Marketplace.\n- Complete Your Professional Profile: Showcase your credentials, COREN / industry certifications, and project track record.\n- Structured Project Milestones: Collaborate seamlessly with verified companies and professionals across Nigeria.\n\nGo to your dashboard: ${targetDashboardUrl}\n\nIf you ever have questions or need assistance, simply reply directly to this email (${ 'Kolly@collektng.com' }).\n\nKind regards,\nKolly from Collekt\nCollekt Technologies Ltd. Lagos, Nigeria`;
 
   const html = `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Welcome to Collekt</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #040F0E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #0D1F1E;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #040F0E; padding: 32px 16px;">
-    <tr>
-      <td align="center">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 580px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.35);">
-          
-          <!-- Header Banner -->
-          <tr>
-            <td style="background: linear-gradient(135deg, #040F0E 0%, #0E3B35 60%, #13756F 100%); padding: 36px 32px; text-align: center;">
-              <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td align="center">
-                    <span style="display: inline-block; background: rgba(212, 146, 11, 0.2); border: 1px solid rgba(212, 146, 11, 0.4); color: #D4920B; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">
-                      🇳🇬 Nigeria's Project &amp; Tender Infrastructure
-                    </span>
-                    <h1 style="color: #ffffff; font-size: 28px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.02em;">Collekt</h1>
-                    <p style="color: rgba(255, 255, 255, 0.8); font-size: 14px; margin: 0; font-weight: 500;">
-                      Energy &bull; EPC &bull; Engineering &bull; Infrastructure
-                    </p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
+<body style="margin: 0; padding: 24px 12px; background-color: #f4f7f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0D1F1E;">
+  <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2eae9; overflow: hidden; box-shadow: 0 8px 28px rgba(14, 59, 53, 0.08);">
+    
+    <!-- Header Banner -->
+    <div style="background: linear-gradient(135deg, #040F0E 0%, #0E3B35 65%, #13756F 100%); padding: 30px 28px 24px; text-align: center;">
+      <img src="https://resend-attachments.s3.amazonaws.com/cedf0c5f-1108-47d6-ae7c-ccfbfd20a6ae" alt="Collekt" width="96" style="display: inline-block; border-radius: 8px; margin-bottom: 12px; border: none; outline: none;" />
+      <div style="display: block;">
+        <span style="display: inline-block; background: rgba(212, 146, 11, 0.2); border: 1px solid rgba(212, 146, 11, 0.45); color: #FBBF24; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 99px; letter-spacing: 0.05em;">
+          ✓ ACCOUNT VERIFIED &bull; WELCOME ABOARD
+        </span>
+      </div>
+      <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 12px 0 4px 0; letter-spacing: -0.02em;">Welcome to the Collekt Family! 🇳🇬</h1>
+      <p style="color: rgba(255, 255, 255, 0.82); font-size: 13.5px; margin: 0; font-weight: 500;">
+        Nigeria's Project, EPC &amp; Engineering Infrastructure
+      </p>
+    </div>
 
-          <!-- Main Body -->
-          <tr>
-            <td style="padding: 36px 32px;">
-              <h2 style="color: #0D1F1E; font-size: 22px; font-weight: 800; margin: 0 0 16px 0;">
-                Welcome aboard, ${greetingName}! 🎉
-              </h2>
+    <!-- Main Body -->
+    <div style="padding: 32px 28px;">
+      <p style="color: #0D1F1E; font-size: 16px; font-weight: 700; margin: 0 0 12px 0;">
+        Hi ${greetingName},
+      </p>
 
-              <p style="color: #4A5568; font-size: 15px; line-height: 1.6; margin: 0 0 18px 0;">
-                I'm <strong>Kolly</strong>, your partner and mascot here at Collekt. We’re thrilled to have you join Nigeria's dedicated marketplace for energy and EPC contracting.
-              </p>
+      <p style="color: #4a5568; font-size: 15px; line-height: 1.6; margin: 0 0 18px 0;">
+        I'm <strong>Kolly</strong> from Collekt. Your email verification is complete and your account is now active! We are excited to have you on board Nigeria's dedicated network for energy, EPC, and infrastructure specialists and companies.
+      </p>
 
-              <p style="color: #4A5568; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
-                Connecting you with Nigeria’s top energy, EPC, and infrastructure opportunities.
-              </p>
+      <div style="background: #f7faf9; border-left: 4px solid #13756F; padding: 18px 20px; border-radius: 8px; margin-bottom: 24px;">
+        <p style="color: #0E3B35; font-size: 13.5px; margin: 0 0 10px 0; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em;">
+          Here is what you can do right away:
+        </p>
+        <ul style="color: #4a5568; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 18px;">
+          <li style="margin-bottom: 8px;"><strong>Explore Verified Projects &amp; Tenders:</strong> Browse curated opportunities across oil &amp; gas, renewables, EPC, and heavy infrastructure.</li>
+          <li style="margin-bottom: 8px;"><strong>Build Your Verified Profile:</strong> Add your credentials, COREN / industry certifications, and project portfolio.</li>
+          <li style="margin-bottom: 0;"><strong>Collaborate with Confidence:</strong> Connect with verified Nigerian companies and engineering professionals.</li>
+        </ul>
+      </div>
 
-              <!-- Feature Highlights Box -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F4F7F6; border-left: 4px solid #13756F; border-radius: 8px; margin-bottom: 28px;">
-                <tr>
-                  <td style="padding: 20px 20px 16px 20px;">
-                    <h3 style="color: #0E3B35; font-size: 14px; font-weight: 800; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.04em;">
-                      What you can do right now:
-                    </h3>
-                    <ul style="color: #4A5568; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 18px;">
-                      <li style="margin-bottom: 8px;"><strong>Browse High-Value Tenders:</strong> Discover curated contracts across oil &amp; gas, renewables, EPC, and heavy infrastructure.</li>
-                      <li style="margin-bottom: 8px;"><strong>Build Your Verified Reputation:</strong> Showcase your credentials, past project delivery, and verified shield status.</li>
-                      <li style="margin-bottom: 8px;"><strong>Guaranteed Milestone Payments:</strong> Work confidently with escrow-secured contracts and instant NUBAN payouts.</li>
-                    </ul>
-                  </td>
-                </tr>
-              </table>
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="${targetDashboardUrl}" style="background-color: #0E3B35; color: #ffffff; text-decoration: none; padding: 14px 30px; border-radius: 10px; font-weight: 800; font-size: 14.5px; display: inline-block;">
+          Go to Your Dashboard &rarr;
+        </a>
+      </div>
 
-              <!-- Action Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 30px;">
-                <tr>
-                  <td align="center">
-                    <a href="${targetDashboardUrl}" style="background-color: #0E3B35; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(14, 59, 53, 0.25);">
-                      Explore Marketplace &amp; Tenders &rarr;
-                    </a>
-                  </td>
-                </tr>
-              </table>
+      <p style="color: #4a5568; font-size: 14px; line-height: 1.6; margin: 0 0 16px 0;">
+        If you ever have any questions or need assistance setting up your profile, simply reply directly to this email (<a href="mailto:Kolly@collektng.com" style="color: #13756F; font-weight: 700; text-decoration: none;">Kolly@collektng.com</a>).
+      </p>
 
-              <!-- Founder / Direct Help Note -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #E2EAE9; padding-top: 20px; margin-top: 10px;">
-                <tr>
-                  <td>
-                    <p style="color: #6B8280; font-size: 13.5px; line-height: 1.6; margin: 0 0 6px 0;">
-                      Need assistance setting up or have a project you'd like guidance posting?
-                    </p>
-                    <p style="color: #0E3B35; font-size: 13.5px; font-weight: 700; margin: 0;">
-                      Just reply directly to this email (<a href="mailto:Kolly@collektng.com" style="color: #13756F; text-decoration: none;">Kolly@collektng.com</a>) and our team will get right back to you.
-                    </p>
-                  </td>
-                </tr>
-              </table>
+      <p style="color: #0D1F1E; font-size: 14px; line-height: 1.5; margin: 0;">
+        Kind regards,<br>
+        <strong>Kolly from Collekt</strong>
+      </p>
+    </div>
 
-            </td>
-          </tr>
+    <!-- Footer -->
+    <div style="background-color: #f8faf9; padding: 18px 28px; text-align: center; border-top: 1px solid #e2eae9;">
+      <p style="color: #8898aa; font-size: 12px; margin: 0 0 4px 0;">
+        &copy; 2026 Collekt Technologies Ltd. Lagos, Nigeria. All rights reserved.
+      </p>
+      <p style="color: #a0aec0; font-size: 11px; margin: 0;">
+        NDPA 2023 Compliant &bull; CAMA 2020 Registered
+      </p>
+    </div>
 
-          <!-- Footer -->
-          <tr>
-            <td style="background-color: #F8FAF9; padding: 24px 32px; text-align: center; border-top: 1px solid #E2EAE9;">
-              <p style="color: #8898AA; font-size: 12px; line-height: 1.5; margin: 0 0 6px 0;">
-                &copy; 2026 Collekt Technologies Ltd. All rights reserved.
-              </p>
-              <p style="color: #A0AEC0; font-size: 11px; margin: 0;">
-                Protected Escrow Infrastructure &bull; CAMA 2020 Registered &bull; NDPA 2023 Compliant &bull; Lagos, Nigeria
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
+  </div>
 </body>
 </html>`;
 
-  return { text, html };
+  return { subject, text, html };
 }
 
 /**
@@ -575,14 +575,34 @@ exports.handler = async (event) => {
         console.warn('[auth-otp] Profile update notice:', profErr.message);
       }
 
-      // 6. Sync contact with Resend
-      syncResendContact({ email, firstName, lastName }).catch(() => {});
+      // Resolve name and role from DB if not provided in request body
+      let resolvedFirstName = firstName;
+      let resolvedLastName = lastName;
+      let resolvedRole = role;
+      if (!resolvedFirstName && supabase) {
+        try {
+          const { data: profRow } = await supabase
+            .from('profiles')
+            .select('name, role')
+            .ilike('email', email)
+            .maybeSingle();
+          if (profRow) {
+            if (profRow.name) {
+              resolvedFirstName = profRow.name.split(' ')[0];
+              resolvedLastName = profRow.name.split(' ').slice(1).join(' ');
+            }
+            if (profRow.role) {
+              resolvedRole = profRow.role;
+            }
+          }
+        } catch (e) {}
+      }
 
-      // 7. Send the Official Welcome Email via Resend!
-      const welcomeContent = getWelcomeEmailContent({ firstName, role });
+      // 6. Send the Official Welcome Email via Resend FIRST (before contact sync to avoid rate-limit collision)
+      const welcomeContent = getWelcomeEmailContent({ firstName: resolvedFirstName, role: resolvedRole });
       const welcomeSendResult = await sendResendEmail({
         to: email,
-        subject: 'Welcome to Collekt — Start Discovering Contracts & Tenders 🇳🇬',
+        subject: welcomeContent.subject || 'Welcome to Collekt! 🇳🇬 (Account Verified)',
         html: welcomeContent.html,
         text: welcomeContent.text
       });
@@ -593,12 +613,16 @@ exports.handler = async (event) => {
         console.log(`[auth-otp] Welcome email dispatched successfully to ${email}`);
       }
 
+      // 7. Sync contact with Resend after email dispatch
+      syncResendContact({ email, firstName: resolvedFirstName, lastName: resolvedLastName }).catch(() => {});
+
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
           success: true,
           verified: true,
+          welcome_email_sent: Boolean(welcomeSendResult && welcomeSendResult.ok),
           message: 'Email verified successfully! Welcome to Collekt.'
         })
       };
@@ -608,6 +632,53 @@ exports.handler = async (event) => {
         statusCode: 500,
         headers,
         body: JSON.stringify({ success: false, error: 'Internal error verifying code. Please try again.' })
+      };
+    }
+  }
+
+  /* ========================================================
+     ACTION: SEND_WELCOME (Explicit or Fallback Welcome Email)
+     ======================================================== */
+  if (action === 'send_welcome') {
+    try {
+      let resolvedFirstName = name ? name.split(' ')[0] : '';
+      let resolvedRole = role || 'professional';
+      if (!resolvedFirstName && supabase) {
+        try {
+          const { data: profRow } = await supabase
+            .from('profiles')
+            .select('name, role')
+            .ilike('email', email)
+            .maybeSingle();
+          if (profRow) {
+            if (profRow.name) resolvedFirstName = profRow.name.split(' ')[0];
+            if (profRow.role) resolvedRole = profRow.role;
+          }
+        } catch (e) {}
+      }
+
+      const welcomeContent = getWelcomeEmailContent({ firstName: resolvedFirstName, role: resolvedRole });
+      const welcomeSendResult = await sendResendEmail({
+        to: email,
+        subject: welcomeContent.subject || 'Welcome to Collekt! 🇳🇬 (Account Verified)',
+        html: welcomeContent.html,
+        text: welcomeContent.text
+      });
+
+      return {
+        statusCode: welcomeSendResult.ok ? 200 : 500,
+        headers,
+        body: JSON.stringify({
+          success: Boolean(welcomeSendResult.ok),
+          welcome_email_sent: Boolean(welcomeSendResult.ok),
+          message: welcomeSendResult.ok ? 'Welcome email sent.' : (welcomeSendResult.error || 'Could not send welcome email.')
+        })
+      };
+    } catch (err) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ success: false, error: err.message })
       };
     }
   }

@@ -445,20 +445,22 @@ async function syncUser() {
         const finalRole = (localUser && localUser.role) || (profile && profile.role) || localStorage.getItem('collekt_last_role') || 'professional';
         const finalProfile = { ...localUser, ...profile, role: finalRole };
 
-        const isAwaitingOtp = (sessionStorage.getItem('collekt_awaiting_otp') === 'true') && !isOAuthUser;
+        const isAwaitingOtp = (sessionStorage.getItem('collekt_awaiting_otp') === 'true') && !isLinkedInUser;
 
         // CRITICAL: NEVER allow verified flags to regress to false once verified locally or in DB!
         const isAlreadyOtpVerified = !isAwaitingOtp && (
                                      (profile && profile.otp_verified === true) || 
-                                     (localUser && localUser.otp_verified === true) || 
+                                     (localUser && localUser.otp_verified === true && localUser.email === session.user.email) || 
                                      (sessionStorage.getItem('collekt_just_verified') === 'true') ||
-                                     isOAuthUser);
+                                     finalRole === 'admin' ||
+                                     isLinkedInUser);
 
         const isAlreadyEmailVerified = !isAwaitingOtp && (
                                        (profile && profile.email_verified === true) || 
-                                       (localUser && localUser.email_verified === true) || 
+                                       (localUser && localUser.email_verified === true && localUser.email === session.user.email) || 
                                        (sessionStorage.getItem('collekt_just_verified') === 'true') ||
-                                       isOAuthUser);
+                                       finalRole === 'admin' ||
+                                       isLinkedInUser);
 
         finalProfile.otp_verified = isAlreadyOtpVerified;
         finalProfile.email_verified = isAlreadyEmailVerified;
@@ -511,6 +513,7 @@ async function syncUser() {
 
         const role = localStorage.getItem('collekt_pending_oauth_role') || localUser.role || 'professional';
         const name = session.user.user_metadata?.name || session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+        const isVerifiedNew = isLinkedInUser || role === 'admin' || (localUser && localUser.otp_verified === true && localUser.email === session.user.email) || (sessionStorage.getItem('collekt_just_verified') === 'true');
         const newProfile = {
           id: session.user.id,
           email: session.user.email,
@@ -522,8 +525,8 @@ async function syncUser() {
           oauth_avatar: session.user.user_metadata?.avatar_url || null,
           is_verified: false,
           verification_status: 'none',
-          otp_verified: isOAuthUser || (localUser && localUser.otp_verified === true) || (sessionStorage.getItem('collekt_just_verified') === 'true'),
-          email_verified: isOAuthUser || (localUser && localUser.email_verified === true) || (sessionStorage.getItem('collekt_just_verified') === 'true'),
+          otp_verified: isVerifiedNew,
+          email_verified: isVerifiedNew,
           provider: isGoogleUser ? 'google' : (isLinkedInUser ? 'linkedin' : ((localUser && localUser.provider) || undefined)),
           wallet_balance: 0,
           escrow_balance: 0,
@@ -551,8 +554,8 @@ async function syncUser() {
             avatar: null,
             is_verified: false,
             verification_status: 'none',
-            otp_verified: isOAuthUser,
-            email_verified: isOAuthUser,
+            otp_verified: isVerifiedNew,
+            email_verified: isVerifiedNew,
             terms_accepted: true,
             terms_accepted_at: newProfile.terms_accepted_at,
             terms_version: newProfile.terms_version,
@@ -689,21 +692,16 @@ async function handleOAuthSessionRouting(session) {
     targetDashboard = 'company-dashboard.html';
   }
 
-  // Check OTP exemption (Admin, LinkedIn, & Google) or verified status
+  // Check OTP exemption (Admin & LinkedIn) or verified status
   const isLinkedIn = (user && user.linkedin_linked) || 
                      (session?.user?.identities?.some(i => i.provider === 'linkedin_oidc' || i.provider === 'linkedin')) ||
                      (session?.user?.app_metadata?.provider === 'linkedin_oidc' || session?.user?.app_metadata?.provider === 'linkedin');
-  const isGoogle = (user && (user.provider === 'google' || user.oauth_provider === 'google')) ||
-                   (session?.user?.identities?.some(i => i.provider === 'google')) ||
-                   (session?.user?.app_metadata?.provider === 'google') ||
-                   (session?.user?.app_metadata?.providers?.includes('google'));
-  const isOAuthVerified = isLinkedIn || isGoogle;
-  const isAwaitingOtp = (sessionStorage.getItem('collekt_awaiting_otp') === 'true') && !isOAuthVerified;
+  const isAwaitingOtp = (sessionStorage.getItem('collekt_awaiting_otp') === 'true') && !isLinkedIn;
   const isOtpVerified = !isAwaitingOtp && (
                         (user && user.otp_verified === true) || 
                         (sessionStorage.getItem('collekt_just_verified') === 'true') || 
                         finalRole === 'admin' || 
-                        isOAuthVerified);
+                        isLinkedIn);
 
   // Always clear oauth state flag now that session is identified
   sessionStorage.removeItem('collekt_oauth_in_progress');
@@ -715,8 +713,14 @@ async function handleOAuthSessionRouting(session) {
                      path === '/' || path.endsWith('index.html');
 
   if (isAuthPage) {
-    if (!isOtpVerified && (path.includes('register') || path.includes('auth-callback'))) {
-      console.log('🔒 Holding dashboard redirect: OTP verification required before dashboard access.');
+    if (!isOtpVerified) {
+      if (path.includes('register') || path.includes('auth-callback')) {
+        console.log('🔒 Holding dashboard redirect: OTP verification required before dashboard access.');
+        return;
+      }
+      if (path.includes('login')) {
+        window.location.replace('auth-callback.html');
+      }
       return;
     }
     const currentFile = (window.location.pathname || '').split('/').pop().toLowerCase();
@@ -1340,8 +1344,9 @@ if (window.sb && window.sb.auth) {
     window.sb.auth.onAuthStateChange(async (event, session) => {
       if (session && session.user) {
         const path = (window.location.pathname || '').toLowerCase();
-        if (path.includes('admin')) {
-          // Do not hijack admin authentication or admin routing
+        if (path.includes('admin') || path.includes('auth-callback') || path.includes('register')) {
+          // Do not hijack admin routing or active OTP verification screens on auth-callback/register
+          await syncUser();
           return;
         }
         if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || hasOAuthParams || wasOAuthStarted) {
@@ -1357,7 +1362,7 @@ if (window.sb && window.sb.auth) {
       setTimeout(async () => {
         try {
           const path = (window.location.pathname || '').toLowerCase();
-          if (path.includes('admin')) return;
+          if (path.includes('admin') || path.includes('auth-callback') || path.includes('register')) return;
           const { data: { session } } = await window.sb.auth.getSession();
           if (session && session.user) {
             await handleOAuthSessionRouting(session);

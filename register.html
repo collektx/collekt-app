@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=154.0">
-<link rel="stylesheet" href="shared.css?v=154.0">
-<link rel="stylesheet" href="glass.css?v=154.0">
+<link rel="stylesheet" href="style.css?v=155.0">
+<link rel="stylesheet" href="shared.css?v=155.0">
+<link rel="stylesheet" href="glass.css?v=155.0">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -962,8 +962,8 @@ html.dark .success-h { color: #e2efed; }
   }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=154.0"></script>
-<script src="app.js?v=154.0"></script>
+<script src="supabase.js?v=155.0"></script>
+<script src="app.js?v=155.0"></script>
 <script>
   // Detect if arriving from OAuth callback
   const regHash = window.location.hash || '';
@@ -1798,6 +1798,20 @@ html.dark .success-h { color: #e2efed; }
         return;
       }
 
+      // Ensure Welcome email is dispatched (with client fallback if needed)
+      if (!data.welcome_email_sent) {
+        fetch('/api/auth-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'send_welcome',
+            email: ctx.email,
+            name: ctx.name,
+            role: ctx.role
+          })
+        }).catch(() => {});
+      }
+
       // Successful OTP Verification: Enforce 2-second countdown wait before granting dashboard access
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -1903,17 +1917,15 @@ html.dark .success-h { color: #e2efed; }
       const currUser = (typeof getUser === 'function') ? getUser() : null;
       if (!currUser) return;
       const isLinkedIn = currUser.linkedin_linked === true || currUser.provider === 'linkedin' || currUser.provider === 'linkedin_oidc';
-      const isGoogle = currUser.provider === 'google' || currUser.oauth_provider === 'google';
-      const isOAuth = isLinkedIn || isGoogle;
       const isVerified = currUser.otp_verified === true || sessionStorage.getItem('collekt_just_verified') === 'true';
 
-      if (isVerified || isOAuth || currUser.role === 'admin') {
+      if (isVerified || isLinkedIn || currUser.role === 'admin') {
         const targetDashboard = currUser.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
         window.location.replace(targetDashboard);
         return;
       }
 
-      if (currUser.otp_verified !== true && currUser.role !== 'admin' && !isOAuth && currUser.email) {
+      if (currUser.otp_verified !== true && currUser.role !== 'admin' && !isLinkedIn && currUser.email) {
         const email = currUser.email;
         const name = currUser.name || currUser.company_name || email.split('@')[0];
         const role = currUser.role || 'professional';

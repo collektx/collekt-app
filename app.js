@@ -3369,9 +3369,8 @@ function requireAuth() {
 
   // Strict OTP verification guard: unverified non-admin users cannot access protected pages
   const isLinkedIn = user.linkedin_linked === true || user.provider === 'linkedin' || user.provider === 'linkedin_oidc';
-  const isGoogle = user.provider === 'google' || user.oauth_provider === 'google' || user.auth_provider === 'google' || (user.app_metadata && user.app_metadata.provider === 'google');
   const isJustVerified = sessionStorage.getItem('collekt_just_verified') === 'true';
-  if (user.role !== 'admin' && !isLinkedIn && !isGoogle && user.otp_verified !== true && !isJustVerified) {
+  if (user.role !== 'admin' && !isLinkedIn && user.otp_verified !== true && !isJustVerified) {
     console.warn('🔒 Unverified account: redirecting to complete verification');
     window.location.replace('register.html?verify_pending=true');
     return false;
@@ -3384,9 +3383,8 @@ function redirectIfAuthed() {
   const user = getUser();
   if (!user) return;
   const isLinkedIn = user.linkedin_linked === true || user.provider === 'linkedin' || user.provider === 'linkedin_oidc';
-  const isGoogle = user.provider === 'google' || user.oauth_provider === 'google' || user.auth_provider === 'google' || (user.app_metadata && user.app_metadata.provider === 'google');
   const isJustVerified = sessionStorage.getItem('collekt_just_verified') === 'true';
-  if (user.role !== 'admin' && !isLinkedIn && !isGoogle && user.otp_verified !== true && !isJustVerified) return;
+  if (user.role !== 'admin' && !isLinkedIn && user.otp_verified !== true && !isJustVerified) return;
   window.location.replace(user.role === 'company' ? 'company-dashboard.html' : 'dashboard.html');
 }
 

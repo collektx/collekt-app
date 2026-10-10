@@ -171,8 +171,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=154.0"></script>
-  <script src="app.js?v=154.0"></script>
+  <script src="supabase.js?v=155.0"></script>
+  <script src="app.js?v=155.0"></script>
   <script>
     function escapeHTML(str) {
       if (!str) return '';
@@ -220,14 +220,13 @@
                                session.user.app_metadata?.providers?.includes('google');
               const isOAuth = isLinkedIn || isGoogle;
 
-              // OAuth (LinkedIn or Google): verified by identity provider
-              if (isOAuth) {
+              // LinkedIn identity linking / login: verified by LinkedIn OIDC
+              if (isLinkedIn) {
                 isRedirecting = true;
                 sessionStorage.setItem('collekt_just_verified', 'true');
                 document.getElementById('statusTitle').textContent = isLinkingLinkedIn ? 'LinkedIn Account Connected!' : 'Success!';
                 document.getElementById('statusDesc').textContent = isLinkingLinkedIn ? 'Verifying real LinkedIn credentials and returning to your profile...' : 'Loading your dashboard...';
 
-                // Ensure user profile in DB and localStorage has otp_verified = true
                 try {
                   await window.sb.from('profiles').update({
                     otp_verified: true,
@@ -242,8 +241,7 @@
                   u.email = u.email || session.user.email;
                   u.otp_verified = true;
                   u.email_verified = true;
-                  if (isGoogle) u.provider = 'google';
-                  if (isLinkedIn) u.provider = 'linkedin';
+                  u.provider = 'linkedin';
                   localStorage.setItem('collekt_user', JSON.stringify(u));
                   if (typeof saveRegisteredUser === 'function') saveRegisteredUser(u);
                 } catch(e) {}
@@ -252,8 +250,8 @@
                 return;
               }
 
-              // Non-OAuth fallback verification check:
-              let isOtpVerified = false;
+              // Check OTP verification status in database (applies to Google signups & manual users)
+              let isOtpVerified = sessionStorage.getItem('collekt_just_verified') === 'true';
               let profile = null;
               try {
                 const { data: prof } = await window.sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
@@ -263,15 +261,18 @@
                 }
               } catch(e) {}
 
-              // If already verified or admin, route straight to dashboard
+              // If already OTP-verified or admin, route straight to dashboard
               if (isOtpVerified || (profile && profile.role === 'admin')) {
+                isRedirecting = true;
+                sessionStorage.setItem('collekt_just_verified', 'true');
                 document.getElementById('statusTitle').textContent = 'Success!';
                 document.getElementById('statusDesc').textContent = 'Loading your dashboard...';
                 await handleOAuthSessionRouting(session);
                 return;
               }
 
-              // Fallback OTP screen if ever required
+              // New Google / unverified signup: require 6-digit OTP verification & send Welcome email upon verification
+              isRedirecting = true;
               renderGoogleOtpScreen(session, profile);
               return;
             }
@@ -466,7 +467,15 @@
               return;
             }
 
-            // OTP Verified! Welcome email dispatched by backend!
+            // OTP Verified! Welcome email dispatched by backend (with client fallback if needed)
+            if (!d.welcome_email_sent) {
+              fetch('/api/auth-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'send_welcome', email: userEmail, name: userName, role: userRole })
+              }).catch(() => {});
+            }
+
             if (submitBtn) {
               submitBtn.disabled = true;
               submitBtn.innerHTML = '<span>✓ Verified! Entering Dashboard in 2s...</span>';
@@ -482,11 +491,28 @@
               if (typeof setUser === 'function') setUser(profile);
             }
             try {
+              sessionStorage.removeItem('collekt_awaiting_otp');
+              sessionStorage.setItem('collekt_just_verified', 'true');
               let u = JSON.parse(localStorage.getItem('collekt_user') || '{}');
+              u.id = u.id || session.user.id;
+              u.email = u.email || userEmail;
               u.otp_verified = true;
               u.email_verified = true;
               localStorage.setItem('collekt_user', JSON.stringify(u));
               if (typeof saveRegisteredUser === 'function') saveRegisteredUser(u);
+            } catch(e) {}
+
+            try {
+              if (window.sb && session.user.id) {
+                window.sb.from('profiles').update({
+                  otp_verified: true,
+                  email_verified: true,
+                  updated_at: new Date().toISOString()
+                }).eq('id', session.user.id).then(() => {});
+              }
+              if (window.sb && userEmail && typeof window.sb.rpc === 'function') {
+                window.sb.rpc('verify_user_otp', { p_email: userEmail }).then(() => {});
+              }
             } catch(e) {}
 
             setTimeout(() => {
