@@ -752,26 +752,13 @@ html.dark .whistory-filter-input { background: rgba(255,255,255,.05); border-col
 .tx-status-badge.pending { background: #fef9c3; color: #ca8a04; }
 
 /* ═════════════════════════════════════════════════════
-   MOBILE & TABLET RESPONSIVE ENGINE (320px - 1024px)
+   MOBILE & TABLET RESPONSIVE ENGINE (320px - 900px)
    ═════════════════════════════════════════════════════ */
-@media (max-width: 992px) {
-  .app-sidebar {
-    width: 240px;
-  }
-  .app-main {
-    margin-left: 240px;
-  }
-  .app-topbar {
-    left: 240px;
-    width: calc(100% - 240px);
-  }
-}
-
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .app-sidebar {
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 1000;
+    z-index: 9999;
   }
   .app-sidebar.open {
     transform: translateX(0);
@@ -785,6 +772,9 @@ html.dark .whistory-filter-input { background: rgba(255,255,255,.05); border-col
     width: 100% !important;
     padding: 0 16px;
   }
+}
+
+@media (max-width: 768px) {
 
   /* Force 1 column layouts on mobile */
   div[style*="grid-template-columns: 1fr 320px"],
@@ -1398,7 +1388,7 @@ body.in-active-chat .mobile-bottom-nav {
 /* Smartphones & Small Tablets (<= 768px) */
 @media (max-width: 768px) {
   .mobile-bottom-nav {
-    display: flex !important;
+    display: none !important;
   }
 
   .app-main {
@@ -1963,10 +1953,10 @@ img, picture, video, canvas, svg, iframe {
   }
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   BREAKPOINT 2: TABLET SCREENS (640px - 1023px) - iPad, Tablet
-   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-@media (min-width: 640px) and (max-width: 1023px) {
+/* ─────────────────────────────────────────────────────────────────
+   BREAKPOINT 2: TABLET SCREENS (640px - 900px) - iPad, Tablet
+   ───────────────────────────────────────────────────────────────── */
+@media (min-width: 640px) and (max-width: 900px) {
   .app-main {
     margin-left: 0 !important;
     width: 100% !important;
@@ -2015,14 +2005,14 @@ img, picture, video, canvas, svg, iframe {
   }
 
   .mobile-bottom-nav {
-    display: flex !important;
+    display: none !important;
   }
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   BREAKPOINT 3: DESKTOP SCREENS (>= 1024px)
-   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-@media (min-width: 1024px) {
+/* ─────────────────────────────────────────────────────────────────
+   BREAKPOINT 3: DESKTOP SCREENS (>= 901px)
+   ───────────────────────────────────────────────────────────────── */
+@media (min-width: 901px) {
   #sidebarToggle {
     display: none !important;
   }

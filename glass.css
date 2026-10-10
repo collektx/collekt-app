@@ -1,17 +1,26 @@
 /* ═══════════════════════════════════════════════════════════
-   COLLEKT — PREMIUM GLASSMORPHISM SYSTEM  (glass.css)
-   Loaded last in every page. Pure visual layer only.
+   COLLEKT — PREMIUM GLASS & VELVET MATTE OBSIDIAN SYSTEM (glass.css)
+   Loaded last in every page.
+   Light Mode: Soft Frosted Pearl
+   Dark Mode:  True Velvet Matte Obsidian (Zero Specular Glare)
    ═══════════════════════════════════════════════════════════ */
 
-/* 0. BODY GRADIENT CANVAS & SMOOTH THEME TRANSITIONS */
+/* 0. BODY CANVAS & SMOOTH THEME TRANSITIONS */
 html, body {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-body { background: linear-gradient(135deg, #e4f4f1 0%, #edf8f5 35%, #e8f5f2 65%, #e2f2ef 100%) !important; }
-html.dark body { background: #090d0c !important; }
+body {
+  background: linear-gradient(135deg, #e8f4f2 0%, #f1f9f7 40%, #ecf6f4 75%, #e5f2ef 100%) !important;
+}
+html.dark body {
+  background: #080d0c !important;
+  background-image: none !important;
+}
 
-/* 0.1 SLEEK GLASS SCROLLBARS */
+/* 0.1 SLEEK SCROLLBARS */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
@@ -20,75 +29,85 @@ html.dark body { background: #090d0c !important; }
   background: rgba(0, 0, 0, 0.03);
 }
 html.dark ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+  background: #080d0c;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(19, 117, 111, 0.32);
+  background: rgba(19, 117, 111, 0.28);
   border-radius: 99px;
   border: 1px solid transparent;
   background-clip: content-box;
   transition: background 0.2s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(19, 117, 111, 0.65);
+  background: rgba(19, 117, 111, 0.55);
 }
 html.dark ::-webkit-scrollbar-thumb {
-  background: rgba(45, 212, 191, 0.28);
+  background: rgba(255, 255, 255, 0.14);
 }
 html.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(45, 212, 191, 0.55);
+  background: rgba(45, 212, 191, 0.35);
 }
 
 /* 1. LANDING NAV */
 .nav-bar {
-  background: rgba(6,18,16,0.52) !important;
-  backdrop-filter: blur(32px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
-  border: 1px solid rgba(255,255,255,0.14) !important;
-  box-shadow: 0 16px 56px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.10) !important;
+  background: rgba(8, 22, 20, 0.72) !important;
+  backdrop-filter: blur(20px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24) !important;
 }
-.nav-bar.solid { background: rgba(6,18,16,0.88) !important; }
+.nav-bar.solid {
+  background: rgba(8, 22, 20, 0.92) !important;
+}
 
 html.dark .nav-bar {
-  background: rgba(9, 13, 12, 0.82) !important;
-  backdrop-filter: blur(24px) saturate(130%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(130%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45) !important;
+  background: rgba(11, 17, 16, 0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.50) !important;
 }
 html.dark .nav-bar.solid {
-  background: rgba(9, 13, 12, 0.95) !important;
+  background: rgba(11, 17, 16, 0.98) !important;
 }
 
 /* 2. APP TOPBAR */
 .app-topbar {
-  background: rgba(255,255,255,0.82) !important;
-  backdrop-filter: blur(28px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
-  border-bottom: 1px solid rgba(19,117,111,0.14) !important;
-  box-shadow: 0 4px 24px rgba(14,59,53,0.06), inset 0 -1px 0 rgba(19,117,111,0.06), inset 0 1px 0 rgba(255,255,255,0.95) !important;
-  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+  border-bottom: 1px solid rgba(19, 117, 111, 0.12) !important;
+  box-shadow: 0 2px 16px rgba(14, 59, 53, 0.05) !important;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 html.dark .app-topbar {
-  background: rgba(13, 19, 18, 0.94) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+  background: rgba(11, 17, 16, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055) !important;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35) !important;
 }
 
 /* 3. SIDEBAR */
 .app-sidebar {
-  background: linear-gradient(170deg, rgba(8,26,23,0.97) 0%, rgba(12,38,34,0.96) 100%) !important;
-  backdrop-filter: blur(28px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
-  border-right: 1px solid rgba(255,255,255,0.07) !important;
-  box-shadow: 6px 0 48px rgba(0,0,0,0.28) !important;
+  background: #0a1f1c !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 4px 0 28px rgba(0, 0, 0, 0.20) !important;
 }
-.sidebar-nav-item.active { background: rgba(212,146,11,0.18) !important; box-shadow: inset 3px 0 0 var(--amber), 0 2px 12px rgba(212,146,11,0.14) !important; }
-.sidebar-nav-item:hover { background: rgba(255,255,255,0.09) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
+html.dark .app-sidebar {
+  background: #0b1211 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.055) !important;
+  box-shadow: none !important;
+}
+.sidebar-nav-item.active {
+  background: rgba(212, 146, 11, 0.16) !important;
+  box-shadow: inset 3px 0 0 var(--amber) !important;
+}
+.sidebar-nav-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
 
-/* 4. MODAL OVERLAY & BACKDROP (iOS Blur Overlay & Screen Centering) */
+/* 4. MODAL OVERLAY & BACKDROP */
 .modal-overlay,
 .settings-backdrop,
 .upload-backdrop,
@@ -107,9 +126,9 @@ html.dark .app-topbar {
   width: 100dvw !important;
   height: 100vh !important;
   height: 100dvh !important;
-  background: rgba(0, 0, 0, 0.52) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  background: rgba(6, 16, 15, 0.50) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
   z-index: 99999 !important;
   justify-content: center !important;
   align-items: center !important;
@@ -144,11 +163,11 @@ html.dark .popup-backdrop,
 html.dark .popup-overlay,
 html.dark .dialog-overlay {
   background: rgba(0, 0, 0, 0.72) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }
 
-/* 5. MODAL CARDS & PANELS (iOS Liquid Frosted Glass) */
+/* 5. MODAL CARDS & PANELS */
 .modal-card,
 .modal-box,
 .modal-dialog,
@@ -157,16 +176,10 @@ html.dark .dialog-overlay {
 .upload-modal-card,
 .upload-panel,
 .settings-card {
-  background: rgba(255, 255, 255, 0.76) !important;
-  backdrop-filter: blur(40px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
-  border-radius: 28px !important;
-  border: 1px solid rgba(255, 255, 255, 0.85) !important;
-  box-shadow:
-    0 32px 80px rgba(0, 0, 0, 0.18),
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04) !important;
+  background: #ffffff !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(19, 117, 111, 0.14) !important;
+  box-shadow: 0 24px 64px rgba(14, 59, 53, 0.16), 0 6px 20px rgba(0, 0, 0, 0.06) !important;
   margin: auto !important;
   position: relative !important;
   max-width: min(540px, calc(100vw - 32px)) !important;
@@ -181,312 +194,591 @@ html.dark .settings-panel,
 html.dark .upload-modal-card,
 html.dark .upload-panel,
 html.dark .settings-card {
-  background: rgba(14, 20, 19, 0.96) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  border-radius: 28px !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.65),
-    0 8px 24px rgba(0, 0, 0, 0.35) !important;
+  background: #101817 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.65) !important;
   margin: auto !important;
 }
 
-
 /* 6. DROPDOWN PANELS */
 .notif-panel, .profile-menu {
-  background: rgba(255,255,255,0.88) !important;
-  backdrop-filter: blur(26px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(26px) saturate(180%) !important;
-  border: 1px solid rgba(19,117,111,0.16) !important;
-  box-shadow: 0 20px 60px rgba(14,59,53,0.20), inset 0 1px 0 rgba(255,255,255,0.80) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(19, 117, 111, 0.14) !important;
+  box-shadow: 0 18px 48px rgba(14, 59, 53, 0.16) !important;
 }
-html.dark .notif-panel, html.dark .profile-menu { background: rgba(16,23,22,0.96) !important; border: 1px solid rgba(255,255,255,0.08) !important; box-shadow: 0 16px 40px rgba(0,0,0,0.50) !important; }
-.notif-item:hover { background: rgba(19,117,111,0.06) !important; }
-.profile-menu-item:hover { background: rgba(19,117,111,0.06) !important; }
+html.dark .notif-panel, html.dark .profile-menu {
+  background: #101817 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.60) !important;
+}
+.notif-item:hover, .profile-menu-item:hover {
+  background: rgba(19, 117, 111, 0.06) !important;
+}
+html.dark .notif-item:hover, html.dark .profile-menu-item:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
 
 /* 7. STAT CARDS */
 .stat-card {
-  background: rgba(255,255,255,0.78) !important;
-  backdrop-filter: blur(20px) saturate(170%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(170%) !important;
-  border: 1px solid rgba(255,255,255,0.85) !important;
-  box-shadow: 0 8px 30px rgba(14,59,53,0.07), inset 0 1.5px 0 rgba(255,255,255,0.98), inset 0 -1px 0 rgba(19,117,111,0.04) !important;
-  transition: all 0.26s cubic-bezier(0.16,1,0.3,1) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 1px solid rgba(19, 117, 111, 0.12) !important;
+  box-shadow: 0 4px 20px rgba(14, 59, 53, 0.05) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease !important;
   border-radius: var(--r-lg) !important;
 }
 .stat-card:hover {
-  background: rgba(255,255,255,0.96) !important;
-  box-shadow: 0 16px 44px rgba(14,59,53,0.14), inset 0 1.5px 0 #fff !important;
-  border-color: rgba(19,117,111,0.30) !important;
-  transform: translateY(-4px) !important;
+  background: #ffffff !important;
+  box-shadow: 0 10px 28px rgba(14, 59, 53, 0.10) !important;
+  border-color: rgba(19, 117, 111, 0.24) !important;
+  transform: translateY(-2px) !important;
 }
 html.dark .stat-card {
-  background: rgba(16, 23, 22, 0.92) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.075) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.055) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28) !important;
 }
 html.dark .stat-card:hover {
-  background: rgba(22, 32, 30, 0.96) !important;
-  border-color: rgba(45, 212, 191, 0.22) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.50) !important;
-  transform: translateY(-3px) !important;
+  background: #121b19 !important;
+  border-color: rgba(45, 212, 191, 0.16) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.40) !important;
+  transform: translateY(-2px) !important;
 }
 
-/* 8. CONTENT CARDS */
+/* 8. CONTENT & UNIVERSAL CARDS */
 .content-card, .card {
-  background: rgba(255,255,255,0.80) !important;
-  backdrop-filter: blur(20px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
-  border: 1px solid rgba(255,255,255,0.82) !important;
-  box-shadow: 0 8px 32px rgba(14,59,53,0.08), inset 0 1.5px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(19,117,111,0.04) !important;
+  background: rgba(255, 255, 255, 0.90) !important;
+  border: 1px solid rgba(19, 117, 111, 0.12) !important;
+  box-shadow: 0 4px 22px rgba(14, 59, 53, 0.05) !important;
   border-radius: var(--r-lg) !important;
 }
 html.dark .content-card, html.dark .card {
-  background: rgba(16, 23, 22, 0.92) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.075) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.055) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.30) !important;
 }
 
 /* 9. WALLET CARDS */
 .shuttlers-balance-card, .shuttlers-bank-card, .wallet-history-section {
-  background: rgba(255,255,255,0.80) !important;
-  backdrop-filter: blur(22px) saturate(170%) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(170%) !important;
-  border: 1px solid rgba(255,255,255,0.85) !important;
-  box-shadow: 0 10px 38px rgba(14,59,53,0.09), inset 0 1.5px 0 rgba(255,255,255,0.95) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(19, 117, 111, 0.12) !important;
+  box-shadow: 0 6px 26px rgba(14, 59, 53, 0.06) !important;
 }
-html.dark .shuttlers-balance-card, html.dark .shuttlers-bank-card, html.dark .wallet-history-section {
-  background: rgba(16, 23, 22, 0.92) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.075) !important;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35) !important;
+html.dark .shuttlers-balance-card,
+html.dark .shuttlers-bank-card,
+html.dark .wallet-history-section {
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.32) !important;
+}
+html.dark .btn-black-fund {
+  background: #0f766e !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(45, 212, 191, 0.20) !important;
+}
+html.dark .btn-black-fund:hover {
+  background: #115e59 !important;
+  border-color: rgba(45, 212, 191, 0.35) !important;
 }
 
-/* 10. GIG CARDS */
+/* 10. GIG, TENDER, TALENT, PROPOSAL & DASHBOARD CARDS */
 .gig-card {
-  background: rgba(255,255,255,0.80) !important;
-  backdrop-filter: blur(18px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
-  border: 1px solid rgba(255,255,255,0.82) !important;
-  box-shadow: 0 6px 24px rgba(14,59,53,0.07), inset 0 1.5px 0 rgba(255,255,255,0.95) !important;
-  transition: all 0.25s cubic-bezier(0.16,1,0.3,1) !important;
+  background: rgba(255, 255, 255, 0.90) !important;
+  border: 1px solid rgba(19, 117, 111, 0.12) !important;
+  box-shadow: 0 4px 18px rgba(14, 59, 53, 0.05) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease !important;
 }
 .gig-card:hover {
-  background: rgba(255,255,255,0.98) !important;
-  border-color: rgba(19,117,111,0.32) !important;
-  box-shadow: 0 18px 52px rgba(14,59,53,0.18), inset 0 1.5px 0 #fff !important;
-  transform: translateY(-5px) !important;
-}
-html.dark .gig-card {
-  background: rgba(16, 23, 22, 0.92) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.075) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
-}
-html.dark .gig-card:hover {
-  background: rgba(22, 32, 30, 0.96) !important;
-  border-color: rgba(45, 212, 191, 0.22) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.50) !important;
+  background: #ffffff !important;
+  border-color: rgba(19, 117, 111, 0.26) !important;
+  box-shadow: 0 12px 32px rgba(14, 59, 53, 0.11) !important;
   transform: translateY(-3px) !important;
 }
+html.dark .gig-card,
+html.dark .tender-card,
+html.dark .talent-card,
+html.dark .talent-card-v2,
+html.dark .rec-card,
+html.dark .profile-strength-card,
+html.dark .proposal-card,
+html.dark .prop-card,
+html.dark .prop-stat-card,
+html.dark .profile-card,
+html.dark .content-section,
+html.dark .v-card,
+html.dark .admin-metric-card,
+html.dark .job-manage-card,
+html.dark .form-section-card,
+html.dark .preview-card,
+html.dark .plan-card,
+html.dark .tx-card-mobile,
+html.dark .escrow-milestone-card {
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.055) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28) !important;
+}
+html.dark .gig-card:hover,
+html.dark .tender-card:hover,
+html.dark .talent-card:hover,
+html.dark .talent-card-v2:hover,
+html.dark .rec-card:hover,
+html.dark .prop-card:hover,
+html.dark .v-card:hover,
+html.dark .job-manage-card:hover,
+html.dark .escrow-milestone-card:hover {
+  background: #121b19 !important;
+  border-color: rgba(45, 212, 191, 0.16) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.40) !important;
+  transform: translateY(-2px) !important;
+}
 
-/* 11. PROJECT ROWS */
+/* 11. PROJECT ROWS & CERTIFICATE ROWS */
 .project-row {
-  background: rgba(255,255,255,0.76) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255,255,255,0.80) !important;
-  box-shadow: 0 3px 16px rgba(14,59,53,0.06), inset 0 1px 0 rgba(255,255,255,0.95) !important;
-  transition: all 0.2s cubic-bezier(0.16,1,0.3,1) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 1px solid rgba(19, 117, 111, 0.11) !important;
+  box-shadow: 0 2px 12px rgba(14, 59, 53, 0.04) !important;
+  transition: all 0.2s ease !important;
 }
 .project-row:hover {
-  background: rgba(255,255,255,0.98) !important;
-  border-color: rgba(19,117,111,0.28) !important;
-  box-shadow: 0 10px 32px rgba(14,59,53,0.12) !important;
+  background: #ffffff !important;
+  border-color: rgba(19, 117, 111, 0.24) !important;
+  box-shadow: 0 6px 20px rgba(14, 59, 53, 0.09) !important;
 }
-html.dark .project-row {
-  background: rgba(16, 23, 22, 0.92) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.075) !important;
+html.dark .project-row,
+html.dark .cert-card-row {
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.055) !important;
+  box-shadow: none !important;
 }
-html.dark .project-row:hover {
-  background: rgba(22, 32, 30, 0.96) !important;
-  border-color: rgba(45, 212, 191, 0.22) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+html.dark .project-row:hover,
+html.dark .cert-card-row:hover {
+  background: #121b19 !important;
+  border-color: rgba(45, 212, 191, 0.16) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.30) !important;
 }
 
 /* 12. LANDING ELEMENTS */
-.hero-panel { background: rgba(255,255,255,0.86) !important; backdrop-filter: blur(24px) saturate(160%) !important; -webkit-backdrop-filter: blur(24px) saturate(160%) !important; border: 1px solid rgba(255,255,255,0.65) !important; box-shadow: 0 40px 100px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.90) !important; }
-.vcard { background: rgba(255,255,255,0.78) !important; backdrop-filter: blur(14px) saturate(150%) !important; -webkit-backdrop-filter: blur(14px) saturate(150%) !important; border: 1px solid rgba(255,255,255,0.60) !important; box-shadow: 0 4px 22px rgba(14,59,53,0.08), inset 0 1px 0 rgba(255,255,255,0.88) !important; }
-.vcard:hover { background: rgba(255,255,255,0.96) !important; border-color: rgba(19,117,111,0.26) !important; box-shadow: 0 14px 44px rgba(14,59,53,0.15) !important; }
-.form-card { background: rgba(255,255,255,0.82) !important; backdrop-filter: blur(20px) saturate(170%) !important; -webkit-backdrop-filter: blur(20px) saturate(170%) !important; border: 1px solid rgba(255,255,255,0.64) !important; box-shadow: 0 20px 60px rgba(14,59,53,0.14), inset 0 1px 0 rgba(255,255,255,0.90) !important; }
-.side-card { background: rgba(255,255,255,0.80) !important; backdrop-filter: blur(18px) saturate(160%) !important; -webkit-backdrop-filter: blur(18px) saturate(160%) !important; border: 1px solid rgba(255,255,255,0.60) !important; box-shadow: 0 14px 48px rgba(14,59,53,0.14) !important; }
-details { background: rgba(255,255,255,0.78) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border: 1px solid rgba(255,255,255,0.56) !important; box-shadow: 0 4px 18px rgba(14,59,53,0.07) !important; }
-.coming-card { background: rgba(255,255,255,0.76) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border: 1px solid rgba(255,255,255,0.56) !important; }
-.launch-pill { background: rgba(255,255,255,0.13) !important; backdrop-filter: blur(16px) saturate(150%) !important; -webkit-backdrop-filter: blur(16px) saturate(150%) !important; border: 1px solid rgba(255,255,255,0.24) !important; }
-.persona-result { background: rgba(255,255,255,0.09) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border: 1px solid rgba(255,255,255,0.16) !important; }
-.ben { background: rgba(255,255,255,0.76) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255,255,255,0.52) !important; }
-.drawer { background: rgba(4,14,13,0.94) !important; backdrop-filter: blur(32px) saturate(160%) !important; -webkit-backdrop-filter: blur(32px) saturate(160%) !important; }
+.hero-panel {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1px solid rgba(19, 117, 111, 0.16) !important;
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.26) !important;
+}
+.vcard {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 1px solid rgba(19, 117, 111, 0.12) !important;
+  box-shadow: 0 4px 18px rgba(14, 59, 53, 0.05) !important;
+}
+.vcard:hover {
+  background: #ffffff !important;
+  border-color: rgba(19, 117, 111, 0.24) !important;
+  box-shadow: 0 12px 32px rgba(14, 59, 53, 0.11) !important;
+}
+.form-card {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(19, 117, 111, 0.14) !important;
+  box-shadow: 0 16px 48px rgba(14, 59, 53, 0.10) !important;
+}
+.side-card {
+  background: rgba(255, 255, 255, 0.90) !important;
+  border: 1px solid rgba(19, 117, 111, 0.12) !important;
+  box-shadow: 0 12px 36px rgba(14, 59, 53, 0.09) !important;
+}
+details {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 1px solid rgba(19, 117, 111, 0.11) !important;
+  box-shadow: 0 2px 14px rgba(14, 59, 53, 0.04) !important;
+}
+.coming-card, .ben {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 1px solid rgba(19, 117, 111, 0.11) !important;
+}
+.launch-pill {
+  background: rgba(255, 255, 255, 0.10) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+.persona-result {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+.drawer {
+  background: rgba(6, 14, 13, 0.97) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
 
-/* 13. INPUTS & SEARCH */
-.form-input, .topbar-search, .whistory-filter-input, .mkt-search-input, .msg-search {
-  background: rgba(255,255,255,0.85) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border: 1.5px solid rgba(19,117,111,0.18) !important;
+/* Dark Mode Overrides for Landing Elements */
+html.dark .hero-panel,
+html.dark .vcard,
+html.dark .form-card,
+html.dark .side-card,
+html.dark details,
+html.dark .coming-card,
+html.dark .ben,
+html.dark .hiw-card,
+html.dark .feat-card,
+html.dark .testi-card {
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.055) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.32) !important;
+}
+html.dark .vcard:hover,
+html.dark .hiw-card:hover,
+html.dark .feat-card:hover,
+html.dark .testi-card:hover {
+  background: #121b19 !important;
+  border-color: rgba(45, 212, 191, 0.16) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42) !important;
+}
+html.dark .hp-head,
+html.dark .hp-stat,
+html.dark .hp-row,
+html.dark .bens-wrap,
+html.dark .ioc-strip,
+html.dark .founder-band,
+html.dark .ticker-wrap,
+html.dark footer {
+  background: #0b1110 !important;
+  border-color: rgba(255, 255, 255, 0.055) !important;
+}
+html.dark .form-band,
+html.dark .how-band,
+html.dark .coming-band {
+  background: #080d0c !important;
+  border-color: rgba(255, 255, 255, 0.055) !important;
+}
+html.dark summary:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* 13. INPUTS, SELECTS & SEARCH (Recessed Matte Wells in Dark Mode) */
+.form-input, .topbar-search, .whistory-filter-input, .mkt-search-input, .mkt-search-select, .msg-search {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(19, 117, 111, 0.18) !important;
   color: #111918 !important;
-  transition: all 0.22s cubic-bezier(0.16,1,0.3,1) !important;
+  box-shadow: none !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
 }
-.form-input:focus, .topbar-search:focus, .whistory-filter-input:focus, .mkt-search-input:focus, .msg-search:focus {
-  background: rgba(255,255,255,0.98) !important;
-  border-color: rgba(26,158,150,0.85) !important;
-  box-shadow: 0 0 0 4px rgba(26,158,150,0.16), 0 6px 20px rgba(14,59,53,0.10) !important;
+.form-input:focus, .topbar-search:focus, .whistory-filter-input:focus, .mkt-search-input:focus, .mkt-search-select:focus, .msg-search:focus {
+  background: #ffffff !important;
+  border-color: #13756F !important;
+  box-shadow: 0 0 0 3px rgba(19, 117, 111, 0.12) !important;
 }
-html.dark .form-input, html.dark .topbar-search, html.dark .whistory-filter-input, html.dark .mkt-search-input, html.dark .msg-search {
-  background: rgba(255,255,255,0.04) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  color: #F1F5F9 !important;
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html.dark select,
+html.dark textarea,
+html.dark .form-input,
+html.dark .form-select,
+html.dark .topbar-search,
+html.dark .whistory-filter-input,
+html.dark .mkt-search-input,
+html.dark .mkt-search-select,
+html.dark .msg-search {
+  background-color: #09100f !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  color: #E2E8F0 !important;
+  box-shadow: none !important;
 }
-html.dark .form-input:focus, html.dark .topbar-search:focus, html.dark .whistory-filter-input:focus, html.dark .mkt-search-input:focus, html.dark .msg-search:focus {
-  background: rgba(255,255,255,0.07) !important;
-  border-color: rgba(45,212,191,0.50) !important;
-  box-shadow: 0 0 0 3px rgba(45,212,191,0.15) !important;
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+html.dark select:focus,
+html.dark textarea:focus,
+html.dark .form-input:focus,
+html.dark .form-select:focus,
+html.dark .topbar-search:focus,
+html.dark .whistory-filter-input:focus,
+html.dark .mkt-search-input:focus,
+html.dark .mkt-search-select:focus,
+html.dark .msg-search:focus {
+  background-color: #0c1413 !important;
+  border-color: rgba(20, 184, 166, 0.45) !important;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.10) !important;
 }
 
 /* 14. BUTTONS & THEME TOGGLE */
 .btn-ghost {
-  background: rgba(255,255,255,0.14) !important;
-  backdrop-filter: blur(16px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
-  border: 1px solid rgba(255,255,255,0.28) !important;
+  background: rgba(255, 255, 255, 0.10) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
+  box-shadow: none !important;
 }
 .btn-ghost:hover {
-  background: rgba(255,255,255,0.25) !important;
-  border-color: rgba(255,255,255,0.40) !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.30) !important;
 }
 .btn-outline {
-  background: rgba(255,255,255,0.80) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border: 1.5px solid rgba(19,117,111,0.18) !important;
+  background: #ffffff !important;
+  border: 1.5px solid rgba(19, 117, 111, 0.18) !important;
   color: var(--forest) !important;
+  box-shadow: none !important;
 }
 .btn-outline:hover {
-  background: rgba(255,255,255,0.98) !important;
+  background: rgba(19, 117, 111, 0.06) !important;
   border-color: var(--teal) !important;
-  box-shadow: 0 6px 20px rgba(14,59,53,0.12) !important;
 }
 html.dark .btn-outline {
-  background: rgba(255,255,255,0.04) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  color: #F1F5F9 !important;
+  background: #121b19 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #E2E8F0 !important;
+  box-shadow: none !important;
 }
 html.dark .btn-outline:hover {
-  background: rgba(255,255,255,0.08) !important;
-  border-color: rgba(45,212,191,0.30) !important;
+  background: #172320 !important;
+  border-color: rgba(45, 212, 191, 0.28) !important;
   color: #2DD4BF !important;
 }
 
 .notif-btn, .theme-btn, .sidebar-toggle-btn, .topbar-icon-btn, #sidebarToggle {
-  background: rgba(255,255,255,0.82) !important;
-  backdrop-filter: blur(14px) saturate(170%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(170%) !important;
-  border: 1.5px solid rgba(19,117,111,0.20) !important;
+  background: #f4f8f7 !important;
+  border: 1px solid rgba(19, 117, 111, 0.16) !important;
   color: #0E3B35 !important;
-  box-shadow: 0 2px 8px rgba(14,59,53,0.06), inset 0 1px 0 rgba(255,255,255,0.95) !important;
-  transition: all 0.22s cubic-bezier(0.16,1,0.3,1) !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
 }
 .notif-btn:hover, .theme-btn:hover, .sidebar-toggle-btn:hover, .topbar-icon-btn:hover, #sidebarToggle:hover {
-  background: #FFFFFF !important;
+  background: #e6f2f0 !important;
   border-color: var(--teal) !important;
-  box-shadow: 0 6px 20px rgba(14,59,53,0.16), inset 0 1px 0 #fff !important;
-  transform: scale(1.05) !important;
+  transform: translateY(-1px) !important;
 }
 html.dark .notif-btn, html.dark .theme-btn, html.dark .sidebar-toggle-btn, html.dark .topbar-icon-btn, html.dark #sidebarToggle {
-  background: rgba(14, 32, 28, 0.90) !important;
-  border: 1px solid rgba(255,255,255,0.07) !important;
-  color: #2DD4BF !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+  background: #121b19 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  color: #CBD5E1 !important;
+  box-shadow: none !important;
 }
 html.dark .notif-btn:hover, html.dark .theme-btn:hover, html.dark .sidebar-toggle-btn:hover, html.dark .topbar-icon-btn:hover, html.dark #sidebarToggle:hover {
-  background: rgba(20, 44, 39, 0.98) !important;
-  border-color: rgba(45,212,191,0.30) !important;
-  color: #5eead4 !important;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.35) !important;
-  transform: scale(1.04) !important;
+  background: #172320 !important;
+  border-color: rgba(45, 212, 191, 0.25) !important;
+  color: #2DD4BF !important;
 }
 
 /* 15. AI CHAT WINDOW */
-.collekt-ai-chat-window { background: rgba(255,255,255,0.84) !important; backdrop-filter: blur(30px) saturate(200%) !important; -webkit-backdrop-filter: blur(30px) saturate(200%) !important; border: 1.5px solid rgba(255,255,255,0.65) !important; box-shadow: 0 32px 90px rgba(14,59,53,0.32), inset 0 1px 0 rgba(255,255,255,0.90) !important; }
-.ai-msg.bot { background: rgba(255,255,255,0.82) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; border: 1px solid rgba(19,117,111,0.12) !important; }
-.ai-chip-prompt { background: rgba(255,255,255,0.78) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; border: 1px solid rgba(19,117,111,0.16) !important; }
-
-/* 16. MOBILE BOTTOM NAV */
-.mobile-bottom-nav { background: rgba(7,22,20,0.88) !important; backdrop-filter: blur(28px) saturate(180%) !important; -webkit-backdrop-filter: blur(28px) saturate(180%) !important; border-top: 1px solid rgba(255,255,255,0.12) !important; box-shadow: 0 -6px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08) !important; }
-
-/* 17. TOAST */
-.toast { background: rgba(8,26,23,0.88) !important; backdrop-filter: blur(20px) saturate(160%) !important; -webkit-backdrop-filter: blur(20px) saturate(160%) !important; border: 1px solid rgba(255,255,255,0.14) !important; box-shadow: 0 20px 60px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.12) !important; }
-
-/* 18. SIDEBAR BACKDROP */
-.sidebar-backdrop { background: rgba(4,14,13,0.62) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
-
-/* 19. ADMIN */
-.audit-item { background: rgba(255,255,255,0.70) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; border: 1px solid rgba(255,255,255,0.52) !important; border-radius: 10px !important; transition: all 0.2s ease !important; }
-.audit-item:hover { background: rgba(255,255,255,0.92) !important; border-color: rgba(19,117,111,0.20) !important; box-shadow: 0 4px 18px rgba(14,59,53,0.10) !important; }
-html.dark .audit-item { background: rgba(12,30,28,0.70) !important; border-color: rgba(255,255,255,0.08) !important; }
-.login-card, .auth-card { background: rgba(255,255,255,0.84) !important; backdrop-filter: blur(24px) saturate(170%) !important; -webkit-backdrop-filter: blur(24px) saturate(170%) !important; border: 1px solid rgba(255,255,255,0.65) !important; box-shadow: 0 24px 72px rgba(14,59,53,0.22), inset 0 1px 0 rgba(255,255,255,0.90) !important; }
-
-/* 20. TABLES */
-.table-head th { background: rgba(244,248,247,0.80) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
-html.dark .table-head th { background: rgba(15,34,32,0.80) !important; }
-.tx-row:hover td { background: rgba(244,248,247,0.88) !important; }
-
-/* 21. PILLS, BADGES, MISC */
-.pill-btn { background: rgba(255,255,255,0.72) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; border: 1.5px solid rgba(19,117,111,0.14) !important; }
-.pill-btn:hover { background: rgba(255,255,255,0.92) !important; border-color: rgba(19,117,111,0.30) !important; }
-.pill-btn.active { background: rgba(14,59,53,0.90) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; box-shadow: 0 4px 16px rgba(14,59,53,0.30) !important; }
-.profile-trigger { background: rgba(255,255,255,0.62) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
-.profile-trigger:hover { background: rgba(255,255,255,0.88) !important; }
-.sidebar-badge { background: rgba(212,146,11,0.90) !important; box-shadow: 0 2px 10px rgba(212,146,11,0.35) !important; }
-.sbal-badge { background: rgba(244,248,247,0.82) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; border: 1px solid rgba(19,117,111,0.16) !important; }
-html.dark .sbal-badge { background: rgba(255,255,255,0.06) !important; border-color: rgba(255,255,255,0.10) !important; }
-.status-pill, .tx-status-badge { backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
-
-/* ═══════════════════════════════════════════════════════════
-   22. MASTER DARK MODE TYPOGRAPHY & FONT VISIBILITY ENGINE
-   Applied across all user and admin pages.
-   Ensures 100% crisp, readable, high-contrast text in Dark Mode.
-   ═══════════════════════════════════════════════════════════ */
-
-/* ── CSS Token Overrides on Root ── */
-html.dark {
-  --ink: #F8FAFC !important;
-  --forest: #0E3B35 !important;
-  --forest-mid: #144e45 !important;
-  --teal: #14B8A6 !important;
-  --teal-mid: #2DD4BF !important;
-  --teal-lt: rgba(45, 212, 191, 0.12) !important;
-  --amber: #F59E0B !important;
-  --amber-lt: rgba(245, 158, 11, 0.14) !important;
-  --slate: #CBD5E1 !important;
-  --muted: #849694 !important;
-  --line: rgba(255, 255, 255, 0.075) !important;
-  --paper: #090d0c !important;
-  --white: #101716 !important;
+.collekt-ai-chat-window {
+  background: #ffffff !important;
+  border: 1px solid rgba(19, 117, 111, 0.16) !important;
+  box-shadow: 0 24px 64px rgba(14, 59, 53, 0.22) !important;
+}
+.ai-msg.bot {
+  background: #ffffff !important;
+  border: 1px solid rgba(19, 117, 111, 0.12) !important;
+}
+.ai-chip-prompt {
+  background: #ffffff !important;
+  border: 1px solid rgba(19, 117, 111, 0.16) !important;
+}
+html.dark .collekt-ai-chat-window {
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.65) !important;
+}
+html.dark .ai-chat-body {
+  background: #09100f !important;
+}
+html.dark .ai-msg.bot {
+  background: #131d1b !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: #E2E8F0 !important;
+}
+html.dark .ai-chip-prompt {
+  background: #131d1b !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  color: #2DD4BF !important;
 }
 
-/* ── Base Text & Headings ── */
-html.dark body {
+/* 16. MOBILE BOTTOM NAV */
+.mobile-bottom-nav {
+  background: rgba(9, 18, 16, 0.94) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.30) !important;
+}
+
+/* 17. TOAST */
+.toast {
+  background: #0d1f1c !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* 18. SIDEBAR BACKDROP */
+.sidebar-backdrop {
+  background: rgba(4, 10, 9, 0.65) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+/* 19. ADMIN & AUTH CARDS */
+.audit-item {
+  background: #ffffff !important;
+  border: 1px solid rgba(19, 117, 111, 0.12) !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
+}
+.audit-item:hover {
+  border-color: rgba(19, 117, 111, 0.24) !important;
+  box-shadow: 0 4px 14px rgba(14, 59, 53, 0.07) !important;
+}
+html.dark .audit-item {
+  background: #0e1514 !important;
+  border-color: rgba(255, 255, 255, 0.055) !important;
+}
+.login-card, .auth-card {
+  background: #ffffff !important;
+  border: 1px solid rgba(19, 117, 111, 0.14) !important;
+  box-shadow: 0 20px 56px rgba(14, 59, 53, 0.14) !important;
+}
+html.dark .login-card,
+html.dark .auth-card,
+html.dark .auth-right,
+html.dark .reg-right {
+  background: #0b1110 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: none !important;
+}
+
+/* 20. TABLES */
+.table-head th {
+  background: #f4f8f7 !important;
+}
+html.dark .table-head th {
+  background: #0b1110 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+.tx-row:hover td, .data-table tbody tr:hover td {
+  background: rgba(19, 117, 111, 0.04) !important;
+}
+html.dark .tx-row:hover td, html.dark .data-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.025) !important;
+}
+html.dark .data-table td, html.dark .tx-row td {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 21. PILLS, BADGES, PROFILE TRIGGER */
+.pill-btn {
+  background: #ffffff !important;
+  border: 1px solid rgba(19, 117, 111, 0.16) !important;
+  box-shadow: none !important;
+}
+.pill-btn:hover {
+  background: #f0f7f6 !important;
+  border-color: rgba(19, 117, 111, 0.30) !important;
+}
+.pill-btn.active {
+  background: var(--forest) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(14, 59, 53, 0.20) !important;
+}
+html.dark .pill-btn,
+html.dark .cat-chip,
+html.dark .prop-pill,
+html.dark .filter-pill-btn {
+  background: #0e1514 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.065) !important;
+  color: #94A3B8 !important;
+  box-shadow: none !important;
+}
+html.dark .pill-btn:hover,
+html.dark .cat-chip:hover,
+html.dark .prop-pill:hover,
+html.dark .filter-pill-btn:hover {
+  background: #141e1c !important;
+  border-color: rgba(45, 212, 191, 0.22) !important;
+  color: #E2E8F0 !important;
+}
+html.dark .pill-btn.active,
+html.dark .cat-chip.active,
+html.dark .prop-pill.active,
+html.dark .filter-pill-btn.active {
+  background: #115e59 !important;
+  border-color: rgba(45, 212, 191, 0.30) !important;
   color: #F1F5F9 !important;
+  box-shadow: none !important;
+}
+
+.profile-trigger {
+  background: #f4f8f7 !important;
+  border: 1px solid rgba(19, 117, 111, 0.14) !important;
+  box-shadow: none !important;
+}
+.profile-trigger:hover {
+  background: #e8f2f0 !important;
+}
+html.dark .profile-trigger {
+  background: #121b19 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: none !important;
+}
+html.dark .profile-trigger:hover {
+  background: #172320 !important;
+  border-color: rgba(45, 212, 191, 0.22) !important;
+}
+
+.sidebar-badge {
+  background: var(--amber) !important;
+  box-shadow: none !important;
+}
+.sbal-badge {
+  background: #f4f8f7 !important;
+  border: 1px solid rgba(19, 117, 111, 0.14) !important;
+}
+html.dark .sbal-badge {
+  background: #131d1b !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  color: #CBD5E1 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   22. VELVET MATTE DARK MODE TYPOGRAPHY & TOKENS
+   Zero harsh pure-white halation; crisp, calm contrast.
+   ═══════════════════════════════════════════════════════════ */
+
+html.dark {
+  --ink: #EDF2F1 !important;
+  --forest: #0E3B35 !important;
+  --forest-mid: #134e46 !important;
+  --teal: #14B8A6 !important;
+  --teal-mid: #2DD4BF !important;
+  --teal-lt: rgba(20, 184, 166, 0.10) !important;
+  --amber: #F59E0B !important;
+  --amber-lt: rgba(245, 158, 11, 0.12) !important;
+  --slate: #CBD5E1 !important;
+  --muted: #849694 !important;
+  --line: rgba(255, 255, 255, 0.055) !important;
+  --paper: #080d0c !important;
+  --white: #0e1514 !important;
+}
+
+/* ── Base Text & Headings (Warm Alabaster, Not Glaring #FFF) ── */
+html.dark body {
+  color: #DCE5E3 !important;
 }
 
 html.dark h1,
@@ -510,8 +802,11 @@ html.dark .am-val,
 html.dark .sbank-val,
 html.dark .founder-name,
 html.dark .how-band h4,
-html.dark .coming-card h4 {
-  color: #FFFFFF !important;
+html.dark .coming-card h4,
+html.dark .tender-title,
+html.dark .rec-title,
+html.dark .prop-card-title {
+  color: #EDF2F1 !important;
 }
 
 /* ── Paragraphs, Spans & Body Copy ── */
@@ -526,10 +821,10 @@ html.dark .how-band p,
 html.dark .coming-card p,
 html.dark .vcard p,
 html.dark details p {
-  color: #E2E8F0 !important;
+  color: #CBD5E1 !important;
 }
 
-/* ── Labels & Checkboxes (Fixes Invisible Notification/Form Text) ── */
+/* ── Labels & Checkboxes ── */
 html.dark label,
 html.dark .form-label,
 html.dark .interests-label,
@@ -537,7 +832,16 @@ html.dark .prog-label,
 html.dark .chk span,
 html.dark label span,
 html.dark .checks span {
-  color: #F8FAFC !important;
+  color: #E2E8F0 !important;
+}
+html.dark .chk span {
+  background: #09100f !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+html.dark .chk input:checked + span {
+  background: rgba(20, 184, 166, 0.12) !important;
+  border-color: rgba(45, 212, 191, 0.30) !important;
+  color: #2DD4BF !important;
 }
 
 /* ── Muted, Secondary, & Metadata Text ── */
@@ -561,19 +865,7 @@ html.dark .ft-copy,
 html.dark .profile-caret,
 html.dark .stat-lbl,
 html.dark .sh p {
-  color: #94A3B8 !important;
-}
-
-/* ── Form Controls & Inputs ── */
-html.dark input,
-html.dark select,
-html.dark textarea,
-html.dark .form-input,
-html.dark .topbar-search,
-html.dark .whistory-filter-input {
-  color: #FFFFFF !important;
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.16) !important;
+  color: #849694 !important;
 }
 
 html.dark input::placeholder,
@@ -581,38 +873,29 @@ html.dark select::placeholder,
 html.dark textarea::placeholder,
 html.dark .form-input::placeholder,
 html.dark .topbar-search::placeholder {
-  color: #64748B !important;
+  color: #566866 !important;
 }
 
 html.dark option,
 html.dark optgroup {
-  background-color: #0c201e !important;
-  color: #F1F5F9 !important;
+  background-color: #0e1514 !important;
+  color: #E2E8F0 !important;
 }
 
 /* ── Tabs & Nav Buttons ── */
 html.dark .wallet-tab-btn {
-  color: #94A3B8 !important;
+  color: #849694 !important;
 }
 html.dark .wallet-tab-btn:hover,
 html.dark .wallet-tab-btn.active {
-  color: #FFFFFF !important;
-}
-
-html.dark .pill-btn {
-  color: #CBD5E1 !important;
-  border-color: rgba(255, 255, 255, 0.14) !important;
-}
-html.dark .pill-btn.active {
-  color: #FFFFFF !important;
-  background: var(--teal) !important;
+  color: #EDF2F1 !important;
 }
 
 html.dark .nav-links a {
-  color: rgba(255, 255, 255, 0.82) !important;
+  color: rgba(237, 242, 241, 0.78) !important;
 }
 html.dark .nav-links a:hover {
-  color: #FFFFFF !important;
+  color: #EDF2F1 !important;
 }
 
 /* ── Modals & Popups ── */
@@ -621,15 +904,11 @@ html.dark .modal-card h2,
 html.dark .modal-card h3,
 html.dark .modal-card h4,
 html.dark .modal-card .modal-title {
-  color: #FFFFFF !important;
+  color: #EDF2F1 !important;
 }
 html.dark .modal-card p,
 html.dark .modal-card label {
-  color: #F1F5F9 !important;
-}
-html.dark .modal-close {
   color: #CBD5E1 !important;
-  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* ── Admin Dashboard Modules & Data ── */
@@ -644,18 +923,18 @@ html.dark .audit-desc,
 html.dark .audit-user,
 html.dark .admin-metric-value,
 html.dark .admin-stat-num {
-  color: #FFFFFF !important;
+  color: #EDF2F1 !important;
 }
 html.dark .admin-pane p,
 html.dark .admin-pane span:not(.badge-active):not(.badge-pending):not(.badge-suspended):not(.badge-verified):not(.status-badge) {
-  color: #E2E8F0 !important;
+  color: #CBD5E1 !important;
 }
 html.dark .admin-nav-item {
-  color: #94A3B8 !important;
+  color: #849694 !important;
 }
 html.dark .admin-nav-item:hover,
 html.dark .admin-nav-item.active {
-  color: #FFFFFF !important;
+  color: #EDF2F1 !important;
 }
 
 /* ── Dropdown Menus & Panels ── */
@@ -664,7 +943,7 @@ html.dark .notif-item-text,
 html.dark .notif-item-text strong,
 html.dark .profile-menu-item,
 html.dark .profile-menu-header .pm-name {
-  color: #F8FAFC !important;
+  color: #EDF2F1 !important;
 }
 
 /* ── Hardcoded Color Fallback Overrides (Attribute Selectors) ── */
@@ -681,7 +960,7 @@ html.dark [style*="color: #000"],
 html.dark [style*="color:#111"],
 html.dark [style*="color:#222"],
 html.dark [style*="color:#333"] {
-  color: #FFFFFF !important;
+  color: #EDF2F1 !important;
 }
 
 html.dark [style*="color:var(--slate)"],
@@ -700,7 +979,7 @@ html.dark [style*="color: #6B8280"],
 html.dark [style*="color:#666"],
 html.dark [style*="color:#777"],
 html.dark [style*="color:#888"] {
-  color: #94A3B8 !important;
+  color: #849694 !important;
 }
 
 /* ── Inline Background Overrides in Dark Mode ── */
@@ -714,72 +993,25 @@ html.dark [style*="background:var(--white)"]:not(.btn):not(.badge):not(.status-b
 html.dark [style*="background: var(--white)"]:not(.btn):not(.badge):not(.status-badge),
 html.dark [style*="background:var(--paper)"]:not(.btn):not(.badge):not(.status-badge),
 html.dark [style*="background: var(--paper)"]:not(.btn):not(.badge):not(.status-badge) {
-  background: rgba(16, 23, 22, 0.92) !important;
+  background: #0e1514 !important;
   color: #CBD5E1 !important;
-  border-color: rgba(255, 255, 255, 0.075) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   23. APPLE iOS FROSTED GLASS & LIQUID MATERIALS (LIGHT & DARK)
+   23. SWITCH TOGGLES & CLOSE BUTTONS (MATTE REFINED)
    ═══════════════════════════════════════════════════════════ */
 
-/* ── iOS Frosted Glass Modals & Sheets (Light Mode) ── */
-.settings-panel,
-.modal-card,
-.upload-modal-card {
-  background: rgba(255, 255, 255, 0.78) !important;
-  backdrop-filter: blur(40px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
-  border-radius: 28px !important;
-  border: 1px solid rgba(255, 255, 255, 0.85) !important;
-  box-shadow:
-    0 32px 80px rgba(0, 0, 0, 0.18),
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04) !important;
-}
-
-/* ── iOS Frosted Glass Modals & Sheets (Dark Mode) ── */
-html.dark .settings-panel,
-html.dark .modal-card,
-html.dark .upload-modal-card {
-  background: rgba(14, 20, 19, 0.96) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  border-radius: 28px !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.65),
-    0 8px 24px rgba(0, 0, 0, 0.35) !important;
-}
-
-/* ── iOS Blur Backdrop ── */
-.settings-backdrop,
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.48) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-}
-html.dark .settings-backdrop,
-html.dark .modal-overlay {
-  background: rgba(0, 0, 0, 0.70) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-}
-
-/* ── iOS Switch Toggles ── */
 .sett-toggle {
   position: relative; width: 51px; height: 31px; flex-shrink: 0;
 }
 .sett-slider {
   position: absolute; inset: 0;
-  background: rgba(120, 120, 128, 0.20) !important;
+  background: rgba(120, 120, 128, 0.22) !important;
   border-radius: 99px !important;
   cursor: pointer;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.20) !important;
-  transition: background 0.28s cubic-bezier(.22,.61,.36,1) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  transition: background 0.25s ease !important;
 }
 .sett-slider::before {
   content: '';
@@ -787,61 +1019,57 @@ html.dark .modal-overlay {
   width: 27px; height: 27px; left: 1px; top: 1px;
   background: #FFFFFF !important;
   border-radius: 50% !important;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.22), 0 1px 2px rgba(0,0,0,0.12) !important;
-  transition: transform 0.28s cubic-bezier(.22,.61,.36,1) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.20) !important;
+  transition: transform 0.25s cubic-bezier(.22,.61,.36,1) !important;
 }
 .sett-toggle input:checked + .sett-slider {
-  background: #F59E0B !important;
-  border-color: rgba(245, 158, 11, 0.4) !important;
-  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35) !important;
+  background: #13756F !important;
+  border-color: rgba(19, 117, 111, 0.4) !important;
+  box-shadow: none !important;
 }
 .sett-toggle input:checked + .sett-slider::before {
   transform: translateX(20px) !important;
 }
 html.dark .sett-slider {
-  background: rgba(255, 255, 255, 0.18) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: #182422 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 html.dark .sett-toggle input:checked + .sett-slider {
-  background: #F59E0B !important;
-  border-color: rgba(245, 158, 11, 0.50) !important;
-  box-shadow: 0 2px 14px rgba(245, 158, 11, 0.50) !important;
+  background: #0f766e !important;
+  border-color: rgba(45, 212, 191, 0.30) !important;
+  box-shadow: none !important;
 }
 
-/* ── iOS Frosted Circle Close Button ── */
 .settings-close,
 .modal-close {
   width: 34px !important;
   height: 34px !important;
   border-radius: 50% !important;
-  background: rgba(0, 0, 0, 0.06) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.07) !important;
   color: #111918 !important;
   font-size: 16px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
-  transition: all 0.25s cubic-bezier(.22,.61,.36,1) !important;
+  transition: all 0.2s ease !important;
 }
 .settings-close:hover,
 .modal-close:hover {
-  background: rgba(0, 0, 0, 0.12) !important;
-  transform: scale(1.08) !important;
+  background: rgba(0, 0, 0, 0.10) !important;
 }
 html.dark .settings-close,
 html.dark .modal-close {
-  background: rgba(255, 255, 255, 0.12) !important;
-  border-color: rgba(255, 255, 255, 0.18) !important;
-  color: #FFFFFF !important;
+  background: #162220 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #CBD5E1 !important;
 }
 html.dark .settings-close:hover,
 html.dark .modal-close:hover {
-  background: rgba(255, 255, 255, 0.22) !important;
-  border-color: rgba(255, 255, 255, 0.30) !important;
-  transform: scale(1.08) !important;
+  background: #1d2c29 !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #EDF2F1 !important;
 }
 
 /* ── Mobile-First Responsive Overrides (Glass Layer) ── */
@@ -959,34 +1187,34 @@ html.dark .modal-close:hover {
   width: min(420px, calc(100vw - 20px));
   height: 62px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.80);
-  backdrop-filter: blur(30px) saturate(190%);
-  -webkit-backdrop-filter: blur(30px) saturate(190%);
-  border: 1.5px solid rgba(255, 255, 255, 0.92);
-  box-shadow: 
-    0 16px 44px rgba(14, 59, 53, 0.14),
-    0 4px 14px rgba(14, 59, 53, 0.08),
-    inset 0 1.5px 1px 0 rgba(255, 255, 255, 1),
-    inset 0 -1px 2px 0 rgba(19, 117, 111, 0.06);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(19, 117, 111, 0.16);
+  box-shadow:
+    0 12px 36px rgba(14, 59, 53, 0.14),
+    0 4px 12px rgba(14, 59, 53, 0.06);
   z-index: 9995;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 4px;
   box-sizing: border-box;
-  overflow: visible !important; /* Enables active Liquid Glass lens to bulge outside */
+  overflow: visible !important;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
-  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 html.dark .liquid-glass-nav {
-  background: rgba(11, 16, 15, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 
-    0 20px 48px rgba(0, 0, 0, 0.60),
-    0 4px 14px rgba(0, 0, 0, 0.35);
+  background: rgba(13, 20, 19, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.60),
+    0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
 /* Navigation items track */
@@ -1018,13 +1246,13 @@ html.dark .liquid-glass-nav {
   flex: 1;
   max-width: 72px;
   cursor: pointer;
-  transition: color 0.28s ease, transform 0.28s cubic-bezier(0.34, 1.45, 0.64, 1);
+  transition: color 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.45, 0.64, 1);
   -webkit-tap-highlight-color: transparent;
   z-index: 5;
 }
 
 html.dark .liquid-nav-item {
-  color: rgba(255, 255, 255, 0.60);
+  color: #849694;
 }
 
 .liquid-nav-icon-wrap {
@@ -1034,7 +1262,7 @@ html.dark .liquid-nav-item {
   justify-content: center;
   width: 28px;
   height: 28px;
-  transition: transform 0.35s cubic-bezier(0.34, 1.45, 0.64, 1);
+  transition: transform 0.3s cubic-bezier(0.34, 1.45, 0.64, 1);
 }
 
 .liquid-nav-svg {
@@ -1045,140 +1273,88 @@ html.dark .liquid-nav-item {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: all 0.28s ease;
+  transition: all 0.25s ease;
 }
 
 .liquid-nav-label {
   font-size: 10px;
   letter-spacing: 0.02em;
-  transition: all 0.28s ease;
+  transition: all 0.25s ease;
   line-height: 1.1;
 }
 
 /* ═════════════════════════════════════════════════════════
-   THE LIQUID GLASS OPTICAL LENS / MAGNIFIER BUBBLE
-   (Protruding bubble overlapping the bar with realistic glass physics)
+   THE LIQUID GLASS OPTICAL LENS / ACTIVE INDICATOR
    ═════════════════════════════════════════════════════════ */
 .liquid-glass-lens {
   position: absolute;
-  top: -5px; /* Protrudes prominently above & below the 62px pill bar */
+  top: -4px;
   left: 0;
-  width: 72px;
-  height: 72px;
-  border-radius: 46% 54% 50% 50% / 50% 48% 52% 50%;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
   pointer-events: none;
   z-index: 3;
   box-sizing: border-box;
-
-  /* Optical Glass Material & Refractive Caustics (Light Mode Default) */
   background: radial-gradient(
-    circle at 38% 22%,
+    circle at 40% 28%,
     rgba(255, 255, 255, 0.96) 0%,
-    rgba(240, 250, 248, 0.82) 28%,
-    rgba(19, 117, 111, 0.20) 65%,
-    rgba(14, 59, 53, 0.38) 100%
+    rgba(232, 246, 244, 0.88) 45%,
+    rgba(19, 117, 111, 0.16) 100%
   );
-
-  /* Optical Refraction & Backdrop Magnification */
-  backdrop-filter: blur(16px) brightness(1.1) saturate(190%);
-  -webkit-backdrop-filter: blur(16px) brightness(1.1) saturate(190%);
-
-  /* Multi-depth specular rim lights & outer elevation shadow */
-  border: 1.5px solid rgba(255, 255, 255, 0.95);
-  box-shadow:
-    0 12px 30px rgba(14, 59, 53, 0.20),
-    0 4px 10px rgba(14, 59, 53, 0.10),
-    inset 0 2.5px 3.5px 0 rgba(255, 255, 255, 1),
-    inset 0 0 2px 1.5px rgba(255, 255, 255, 0.60),
-    inset 0 -3px 6px 0 rgba(14, 59, 53, 0.24);
-
-  /* Liquid Spring Glide Animation */
-  transition: transform 0.44s cubic-bezier(0.34, 1.45, 0.64, 1),
-              width 0.3s ease,
-              height 0.3s ease,
-              border-radius 0.35s ease;
+  border: 1px solid rgba(19, 117, 111, 0.22);
+  box-shadow: 0 8px 24px rgba(14, 59, 53, 0.14);
+  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+              width 0.28s ease,
+              height 0.28s ease,
+              border-radius 0.28s ease;
   will-change: transform;
 }
 
 html.dark .liquid-glass-lens {
-  background: rgba(18, 44, 38, 0.85);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.45);
+  background: #132a26;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(45, 212, 191, 0.22);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 
-/* Top Specular Crescent Highlight (Sun/Sky reflection on curved glass bubble) */
-.lens-specular-crescent {
-  position: absolute;
-  top: 4px;
-  left: 18%;
-  width: 64%;
-  height: 32%;
-  border-radius: 50% 50% 42% 42%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.90) 0%,
-    rgba(255, 255, 255, 0.20) 75%,
-    transparent 100%
-  );
-  filter: blur(0.5px);
-  pointer-events: none;
-  opacity: 0.95;
-}
-html.dark .lens-specular-crescent {
-  display: none !important;
-}
-
-/* Inner Caustic Refraction Glow */
+.lens-specular-crescent,
 .lens-caustic-ring {
-  position: absolute;
-  inset: 2px;
-  border-radius: inherit;
-  box-shadow: 
-    inset 0 0 14px rgba(74, 222, 128, 0.25),
-    inset 0 -2px 5px rgba(255, 255, 255, 0.45);
-  pointer-events: none;
-}
-html.dark .lens-caustic-ring {
   display: none !important;
 }
 
-/* ACTIVE ITEM OPTICAL MAGNIFICATION INSIDE LENS */
+/* ACTIVE ITEM INSIDE LENS */
 .liquid-nav-item.active {
   color: #0E3B35;
   z-index: 6;
 }
 
 .liquid-nav-item.active .liquid-nav-icon-wrap {
-  transform: scale(1.22) translateY(-2.5px);
+  transform: scale(1.14) translateY(-1.5px);
 }
 
 .liquid-nav-item.active .liquid-nav-svg {
   stroke: #0E3B35;
-  filter: drop-shadow(0 2px 6px rgba(14, 59, 53, 0.25));
 }
 
 .liquid-nav-item.active .liquid-nav-label {
   color: #0E3B35;
-  font-weight: 900;
-  transform: scale(1.06);
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.85);
+  font-weight: 800;
 }
 
 html.dark .liquid-nav-item.active {
-  color: #ffffff;
+  color: #EDF2F1;
 }
 
 html.dark .liquid-nav-item.active .liquid-nav-svg {
-  stroke: #ffffff;
-  filter: drop-shadow(0 2px 6px rgba(45, 212, 191, 0.45));
+  stroke: #2DD4BF;
+  filter: none;
 }
 
 html.dark .liquid-nav-item.active .liquid-nav-label {
-  color: #ffffff;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  color: #EDF2F1;
+  text-shadow: none;
 }
 
 /* ═════════════════════════════════════════════════════════
@@ -1206,12 +1382,10 @@ html.dark .liquid-nav-item.active .liquid-nav-label {
 }
 
 .liquid-nav-badge.green-badge {
-  background: #22c55e;
+  background: #10b981;
   color: #ffffff;
-  border: 1.5px solid rgba(8, 24, 21, 0.95);
-  box-shadow: 
-    0 2.5px 8px rgba(34, 197, 94, 0.7),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  border: 1.5px solid #0b1614;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
   animation: badgePop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -1221,10 +1395,10 @@ html.dark .liquid-nav-item.active .liquid-nav-label {
 }
 
 /* ═════════════════════════════════════════════════════════
-   DESKTOP SIDEBAR INTEGRATION (> 900px)
+   DESKTOP SIDEBAR INTEGRATION (>= 901px)
+   Seamless matte integration inside the dark sidebar
    ═════════════════════════════════════════════════════════ */
 @media (min-width: 901px) {
-  /* On desktop browser, dock into the sidebar as a vertical Liquid Glass dock */
   .liquid-glass-nav.docked-sidebar,
   .app-sidebar .liquid-glass-nav {
     position: relative;
@@ -1234,73 +1408,97 @@ html.dark .liquid-nav-item.active .liquid-nav-label {
     width: 100%;
     max-width: 100%;
     height: auto;
-    border-radius: 20px;
-    padding: 8px 6px;
-    margin: 10px 0;
+    border-radius: 16px;
+    padding: 6px;
+    margin: 8px 0;
     flex-direction: column;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: none !important;
   }
 
   .liquid-glass-nav.docked-sidebar .liquid-nav-track,
   .app-sidebar .liquid-glass-nav .liquid-nav-track {
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
   }
 
   .liquid-glass-nav.docked-sidebar .liquid-nav-item,
   .app-sidebar .liquid-glass-nav .liquid-nav-item {
     flex-direction: row;
     justify-content: flex-start;
-    padding: 10px 16px;
+    padding: 10px 14px;
     max-width: 100%;
     width: 100%;
-    height: 48px;
-    border-radius: 14px;
+    height: 44px;
+    border-radius: 12px;
     gap: 12px;
+    color: rgba(255, 255, 255, 0.68) !important;
+  }
+
+  .liquid-glass-nav.docked-sidebar .liquid-nav-item:hover,
+  .app-sidebar .liquid-glass-nav .liquid-nav-item:hover {
+    color: #ffffff !important;
   }
 
   .liquid-glass-nav.docked-sidebar .liquid-nav-label,
   .app-sidebar .liquid-glass-nav .liquid-nav-label {
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 700;
+    color: inherit !important;
+    text-shadow: none !important;
+  }
+
+  .liquid-glass-nav.docked-sidebar .liquid-nav-item.active,
+  .app-sidebar .liquid-glass-nav .liquid-nav-item.active {
+    color: #ffffff !important;
   }
 
   .liquid-glass-nav.docked-sidebar .liquid-nav-item.active .liquid-nav-icon-wrap,
   .app-sidebar .liquid-glass-nav .liquid-nav-item.active .liquid-nav-icon-wrap {
-    transform: scale(1.15);
+    transform: scale(1.06);
+  }
+
+  .liquid-glass-nav.docked-sidebar .liquid-nav-item.active .liquid-nav-svg,
+  .app-sidebar .liquid-glass-nav .liquid-nav-item.active .liquid-nav-svg {
+    stroke: #2DD4BF !important;
+    filter: none !important;
   }
 
   .liquid-glass-nav.docked-sidebar .liquid-nav-item.active .liquid-nav-label,
   .app-sidebar .liquid-glass-nav .liquid-nav-item.active .liquid-nav-label {
-    font-size: 13.5px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #ffffff !important;
+    transform: none;
   }
 
-  /* Desktop lens covers the active item horizontally */
+  /* Desktop active indicator covers the active item cleanly */
   .liquid-glass-nav.docked-sidebar .liquid-glass-lens,
   .app-sidebar .liquid-glass-nav .liquid-glass-lens {
     width: calc(100% - 8px);
-    height: 48px;
+    height: 44px;
     left: 4px;
     top: 0;
-    border-radius: 14px;
-  }
-
-  .liquid-glass-nav.docked-sidebar .lens-specular-crescent,
-  .app-sidebar .liquid-glass-nav .lens-specular-crescent {
-    top: 2px;
-    left: 10%;
-    width: 80%;
-    height: 40%;
+    border-radius: 12px;
+    background: rgba(20, 184, 166, 0.16) !important;
+    border: 1px solid rgba(45, 212, 191, 0.24) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }
 
-/* ── ULTRA-WIDE DESKTOP ERGONOMICS (1441px+) ──────────── */
-@media (min-width: 1441px) {
+/* ── DESKTOP & ULTRA-WIDE ERGONOMICS (>= 901px) ──────────── */
+@media (min-width: 901px) {
   .page-inner,
   .mkt-container {
-    max-width: 1440px !important;
+    max-width: 1380px !important;
     margin-left: auto !important;
     margin-right: auto !important;
+    padding: 28px 32px 48px !important;
   }
   .app-main {
     max-width: 100%;
