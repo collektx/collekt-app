@@ -696,7 +696,7 @@ function ensureKollyEngineLoaded(callback) {
     return;
   }
   const s = document.createElement('script');
-  s.src = 'kolly-engine.js?v=160.0';
+  s.src = 'kolly-engine.js?v=161.0';
   s.onload = () => callback();
   document.head.appendChild(s);
 }
@@ -924,6 +924,37 @@ function initCollektAICopilot() {
       .kolly-drawer-send:hover {
         opacity: 0.9;
       }
+      @keyframes kollyPulseDot {
+        0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+        40% { opacity: 1; transform: scale(1.15); }
+      }
+      .kolly-thinking-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #b4b4b4;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .kolly-thinking-dots {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .kolly-thinking-dots span {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #10a37f;
+        display: inline-block;
+        animation: kollyPulseDot 1.2s infinite ease-in-out;
+      }
+      .kolly-thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+      .kolly-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
       @media (max-width: 900px) {
         .kolly-fab-btn {
           bottom: 84px;
@@ -1222,7 +1253,26 @@ function initCollektAICopilot() {
       window.KollyEngine.saveThreads(threads);
       renderDrawerMessages();
 
+      // Show 2-second deliberate Thinking indicator in the chat stream
+      const thinkingRow = document.createElement('div');
+      thinkingRow.id = 'kollyDrawerThinkingRow';
+      thinkingRow.style.cssText = 'display:flex;gap:10px;align-items:center;';
+      thinkingRow.innerHTML = `
+        <div style="width:26px;height:26px;border-radius:50%;background:#10a37f;color:#fff;font-weight:800;font-size:12px;display:grid;place-items:center;flex-shrink:0;">K</div>
+        <div class="kolly-thinking-wrap">
+          <span>Thinking</span>
+          <span class="kolly-thinking-dots"><span></span><span></span><span></span></span>
+        </div>
+      `;
+      stream.appendChild(thinkingRow);
+      stream.scrollTop = stream.scrollHeight;
+
+      const startMs = Date.now();
       const replyText = await window.KollyEngine.generateReply(clean, thread.messages);
+      const elapsedMs = Date.now() - startMs;
+      if (elapsedMs < 2000) {
+        await new Promise(r => setTimeout(r, 2000 - elapsedMs));
+      }
 
       const updatedThreads = window.KollyEngine.getThreads();
       const target = updatedThreads.find(t => t.id === thread.id) || updatedThreads[0];
@@ -1316,4 +1366,3 @@ window.profileVendorTrust = async function(vendorDetails) {
   const prompt = `Profile vendor trust and risk metrics for: ${typeof vendorDetails === 'object' ? JSON.stringify(vendorDetails) : vendorDetails}.`;
   return await queryGeminiAI(prompt, '', 'trust_profile');
 };
-
