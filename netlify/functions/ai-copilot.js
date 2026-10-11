@@ -34,7 +34,15 @@ CRITICAL ANTI-FABRICATION & FACTUAL ACCURACY RULES:
    - Commitments or binding promises from the company.
    - Previous conversations or shared history.
 3. If any detail is missing, OMIT IT completely rather than guessing or making it up.
-4. Keep the draft courteous, professional, crisp, and direct (2 to 3 short paragraphs). Format cleanly with plain text or light markdown suitable for in-app chat.`
+4. Keep the draft courteous, professional, crisp, and direct (2 to 3 short paragraphs). Format cleanly with plain text or light markdown suitable for in-app chat.`,
+
+  kolly_chat: `You are Kolly, the Senior Executive & Technical Advisor for Collekt (collektng.com), Nigeria's verified B2B project marketplace and milestone-escrow platform.
+Think, reason, and respond with the analytical clarity, warmth, precision, and executive polish of Anthropic's Claude.
+CRITICAL ALIGNMENT & PRIVACY RULES:
+1. Directly answer and align with what the user actually said or asked. If the user says "thank you", "hello", "ok", or a short conversational remark, reply naturally, warmly, and concisely (1-2 sentences) without dumping a long menu.
+2. NEVER mention, output, or disclose any internal filenames or extensions such as .html, .js, .css, post-job.html, wallet.html, dashboard.html, etc.
+3. Refer to platform sections exclusively by their clean UI names: **Overview**, **Marketplace**, **Post Opportunity**, **Collektions**, **Messages**, **Wallet**, and **Profile**.
+4. Ground all commercial, engineering, legal, and financial advice in authentic Nigerian market realities (Naira ₦ pricing, CBN-licensed NUBAN escrow rails, COREN/ICAN/NBA accreditations, FIRS WHT/VAT).`
 };
 
 exports.handler = async (event) => {
@@ -43,8 +51,13 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
 
   try {
+    const body = JSON.parse(event.body || '{}');
+    const prompt = (body.prompt || body.query || '').trim();
+    const action = body.action || body.skill || 'chat';
+    const context = body.context || '';
+
     const { user: authUser, error: authError } = await authenticateRequest(event);
-    if (authError || !authUser) {
+    if ((authError || !authUser) && action !== 'kolly_chat') {
       return {
         statusCode: 401,
         headers,
@@ -52,16 +65,12 @@ exports.handler = async (event) => {
       };
     }
 
-    const body = JSON.parse(event.body || '{}');
-    const prompt = (body.prompt || body.query || '').trim();
-    const action = body.action || body.skill || 'chat';
-    const context = body.context || '';
-    const user = body.user || { name: authUser.email, id: authUser.id };
+    const user = body.user || (authUser ? { name: authUser.email, id: authUser.id } : { name: 'Member', id: null });
 
-    // Abuse throttling: limit 20 AI requests/min per authenticated user
+    // Abuse throttling: limit 20 AI requests/min per authenticated user or IP
     const rateCheck = enforceRateLimit(event, {
       action: 'ai-copilot',
-      userId: authUser.id,
+      userId: authUser ? authUser.id : null,
       limit: 20,
       windowMs: 60 * 1000,
       customHeaders: headers
