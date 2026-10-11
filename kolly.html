@@ -531,6 +531,10 @@
         <span>🧠 Questions Learned</span>
         <strong id="learnedCount" style="color:#34d399;">0</strong>
       </div>
+      <button type="button" id="btnMemoryGovernance" style="margin-top:4px;padding:7px 10px;border-radius:8px;border:1px solid var(--border-subtle);background:transparent;color:var(--text-muted);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-family:inherit;">
+        <span>🛡️ Memory &amp; Privacy</span>
+        <span id="memoryConsentDot" style="color:#34d399;font-weight:700;">ON</span>
+      </button>
     </div>
   </aside>
 
@@ -545,6 +549,7 @@
         </div>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
+        <button type="button" id="btnResearchToggle" class="collekt-link" style="background:transparent;cursor:pointer;font-family:inherit;" title="Toggle Grounded Web & Regulatory Research Mode">🌐 Research: OFF</button>
         <a href="index.html" id="backToCollektLink" class="collekt-link">← Back to Collekt</a>
       </div>
     </header>
@@ -554,7 +559,13 @@
     </div>
 
     <div class="input-area">
+      <div id="attachedDocBanner" style="display:none;max-width:760px;margin:0 auto 6px;padding:6px 14px;border-radius:12px;background:rgba(16,163,127,0.14);border:1px solid rgba(16,163,127,0.35);font-size:12.5px;color:#34d399;align-items:center;justify-content:space-between;">
+        <span id="attachedDocLabel">📄 Attached Tender / RFQ Document</span>
+        <button type="button" id="btnClearDoc" style="background:none;border:none;color:#ececec;cursor:pointer;font-size:14px;">×</button>
+      </div>
       <form id="chatForm" class="input-box-wrap">
+        <input type="file" id="docFileInput" accept=".txt,.md,.csv,.json,.xml,.html" style="display:none;" />
+        <button type="button" id="btnAttachDoc" title="Attach Tender / RFQ / Scope Document for Compliance Analysis" style="background:none;border:none;font-size:17px;cursor:pointer;padding:2px 4px;color:#333;">📎</button>
         <textarea
           id="chatInput"
           class="chat-textarea"
@@ -564,12 +575,31 @@
         <button type="submit" class="send-btn" id="btnSend">↑</button>
       </form>
       <div class="footer-note">
-        Kolly learns from your questions to help you navigate Collekt, estimate project fees, and use Milestone Escrow safely.
+        Kolly learns from your questions to help you navigate Collekt, estimate project fees, analyze tenders, and use Milestone Escrow safely.
       </div>
     </div>
   </main>
 
-  <script src="kolly-engine.js?v=161.0"></script>
+  <!-- Memory Governance Modal (NDPA 2023 Compliant) -->
+  <div id="memoryModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:1000;place-items:center;padding:16px;">
+    <div style="background:#1e1e1e;border:1px solid var(--border-subtle);border-radius:16px;max-width:520px;width:100%;padding:20px;color:var(--text-main);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <strong style="font-size:16px;">🧠 Personal Memory &amp; Privacy Governance</strong>
+        <button type="button" id="btnCloseMemoryModal" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">×</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:12px;line-height:1.5;">
+        Your personal memory profile is strictly isolated to your account and governed under the Nigeria Data Protection Act (NDPA) 2023.
+      </p>
+      <div id="memoryModalBody" style="background:#141414;border-radius:10px;padding:12px;font-size:13px;line-height:1.6;max-height:240px;overflow-y:auto;margin-bottom:14px;"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;">
+        <button type="button" id="btnToggleConsent" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border-subtle);background:#2a2a2a;color:#fff;font-size:12.5px;cursor:pointer;">Toggle Memory Consent</button>
+        <button type="button" id="btnExportMemory" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border-subtle);background:#2a2a2a;color:#34d399;font-size:12.5px;cursor:pointer;">⬇ Export JSON</button>
+        <button type="button" id="btnClearMemory" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.12);color:#f87171;font-size:12.5px;cursor:pointer;">🗑 Reset Memory</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="kolly-engine.js?v=162.0"></script>
   <script>
     const sidebar = document.getElementById('sidebar');
     const btnToggleSidebar = document.getElementById('btnToggleSidebar');
@@ -582,6 +612,24 @@
     const learnedCount = document.getElementById('learnedCount');
     const userNameBadge = document.getElementById('userNameBadge');
     const backToCollektLink = document.getElementById('backToCollektLink');
+    const btnResearchToggle = document.getElementById('btnResearchToggle');
+    const btnAttachDoc = document.getElementById('btnAttachDoc');
+    const docFileInput = document.getElementById('docFileInput');
+    const attachedDocBanner = document.getElementById('attachedDocBanner');
+    const attachedDocLabel = document.getElementById('attachedDocLabel');
+    const btnClearDoc = document.getElementById('btnClearDoc');
+    const btnMemoryGovernance = document.getElementById('btnMemoryGovernance');
+    const memoryConsentDot = document.getElementById('memoryConsentDot');
+    const memoryModal = document.getElementById('memoryModal');
+    const memoryModalBody = document.getElementById('memoryModalBody');
+    const btnCloseMemoryModal = document.getElementById('btnCloseMemoryModal');
+    const btnToggleConsent = document.getElementById('btnToggleConsent');
+    const btnExportMemory = document.getElementById('btnExportMemory');
+    const btnClearMemory = document.getElementById('btnClearMemory');
+
+    let researchModeActive = false;
+    let pendingDocumentText = null;
+    let pendingDocumentName = null;
 
     // Smart back link if user has an active Collekt session
     try {
@@ -625,7 +673,7 @@
       html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
       html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-      html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2">$1</a>');
+      html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 
       const lines = html.split('\n');
       let out = '';
@@ -692,6 +740,10 @@
       const mem = window.KollyEngine.getLearnedMemory();
       learnedCount.textContent = mem.questionsAskedCount || 0;
       userNameBadge.textContent = mem.userName || 'Not set yet';
+      if (memoryConsentDot) {
+        memoryConsentDot.textContent = mem.memoryConsent !== false ? 'ON' : 'OFF';
+        memoryConsentDot.style.color = mem.memoryConsent !== false ? '#34d399' : '#f87171';
+      }
     }
 
     function renderMessages() {
@@ -702,7 +754,7 @@
       if (!thread || !thread.messages || thread.messages.length === 0) {
         const greetingName = mem.userName ? `, ${mem.userName}` : '';
         const nameHint = mem.userName
-          ? `Welcome back, ${mem.userName}. Ask me anything about Collekt, project fees, or Milestone Escrow.`
+          ? `Welcome back, ${mem.userName}. Ask me anything about Collekt, project fees, tender compliance, or Milestone Escrow.`
           : `I'm Kolly, Collekt's AI. Ask me anything below—or tell me what you'd like me to call you!`;
 
         const empty = document.createElement('div');
@@ -715,7 +767,7 @@
             <button class="suggestion-pill" data-q="What is Collekt and how does the platform work?">What is Collekt &amp; how does it work?</button>
             <button class="suggestion-pill" data-q="How does Collekt's Milestone Escrow & NUBAN wallet protect my money?">How does Milestone Escrow work?</button>
             <button class="suggestion-pill" data-q="Suggest realistic Nigerian Naira fees and milestones for hiring a Senior Engineer or Developer.">Suggest fees for a job</button>
-            <button class="suggestion-pill" data-q="Guide me around collektng.com and show me where to post a job or submit a Collektion.">Help me navigate collektng.com</button>
+            <button class="suggestion-pill" data-q="Are there any suitable opportunities for me on Collekt?">Match opportunities to my profile</button>
           </div>
         `;
         empty.querySelectorAll('.suggestion-pill').forEach(pill => {
@@ -760,16 +812,25 @@
 
     async function sendMessage(text) {
       const clean = (text || '').trim();
-      if (!clean) return;
+      if (!clean && !pendingDocumentText) return;
+
+      const userDisplay = pendingDocumentName
+        ? `[Attached: ${pendingDocumentName}]\n${clean || 'Please analyze this tender / RFQ document and generate a compliance checklist.'}`
+        : clean;
+
+      const docToSend = pendingDocumentText;
+      pendingDocumentText = null;
+      pendingDocumentName = null;
+      if (attachedDocBanner) attachedDocBanner.style.display = 'none';
 
       const thread = getActiveThread();
       if (!thread.messages.length) {
-        thread.title = clean.length > 34 ? clean.slice(0, 34) + '...' : clean;
+        thread.title = userDisplay.length > 34 ? userDisplay.slice(0, 34) + '...' : userDisplay;
       }
 
       thread.messages.push({
         role: 'user',
-        content: clean,
+        content: userDisplay,
         createdAt: new Date().toISOString()
       });
       thread.updatedAt = new Date().toISOString();
@@ -792,7 +853,11 @@
       chatScroll.scrollTop = chatScroll.scrollHeight;
 
       const startMs = Date.now();
-      const replyText = await window.KollyEngine.generateReply(clean, thread.messages);
+      const replyText = await window.KollyEngine.generateReply(
+        clean || 'Analyze attached tender document',
+        thread.messages,
+        { documentText: docToSend, researchMode: researchModeActive }
+      );
       const elapsedMs = Date.now() - startMs;
       if (elapsedMs < 2000) {
         await new Promise(r => setTimeout(r, 2000 - elapsedMs));
@@ -807,6 +872,93 @@
       window.KollyEngine.saveThreads(threads);
       updateSidebar();
       renderMessages();
+    }
+
+    if (btnResearchToggle) {
+      btnResearchToggle.addEventListener('click', () => {
+        researchModeActive = !researchModeActive;
+        btnResearchToggle.textContent = researchModeActive ? '🌐 Research: ON' : '🌐 Research: OFF';
+        btnResearchToggle.style.borderColor = researchModeActive ? '#10a37f' : 'var(--border-subtle)';
+        btnResearchToggle.style.color = researchModeActive ? '#34d399' : 'var(--text-muted)';
+      });
+    }
+
+    if (btnAttachDoc && docFileInput) {
+      btnAttachDoc.addEventListener('click', () => docFileInput.click());
+      docFileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+          pendingDocumentText = String(ev.target.result || '').slice(0, 35000);
+          pendingDocumentName = file.name;
+          if (attachedDocLabel) attachedDocLabel.textContent = `📄 Attached: ${file.name}`;
+          if (attachedDocBanner) attachedDocBanner.style.display = 'flex';
+        };
+        reader.readAsText(file);
+        docFileInput.value = '';
+      });
+    }
+
+    if (btnClearDoc) {
+      btnClearDoc.addEventListener('click', () => {
+        pendingDocumentText = null;
+        pendingDocumentName = null;
+        attachedDocBanner.style.display = 'none';
+      });
+    }
+
+    function renderMemoryModal() {
+      const mem = window.KollyEngine.getLearnedMemory();
+      const supCount = (mem.supersedesHistory || []).length;
+      memoryModalBody.innerHTML = `
+        <div><strong>Memory Consent:</strong> ${mem.memoryConsent !== false ? '<span style="color:#34d399;">Enabled</span>' : '<span style="color:#f87171;">Disabled</span>'}</div>
+        <div><strong>Preferred Name:</strong> ${mem.userName || 'Not set'}</div>
+        <div><strong>Specialization:</strong> ${mem.specialization || mem.userIndustry || 'Not set'}</div>
+        <div><strong>Experience:</strong> ${mem.yearsOfExperience ? mem.yearsOfExperience + ' years' : 'Not set'}</div>
+        <div><strong>Certifications:</strong> ${(mem.certifications && mem.certifications.length) ? mem.certifications.join(', ') : 'None recorded'}</div>
+        <div><strong>Location:</strong> ${mem.location || 'Nigeria'}</div>
+        <div><strong>Superseded Updates Archived:</strong> ${supCount}</div>
+      `;
+    }
+
+    if (btnMemoryGovernance) {
+      btnMemoryGovernance.addEventListener('click', () => {
+        renderMemoryModal();
+        memoryModal.style.display = 'grid';
+      });
+    }
+    if (btnCloseMemoryModal) {
+      btnCloseMemoryModal.addEventListener('click', () => {
+        memoryModal.style.display = 'none';
+      });
+    }
+    if (btnToggleConsent) {
+      btnToggleConsent.addEventListener('click', () => {
+        const mem = window.KollyEngine.getLearnedMemory();
+        window.KollyEngine.setMemoryConsent(mem.memoryConsent === false);
+        renderMemoryModal();
+        updateSidebar();
+      });
+    }
+    if (btnExportMemory) {
+      btnExportMemory.addEventListener('click', () => {
+        const data = window.KollyEngine.exportUserMemory();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'kolly-personal-memory-export.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+    if (btnClearMemory) {
+      btnClearMemory.addEventListener('click', () => {
+        window.KollyEngine.clearUserMemory();
+        renderMemoryModal();
+        updateSidebar();
+      });
     }
 
     btnToggleSidebar.addEventListener('click', () => {

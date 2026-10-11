@@ -84,7 +84,17 @@
     Cache-Control = "public, max-age=0, must-revalidate"
 
 
-# Gemini AI Copilot Serverless Functions
+# Gemini AI Copilot & Kolly Multi-Provider Orchestration Serverless Functions
+[[redirects]]
+  from = "/api/kolly"
+  to = "/.netlify/functions/kolly-ai"
+  status = 200
+
+[[redirects]]
+  from = "/api/kolly-ai"
+  to = "/.netlify/functions/kolly-ai"
+  status = 200
+
 [[redirects]]
   from = "/api/gemini"
   to = "/.netlify/functions/ai-copilot"
@@ -331,4 +341,3 @@
   from = "/terms"
   to = "/terms.html"
   status = 200
-
