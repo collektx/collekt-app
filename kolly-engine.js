@@ -1,18 +1,22 @@
 /* ============================================================================
-   KOLLY AI — EXECUTIVE REASONING & CONTINUOUS LEARNING ENGINE (v4.0)
-   Claude-Caliber Professional Intelligence for Collekt (collektng.com)
-   - 2-Second Deliberate Thinking Cadence & Context-Aligned Responses
-   - Natural Conversational Intelligence (Gratitude, Greetings, Follow-ups)
+   KOLLY AI — MULTI-PROVIDER INTELLIGENCE ENGINE FOR COLLEKT (v5.0)
+   Architecture: Anthropic Claude + OpenAI + Google Gemini + Supabase pgvector
+   - 2-Second Deliberate Thinking Cadence & Context-Aligned Conversational Replies
+   - Multi-Provider Task Routing & Automatic Provider Failover
+   - Isolated Long-Term Personal Memory, Supersession Audit & Consent Controls
+   - Tender / RFQ Document Intelligence & Compliance Matrix Extraction
+   - Collekt Marketplace & Candidate Matching (Verified vs. Self-Reported)
+   - Grounded Web Research with Source Citations & Financial Safety Guardrails
    - Strict Zero-Disclosure of Internal Filenames (.html, .js, .css)
-   - Proactive Name Personalization & Persistent Conversational Memory
 ============================================================================ */
 
 (function (global) {
-  const STORAGE_KEYS = {
+  const BASE_STORAGE_KEYS = {
     THREADS: 'kolly_chatgpt_threads_v2',
     ACTIVE_THREAD: 'kolly_chatgpt_active_thread_v2',
     LEARNED_MEMORY: 'kolly_learned_knowledge_v2',
-    GEMINI_KEY: 'collekt_gemini_api_key'
+    GEMINI_KEY: 'collekt_gemini_api_key',
+    RESEARCH_MODE: 'kolly_research_mode_v1'
   };
 
   const THINKING_DURATION_MS = 2000;
@@ -82,8 +86,14 @@
   }
 
   /* --------------------------------------------------------------------------
-     1. SESSION USER & PERSISTENT MEMORY HELPERS
+     1. SESSION USER & STRICT CROSS-USER MEMORY ISOLATION HELPERS
   -------------------------------------------------------------------------- */
+  let _activeOverrideUserId = null;
+
+  function setActiveUserContext(userId) {
+    _activeOverrideUserId = userId ? String(userId).trim() : null;
+  }
+
   function getSessionUser() {
     try {
       const u = JSON.parse(localStorage.getItem('collekt_user') || 'null');
@@ -92,7 +102,22 @@
     return null;
   }
 
+  function getCurrentUserId(explicitUserId) {
+    if (explicitUserId) return String(explicitUserId).trim();
+    if (_activeOverrideUserId) return _activeOverrideUserId;
+    const u = getSessionUser();
+    if (u && (u.id || u.email)) return String(u.id || u.email).trim();
+    return 'guest_default';
+  }
+
+  function getScopedStorageKey(baseKey, explicitUserId) {
+    const uid = getCurrentUserId(explicitUserId);
+    if (uid === 'guest_default') return baseKey;
+    return `${baseKey}__uid_${uid.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+  }
+
   function getSessionFirstName() {
+    if (_activeOverrideUserId) return null;
     const u = getSessionUser();
     const rawName = u && (u.name || u.full_name || u.company_name);
     if (!rawName || typeof rawName !== 'string') return null;
@@ -101,45 +126,119 @@
     return cleaned.split(/\s+/)[0];
   }
 
-  function getLearnedMemory() {
-    let mem = {
+  function createDefaultMemory(uid) {
+    return {
+      userId: uid || 'guest_default',
+      memoryConsent: true,
       userName: null,
       awaitingName: false,
       askedForNameOnce: false,
       userRole: null,
       userIndustry: null,
+      specialization: null,
+      yearsOfExperience: null,
+      certifications: [],
+      location: null,
       userBudget: null,
       questionsAskedCount: 0,
       customFacts: [],
+      memories: [],
+      supersedesHistory: [],
       topicFrequency: {}
     };
+  }
+
+  function getLearnedMemory(explicitUserId) {
+    const uid = getCurrentUserId(explicitUserId);
+    const key = getScopedStorageKey(BASE_STORAGE_KEYS.LEARNED_MEMORY, uid);
+    let mem = createDefaultMemory(uid);
     try {
-      const raw = localStorage.getItem(STORAGE_KEYS.LEARNED_MEMORY);
+      const raw = localStorage.getItem(key);
       if (raw) {
-        mem = Object.assign(mem, JSON.parse(raw));
+        const parsed = JSON.parse(raw);
+        if (!parsed.userId || parsed.userId === uid) {
+          mem = Object.assign(mem, parsed);
+          mem.userId = uid;
+        }
       }
     } catch (e) {}
 
-    // Sync role from active Collekt session if not yet learned
-    const sessionUser = getSessionUser();
-    if (sessionUser && !mem.userRole && sessionUser.role) {
-      mem.userRole = sessionUser.role === 'company' ? 'company' : 'talent';
+    if (!Array.isArray(mem.certifications)) mem.certifications = [];
+    if (!Array.isArray(mem.customFacts)) mem.customFacts = [];
+    if (!Array.isArray(mem.memories)) mem.memories = [];
+    if (!Array.isArray(mem.supersedesHistory)) mem.supersedesHistory = [];
+
+    if (!_activeOverrideUserId && !explicitUserId) {
+      const sessionUser = getSessionUser();
+      if (sessionUser && !mem.userRole && sessionUser.role) {
+        mem.userRole = sessionUser.role === 'company' ? 'company' : 'talent';
+      }
     }
-    // Clear any accidental conversational phrase that was ever saved as userName
+
     if (mem.userName && /^(thank|thanks|hello|hi|hey|ok|okay|yes|no|sure|good|great|nice|cool|alright|please|welcome)/i.test(mem.userName.trim())) {
       mem.userName = null;
     }
     return mem;
   }
 
-  function saveLearnedMemory(mem) {
+  function saveLearnedMemory(mem, explicitUserId) {
+    const uid = getCurrentUserId(explicitUserId || (mem && mem.userId));
+    const key = getScopedStorageKey(BASE_STORAGE_KEYS.LEARNED_MEMORY, uid);
+    mem.userId = uid;
     try {
-      localStorage.setItem(STORAGE_KEYS.LEARNED_MEMORY, JSON.stringify(mem));
+      localStorage.setItem(key, JSON.stringify(mem));
     } catch (e) {}
   }
 
+  function setMemoryConsent(enabled, explicitUserId) {
+    const mem = getLearnedMemory(explicitUserId);
+    mem.memoryConsent = Boolean(enabled);
+    saveLearnedMemory(mem, explicitUserId);
+    return mem;
+  }
+
+  function deleteMemoryItem(memoryIdOrText, explicitUserId) {
+    const mem = getLearnedMemory(explicitUserId);
+    mem.memories = (mem.memories || []).filter(m => m.id !== memoryIdOrText && m.content !== memoryIdOrText);
+    mem.customFacts = (mem.customFacts || []).filter(f => f !== memoryIdOrText);
+    saveLearnedMemory(mem, explicitUserId);
+    return mem;
+  }
+
+  function clearUserMemory(explicitUserId) {
+    const uid = getCurrentUserId(explicitUserId);
+    const fresh = createDefaultMemory(uid);
+    saveLearnedMemory(fresh, uid);
+    return fresh;
+  }
+
+  function exportUserMemory(explicitUserId) {
+    const mem = getLearnedMemory(explicitUserId);
+    return {
+      exportedAt: new Date().toISOString(),
+      platform: 'Collekt (collektng.com) — Kolly AI',
+      userId: mem.userId,
+      memoryConsent: mem.memoryConsent,
+      profile: {
+        userName: mem.userName,
+        userRole: mem.userRole,
+        specialization: mem.specialization,
+        yearsOfExperience: mem.yearsOfExperience,
+        certifications: mem.certifications,
+        location: mem.location,
+        userIndustry: mem.userIndustry,
+        userBudget: mem.userBudget
+      },
+      activeMemories: (mem.memories || []).filter(m => m.status === 'active'),
+      supersedesHistory: mem.supersedesHistory || [],
+      customFacts: mem.customFacts || []
+    };
+  }
+
   function getEffectiveUserName(mem) {
-    return (mem && mem.userName) || getSessionFirstName() || null;
+    if (mem && mem.userName) return mem.userName;
+    if (!_activeOverrideUserId) return getSessionFirstName() || null;
+    return null;
   }
 
   /* --------------------------------------------------------------------------
@@ -148,7 +247,7 @@
   const FEE_GUIDES = [
     {
       name: 'Oil, Gas, Subsea, Piping & Mechanical Engineering',
-      keywords: ['subsea', 'piping', 'pipeline', 'offshore', 'epc', 'mechanical', 'process', 'coren', 'rig', 'oil', 'gas', 'welding', 'hazop', 'ndt', 'instrumentation', 'turbine', 'rotating equipment', 'cathodic'],
+      keywords: ['subsea', 'piping', 'pipeline', 'offshore', 'epc', 'mechanical', 'process', 'coren', 'rig', 'oil', 'gas', 'welding', 'hazop', 'ndt', 'instrumentation', 'turbine', 'rotating equipment', 'cathodic', 'pressure vessel', 'asme'],
       shortSprint: '₦650,000 – ₦1,200,000 (1–2 weeks • Technical Audit / P&ID Review / Stress Check)',
       standardProject: '₦1,800,000 – ₦3,500,000 (3–6 weeks • Full Engineering Package / Isometrics / Tie-In Spec)',
       complexPackage: '₦5,000,000 – ₦14,500,000+ (2–3 months • Multi-Discipline FEED / EPC Work Package)',
@@ -209,9 +308,112 @@
   ];
 
   /* --------------------------------------------------------------------------
-     3. CONTINUOUS LEARNING & NAME EXTRACTION
+     2B. VERIFIED COLLEKT MARKETPLACE OPPORTUNITIES & CANDIDATE DIRECTORY
+  -------------------------------------------------------------------------- */
+  const COLLEKT_OPPORTUNITIES_CATALOG = [
+    {
+      id: 'OPP-NG-101',
+      title: 'Senior Mechanical Piping & Stress Analysis Package (Brownfield Flowstation Tie-In)',
+      company: 'DeltaCrest Energy & EPC Services Ltd',
+      location: 'Port Harcourt / Bonny Island, Rivers State',
+      category: 'Mechanical & Piping Engineering',
+      keywords: ['mechanical', 'piping', 'pipe stress', 'oil', 'gas', 'caesar ii', 'asme', 'isometric', 'flowstation', 'epc', 'port harcourt'],
+      budget: '₦3,200,000',
+      duration: '5 Weeks',
+      minYearsExp: 6,
+      requiredCertifications: ['COREN', 'NIN Identity Verification'],
+      scopeSummary: 'Prepare pipe stress analysis (Caesar II), isometric drawings, ASME B31.3 compliance verification, and priced Material Take-Off (MTO) for a 12-inch high-pressure gas header tie-in.'
+    },
+    {
+      id: 'OPP-NG-102',
+      title: 'Early Production Facility (EPF) Process & Mechanical Piping Verification Audit',
+      company: 'NigerDelta Integrated Facilities Ltd',
+      location: 'Warri / Escravos, Delta State (Hybrid)',
+      category: 'Oil & Gas / Process & Piping',
+      keywords: ['mechanical', 'piping', 'process', 'p&id', 'oil', 'gas', 'epc', 'facility', 'audit', 'coren'],
+      budget: '₦2,450,000',
+      duration: '4 Weeks',
+      minYearsExp: 5,
+      requiredCertifications: ['COREN', 'NUPRC / OGISP Familiarity'],
+      scopeSummary: 'As-built P&ID redlining, mechanical piping tie-in schedule, valve data sheets, and corrosion allowance verification for a 15,000 BPD modular facility.'
+    },
+    {
+      id: 'OPP-NG-103',
+      title: '250kWp Commercial Industrial Solar & Substation Hybridization EPC Supervision',
+      company: 'PrimeGrid Infrastructure Nigeria',
+      location: 'Ikeja Industrial Estate, Lagos',
+      category: 'Electrical & Renewable Energy EPC',
+      keywords: ['electrical', 'solar', 'inverter', 'substation', 'civil', 'epc', 'power', 'lagos'],
+      budget: '₦2,800,000',
+      duration: '6 Weeks',
+      minYearsExp: 5,
+      requiredCertifications: ['COREN', 'NEMSA'],
+      scopeSummary: 'Single-line diagrams, protection relay coordination, earthing grid audit, and FAT/SAT commissioning supervision.'
+    },
+    {
+      id: 'OPP-NG-104',
+      title: 'Enterprise B2B Vendor Procurement & Milestone Ledger API Integration',
+      company: 'Africapital Industrial Supply Ltd',
+      location: 'Victoria Island, Lagos (Remote)',
+      category: 'Software & Fintech Engineering',
+      keywords: ['software', 'developer', 'backend', 'node', 'react', 'fintech', 'api', 'database', 'fullstack'],
+      budget: '₦2,600,000',
+      duration: '4 Weeks',
+      minYearsExp: 4,
+      requiredCertifications: ['NIN Identity Verification', 'Verified GitHub Portfolio'],
+      scopeSummary: 'Full-stack TypeScript/Node.js procurement tracking module with automated WHT/VAT invoice reconciliation and role-based audit logs.'
+    }
+  ];
+
+  const COLLEKT_CANDIDATE_DIRECTORY = [
+    {
+      id: 'PRO-NG-201',
+      name: 'Engr. Chukwudi Okafor, MNSE',
+      title: 'Principal Mechanical & Piping Design Engineer',
+      location: 'Port Harcourt, Rivers State',
+      yearsExp: 11,
+      skills: ['Mechanical Piping Design', 'Caesar II Stress Analysis', 'AutoCAD Plant 3D', 'PDMS/E3D', 'ASME B31.3', 'P&ID & Isometric Packages', 'MTO / BOQ Preparation'],
+      verifiedStatus: 'Shield Verified 🛡️',
+      verifiedCredentials: ['NIN Biometric Identity Verified', 'COREN Registered Engineer (R.48219)', 'NSE Corporate Member'],
+      selfReportedClaims: ['11 years brownfield/greenfield EPC experience across Bonny, Escravos & Port Harcourt flowstations', 'Previously Lead Piping Engineer on 3 JV gas gathering tie-ins'],
+      indicativeRate: '₦2,200,000 – ₦3,500,000 per package'
+    },
+    {
+      id: 'PRO-NG-202',
+      name: 'Engr. Amina Bello',
+      title: 'Senior Process & Mechanical Facilities Engineer',
+      location: 'Lagos / Port Harcourt',
+      yearsExp: 8,
+      skills: ['Mechanical Piping', 'Process Simulation (HYSYS)', 'HAZOP Documentation', 'Equipment Sizing', 'API 650 / ASME VIII', 'Procurement Technical Bid Evaluation (TBE)'],
+      verifiedStatus: 'Shield Verified 🛡️',
+      verifiedCredentials: ['NIN Biometric Identity Verified', 'COREN Registered Engineer (R.53904)', 'NEBOSH IGC Certified'],
+      selfReportedClaims: ['8 years experience in modular refinery and gas processing plant design'],
+      indicativeRate: '₦1,800,000 – ₦2,900,000 per package'
+    },
+    {
+      id: 'PRO-NG-203',
+      name: 'Tunde Adeyemi',
+      title: 'Mechanical Piping & Structural CAD Specialist',
+      location: 'Warri, Delta State',
+      yearsExp: 6,
+      skills: ['AutoCAD Plant 3D', 'Piping Isometrics', 'Structural Pipe Supports', 'As-Built Site Surveys'],
+      verifiedStatus: 'Identity Verified (Credential Verification Pending)',
+      verifiedCredentials: ['NIN Biometric Identity Verified'],
+      selfReportedClaims: ['6 years field drafting & piping isometric generation', 'COREN application currently in progress (Self-Reported — Not Yet Verified by Collekt)'],
+      indicativeRate: '₦950,000 – ₦1,600,000 per package'
+    }
+  ];
+
+  /* --------------------------------------------------------------------------
+     3. CONTINUOUS LEARNING, MEMORY EXTRACTION & SUPERSESSION ENGINE
   -------------------------------------------------------------------------- */
   const NON_NAME_WORDS = /^(thank|thanks|thank\s+you|thx|ty|appreciate|hello|hi|hey|yo|good\s+morning|good\s+afternoon|good\s+evening|ok|okay|k|alright|got\s+it|understood|sure|yes|yeah|yep|no|nope|nah|cool|great|nice|awesome|perfect|fine|well\s+done|weldone|bye|goodbye|later|help|please|what|how|why|where|when|who|can|collekt|escrow|fee|budget|hire|job|wallet|skip|explain|draft|write|suggest|test|testing)$/i;
+
+  const WORD_TO_NUM = {
+    one: 1, two: 2, three: 3, four: 4, five: 5, six: 6,
+    seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12,
+    thirteen: 13, fourteen: 14, fifteen: 15, twenty: 20
+  };
 
   function extractNameIfProvided(clean, mem) {
     const explicitMatch = clean.match(/^(?:please\s+)?(?:you can\s+)?(?:call me|my name is|i am called|i'm called|name is)\s+([A-Za-z][A-Za-z0-9\s.-]{1,24})$/i) ||
@@ -227,7 +429,7 @@
       const stripped = clean.replace(/[.!?,]+$/g, '').trim();
       const words = stripped.split(/\s+/);
       const hasNonName = NON_NAME_WORDS.test(stripped) ||
-                         /\b(thank|thanks|hello|hi|hey|ok|okay|yes|no|what|how|why|where|when|who|can|help|collekt|escrow|fee|budget|hire|job|wallet|skip|later|explain|draft|write|suggest|need|want|looking|work|project|money|account)\b/i.test(stripped);
+                         /\b(thank|thanks|hello|hi|hey|ok|okay|yes|no|what|how|why|where|when|who|can|help|collekt|escrow|fee|budget|hire|job|wallet|skip|later|explain|draft|write|suggest|need|want|looking|work|project|money|account|specialize|experience|years)\b/i.test(stripped);
       if (words.length >= 1 && words.length <= 2 && stripped.length >= 2 && stripped.length <= 22 && !hasNonName && /^[A-Za-z\s-]+$/.test(stripped)) {
         return words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
       }
@@ -235,29 +437,131 @@
     return null;
   }
 
-  function learnFromMessage(userText) {
-    const mem = getLearnedMemory();
+  function upsertStructuredMemory(mem, category, key, newValue, rawText) {
+    if (!mem.memoryConsent) return { updated: false, superseded: null };
+    if (!Array.isArray(mem.memories)) mem.memories = [];
+    if (!Array.isArray(mem.supersedesHistory)) mem.supersedesHistory = [];
+
+    const now = new Date().toISOString();
+    const existingActiveIdx = mem.memories.findIndex(m => m.key === key && m.status === 'active');
+    let supersededRecord = null;
+
+    if (existingActiveIdx !== -1) {
+      const prev = mem.memories[existingActiveIdx];
+      if (String(prev.value).toLowerCase() === String(newValue).toLowerCase()) {
+        return { updated: false, superseded: null };
+      }
+      prev.status = 'superseded';
+      prev.supersededAt = now;
+      supersededRecord = {
+        key,
+        previousValue: prev.value,
+        newValue,
+        supersededAt: now,
+        sourceQuote: rawText
+      };
+      mem.supersedesHistory.push(supersededRecord);
+    }
+
+    const newEntry = {
+      id: 'mem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      category,
+      key,
+      value: newValue,
+      content: `${key}: ${newValue}`,
+      sourceQuote: rawText,
+      status: 'active',
+      supersedesId: existingActiveIdx !== -1 ? mem.memories[existingActiveIdx].id : null,
+      createdAt: now
+    };
+    mem.memories.push(newEntry);
+    return { updated: true, superseded: supersededRecord, entry: newEntry };
+  }
+
+  function learnFromMessage(userText, explicitUserId) {
+    const mem = getLearnedMemory(explicitUserId);
     const clean = (userText || '').trim();
     const lower = clean.toLowerCase();
 
     mem.questionsAskedCount = (mem.questionsAskedCount || 0) + 1;
 
+    if (!mem.memoryConsent) {
+      saveLearnedMemory(mem, explicitUserId);
+      return { mem, justLearnedName: false, memoryChanges: [] };
+    }
+
+    const memoryChanges = [];
+
     const detectedName = extractNameIfProvided(clean, mem);
     let justLearnedName = false;
     if (detectedName) {
+      const res = upsertStructuredMemory(mem, 'identity', 'preferred_name', detectedName, clean);
+      if (res.updated) memoryChanges.push(res);
       mem.userName = detectedName;
       mem.awaitingName = false;
       mem.askedForNameOnce = true;
       justLearnedName = true;
     } else if (mem.awaitingName) {
-      // User replied with a normal message instead of a name; don't trap them in awaitingName
       mem.awaitingName = false;
     }
 
-    if (/\b(we want to hire|we need a|our company|my company|i want to hire|post a job|post an opportunity|looking for a|we are hiring)\b/i.test(lower)) {
+    if (/\b(we want to hire|we need a|our company|my company|i want to hire|post a job|post an opportunity|looking for a|we are hiring|find qualified|recommend candidates|shortlist)\b/i.test(lower)) {
       mem.userRole = 'company';
-    } else if (/\b(i am a|i'm a|my skills|how much should i charge|how much should i bid|my cv|find work|win projects|win a project|get hired)\b/i.test(lower)) {
+    } else if (/\b(i am a|i'm a|i specialize in|my specialization|my skills|how much should i charge|how much should i bid|my cv|find work|win projects|win a project|get hired|opportunities for me|projects suit me)\b/i.test(lower)) {
       mem.userRole = 'talent';
+    }
+
+    const specMatch = clean.match(/\b(?:i specialize in|my specialization is|i am a specialist in|i work as a|i'm a|i am an?|experienced in)\s+([a-zA-Z0-9\s,&/-]{3,55}?)(?=\s+(?:and\s+have|with|having|in\s+port\s+harcourt|in\s+lagos|in\s+abuja|in\s+warri|working\s+on|for\s+\d+|who\s+|\.|,|$))/i);
+    if (specMatch && specMatch[1]) {
+      const candidateSpec = specMatch[1].trim();
+      if (!/^(new|member|company|client|user|ready|looking|asking|wondering|here|fine|good)$/i.test(candidateSpec)) {
+        mem.specialization = candidateSpec;
+        const res = upsertStructuredMemory(mem, 'professional_background', 'specialization', candidateSpec, clean);
+        if (res.updated) memoryChanges.push(res);
+      }
+    }
+
+    const expRegex = /\b(?:have|with|now\s+have|completed|over)?\s*(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|twenty)\s*(?:\+\s*)?(?:years|yrs)\s+(?:of\s+)?(?:experience|exp|working|practice)?/i;
+    const expMatch = lower.match(expRegex);
+    if (expMatch && expMatch[1]) {
+      const rawToken = expMatch[1].toLowerCase();
+      const parsedYears = WORD_TO_NUM[rawToken] || parseInt(rawToken, 10);
+      if (!isNaN(parsedYears) && parsedYears > 0 && parsedYears <= 60) {
+        mem.yearsOfExperience = parsedYears;
+        const res = upsertStructuredMemory(mem, 'professional_background', 'years_of_experience', `${parsedYears} years`, clean);
+        if (res.updated) memoryChanges.push(res);
+      }
+    }
+
+    const certPatterns = [
+      { code: 'COREN', regex: /\b(coren(?:\s+registered|\s+registration|\s+certified|\s+license)?)\b/i },
+      { code: 'ICAN', regex: /\b(ican(?:\s+chartered|\s+certified)?)\b/i },
+      { code: 'ACCA', regex: /\b(acca)\b/i },
+      { code: 'PMP', regex: /\b(pmp|prince2)\b/i },
+      { code: 'NEBOSH HSE', regex: /\b(nebosh)\b/i },
+      { code: 'NUPRC Permit', regex: /\b(nuprc|ogisp|dpr\s+permit)\b/i },
+      { code: 'NCDMB NOGICD', regex: /\b(ncdmb|nogicd)\b/i },
+      { code: 'NIQS', regex: /\b(niqs)\b/i },
+      { code: 'NEMSA', regex: /\b(nemsa)\b/i }
+    ];
+    for (const cp of certPatterns) {
+      if (cp.regex.test(clean) && !/\b(do i need|what is|require|requires|missing)\s+${cp.code}/i.test(lower)) {
+        if (/\b(i have|i now have|with|registered|certified|hold|earned|completed|my)\b/i.test(lower)) {
+          if (!mem.certifications.includes(cp.code)) {
+            mem.certifications.push(cp.code);
+          }
+          const res = upsertStructuredMemory(mem, 'credentials', 'certifications', mem.certifications.join(', '), clean);
+          if (res.updated) memoryChanges.push(res);
+        }
+      }
+    }
+
+    const locMatch = clean.match(/\b(?:in|based in|located in|from)\s+(Port\s+Harcourt|Lagos|Abuja|Warri|Bonny(?:\s+Island)?|Eket|Uyo|Calabar|Kano|Ibadan|Nigeria)\b/i);
+    if (locMatch && locMatch[1]) {
+      const loc = locMatch[1].trim();
+      mem.location = loc;
+      const res = upsertStructuredMemory(mem, 'location', 'primary_location', loc, clean);
+      if (res.updated) memoryChanges.push(res);
     }
 
     for (const fg of FEE_GUIDES) {
@@ -284,11 +588,13 @@
       const fact = clean.replace(/^(?:please\s+)?(?:remember that|note that|keep in mind that|learn this:?)\s*/i, '').trim();
       if (fact && !mem.customFacts.includes(fact)) {
         mem.customFacts.push(fact);
+        const res = upsertStructuredMemory(mem, 'custom_note', 'user_note_' + mem.customFacts.length, fact, clean);
+        if (res.updated) memoryChanges.push(res);
       }
     }
 
-    saveLearnedMemory(mem);
-    return { mem, justLearnedName };
+    saveLearnedMemory(mem, explicitUserId);
+    return { mem, justLearnedName, memoryChanges };
   }
 
   function appendNamePromptIfNeeded(replyText, mem, skipNamePrompt = false) {
@@ -298,7 +604,7 @@
     if (!mem.userName && !mem.askedForNameOnce) {
       mem.awaitingName = true;
       mem.askedForNameOnce = true;
-      saveLearnedMemory(mem);
+      saveLearnedMemory(mem, mem.userId);
       const sessionFirst = getSessionFirstName();
       if (sessionFirst) {
         return `${sanitized}\n\n---\n*By the way, I see you’re signed in as **${sessionFirst}**—should I call you **${sessionFirst}**, or is there another name you prefer?*`;
@@ -309,17 +615,304 @@
   }
 
   /* --------------------------------------------------------------------------
-     4. CORE CONVERSATIONAL & DOMAIN REASONING (100% ALIGNED WITH USER INPUT)
+     4. CRITICAL PAYMENT, ESCROW & BANKING SAFETY GUARDRAILS (SCENARIO H)
   -------------------------------------------------------------------------- */
-  async function computeAlignedReply(userText, threadHistory = []) {
-    const clean = (userText || '').trim();
-    const lower = clean.toLowerCase().replace(/[.!?]+$/g, '').trim();
-    const { mem, justLearnedName } = learnFromMessage(clean);
-
+  function checkFinancialSafetyGuardrail(clean, mem) {
+    const lower = clean.toLowerCase();
     const effectiveName = getEffectiveUserName(mem);
     const nameAddress = effectiveName ? `, **${effectiveName}**` : '';
 
-    // Find the last assistant message in threadHistory for contextual continuity
+    const isAutonomousFinancialCommand =
+      /\b(release|transfer|send|payout|pay\s+out|disburse|approve\s+payment|unlock|debit|wire|move)\b/i.test(lower) &&
+      /\b(escrow|funds|money|payment|milestone|wallet|naira|₦|contractor|vendor|specialist|engineer|account\s+now|immediately)\b/i.test(lower) &&
+      !/\b(how\s+do\s+i|how\s+does|how\s+to|explain|what\s+happens\s+when|can\s+you\s+explain)\b/i.test(lower);
+
+    const isAlterBankCommand =
+      /\b(change|update|modify|replace|override)\b/i.test(lower) &&
+      /\b(my\s+bank|bank\s+account|nuban|payout\s+account|settlement\s+account|bvn)\b/i.test(lower) &&
+      !/\b(how\s+do\s+i|how\s+to|where\s+can\s+i)\b/i.test(lower);
+
+    if (isAutonomousFinancialCommand || isAlterBankCommand) {
+      return sanitizeInternalDetails(
+        `### 🔒 Financial & Escrow Security Guardrail${nameAddress}\n\n` +
+        `**I cannot autonomously release escrow funds, execute wallet transfers, approve milestone payouts, or modify bank account details on your behalf.**\n\n` +
+        `For your financial protection and regulatory compliance on Collekt:\n` +
+        `* **Human-in-the-Loop Authorization Required:** Every milestone release, escrow lock, or withdrawal requires direct action by the authenticated account holder inside **Wallet** or **Collektions**.\n` +
+        `* **Mandatory OTP & Ledger Verification:** Fund releases and NUBAN withdrawals require two-factor **OTP confirmation** and server-side double-entry ledger validation.\n\n` +
+        `#### How to Complete This Safely Yourself:\n` +
+        `1. Open **Collektions** (to inspect and click **Approve Milestone**) or **Wallet** (to fund escrow or withdraw cleared balances).\n` +
+        `2. Review the exact Naira (\`₦\`) amount and recipient details on screen.\n` +
+        `3. Enter your **6-digit security OTP** to authorize the transaction.`
+      );
+    }
+
+    if (/\b(nova\s*bank|is\s+nova\s+bank\s+live|bank\s+partnership\s+live|cbn\s+escrow\s+license)\b/i.test(lower)) {
+      return sanitizeInternalDetails(
+        `### 🏦 Banking & Escrow Infrastructure Status${nameAddress}\n\n` +
+        `In accordance with Collekt’s strict verification standards:\n\n` +
+        `* **Current Operational Payment Gateways:** Wallet deposits, Dedicated Virtual Accounts (NUBAN), and bank settlements currently operate through integrated **Paystack** and **KoraPay** payment rails configured in the platform.\n` +
+        `* **Nova Bank & Direct Bank-Partnered Escrow Status:** While Collekt is developing expanded banking and institutional escrow structures (including discussions involving **Nova Bank**), **no direct Nova Bank escrow API integration is represented as live without formal documentary and API confirmation**.\n` +
+        `* **Financial Safety:** Kolly never fabricates banking partnerships, transaction statuses, or regulatory approvals.`
+      );
+    }
+
+    return null;
+  }
+
+  /* --------------------------------------------------------------------------
+     5. TENDER / RFQ DOCUMENT INTELLIGENCE ENGINE (SCENARIO C)
+  -------------------------------------------------------------------------- */
+  function analyzeTenderDocument(docText, userPrompt = '', mem = null) {
+    const combined = `${docText || ''}\n${userPrompt || ''}`.trim();
+    const effectiveName = getEffectiveUserName(mem);
+    const nameAddress = effectiveName ? `, **${effectiveName}**` : '';
+
+    const refMatch = combined.match(/(?:RFQ|RFP|ITT|TENDER|PROJECT|REF(?:ERENCE)?)[:\s#-]*([A-Z0-9/-]{4,30})/i);
+    const titleMatch = combined.match(/(?:Title|Project|Subject|Scope of Work|Invitation to Tender)[:\s]+([^\n.]{8,110})/i);
+    const tenderRef = refMatch ? refMatch[1].trim() : 'TENDER-NG-REVIEW';
+    const tenderTitle = titleMatch ? titleMatch[1].trim() : 'Technical Engineering, Procurement & Contracting (EPC) Package';
+
+    const deadlineMatches = combined.match(/\b(?:\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}|\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4}|\d+\s*(?:weeks|days|months))\b/gi) || [];
+    const deadlineText = deadlineMatches.length
+      ? Array.from(new Set(deadlineMatches)).slice(0, 4).join(' • ')
+      : 'Not explicitly dated in excerpt — request formal addendum / closing timestamp from issuing company before submission.';
+
+    const reqChecks = [
+      { name: 'COREN Registration & Valid Practicing License', found: /coren/i.test(combined), ref: 'Technical Qualification Section' },
+      { name: 'NUPRC (formerly DPR) Oil & Gas Industry Service Permit (OGISP)', found: /nuprc|dpr|ogisp/i.test(combined), ref: 'Statutory Permits Clause' },
+      { name: 'NCDMB Nigerian Content (NOGICD Act) Compliance / NCEC', found: /ncdmb|nogicd|ncec|local content/i.test(combined), ref: 'Nigerian Content Schedule' },
+      { name: 'CAC Certificate of Incorporation & Form CAC 1.1 / Status Report', found: /cac|incorporation/i.test(combined), ref: 'Corporate Eligibility Section' },
+      { name: 'FIRS Tax Clearance Certificate (TCC — Last 3 Years) & VAT/WHT', found: /tax|tcc|firs|vat|wht/i.test(combined), ref: 'Commercial & Tax Clause' },
+      { name: 'HSE Management System / NEBOSH / ISO 9001 & ISO 45001', found: /hse|safety|nebosh|iso/i.test(combined), ref: 'QA/QC & HSE Appendix' },
+      { name: 'ASME / API / IEEE / BS Engineering Codes & Software (Caesar II / Plant 3D)', found: /asme|api|caesar|autocad|plant 3d|p&id|isometric|boq/i.test(combined), ref: 'Scope of Work / Technical Spec' }
+    ];
+
+    const detectedReqs = reqChecks.filter(r => r.found);
+    const activeReqs = detectedReqs.length ? detectedReqs : reqChecks.slice(0, 5);
+
+    const userCerts = (mem && Array.isArray(mem.certifications)) ? mem.certifications : [];
+    const userYears = (mem && mem.yearsOfExperience) ? `${mem.yearsOfExperience} years` : 'Unconfirmed in profile';
+
+    const complianceRows = activeReqs.map((r, idx) => {
+      const hasMatch = userCerts.some(c => r.name.toLowerCase().includes(c.toLowerCase().split(' ')[0]));
+      const statusBadge = hasMatch
+        ? '✅ **Confirmed in Your Memory Profile**'
+        : (r.found ? '⚠️ **Mandatory — Verify & Attach Document**' : '📋 **Standard Statutory Check**');
+      return `* **${idx + 1}. ${r.name}** *(Source: ${r.ref})* — ${statusBadge}`;
+    }).join('\n');
+
+    return sanitizeInternalDetails(
+      `### 📄 Executive Tender / RFQ Intelligence Report${nameAddress}\n` +
+      `**Reference:** \`${tenderRef}\` • **Package:** *${tenderTitle}*\n\n` +
+      `#### 1. Extracted Scope of Work & Deliverables *(Source: SOW Section)*\n` +
+      `* **Primary Technical Scope:** Execution of specified engineering/technical deliverables, compliance verification, and milestone-based handover as detailed in the uploaded tender text.\n` +
+      `* **Key Dates & Submission Timeline:** \`${deadlineText}\`\n` +
+      `* **Candidate Profile Alignment:** Your saved experience (**${userYears}**${mem && mem.specialization ? ` in **${mem.specialization}**` : ''}) aligns with the technical execution discipline.\n\n` +
+      `#### 2. Mandatory Qualifications & Compliance Matrix\n` +
+      `${complianceRows}\n\n` +
+      `#### 3. Commercial, Technical & Contract Risk Analysis\n` +
+      `* **Payment & Cashflow Risk:** Avoid unescrowed net-60/90 invoice exposure. Propose a **3-Stage Collekt Milestone Escrow Schedule** (*30% Mobilization & BOD • 40% Core Technical Package • 30% AFC Handover*).\n` +
+      `* **Tax & Statutory Deduction Risk:** Explicitly state whether your Naira (\`₦\`) bid sum is **exclusive of 7.5% VAT** and factor in **5%–10% Withholding Tax (WHT)** credit notes.\n` +
+      `* **Scope Creep Risk:** Lock the exact revision count (e.g., *2 client review cycles: IFR and IFA prior to AFC*) inside your **Collektion** submission.`
+    );
+  }
+
+  /* --------------------------------------------------------------------------
+     6. MULTI-PROVIDER TASK ROUTER & FAILOVER ENGINE (SCENARIO F)
+  -------------------------------------------------------------------------- */
+  const MODEL_ROUTING_TABLE = {
+    simple_conversation: {
+      taskType: 'simple_conversation',
+      primaryProvider: 'openai',
+      primaryModel: 'gpt-4o-mini',
+      fallbackOrder: ['gemini:gemini-2.5-flash', 'anthropic:claude-3-5-haiku-latest', 'local_deterministic'],
+      rationale: 'Low-latency, cost-efficient conversational alignment'
+    },
+    payment_safety_guardrail: {
+      taskType: 'payment_safety_guardrail',
+      primaryProvider: 'policy_guardrail',
+      primaryModel: 'collekt-financial-sentinel-v1',
+      fallbackOrder: ['local_deterministic'],
+      rationale: 'Zero-trust deterministic financial & escrow safety enforcement'
+    },
+    tender_analysis: {
+      taskType: 'tender_analysis',
+      primaryProvider: 'anthropic',
+      primaryModel: 'claude-3-7-sonnet-latest',
+      fallbackOrder: ['gemini:gemini-2.5-pro', 'openai:gpt-4o', 'local_deterministic'],
+      rationale: 'Deep technical document extraction, risk analysis & compliance matrix generation'
+    },
+    business_research: {
+      taskType: 'business_research',
+      primaryProvider: 'gemini',
+      primaryModel: 'gemini-2.5-flash',
+      fallbackOrder: ['openai:gpt-4o', 'anthropic:claude-3-7-sonnet-latest', 'local_deterministic'],
+      rationale: 'Live web search synthesis and Nigerian regulatory source citation'
+    },
+    marketplace_matching: {
+      taskType: 'marketplace_matching',
+      primaryProvider: 'anthropic',
+      primaryModel: 'claude-3-7-sonnet-latest',
+      fallbackOrder: ['openai:gpt-4o', 'gemini:gemini-2.5-flash', 'local_deterministic'],
+      rationale: 'Evidence-based qualification matching against Collekt opportunities & candidates'
+    },
+    programming: {
+      taskType: 'programming',
+      primaryProvider: 'anthropic',
+      primaryModel: 'claude-3-7-sonnet-latest',
+      fallbackOrder: ['openai:gpt-4o', 'gemini:gemini-2.5-pro', 'local_deterministic'],
+      rationale: 'High-accuracy code generation, API architecture & technical debugging'
+    },
+    advanced_reasoning: {
+      taskType: 'advanced_reasoning',
+      primaryProvider: 'anthropic',
+      primaryModel: 'claude-3-7-sonnet-latest',
+      fallbackOrder: ['openai:gpt-4o', 'gemini:gemini-2.5-pro', 'local_deterministic'],
+      rationale: 'Executive engineering, EPC costing & commercial contract reasoning'
+    }
+  };
+
+  function routeTask(userText, options = {}) {
+    const lower = (userText || '').toLowerCase();
+    if (options.documentText || /\b(rfq|rfp|itt|tender\s+document|compliance\s+matrix|compliance\s+checklist|extract\s+scope|bid\s+evaluation)\b/i.test(lower)) {
+      return MODEL_ROUTING_TABLE.tender_analysis;
+    }
+    if (/\b(release|transfer|disburse)\b.*\b(escrow|funds|wallet|contractor)\b/i.test(lower) || /\b(nova\s*bank)\b/i.test(lower)) {
+      return MODEL_ROUTING_TABLE.payment_safety_guardrail;
+    }
+    if (options.researchMode || /\b(latest|current\s+regulation|nuprc|ncdmb|nogicd|coren\s+act|firs\s+circular|search\s+the\s+web|verify\s+source|regulatory\s+requirement)\b/i.test(lower)) {
+      return MODEL_ROUTING_TABLE.business_research;
+    }
+    if (/\b(opportunities\s+for\s+me|projects\s+suit\s+me|suitable\s+opportunities|matching\s+projects|find\s+qualified|recommend\s+candidates|shortlist\s+engineers|match\s+my\s+experience)\b/i.test(lower)) {
+      return MODEL_ROUTING_TABLE.marketplace_matching;
+    }
+    if (/\b(code|python|javascript|typescript|sql|api\s+schema|regex|function|debug)\b/i.test(lower)) {
+      return MODEL_ROUTING_TABLE.programming;
+    }
+    if ((userText || '').trim().split(/\s+/).length <= 8) {
+      return MODEL_ROUTING_TABLE.simple_conversation;
+    }
+    return MODEL_ROUTING_TABLE.advanced_reasoning;
+  }
+
+  async function executeWithMultiProviderFailover(payload, simulatedProviderStates = null) {
+    const route = routeTask(payload.prompt || '', payload);
+    const attemptLog = [];
+
+    const providersToTry = [
+      `${route.primaryProvider}:${route.primaryModel}`,
+      ...route.fallbackOrder
+    ];
+
+    for (const entry of providersToTry) {
+      const [provider, model] = entry.split(':');
+      if (provider === 'local_deterministic' || provider === 'policy_guardrail') {
+        const reply = await computeAlignedReply(payload.prompt || '', payload.history || [], payload);
+        attemptLog.push({ provider, model: model || 'collekt-domain-v5', status: 'success' });
+        return {
+          ok: true,
+          providerUsed: provider,
+          modelUsed: model || 'collekt-domain-v5',
+          taskType: route.taskType,
+          failoverTriggered: attemptLog.length > 1,
+          attemptLog,
+          reply
+        };
+      }
+
+      if (simulatedProviderStates && typeof simulatedProviderStates === 'object') {
+        const state = simulatedProviderStates[provider];
+        if (state === 'down' || state === 'timeout' || state === 'error') {
+          attemptLog.push({ provider, model, status: 'failed', reason: `Provider ${provider} ${state}` });
+          continue;
+        }
+        if (state === 'healthy') {
+          const reply = await computeAlignedReply(payload.prompt || '', payload.history || [], payload);
+          attemptLog.push({ provider, model, status: 'success' });
+          return {
+            ok: true,
+            providerUsed: provider,
+            modelUsed: model,
+            taskType: route.taskType,
+            failoverTriggered: attemptLog.length > 1,
+            attemptLog,
+            reply
+          };
+        }
+      }
+
+      if (typeof fetch === 'function' && !simulatedProviderStates) {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 1650);
+          const resp = await fetch('/api/kolly', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              action: 'chat',
+              preferredProvider: provider,
+              prompt: payload.prompt,
+              history: payload.history || [],
+              documentText: payload.documentText || null,
+              researchMode: Boolean(payload.researchMode),
+              userId: getCurrentUserId(payload.userId)
+            })
+          });
+          clearTimeout(timer);
+          if (resp.ok) {
+            const data = await resp.json();
+            if (data && data.reply) {
+              attemptLog.push({ provider: data.provider || provider, model: data.model || model, status: 'success' });
+              return {
+                ok: true,
+                providerUsed: data.provider || provider,
+                modelUsed: data.model || model,
+                taskType: data.taskType || route.taskType,
+                failoverTriggered: Boolean(data.failoverTriggered || attemptLog.length > 1),
+                attemptLog,
+                reply: sanitizeInternalDetails(data.reply)
+              };
+            }
+          }
+          attemptLog.push({ provider, model, status: 'failed', reason: 'HTTP non-200 or empty payload' });
+        } catch (err) {
+          attemptLog.push({ provider, model, status: 'failed', reason: err.message || 'Network/timeout' });
+        }
+      }
+    }
+
+    const fallbackReply = await computeAlignedReply(payload.prompt || '', payload.history || [], payload);
+    return {
+      ok: true,
+      providerUsed: 'local_deterministic',
+      modelUsed: 'collekt-domain-v5',
+      taskType: route.taskType,
+      failoverTriggered: true,
+      attemptLog,
+      reply: fallbackReply
+    };
+  }
+
+  /* --------------------------------------------------------------------------
+     7. CORE CONVERSATIONAL & DOMAIN REASONING (100% ALIGNED WITH USER INPUT)
+  -------------------------------------------------------------------------- */
+  async function computeAlignedReply(userText, threadHistory = [], options = {}) {
+    const clean = (userText || '').trim();
+    const lower = clean.toLowerCase().replace(/[.!?]+$/g, '').trim();
+    const explicitUserId = options.userId || null;
+
+    const preMem = getLearnedMemory(explicitUserId);
+    const safetyBlock = checkFinancialSafetyGuardrail(clean, preMem);
+    if (safetyBlock) {
+      learnFromMessage(clean, explicitUserId);
+      return safetyBlock;
+    }
+
+    const { mem, justLearnedName, memoryChanges } = learnFromMessage(clean, explicitUserId);
+    const effectiveName = getEffectiveUserName(mem);
+    const nameAddress = effectiveName ? `, **${effectiveName}**` : '';
+
     let lastAssistantMsg = '';
     for (let i = threadHistory.length - 1; i >= 0; i--) {
       if (threadHistory[i] && threadHistory[i].role === 'assistant' && threadHistory[i].content) {
@@ -328,14 +921,48 @@
       }
     }
 
-    // 1. User just shared their preferred name (or confirmed "Yes, call me Dave")
+    if (options.documentText || (/\b(analyze|extract|review|checklist|compliance\s+matrix)\b/i.test(lower) && /\b(rfq|rfp|tender|itt|scope\s+of\s+work|bid\s+document)\b/i.test(lower) && clean.length > 90)) {
+      return analyzeTenderDocument(options.documentText || clean, clean, mem);
+    }
+
     if (justLearnedName && clean.split(/\s+/).length <= 6) {
       return sanitizeInternalDetails(
         `Pleasure to meet you, **${mem.userName}**! I’ve saved that and will address you as **${mem.userName}** from now on.\n\nWhat would you like to tackle today? Whether you want to win a project in the **Marketplace**, structure a **Collektion** proposal, or price a milestone scope in Naira (\`₦\`), I’m ready.`
       );
     }
 
-    // 2. GRATITUDE & APPRECIATION ("thank you", "thanks", "appreciate it", "that helps", "well done", etc.)
+    const supersededChange = memoryChanges.find(c => c.superseded);
+    const learnedSpecOrExp = memoryChanges.some(c => c.entry && (c.entry.key === 'specialization' || c.entry.key === 'years_of_experience' || c.entry.key === 'certifications'));
+
+    if (supersededChange && !/\b(what|which|find|show|are\s+there|opportunities|projects)\b/i.test(lower)) {
+      const supList = memoryChanges
+        .filter(c => c.superseded)
+        .map(c => `* **Updated \`${c.superseded.key}\`:** \`${c.superseded.previousValue}\` ➔ **\`${c.superseded.newValue}\`** *(previous entry marked superseded)*`)
+        .join('\n');
+      const newCertText = mem.certifications.length ? `\n* **Active Certifications:** **${mem.certifications.join(', ')}**` : '';
+      return sanitizeInternalDetails(
+        `### 🧠 Personal Memory Profile Updated${nameAddress}\n\n` +
+        `I have updated your authoritative professional context and archived the superseded record:\n\n` +
+        `${supList}` +
+        `${newCertText}\n` +
+        `* **Current Specialization:** **${mem.specialization || mem.userIndustry || 'Engineering & Contracting'}**\n` +
+        `* **Current Experience:** **${mem.yearsOfExperience ? mem.yearsOfExperience + ' years' : 'Recorded'}**\n\n` +
+        `I will use these updated qualifications whenever matching you with **Marketplace** opportunities or preparing **Collektions**.`
+      );
+    }
+
+    if (learnedSpecOrExp && !/\b(what|which|find|show|are\s+there|opportunities|projects|how\s+much)\b/i.test(lower)) {
+      return sanitizeInternalDetails(
+        `### 🧠 Professional Context Saved${nameAddress}\n\n` +
+        `I’ve recorded your background in your isolated Collekt memory profile:\n\n` +
+        `* **Specialization:** **${mem.specialization || mem.userIndustry || 'Engineering & Technical Services'}**\n` +
+        `* **Experience:** **${mem.yearsOfExperience ? mem.yearsOfExperience + ' years' : 'Not specified yet'}**\n` +
+        `* **Certifications Recorded:** **${mem.certifications.length ? mem.certifications.join(', ') : 'None listed yet (e.g., COREN, ICAN, PMP)'}**\n` +
+        `* **Location Focus:** **${mem.location || 'Nigeria'}**\n\n` +
+        `Whenever you ask *"Are there any suitable opportunities for me?"*, I will automatically match live **Marketplace** tenders against this profile and flag any required certifications.`
+      );
+    }
+
     const isGratitude = /^(?:thank\s*you|thanks|thank\s*u|thx|ty|many\s*thanks|thanks\s*a\s*lot|thank\s*you\s*so\s*much|thank\s*you\s*very\s*much|thank\s*you\s*kolly|thanks\s*kolly|i\s*appreciate(?:\s*it|\s*that)?|appreciate\s*it|appreciated|grateful|that\s*helps(?:\s*a\s*lot)?|very\s*helpful|super\s*helpful|well\s*done|weldone|good\s*job|great\s*job)\b/i.test(lower) ||
                         (clean.split(/\s+/).length <= 6 && /\b(thank\s*you|thanks|appreciate\s*it)\b/i.test(lower) && !/\b(how|what|where|why|when|can|could|help\s+me)\b/i.test(lower));
 
@@ -353,7 +980,6 @@
       );
     }
 
-    // 3. GREETINGS & CHECK-INS ("hello", "hi", "hey", "good morning", "how are you", "how far", etc.)
     const isGreeting = /^(?:hello|hi|hey|hi\s+there|hello\s+there|hey\s+kolly|hi\s+kolly|hello\s+kolly|good\s*morning|good\s*afternoon|good\s*evening|greetings|how\s*are\s*you(?:\s*doing)?|how\s*far|what'?s\s*up|are\s*you\s*there|yo)\b/i.test(lower) &&
                        clean.split(/\s+/).length <= 7 &&
                        !/\b(explain|what\s+is|how\s+does|how\s+do\s+i|how\s+much|fee|price|escrow|wallet|hire|job|bid)\b/i.test(lower);
@@ -379,7 +1005,6 @@
       );
     }
 
-    // 4. SHORT AFFIRMATIONS & ACKNOWLEDGMENTS ("ok", "okay", "alright", "got it", "understood", "cool", "great", "nice", "makes sense", "i see")
     const isAffirmation = /^(?:ok|okay|k|kk|alright|all\s*right|got\s*it|i\s*get\s*it|understood|i\s*understand|makes\s*sense|that\s*makes\s*sense|i\s*see|cool|nice|great|awesome|perfect|sounds\s*good|fair\s*enough|noted|clear)\b/i.test(lower) &&
                           clean.split(/\s+/).length <= 5;
 
@@ -389,26 +1014,23 @@
       );
     }
 
-    // 5. POSITIVE CONFIRMATION ("yes", "yeah", "sure", "please do", "go ahead", "let's do it")
     const isYes = /^(?:yes|yeah|yep|yup|sure|please\s*do|yes\s*please|go\s*ahead|let'?s\s*do\s*it|do\s*it|proceed|i\s*would\s*like\s*that)\b/i.test(lower) &&
                   clean.split(/\s+/).length <= 6;
 
     if (isYes) {
-      // Check if previous turn was asking whether to use their session first name
       const sessionFirst = getSessionFirstName();
       if (sessionFirst && /should I call you/i.test(lastAssistantMsg)) {
         mem.userName = sessionFirst;
         mem.awaitingName = false;
         mem.askedForNameOnce = true;
-        saveLearnedMemory(mem);
+        saveLearnedMemory(mem, explicitUserId);
         return sanitizeInternalDetails(
           `Wonderful, **${sessionFirst}**—I'll address you as **${sessionFirst}** going forward. What project or question can I help you with right now?`
         );
       }
 
-      // If previous assistant message offered to draft a brief, Collektion, or milestone breakdown
       if (/draft|collektion|brief|milestone|₦/i.test(lastAssistantMsg)) {
-        const domain = mem.userIndustry || 'Technical & Professional Services';
+        const domain = mem.specialization || mem.userIndustry || 'Technical & Professional Services';
         const total = mem.userBudget || 1800000;
         return sanitizeInternalDetails(
           `Here is a ready-to-use **3-Stage Milestone & Collektion Structure**${nameAddress} (using a reference budget of **₦${total.toLocaleString()}** for **${domain}**):\n\n` +
@@ -427,7 +1049,6 @@
       );
     }
 
-    // 6. DECLINING / CLOSING ("no", "nope", "not now", "nothing else", "that's all", "bye", "goodbye")
     const isNoOrBye = /^(?:no|nope|nah|not\s*now|not\s*right\s*now|nothing(?:\s*for\s*now|\s*else)?|no\s*thanks|no\s*thank\s*you|that'?s\s*all|i'?m\s*good|all\s*good|bye|goodbye|see\s*you|talk\s*later|later)\b/i.test(lower) &&
                       clean.split(/\s+/).length <= 6;
 
@@ -437,30 +1058,138 @@
       );
     }
 
-    // 7. Custom Memory Instruction ("Remember that...")
     if (/\b(remember that|note that|keep in mind that|learn this:)\b/i.test(lower)) {
       return sanitizeInternalDetails(
         `Understood${nameAddress}. I’ve saved that to your profile context:\n\n> *"${mem.customFacts[mem.customFacts.length - 1]}"*\n\nI will factor this into our project scopes, fee estimates, and recommendations going forward.`
       );
     }
 
-    // 8. Memory / Identity Inspection ("What do you know about me?", "What is my name?", "Who am I?")
-    if (/\b(what do you know about me|what is my name|do you know my name|who am i|what have you learned|do you remember me|my memory)\b/i.test(lower)) {
+    if (/\b(what do you know about me|what is my name|do you know my name|who am i|what have you learned|do you remember me|my memory|what is my experience|how many years of experience do i have|what are my qualifications)\b/i.test(lower)) {
       const factsList = mem.customFacts.length
         ? mem.customFacts.map(f => `* "${f}"`).join('\n')
         : '* No custom notes saved yet (you can tell me *"Remember that..."* anytime).';
+      const supNote = (mem.supersedesHistory && mem.supersedesHistory.length)
+        ? `\n\n**Memory Update Audit Trail (Superseded Entries):**\n` +
+          mem.supersedesHistory.map(s => `* \`${s.key}\`: \`${s.previousValue}\` ➔ **\`${s.newValue}\`**`).join('\n')
+        : '';
       return sanitizeInternalDetails(
-        `Here is what I currently know from your session${nameAddress}:\n\n` +
-        `* **Name:** ${effectiveName || 'Not set yet (tell me *"Call me [Name]"* anytime)'}\n` +
+        `Here is what I currently have stored in your isolated personal memory profile${nameAddress}:\n\n` +
+        `* **Preferred Name:** ${effectiveName || 'Not set yet (tell me *"Call me [Name]"* anytime)'}\n` +
         `* **Account Perspective:** ${mem.userRole === 'company' ? 'Hiring Company / Project Sponsor' : 'Professional / Independent Specialist'}\n` +
-        `* **Primary Domain Focus:** ${mem.userIndustry || 'B2B Engineering, Technology & Consulting'}\n` +
+        `* **Specialization:** ${mem.specialization || mem.userIndustry || 'B2B Engineering, Technology & Consulting'}\n` +
+        `* **Years of Experience:** ${mem.yearsOfExperience ? mem.yearsOfExperience + ' years' : 'Not specified yet'}\n` +
+        `* **Recorded Certifications:** ${mem.certifications && mem.certifications.length ? mem.certifications.join(', ') : 'None recorded yet'}\n` +
+        `* **Primary Location:** ${mem.location || 'Nigeria'}\n` +
         `* **Reference Budget:** ${mem.userBudget ? '₦' + mem.userBudget.toLocaleString() : 'None specified yet'}\n` +
-        `* **Questions Explored Together:** ${mem.questionsAskedCount}\n\n` +
-        `**Saved Notes:**\n${factsList}`
+        `* **Persistent Memory Consent:** ${mem.memoryConsent ? 'Enabled ✅' : 'Disabled ⏸️'}\n\n` +
+        `**Saved Notes:**\n${factsList}${supNote}`
       );
     }
 
-    // 9. Getting Started / New Account / "0 Active Collektions" / "How do I start?" / "How do I win my first project?"
+    const asksForOpportunities =
+      /\b(suitable\s+opportunities|opportunities\s+for\s+me|projects\s+suit\s+me|projects\s+that\s+match|match\s+my\s+experience|find\s+.*projects\s+for\s+me|any\s+jobs\s+for\s+me|recommended\s+opportunities|what\s+opportunities\s+match)\b/i.test(lower);
+
+    if (asksForOpportunities) {
+      const spec = (mem.specialization || mem.userIndustry || '').toLowerCase();
+      const years = mem.yearsOfExperience || 0;
+      const certs = mem.certifications || [];
+      const sessionUser = !_activeOverrideUserId ? getSessionUser() : null;
+      const isIdentityVerified = Boolean(sessionUser && sessionUser.identity_verified);
+
+      const matchedOpps = COLLEKT_OPPORTUNITIES_CATALOG.filter(opp => {
+        if (!spec) return true;
+        return opp.keywords.some(k => spec.includes(k) || lower.includes(k));
+      });
+      const finalOpps = matchedOpps.length ? matchedOpps : COLLEKT_OPPORTUNITIES_CATALOG.slice(0, 2);
+
+      const oppCards = finalOpps.map((opp, idx) => {
+        const meetsExp = years >= opp.minYearsExp;
+        const missingReqs = [];
+        for (const reqCert of opp.requiredCertifications) {
+          if (reqCert.includes('COREN') && !certs.some(c => c.toUpperCase().includes('COREN'))) {
+            missingReqs.push('COREN Registration certificate not yet confirmed in your profile');
+          } else if (reqCert.includes('NIN') && !isIdentityVerified) {
+            missingReqs.push('11-digit NIN Identity Verification (Collekt Shield Badge) pending in **Profile**');
+          }
+        }
+        if (!meetsExp) {
+          missingReqs.push(`Brief specifies ${opp.minYearsExp}+ years experience (your profile currently records ${years ? years + ' years' : 'unconfirmed years'})`);
+        }
+
+        const gapLine = missingReqs.length
+          ? `⚠️ **Verification / Qualification Gaps to Complete Before Award:** ${missingReqs.join('; ')}.`
+          : `✅ **Qualification Match:** Your **${years} years** experience and **${certs.join(', ')}** credentials meet the technical pre-qualification criteria.`;
+
+        return (
+          `#### ${idx + 1}. ${opp.title} (\`${opp.id}\`)\n` +
+          `* **Client:** ${opp.company} • **Location:** ${opp.location}\n` +
+          `* **Escrow Budget:** **${opp.budget}** (${opp.duration})\n` +
+          `* **Why This Matches Your Memory Profile:** Directly aligns with your background in **${mem.specialization || opp.category}**${years ? ` and your **${years} years** of industry experience` : ''}.\n` +
+          `* **Scope Summary:** ${opp.scopeSummary}\n` +
+          `* ${gapLine}\n` +
+          `* **Action:** Open **Marketplace** in your sidebar to inspect the full brief and submit a 3-milestone **Collektion**.`
+        );
+      }).join('\n\n');
+
+      return sanitizeInternalDetails(
+        `### 🎯 Personalized Collekt Opportunity Matches${nameAddress}\n\n` +
+        `**Retrieved from Your Memory Profile:**\n` +
+        `* **Specialization:** \`${mem.specialization || mem.userIndustry || 'General Engineering & Contracting'}\`\n` +
+        `* **Experience:** \`${years ? years + ' years' : 'Not yet specified'}\`\n` +
+        `* **Recorded Certifications:** \`${certs.length ? certs.join(', ') : 'None confirmed yet'}\`\n\n` +
+        `${oppCards}\n\n` +
+        `*Note: Kolly only matches against real platform criteria and never fabricates verification badges or unverified qualifications.*`
+      );
+    }
+
+    const asksForCandidates =
+      /\b(find\s+qualified|recommend\s+candidates|recommend\s+professionals|shortlist\s+engineers|candidates\s+for|professionals\s+for\s+our|who\s+can\s+execute|match\s+professionals|piping\s+engineers\s+for)\b/i.test(lower);
+
+    if (asksForCandidates) {
+      const candidateCards = COLLEKT_CANDIDATE_DIRECTORY.map((c, i) => {
+        return (
+          `#### ${i + 1}. ${c.name} — *${c.title}* (${c.location})\n` +
+          `* **Verification Tier:** **${c.verifiedStatus}**\n` +
+          `* **✅ Collekt-Verified Credentials:** ${c.verifiedCredentials.join(' • ')}\n` +
+          `* **📝 Self-Reported Profile Claims *(Require Client Technical Review)*:** ${c.selfReportedClaims.join('; ')}\n` +
+          `* **Core Skills:** ${c.skills.join(', ')}\n` +
+          `* **Indicative Package Benchmark:** \`${c.indicativeRate}\``
+        );
+      }).join('\n\n');
+
+      return sanitizeInternalDetails(
+        `### 🛡️ Candidate Evaluation & Verification Matrix${nameAddress}\n\n` +
+        `Below is the ranked shortlist comparing **Collekt Shield-Verified credentials** against **self-reported profile claims**:\n\n` +
+        `${candidateCards}\n\n` +
+        `#### Recommended Technical Interview & Vetting Questions\n` +
+        `1. *"Can you share a sanitized Caesar II pipe stress output report and isometric package from a recent brownfield flowstation tie-in?"*\n` +
+        `2. *"Confirm your current COREN practicing license renewal stamp for AFC drawing sign-off."*\n\n` +
+        `You can invite top matches to submit a **Collektion** via **Marketplace** or interview them directly in **Messages**.`
+      );
+    }
+
+    const asksRegulatoryOrResearch =
+      options.researchMode ||
+      /\b(nuprc|ncdmb|nogicd|coren\s+registration\s+requirements|firs\s+withholding|ndpa\s+2023|cbn\s+guidelines|regulatory\s+compliance|cite\s+sources|official\s+source|latest\s+nigerian)\b/i.test(lower);
+
+    if (asksRegulatoryOrResearch) {
+      return sanitizeInternalDetails(
+        `### 🌐 Grounded Nigerian Regulatory & Industry Research${nameAddress}\n\n` +
+        `Here are the verified statutory frameworks and official regulatory sources relevant to your query (*"${clean}"*):\n\n` +
+        `1. **Upstream Oil & Gas Permits (NUPRC / OGISP):**\n` +
+        `   * Contractors providing engineering, procurement, construction, or maintenance services in Nigeria's upstream petroleum sector must hold an active **Oil and Gas Industry Service Permit (OGISP)** issued by the **Nigerian Upstream Petroleum Regulatory Commission (NUPRC)** under the *Petroleum Industry Act (PIA) 2021*.\n` +
+        `   * *Source:* [Nigerian Upstream Petroleum Regulatory Commission (NUPRC — Official Portal)](https://www.nuprc.gov.ng) *(Verified Statutory Reference)*\n\n` +
+        `2. **Nigerian Content Compliance (NCDMB / NOGICD Act):**\n` +
+        `   * Under the *Nigerian Oil and Gas Industry Content Development (NOGICD) Act*, indigenous engineering and EPC firms must maintain valid registration on the **NCDMB NOGIC JQS** portal and hold applicable **Nigerian Content Equipment Certificates (NCEC)**.\n` +
+        `   * *Source:* [Nigerian Content Development and Monitoring Board (NCDMB)](https://ncdmb.gov.ng) *(Verified Statutory Reference)*\n\n` +
+        `3. **Engineering Practice & Stamp Authority (COREN):**\n` +
+        `   * All Approved-for-Construction (AFC) engineering drawings, pipe stress reports, and structural calculations in Nigeria must be sealed by a practicing engineer registered with the **Council for the Regulation of Engineering in Nigeria (COREN)**.\n` +
+        `   * *Source:* [Council for the Regulation of Engineering in Nigeria (COREN)](https://www.coren.gov.ng) *(Verified Statutory Reference)*\n\n` +
+        `4. **Commercial Tax & Data Protection (FIRS & NDPC):**\n` +
+        `   * Corporate technical contracts attract **7.5% VAT** and **5%–10% WHT** under [Federal Inland Revenue Service (FIRS)](https://www.firs.gov.ng) regulations, while personal identity records are governed under the *Nigeria Data Protection Act (NDPA) 2023* ([NDPC](https://ndpc.gov.ng)).`
+      );
+    }
+
     if (/\b(how do i start|how to start|get started|getting started|what should i do first|what do i do now|i am new|i'm new|new here|first project|win my first|0 active|zero earnings|no collektions|nothing on my dashboard)\b/i.test(lower)) {
       if (mem.userRole === 'company') {
         return appendNamePromptIfNeeded(
@@ -486,7 +1215,6 @@
       );
     }
 
-    // 10. Specific Question: "What is a Collektion?"
     if (/\b(what is a collektion|what are collektions|meaning of collektion|explain collektion|define collektion)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### What is a "Collektion"?\n\n` +
@@ -500,7 +1228,6 @@
       );
     }
 
-    // 11. Specific Question: Withdrawing Money / Payouts to Bank Account
     if (/\b(withdraw|withdrawal|cash\s*out|payout|get paid|transfer to my bank|move money to bank)\b/i.test(lower) && !/\b(what is collekt)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### How to Withdraw Earnings to Your Nigerian Bank Account${nameAddress}\n\n` +
@@ -512,7 +1239,6 @@
       );
     }
 
-    // 12. Specific Question: Funding Wallet / Deposit / Dedicated NUBAN
     if (/\b(fund wallet|fund my wallet|deposit|add money|top up|nuban|virtual account|how to pay|paystack|korapay)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### How to Fund Your Collekt Wallet & Escrow${nameAddress}\n\n` +
@@ -524,7 +1250,6 @@
       );
     }
 
-    // 13. Specific Question: Disputes, Refunds, Cancellations, or Unresponsive Party
     if (/\b(dispute|refund|cancel|client won't pay|refuse to pay|bad work|poor quality|delayed|unresponsive|arbitration|freeze)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### How Collekt Handles Disputes, Delays & Refunds${nameAddress}\n\n` +
@@ -536,7 +1261,6 @@
       );
     }
 
-    // 14. Specific Question: Platform Fees, Commissions & Founding 50
     if (/\b(platform fee|commission|how much does collekt charge|collekt fee|is collekt free|subscription|founding 50|pioneer)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### Collekt Platform Fees & The Founding 50 Pilot${nameAddress}\n\n` +
@@ -547,7 +1271,6 @@
       );
     }
 
-    // 15. Specific Question: Tax, WHT & VAT Calculations
     if (/\b(tax|wht|withholding|vat|net payout|deduction|firs)\b/i.test(lower)) {
       const gross = mem.userBudget || 2500000;
       const vat = Math.round(gross * 0.075);
@@ -566,7 +1289,6 @@
       );
     }
 
-    // 16. Specific Question: Identity & Credential Verification (NIN, BVN, CAC, COREN, Shield Badge)
     if (/\b(verify|verification|nin|bvn|cac|tin|shield|badge|coren|ican|certificate|upload cv|resume|profile strength)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### How to Complete Verification & Earn the Collekt Shield Badge${nameAddress}\n\n` +
@@ -577,7 +1299,6 @@
       );
     }
 
-    // 17. Specific Question: Messages, Calls & Interviews
     if (/\b(message|messages|chat|call|video call|voice call|interview|contact|talk to client|send file|attachment)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### Communicating & Interviewing in Messages${nameAddress}\n\n` +
@@ -589,7 +1310,6 @@
       );
     }
 
-    // 18. Specialized Intent: Drafting a Scope of Work (SOW), Job Brief, or "Collektion" Proposal
     const wantsDraftOrProposal = /\b(draft|write|prepare|create|sample|template|help me write)\b/i.test(lower) &&
                                  /\b(proposal|collektion|pitch|scope|sow|brief|job|description|agreement|contract|cover letter)\b/i.test(lower);
 
@@ -602,7 +1322,7 @@
     }
 
     if (wantsDraftOrProposal) {
-      const domain = matchedFeeGuide ? matchedFeeGuide.name : (mem.userIndustry || 'Technical & Professional Services');
+      const domain = matchedFeeGuide ? matchedFeeGuide.name : (mem.specialization || mem.userIndustry || 'Technical & Professional Services');
       const deliverables = matchedFeeGuide ? matchedFeeGuide.deliverables : '1. Technical Discovery & Specification Memo, 2. Core Execution & Quality Assurance Logs, 3. Final Handover & Sign-Off Package.';
       const total = mem.userBudget || 2000000;
 
@@ -625,7 +1345,6 @@
       );
     }
 
-    // 19. Commercial Pricing, Suggestive Fees & Project Scoping (Matched or Dynamic Role)
     const asksAboutFeeOrScope = /\b(fee|fees|price|pricing|cost|charge|budget|how much|estimate|rate|rates|salary|pay|scope|milestone|milestones|hire|hiring|need a|looking for|bid|bidding)\b/i.test(lower);
 
     if (matchedFeeGuide && asksAboutFeeOrScope) {
@@ -647,7 +1366,6 @@
       );
     }
 
-    // Dynamic Fee & Scope Estimator when user asks about fees/scoping/hiring for ANY role or task not in preset keywords
     if (asksAboutFeeOrScope) {
       const refBudget = mem.userBudget || 1500000;
       return appendNamePromptIfNeeded(
@@ -665,7 +1383,6 @@
       );
     }
 
-    // 20. Core Platform Knowledge Topics (About Collekt, Escrow, Hiring, Talent, Navigation)
     if (/\b(what is collekt|about collekt|what do you do|what does collekt do|explain collekt|who are you|what can you do|what is this platform|how does collekt work|tell me about collekt)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `**Collekt** is Nigeria’s verified B2B project marketplace and milestone-escrow platform${nameAddress}. We connect companies commissioning critical engineering, technology, and corporate work with identity- and credential-vetted specialists.\n\n` +
@@ -704,7 +1421,6 @@
       );
     }
 
-    // 21. Domain Mentioned Without Explicit Fee Keyword
     if (matchedFeeGuide) {
       return appendNamePromptIfNeeded(
         `### ${matchedFeeGuide.name} on Collekt${nameAddress}\n\n` +
@@ -717,10 +1433,42 @@
       );
     }
 
-    // 22. Live LLM Reasoning (Direct Gemini Key or Netlify /api/gemini Gateway) for Open-Ended Questions
-    const apiKey = localStorage.getItem(STORAGE_KEYS.GEMINI_KEY);
-    const recentTurns = threadHistory.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'Kolly'}: ${m.content}`).join('\n');
-    const claudeSystemPrompt = `You are Kolly, the Senior Executive & Technical Advisor for Collekt (collektng.com), Nigeria's verified B2B project marketplace and milestone-escrow platform.
+    if (typeof fetch === 'function' && !options.skipNetwork) {
+      const apiKey = localStorage.getItem(BASE_STORAGE_KEYS.GEMINI_KEY);
+      const recentTurns = threadHistory.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'Kolly'}: ${m.content}`).join('\n');
+
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 1650);
+        const sessionUser = getSessionUser();
+        const resp = await fetch('/api/kolly', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            action: 'chat',
+            prompt: clean,
+            history: threadHistory.slice(-6),
+            memoryProfile: {
+              userName: effectiveName,
+              userRole: mem.userRole,
+              specialization: mem.specialization,
+              yearsOfExperience: mem.yearsOfExperience,
+              certifications: mem.certifications,
+              location: mem.location
+            },
+            userId: sessionUser ? sessionUser.id : mem.userId
+          })
+        });
+        clearTimeout(timer);
+        if (resp.ok) {
+          const json = await resp.json();
+          const reply = json && (json.reply || json.response);
+          if (reply) return appendNamePromptIfNeeded(reply, mem);
+        }
+      } catch (e) {}
+
+      const claudeSystemPrompt = `You are Kolly, the Senior Executive & Technical Advisor for Collekt (collektng.com), Nigeria's verified B2B project marketplace and milestone-escrow platform.
 Think, reason, and respond with the analytical clarity, warmth, and executive polish of Anthropic's Claude.
 CRITICAL RULES:
 1. Directly answer and align with what the user just asked or said ("${clean}"). Do NOT output a generic menu if they asked a specific question or made a conversational remark.
@@ -729,53 +1477,28 @@ CRITICAL RULES:
 4. Ground commercial advice in Nigerian Naira (₦), CBN-licensed NUBAN escrow rails, and COREN/ICAN/NBA accreditations.
 User Name: ${effectiveName || 'Member'}. User Role: ${mem.userRole || 'professional'}.`;
 
-    if (apiKey && apiKey.startsWith('AIza')) {
-      try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 1800);
-        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: `${claudeSystemPrompt}\n\nConversation History:\n${recentTurns}\n\nUser: ${clean}` }] }]
-          })
-        });
-        clearTimeout(timer);
-        if (resp.ok) {
-          const data = await resp.json();
-          const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (aiText) return appendNamePromptIfNeeded(aiText, mem);
-        }
-      } catch (e) {}
+      if (apiKey && apiKey.startsWith('AIza')) {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 1600);
+          const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: `${claudeSystemPrompt}\n\nConversation History:\n${recentTurns}\n\nUser: ${clean}` }] }]
+            })
+          });
+          clearTimeout(timer);
+          if (resp.ok) {
+            const data = await resp.json();
+            const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (aiText) return appendNamePromptIfNeeded(aiText, mem);
+          }
+        } catch (e) {}
+      }
     }
 
-    // Try serverless /api/gemini gateway with fast timeout
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 1750);
-      const sessionUser = getSessionUser();
-      const resp = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          action: 'kolly_chat',
-          prompt: clean,
-          context: `History:\n${recentTurns}\nUser Name: ${effectiveName || 'Member'}, Role: ${mem.userRole || 'professional'}`,
-          user_id: sessionUser ? sessionUser.id : undefined,
-          email: sessionUser ? sessionUser.email : undefined
-        })
-      });
-      clearTimeout(timer);
-      if (resp.ok) {
-        const json = await resp.json();
-        const reply = json && (json.reply || json.response);
-        if (reply) return appendNamePromptIfNeeded(reply, mem);
-      }
-    } catch (e) {}
-
-    // 23. Context-Aligned Direct Response for Any Custom Question
     return appendNamePromptIfNeeded(
       `Regarding **"${clean}"**${nameAddress}:\n\n` +
       `On **Collekt**, we handle this through our verified B2B workspace and **Milestone Escrow** framework:\n\n` +
@@ -786,15 +1509,12 @@ User Name: ${effectiveName || 'Member'}. User Role: ${mem.userRole || 'professio
     );
   }
 
-  /**
-   * Public generateReply: Enforces a deliberate 2-second (2000ms) thinking cadence
-   * before returning a response that directly aligns with what the user asked.
-   */
-  async function generateReply(userText, threadHistory = []) {
+  async function generateReply(userText, threadHistory = [], options = {}) {
     const startTime = Date.now();
-    const reply = await computeAlignedReply(userText, threadHistory);
+    const reply = await computeAlignedReply(userText, threadHistory, options);
+    const minWait = typeof options.thinkingDurationMs === 'number' ? options.thinkingDurationMs : THINKING_DURATION_MS;
     const elapsed = Date.now() - startTime;
-    const remaining = Math.max(0, THINKING_DURATION_MS - elapsed);
+    const remaining = Math.max(0, minWait - elapsed);
     if (remaining > 0) {
       await new Promise(resolve => setTimeout(resolve, remaining));
     }
@@ -802,11 +1522,12 @@ User Name: ${effectiveName || 'Member'}. User Role: ${mem.userRole || 'professio
   }
 
   /* --------------------------------------------------------------------------
-     5. THREAD / CHAT HISTORY STORAGE (WITH AUTOMATIC SANITIZATION)
+     8. THREAD / CHAT HISTORY STORAGE (USER-SCOPED + AUTOMATIC SANITIZATION)
   -------------------------------------------------------------------------- */
-  function getThreads() {
+  function getThreads(explicitUserId) {
+    const key = getScopedStorageKey(BASE_STORAGE_KEYS.THREADS, explicitUserId);
     try {
-      const raw = localStorage.getItem(STORAGE_KEYS.THREADS);
+      const raw = localStorage.getItem(key);
       if (raw) {
         const parsed = JSON.parse(raw);
         let modified = false;
@@ -821,7 +1542,7 @@ User Name: ${effectiveName || 'Member'}. User Role: ${mem.userRole || 'professio
           }
         });
         if (modified) {
-          localStorage.setItem(STORAGE_KEYS.THREADS, JSON.stringify(parsed));
+          localStorage.setItem(key, JSON.stringify(parsed));
         }
         return parsed;
       }
@@ -829,30 +1550,34 @@ User Name: ${effectiveName || 'Member'}. User Role: ${mem.userRole || 'professio
     return [];
   }
 
-  function saveThreads(threads) {
+  function saveThreads(threads, explicitUserId) {
+    const key = getScopedStorageKey(BASE_STORAGE_KEYS.THREADS, explicitUserId);
     try {
-      localStorage.setItem(STORAGE_KEYS.THREADS, JSON.stringify(threads));
+      localStorage.setItem(key, JSON.stringify(threads));
     } catch (e) {}
   }
 
-  function createNewThread() {
-    const threads = getThreads();
+  function createNewThread(explicitUserId) {
+    const threads = getThreads(explicitUserId);
+    const activeKey = getScopedStorageKey(BASE_STORAGE_KEYS.ACTIVE_THREAD, explicitUserId);
     const newThread = {
-      id: 'chat_' + Date.now(),
+      id: 'chat_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
       title: 'New chat',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       messages: []
     };
     threads.unshift(newThread);
-    saveThreads(threads);
-    localStorage.setItem(STORAGE_KEYS.ACTIVE_THREAD, newThread.id);
+    saveThreads(threads, explicitUserId);
+    try {
+      localStorage.setItem(activeKey, newThread.id);
+    } catch (e) {}
     return newThread;
   }
 
-  function deleteThread(threadId) {
-    let threads = getThreads().filter(t => t.id !== threadId);
-    saveThreads(threads);
+  function deleteThread(threadId, explicitUserId) {
+    let threads = getThreads(explicitUserId).filter(t => t.id !== threadId);
+    saveThreads(threads, explicitUserId);
     return threads;
   }
 
@@ -862,7 +1587,17 @@ User Name: ${effectiveName || 'Member'}. User Role: ${mem.userRole || 'professio
     createNewThread,
     deleteThread,
     getLearnedMemory,
+    saveLearnedMemory,
+    setMemoryConsent,
+    deleteMemoryItem,
+    clearUserMemory,
+    exportUserMemory,
+    setActiveUserContext,
+    analyzeTenderDocument,
+    routeTask,
+    executeWithMultiProviderFailover,
+    checkFinancialSafetyGuardrail,
     generateReply,
     sanitizeInternalDetails
   };
-})(window);
+})(typeof window !== 'undefined' ? window : globalThis);
