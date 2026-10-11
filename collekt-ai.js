@@ -696,7 +696,7 @@ function ensureKollyEngineLoaded(callback) {
     return;
   }
   const s = document.createElement('script');
-  s.src = 'kolly-engine.js?v=159.0';
+  s.src = 'kolly-engine.js?v=160.0';
   s.onload = () => callback();
   document.head.appendChild(s);
 }
@@ -763,38 +763,41 @@ function initCollektAICopilot() {
         bottom: 24px;
         right: 24px;
         z-index: 9998;
-        width: 50px;
-        height: 50px;
+        width: 52px;
+        height: 52px;
         border-radius: 50%;
-        background: #10a37f;
-        color: #ffffff;
-        border: 2px solid rgba(255, 255, 255, 0.18);
+        background: #10a37f !important;
+        color: #ffffff !important;
+        border: 2px solid rgba(255, 255, 255, 0.22) !important;
         font-family: 'Inter', 'Manrope', sans-serif;
         font-size: 21px;
         font-weight: 800;
         display: grid;
         place-items: center;
-        cursor: pointer;
-        box-shadow: 0 10px 28px rgba(16, 163, 127, 0.42), 0 4px 10px rgba(0, 0, 0, 0.3);
-        transition: transform 0.2s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.2s ease;
+        cursor: grab;
+        box-shadow: 0 10px 28px rgba(16, 163, 127, 0.45), 0 4px 10px rgba(0, 0, 0, 0.32);
+        transition: box-shadow 0.2s ease, transform 0.15s ease;
         user-select: none;
+        touch-action: none;
       }
       .kolly-fab-btn:hover {
-        transform: translateY(-3px) scale(1.05);
-        box-shadow: 0 14px 34px rgba(16, 163, 127, 0.55), 0 6px 14px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 14px 34px rgba(16, 163, 127, 0.6), 0 6px 14px rgba(0, 0, 0, 0.38);
+      }
+      .kolly-fab-btn:active {
+        cursor: grabbing;
       }
       .kolly-drawer-panel {
         position: fixed;
-        bottom: 84px;
+        bottom: 86px;
         right: 24px;
         z-index: 9999;
         width: min(410px, calc(100vw - 28px));
         height: min(580px, calc(100dvh - 110px));
         background: #212121;
         color: #ececec;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 20px;
-        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.58);
         display: none;
         flex-direction: column;
         overflow: hidden;
@@ -809,6 +812,12 @@ function initCollektAICopilot() {
         align-items: center;
         justify-content: space-between;
         flex-shrink: 0;
+        cursor: grab;
+        user-select: none;
+        touch-action: none;
+      }
+      .kolly-drawer-header:active {
+        cursor: grabbing;
       }
       .kolly-hdr-btn {
         background: rgba(255, 255, 255, 0.06);
@@ -863,53 +872,68 @@ function initCollektAICopilot() {
       .kolly-drawer-input-wrap {
         padding: 10px 12px 12px;
         background: #212121;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
       }
       .kolly-drawer-form {
-        background: #2f2f2f;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: #ffffff !important;
+        border: 1.5px solid rgba(16, 163, 127, 0.35) !important;
         border-radius: 24px;
         padding: 6px 8px 6px 14px;
         display: flex;
         align-items: center;
         gap: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
       }
-      .kolly-drawer-input {
+      #kollyDrawerInput,
+      .kolly-drawer-input,
+      .kolly-drawer-input:focus {
         flex: 1;
-        background: transparent;
-        border: none;
-        outline: none;
-        color: #ececec;
-        font-size: 13.5px;
-        font-family: inherit;
+        background: #ffffff !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
+        caret-color: #000000 !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        font-family: 'Inter', 'Manrope', sans-serif !important;
       }
+      #kollyDrawerInput::placeholder,
       .kolly-drawer-input::placeholder {
-        color: #8e8e8e;
+        color: #555555 !important;
+        -webkit-text-fill-color: #555555 !important;
+        font-weight: 500 !important;
+        opacity: 1 !important;
       }
       .kolly-drawer-send {
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         border: none;
-        background: #ffffff;
-        color: #171717;
+        background: #10a37f !important;
+        color: #ffffff !important;
         font-weight: 800;
-        font-size: 14px;
+        font-size: 15px;
         cursor: pointer;
         display: grid;
         place-items: center;
         flex-shrink: 0;
+        transition: opacity 0.15s;
+      }
+      .kolly-drawer-send:hover {
+        opacity: 0.9;
       }
       @media (max-width: 900px) {
         .kolly-fab-btn {
           bottom: 84px;
           right: 16px;
-          width: 46px;
-          height: 46px;
+          width: 48px;
+          height: 48px;
           font-size: 19px;
         }
         .kolly-drawer-panel {
-          bottom: 138px;
+          bottom: 140px;
           right: 14px;
           width: calc(100vw - 28px);
           height: min(510px, calc(100dvh - 160px));
@@ -921,9 +945,9 @@ function initCollektAICopilot() {
     const widget = document.createElement('div');
     widget.id = 'kollyFloatingWidget';
     widget.innerHTML = `
-      <button type="button" class="kolly-fab-btn" id="kollyFabBtn" title="Ask Kolly — Collekt AI">K</button>
+      <button type="button" class="kolly-fab-btn" id="kollyFabBtn" title="Click to chat with Kolly • Drag to move anywhere">K</button>
       <div class="kolly-drawer-panel" id="kollyDrawerPanel">
-        <div class="kolly-drawer-header">
+        <div class="kolly-drawer-header" id="kollyDrawerHeader" title="Drag to move chat window">
           <div style="display:flex;align-items:center;gap:8px;">
             <span style="width:26px;height:26px;border-radius:50%;background:#10a37f;color:#fff;display:inline-grid;place-items:center;font-size:13px;font-weight:800;">K</span>
             <span style="font-weight:700;font-size:14px;color:#ececec;">Kolly</span>
@@ -932,7 +956,7 @@ function initCollektAICopilot() {
           <div style="display:flex;align-items:center;gap:6px;">
             <button type="button" class="kolly-hdr-btn" id="kollyBtnNew" title="Start a new chat">+ New</button>
             <button type="button" class="kolly-hdr-btn" id="kollyBtnHist" title="View saved chat history">History</button>
-            <a href="kolly.html" class="kolly-hdr-btn" title="Open full-screen ChatGPT view">⛶ Full</a>
+            <a href="kolly.html" class="kolly-hdr-btn" title="Open full-screen view">⛶ Full</a>
             <button type="button" id="kollyBtnClose" style="background:none;border:none;color:#b4b4b4;font-size:20px;cursor:pointer;padding:0 4px;line-height:1;">&times;</button>
           </div>
         </div>
@@ -950,6 +974,7 @@ function initCollektAICopilot() {
 
     const fabBtn = document.getElementById('kollyFabBtn');
     const panel = document.getElementById('kollyDrawerPanel');
+    const drawerHeader = document.getElementById('kollyDrawerHeader');
     const btnNew = document.getElementById('kollyBtnNew');
     const btnHist = document.getElementById('kollyBtnHist');
     const btnClose = document.getElementById('kollyBtnClose');
@@ -957,6 +982,142 @@ function initCollektAICopilot() {
     const stream = document.getElementById('kollyDrawerStream');
     const form = document.getElementById('kollyDrawerForm');
     const input = document.getElementById('kollyDrawerInput');
+
+    // --- Make Floating "K" Icon & Drawer Header Moveable Across Screen ---
+    let fabDragging = false;
+    let fabMovedDist = 0;
+    let fabStartX = 0, fabStartY = 0;
+    let fabInitLeft = 0, fabInitTop = 0;
+
+    function syncPanelNearFab(left, top) {
+      if (panel.getAttribute('data-custom-drag') === 'true') return;
+      const pW = panel.offsetWidth || Math.min(410, window.innerWidth - 28);
+      const pH = panel.offsetHeight || Math.min(580, window.innerHeight - 110);
+      let pLeft = left + 52 - pW;
+      let pTop = top - pH - 12;
+
+      if (pLeft < 10) pLeft = 10;
+      if (pLeft + pW > window.innerWidth - 10) pLeft = window.innerWidth - pW - 10;
+      if (pTop < 10) pTop = Math.min(window.innerHeight - pH - 10, top + 60);
+
+      panel.style.setProperty('left', pLeft + 'px', 'important');
+      panel.style.setProperty('top', pTop + 'px', 'important');
+      panel.style.setProperty('bottom', 'auto', 'important');
+      panel.style.setProperty('right', 'auto', 'important');
+    }
+
+    function applyFabPos(left, top) {
+      const maxL = Math.max(8, window.innerWidth - 58);
+      const maxT = Math.max(8, window.innerHeight - 58);
+      const sL = Math.max(8, Math.min(left, maxL));
+      const sT = Math.max(8, Math.min(top, maxT));
+      fabBtn.style.setProperty('left', sL + 'px', 'important');
+      fabBtn.style.setProperty('top', sT + 'px', 'important');
+      fabBtn.style.setProperty('bottom', 'auto', 'important');
+      fabBtn.style.setProperty('right', 'auto', 'important');
+      syncPanelNearFab(sL, sT);
+    }
+
+    try {
+      const savedFab = JSON.parse(localStorage.getItem('kolly_fab_pos_v3') || 'null');
+      if (savedFab && typeof savedFab.left === 'number' && typeof savedFab.top === 'number') {
+        applyFabPos(savedFab.left, savedFab.top);
+      }
+    } catch (e) {}
+
+    function onFabDown(e) {
+      if (e.button && e.button !== 0) return;
+      fabDragging = true;
+      fabMovedDist = 0;
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      fabStartX = cx;
+      fabStartY = cy;
+      const rect = fabBtn.getBoundingClientRect();
+      fabInitLeft = rect.left;
+      fabInitTop = rect.top;
+      fabBtn.style.transition = 'none';
+
+      document.addEventListener('mousemove', onFabMove, { passive: false });
+      document.addEventListener('mouseup', onFabUp);
+      document.addEventListener('touchmove', onFabMove, { passive: false });
+      document.addEventListener('touchend', onFabUp);
+    }
+
+    function onFabMove(e) {
+      if (!fabDragging) return;
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      const dx = cx - fabStartX;
+      const dy = cy - fabStartY;
+      fabMovedDist = Math.hypot(dx, dy);
+      if (fabMovedDist > 3 && e.cancelable) e.preventDefault();
+      applyFabPos(fabInitLeft + dx, fabInitTop + dy);
+    }
+
+    function onFabUp() {
+      if (!fabDragging) return;
+      fabDragging = false;
+      fabBtn.style.transition = 'box-shadow 0.2s ease, transform 0.15s ease';
+      document.removeEventListener('mousemove', onFabMove);
+      document.removeEventListener('mouseup', onFabUp);
+      document.removeEventListener('touchmove', onFabMove);
+      document.removeEventListener('touchend', onFabUp);
+
+      const rect = fabBtn.getBoundingClientRect();
+      try {
+        localStorage.setItem('kolly_fab_pos_v3', JSON.stringify({ left: rect.left, top: rect.top }));
+      } catch (e) {}
+    }
+
+    fabBtn.addEventListener('mousedown', onFabDown);
+    fabBtn.addEventListener('touchstart', onFabDown, { passive: true });
+
+    // Make Drawer Header Draggable
+    let hdrDragging = false, hdrStartX = 0, hdrStartY = 0, hdrInitL = 0, hdrInitT = 0;
+    function onHdrDown(e) {
+      if (e.target.closest('button') || e.target.closest('a')) return;
+      hdrDragging = true;
+      panel.setAttribute('data-custom-drag', 'true');
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      hdrStartX = cx;
+      hdrStartY = cy;
+      const r = panel.getBoundingClientRect();
+      hdrInitL = r.left;
+      hdrInitT = r.top;
+
+      document.addEventListener('mousemove', onHdrMove, { passive: false });
+      document.addEventListener('mouseup', onHdrUp);
+      document.addEventListener('touchmove', onHdrMove, { passive: false });
+      document.addEventListener('touchend', onHdrUp);
+    }
+    function onHdrMove(e) {
+      if (!hdrDragging) return;
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      const dx = cx - hdrStartX;
+      const dy = cy - hdrStartY;
+      if (Math.hypot(dx, dy) > 3 && e.cancelable) e.preventDefault();
+      const maxL = Math.max(8, window.innerWidth - panel.offsetWidth - 8);
+      const maxT = Math.max(8, window.innerHeight - panel.offsetHeight - 8);
+      const nL = Math.max(8, Math.min(hdrInitL + dx, maxL));
+      const nT = Math.max(8, Math.min(hdrInitT + dy, maxT));
+      panel.style.setProperty('left', nL + 'px', 'important');
+      panel.style.setProperty('top', nT + 'px', 'important');
+      panel.style.setProperty('bottom', 'auto', 'important');
+      panel.style.setProperty('right', 'auto', 'important');
+    }
+    function onHdrUp() {
+      if (!hdrDragging) return;
+      hdrDragging = false;
+      document.removeEventListener('mousemove', onHdrMove);
+      document.removeEventListener('mouseup', onHdrUp);
+      document.removeEventListener('touchmove', onHdrMove);
+      document.removeEventListener('touchend', onHdrUp);
+    }
+    drawerHeader.addEventListener('mousedown', onHdrDown);
+    drawerHeader.addEventListener('touchstart', onHdrDown, { passive: true });
 
     function getActiveDrawerThread() {
       let threads = window.KollyEngine.getThreads();
@@ -1002,7 +1163,7 @@ function initCollektAICopilot() {
             <button type="button" class="kolly-q-pill" data-q="What is Collekt and how does it work?" style="padding:7px 11px;border-radius:99px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#b4b4b4;font-size:12px;cursor:pointer;">What is Collekt?</button>
             <button type="button" class="kolly-q-pill" data-q="How does Milestone Escrow protect my money?" style="padding:7px 11px;border-radius:99px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#b4b4b4;font-size:12px;cursor:pointer;">How Escrow works</button>
             <button type="button" class="kolly-q-pill" data-q="Suggest realistic Nigerian Naira fees for hiring an Engineer or Developer." style="padding:7px 11px;border-radius:99px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#b4b4b4;font-size:12px;cursor:pointer;">Suggest job fees</button>
-            <button type="button" class="kolly-q-pill" data-q="Guide me around collektng.com" style="padding:7px 11px;border-radius:99px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#b4b4b4;font-size:12px;cursor:pointer;">Navigate website</button>
+            <button type="button" class="kolly-q-pill" data-q="Guide me around the Collekt workspace" style="padding:7px 11px;border-radius:99px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#b4b4b4;font-size:12px;cursor:pointer;">Navigate workspace</button>
           </div>
         `;
         empty.querySelectorAll('.kolly-q-pill').forEach(btn => {
@@ -1077,10 +1238,17 @@ function initCollektAICopilot() {
       renderDrawerMessages();
     }
 
-    fabBtn.addEventListener('click', () => {
+    fabBtn.addEventListener('click', (e) => {
+      if (fabMovedDist > 5) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       const isHidden = panel.style.display === 'none' || !panel.style.display;
       panel.style.display = isHidden ? 'flex' : 'none';
       if (isHidden) {
+        const rect = fabBtn.getBoundingClientRect();
+        syncPanelNearFab(rect.left, rect.top);
         renderDrawerMessages();
         setTimeout(() => input.focus(), 80);
       }
