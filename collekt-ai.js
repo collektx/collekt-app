@@ -683,165 +683,437 @@ function makeElementDraggable(fabEl, panelEl) {
 }
 
 /**
- * Floating AI Copilot Widget UI Engine
+ * Kolly AI — Option 3 Integration (Floating Emerald "K" Circle + Compact ChatGPT Drawer + Full-Screen Link)
  */
-function initCollektAICopilot() {
-  // Old floating AI disabled in favor of unified Kolly AI Assistant in app.js
-  return;
-
-  const style = document.createElement('style');
-  style.textContent = `
-    .ai-fab {
-      position: fixed; bottom: 28px; right: 28px; z-index: 9999;
-      background: linear-gradient(135deg, #0E3B35, #13756F);
-      color: #fff; border: 1.5px solid rgba(74, 222, 128, 0.4);
-      padding: 12px 20px; border-radius: 99px; font-weight: 800; font-size: 13px;
-      display: flex; align-items: center; gap: 8px; cursor: grab;
-      box-shadow: 0 10px 32px rgba(14, 59, 53, 0.35); transition: all .25s ease;
-      font-family: 'Manrope', sans-serif; user-select: none; touch-action: none;
-    }
-    .ai-fab:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 16px 40px rgba(14, 59, 53, 0.5); }
-    .ai-fab:active { cursor: grabbing; }
-    .ai-panel {
-      position: fixed; bottom: 92px; right: 28px; z-index: 9999;
-      width: min(380px, calc(100vw - 40px)); height: 520px;
-      background: var(--white); border: 1px solid var(--line);
-      border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-      display: flex; flex-direction: column; overflow: hidden;
-      animation: fadeIn .2s ease-out; font-family: 'Manrope', sans-serif;
-    }
-    html.dark .ai-panel { background: #0f2220; border-color: rgba(255,255,255,.1); }
-    .ai-panel-header {
-      background: linear-gradient(135deg, #0E3B35, #13756F);
-      padding: 14px 18px; color: #fff; display: flex; justify-content: space-between; align-items: center;
-      cursor: grab; user-select: none; touch-action: none;
-    }
-    .ai-panel-header:active { cursor: grabbing; }
-    .ai-chat-body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: var(--paper); }
-    html.dark .ai-chat-body { background: #071210; }
-    .ai-msg { max-width: 88%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5; word-wrap: break-word; }
-    .ai-msg.bot { background: var(--white); border: 1px solid var(--line); color: var(--ink); align-self: flex-start; }
-    html.dark .ai-msg.bot { background: #0f2220; border-color: rgba(255,255,255,.08); color: #e2efed; }
-    .ai-msg.user { background: var(--teal); color: #fff; align-self: flex-end; }
-    .ai-quick-prompts { display: flex; gap: 6px; overflow-x: auto; padding: 8px 16px; background: var(--white); border-top: 1px solid var(--line); }
-    html.dark .ai-quick-prompts { background: #0f2220; border-color: rgba(255,255,255,.08); }
-    .ai-chip { font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 99px; background: var(--teal-lt); color: var(--teal); border: 1px solid rgba(19,117,111,0.2); white-space: nowrap; cursor: pointer; }
-    .ai-input-bar { padding: 10px 16px; background: var(--white); border-top: 1px solid var(--line); display: flex; gap: 8px; }
-    html.dark .ai-input-bar { background: #0f2220; border-color: rgba(255,255,255,.08); }
-    .ai-input-bar input { flex: 1; padding: 9px 14px; border: 1.5px solid var(--line); border-radius: 99px; font-size: 13px; outline: none; background: var(--paper); color: var(--ink); }
-    html.dark .ai-input-bar input { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); color: #e2efed; }
-  `;
-  document.head.appendChild(style);
-
-  const widget = document.createElement('div');
-  widget.id = 'collektAiWidget';
-  widget.innerHTML = `
-    <div class="ai-fab" onclick="toggleCollektAIPanel()" title="Click to chat • Drag to move anywhere">
-      <span style="opacity:0.6; font-size:12px;">⠿</span> <img src="kolly-mascot-clean.png" alt="Kolly" style="height:24px; width:auto; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));"> Kolly AI Assistant
-    </div>
-
-    <div class="ai-panel" id="collektAiPanel" style="display:none;">
-      <div class="ai-panel-header" title="Drag to move chat window">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="opacity:0.6; font-size:14px;">⠿</span>
-          <img src="kolly-mascot-clean.png" alt="Kolly" style="height:32px; width:auto; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.4));">
-          <div>
-            <div style="font-weight:900; font-size:14px;">Kolly &bull; Collekt Mascot AI</div>
-            <div style="font-size:10px; opacity:0.85;">Powered by Google Gemini 2.5</div>
-          </div>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <button onclick="openGeminiApiKeyModal()" title="Gemini API Key Settings" style="background:rgba(255,255,255,0.15); border:none; color:#fff; font-size:14px; padding:4px 8px; border-radius:6px; cursor:pointer;">⚙️ Key</button>
-          <button onclick="clearCollektAIChat()" title="Clear Chat" style="background:rgba(255,255,255,0.15); border:none; color:#fff; font-size:14px; padding:4px 8px; border-radius:6px; cursor:pointer;">🗑️</button>
-          <button onclick="toggleCollektAIPanel()" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer; line-height:1;">&times;</button>
-        </div>
-      </div>
-
-      <div class="ai-chat-body" id="collektAiChatBody">
-        <div class="ai-msg bot">
-          👋 Hello! I'm <strong>Kolly</strong>, your Collekt Dino Mascot &amp; AI Assistant 🦖. Ask me anything about bidding on energy tenders, drafting proposal pitches, funding your wallet via Paystack, bank withdrawals, or CAC/NIN verification!
-        </div>
-      </div>
-
-      <div class="ai-quick-prompts">
-        <span class="ai-chip" onclick="askAICopilot('How do I fund my wallet via Paystack?')">💳 Paystack Funding</span>
-        <span class="ai-chip" onclick="askAICopilot('How do I withdraw to my bank account?')">🏦 Bank Withdrawal</span>
-        <span class="ai-chip" onclick="askAICopilot('How do I complete identity verification?')">🛡️ Verification</span>
-        <span class="ai-chip" onclick="askAICopilot('How do I win EPC tenders on Collekt?')">📝 Tender Bidding</span>
-      </div>
-
-      <div class="ai-input-bar">
-        <input type="text" id="collektAiInput" placeholder="Ask Kolly AI..." onkeydown="if(event.key==='Enter') sendCollektAIMessage()">
-        <button class="btn btn-primary btn-sm" style="border-radius:99px; padding:0 16px; background:var(--teal); font-weight:800;" onclick="sendCollektAIMessage()">Send</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(widget);
-
-  const fab = widget.querySelector('.ai-fab');
-  const panel = widget.querySelector('.ai-panel');
-  makeElementDraggable(fab, panel);
+function ensureKollyEngineLoaded(callback) {
+  if (window.KollyEngine) {
+    callback();
+    return;
+  }
+  const existing = document.querySelector('script[src*="kolly-engine.js"]');
+  if (existing) {
+    existing.addEventListener('load', () => callback());
+    return;
+  }
+  const s = document.createElement('script');
+  s.src = 'kolly-engine.js?v=158.0';
+  s.onload = () => callback();
+  document.head.appendChild(s);
 }
 
-function clearCollektAIChat() {
-  const chatBody = document.getElementById('collektAiChatBody');
-  if (chatBody) {
-    chatBody.innerHTML = `
-      <div class="ai-msg bot">
-        👋 Chat cleared! I'm Kolly 🦖 — ask me anything about bidding on energy tenders, drafting proposal pitches, Paystack wallet funding, NUBAN withdrawals, or identity verification!
+function formatKollyDrawerMarkdown(md) {
+  if (!md) return '';
+  let html = md
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  html = html.replace(/^---$/gim, '<hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin:10px 0;" />');
+  html = html.replace(/^#### (.*$)/gim, '<h4 style="font-size:14px;font-weight:700;color:#fff;margin:10px 0 6px;">$1</h4>');
+  html = html.replace(/^### (.*$)/gim, '<h3 style="font-size:15px;font-weight:700;color:#fff;margin:12px 0 6px;">$1</h3>');
+  html = html.replace(/^&gt; (.*$)/gim, '<blockquote style="border-left:3px solid #10a37f;padding-left:10px;color:#b4b4b4;margin:8px 0;">$1</blockquote>');
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  html = html.replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.1);padding:2px 5px;border-radius:4px;font-size:12.5px;">$1</code>');
+  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" style="color:#34d399;text-decoration:underline;">$1</a>');
+
+  const lines = html.split('\n');
+  let out = '';
+  let inList = false;
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (/^(\*|-|\d+\.)\s+/.test(trimmed)) {
+      if (!inList) {
+        out += '<ul style="margin:6px 0 10px 18px;">';
+        inList = true;
+      }
+      out += '<li style="margin-bottom:4px;">' + trimmed.replace(/^(\*|-|\d+\.)\s+/, '') + '</li>';
+    } else {
+      if (inList) {
+        out += '</ul>';
+        inList = false;
+      }
+      if (trimmed.startsWith('<h') || trimmed.startsWith('<blockquote') || trimmed.startsWith('<hr')) {
+        out += trimmed;
+      } else if (trimmed.length > 0) {
+        out += '<p style="margin-bottom:8px;">' + trimmed + '</p>';
+      }
+    }
+  });
+  if (inList) out += '</ul>';
+  return out;
+}
+
+function initCollektAICopilot() {
+  const path = (window.location.pathname.split('/').pop() || '').toLowerCase();
+  if (path.includes('kolly.html')) return;
+  if (document.getElementById('kollyFloatingWidget')) return;
+
+  ensureKollyEngineLoaded(() => {
+    if (!window.KollyEngine || document.getElementById('kollyFloatingWidget')) return;
+
+    const style = document.createElement('style');
+    style.textContent = `
+      .kolly-fab-btn {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 9998;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #10a37f;
+        color: #ffffff;
+        border: 2px solid rgba(255, 255, 255, 0.18);
+        font-family: 'Inter', 'Manrope', sans-serif;
+        font-size: 21px;
+        font-weight: 800;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        box-shadow: 0 10px 28px rgba(16, 163, 127, 0.42), 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.2s ease;
+        user-select: none;
+      }
+      .kolly-fab-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 14px 34px rgba(16, 163, 127, 0.55), 0 6px 14px rgba(0, 0, 0, 0.35);
+      }
+      .kolly-drawer-panel {
+        position: fixed;
+        bottom: 84px;
+        right: 24px;
+        z-index: 9999;
+        width: min(410px, calc(100vw - 28px));
+        height: min(580px, calc(100dvh - 110px));
+        background: #212121;
+        color: #ececec;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        font-family: 'Inter', 'Manrope', -apple-system, sans-serif;
+      }
+      .kolly-drawer-header {
+        height: 52px;
+        padding: 0 14px;
+        background: #171717;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+      }
+      .kolly-hdr-btn {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #ececec;
+        font-size: 11.5px;
+        font-weight: 600;
+        padding: 5px 9px;
+        border-radius: 7px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-family: inherit;
+      }
+      .kolly-hdr-btn:hover {
+        background: #2a2a2a;
+      }
+      .kolly-history-Tray {
+        background: #171717;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        max-height: 170px;
+        overflow-y: auto;
+        padding: 8px 10px;
+        display: none;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .kolly-hist-item {
+        padding: 7px 10px;
+        border-radius: 7px;
+        font-size: 12.5px;
+        color: #b4b4b4;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .kolly-hist-item:hover, .kolly-hist-item.active {
+        background: #2a2a2a;
+        color: #ececec;
+      }
+      .kolly-drawer-stream {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 14px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .kolly-drawer-input-wrap {
+        padding: 10px 12px 12px;
+        background: #212121;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .kolly-drawer-form {
+        background: #2f2f2f;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 6px 8px 6px 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .kolly-drawer-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #ececec;
+        font-size: 13.5px;
+        font-family: inherit;
+      }
+      .kolly-drawer-input::placeholder {
+        color: #8e8e8e;
+      }
+      .kolly-drawer-send {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: none;
+        background: #ffffff;
+        color: #171717;
+        font-weight: 800;
+        font-size: 14px;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+      @media (max-width: 900px) {
+        .kolly-fab-btn {
+          bottom: 84px;
+          right: 16px;
+          width: 46px;
+          height: 46px;
+          font-size: 19px;
+        }
+        .kolly-drawer-panel {
+          bottom: 138px;
+          right: 14px;
+          width: calc(100vw - 28px);
+          height: min(510px, calc(100dvh - 160px));
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    const widget = document.createElement('div');
+    widget.id = 'kollyFloatingWidget';
+    widget.innerHTML = `
+      <button type="button" class="kolly-fab-btn" id="kollyFabBtn" title="Ask Kolly — Collekt AI">K</button>
+      <div class="kolly-drawer-panel" id="kollyDrawerPanel">
+        <div class="kolly-drawer-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="width:26px;height:26px;border-radius:50%;background:#10a37f;color:#fff;display:inline-grid;place-items:center;font-size:13px;font-weight:800;">K</span>
+            <span style="font-weight:700;font-size:14px;color:#ececec;">Kolly</span>
+            <span style="font-size:10.5px;font-weight:600;padding:2px 6px;border-radius:99px;background:rgba(16,163,127,0.18);color:#34d399;">Collekt AI</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button type="button" class="kolly-hdr-btn" id="kollyBtnNew" title="Start a new chat">+ New</button>
+            <button type="button" class="kolly-hdr-btn" id="kollyBtnHist" title="View saved chat history">History</button>
+            <a href="kolly.html" class="kolly-hdr-btn" title="Open full-screen ChatGPT view">⛶ Full</a>
+            <button type="button" id="kollyBtnClose" style="background:none;border:none;color:#b4b4b4;font-size:20px;cursor:pointer;padding:0 4px;line-height:1;">&times;</button>
+          </div>
+        </div>
+        <div class="kolly-history-Tray" id="kollyHistoryTray"></div>
+        <div class="kolly-drawer-stream" id="kollyDrawerStream"></div>
+        <div class="kolly-drawer-input-wrap">
+          <form class="kolly-drawer-form" id="kollyDrawerForm">
+            <input type="text" class="kolly-drawer-input" id="kollyDrawerInput" placeholder="Message Kolly..." autocomplete="off" />
+            <button type="submit" class="kolly-drawer-send">↑</button>
+          </form>
+        </div>
       </div>
     `;
-  }
+    document.body.appendChild(widget);
+
+    const fabBtn = document.getElementById('kollyFabBtn');
+    const panel = document.getElementById('kollyDrawerPanel');
+    const btnNew = document.getElementById('kollyBtnNew');
+    const btnHist = document.getElementById('kollyBtnHist');
+    const btnClose = document.getElementById('kollyBtnClose');
+    const historyTray = document.getElementById('kollyHistoryTray');
+    const stream = document.getElementById('kollyDrawerStream');
+    const form = document.getElementById('kollyDrawerForm');
+    const input = document.getElementById('kollyDrawerInput');
+
+    function getActiveDrawerThread() {
+      let threads = window.KollyEngine.getThreads();
+      let activeId = localStorage.getItem('kolly_chatgpt_active_thread_v2');
+      if (!threads.length) {
+        const nt = window.KollyEngine.createNewThread();
+        return nt;
+      }
+      return threads.find(t => t.id === activeId) || threads[0];
+    }
+
+    function renderDrawerHistory() {
+      const threads = window.KollyEngine.getThreads();
+      const activeThread = getActiveDrawerThread();
+      historyTray.innerHTML = '';
+      threads.forEach(t => {
+        const row = document.createElement('div');
+        row.className = 'kolly-hist-item' + (t.id === activeThread.id ? ' active' : '');
+        row.innerHTML = `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.title || 'New chat'}</span>`;
+        row.addEventListener('click', () => {
+          localStorage.setItem('kolly_chatgpt_active_thread_v2', t.id);
+          historyTray.style.display = 'none';
+          renderDrawerMessages();
+        });
+        historyTray.appendChild(row);
+      });
+    }
+
+    function renderDrawerMessages() {
+      const thread = getActiveDrawerThread();
+      const mem = window.KollyEngine.getLearnedMemory();
+      stream.innerHTML = '';
+
+      if (!thread.messages || thread.messages.length === 0) {
+        const greetingName = mem.userName ? `, ${mem.userName}` : '';
+        const empty = document.createElement('div');
+        empty.style.cssText = 'margin:auto;text-align:center;padding:18px 8px;';
+        empty.innerHTML = `
+          <div style="width:40px;height:40px;border-radius:50%;background:#10a37f;color:#fff;font-weight:800;font-size:18px;display:inline-grid;place-items:center;margin-bottom:12px;">K</div>
+          <div style="font-size:19px;font-weight:600;color:#ececec;margin-bottom:6px;">What can I help with${greetingName}?</div>
+          <div style="font-size:12.5px;color:#b4b4b4;margin-bottom:16px;">Ask anything about Collekt, Naira project fees, or Milestone Escrow.</div>
+          <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;">
+            <button type="button" class="kolly-q-pill" data-q="What is Collekt and how does it work?" style="padding:7px 11px;border-radius:99px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#b4b4b4;font-size:12px;cursor:pointer;">What is Collekt?</button>
+            <button type="button" class="kolly-q-pill" data-q="How does Milestone Escrow protect my money?" style="padding:7px 11px;border-radius:99px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#b4b4b4;font-size:12px;cursor:pointer;">How Escrow works</button>
+            <button type="button" class="kolly-q-pill" data-q="Suggest realistic Nigerian Naira fees for hiring an Engineer or Developer." style="padding:7px 11px;border-radius:99px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#b4b4b4;font-size:12px;cursor:pointer;">Suggest job fees</button>
+            <button type="button" class="kolly-q-pill" data-q="Guide me around collektng.com" style="padding:7px 11px;border-radius:99px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#b4b4b4;font-size:12px;cursor:pointer;">Navigate website</button>
+          </div>
+        `;
+        empty.querySelectorAll('.kolly-q-pill').forEach(btn => {
+          btn.addEventListener('click', () => sendDrawerMessage(btn.getAttribute('data-q')));
+        });
+        stream.appendChild(empty);
+        return;
+      }
+
+      thread.messages.forEach(msg => {
+        if (msg.role === 'user') {
+          const row = document.createElement('div');
+          row.style.cssText = 'display:flex;justify-content:flex-end;';
+          const bub = document.createElement('div');
+          bub.style.cssText = 'background:#2f2f2f;color:#ececec;padding:10px 14px;border-radius:18px;max-width:82%;font-size:13.5px;line-height:1.5;white-space:pre-wrap;';
+          bub.textContent = msg.content;
+          row.appendChild(bub);
+          stream.appendChild(row);
+        } else {
+          const row = document.createElement('div');
+          row.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+          row.innerHTML = `
+            <div style="width:26px;height:26px;border-radius:50%;background:#10a37f;color:#fff;font-weight:800;font-size:12px;display:grid;place-items:center;flex-shrink:0;margin-top:2px;">K</div>
+            <div style="flex:1;min-width:0;font-size:13.5px;line-height:1.6;color:#ececec;">
+              ${formatKollyDrawerMarkdown(msg.content)}
+            </div>
+          `;
+          stream.appendChild(row);
+        }
+      });
+
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    async function sendDrawerMessage(text) {
+      const clean = (text || '').trim();
+      if (!clean) return;
+
+      const threads = window.KollyEngine.getThreads();
+      let activeId = localStorage.getItem('kolly_chatgpt_active_thread_v2');
+      let thread = threads.find(t => t.id === activeId) || threads[0];
+      if (!thread) {
+        thread = window.KollyEngine.createNewThread();
+      }
+
+      if (!thread.messages.length) {
+        thread.title = clean.length > 34 ? clean.slice(0, 34) + '...' : clean;
+      }
+
+      thread.messages.push({
+        role: 'user',
+        content: clean,
+        createdAt: new Date().toISOString()
+      });
+      thread.updatedAt = new Date().toISOString();
+      window.KollyEngine.saveThreads(threads);
+      renderDrawerMessages();
+
+      const replyText = await window.KollyEngine.generateReply(clean, thread.messages);
+
+      const updatedThreads = window.KollyEngine.getThreads();
+      const target = updatedThreads.find(t => t.id === thread.id) || updatedThreads[0];
+      if (target) {
+        target.messages.push({
+          role: 'assistant',
+          content: replyText,
+          createdAt: new Date().toISOString()
+        });
+        target.updatedAt = new Date().toISOString();
+        window.KollyEngine.saveThreads(updatedThreads);
+      }
+      renderDrawerMessages();
+    }
+
+    fabBtn.addEventListener('click', () => {
+      const isHidden = panel.style.display === 'none' || !panel.style.display;
+      panel.style.display = isHidden ? 'flex' : 'none';
+      if (isHidden) {
+        renderDrawerMessages();
+        setTimeout(() => input.focus(), 80);
+      }
+    });
+
+    btnClose.addEventListener('click', () => {
+      panel.style.display = 'none';
+    });
+
+    btnNew.addEventListener('click', () => {
+      window.KollyEngine.createNewThread();
+      historyTray.style.display = 'none';
+      renderDrawerMessages();
+      input.focus();
+    });
+
+    btnHist.addEventListener('click', () => {
+      const open = historyTray.style.display === 'flex';
+      if (!open) renderDrawerHistory();
+      historyTray.style.display = open ? 'none' : 'flex';
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = input.value;
+      input.value = '';
+      sendDrawerMessage(val);
+    });
+  });
 }
 
 function toggleCollektAIPanel() {
-  const fab = document.querySelector('.ai-fab');
-  if (fab && fab.getAttribute('data-dragged') === 'true') return;
-  const panel = document.getElementById('collektAiPanel');
-  if (!panel) return;
-  panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
-}
-
-async function askAICopilot(promptText) {
-  const input = document.getElementById('collektAiInput');
-  if (input) input.value = promptText;
-  sendCollektAIMessage();
-}
-
-async function sendCollektAIMessage() {
-  const input = document.getElementById('collektAiInput');
-  const chatBody = document.getElementById('collektAiChatBody');
-  if (!input || !chatBody) return;
-
-  const text = input.value.trim();
-  if (!text) return;
-
-  const userMsg = document.createElement('div');
-  userMsg.className = 'ai-msg user';
-  userMsg.textContent = text;
-  chatBody.appendChild(userMsg);
-
-  input.value = '';
-  chatBody.scrollTop = chatBody.scrollHeight;
-
-  const botMsg = document.createElement('div');
-  botMsg.className = 'ai-msg bot';
-  botMsg.innerHTML = `<em>✨ Google Gemini AI is thinking...</em>`;
-  chatBody.appendChild(botMsg);
-  chatBody.scrollTop = chatBody.scrollHeight;
-
-  const responseText = await queryGeminiAI(text);
-  
-  const formatted = responseText
-    .replace(/```([\s\S]*?)```/g, '<pre style="background:rgba(0,0,0,0.1); padding:8px 12px; border-radius:8px; font-family:monospace; font-size:11px; overflow-x:auto; margin:6px 0;"><code>$1</code></pre>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.06); padding:2px 5px; border-radius:4px; font-family:monospace; font-size:12px;">$1</code>')
-    .replace(/\n/g, '<br>');
-
-  botMsg.innerHTML = formatted;
-  chatBody.scrollTop = chatBody.scrollHeight;
+  const panel = document.getElementById('kollyDrawerPanel');
+  if (panel) {
+    panel.style.display = (panel.style.display === 'none' || !panel.style.display) ? 'flex' : 'none';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

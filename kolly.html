@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kolly — Collekt AI</title>
+  <link rel="icon" href="favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-main: #212121;
+      --bg-sidebar: #171717;
+      --bg-input: #2f2f2f;
+      --bg-user-bubble: #2f2f2f;
+      --bg-hover: #2a2a2a;
+      --text-main: #ececec;
+      --text-muted: #b4b4b4;
+      --text-dim: #8e8e8e;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --accent: #10a37f;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-main);
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Left ChatGPT Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-sidebar);
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border-subtle);
+      transition: margin-left 0.2s ease;
+    }
+
+    .sidebar.collapsed {
+      margin-left: -260px;
+    }
+
+    .new-chat-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+
+    .new-chat-btn:hover {
+      background: var(--bg-hover);
+    }
+
+    .history-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-dim);
+      padding: 14px 12px 6px;
+    }
+
+    .thread-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .thread-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      user-select: none;
+    }
+
+    .thread-item:hover,
+    .thread-item.active {
+      background: var(--bg-hover);
+      color: var(--text-main);
+    }
+
+    .thread-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .thread-del {
+      opacity: 0;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 15px;
+      padding: 0 4px;
+    }
+
+    .thread-item:hover .thread-del {
+      opacity: 1;
+    }
+
+    .thread-del:hover {
+      color: #ef4444;
+    }
+
+    .sidebar-footer {
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .memory-pill {
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Main ChatGPT Area */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-width: 0;
+      position: relative;
+    }
+
+    .topbar {
+      height: 54px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+    }
+
+    .icon-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-main);
+    }
+
+    .model-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .model-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 99px;
+      background: rgba(16, 163, 127, 0.16);
+      color: #34d399;
+    }
+
+    .collekt-link {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      transition: all 0.15s;
+    }
+
+    .collekt-link:hover {
+      background: var(--bg-hover);
+      color: var(--text-main);
+    }
+
+    /* Messages Stream */
+    .chat-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px 32px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-container {
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      flex: 1;
+    }
+
+    /* Empty State Greeting (Centered like ChatGPT) */
+    .empty-state {
+      margin: auto;
+      text-align: center;
+      max-width: 640px;
+      width: 100%;
+      padding: 20px 0;
+    }
+
+    .empty-title {
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .empty-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .suggestion-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .suggestion-pill {
+      padding: 9px 14px;
+      border-radius: 99px;
+      border: 1px solid var(--border-subtle);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .suggestion-pill:hover {
+      background: var(--bg-hover);
+      color: var(--text-main);
+    }
+
+    /* Message Rows */
+    .msg-row-user {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .user-bubble {
+      background: var(--bg-user-bubble);
+      color: var(--text-main);
+      padding: 12px 18px;
+      border-radius: 22px;
+      max-width: 78%;
+      font-size: 15px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .msg-row-assistant {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .assistant-content {
+      flex: 1;
+      min-width: 0;
+      font-size: 15px;
+      line-height: 1.68;
+      color: var(--text-main);
+    }
+
+    .assistant-content h3,
+    .assistant-content h4 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 14px 0 8px;
+      color: #fff;
+    }
+
+    .assistant-content h3:first-child {
+      margin-top: 0;
+    }
+
+    .assistant-content p {
+      margin-bottom: 12px;
+    }
+
+    .assistant-content ul,
+    .assistant-content ol {
+      margin: 8px 0 14px 22px;
+    }
+
+    .assistant-content li {
+      margin-bottom: 6px;
+    }
+
+    .assistant-content code {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 13.5px;
+    }
+
+    .assistant-content blockquote {
+      border-left: 3px solid #10a37f;
+      padding-left: 12px;
+      color: var(--text-muted);
+      margin: 10px 0;
+    }
+
+    .assistant-content hr {
+      border: none;
+      border-top: 1px solid var(--border-subtle);
+      margin: 14px 0;
+    }
+
+    .assistant-content a {
+      color: #34d399;
+      text-decoration: underline;
+    }
+
+    .msg-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .msg-action-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+    }
+
+    .msg-action-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-main);
+    }
+
+    /* Bottom ChatGPT Input Bar */
+    .input-area {
+      padding: 8px 16px 18px;
+      width: 100%;
+    }
+
+    .input-box-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 26px;
+      padding: 8px 10px 8px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .chat-textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 15px;
+      line-height: 1.45;
+      resize: none;
+      max-height: 140px;
+    }
+
+    .chat-textarea::placeholder {
+      color: var(--text-dim);
+    }
+
+    .send-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: #ffffff;
+      color: #171717;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      transition: opacity 0.15s;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--text-dim);
+      margin-top: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        z-index: 50;
+        height: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Left ChatGPT History Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <button class="new-chat-btn" id="btnNewChat">
+      <span style="display:flex; align-items:center; gap:8px;">
+        <span style="width:24px; height:24px; border-radius:50%; background:#10a37f; color:#fff; display:inline-grid; place-items:center; font-size:12px; font-weight:700;">K</span>
+        <span>New chat</span>
+      </span>
+      <span style="font-size:16px;">✎</span>
+    </button>
+
+    <div class="history-label">Chat History</div>
+    <div class="thread-list" id="threadList"></div>
+
+    <div class="sidebar-footer">
+      <div class="memory-pill">
+        <span>👤 Preferred Name</span>
+        <strong id="userNameBadge" style="color:#fbbf24;">Ask me</strong>
+      </div>
+      <div class="memory-pill">
+        <span>🧠 Questions Learned</span>
+        <strong id="learnedCount" style="color:#34d399;">0</strong>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main ChatGPT Stage -->
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" id="btnToggleSidebar" title="Toggle chat history sidebar">☰</button>
+        <div class="model-title">
+          <span>Kolly</span>
+          <span class="model-badge">Collekt AI</span>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <a href="index.html" id="backToCollektLink" class="collekt-link">← Back to Collekt</a>
+      </div>
+    </header>
+
+    <div class="chat-scroll" id="chatScroll">
+      <div class="chat-container" id="chatContainer"></div>
+    </div>
+
+    <div class="input-area">
+      <form id="chatForm" class="input-box-wrap">
+        <textarea
+          id="chatInput"
+          class="chat-textarea"
+          rows="1"
+          placeholder="Message Kolly..."
+        ></textarea>
+        <button type="submit" class="send-btn" id="btnSend">↑</button>
+      </form>
+      <div class="footer-note">
+        Kolly learns from your questions to help you navigate Collekt, estimate project fees, and use Milestone Escrow safely.
+      </div>
+    </div>
+  </main>
+
+  <script src="kolly-engine.js?v=158.0"></script>
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const btnToggleSidebar = document.getElementById('btnToggleSidebar');
+    const btnNewChat = document.getElementById('btnNewChat');
+    const threadList = document.getElementById('threadList');
+    const chatScroll = document.getElementById('chatScroll');
+    const chatContainer = document.getElementById('chatContainer');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const learnedCount = document.getElementById('learnedCount');
+    const userNameBadge = document.getElementById('userNameBadge');
+    const backToCollektLink = document.getElementById('backToCollektLink');
+
+    // Smart back link if user has an active Collekt session
+    try {
+      const u = JSON.parse(localStorage.getItem('collekt_user') || 'null');
+      if (u && (u.id || u.email)) {
+        const dash = u.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+        backToCollektLink.href = dash;
+        backToCollektLink.textContent = '← Back to Dashboard';
+      }
+    } catch (e) {}
+
+    let threads = window.KollyEngine.getThreads();
+    let activeThreadId = localStorage.getItem('kolly_chatgpt_active_thread_v2');
+
+    if (!threads.length) {
+      const first = window.KollyEngine.createNewThread();
+      threads = window.KollyEngine.getThreads();
+      activeThreadId = first.id;
+    } else if (!activeThreadId || !threads.some(t => t.id === activeThreadId)) {
+      activeThreadId = threads[0].id;
+    }
+
+    function getActiveThread() {
+      return threads.find(t => t.id === activeThreadId) || threads[0];
+    }
+
+    function formatMarkdown(md) {
+      if (!md) return '';
+      let html = md
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      html = html.replace(/^---$/gim, '<hr />');
+      html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
+      html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+      html = html.replace(/^&gt; (.*$)/gim, '<blockquote>$1</blockquote>');
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2">$1</a>');
+
+      const lines = html.split('\n');
+      let out = '';
+      let inList = false;
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (/^(\*|-|\d+\.)\s+/.test(trimmed)) {
+          if (!inList) {
+            out += '<ul>';
+            inList = true;
+          }
+          out += '<li>' + trimmed.replace(/^(\*|-|\d+\.)\s+/, '') + '</li>';
+        } else {
+          if (inList) {
+            out += '</ul>';
+            inList = false;
+          }
+          if (trimmed.startsWith('<h') || trimmed.startsWith('<blockquote') || trimmed.startsWith('<hr')) {
+            out += trimmed;
+          } else if (trimmed.length > 0) {
+            out += '<p>' + trimmed + '</p>';
+          }
+        }
+      });
+      if (inList) out += '</ul>';
+      return out;
+    }
+
+    function updateSidebar() {
+      threads = window.KollyEngine.getThreads();
+      threadList.innerHTML = '';
+
+      threads.forEach(t => {
+        const item = document.createElement('div');
+        item.className = 'thread-item' + (t.id === activeThreadId ? ' active' : '');
+        item.innerHTML = `
+          <span class="thread-title">${t.title || 'New chat'}</span>
+          <button class="thread-del" title="Delete chat">×</button>
+        `;
+        item.addEventListener('click', (e) => {
+          if (e.target.classList.contains('thread-del')) {
+            e.stopPropagation();
+            threads = window.KollyEngine.deleteThread(t.id);
+            if (!threads.length) {
+              const nt = window.KollyEngine.createNewThread();
+              threads = window.KollyEngine.getThreads();
+              activeThreadId = nt.id;
+            } else if (activeThreadId === t.id) {
+              activeThreadId = threads[0].id;
+            }
+            updateSidebar();
+            renderMessages();
+            return;
+          }
+          activeThreadId = t.id;
+          localStorage.setItem('kolly_chatgpt_active_thread_v2', activeThreadId);
+          updateSidebar();
+          renderMessages();
+        });
+        threadList.appendChild(item);
+      });
+
+      const mem = window.KollyEngine.getLearnedMemory();
+      learnedCount.textContent = mem.questionsAskedCount || 0;
+      userNameBadge.textContent = mem.userName || 'Not set yet';
+    }
+
+    function renderMessages() {
+      const thread = getActiveThread();
+      const mem = window.KollyEngine.getLearnedMemory();
+      chatContainer.innerHTML = '';
+
+      if (!thread || !thread.messages || thread.messages.length === 0) {
+        const greetingName = mem.userName ? `, ${mem.userName}` : '';
+        const nameHint = mem.userName
+          ? `Welcome back, ${mem.userName}. Ask me anything about Collekt, project fees, or Milestone Escrow.`
+          : `I'm Kolly, Collekt's AI. Ask me anything below—or tell me what you'd like me to call you!`;
+
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML = `
+          <div style="width:46px; height:46px; border-radius:50%; background:#10a37f; color:#fff; font-weight:700; font-size:20px; display:inline-grid; place-items:center; margin-bottom:16px;">K</div>
+          <div class="empty-title">What can I help with${greetingName}?</div>
+          <div class="empty-subtitle">${nameHint}</div>
+          <div class="suggestion-pills">
+            <button class="suggestion-pill" data-q="What is Collekt and how does the platform work?">What is Collekt &amp; how does it work?</button>
+            <button class="suggestion-pill" data-q="How does Collekt's Milestone Escrow & NUBAN wallet protect my money?">How does Milestone Escrow work?</button>
+            <button class="suggestion-pill" data-q="Suggest realistic Nigerian Naira fees and milestones for hiring a Senior Engineer or Developer.">Suggest fees for a job</button>
+            <button class="suggestion-pill" data-q="Guide me around collektng.com and show me where to post a job or submit a Collektion.">Help me navigate collektng.com</button>
+          </div>
+        `;
+        empty.querySelectorAll('.suggestion-pill').forEach(pill => {
+          pill.addEventListener('click', () => sendMessage(pill.getAttribute('data-q')));
+        });
+        chatContainer.appendChild(empty);
+        return;
+      }
+
+      thread.messages.forEach(msg => {
+        if (msg.role === 'user') {
+          const row = document.createElement('div');
+          row.className = 'msg-row-user';
+          const bubble = document.createElement('div');
+          bubble.className = 'user-bubble';
+          bubble.textContent = msg.content;
+          row.appendChild(bubble);
+          chatContainer.appendChild(row);
+        } else {
+          const row = document.createElement('div');
+          row.className = 'msg-row-assistant';
+          row.innerHTML = `
+            <div style="width:30px; height:30px; border-radius:50%; background:#10a37f; color:#fff; font-weight:700; font-size:14px; display:grid; place-items:center; flex-shrink:0; margin-top:2px;" title="Kolly — Collekt AI">K</div>
+            <div class="assistant-content">
+              ${formatMarkdown(msg.content)}
+              <div class="msg-actions">
+                <button class="msg-action-btn copy-btn">📋 Copy</button>
+              </div>
+            </div>
+          `;
+          row.querySelector('.copy-btn').addEventListener('click', function () {
+            navigator.clipboard.writeText(msg.content);
+            this.textContent = '✓ Copied';
+            setTimeout(() => { this.textContent = '📋 Copy'; }, 2000);
+          });
+          chatContainer.appendChild(row);
+        }
+      });
+
+      chatScroll.scrollTop = chatScroll.scrollHeight;
+    }
+
+    async function sendMessage(text) {
+      const clean = (text || '').trim();
+      if (!clean) return;
+
+      const thread = getActiveThread();
+      if (!thread.messages.length) {
+        thread.title = clean.length > 34 ? clean.slice(0, 34) + '...' : clean;
+      }
+
+      thread.messages.push({
+        role: 'user',
+        content: clean,
+        createdAt: new Date().toISOString()
+      });
+      thread.updatedAt = new Date().toISOString();
+      window.KollyEngine.saveThreads(threads);
+      updateSidebar();
+      renderMessages();
+
+      const replyText = await window.KollyEngine.generateReply(clean, thread.messages);
+
+      thread.messages.push({
+        role: 'assistant',
+        content: replyText,
+        createdAt: new Date().toISOString()
+      });
+      thread.updatedAt = new Date().toISOString();
+      window.KollyEngine.saveThreads(threads);
+      updateSidebar();
+      renderMessages();
+    }
+
+    btnToggleSidebar.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+    });
+
+    btnNewChat.addEventListener('click', () => {
+      const nt = window.KollyEngine.createNewThread();
+      threads = window.KollyEngine.getThreads();
+      activeThreadId = nt.id;
+      updateSidebar();
+      renderMessages();
+      chatInput.focus();
+    });
+
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = chatInput.value;
+      chatInput.value = '';
+      chatInput.style.height = 'auto';
+      sendMessage(val);
+    });
+
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        chatForm.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    chatInput.addEventListener('input', function () {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+    });
+
+    updateSidebar();
+    renderMessages();
+  </script>
+</body>
+</html>

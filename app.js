@@ -4493,6 +4493,7 @@ function buildSidebar(activePage) {
     const svgPlus    = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`;
     const svgBriefcase = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`;
     const svgSearch  = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`;
+    const svgKolly   = `<span style="width:18px;height:18px;border-radius:50%;background:#10a37f;color:#fff;display:inline-grid;place-items:center;font-size:10px;font-weight:800;line-height:1;">K</span>`;
 
     const proNav = [
       { icon: svgGrid,      label: 'Overview',     href: 'dashboard.html',    key: 'dashboard' },
@@ -4501,6 +4502,7 @@ function buildSidebar(activePage) {
       { icon: svgMsg,       label: 'Messages',     href: 'messages.html',     key: 'messages' },
       { icon: svgWallet,    label: 'Wallet',       href: 'wallet.html',       key: 'wallet' },
       { icon: svgUser,      label: 'Profile',      href: 'profile.html',      key: 'profile' },
+      { icon: svgKolly,     label: 'Kolly AI',     href: 'kolly.html',        key: 'kolly' },
     ];
     const companyNav = [
       { icon: svgGrid,      label: 'Overview',          href: 'company-dashboard.html', key: 'dashboard' },
@@ -4510,6 +4512,7 @@ function buildSidebar(activePage) {
       { icon: svgMsg,       label: 'Messages',          href: 'messages.html',          key: 'messages' },
       { icon: svgWallet,    label: 'Payments & Escrow', href: 'wallet.html',            key: 'wallet' },
       { icon: svgUser,      label: 'Company Profile',   href: 'company-profile.html',   key: 'profile' },
+      { icon: svgKolly,     label: 'Kolly AI',          href: 'kolly.html',             key: 'kolly' },
     ];
 
     const navItems = isCompany ? companyNav : proNav;
