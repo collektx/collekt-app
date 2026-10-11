@@ -6140,18 +6140,18 @@ async function syncContractToSupabase(contractRecord) {
    ═════════════════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', () => {
-  try { initKollyAiAssistant(); } catch(e){}
+  try {
+    const oldFab = document.getElementById('collektAiFab');
+    if (oldFab) oldFab.remove();
+    const oldWin = document.getElementById('collektAiChatWindow');
+    if (oldWin) oldWin.remove();
+  } catch(e){}
   try { initNdpaConsentBanner(); } catch(e){}
 });
 
 function initKollyAiAssistant() {
-  if (document.getElementById('collektAiFab')) return;
-
-  // 1. Floating Kolly AI Assistant FAB
-  const fab = document.createElement('button');
-  fab.id = 'collektAiFab';
-  fab.className = 'collekt-ai-fab';
-  fab.innerHTML = `<span style="opacity:0.65; font-size:12px; margin-right:2px; user-select:none;">⠿</span> <img src="kolly-mascot-clean.png" alt="Kolly" style="width:24px; height:24px; min-width:24px; min-height:24px; object-fit:contain; border-radius:50%; background:rgba(255,255,255,0.2); padding:2px; flex-shrink:0;" onerror="this.style.display='none'"> <span>Kolly AI Assistant</span>`;
+  // Legacy Kolly AI Assistant pill permanently removed in favor of Kolly AI (ChatGPT/Claude interface)
+  return;
   fab.title = "Click to chat • Drag to move anywhere";
   fab.style.cursor = 'grab';
   fab.style.userSelect = 'none';

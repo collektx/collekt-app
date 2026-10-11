@@ -696,14 +696,17 @@ function ensureKollyEngineLoaded(callback) {
     return;
   }
   const s = document.createElement('script');
-  s.src = 'kolly-engine.js?v=158.0';
+  s.src = 'kolly-engine.js?v=159.0';
   s.onload = () => callback();
   document.head.appendChild(s);
 }
 
 function formatKollyDrawerMarkdown(md) {
   if (!md) return '';
-  let html = md
+  const cleanMd = (window.KollyEngine && window.KollyEngine.sanitizeInternalDetails)
+    ? window.KollyEngine.sanitizeInternalDetails(md)
+    : md;
+  let html = cleanMd
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
