@@ -8,7 +8,7 @@ const { enforceRateLimit } = require('./lib/rate-limiter');
  * Dispatch an email using Resend API
  */
 async function sendResendEmail({ to, subject, html, text }) {
-  const apiKey = (process.env.RESEND_API_KEY || '').trim();
+  const apiKey = (process.env.RESEND_API_KEY || process.env.RESEND_API || '').trim();
   if (!apiKey) {
     console.warn('[auth-otp] RESEND_API_KEY is not configured in environment');
     return { ok: false, error: 'RESEND_API_KEY missing' };
@@ -104,7 +104,7 @@ async function sendResendEmail({ to, subject, html, text }) {
  * Add or sync contact in Resend Audience
  */
 async function syncResendContact({ email, firstName, lastName }) {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = (process.env.RESEND_API_KEY || process.env.RESEND_API || '').trim();
   if (!apiKey) return;
 
   try {
