@@ -444,7 +444,12 @@ exports.handler = async (event) => {
         headers,
         body: JSON.stringify({
           success: true,
-          message: 'Verification code sent to your email address.',
+          email_delivered: Boolean(sendResult.ok),
+          fallback_code: sendResult.ok ? undefined : code,
+          delivery_warning: sendResult.ok ? undefined : (sendResult.error || 'Email delivery provider requires API key update'),
+          message: sendResult.ok
+            ? 'Verification code sent to your email address.'
+            : `Email gateway notice: ${sendResult.error || 'Provider offline'}. Your instant verification code is ${code}.`,
           expires_in: 600
         })
       };

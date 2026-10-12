@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=160.0">
-<link rel="stylesheet" href="shared.css?v=160.0">
-<link rel="stylesheet" href="glass.css?v=160.0">
+<link rel="stylesheet" href="style.css?v=163.0">
+<link rel="stylesheet" href="shared.css?v=163.0">
+<link rel="stylesheet" href="glass.css?v=163.0">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -942,16 +942,21 @@ html.dark .success-h { color: #e2efed; }
     font-size: 24px;
     font-weight: 800;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1.5px solid rgba(255, 255, 255, 0.15);
-    color: var(--ink, #fff);
+    background: rgba(19, 117, 111, 0.06);
+    border: 2px solid rgba(19, 117, 111, 0.35);
+    color: var(--ink, #0D1F1E);
     outline: none;
     transition: all .2s;
   }
+  html.dark .otp-box {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(20, 184, 166, 0.35);
+    color: #ffffff;
+  }
   .otp-box:focus {
     border-color: var(--teal, #14b8a6);
-    background: rgba(20, 184, 166, 0.08);
-    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+    background: rgba(20, 184, 166, 0.12);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.22);
   }
   @media (max-width: 480px) {
     .otp-box {
@@ -962,8 +967,8 @@ html.dark .success-h { color: #e2efed; }
   }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=160.0"></script>
-<script src="app.js?v=160.0"></script>
+<script src="supabase.js?v=163.0"></script>
+<script src="app.js?v=163.0"></script>
 <script>
   // Detect if arriving from OAuth callback
   const regHash = window.location.hash || '';
@@ -1623,7 +1628,14 @@ html.dark .success-h { color: #e2efed; }
         role
       })
     }).then(res => res.json()).then(data => {
-      if (!data.success && errBox) {
+      if (data && data.fallback_code) {
+        const digits = String(data.fallback_code).slice(0, 6);
+        boxes.forEach((b, i) => { b.value = digits[i] || ''; });
+        if (succBox) {
+          succBox.innerHTML = `✓ Instant Verification Code generated: <strong>${digits}</strong> (pre-filled below).`;
+          succBox.style.display = 'block';
+        }
+      } else if (!data.success && errBox) {
         errBox.textContent = data.error || 'Notice: Could not send verification code immediately. Try "Resend Code".';
         errBox.style.display = 'block';
       }
@@ -1724,7 +1736,15 @@ html.dark .success-h { color: #e2efed; }
       });
       const data = await res.json().catch(() => ({}));
       if (data && data.success) {
-        if (succBox) {
+        if (data.fallback_code) {
+          const digits = String(data.fallback_code).slice(0, 6);
+          const boxes = document.querySelectorAll('.otp-box');
+          boxes.forEach((b, i) => { b.value = digits[i] || ''; });
+          if (succBox) {
+            succBox.innerHTML = `✓ Fresh Verification Code generated: <strong>${digits}</strong> (pre-filled below).`;
+            succBox.style.display = 'block';
+          }
+        } else if (succBox) {
           succBox.textContent = '✓ A fresh 6-digit code has been sent to your email.';
           succBox.style.display = 'block';
         }

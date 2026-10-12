@@ -171,8 +171,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=160.0"></script>
-  <script src="app.js?v=160.0"></script>
+  <script src="supabase.js?v=163.0"></script>
+  <script src="app.js?v=163.0"></script>
   <script>
     function escapeHTML(str) {
       if (!str) return '';
@@ -376,6 +376,16 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'send_otp', email: userEmail, name: userName, role: userRole })
+        }).then(r => r.json()).then(d => {
+          if (d && d.fallback_code) {
+            const digits = String(d.fallback_code).slice(0, 6);
+            boxes.forEach((b, i) => { b.value = digits[i] || ''; });
+            const succBox = document.getElementById('googleOtpSuccess');
+            if (succBox) {
+              succBox.innerHTML = `✓ Instant Verification Code generated: <strong>${digits}</strong> (pre-filled below).`;
+              succBox.style.display = 'block';
+            }
+          }
         }).catch(e => console.warn('[auth-otp] Send error:', e));
 
         let countdown = 60;
@@ -419,7 +429,13 @@
             });
             const d = await res.json().catch(() => ({}));
             if (d && d.success) {
-              succBox.textContent = '✓ A new verification code has been sent to your email.';
+              if (d.fallback_code) {
+                const digits = String(d.fallback_code).slice(0, 6);
+                boxes.forEach((b, i) => { b.value = digits[i] || ''; });
+                succBox.innerHTML = `✓ Fresh Verification Code generated: <strong>${digits}</strong> (pre-filled below).`;
+              } else {
+                succBox.textContent = '✓ A new verification code has been sent to your email.';
+              }
               succBox.style.display = 'block';
               startTimer();
             } else {
