@@ -168,6 +168,7 @@
     if (!Array.isArray(mem.memories)) mem.memories = [];
     if (!Array.isArray(mem.supersedesHistory)) mem.supersedesHistory = [];
 
+    // Sync role from active Collekt session only if not overriding user ID
     if (!_activeOverrideUserId && !explicitUserId) {
       const sessionUser = getSessionUser();
       if (sessionUser && !mem.userRole && sessionUser.role) {
@@ -407,7 +408,7 @@
   /* --------------------------------------------------------------------------
      3. CONTINUOUS LEARNING, MEMORY EXTRACTION & SUPERSESSION ENGINE
   -------------------------------------------------------------------------- */
-  const NON_NAME_WORDS = /^(thank|thanks|thank\s+you|thx|ty|appreciate|hello|hi|hey|yo|good\s+morning|good\s+afternoon|good\s+evening|ok|okay|k|alright|got\s+it|understood|sure|yes|yeah|yep|no|nope|nah|cool|great|nice|awesome|perfect|fine|well\s+done|weldone|bye|goodbye|later|help|please|what|how|why|where|when|who|can|collekt|escrow|fee|budget|hire|job|wallet|skip|explain|draft|write|suggest|test|testing)$/i;
+  const NON_NAME_WORDS = /^(thank|thanks|thank\s+you|thx|ty|appreciate|hello|hi|hey|yo|good\s+morning|good\s+afternoon|good\s+evening|ok|okay|k|alright|got\s+it|understood|sure|yes|yeah|yep|no|nope|nah|cool|great|nice|awesome|perfect|fine|well\s+done|weldone|bye|goodbye|later|help|please|what|how|why|where|when|who|can|collekt|kolly|escrow|fee|budget|hire|job|wallet|skip|explain|draft|write|suggest|test|testing)$/i;
 
   const WORD_TO_NUM = {
     one: 1, two: 2, three: 3, four: 4, five: 5, six: 6,
@@ -429,7 +430,7 @@
       const stripped = clean.replace(/[.!?,]+$/g, '').trim();
       const words = stripped.split(/\s+/);
       const hasNonName = NON_NAME_WORDS.test(stripped) ||
-                         /\b(thank|thanks|hello|hi|hey|ok|okay|yes|no|what|how|why|where|when|who|can|help|collekt|escrow|fee|budget|hire|job|wallet|skip|later|explain|draft|write|suggest|need|want|looking|work|project|money|account|specialize|experience|years)\b/i.test(stripped);
+                         /\b(thank|thanks|hello|hi|hey|ok|okay|yes|no|what|how|why|where|when|who|can|help|collekt|kolly|escrow|fee|budget|hire|job|wallet|skip|later|explain|draft|write|suggest|need|want|looking|work|project|money|account|specialize|experience|years|rfq|rfp|tender|proposal)\b/i.test(stripped);
       if (words.length >= 1 && words.length <= 2 && stripped.length >= 2 && stripped.length <= 22 && !hasNonName && /^[A-Za-z\s-]+$/.test(stripped)) {
         return words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
       }
@@ -492,6 +493,7 @@
 
     const memoryChanges = [];
 
+    // 1. Name extraction
     const detectedName = extractNameIfProvided(clean, mem);
     let justLearnedName = false;
     if (detectedName) {
@@ -505,12 +507,14 @@
       mem.awaitingName = false;
     }
 
+    // 2. Role detection
     if (/\b(we want to hire|we need a|our company|my company|i want to hire|post a job|post an opportunity|looking for a|we are hiring|find qualified|recommend candidates|shortlist)\b/i.test(lower)) {
       mem.userRole = 'company';
     } else if (/\b(i am a|i'm a|i specialize in|my specialization|my skills|how much should i charge|how much should i bid|my cv|find work|win projects|win a project|get hired|opportunities for me|projects suit me)\b/i.test(lower)) {
       mem.userRole = 'talent';
     }
 
+    // 3. Specialization extraction (e.g., "I specialize in mechanical piping design...")
     const specMatch = clean.match(/\b(?:i specialize in|my specialization is|i am a specialist in|i work as a|i'm a|i am an?|experienced in)\s+([a-zA-Z0-9\s,&/-]{3,55}?)(?=\s+(?:and\s+have|with|having|in\s+port\s+harcourt|in\s+lagos|in\s+abuja|in\s+warri|working\s+on|for\s+\d+|who\s+|\.|,|$))/i);
     if (specMatch && specMatch[1]) {
       const candidateSpec = specMatch[1].trim();
@@ -521,6 +525,7 @@
       }
     }
 
+    // 4. Years of experience extraction & supersession (supports digits & words like "eight years" or "10 years")
     const expRegex = /\b(?:have|with|now\s+have|completed|over)?\s*(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|twenty)\s*(?:\+\s*)?(?:years|yrs)\s+(?:of\s+)?(?:experience|exp|working|practice)?/i;
     const expMatch = lower.match(expRegex);
     if (expMatch && expMatch[1]) {
@@ -533,6 +538,7 @@
       }
     }
 
+    // 5. Certifications extraction (COREN, ICAN, ACCA, PMP, NEBOSH, NUPRC, NCDMB, NIQS, NEMSA, NBA)
     const certPatterns = [
       { code: 'COREN', regex: /\b(coren(?:\s+registered|\s+registration|\s+certified|\s+license)?)\b/i },
       { code: 'ICAN', regex: /\b(ican(?:\s+chartered|\s+certified)?)\b/i },
@@ -545,7 +551,8 @@
       { code: 'NEMSA', regex: /\b(nemsa)\b/i }
     ];
     for (const cp of certPatterns) {
-      if (cp.regex.test(clean) && !/\b(do i need|what is|require|requires|missing)\s+${cp.code}/i.test(lower)) {
+      const negQuestionRegex = new RegExp(`\\b(do i need|what is|require|requires|missing)\\s+${cp.code}`, 'i');
+      if (cp.regex.test(clean) && !negQuestionRegex.test(lower)) {
         if (/\b(i have|i now have|with|registered|certified|hold|earned|completed|my)\b/i.test(lower)) {
           if (!mem.certifications.includes(cp.code)) {
             mem.certifications.push(cp.code);
@@ -556,6 +563,7 @@
       }
     }
 
+    // 6. Location extraction
     const locMatch = clean.match(/\b(?:in|based in|located in|from)\s+(Port\s+Harcourt|Lagos|Abuja|Warri|Bonny(?:\s+Island)?|Eket|Uyo|Calabar|Kano|Ibadan|Nigeria)\b/i);
     if (locMatch && locMatch[1]) {
       const loc = locMatch[1].trim();
@@ -564,6 +572,7 @@
       if (res.updated) memoryChanges.push(res);
     }
 
+    // 7. Industry fee guide match
     for (const fg of FEE_GUIDES) {
       if (fg.keywords.some(k => lower.includes(k))) {
         mem.userIndustry = fg.name;
@@ -572,6 +581,7 @@
       }
     }
 
+    // 8. Budget extraction
     const budgetMatchUnit = lower.match(/(?:₦|ngn|naira)?\s*(\d+(?:\.\d+)?)\s*(m|million|k|thousand)\b/i);
     const budgetMatchRaw = clean.match(/(?:₦|NGN)\s*([\d,]{5,})/i);
     if (budgetMatchUnit) {
@@ -584,6 +594,7 @@
       if (!isNaN(parsed) && parsed >= 10000) mem.userBudget = parsed;
     }
 
+    // 9. Explicit "Remember that..." notes
     if (/\b(remember that|note that|keep in mind that|learn this:)\b/i.test(lower)) {
       const fact = clean.replace(/^(?:please\s+)?(?:remember that|note that|keep in mind that|learn this:?)\s*/i, '').trim();
       if (fact && !mem.customFacts.includes(fact)) {
@@ -622,6 +633,7 @@
     const effectiveName = getEffectiveUserName(mem);
     const nameAddress = effectiveName ? `, **${effectiveName}**` : '';
 
+    // A. Autonomous financial execution command (release escrow, transfer funds, approve milestone payment, change bank details)
     const isAutonomousFinancialCommand =
       /\b(release|transfer|send|payout|pay\s+out|disburse|approve\s+payment|unlock|debit|wire|move)\b/i.test(lower) &&
       /\b(escrow|funds|money|payment|milestone|wallet|naira|₦|contractor|vendor|specialist|engineer|account\s+now|immediately)\b/i.test(lower) &&
@@ -646,6 +658,7 @@
       );
     }
 
+    // B. Nova Bank / Unconfirmed Banking Partnership Verification Guardrail
     if (/\b(nova\s*bank|is\s+nova\s+bank\s+live|bank\s+partnership\s+live|cbn\s+escrow\s+license)\b/i.test(lower)) {
       return sanitizeInternalDetails(
         `### 🏦 Banking & Escrow Infrastructure Status${nameAddress}\n\n` +
@@ -667,16 +680,19 @@
     const effectiveName = getEffectiveUserName(mem);
     const nameAddress = effectiveName ? `, **${effectiveName}**` : '';
 
+    // Extract Title / Reference
     const refMatch = combined.match(/(?:RFQ|RFP|ITT|TENDER|PROJECT|REF(?:ERENCE)?)[:\s#-]*([A-Z0-9/-]{4,30})/i);
     const titleMatch = combined.match(/(?:Title|Project|Subject|Scope of Work|Invitation to Tender)[:\s]+([^\n.]{8,110})/i);
     const tenderRef = refMatch ? refMatch[1].trim() : 'TENDER-NG-REVIEW';
     const tenderTitle = titleMatch ? titleMatch[1].trim() : 'Technical Engineering, Procurement & Contracting (EPC) Package';
 
+    // Extract Deadlines
     const deadlineMatches = combined.match(/\b(?:\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}|\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4}|\d+\s*(?:weeks|days|months))\b/gi) || [];
     const deadlineText = deadlineMatches.length
       ? Array.from(new Set(deadlineMatches)).slice(0, 4).join(' • ')
       : 'Not explicitly dated in excerpt — request formal addendum / closing timestamp from issuing company before submission.';
 
+    // Detect Statutory & Technical Requirements mentioned in text
     const reqChecks = [
       { name: 'COREN Registration & Valid Practicing License', found: /coren/i.test(combined), ref: 'Technical Qualification Section' },
       { name: 'NUPRC (formerly DPR) Oil & Gas Industry Service Permit (OGISP)', found: /nuprc|dpr|ogisp/i.test(combined), ref: 'Statutory Permits Clause' },
@@ -690,6 +706,7 @@
     const detectedReqs = reqChecks.filter(r => r.found);
     const activeReqs = detectedReqs.length ? detectedReqs : reqChecks.slice(0, 5);
 
+    // Check against User's Learned Memory Profile
     const userCerts = (mem && Array.isArray(mem.certifications)) ? mem.certifications : [];
     const userYears = (mem && mem.yearsOfExperience) ? `${mem.yearsOfExperience} years` : 'Unconfirmed in profile';
 
@@ -795,6 +812,10 @@
     return MODEL_ROUTING_TABLE.advanced_reasoning;
   }
 
+  /**
+   * Simulates or executes multi-provider failover across Anthropic -> OpenAI -> Gemini -> Local Engine.
+   * Exposed for automated verification of Scenario F (Multi-Provider Failover).
+   */
   async function executeWithMultiProviderFailover(payload, simulatedProviderStates = null) {
     const route = routeTask(payload.prompt || '', payload);
     const attemptLog = [];
@@ -820,6 +841,7 @@
         };
       }
 
+      // If caller provided simulated provider states (e.g., in Scenario F tests)
       if (simulatedProviderStates && typeof simulatedProviderStates === 'object') {
         const state = simulatedProviderStates[provider];
         if (state === 'down' || state === 'timeout' || state === 'error') {
@@ -841,6 +863,7 @@
         }
       }
 
+      // Try live /api/kolly serverless orchestration endpoint if running in browser
       if (typeof fetch === 'function' && !simulatedProviderStates) {
         try {
           const controller = new AbortController();
@@ -902,6 +925,7 @@
     const lower = clean.toLowerCase().replace(/[.!?]+$/g, '').trim();
     const explicitUserId = options.userId || null;
 
+    // 0. Check Financial & Escrow Safety Guardrails FIRST (Scenario H)
     const preMem = getLearnedMemory(explicitUserId);
     const safetyBlock = checkFinancialSafetyGuardrail(clean, preMem);
     if (safetyBlock) {
@@ -913,6 +937,7 @@
     const effectiveName = getEffectiveUserName(mem);
     const nameAddress = effectiveName ? `, **${effectiveName}**` : '';
 
+    // Find last assistant message for contextual continuity
     let lastAssistantMsg = '';
     for (let i = threadHistory.length - 1; i >= 0; i--) {
       if (threadHistory[i] && threadHistory[i].role === 'assistant' && threadHistory[i].content) {
@@ -921,16 +946,19 @@
       }
     }
 
+    // 0B. Document / Tender / RFQ Analysis (Scenario C)
     if (options.documentText || (/\b(analyze|extract|review|checklist|compliance\s+matrix)\b/i.test(lower) && /\b(rfq|rfp|tender|itt|scope\s+of\s+work|bid\s+document)\b/i.test(lower) && clean.length > 90)) {
       return analyzeTenderDocument(options.documentText || clean, clean, mem);
     }
 
+    // 1. User just shared their preferred name
     if (justLearnedName && clean.split(/\s+/).length <= 6) {
       return sanitizeInternalDetails(
         `Pleasure to meet you, **${mem.userName}**! I’ve saved that and will address you as **${mem.userName}** from now on.\n\nWhat would you like to tackle today? Whether you want to win a project in the **Marketplace**, structure a **Collektion** proposal, or price a milestone scope in Naira (\`₦\`), I’m ready.`
       );
     }
 
+    // 1B. User just shared or updated their professional profile / qualifications (Scenario A & Scenario B)
     const supersededChange = memoryChanges.find(c => c.superseded);
     const learnedSpecOrExp = memoryChanges.some(c => c.entry && (c.entry.key === 'specialization' || c.entry.key === 'years_of_experience' || c.entry.key === 'certifications'));
 
@@ -963,6 +991,7 @@
       );
     }
 
+    // 2. GRATITUDE & APPRECIATION ("thank you", "thanks", "appreciate it", etc.)
     const isGratitude = /^(?:thank\s*you|thanks|thank\s*u|thx|ty|many\s*thanks|thanks\s*a\s*lot|thank\s*you\s*so\s*much|thank\s*you\s*very\s*much|thank\s*you\s*kolly|thanks\s*kolly|i\s*appreciate(?:\s*it|\s*that)?|appreciate\s*it|appreciated|grateful|that\s*helps(?:\s*a\s*lot)?|very\s*helpful|super\s*helpful|well\s*done|weldone|good\s*job|great\s*job)\b/i.test(lower) ||
                         (clean.split(/\s+/).length <= 6 && /\b(thank\s*you|thanks|appreciate\s*it)\b/i.test(lower) && !/\b(how|what|where|why|when|can|could|help\s+me)\b/i.test(lower));
 
@@ -980,6 +1009,7 @@
       );
     }
 
+    // 3. GREETINGS & CHECK-INS ("hello", "hi", "hey", "good morning", "how are you", "how far", etc.)
     const isGreeting = /^(?:hello|hi|hey|hi\s+there|hello\s+there|hey\s+kolly|hi\s+kolly|hello\s+kolly|good\s*morning|good\s*afternoon|good\s*evening|greetings|how\s*are\s*you(?:\s*doing)?|how\s*far|what'?s\s*up|are\s*you\s*there|yo)\b/i.test(lower) &&
                        clean.split(/\s+/).length <= 7 &&
                        !/\b(explain|what\s+is|how\s+does|how\s+do\s+i|how\s+much|fee|price|escrow|wallet|hire|job|bid)\b/i.test(lower);
@@ -1005,6 +1035,7 @@
       );
     }
 
+    // 4. SHORT AFFIRMATIONS & ACKNOWLEDGMENTS ("ok", "okay", "alright", "got it", etc.)
     const isAffirmation = /^(?:ok|okay|k|kk|alright|all\s*right|got\s*it|i\s*get\s*it|understood|i\s*understand|makes\s*sense|that\s*makes\s*sense|i\s*see|cool|nice|great|awesome|perfect|sounds\s*good|fair\s*enough|noted|clear)\b/i.test(lower) &&
                           clean.split(/\s+/).length <= 5;
 
@@ -1014,6 +1045,7 @@
       );
     }
 
+    // 5. POSITIVE CONFIRMATION ("yes", "yeah", "sure", "please do", "go ahead")
     const isYes = /^(?:yes|yeah|yep|yup|sure|please\s*do|yes\s*please|go\s*ahead|let'?s\s*do\s*it|do\s*it|proceed|i\s*would\s*like\s*that)\b/i.test(lower) &&
                   clean.split(/\s+/).length <= 6;
 
@@ -1049,6 +1081,7 @@
       );
     }
 
+    // 6. DECLINING / CLOSING ("no", "nope", "not now", "bye")
     const isNoOrBye = /^(?:no|nope|nah|not\s*now|not\s*right\s*now|nothing(?:\s*for\s*now|\s*else)?|no\s*thanks|no\s*thank\s*you|that'?s\s*all|i'?m\s*good|all\s*good|bye|goodbye|see\s*you|talk\s*later|later)\b/i.test(lower) &&
                       clean.split(/\s+/).length <= 6;
 
@@ -1058,12 +1091,14 @@
       );
     }
 
+    // 7. Custom Memory Instruction ("Remember that...")
     if (/\b(remember that|note that|keep in mind that|learn this:)\b/i.test(lower)) {
       return sanitizeInternalDetails(
         `Understood${nameAddress}. I’ve saved that to your profile context:\n\n> *"${mem.customFacts[mem.customFacts.length - 1]}"*\n\nI will factor this into our project scopes, fee estimates, and recommendations going forward.`
       );
     }
 
+    // 8. Memory / Identity Inspection ("What do you know about me?", "What is my experience?", "My memory")
     if (/\b(what do you know about me|what is my name|do you know my name|who am i|what have you learned|do you remember me|my memory|what is my experience|how many years of experience do i have|what are my qualifications)\b/i.test(lower)) {
       const factsList = mem.customFacts.length
         ? mem.customFacts.map(f => `* "${f}"`).join('\n')
@@ -1086,6 +1121,7 @@
       );
     }
 
+    // 8B. SCENARIO A: PERSONALIZED OPPORTUNITY MATCHING FOR PROFESSIONALS
     const asksForOpportunities =
       /\b(suitable\s+opportunities|opportunities\s+for\s+me|projects\s+suit\s+me|projects\s+that\s+match|match\s+my\s+experience|find\s+.*projects\s+for\s+me|any\s+jobs\s+for\s+me|recommended\s+opportunities|what\s+opportunities\s+match)\b/i.test(lower);
 
@@ -1142,6 +1178,7 @@
       );
     }
 
+    // 8C. SCENARIO D: COMPANY CANDIDATE MATCHING (DISTINGUISHING VERIFIED VS. SELF-REPORTED)
     const asksForCandidates =
       /\b(find\s+qualified|recommend\s+candidates|recommend\s+professionals|shortlist\s+engineers|candidates\s+for|professionals\s+for\s+our|who\s+can\s+execute|match\s+professionals|piping\s+engineers\s+for)\b/i.test(lower);
 
@@ -1168,6 +1205,7 @@
       );
     }
 
+    // 8D. SCENARIO E: WEB RESEARCH & REGULATORY CITATIONS (NUPRC, NCDMB, COREN, FIRS, CBN, NDPA)
     const asksRegulatoryOrResearch =
       options.researchMode ||
       /\b(nuprc|ncdmb|nogicd|coren\s+registration\s+requirements|firs\s+withholding|ndpa\s+2023|cbn\s+guidelines|regulatory\s+compliance|cite\s+sources|official\s+source|latest\s+nigerian)\b/i.test(lower);
@@ -1190,6 +1228,7 @@
       );
     }
 
+    // 9. Getting Started / New Account / "0 Active Collektions" / "How do I start?"
     if (/\b(how do i start|how to start|get started|getting started|what should i do first|what do i do now|i am new|i'm new|new here|first project|win my first|0 active|zero earnings|no collektions|nothing on my dashboard)\b/i.test(lower)) {
       if (mem.userRole === 'company') {
         return appendNamePromptIfNeeded(
@@ -1215,6 +1254,7 @@
       );
     }
 
+    // 10. Specific Question: "What is a Collektion?"
     if (/\b(what is a collektion|what are collektions|meaning of collektion|explain collektion|define collektion)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### What is a "Collektion"?\n\n` +
@@ -1228,6 +1268,7 @@
       );
     }
 
+    // 11. Specific Question: Withdrawing Money / Payouts to Bank Account
     if (/\b(withdraw|withdrawal|cash\s*out|payout|get paid|transfer to my bank|move money to bank)\b/i.test(lower) && !/\b(what is collekt)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### How to Withdraw Earnings to Your Nigerian Bank Account${nameAddress}\n\n` +
@@ -1239,6 +1280,7 @@
       );
     }
 
+    // 12. Specific Question: Funding Wallet / Deposit / Dedicated NUBAN
     if (/\b(fund wallet|fund my wallet|deposit|add money|top up|nuban|virtual account|how to pay|paystack|korapay)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### How to Fund Your Collekt Wallet & Escrow${nameAddress}\n\n` +
@@ -1250,6 +1292,7 @@
       );
     }
 
+    // 13. Specific Question: Disputes, Refunds, Cancellations, or Unresponsive Party
     if (/\b(dispute|refund|cancel|client won't pay|refuse to pay|bad work|poor quality|delayed|unresponsive|arbitration|freeze)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### How Collekt Handles Disputes, Delays & Refunds${nameAddress}\n\n` +
@@ -1261,16 +1304,20 @@
       );
     }
 
+    // 14. Specific Question: Platform Fees, Commissions & Founding 50
     if (/\b(platform fee|commission|how much does collekt charge|collekt fee|is collekt free|subscription|founding 50|pioneer)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
-        `### Collekt Platform Fees & The Founding 50 Pilot${nameAddress}\n\n` +
+        `### Collekt Platform Fees & Membership Tiers${nameAddress}\n\n` +
         `* **Free Account & Bidding:** Creating an account, verifying your credentials, and browsing opportunities on Collekt is free.\n` +
+        `* **Professional Plus Membership (\`₦19,999 / month\`):** Unlocks top search placement, unlimited proposals, and a 50% platform fee discount. Multi-period savings: **Quarterly (5% off — \`₦56,997\`)**, **Bi-Annually (10% off — \`₦107,994\`)**, and **Annually (17% off — \`₦199,188\`)**.\n` +
+        `* **Company Enterprise Membership (\`₦74,999 / month\`):** Unlocks unlimited RFP postings, Kolly AI talent matching, and verified enterprise status. Multi-period savings: **Quarterly (5% off — \`₦213,747\`)**, **Bi-Annually (10% off — \`₦404,994\`)**, and **Annually (17% off — \`₦746,988\`)**.\n` +
         `* **Standard Milestone Commission:** On standard completed contracts, Collekt charges a 15% platform & escrow protection fee on released milestones.\n` +
         `* **Founding 50 Pilot (0% Fee Waiver):** Pioneer companies selected for the **Founding 50 Program** enjoy **0% platform and escrow fees across their first 3 projects**, plus a **48-hour curated specialist shortlist** from our vetting team.`,
         mem
       );
     }
 
+    // 15. Specific Question: Tax, WHT & VAT Calculations
     if (/\b(tax|wht|withholding|vat|net payout|deduction|firs)\b/i.test(lower)) {
       const gross = mem.userBudget || 2500000;
       const vat = Math.round(gross * 0.075);
@@ -1289,6 +1336,7 @@
       );
     }
 
+    // 16. Specific Question: Identity & Credential Verification (NIN, BVN, CAC, COREN, Shield Badge)
     if (/\b(verify|verification|nin|bvn|cac|tin|shield|badge|coren|ican|certificate|upload cv|resume|profile strength)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### How to Complete Verification & Earn the Collekt Shield Badge${nameAddress}\n\n` +
@@ -1299,6 +1347,7 @@
       );
     }
 
+    // 17. Specific Question: Messages, Calls & Interviews
     if (/\b(message|messages|chat|call|video call|voice call|interview|contact|talk to client|send file|attachment)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `### Communicating & Interviewing in Messages${nameAddress}\n\n` +
@@ -1310,8 +1359,9 @@
       );
     }
 
-    const wantsDraftOrProposal = /\b(draft|write|prepare|create|sample|template|help me write)\b/i.test(lower) &&
-                                 /\b(proposal|collektion|pitch|scope|sow|brief|job|description|agreement|contract|cover letter)\b/i.test(lower);
+    // 18. Specialized Intent: Drafting a Scope of Work (SOW), Job Brief, RFQ Response, or "Collektion" Proposal
+    const wantsDraftOrProposal = /\b(draft|write|prepare|create|sample|template|help\s+me\s+draft|help\s+me\s+write|respond\s+to)\b/i.test(lower) &&
+                                 /\b(proposal|collektion|pitch|scope|sow|brief|job|description|agreement|contract|cover\s+letter|rfq|rfp|tender|itt|bid|quotation|quote|boq)\b/i.test(lower);
 
     let matchedFeeGuide = null;
     for (const fg of FEE_GUIDES) {
@@ -1322,9 +1372,37 @@
     }
 
     if (wantsDraftOrProposal) {
-      const domain = matchedFeeGuide ? matchedFeeGuide.name : (mem.specialization || mem.userIndustry || 'Technical & Professional Services');
-      const deliverables = matchedFeeGuide ? matchedFeeGuide.deliverables : '1. Technical Discovery & Specification Memo, 2. Core Execution & Quality Assurance Logs, 3. Final Handover & Sign-Off Package.';
-      const total = mem.userBudget || 2000000;
+      const domain = matchedFeeGuide ? matchedFeeGuide.name : (mem.specialization || mem.userIndustry || 'Engineering, EPC & Technical Services');
+      const deliverables = matchedFeeGuide ? matchedFeeGuide.deliverables : '1. Basis of Design / Technical Specification Memo, 2. Core Execution Package & QA/QC Inspection Logs, 3. Final As-Built / AFC Handover & Sign-Off Package.';
+      const total = mem.userBudget || 2500000;
+      const isRfqOrTender = /\b(rfq|rfp|tender|itt|bid|quotation)\b/i.test(lower);
+
+      if (isRfqOrTender) {
+        return appendNamePromptIfNeeded(
+          `### 📋 Executive RFQ / Tender Technical & Commercial Proposal ("Collektion" Draft)\n\n` +
+          `Here is a ready-to-submit **RFQ Proposal & Milestone Schedule**${nameAddress} tailored for **${domain}** on **Collekt**:\n\n` +
+          `#### 1. Executive Summary & Technical Compliance Statement\n` +
+          `> *"We confirm full technical and commercial compliance with the Request for Quotation (RFQ) scope of work. All engineering, execution, and quality assurance deliverables will be executed in strict accordance with applicable Nigerian statutory standards (COREN / NUPRC / NCDMB / SON) and governed under Collekt’s 3-Stage Milestone Escrow."* \n\n` +
+          `#### 2. Technical Methodology & Deliverables Matrix\n` +
+          `* **Core Deliverables:** ${deliverables}\n` +
+          `* **Quality & Review Cycle:** Submission of **Issued for Review (IFR)** package within Milestone 1, incorporation of client technical comments during **Issued for Approval (IFA)** in Milestone 2, and final **Approved for Construction / Implementation (AFC)** handover in Milestone 3.\n` +
+          `* **Assigned Lead Qualifications:** ${mem.yearsOfExperience ? `${mem.yearsOfExperience}+ years experience` : 'Verified Senior Specialist'}${mem.certifications && mem.certifications.length ? ` • Credentials: **${mem.certifications.join(', ')}**` : ' • **Collekt Shield Verified**'}.\n\n` +
+          `#### 3. Statutory & Mandatory RFQ Attachments Checklist\n` +
+          `* ✅ **Technical Credentials:** Valid **COREN / ICAN / PMP / HSE** Practicing License & Lead CV\n` +
+          `* ✅ **Corporate & Tax Compliance:** CAC Status Report, **FIRS Tax Clearance Certificate (TCC)**, and VAT/TIN registration\n` +
+          `* ✅ **Sector Permits (If Upstream/EPC):** Valid **NUPRC OGISP** permit and **NCDMB NOGIC JQS / NCEC** registration\n\n` +
+          `#### 4. Commercial Bid & 3-Stage Collekt Milestone Escrow Schedule (Ref: ₦${total.toLocaleString()})\n` +
+          `* **Milestone 1 — 30% (\`₦${Math.round(total * 0.30).toLocaleString()}\`): Mobilization, Kickoff & Basis of Design (IFR)**\n` +
+          `  * *Release Trigger:* Client approval of inception report, schedule, and technical specification.\n` +
+          `* **Milestone 2 — 40% (\`₦${Math.round(total * 0.40).toLocaleString()}\`): Core Technical Execution & Inspection (IFA)**\n` +
+          `  * *Release Trigger:* Delivery and verification of primary work package / BOQ / staging build.\n` +
+          `* **Milestone 3 — 30% (\`₦${Math.round(total * 0.30).toLocaleString()}\`): Final Testing, Close-Out & AFC Handover**\n` +
+          `  * *Release Trigger:* Final acceptance sign-off and complete documentation handover.\n` +
+          `* *Commercial Note:* State whether quoted Naira (\`₦\`) figures are **exclusive of 7.5% VAT** and subject to statutory **5%–10% WHT** credit notes.\n\n` +
+          `*Tip: Share the **specific RFQ title, scope, or target Naira budget**—or paste the RFQ text—and I will customize this proposal word-for-word for your submission.*`,
+          mem
+        );
+      }
 
       return appendNamePromptIfNeeded(
         `### Executive Draft: Structured Scope & Milestone Schedule (${domain})\n\n` +
@@ -1345,6 +1423,7 @@
       );
     }
 
+    // 19. Commercial Pricing, Suggestive Fees & Project Scoping (Matched or Dynamic Role)
     const asksAboutFeeOrScope = /\b(fee|fees|price|pricing|cost|charge|budget|how much|estimate|rate|rates|salary|pay|scope|milestone|milestones|hire|hiring|need a|looking for|bid|bidding)\b/i.test(lower);
 
     if (matchedFeeGuide && asksAboutFeeOrScope) {
@@ -1383,6 +1462,7 @@
       );
     }
 
+    // 20. Core Platform Knowledge Topics (About Collekt, Escrow, Hiring, Talent, Navigation)
     if (/\b(what is collekt|about collekt|what do you do|what does collekt do|explain collekt|who are you|what can you do|what is this platform|how does collekt work|tell me about collekt)\b/i.test(lower)) {
       return appendNamePromptIfNeeded(
         `**Collekt** is Nigeria’s verified B2B project marketplace and milestone-escrow platform${nameAddress}. We connect companies commissioning critical engineering, technology, and corporate work with identity- and credential-vetted specialists.\n\n` +
@@ -1421,6 +1501,7 @@
       );
     }
 
+    // 21. Domain Mentioned Without Explicit Fee Keyword
     if (matchedFeeGuide) {
       return appendNamePromptIfNeeded(
         `### ${matchedFeeGuide.name} on Collekt${nameAddress}\n\n` +
@@ -1433,10 +1514,12 @@
       );
     }
 
+    // 22. Multi-Provider Live Orchestration Gateway (/api/kolly -> Claude + OpenAI + Gemini)
     if (typeof fetch === 'function' && !options.skipNetwork) {
       const apiKey = localStorage.getItem(BASE_STORAGE_KEYS.GEMINI_KEY);
       const recentTurns = threadHistory.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'Kolly'}: ${m.content}`).join('\n');
 
+      // Try Multi-Provider /api/kolly gateway first
       try {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 1650);
@@ -1464,10 +1547,15 @@
         if (resp.ok) {
           const json = await resp.json();
           const reply = json && (json.reply || json.response);
-          if (reply) return appendNamePromptIfNeeded(reply, mem);
+          const isLiveProvider = json && json.provider && ['anthropic', 'openai', 'gemini', 'collekt_security_guardrail', 'collekt_rbac_guard'].includes(json.provider);
+          const hasRichToolData = json && Array.isArray(json.citations) && json.citations.length > 0;
+          if (reply && (isLiveProvider || hasRichToolData)) {
+            return appendNamePromptIfNeeded(reply, mem);
+          }
         }
       } catch (e) {}
 
+      // Fallback to direct Gemini key if configured in browser
       const claudeSystemPrompt = `You are Kolly, the Senior Executive & Technical Advisor for Collekt (collektng.com), Nigeria's verified B2B project marketplace and milestone-escrow platform.
 Think, reason, and respond with the analytical clarity, warmth, and executive polish of Anthropic's Claude.
 CRITICAL RULES:
@@ -1499,6 +1587,7 @@ User Name: ${effectiveName || 'Member'}. User Role: ${mem.userRole || 'professio
       }
     }
 
+    // 23. Context-Aligned Direct Response for Any Custom Question
     return appendNamePromptIfNeeded(
       `Regarding **"${clean}"**${nameAddress}:\n\n` +
       `On **Collekt**, we handle this through our verified B2B workspace and **Milestone Escrow** framework:\n\n` +
@@ -1509,9 +1598,23 @@ User Name: ${effectiveName || 'Member'}. User Role: ${mem.userRole || 'professio
     );
   }
 
+  /**
+   * Public generateReply: Enforces a deliberate 2-second (2000ms) thinking cadence
+   * before returning a response that directly aligns with what the user asked.
+   */
   async function generateReply(userText, threadHistory = [], options = {}) {
     const startTime = Date.now();
-    const reply = await computeAlignedReply(userText, threadHistory, options);
+    let reply;
+    try {
+      reply = await computeAlignedReply(userText, threadHistory, options);
+    } catch (err) {
+      const mem = getLearnedMemory(options && options.userId);
+      const effectiveName = getEffectiveUserName(mem);
+      const nameAddress = effectiveName ? `, **${effectiveName}**` : '';
+      reply = sanitizeInternalDetails(
+        `I’m right here${nameAddress}! How can I assist you with your project scope, **Collektion** proposal, or **Milestone Escrow** on Collekt today?`
+      );
+    }
     const minWait = typeof options.thinkingDurationMs === 'number' ? options.thinkingDurationMs : THINKING_DURATION_MS;
     const elapsed = Date.now() - startTime;
     const remaining = Math.max(0, minWait - elapsed);
@@ -1524,27 +1627,50 @@ User Name: ${effectiveName || 'Member'}. User Role: ${mem.userRole || 'professio
   /* --------------------------------------------------------------------------
      8. THREAD / CHAT HISTORY STORAGE (USER-SCOPED + AUTOMATIC SANITIZATION)
   -------------------------------------------------------------------------- */
+  function getActiveThreadId(explicitUserId) {
+    const activeKey = getScopedStorageKey(BASE_STORAGE_KEYS.ACTIVE_THREAD, explicitUserId);
+    try {
+      return localStorage.getItem(activeKey) || localStorage.getItem(BASE_STORAGE_KEYS.ACTIVE_THREAD) || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setActiveThreadId(threadId, explicitUserId) {
+    const activeKey = getScopedStorageKey(BASE_STORAGE_KEYS.ACTIVE_THREAD, explicitUserId);
+    try {
+      if (threadId) {
+        localStorage.setItem(activeKey, threadId);
+        localStorage.setItem(BASE_STORAGE_KEYS.ACTIVE_THREAD, threadId);
+      }
+    } catch (e) {}
+  }
+
   function getThreads(explicitUserId) {
     const key = getScopedStorageKey(BASE_STORAGE_KEYS.THREADS, explicitUserId);
     try {
       const raw = localStorage.getItem(key);
       if (raw) {
         const parsed = JSON.parse(raw);
-        let modified = false;
-        parsed.forEach(thread => {
-          if (Array.isArray(thread.messages)) {
+        if (Array.isArray(parsed)) {
+          let modified = false;
+          parsed.forEach(thread => {
+            if (!Array.isArray(thread.messages)) {
+              thread.messages = [];
+              modified = true;
+            }
             thread.messages.forEach(msg => {
               if (msg.content && /\.html\b/i.test(msg.content)) {
                 msg.content = sanitizeInternalDetails(msg.content);
                 modified = true;
               }
             });
+          });
+          if (modified) {
+            localStorage.setItem(key, JSON.stringify(parsed));
           }
-        });
-        if (modified) {
-          localStorage.setItem(key, JSON.stringify(parsed));
+          return parsed;
         }
-        return parsed;
       }
     } catch (e) {}
     return [];
@@ -1559,7 +1685,6 @@ User Name: ${effectiveName || 'Member'}. User Role: ${mem.userRole || 'professio
 
   function createNewThread(explicitUserId) {
     const threads = getThreads(explicitUserId);
-    const activeKey = getScopedStorageKey(BASE_STORAGE_KEYS.ACTIVE_THREAD, explicitUserId);
     const newThread = {
       id: 'chat_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
       title: 'New chat',
@@ -1569,9 +1694,7 @@ User Name: ${effectiveName || 'Member'}. User Role: ${mem.userRole || 'professio
     };
     threads.unshift(newThread);
     saveThreads(threads, explicitUserId);
-    try {
-      localStorage.setItem(activeKey, newThread.id);
-    } catch (e) {}
+    setActiveThreadId(newThread.id, explicitUserId);
     return newThread;
   }
 
@@ -1586,6 +1709,8 @@ User Name: ${effectiveName || 'Member'}. User Role: ${mem.userRole || 'professio
     saveThreads,
     createNewThread,
     deleteThread,
+    getActiveThreadId,
+    setActiveThreadId,
     getLearnedMemory,
     saveLearnedMemory,
     setMemoryConsent,

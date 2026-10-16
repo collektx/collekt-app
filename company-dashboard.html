@@ -81,9 +81,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=160.0">
-<link rel="stylesheet" href="shared.css?v=160.0">
-<link rel="stylesheet" href="glass.css?v=160.0">
+<link rel="stylesheet" href="style.css?v=173.0">
+<link rel="stylesheet" href="shared.css?v=173.0">
+<link rel="stylesheet" href="glass.css?v=173.0">
 
 <style>
   html, body {
@@ -266,7 +266,7 @@
         <div>
           <div style="font-size:11px; font-weight:800; color:var(--amber); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;">Company Dashboard</div>
           <h1 style="font-size:22px; font-weight:900; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">Welcome, <span id="companyWelcomeName">Company Account</span><span id="coWelcomeBadge"></span> &#x1F44F;</h1>
-          <p style="font-size:14px; color:rgba(255,255,255,.7);">Find verified talent, post opportunities and manage contracts &mdash; all in one place.</p>
+          <p style="font-size:14px; color:rgba(255,255,255,.7);">Find top talent, post opportunities and manage contracts &mdash; all in one place.</p>
         </div>
         <div class="co-welcome-actions">
           <a href="marketplace.html" class="btn btn-ghost btn-sm" style="min-height:40px;">&#x1F50D; Browse Talent</a>
@@ -416,9 +416,9 @@
             <div style="background:linear-gradient(135deg, var(--forest), #1a7a6f); border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.12); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=company'">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <div style="font-size:24px;">🏢</div>
-                <span style="background:rgba(255,255,255,0.28); color:#fff; font-size:11px; font-weight:900; padding:3px 8px; border-radius:99px; letter-spacing:0.3px;">$50 / Month</span>
+                <span style="background:rgba(255,255,255,0.28); color:#fff; font-size:11px; font-weight:900; padding:3px 8px; border-radius:99px; letter-spacing:0.3px;">₦74,999 / Month</span>
               </div>
-              <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Company Enterprise ($50 / Month)</h4>
+              <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Company Enterprise (₦74,999 / Month)</h4>
               <p style="font-size:12px; opacity:.9; margin-bottom:14px; line-height:1.4;">Post unlimited RFPs &amp; tenders, access AI candidate matching, automated tax invoices, and verified enterprise badge.</p>
               <a href="upgrade.html?role=company" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=company';" style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.4); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">Learn More &amp; Upgrade &rarr;</a>
             </div>
@@ -433,9 +433,16 @@
           <h2 class="section-heading" style="margin:0;">Recommended Professionals for Your Projects</h2>
           <div style="font-size:12px; color:var(--muted); margin-top:2px;">Infused with Kolly AI Candidate Matching &amp; PRD Verification Screening</div>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="runKollyTalentMatchDashboard()" style="font-weight:800; font-size:12px; border-color:var(--teal); color:var(--teal); display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
-          <span>🦖</span> <span>Run Kolly AI Match</span>
-        </button>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <select class="mkt-search-select" id="companyTalentSortSelect" style="padding:6px 14px; font-size:12px; font-weight:700; background:var(--paper); border:1px solid var(--line); border-radius:8px; color:var(--ink); cursor:pointer;" onchange="renderRecommendedProfessionals()">
+            <option value="newest">Newest</option>
+            <option value="a_z">A-Z</option>
+            <option value="z_a">Z-A</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="runKollyTalentMatchDashboard()" style="font-weight:800; font-size:12px; border-color:var(--teal); color:var(--teal); display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+            <span>🦖</span> <span>Run Kolly AI Match</span>
+          </button>
+        </div>
       </div>
       <div class="co-grid fade-in" id="recommendedTalentGrid">
         <!-- Rendered dynamically from real registered professionals -->
@@ -626,9 +633,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=160.0"></script>
-<script src="app.js?v=160.0"></script>
-<script src="collekt-ai.js?v=160.0"></script>
+<script src="supabase.js?v=173.0"></script>
+<script src="app.js?v=173.0"></script>
+<script src="collekt-ai.js?v=173.0"></script>
 <script>
   requireCompany();
   
@@ -946,17 +953,41 @@
       }
     }
 
-    // 2. If Supabase query returned results, only merge local non-sensitive details for those exact verified IDs
-    if (pros.length > 0 && typeof getAllRegisteredUsers === 'function') {
+    // 2. Merge local non-sensitive details and guarantee all authentic registered professionals are included
+    if (typeof getAllRegisteredUsers === 'function') {
       const allUsers = getAllRegisteredUsers();
-      pros = pros.map(p => {
-        const local = allUsers.find(lp => lp && lp.id && lp.id === p.id);
-        return local ? { ...local, ...p } : p;
+      const authenticTalents = allUsers.filter(u => u && u.name && !u.suspended && u.status !== 'suspended' && (u.role === 'professional' || (!u.role && u.role !== 'company')));
+
+      if (pros.length > 0) {
+        pros = pros.map(p => {
+          const local = allUsers.find(lp => lp && ((lp.id && lp.id === p.id) || (lp.email && p.email && lp.email.toLowerCase() === p.email.toLowerCase())));
+          return local ? { ...local, ...p } : p;
+        });
+
+        for (const at of authenticTalents) {
+          const exists = pros.some(p => (p.id && p.id === at.id) || (p.email && at.email && p.email.toLowerCase() === at.email.toLowerCase()));
+          if (!exists) {
+            pros.push(at);
+          }
+        }
+      } else {
+        pros = authenticTalents;
+      }
+    }
+
+    // 3. Apply sorting (Newest, A-Z, Z-A) matching marketplace.html
+    const sortVal = document.getElementById('companyTalentSortSelect')?.value || 'newest';
+    if (sortVal === 'a_z') {
+      pros.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
+    } else if (sortVal === 'z_a') {
+      pros.sort((a, b) => (b.name || '').localeCompare(a.name || '', undefined, { sensitivity: 'base' }));
+    } else {
+      // 'newest' (default)
+      pros.sort((a, b) => {
+        const tA = new Date(a.created_at || 0).getTime();
+        const tB = new Date(b.created_at || 0).getTime();
+        return tB - tA;
       });
-    } else if (pros.length === 0 && typeof getAllRegisteredUsers === 'function') {
-      // Offline fallback: strictly filtered verified registered users
-      const allUsers = getAllRegisteredUsers();
-      pros = allUsers.filter(u => u && u.name && !u.suspended && u.status !== 'suspended' && (u.role === 'professional' || (!u.role && u.role !== 'company')));
     }
 
     if (!pros || pros.length === 0) {
@@ -975,8 +1006,11 @@
     container.innerHTML = pros.map((p, idx) => {
       const bg = bgColors[idx % bgColors.length];
       const initial = (p.name || p.username || 'P').charAt(0).toUpperCase();
-      const avatarContent = (p.avatar && p.avatar.startsWith('data:'))
-        ? `<img src="${p.avatar}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" loading="lazy" decoding="async">`
+      const isVerified = (typeof isUserVerified === 'function') ? isUserVerified(p) : false;
+      const verifiedBadge = (isVerified && typeof getShieldBadgeHTML === 'function') ? getShieldBadgeHTML(14, p) : '';
+      const avatarSrc = (typeof resolveUserAvatarSrc === 'function') ? resolveUserAvatarSrc(p) : (p.avatar || p.avatar_url || '');
+      const avatarContent = avatarSrc
+        ? `<img src="${avatarSrc}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.onerror=null;this.parentElement.innerHTML='${initial}';" loading="lazy" decoding="async">`
         : initial;
 
       const skillsTags = (p.skills && p.skills.length)
@@ -985,7 +1019,6 @@
 
       const ratingVal = (p.rating != null && Number(p.rating) > 0) ? Number(p.rating).toFixed(1) : '0.0';
       const reviewsStr = p.review_count ? `(${p.review_count} reviews)` : '(0 reviews)';
-      const verifiedBadge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(14, p) : '';
       const matchScore = (p.match_score != null && Number(p.match_score) > 0) ? Math.round(Number(p.match_score)) : null;
       const matchReason = p.match_reason || '';
 
@@ -1274,6 +1307,44 @@
       acceptedSkills = targetProp.userSkills || targetProp.skills || [];
     }
 
+    const allJobs = typeof getLiveJobsFromState === 'function' ? getLiveJobsFromState() : (JSON.parse(localStorage.getItem('collekt_jobs') || '[]'));
+    const matchedJob = allJobs.find(j => j.id === _currentApplicantsProjectId) || {};
+
+    if (typeof openAwardContractModal === 'function') {
+      openAwardContractModal({
+        proposalId: proposalId,
+        proposal: targetProp,
+        jobId: _currentApplicantsProjectId,
+        jobTitle: _currentApplicantsProjectTitle || matchedJob.title || targetProp?.jobTitle || 'Marketplace Opportunity',
+        proId: acceptedProId,
+        proName: acceptedProName,
+        proSkills: acceptedSkills,
+        onSuccess: () => {
+          renderDashboardData();
+          if (_currentApplicantsProjectId) {
+            openApplicantsModal(_currentApplicantsProjectId, _currentApplicantsProjectTitle);
+          }
+          if (acceptedProId && typeof openAiMessageModal === 'function') {
+            setTimeout(() => {
+              openAiMessageModal({
+                proId: acceptedProId,
+                proName: acceptedProName,
+                proSkills: acceptedSkills,
+                projectId: _currentApplicantsProjectId,
+                projectTitle: _currentApplicantsProjectTitle || matchedJob.title || 'Marketplace Opportunity',
+                projectDesc: matchedJob.description || '',
+                projectFee: matchedJob.budget || matchedJob.professional_fee || null,
+                proposalId: proposalId,
+                collectionStatus: 'ACCEPTED',
+                defaultIntent: 'acceptance_kickoff'
+              });
+            }, 400);
+          }
+        }
+      });
+      return;
+    }
+
     if (typeof acceptCollectorProposalInSupabase === 'function') {
       const res = await acceptCollectorProposalInSupabase(proposalId, {
         jobId: _currentApplicantsProjectId,
@@ -1282,27 +1353,6 @@
       if (res.success) {
         if (typeof showToast === 'function') {
           showToast('🎉 Collekt Accepted! Professional engaged & active contract created.');
-        }
-
-        // Offer immediate AI kickoff message drafting
-        if (acceptedProId && typeof openAiMessageModal === 'function') {
-          setTimeout(() => {
-            const allJobs = typeof getLiveJobsFromState === 'function' ? getLiveJobsFromState() : (JSON.parse(localStorage.getItem('collekt_jobs') || '[]'));
-            const matchedJob = allJobs.find(j => j.id === _currentApplicantsProjectId) || {};
-
-            openAiMessageModal({
-              proId: acceptedProId,
-              proName: acceptedProName,
-              proSkills: acceptedSkills,
-              projectId: _currentApplicantsProjectId,
-              projectTitle: _currentApplicantsProjectTitle || matchedJob.title || 'Marketplace Opportunity',
-              projectDesc: matchedJob.description || '',
-              projectFee: matchedJob.budget || matchedJob.professional_fee || null,
-              proposalId: proposalId,
-              collectionStatus: 'ACCEPTED',
-              defaultIntent: 'acceptance_kickoff'
-            });
-          }, 400);
         }
       } else {
         if (typeof showToast === 'function') {
@@ -1334,9 +1384,8 @@
   }
 
   let coCurrentMilestones = [
-    { name: 'Phase 1: Mobilization & Site Analysis', percentage: 40 },
-    { name: 'Phase 2: Technical Execution & Interim Review', percentage: 30 },
-    { name: 'Phase 3: Final Delivery & Sign-Off', percentage: 30 }
+    { name: 'Phase 1: Mobilization & Site Analysis', percentage: 50 },
+    { name: 'Phase 2: Final Execution, Delivery & Sign-Off', percentage: 50 }
   ];
 
   function setCoPaymentMode(mode) {
@@ -1399,11 +1448,15 @@
   }
 
   function addCoMilestoneRow() {
-    const nextIdx = coCurrentMilestones.length + 1;
-    coCurrentMilestones.push({
-      name: `Phase ${nextIdx}: Specific Milestone Scope`,
-      percentage: 0
-    });
+    if (coCurrentMilestones.length >= 3) {
+      if (typeof showToast === 'function') showToast('ℹ️ Companies can define 2 or 3 custom milestones per contract.', 'info');
+      return;
+    }
+    coCurrentMilestones = [
+      { name: coCurrentMilestones[0]?.name || 'Phase 1: Mobilization & Site Analysis', percentage: 40 },
+      { name: 'Phase 2: Technical Execution & Interim Inspection', percentage: 30 },
+      { name: coCurrentMilestones[1]?.name || 'Phase 3: Final Delivery & Sign-Off', percentage: 30 }
+    ];
     renderCoMilestoneRows();
   }
 
@@ -1413,6 +1466,10 @@
       return;
     }
     coCurrentMilestones.splice(idx, 1);
+    if (coCurrentMilestones.length === 2) {
+      coCurrentMilestones[0].percentage = 50;
+      coCurrentMilestones[1].percentage = 50;
+    }
     renderCoMilestoneRows();
   }
 
@@ -1847,7 +1904,7 @@
   </div>
 </div>
 
-<script src="settings-popup.js?v=160.0"></script>
+<script src="settings-popup.js?v=173.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>

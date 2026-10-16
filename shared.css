@@ -2304,18 +2304,40 @@ html.dark .escrow-milestone-card {
   font-weight: 800;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.18s ease;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   touch-action: manipulation;
+  user-select: none;
 }
-.amount-chip:hover, .amount-chip.active {
-  background: var(--teal);
-  color: #FFFFFF;
-  border-color: var(--teal);
+.amount-chip:hover {
+  background: rgba(13, 148, 136, 0.12);
+  border-color: var(--teal, #0D9488);
+  color: var(--teal, #0D9488);
+}
+.amount-chip.active,
+.amount-chip.active:hover {
+  background: var(--teal, #0D9488) !important;
+  color: #FFFFFF !important;
+  border-color: var(--teal, #0D9488) !important;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.45) !important;
+  font-weight: 900 !important;
 }
 html.dark .amount-chip {
   background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.85);
+}
+html.dark .amount-chip:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
   color: #FFFFFF;
+}
+html.dark .amount-chip.active,
+html.dark .amount-chip.active:hover {
+  background: var(--teal, #0D9488) !important;
+  color: #FFFFFF !important;
+  border-color: var(--teal, #0D9488) !important;
+  box-shadow: 0 4px 16px rgba(13, 148, 136, 0.55) !important;
+  font-weight: 900 !important;
 }
 
 /* â”€â”€ Skeleton Loading Animations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */

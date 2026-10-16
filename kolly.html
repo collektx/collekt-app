@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -599,7 +599,7 @@
     </div>
   </div>
 
-  <script src="kolly-engine.js?v=162.0"></script>
+  <script src="kolly-engine.js?v=173.0"></script>
   <script>
     const sidebar = document.getElementById('sidebar');
     const btnToggleSidebar = document.getElementById('btnToggleSidebar');
@@ -642,7 +642,9 @@
     } catch (e) {}
 
     let threads = window.KollyEngine.getThreads();
-    let activeThreadId = localStorage.getItem('kolly_chatgpt_active_thread_v2');
+    let activeThreadId = window.KollyEngine.getActiveThreadId
+      ? window.KollyEngine.getActiveThreadId()
+      : localStorage.getItem('kolly_chatgpt_active_thread_v2');
 
     if (!threads.length) {
       const first = window.KollyEngine.createNewThread();
@@ -650,9 +652,18 @@
       activeThreadId = first.id;
     } else if (!activeThreadId || !threads.some(t => t.id === activeThreadId)) {
       activeThreadId = threads[0].id;
+      if (window.KollyEngine.setActiveThreadId) {
+        window.KollyEngine.setActiveThreadId(activeThreadId);
+      }
     }
 
     function getActiveThread() {
+      threads = window.KollyEngine.getThreads();
+      if (!threads.length) {
+        const created = window.KollyEngine.createNewThread();
+        threads = window.KollyEngine.getThreads();
+        activeThreadId = created.id;
+      }
       return threads.find(t => t.id === activeThreadId) || threads[0];
     }
 
@@ -725,12 +736,19 @@
             } else if (activeThreadId === t.id) {
               activeThreadId = threads[0].id;
             }
+            if (window.KollyEngine.setActiveThreadId) {
+              window.KollyEngine.setActiveThreadId(activeThreadId);
+            }
             updateSidebar();
             renderMessages();
             return;
           }
           activeThreadId = t.id;
-          localStorage.setItem('kolly_chatgpt_active_thread_v2', activeThreadId);
+          if (window.KollyEngine.setActiveThreadId) {
+            window.KollyEngine.setActiveThreadId(activeThreadId);
+          } else {
+            localStorage.setItem('kolly_chatgpt_active_thread_v2', activeThreadId);
+          }
           updateSidebar();
           renderMessages();
         });
@@ -810,6 +828,24 @@
       chatScroll.scrollTop = chatScroll.scrollHeight;
     }
 
+    function showThinkingRow() {
+      const existing = document.getElementById('kollyThinkingRow');
+      if (existing) existing.remove();
+      const thinkingRow = document.createElement('div');
+      thinkingRow.id = 'kollyThinkingRow';
+      thinkingRow.className = 'msg-row-assistant';
+      thinkingRow.style.alignItems = 'center';
+      thinkingRow.innerHTML = `
+        <div style="width:30px; height:30px; border-radius:50%; background:#10a37f; color:#fff; font-weight:700; font-size:14px; display:grid; place-items:center; flex-shrink:0;" title="Kolly — Collekt AI">K</div>
+        <div class="thinking-pill">
+          <span>Thinking</span>
+          <span class="thinking-dots"><span></span><span></span><span></span></span>
+        </div>
+      `;
+      chatContainer.appendChild(thinkingRow);
+      chatScroll.scrollTop = chatScroll.scrollHeight;
+    }
+
     async function sendMessage(text) {
       const clean = (text || '').trim();
       if (!clean && !pendingDocumentText) return;
@@ -823,7 +859,17 @@
       pendingDocumentName = null;
       if (attachedDocBanner) attachedDocBanner.style.display = 'none';
 
-      const thread = getActiveThread();
+      // Always acquire fresh threads array & target thread ID before mutation
+      threads = window.KollyEngine.getThreads();
+      let thread = threads.find(t => t.id === activeThreadId) || threads[0];
+      if (!thread) {
+        thread = window.KollyEngine.createNewThread();
+        threads = window.KollyEngine.getThreads();
+        thread = threads[0];
+      }
+      const targetThreadId = thread.id;
+      activeThreadId = targetThreadId;
+
       if (!thread.messages.length) {
         thread.title = userDisplay.length > 34 ? userDisplay.slice(0, 34) + '...' : userDisplay;
       }
@@ -834,42 +880,44 @@
         createdAt: new Date().toISOString()
       });
       thread.updatedAt = new Date().toISOString();
+      const historySnapshot = thread.messages.slice();
+
       window.KollyEngine.saveThreads(threads);
       updateSidebar();
       renderMessages();
 
       // Show 2-second deliberate Thinking indicator
-      const thinkingRow = document.createElement('div');
-      thinkingRow.className = 'msg-row-assistant';
-      thinkingRow.style.alignItems = 'center';
-      thinkingRow.innerHTML = `
-        <div style="width:30px; height:30px; border-radius:50%; background:#10a37f; color:#fff; font-weight:700; font-size:14px; display:grid; place-items:center; flex-shrink:0;" title="Kolly — Collekt AI">K</div>
-        <div class="thinking-pill">
-          <span>Thinking</span>
-          <span class="thinking-dots"><span></span><span></span><span></span></span>
-        </div>
-      `;
-      chatContainer.appendChild(thinkingRow);
-      chatScroll.scrollTop = chatScroll.scrollHeight;
+      showThinkingRow();
 
-      const startMs = Date.now();
-      const replyText = await window.KollyEngine.generateReply(
-        clean || 'Analyze attached tender document',
-        thread.messages,
-        { documentText: docToSend, researchMode: researchModeActive }
-      );
-      const elapsedMs = Date.now() - startMs;
-      if (elapsedMs < 2000) {
-        await new Promise(r => setTimeout(r, 2000 - elapsedMs));
+      let replyText = '';
+      try {
+        const startMs = Date.now();
+        replyText = await window.KollyEngine.generateReply(
+          clean || 'Analyze attached tender document',
+          historySnapshot,
+          { documentText: docToSend, researchMode: researchModeActive }
+        );
+        const elapsedMs = Date.now() - startMs;
+        if (elapsedMs < 2000) {
+          await new Promise(r => setTimeout(r, 2000 - elapsedMs));
+        }
+      } catch (err) {
+        replyText = 'I am right here and ready to help! Please share the details of your RFQ, project scope, or Milestone Escrow question.';
       }
 
-      thread.messages.push({
-        role: 'assistant',
-        content: replyText,
-        createdAt: new Date().toISOString()
-      });
-      thread.updatedAt = new Date().toISOString();
-      window.KollyEngine.saveThreads(threads);
+      // Re-acquire fresh threads array after the async await boundary so reply is NEVER lost
+      threads = window.KollyEngine.getThreads();
+      let targetThread = threads.find(t => t.id === targetThreadId) || threads[0];
+      if (targetThread) {
+        targetThread.messages.push({
+          role: 'assistant',
+          content: replyText,
+          createdAt: new Date().toISOString()
+        });
+        targetThread.updatedAt = new Date().toISOString();
+        window.KollyEngine.saveThreads(threads);
+      }
+
       updateSidebar();
       renderMessages();
     }
@@ -994,8 +1042,39 @@
       this.style.height = Math.min(this.scrollHeight, 140) + 'px';
     });
 
+    async function recoverPendingUserMessages() {
+      const currentThread = getActiveThread();
+      if (!currentThread || !Array.isArray(currentThread.messages) || !currentThread.messages.length) return;
+      const lastMsg = currentThread.messages[currentThread.messages.length - 1];
+      if (lastMsg && lastMsg.role === 'user' && lastMsg.content) {
+        const targetId = currentThread.id;
+        showThinkingRow();
+        try {
+          const replyText = await window.KollyEngine.generateReply(
+            lastMsg.content,
+            currentThread.messages.slice(),
+            { researchMode: researchModeActive }
+          );
+          threads = window.KollyEngine.getThreads();
+          const target = threads.find(t => t.id === targetId) || threads[0];
+          if (target) {
+            target.messages.push({
+              role: 'assistant',
+              content: replyText,
+              createdAt: new Date().toISOString()
+            });
+            target.updatedAt = new Date().toISOString();
+            window.KollyEngine.saveThreads(threads);
+          }
+          updateSidebar();
+          renderMessages();
+        } catch (e) {}
+      }
+    }
+
     updateSidebar();
     renderMessages();
+    recoverPendingUserMessages();
   </script>
 </body>
 </html>

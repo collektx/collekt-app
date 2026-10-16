@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=160.0">
-<link rel="stylesheet" href="shared.css?v=160.0">
-<link rel="stylesheet" href="glass.css?v=160.0">
+<link rel="stylesheet" href="style.css?v=173.0">
+<link rel="stylesheet" href="shared.css?v=173.0">
+<link rel="stylesheet" href="glass.css?v=173.0">
 
 <style>
   body { background: var(--paper); }
@@ -201,8 +201,8 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=160.0"></script>
-<script src="app.js?v=160.0"></script>
+<script src="supabase.js?v=173.0"></script>
+<script src="app.js?v=173.0"></script>
 <script>
   // Detect if arriving from OAuth callback & show immediate feedback
   const oauthHash = window.location.hash || '';
@@ -429,6 +429,10 @@
         }
         localStorage.setItem('collekt_last_user_email', email);
 
+        if (typeof dispatchLoginAlertIfEnabled === 'function') {
+          try { dispatchLoginAlertIfEnabled(profile); } catch(e){}
+        }
+
         // Determine destination dashboard
         let target = 'dashboard.html';
         if (profile.role === 'admin') {
@@ -468,55 +472,322 @@
     }
   })();
 
-  // Forgot password
-  async function handleForgotPassword(e) {
-    if (e && typeof e.preventDefault === 'function') e.preventDefault();
-    const emailInput = document.getElementById('email');
-    const email = (emailInput?.value || '').trim();
-    const emailError = document.getElementById('emailError');
+  // Forgot password / Set password for Google & Email users
+  let resetCooldownTimer = null;
+  let resetCooldownSec = 0;
 
-    if (!email) {
-      if (emailError) {
-        emailError.textContent = 'Please enter your registered email address first.';
-        emailError.classList.add('show');
+  function ensurePasswordResetModal() {
+    if (document.getElementById('collektResetModal')) return;
+    const modalHtml = `
+      <div id="collektResetModal" style="display:none; position:fixed; inset:0; z-index:100001; background:rgba(4,14,13,0.92); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); align-items:center; justify-content:center; padding:16px;">
+        <div style="max-width:450px; width:100%; border-radius:20px; padding:28px 24px; background:var(--white, #ffffff); border:1.5px solid var(--line, rgba(20,184,166,0.28)); position:relative; font-family:'Plus Jakarta Sans','Manrope',sans-serif; box-shadow:0 24px 70px rgba(0,0,0,0.55); text-align:center;">
+          <button type="button" onclick="closePasswordResetModal()" style="position:absolute; top:14px; right:14px; width:32px; height:32px; border-radius:50%; border:1px solid var(--line, #e2e8f0); background:transparent; color:var(--muted, #64748b); font-size:16px; cursor:pointer; display:grid; place-items:center;">&times;</button>
+
+          <div style="width:48px; height:48px; border-radius:50%; background:rgba(20,184,166,0.12); border:1.5px solid rgba(20,184,166,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:22px;">🔐</div>
+
+          <div style="display:inline-block; margin:0 auto 6px; font-size:10px; font-weight:800; color:var(--amber, #D4920B); background:rgba(212,146,11,0.14); border:1px solid rgba(212,146,11,0.3); padding:3px 12px; border-radius:99px; text-transform:uppercase; letter-spacing:0.06em;">
+            Account Recovery &bull; Email &amp; Google
+          </div>
+
+          <h2 style="font-size:20px; font-weight:900; color:var(--ink, #0D1F1E); margin:0 0 6px 0;">Reset or Set Your Password</h2>
+          <p style="font-size:12.5px; color:var(--muted, #64748b); line-height:1.5; margin:0 0 16px 0;">
+            We sent a 6-digit recovery code to <strong id="resetTargetEmailLabel" style="color:var(--teal, #13756F);">your email</strong>.<br>
+            Enter the code and choose your new password below.
+          </p>
+
+          <div style="text-align:left; margin-bottom:12px;">
+            <label style="display:block; font-size:11.5px; font-weight:800; color:var(--ink, #0D1F1E); margin-bottom:5px;">Account Email</label>
+            <div style="display:flex; gap:8px;">
+              <input type="email" id="resetModalEmailInput" placeholder="you@company.com" style="flex:1; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line, #cbd5e1); background:var(--paper, #f8fafc); color:var(--ink, #0D1F1E); font-size:13px; font-weight:600; outline:none;">
+              <button type="button" id="resetSendCodeBtn" onclick="dispatchPasswordResetOtp()" style="padding:10px 14px; border-radius:10px; border:1.5px solid rgba(19,117,111,0.35); background:rgba(19,117,111,0.1); color:var(--teal, #13756F); font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap;">Resend Code</button>
+            </div>
+          </div>
+
+          <div style="text-align:left; margin-bottom:14px;">
+            <label style="display:block; font-size:11.5px; font-weight:800; color:var(--ink, #0D1F1E); margin-bottom:6px;">6-Digit Recovery Code (from Email)</label>
+            <div style="display:flex; justify-content:space-between; gap:6px;" id="resetOtpBoxGroup">
+              <input type="text" maxlength="1" inputmode="numeric" class="reset-otp-box" data-idx="0" autocomplete="one-time-code" style="width:46px; height:50px; text-align:center; font-size:21px; font-weight:800; border-radius:10px; background:rgba(19,117,111,0.06); border:2px solid rgba(19,117,111,0.35); color:var(--ink, #0D1F1E); outline:none;">
+              <input type="text" maxlength="1" inputmode="numeric" class="reset-otp-box" data-idx="1" style="width:46px; height:50px; text-align:center; font-size:21px; font-weight:800; border-radius:10px; background:rgba(19,117,111,0.06); border:2px solid rgba(19,117,111,0.35); color:var(--ink, #0D1F1E); outline:none;">
+              <input type="text" maxlength="1" inputmode="numeric" class="reset-otp-box" data-idx="2" style="width:46px; height:50px; text-align:center; font-size:21px; font-weight:800; border-radius:10px; background:rgba(19,117,111,0.06); border:2px solid rgba(19,117,111,0.35); color:var(--ink, #0D1F1E); outline:none;">
+              <input type="text" maxlength="1" inputmode="numeric" class="reset-otp-box" data-idx="3" style="width:46px; height:50px; text-align:center; font-size:21px; font-weight:800; border-radius:10px; background:rgba(19,117,111,0.06); border:2px solid rgba(19,117,111,0.35); color:var(--ink, #0D1F1E); outline:none;">
+              <input type="text" maxlength="1" inputmode="numeric" class="reset-otp-box" data-idx="4" style="width:46px; height:50px; text-align:center; font-size:21px; font-weight:800; border-radius:10px; background:rgba(19,117,111,0.06); border:2px solid rgba(19,117,111,0.35); color:var(--ink, #0D1F1E); outline:none;">
+              <input type="text" maxlength="1" inputmode="numeric" class="reset-otp-box" data-idx="5" style="width:46px; height:50px; text-align:center; font-size:21px; font-weight:800; border-radius:10px; background:rgba(19,117,111,0.06); border:2px solid rgba(19,117,111,0.35); color:var(--ink, #0D1F1E); outline:none;">
+            </div>
+          </div>
+
+          <div style="text-align:left; margin-bottom:10px;">
+            <label style="display:block; font-size:11.5px; font-weight:800; color:var(--ink, #0D1F1E); margin-bottom:5px;">New Password (min. 8 characters)</label>
+            <input type="password" id="resetNewPassword" placeholder="Enter new password" style="width:100%; box-sizing:border-box; padding:11px 12px; border-radius:10px; border:1.5px solid var(--line, #cbd5e1); background:var(--paper, #f8fafc); color:var(--ink, #0D1F1E); font-size:13.5px; outline:none;">
+          </div>
+
+          <div style="text-align:left; margin-bottom:14px;">
+            <label style="display:block; font-size:11.5px; font-weight:800; color:var(--ink, #0D1F1E); margin-bottom:5px;">Confirm New Password</label>
+            <input type="password" id="resetConfirmPassword" placeholder="Confirm new password" style="width:100%; box-sizing:border-box; padding:11px 12px; border-radius:10px; border:1.5px solid var(--line, #cbd5e1); background:var(--paper, #f8fafc); color:var(--ink, #0D1F1E); font-size:13.5px; outline:none;">
+          </div>
+
+          <div id="resetModalError" style="display:none; color:#ef4444; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:9px 12px; font-size:12px; font-weight:600; margin-bottom:12px; text-align:center;"></div>
+          <div id="resetModalSuccess" style="display:none; color:#10b981; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:10px; padding:9px 12px; font-size:12px; font-weight:600; margin-bottom:12px; text-align:center;"></div>
+
+          <button type="button" id="resetSubmitBtn" onclick="submitPasswordReset()" style="width:100%; padding:13px; background:var(--forest, #0E3B35); border:1.5px solid rgba(20,184,166,0.3); color:#fff; border-radius:12px; font-size:14px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <span>Verify Code &amp; Update Password &rarr;</span>
+          </button>
+
+          <div style="margin-top:12px; font-size:11px; color:var(--muted, #64748b); line-height:1.4;">
+            💡 Works for both standard Email accounts and Google Sign-In accounts.
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    const boxes = document.querySelectorAll('.reset-otp-box');
+    boxes.forEach((box, idx) => {
+      box.oninput = function() {
+        const v = this.value.replace(/\D/g, '');
+        this.value = v ? v[0] : '';
+        if (this.value && idx < boxes.length - 1) boxes[idx + 1].focus();
+      };
+      box.onkeydown = function(ev) {
+        if (ev.key === 'Backspace' && !this.value && idx > 0) boxes[idx - 1].focus();
+      };
+      box.onpaste = function(ev) {
+        ev.preventDefault();
+        const txt = (ev.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+        if (txt) {
+          boxes.forEach((b, i) => { b.value = txt[i] || ''; });
+          boxes[Math.min(txt.length, boxes.length - 1)].focus();
+        }
+      };
+    });
+  }
+
+  function closePasswordResetModal() {
+    const m = document.getElementById('collektResetModal');
+    if (m) m.style.display = 'none';
+  }
+  window.closePasswordResetModal = closePasswordResetModal;
+
+  async function dispatchPasswordResetOtp() {
+    const emailEl = document.getElementById('resetModalEmailInput');
+    const email = (emailEl?.value || '').trim().toLowerCase();
+    const errBox = document.getElementById('resetModalError');
+    const succBox = document.getElementById('resetModalSuccess');
+    const sendBtn = document.getElementById('resetSendCodeBtn');
+    const labelEl = document.getElementById('resetTargetEmailLabel');
+
+    if (errBox) errBox.style.display = 'none';
+    if (succBox) succBox.style.display = 'none';
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (errBox) {
+        errBox.textContent = 'Please enter a valid registered email address.';
+        errBox.style.display = 'block';
       }
-      if (emailInput) emailInput.focus();
-      if (typeof showToast === 'function') showToast('⚠️ Please enter your registered email address first.', 'warning');
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      if (emailError) {
-        emailError.textContent = 'Please enter a valid email address.';
-        emailError.classList.add('show');
-      }
-      if (emailInput) emailInput.focus();
-      if (typeof showToast === 'function') showToast('⚠️ Please enter a valid email format.', 'warning');
-      return;
+    if (labelEl) labelEl.textContent = email;
+    if (sendBtn) {
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending...';
     }
-
-    if (emailError) emailError.classList.remove('show');
 
     try {
-      if (typeof showToast === 'function') showToast('Sending password reset instructions... ⏳', 'info');
-      if (window.sb && window.sb.auth && typeof window.sb.auth.resetPasswordForEmail === 'function') {
-        const { error } = await sb.auth.resetPasswordForEmail(email, { 
-          redirectTo: window.location.origin + '/login.html?reset=true' 
-        });
-        if (error) {
-          if (typeof showToast === 'function') showToast('⚠️ ' + (error.message || 'Could not send reset email.'), 'error');
-          return;
+      const res = await fetch('/api/auth-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send_reset_otp', email })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data && data.success) {
+        if (data.fallback_code) {
+          const digits = String(data.fallback_code).slice(0, 6);
+          document.querySelectorAll('.reset-otp-box').forEach((b, i) => { b.value = digits[i] || ''; });
+          if (succBox) {
+            succBox.innerHTML = `✓ Recovery code generated: <strong>${digits}</strong> (pre-filled).`;
+            succBox.style.display = 'block';
+          }
+        } else if (succBox) {
+          succBox.innerHTML = `✓ 6-digit recovery code sent to <strong>${email}</strong>. Check your inbox!`;
+          succBox.style.display = 'block';
+        }
+        if (typeof showToast === 'function') {
+          showToast('✅ Recovery code sent to ' + email, 'success');
+        }
+      } else {
+        const msg = (data && data.error) || 'Could not send recovery email. Please try again.';
+        if (errBox) {
+          errBox.textContent = msg;
+          errBox.style.display = 'block';
         }
       }
-      if (typeof showToast === 'function') {
-        showToast('✅ Password reset instructions sent to ' + email + '. Check your inbox.', 'success');
+    } catch (err) {
+      if (errBox) {
+        errBox.textContent = 'Network error sending recovery code. Please try again.';
+        errBox.style.display = 'block';
       }
-    } catch(err) {
-      if (typeof showToast === 'function') showToast('⚠️ ' + (err.message || 'Error requesting password reset.'), 'error');
+    } finally {
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Resend Code';
+      }
+    }
+  }
+  window.dispatchPasswordResetOtp = dispatchPasswordResetOtp;
+
+  async function submitPasswordReset() {
+    const email = (document.getElementById('resetModalEmailInput')?.value || '').trim().toLowerCase();
+    const newPw = document.getElementById('resetNewPassword')?.value || '';
+    const confPw = document.getElementById('resetConfirmPassword')?.value || '';
+    const errBox = document.getElementById('resetModalError');
+    const succBox = document.getElementById('resetModalSuccess');
+    const submitBtn = document.getElementById('resetSubmitBtn');
+
+    if (errBox) errBox.style.display = 'none';
+    if (succBox) succBox.style.display = 'none';
+
+    let code = '';
+    document.querySelectorAll('.reset-otp-box').forEach(b => { code += (b.value || '').trim(); });
+
+    if (!email || !email.includes('@')) {
+      if (errBox) { errBox.textContent = 'Please enter your email address.'; errBox.style.display = 'block'; }
+      return;
+    }
+    if (code.length !== 6 || !/^\d{6}$/.test(code)) {
+      if (errBox) { errBox.textContent = 'Please enter the 6-digit recovery code sent to your email.'; errBox.style.display = 'block'; }
+      return;
+    }
+    if (newPw.length < 8) {
+      if (errBox) { errBox.textContent = 'Your new password must be at least 8 characters long.'; errBox.style.display = 'block'; }
+      return;
+    }
+    if (newPw !== confPw) {
+      if (errBox) { errBox.textContent = 'New password and confirmation do not match.'; errBox.style.display = 'block'; }
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Updating password... ⏳</span>';
+    }
+
+    try {
+      const res = await fetch('/api/auth-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reset_password',
+          email,
+          code,
+          new_password: newPw
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data || !data.success) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Verify Code &amp; Update Password &rarr;</span>';
+        }
+        if (errBox) {
+          errBox.textContent = (data && data.error) || 'Invalid or expired recovery code. Please try again.';
+          errBox.style.display = 'block';
+        }
+        return;
+      }
+
+      if (succBox) {
+        succBox.innerHTML = '🎉 <strong>Password Updated!</strong> Signing you into your dashboard...';
+        succBox.style.display = 'block';
+      }
+      if (typeof showToast === 'function') {
+        showToast('✅ Password updated! Signing you in...', 'success');
+      }
+
+      // Auto-sign the user in with their new password
+      const loginInput = document.getElementById('email');
+      const passInput = document.getElementById('password');
+      if (loginInput) loginInput.value = email;
+      if (passInput) passInput.value = newPw;
+
+      const { profile, error: signInErr } = await signInWithEmailPassword({ email, password: newPw });
+      if (!signInErr && profile) {
+        if (typeof setUser === 'function') setUser(profile);
+        if (typeof dispatchLoginAlertIfEnabled === 'function') {
+          try { dispatchLoginAlertIfEnabled(profile); } catch(e){}
+        }
+        const dest = profile.role === 'admin' ? 'admin-dashboard.html' : (profile.role === 'company' ? 'company-dashboard.html' : 'dashboard.html');
+        setTimeout(() => { window.location.replace(dest); }, 900);
+        return;
+      }
+
+      setTimeout(() => {
+        closePasswordResetModal();
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Verify Code &amp; Update Password &rarr;</span>';
+        }
+      }, 1200);
+    } catch (err) {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Verify Code &amp; Update Password &rarr;</span>';
+      }
+      if (errBox) {
+        errBox.textContent = 'Network error while updating password. Please try again.';
+        errBox.style.display = 'block';
+      }
+    }
+  }
+  window.submitPasswordReset = submitPasswordReset;
+
+  async function handleForgotPassword(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    ensurePasswordResetModal();
+
+    const emailInput = document.getElementById('email');
+    const email = (emailInput?.value || localStorage.getItem('collekt_last_user_email') || '').trim();
+    const modal = document.getElementById('collektResetModal');
+    const modalEmail = document.getElementById('resetModalEmailInput');
+    const labelEl = document.getElementById('resetTargetEmailLabel');
+    const errBox = document.getElementById('resetModalError');
+    const succBox = document.getElementById('resetModalSuccess');
+
+    if (errBox) errBox.style.display = 'none';
+    if (succBox) succBox.style.display = 'none';
+    document.querySelectorAll('.reset-otp-box').forEach(b => { b.value = ''; });
+
+    if (modalEmail) modalEmail.value = email;
+    if (labelEl) labelEl.textContent = email || 'your email';
+    if (modal) modal.style.display = 'flex';
+
+    if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      await dispatchPasswordResetOtp();
+    } else if (modalEmail) {
+      modalEmail.focus();
     }
   }
   window.handleForgotPassword = handleForgotPassword;
+
+  // Auto-open reset modal if user clicked link from recovery email (?reset_email=...&reset_code=...)
+  (function checkEmailResetLink() {
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const rEmail = p.get('reset_email');
+      const rCode = p.get('reset_code');
+      if (rEmail) {
+        ensurePasswordResetModal();
+        const modal = document.getElementById('collektResetModal');
+        const modalEmail = document.getElementById('resetModalEmailInput');
+        const labelEl = document.getElementById('resetTargetEmailLabel');
+        if (modalEmail) modalEmail.value = rEmail;
+        if (labelEl) labelEl.textContent = rEmail;
+        if (rCode && /^\d{6}$/.test(rCode)) {
+          document.querySelectorAll('.reset-otp-box').forEach((b, i) => { b.value = rCode[i] || ''; });
+        }
+        if (modal) modal.style.display = 'flex';
+      }
+    } catch (e) {}
+  })();
 
   function socialLogin() {
     showToast('Social login coming soon.', 'warning');

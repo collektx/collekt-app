@@ -171,8 +171,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=163.0"></script>
-  <script src="app.js?v=163.0"></script>
+  <script src="supabase.js?v=173.0"></script>
+  <script src="app.js?v=173.0"></script>
   <script>
     function escapeHTML(str) {
       if (!str) return '';
@@ -220,6 +220,16 @@
                                session.user.app_metadata?.providers?.includes('google');
               const isOAuth = isLinkedIn || isGoogle;
 
+              // Strictly purge any previous user's local session/uploads if a different user signed in on this browser
+              try {
+                const prev = JSON.parse(localStorage.getItem('collekt_user') || 'null');
+                if (prev && ((prev.id && prev.id !== session.user.id) || (prev.email && session.user.email && prev.email.toLowerCase() !== session.user.email.toLowerCase()))) {
+                  ['collekt_user', 'collekt_user_avatar', 'collekt_company_logo', 'collekt_user_cover_photo', 'collekt_user_cv', 'collekt_custom_quals', 'collekt_user_nin', 'collekt_uploads_default'].forEach(k => {
+                    try { localStorage.removeItem(k); } catch(e) {}
+                  });
+                }
+              } catch(e) {}
+
               // LinkedIn identity linking / login: verified by LinkedIn OIDC
               if (isLinkedIn) {
                 isRedirecting = true;
@@ -237,8 +247,10 @@
 
                 try {
                   let u = JSON.parse(localStorage.getItem('collekt_user') || '{}');
-                  u.id = u.id || session.user.id;
-                  u.email = u.email || session.user.email;
+                  if (u.id && u.id !== session.user.id) u = {};
+                  u.id = session.user.id;
+                  u.email = session.user.email;
+                  u.name = u.name || session.user.user_metadata?.full_name || session.user.user_metadata?.name || (session.user.email ? session.user.email.split('@')[0] : 'User');
                   u.otp_verified = true;
                   u.email_verified = true;
                   u.provider = 'linkedin';
@@ -510,12 +522,18 @@
               sessionStorage.removeItem('collekt_awaiting_otp');
               sessionStorage.setItem('collekt_just_verified', 'true');
               let u = JSON.parse(localStorage.getItem('collekt_user') || '{}');
-              u.id = u.id || session.user.id;
-              u.email = u.email || userEmail;
+              if (u.id && u.id !== session.user.id) u = {};
+              u.id = session.user.id;
+              u.email = userEmail;
+              u.name = (profile && (profile.name || profile.full_name)) || userName || u.name || (userEmail ? userEmail.split('@')[0] : 'User');
+              u.role = (profile && profile.role) || userRole || 'professional';
               u.otp_verified = true;
               u.email_verified = true;
               localStorage.setItem('collekt_user', JSON.stringify(u));
               if (typeof saveRegisteredUser === 'function') saveRegisteredUser(u);
+              if (typeof dispatchLoginAlertIfEnabled === 'function') {
+                try { dispatchLoginAlertIfEnabled(profile || u); } catch(e){}
+              }
             } catch(e) {}
 
             try {

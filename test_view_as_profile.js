@@ -95,4 +95,13 @@ filesToCheck.forEach(file => {
 });
 console.log('  ✅ Verified navigation links across Company Dashboard, Marketplace, My Jobs, and Messages.');
 
+// 5. Test Self-Interaction Prevention ("View As" & Review Engine)
+console.log('\n▶ Test 5: Self-Interaction Prevention (Connect, Message, Hire, Review) in "View As" Mode');
+assert.ok(pubHtml.includes('isOwnProfile'), 'public-profile.html must detect isOwnProfile to prevent self-actions');
+assert.ok(pubHtml.includes("['connectBtn', 'messageBtn', 'hireBtn', 'leaveReviewBtn']"), 'public-profile.html must disable all 4 action buttons on own profile preview');
+assert.ok(appJsContent.includes('function isSelfReviewTarget('), 'app.js must define isSelfReviewTarget guard');
+assert.ok(appJsContent.includes('You cannot leave a review for yourself'), 'app.js must reject self-reviews in openReviewSubmissionModal and submitClientReview');
+console.log('  ✅ Verified Connect, Message, Hire Professional, and Leave a Review buttons are disabled on own profile preview.');
+
 console.log('\n🎉 ALL TESTS PASSED SUCCESSFULLY! 100% Data Integrity & "View As" Engine Verified.\n');
+

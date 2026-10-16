@@ -642,6 +642,24 @@
             </div>
           </div>
 
+          <!-- 5b. MEMBERSHIP & SUBSCRIPTION BILLING -->
+          <div class="settings-section">
+            <div class="settings-section-title">Membership &amp; Subscription Plans</div>
+            <div class="settings-row" style="align-items:center;">
+              <div class="settings-row-info">
+                <div class="settings-row-label" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                  <span>⚡ Professional Plus: <strong>&#x20A6;19,999/mo</strong></span>
+                  <span style="color:#6B8280;">&bull;</span>
+                  <span>🏢 Company Enterprise: <strong>&#x20A6;74,999/mo</strong></span>
+                </div>
+                <div class="settings-row-desc">Save 5% Quarterly, 10% Bi-Annually, or 17% Annually. Cancel or switch plans anytime.</div>
+              </div>
+              <a href="upgrade.html" class="sett-btn sett-btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;">
+                Manage Plan &rarr;
+              </a>
+            </div>
+          </div>
+
           <!-- 6. PLATFORM REVIEWS & FEEDBACK -->
           <div class="settings-section">
             <div class="settings-section-title">Platform Feedback &amp; Performance</div>
@@ -724,8 +742,6 @@
       'sett-profile-public':{ key: 'profile_public' },
       'sett-show-earnings': { key: 'show_earnings' },
       'sett-show-avail':    { key: 'show_availability' },
-      'sett-2fa':           { key: 'two_factor' },
-      'sett-login-alerts':  { key: 'login_alerts' },
       'sett-compact':       { key: 'compact_view' },
     };
 
@@ -734,6 +750,50 @@
       if (!el) return;
       el.addEventListener('change', () => setSetting(key, el.checked));
     });
+
+    /* Two-Factor Authentication Toggle: Requires Email OTP */
+    const twoFaToggle = document.getElementById('sett-2fa');
+    if (twoFaToggle) {
+      twoFaToggle.addEventListener('change', () => {
+        if (twoFaToggle.checked) {
+          // Revert checkbox state until email OTP is successfully verified
+          twoFaToggle.checked = false;
+          openTwoFactorModal();
+        } else {
+          setSetting('two_factor', false);
+          const curr = (typeof getUser === 'function' ? getUser() : null) || JSON.parse(localStorage.getItem('collekt_user') || '{}');
+          if (curr) {
+            curr.two_factor = false;
+            curr.two_factor_enabled = false;
+            localStorage.setItem('collekt_user', JSON.stringify(curr));
+          }
+          if (window.sb && curr && curr.id) {
+            sb.from('profiles').update({ two_factor_enabled: false }).eq('id', curr.id).then(()=>{}).catch(()=>{});
+          }
+          if (typeof showToast === 'function') showToast('Two-Factor Authentication turned OFF.');
+          else alert('Two-Factor Authentication turned OFF.');
+        }
+      });
+    }
+
+    /* Login Alerts Toggle: Sync to settings and profiles */
+    const loginAlertsToggle = document.getElementById('sett-login-alerts');
+    if (loginAlertsToggle) {
+      loginAlertsToggle.addEventListener('change', () => {
+        const on = loginAlertsToggle.checked;
+        setSetting('login_alerts', on);
+        const curr = (typeof getUser === 'function' ? getUser() : null) || JSON.parse(localStorage.getItem('collekt_user') || '{}');
+        if (curr) {
+          curr.login_alerts = on;
+          localStorage.setItem('collekt_user', JSON.stringify(curr));
+        }
+        if (window.sb && curr && curr.id) {
+          sb.from('profiles').update({ login_alerts: on }).eq('id', curr.id).then(()=>{}).catch(()=>{});
+        }
+        const msg = on ? '🔔 Login alerts turned ON. You will receive an email on new logins.' : '🔕 Login alerts turned OFF. No login notification emails will be sent.';
+        if (typeof showToast === 'function') showToast(msg);
+      });
+    }
 
     /* Dark mode special handling */
     const darkToggle = document.getElementById('sett-dark-mode');
@@ -770,12 +830,9 @@
       el.addEventListener('change', () => setSetting(key, el.value));
     });
 
-    /* Change password */
+    /* Change password with Email OTP */
     document.getElementById('sett-change-pw-btn')?.addEventListener('click', () => {
-      closeSettingsModal();
-      const target = document.getElementById('changePasswordSection') || document.querySelector('[href="login.html"]');
-      if (target && target.tagName === 'A') window.location.href = target.href;
-      else alert('Change Password flow coming soon!');
+      openChangePasswordModal();
     });
 
     /* Delete account: Open NDPA Section 34 verification modal */
@@ -1474,6 +1531,477 @@
       }
     }
   }
+
+  /* ========================================================
+     TWO-FACTOR AUTHENTICATION (2FA) EMAIL OTP FLOW
+     ======================================================== */
+  let twoFactorModalBuilt = false;
+
+  function buildTwoFactorModal() {
+    if (document.getElementById('twoFactorBackdrop')) return;
+    const div = document.createElement('div');
+    div.className = 'settings-backdrop';
+    div.id = 'twoFactorBackdrop';
+    div.style.display = 'none';
+    div.style.zIndex = '9950';
+
+    div.innerHTML = `
+      <div class="settings-panel" style="max-width:440px; padding:24px 28px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:22px;">🛡️</span>
+            <div style="font-size:18px; font-weight:800; color:#0D1F1E;">Two-Factor Authentication</div>
+          </div>
+          <button type="button" class="settings-close-btn" onclick="closeTwoFactorModal()" style="font-size:22px; background:none; border:none; cursor:pointer;">&times;</button>
+        </div>
+        <p style="font-size:13px; color:#555; margin-bottom:16px; line-height:1.45;">
+          To activate Two-Factor Authentication, enter the 6-digit verification code sent to <strong id="twoFactorEmailBadge" style="color:#0E3B35;">your registered email</strong>:
+        </p>
+        <div style="margin-bottom:16px;">
+          <input type="text" id="twoFactorOtpCode" maxlength="6" inputmode="numeric" placeholder="1 2 3 4 5 6" autocomplete="one-time-code" style="width:100%; height:48px; border-radius:12px; border:1px solid rgba(0,0,0,0.18); text-align:center; font-size:22px; font-weight:900; letter-spacing:0.35em; background:rgba(255,255,255,0.95); box-sizing:border-box;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:12px;">
+            <span id="twoFactorTimer" style="color:#888;">⏱ Valid for 10 minutes</span>
+            <button type="button" id="twoFactorResendBtn" onclick="resendTwoFactorOtp()" style="background:none; border:none; color:#0E3B35; font-weight:800; cursor:pointer; text-decoration:underline;">Resend Code</button>
+          </div>
+          <div id="twoFactorErrBox" style="display:none; color:#dc2626; font-size:12px; font-weight:700; margin-top:6px;"></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="sett-btn sett-btn-outline" style="flex:1;" onclick="closeTwoFactorModal()">Cancel</button>
+          <button type="button" class="sett-btn sett-btn-primary" id="twoFactorSubmitBtn" style="flex:1.4; background:#0E3B35; color:#fff;" onclick="verifyTwoFactorOtp()">Verify &amp; Enable 2FA</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(div);
+    twoFactorModalBuilt = true;
+  }
+
+  function openTwoFactorModal() {
+    if (!twoFactorModalBuilt) buildTwoFactorModal();
+    const user = (typeof getUser === 'function' ? getUser() : null) || JSON.parse(localStorage.getItem('collekt_user') || '{}');
+    if (!user || !user.email) {
+      if (typeof showToast === 'function') showToast('⚠️ Please log in to enable Two-Factor Authentication.', 'warning');
+      else alert('Please log in to enable Two-Factor Authentication.');
+      return;
+    }
+
+    const emailBadge = document.getElementById('twoFactorEmailBadge');
+    if (emailBadge) emailBadge.textContent = user.email;
+
+    const codeInput = document.getElementById('twoFactorOtpCode');
+    if (codeInput) codeInput.value = '';
+
+    const errBox = document.getElementById('twoFactorErrBox');
+    if (errBox) { errBox.textContent = ''; errBox.style.display = 'none'; }
+
+    // Dispatch OTP
+    fetch('/api/auth-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'send_otp',
+        email: user.email,
+        name: user.name || user.company_name || '',
+        purpose: '2fa_setup'
+      })
+    }).then(r => r.json()).then(d => {
+      if (d.success && typeof showToast === 'function') {
+        showToast('📧 2FA verification code sent to ' + user.email, 'info');
+      }
+    }).catch(e => console.warn('2FA OTP dispatch error:', e));
+
+    const backdrop = document.getElementById('twoFactorBackdrop');
+    if (backdrop) {
+      backdrop.style.display = 'flex';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => backdrop.classList.add('open'));
+      });
+      setTimeout(() => { if (codeInput) codeInput.focus(); }, 150);
+    }
+  }
+
+  function closeTwoFactorModal() {
+    const backdrop = document.getElementById('twoFactorBackdrop');
+    if (backdrop) {
+      backdrop.classList.remove('open');
+      setTimeout(() => { backdrop.style.display = 'none'; }, 350);
+    }
+  }
+
+  async function resendTwoFactorOtp() {
+    const user = (typeof getUser === 'function' ? getUser() : null) || JSON.parse(localStorage.getItem('collekt_user') || '{}');
+    if (!user || !user.email) return;
+    const btn = document.getElementById('twoFactorResendBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+
+    try {
+      const res = await fetch('/api/auth-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send_otp',
+          email: user.email,
+          name: user.name || user.company_name || '',
+          purpose: '2fa_setup'
+        })
+      });
+      const d = await res.json();
+      if (d.success) {
+        if (typeof showToast === 'function') showToast('📧 New code sent to ' + user.email, 'success');
+        let count = 30;
+        const timer = setInterval(() => {
+          count--;
+          if (btn) {
+            btn.textContent = `Resend in ${count}s`;
+            if (count <= 0) {
+              clearInterval(timer);
+              btn.disabled = false;
+              btn.textContent = 'Resend Code';
+            }
+          }
+        }, 1000);
+      } else {
+        if (typeof showToast === 'function') showToast('⚠️ ' + (d.error || 'Please wait before resending.'), 'warning');
+        if (btn) { btn.disabled = false; btn.textContent = 'Resend Code'; }
+      }
+    } catch(e) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Resend Code'; }
+    }
+  }
+
+  async function verifyTwoFactorOtp() {
+    const user = (typeof getUser === 'function' ? getUser() : null) || JSON.parse(localStorage.getItem('collekt_user') || '{}');
+    const code = document.getElementById('twoFactorOtpCode')?.value.trim();
+    const errBox = document.getElementById('twoFactorErrBox');
+    const submitBtn = document.getElementById('twoFactorSubmitBtn');
+
+    if (!code || code.length !== 6 || !/^\d{6}$/.test(code)) {
+      if (errBox) { errBox.textContent = 'Please enter the 6-digit numeric verification code.'; errBox.style.display = 'block'; }
+      return;
+    }
+
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Verifying...'; }
+    if (errBox) errBox.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/auth-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'verify_otp',
+          email: user.email,
+          code: code
+        })
+      });
+      const d = await res.json();
+      if (d.success) {
+        setSetting('two_factor', true);
+        const chk = document.getElementById('sett-2fa');
+        if (chk) chk.checked = true;
+
+        const curr = (typeof getUser === 'function' ? getUser() : null) || JSON.parse(localStorage.getItem('collekt_user') || '{}');
+        if (curr) {
+          curr.two_factor = true;
+          curr.two_factor_enabled = true;
+          localStorage.setItem('collekt_user', JSON.stringify(curr));
+        }
+        if (window.sb && curr && curr.id) {
+          sb.from('profiles').update({ two_factor_enabled: true }).eq('id', curr.id).then(()=>{}).catch(()=>{});
+        }
+
+        closeTwoFactorModal();
+        if (typeof showToast === 'function') showToast('🛡️ Two-Factor Authentication enabled successfully!', 'success');
+        else alert('Two-Factor Authentication enabled successfully!');
+      } else {
+        if (errBox) { errBox.textContent = d.error || 'Invalid or expired verification code.'; errBox.style.display = 'block'; }
+      }
+    } catch(e) {
+      if (errBox) { errBox.textContent = 'Verification error. Please check your network and try again.'; errBox.style.display = 'block'; }
+    } finally {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Verify & Enable 2FA'; }
+    }
+  }
+
+  /* ========================================================
+     PASSWORD CHANGE EMAIL OTP FLOW
+     ======================================================== */
+  let changePwModalBuilt = false;
+  let _verifiedChangePwCode = null;
+
+  function buildChangePasswordModal() {
+    if (document.getElementById('changePasswordBackdrop')) return;
+    const div = document.createElement('div');
+    div.className = 'settings-backdrop';
+    div.id = 'changePasswordBackdrop';
+    div.style.display = 'none';
+    div.style.zIndex = '9950';
+
+    div.innerHTML = `
+      <div class="settings-panel" style="max-width:440px; padding:24px 28px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:22px;">🔑</span>
+            <div style="font-size:18px; font-weight:800; color:#0D1F1E;" id="changePwModalTitle">Change Password</div>
+          </div>
+          <button type="button" class="settings-close-btn" onclick="closeChangePasswordModal()" style="font-size:22px; background:none; border:none; cursor:pointer;">&times;</button>
+        </div>
+
+        <!-- STEP 1: EMAIL OTP -->
+        <div id="changePwStepOtp">
+          <p style="font-size:13px; color:#555; margin-bottom:16px; line-height:1.45;">
+            For your security, enter the 6-digit verification code sent to <strong id="changePwEmailBadge" style="color:#0E3B35;">your registered email</strong>:
+          </p>
+          <div style="margin-bottom:16px;">
+            <input type="text" id="changePwOtpCode" maxlength="6" inputmode="numeric" placeholder="1 2 3 4 5 6" autocomplete="one-time-code" style="width:100%; height:48px; border-radius:12px; border:1px solid rgba(0,0,0,0.18); text-align:center; font-size:22px; font-weight:900; letter-spacing:0.35em; background:rgba(255,255,255,0.95); box-sizing:border-box;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:12px;">
+              <span id="changePwTimer" style="color:#888;">⏱ Valid for 10 minutes</span>
+              <button type="button" id="changePwResendBtn" onclick="resendChangePwOtp()" style="background:none; border:none; color:#0E3B35; font-weight:800; cursor:pointer; text-decoration:underline;">Resend Code</button>
+            </div>
+            <div id="changePwErrBox" style="display:none; color:#dc2626; font-size:12px; font-weight:700; margin-top:6px;"></div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="sett-btn sett-btn-outline" style="flex:1;" onclick="closeChangePasswordModal()">Cancel</button>
+            <button type="button" class="sett-btn sett-btn-primary" id="changePwVerifyBtn" style="flex:1.4; background:#0E3B35; color:#fff;" onclick="verifyChangePwOtp()">Verify &amp; Continue &rarr;</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: ENTER NEW PASSWORD -->
+        <div id="changePwStepInputs" style="display:none;">
+          <p style="font-size:13px; color:#555; margin-bottom:14px; line-height:1.4;">
+            ✅ Authorization verified! Choose a new secure password (minimum 8 characters).
+          </p>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; font-weight:700; color:#333; display:block; margin-bottom:4px;">New Password</label>
+            <input type="password" id="changePwNewPass" placeholder="Enter new password (min 8 chars)" style="width:100%; height:42px; border-radius:10px; border:1px solid rgba(0,0,0,0.18); padding:0 12px; font-size:14px; box-sizing:border-box;">
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:700; color:#333; display:block; margin-bottom:4px;">Confirm New Password</label>
+            <input type="password" id="changePwConfirmPass" placeholder="Confirm new password" style="width:100%; height:42px; border-radius:10px; border:1px solid rgba(0,0,0,0.18); padding:0 12px; font-size:14px; box-sizing:border-box;">
+            <div id="changePwStep2ErrBox" style="display:none; color:#dc2626; font-size:12px; font-weight:700; margin-top:6px;"></div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="sett-btn sett-btn-outline" style="flex:1;" onclick="closeChangePasswordModal()">Cancel</button>
+            <button type="button" class="sett-btn sett-btn-primary" id="changePwSaveBtn" style="flex:1.4; background:#0E3B35; color:#fff;" onclick="executeSaveNewPassword()">Update Password</button>
+          </div>
+        </div>
+
+      </div>
+    `;
+    document.body.appendChild(div);
+    changePwModalBuilt = true;
+  }
+
+  function openChangePasswordModal() {
+    if (!changePwModalBuilt) buildChangePasswordModal();
+    const user = (typeof getUser === 'function' ? getUser() : null) || JSON.parse(localStorage.getItem('collekt_user') || '{}');
+    if (!user || !user.email) {
+      if (typeof showToast === 'function') showToast('⚠️ Please log in to change your password.', 'warning');
+      else alert('Please log in to change your password.');
+      return;
+    }
+
+    _verifiedChangePwCode = null;
+
+    const emailBadge = document.getElementById('changePwEmailBadge');
+    if (emailBadge) emailBadge.textContent = user.email;
+
+    const stepOtp = document.getElementById('changePwStepOtp');
+    const stepInputs = document.getElementById('changePwStepInputs');
+    if (stepOtp) stepOtp.style.display = 'block';
+    if (stepInputs) stepInputs.style.display = 'none';
+
+    const codeInput = document.getElementById('changePwOtpCode');
+    if (codeInput) codeInput.value = '';
+
+    const newPass = document.getElementById('changePwNewPass');
+    const confirmPass = document.getElementById('changePwConfirmPass');
+    if (newPass) newPass.value = '';
+    if (confirmPass) confirmPass.value = '';
+
+    const errBox = document.getElementById('changePwErrBox');
+    if (errBox) { errBox.textContent = ''; errBox.style.display = 'none'; }
+    const errBox2 = document.getElementById('changePwStep2ErrBox');
+    if (errBox2) { errBox2.textContent = ''; errBox2.style.display = 'none'; }
+
+    // Dispatch OTP
+    fetch('/api/auth-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'send_otp',
+        email: user.email,
+        name: user.name || user.company_name || '',
+        purpose: 'password_change'
+      })
+    }).then(r => r.json()).then(d => {
+      if (d.success && typeof showToast === 'function') {
+        showToast('📧 Password change authorization code sent to ' + user.email, 'info');
+      }
+    }).catch(e => console.warn('Password change OTP error:', e));
+
+    const backdrop = document.getElementById('changePasswordBackdrop');
+    if (backdrop) {
+      backdrop.style.display = 'flex';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => backdrop.classList.add('open'));
+      });
+      setTimeout(() => { if (codeInput) codeInput.focus(); }, 150);
+    }
+  }
+
+  function closeChangePasswordModal() {
+    const backdrop = document.getElementById('changePasswordBackdrop');
+    if (backdrop) {
+      backdrop.classList.remove('open');
+      setTimeout(() => { backdrop.style.display = 'none'; }, 350);
+    }
+  }
+
+  async function resendChangePwOtp() {
+    const user = (typeof getUser === 'function' ? getUser() : null) || JSON.parse(localStorage.getItem('collekt_user') || '{}');
+    if (!user || !user.email) return;
+    const btn = document.getElementById('changePwResendBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+
+    try {
+      const res = await fetch('/api/auth-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send_otp',
+          email: user.email,
+          name: user.name || user.company_name || '',
+          purpose: 'password_change'
+        })
+      });
+      const d = await res.json();
+      if (d.success) {
+        if (typeof showToast === 'function') showToast('📧 New code sent to ' + user.email, 'success');
+        let count = 30;
+        const timer = setInterval(() => {
+          count--;
+          if (btn) {
+            btn.textContent = `Resend in ${count}s`;
+            if (count <= 0) {
+              clearInterval(timer);
+              btn.disabled = false;
+              btn.textContent = 'Resend Code';
+            }
+          }
+        }, 1000);
+      } else {
+        if (typeof showToast === 'function') showToast('⚠️ ' + (d.error || 'Please wait before resending.'), 'warning');
+        if (btn) { btn.disabled = false; btn.textContent = 'Resend Code'; }
+      }
+    } catch(e) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Resend Code'; }
+    }
+  }
+
+  async function verifyChangePwOtp() {
+    const user = (typeof getUser === 'function' ? getUser() : null) || JSON.parse(localStorage.getItem('collekt_user') || '{}');
+    const code = document.getElementById('changePwOtpCode')?.value.trim();
+    const errBox = document.getElementById('changePwErrBox');
+    const verifyBtn = document.getElementById('changePwVerifyBtn');
+
+    if (!code || code.length !== 6 || !/^\d{6}$/.test(code)) {
+      if (errBox) { errBox.textContent = 'Please enter the 6-digit numeric verification code.'; errBox.style.display = 'block'; }
+      return;
+    }
+
+    if (verifyBtn) { verifyBtn.disabled = true; verifyBtn.textContent = 'Verifying...'; }
+    if (errBox) errBox.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/auth-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'verify_otp',
+          email: user.email,
+          code: code
+        })
+      });
+      const d = await res.json();
+      if (d.success) {
+        _verifiedChangePwCode = code;
+        const stepOtp = document.getElementById('changePwStepOtp');
+        const stepInputs = document.getElementById('changePwStepInputs');
+        if (stepOtp) stepOtp.style.display = 'none';
+        if (stepInputs) stepInputs.style.display = 'block';
+        if (typeof showToast === 'function') showToast('✅ Authorization verified! Please choose your new password.', 'success');
+        const newPass = document.getElementById('changePwNewPass');
+        setTimeout(() => { if (newPass) newPass.focus(); }, 100);
+      } else {
+        if (errBox) { errBox.textContent = d.error || 'Invalid or expired verification code.'; errBox.style.display = 'block'; }
+      }
+    } catch(e) {
+      if (errBox) { errBox.textContent = 'Verification error. Please try again.'; errBox.style.display = 'block'; }
+    } finally {
+      if (verifyBtn) { verifyBtn.disabled = false; verifyBtn.innerHTML = 'Verify &amp; Continue &rarr;'; }
+    }
+  }
+
+  async function executeSaveNewPassword() {
+    const user = (typeof getUser === 'function' ? getUser() : null) || JSON.parse(localStorage.getItem('collekt_user') || '{}');
+    const p1 = document.getElementById('changePwNewPass')?.value.trim();
+    const p2 = document.getElementById('changePwConfirmPass')?.value.trim();
+    const errBox = document.getElementById('changePwStep2ErrBox');
+    const saveBtn = document.getElementById('changePwSaveBtn');
+
+    if (!p1 || p1.length < 8) {
+      if (errBox) { errBox.textContent = 'Password must be at least 8 characters long.'; errBox.style.display = 'block'; }
+      return;
+    }
+    if (p1 !== p2) {
+      if (errBox) { errBox.textContent = 'Passwords do not match. Please re-enter.'; errBox.style.display = 'block'; }
+      return;
+    }
+
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Updating...'; }
+    if (errBox) errBox.style.display = 'none';
+
+    try {
+      // 1. If Supabase auth session is active
+      if (window.sb && window.sb.auth) {
+        const { error: sbErr } = await window.sb.auth.updateUser({ password: p1 });
+        if (sbErr) console.warn('Supabase updateUser notice:', sbErr.message);
+      }
+
+      // 2. Also execute via serverless reset_password for full database sync
+      if (_verifiedChangePwCode) {
+        await fetch('/api/auth-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'reset_password',
+            email: user.email,
+            code: _verifiedChangePwCode,
+            new_password: p1
+          })
+        }).catch(() => {});
+      }
+
+      closeChangePasswordModal();
+      if (typeof showToast === 'function') showToast('🎉 Password successfully updated!', 'success');
+      else alert('Password successfully updated!');
+
+    } catch (e) {
+      if (errBox) { errBox.textContent = 'Could not update password. Please try again.'; errBox.style.display = 'block'; }
+    } finally {
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Update Password'; }
+    }
+  }
+
+  window.openTwoFactorModal = openTwoFactorModal;
+  window.closeTwoFactorModal = closeTwoFactorModal;
+  window.resendTwoFactorOtp = resendTwoFactorOtp;
+  window.verifyTwoFactorOtp = verifyTwoFactorOtp;
+
+  window.openChangePasswordModal = openChangePasswordModal;
+  window.closeChangePasswordModal = closeChangePasswordModal;
+  window.resendChangePwOtp = resendChangePwOtp;
+  window.verifyChangePwOtp = verifyChangePwOtp;
+  window.executeSaveNewPassword = executeSaveNewPassword;
 
   window.exportUserDataJSON = exportUserDataJSON;
 

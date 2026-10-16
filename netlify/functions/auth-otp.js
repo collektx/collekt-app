@@ -127,18 +127,50 @@ async function syncResendContact({ email, firstName, lastName }) {
 }
 
 /**
- * Generate 6-digit OTP Email Template
+ * Generate 6-digit OTP Email Template with Purpose Awareness
  */
-function getOtpEmailContent({ code, firstName }) {
+function getOtpEmailContent({ code, firstName, purpose }) {
   const greetingName = firstName ? ` ${firstName}` : '';
-  const text = `Your Collekt Verification Code is: ${code}\n\nHi${greetingName},\n\nThank you for signing up for Collekt. To complete your registration and access your dashboard, please enter this 6-digit verification code:\n\n${code}\n\nThis code will expire in 10 minutes.\nIf you did not request this code, please ignore this email.\n\nBest regards,\nThe Collekt Team\nCollekt Technologies Ltd. Lagos, Nigeria`;
+  let subject = `Your Collekt Verification Code: ${code} 🔐`;
+  let title = 'Verify Your Collekt Account 🔐';
+  let bannerSub = 'One-Time Email Verification Code';
+  let intro = `Hi${greetingName ? ' <strong>' + greetingName + '</strong>' : ''}, welcome to Collekt. Use the verification code below to verify your email address and activate access to your dashboard:`;
+  let textIntro = `Thank you for signing up for Collekt. To complete your registration and access your dashboard, please enter this 6-digit verification code:`;
+
+  if (purpose === 'pin_setup' || purpose === 'create_pin') {
+    subject = `Your Collekt Transaction PIN Setup Code: ${code} 🔐`;
+    title = 'Authorize Transaction PIN Setup 🔐';
+    bannerSub = 'Transaction PIN Authorization';
+    intro = `Hi${greetingName ? ' <strong>' + greetingName + '</strong>' : ''}, you requested to set up or change your confidential 4-digit Transaction PIN. Use the verification code below to authorize this financial security configuration:`;
+    textIntro = `You requested to set up or change your 4-digit Transaction PIN. Use this 6-digit verification code to proceed:`;
+  } else if (purpose === '2fa_setup' || purpose === 'two_factor') {
+    subject = `Your Collekt Two-Factor Authentication Code: ${code} 🛡️`;
+    title = 'Enable Two-Factor Authentication 🛡️';
+    bannerSub = 'Two-Factor Authentication Setup';
+    intro = `Hi${greetingName ? ' <strong>' + greetingName + '</strong>' : ''}, you requested to enable Two-Factor Authentication on your Collekt account. Use the verification code below to confirm and activate this security layer:`;
+    textIntro = `You requested to enable Two-Factor Authentication. Use this 6-digit verification code to confirm:`;
+  } else if (purpose === 'password_change' || purpose === 'change_password') {
+    subject = `Your Collekt Password Change Code: ${code} 🔑`;
+    title = 'Authorize Password Change 🔑';
+    bannerSub = 'Password Change Security Authorization';
+    intro = `Hi${greetingName ? ' <strong>' + greetingName + '</strong>' : ''}, you requested to change your Collekt account password. Use the verification code below to authorize this password update:`;
+    textIntro = `You requested to change your Collekt account password. Use this 6-digit verification code to authorize:`;
+  } else if (purpose === 'pin_reset') {
+    subject = `Your Collekt Transaction PIN Reset Code: ${code} 🔐`;
+    title = 'Reset Your Transaction PIN 🔐';
+    bannerSub = 'Transaction PIN Reset Authorization';
+    intro = `Hi${greetingName ? ' <strong>' + greetingName + '</strong>' : ''}, you requested to reset your 4-digit Transaction PIN. Use the verification code below to authorize setting a new PIN:`;
+    textIntro = `You requested to reset your Transaction PIN. Use this 6-digit verification code to proceed:`;
+  }
+
+  const text = `Your Collekt Security Code is: ${code}\n\nHi${greetingName},\n\n${textIntro}\n\n${code}\n\nThis code will expire in 10 minutes.\nIf you did not request this code, please secure your account immediately.\n\nBest regards,\nThe Collekt Team\nCollekt Technologies Ltd. Lagos, Nigeria`;
 
   const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Collekt Verification Code</title>
+  <title>${title}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #040F0E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #0D1F1E;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #040F0E; padding: 36px 16px;">
@@ -153,7 +185,7 @@ function getOtpEmailContent({ code, firstName }) {
               </span>
               <h1 style="color: #ffffff; font-size: 26px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.02em;">Collekt Security</h1>
               <p style="color: rgba(255, 255, 255, 0.8); font-size: 13.5px; margin: 0; font-weight: 500;">
-                One-Time Email Verification Code
+                ${bannerSub}
               </p>
             </td>
           </tr>
@@ -162,11 +194,11 @@ function getOtpEmailContent({ code, firstName }) {
           <tr>
             <td style="padding: 36px 32px 28px;">
               <h2 style="color: #0D1F1E; font-size: 20px; font-weight: 800; margin: 0 0 14px 0;">
-                Verify Your Collekt Account 🔐
+                ${title}
               </h2>
 
               <p style="color: #4A5568; font-size: 14.5px; line-height: 1.6; margin: 0 0 20px 0;">
-                Hi${greetingName ? ' <strong>' + greetingName + '</strong>' : ''}, welcome to Collekt. Use the verification code below to verify your email address and activate access to your dashboard:
+                ${intro}
               </p>
 
               <!-- OTP Code Display Card -->
@@ -193,7 +225,7 @@ function getOtpEmailContent({ code, firstName }) {
               </p>
 
               <p style="color: #A0AEC0; font-size: 12px; line-height: 1.5; margin: 0;">
-                If you did not request this verification code, you can safely ignore this email.
+                If you did not initiate this request, please secure your account credentials immediately.
               </p>
             </td>
           </tr>
@@ -216,7 +248,114 @@ function getOtpEmailContent({ code, firstName }) {
 </body>
 </html>`;
 
-  return { text, html };
+  return { text, html, subject };
+}
+
+/**
+ * Generate Security Alert Email for Logins
+ */
+function getLoginAlertEmailContent({ name, email, location, device, ip, time, resetUrl }) {
+  const greetingName = name ? ` ${name}` : '';
+  const subject = `🔔 Security Alert: New sign-in to your Collekt account (${location})`;
+
+  const text = `Security Alert: New Sign-In to Collekt\n\nHi${greetingName},\n\nWe detected a new sign-in to your Collekt account (${email}).\n\nSign-in details:\n- Date & Time: ${time}\n- Device / Browser: ${device}\n- Approximate Location: ${location}\n- IP Address: ${ip}\n\nWas this you?\nIf you recently signed in, you can safely ignore this email.\n\nWas this NOT you?\nIf you did not sign in or suspect unauthorized activity, someone else may have accessed your account. Change your password immediately to protect your funds and profile:\n\n${resetUrl}\n\nBest regards,\nCollekt Security Team\nCollekt Technologies Ltd. Lagos, Nigeria`;
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Alert: New Sign-in</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #040F0E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #0D1F1E;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #040F0E; padding: 36px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 540px; background-color: #ffffff; border-radius: 18px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.4);">
+          <!-- Header Banner -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #040F0E 0%, #0E3B35 60%, #13756F 100%); padding: 36px 32px 30px; text-align: center;">
+              <span style="display: inline-block; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.45); color: #FBBF24; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">
+                🛡️ Account Security Alert
+              </span>
+              <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.02em;">New Sign-In Detected</h1>
+              <p style="color: rgba(255, 255, 255, 0.85); font-size: 13.5px; margin: 0; font-weight: 500;">
+                Login alert notification for your Collekt account
+              </p>
+            </td>
+          </tr>
+
+          <!-- Main Body -->
+          <tr>
+            <td style="padding: 34px 32px 28px;">
+              <h2 style="color: #0D1F1E; font-size: 19px; font-weight: 800; margin: 0 0 12px 0;">
+                We noticed a new sign-in to your account
+              </h2>
+
+              <p style="color: #4A5568; font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
+                Hi${greetingName ? ' <strong>' + greetingName + '</strong>' : ''}, a new sign-in was recorded for <strong>${email}</strong> with the following session details:
+              </p>
+
+              <!-- Session Details Table -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F8FAF9; border: 1px solid #E2EAE9; border-radius: 14px; margin-bottom: 24px; overflow: hidden;">
+                <tr>
+                  <td style="padding: 12px 18px; border-bottom: 1px solid #E2EAE9; font-size: 13px; color: #718096; width: 38%;">Date &amp; Time</td>
+                  <td style="padding: 12px 18px; border-bottom: 1px solid #E2EAE9; font-size: 13px; font-weight: 700; color: #0D1F1E;">${time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 18px; border-bottom: 1px solid #E2EAE9; font-size: 13px; color: #718096;">Location</td>
+                  <td style="padding: 12px 18px; border-bottom: 1px solid #E2EAE9; font-size: 13px; font-weight: 700; color: #0E3B35;">📍 ${location}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 18px; border-bottom: 1px solid #E2EAE9; font-size: 13px; color: #718096;">Device / Browser</td>
+                  <td style="padding: 12px 18px; border-bottom: 1px solid #E2EAE9; font-size: 13px; font-weight: 700; color: #0D1F1E;">💻 ${device}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 18px; font-size: 13px; color: #718096;">IP Address</td>
+                  <td style="padding: 12px 18px; font-size: 13px; font-family: monospace; font-weight: 700; color: #0D1F1E;">${ip}</td>
+                </tr>
+              </table>
+
+              <!-- Action Card -->
+              <div style="background-color: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;">
+                <div style="color: #92400E; font-size: 13.5px; font-weight: 700; margin-bottom: 4px;">
+                  ⚠️ Was this NOT you?
+                </div>
+                <p style="color: #78350F; font-size: 13px; line-height: 1.5; margin: 0 0 14px 0;">
+                  If you did not initiate this sign-in, your account credentials may have been compromised. Change your password immediately to secure your account, earnings, and escrow funds.
+                </p>
+                <div style="text-align: center;">
+                  <a href="${resetUrl}" style="display: inline-block; background-color: #B45309; color: #ffffff; text-decoration: none; font-weight: 800; font-size: 13px; padding: 12px 24px; border-radius: 10px; box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);">
+                    🔑 Change Your Password Immediately &rarr;
+                  </a>
+                </div>
+              </div>
+
+              <p style="color: #718096; font-size: 12px; line-height: 1.5; margin: 0;">
+                If this sign-in was initiated by you, you can safely disregard this message. You received this email because <em>Login Alerts</em> are turned ON in your security settings.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #F8FAF9; padding: 22px 32px; text-align: center; border-top: 1px solid #E2EAE9;">
+              <p style="color: #8898AA; font-size: 12px; line-height: 1.5; margin: 0 0 4px 0;">
+                &copy; 2026 Collekt Technologies Ltd. All rights reserved.
+              </p>
+              <p style="color: #A0AEC0; font-size: 11px; margin: 0;">
+                NDPA 2023 Compliant &bull; CAMA 2020 Registered &bull; Lagos, Nigeria
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  return { text, html, subject };
 }
 
 /**
@@ -352,6 +491,7 @@ exports.handler = async (event) => {
   const rawEmail = (body.email || '').trim().toLowerCase();
   const name = (body.name || '').trim();
   const role = (body.role || 'professional').trim();
+  const purpose = (body.purpose || '').trim().toLowerCase();
 
   if (!rawEmail || !rawEmail.includes('@')) {
     return {
@@ -424,13 +564,13 @@ exports.handler = async (event) => {
         }
       }
 
-      // 4. Send OTP email via Resend
+      // 4. Send OTP email via Resend with purpose awareness
       const firstName = name ? name.split(' ')[0] : '';
-      const emailContent = getOtpEmailContent({ code, firstName });
+      const emailContent = getOtpEmailContent({ code, firstName, purpose });
 
       const sendResult = await sendResendEmail({
         to: email,
-        subject: `Your Collekt Verification Code: ${code} 🔐`,
+        subject: emailContent.subject,
         html: emailContent.html,
         text: emailContent.text
       });
@@ -684,6 +824,291 @@ exports.handler = async (event) => {
         statusCode: 500,
         headers,
         body: JSON.stringify({ success: false, error: err.message })
+      };
+    }
+  }
+
+  /* ========================================================
+     ACTION: SEND_RESET_OTP (Password Recovery / Set Password for Google & Email Users)
+     ======================================================== */
+  if (action === 'send_reset_otp') {
+    try {
+      // 1. Verify account exists in profiles or auth.users
+      let firstName = name ? name.split(' ')[0] : '';
+      if (supabase) {
+        try {
+          const { data: profRow } = await supabase
+            .from('profiles')
+            .select('name, first_name')
+            .ilike('email', email)
+            .maybeSingle();
+          if (profRow) {
+            firstName = profRow.first_name || (profRow.name ? profRow.name.split(' ')[0] : '');
+          }
+        } catch (e) {}
+      }
+
+      // 2. Generate cryptographically secure 6-digit numeric reset OTP
+      const code = crypto.randomInt(100000, 999999).toString();
+      const codeHash = crypto.createHash('sha256').update(`${email}:${code}`).digest('hex');
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+
+      if (supabase) {
+        await supabase
+          .from('auth_otps')
+          .update({ verified: true })
+          .eq('email', email)
+          .eq('verified', false);
+
+        await supabase
+          .from('auth_otps')
+          .insert({
+            email,
+            code_hash: codeHash,
+            expires_at: expiresAt,
+            verified: false,
+            attempts: 0
+          });
+      }
+
+      const resetLink = `https://collektng.com/login.html?reset_email=${encodeURIComponent(email)}&reset_code=${code}`;
+      const greeting = firstName ? ` ${firstName}` : '';
+      const resetText = `Collekt Password Reset Code: ${code}\n\nHi${greeting},\n\nWe received a request to reset or set the password for your Collekt account (${email}).\n\nYour 6-Digit Password Reset Code is:\n\n${code}\n\nOr click the link below to open the password reset dialog directly:\n${resetLink}\n\nThis code expires in 10 minutes. If you signed in with Google previously, setting a password here allows you to sign in using either Google or your email and password.\n\nBest regards,\nKolly from Collekt\nCollekt Technologies Ltd. Lagos, Nigeria`;
+
+      const resetHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Your Collekt Password</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #040F0E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; color: #0D1F1E;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #040F0E; padding: 36px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 540px; background-color: #ffffff; border-radius: 18px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.4);">
+          <tr>
+            <td style="background: linear-gradient(135deg, #040F0E 0%, #0E3B35 60%, #13756F 100%); padding: 34px 32px 28px; text-align: center;">
+              <span style="display: inline-block; background: rgba(212, 146, 11, 0.2); border: 1px solid rgba(212, 146, 11, 0.4); color: #D4920B; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">
+                🔐 Account Security &amp; Password Recovery
+              </span>
+              <h1 style="color: #ffffff; font-size: 25px; font-weight: 800; margin: 0 0 6px 0;">Reset Your Password</h1>
+              <p style="color: rgba(255, 255, 255, 0.82); font-size: 13.5px; margin: 0;">
+                Collekt Account Recovery &bull; Works for Email &amp; Google Accounts
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 34px 32px 28px;">
+              <p style="color: #4A5568; font-size: 14.5px; line-height: 1.6; margin: 0 0 20px 0;">
+                Hi${greeting ? ' <strong>' + greeting + '</strong>' : ''}, enter the 6-digit recovery code below on the Collekt login screen to set your new password:
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 22px 0;">
+                <tr>
+                  <td align="center">
+                    <div style="background-color: #F4F7F6; border: 2px dashed #13756F; border-radius: 14px; padding: 20px 28px; display: inline-block; text-align: center; max-width: 320px; width: 100%; box-sizing: border-box;">
+                      <div style="color: #6B8280; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">
+                        Password Reset Code
+                      </div>
+                      <div style="font-family: 'SF Pro Display', -apple-system, Monaco, monospace; font-size: 38px; font-weight: 900; letter-spacing: 12px; color: #0E3B35; margin: 4px 0 6px 12px;">
+                        ${code}
+                      </div>
+                      <div style="color: #D4920B; font-size: 12px; font-weight: 700;">
+                        ⏱ Valid for 10 minutes
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              <div style="text-align: center; margin: 24px 0;">
+                <a href="${resetLink}" style="background-color: #0E3B35; color: #ffffff; text-decoration: none; padding: 13px 28px; border-radius: 10px; font-weight: 800; font-size: 14px; display: inline-block;">
+                  Open Password Reset Screen &rarr;
+                </a>
+              </div>
+              <p style="color: #718096; font-size: 12.5px; line-height: 1.55; margin: 0; background: #FFFBEB; border-left: 3px solid #D4920B; padding: 10px 14px; border-radius: 6px;">
+                <strong>Note for Google Sign-In Users:</strong> Setting a password here links email+password login to your Google account so you can sign in using either method anytime.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #F8FAF9; padding: 20px 32px; text-align: center; border-top: 1px solid #E2EAE9;">
+              <p style="color: #8898AA; font-size: 12px; margin: 0;">
+                &copy; 2026 Collekt Technologies Ltd. Lagos, Nigeria
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+      const sendResult = await sendResendEmail({
+        to: email,
+        subject: `Reset Your Collekt Password (Code: ${code}) 🔐`,
+        html: resetHtml,
+        text: resetText
+      });
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          email_delivered: Boolean(sendResult.ok),
+          fallback_code: sendResult.ok ? undefined : code,
+          message: sendResult.ok
+            ? `Password recovery code sent to ${email}.`
+            : `Instant recovery code generated: ${code}.`
+        })
+      };
+    } catch (err) {
+      console.error('[auth-otp] send_reset_otp error:', err);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ success: false, error: 'Could not send password recovery code. Please try again.' })
+      };
+    }
+  }
+
+  /* ========================================================
+     ACTION: RESET_PASSWORD (Verify 6-digit code & update password)
+     ======================================================== */
+  if (action === 'reset_password') {
+    const rawCode = (body.code || '').toString().trim();
+    const newPassword = (body.new_password || body.password || '').toString();
+
+    if (!rawCode || rawCode.length !== 6 || !/^\d{6}$/.test(rawCode)) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ success: false, error: 'Please enter the 6-digit recovery code sent to your email.' })
+      };
+    }
+
+    if (!newPassword || newPassword.length < 8) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ success: false, error: 'Your new password must be at least 8 characters long.' })
+      };
+    }
+
+    try {
+      const codeHash = crypto.createHash('sha256').update(`${email}:${rawCode}`).digest('hex');
+      const { data: rpcRes, error: rpcErr } = await supabase.rpc('verify_otp_and_reset_password', {
+        p_email: email,
+        p_code_hash: codeHash,
+        p_new_password: newPassword
+      });
+
+      if (rpcErr) {
+        console.error('[auth-otp] verify_otp_and_reset_password RPC error:', rpcErr);
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ success: false, error: rpcErr.message || 'Could not update password.' })
+        };
+      }
+
+      if (!rpcRes || !rpcRes.success) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({
+            success: false,
+            error: (rpcRes && rpcRes.error) || 'Invalid or expired recovery code.'
+          })
+        };
+      }
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          message: 'Your password has been updated! You can now sign in with your email and new password.'
+        })
+      };
+    } catch (err) {
+      console.error('[auth-otp] reset_password exception:', err);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ success: false, error: 'Failed to update password. Please try again.' })
+      };
+    }
+  }
+
+  /* ========================================================
+     ACTION: LOGIN_ALERT (Conditional New Device Sign-In Notification)
+     ======================================================== */
+  if (action === 'login_alert') {
+    try {
+      // 1. Resolve client IP and geographic location from Netlify headers or payload
+      const clientIp = (
+        (event.headers && (event.headers['x-nf-client-connection-ip'] || event.headers['client-ip'] || event.headers['x-forwarded-for'])) ||
+        body.ip ||
+        '102.89.23.41'
+      ).split(',')[0].trim();
+
+      let location = (body.location || '').trim();
+      if (!location && event.headers && event.headers['x-nf-geo']) {
+        try {
+          const geo = JSON.parse(event.headers['x-nf-geo']);
+          const parts = [geo.city, geo.subdivision_name, geo.country_name].filter(Boolean);
+          if (parts.length > 0) location = parts.join(', ');
+        } catch(e){}
+      }
+      if (!location) location = 'Lagos, Nigeria';
+
+      const device = (body.device || (event.headers && event.headers['user-agent']) || 'Web Browser').trim();
+      const firstName = name ? name.split(' ')[0] : 'Collektor';
+
+      const now = new Date();
+      const timeFormatted = now.toLocaleString('en-NG', {
+        timeZone: 'Africa/Lagos',
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      }) + ' WAT';
+
+      const resetUrl = `https://collektng.com/login.html?reset_email=${encodeURIComponent(email)}`;
+
+      // 2. Generate and dispatch security alert email via Resend
+      const alertContent = getLoginAlertEmailContent({
+        name: firstName,
+        email,
+        location,
+        device,
+        ip: clientIp,
+        time: timeFormatted,
+        resetUrl
+      });
+
+      const sendResult = await sendResendEmail({
+        to: email,
+        subject: alertContent.subject,
+        html: alertContent.html,
+        text: alertContent.text
+      });
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          email_delivered: Boolean(sendResult.ok),
+          message: sendResult.ok ? 'Login alert notification delivered.' : 'Login alert triggered (notification provider notice).'
+        })
+      };
+    } catch (err) {
+      console.error('[auth-otp] login_alert exception:', err);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ success: false, error: err.message || 'Failed to dispatch login alert.' })
       };
     }
   }

@@ -27,9 +27,17 @@ console.log('--- DEPLOYING STATIC SITES & ALL 23 NETLIFY FUNCTIONS TO PRODUCTION
 console.log('Site ID:', SITE_ID);
 
 try {
-  const cmd = `npx --yes netlify deploy --prod --no-build -d dist -f netlify/functions --auth ${NETLIFY_AUTH_TOKEN} --site ${SITE_ID}`;
+  const cmd = `npx --yes netlify deploy --prod --no-build -d dist -f netlify/functions --site ${SITE_ID}`;
   console.log('Executing Netlify deploy command...');
-  execSync(cmd, { stdio: 'inherit', cwd: __dirname });
+  execSync(cmd, {
+    stdio: 'inherit',
+    cwd: __dirname,
+    env: {
+      ...process.env,
+      NETLIFY_AUTH_TOKEN: NETLIFY_AUTH_TOKEN,
+      NETLIFY_SITE_ID: SITE_ID
+    }
+  });
   console.log('🚀 LIVE DEPLOYMENT COMPLETE! All functions & static assets are live at https://collektng.com');
 } catch (err) {
   console.error('Deployment failed:', err.message);

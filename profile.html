@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=160.0">
-<link rel="stylesheet" href="shared.css?v=160.0">
-<link rel="stylesheet" href="glass.css?v=160.0">
+<link rel="stylesheet" href="style.css?v=173.0">
+<link rel="stylesheet" href="shared.css?v=173.0">
+<link rel="stylesheet" href="glass.css?v=173.0">
 
 <style>
   body { background: var(--paper); }
@@ -243,9 +243,9 @@
             <div style="background:linear-gradient(135deg,var(--amber),#e8a612); border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.12); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=professional'">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <div style="font-size:24px;">⚡</div>
-                <span style="background:rgba(255,255,255,0.28); color:#fff; font-size:11px; font-weight:900; padding:3px 8px; border-radius:99px; letter-spacing:0.3px;">$15 / Month</span>
+                <span style="background:rgba(255,255,255,0.28); color:#fff; font-size:11px; font-weight:900; padding:3px 8px; border-radius:99px; letter-spacing:0.3px;">₦19,999 / Month</span>
               </div>
-              <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Upgrade to Pro ($15 / Month)</h4>
+              <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Upgrade to Pro (₦19,999 / Month)</h4>
               <p style="font-size:12px; opacity:.9; margin-bottom:14px; line-height:1.4;">Unlock featured placement, unlimited proposal submissions, 5% reduced platform fees, and analytics.</p>
               <a href="upgrade.html?role=professional" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=professional';" style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.4); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">Learn More &amp; Upgrade &rarr;</a>
             </div>
@@ -1061,9 +1061,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=160.0"></script>
-<script src="app.js?v=160.0"></script>
-<script src="collekt-ai.js?v=160.0"></script>
+<script src="supabase.js?v=173.0"></script>
+<script src="app.js?v=173.0"></script>
+<script src="collekt-ai.js?v=173.0"></script>
 <script>
   requireAuth();
 
@@ -1143,15 +1143,28 @@
     if (window.sb) {
       if (user.id) {
         try {
-          const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
+          const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
           if (prof) {
-            const merged = { ...user, ...prof, role: 'professional' };
+            const cleanProf = {};
+            Object.keys(prof).forEach(k => {
+              if (prof[k] !== null && prof[k] !== undefined && prof[k] !== '') {
+                cleanProf[k] = prof[k];
+              }
+            });
+            if (cleanProf.title === 'professional Specialist' && user.title && user.title !== 'professional Specialist') {
+              delete cleanProf.title;
+            }
+            const merged = { ...user, ...cleanProf, role: 'professional' };
+            if (user.name && user.name !== 'User' && (!cleanProf.name || cleanProf.name === 'User')) {
+              merged.name = user.name;
+            }
             delete merged.company_name;
             delete merged.rep_first_name;
             delete merged.rep_last_name;
             delete merged.rep_other_name;
             delete merged.contact_person;
             delete merged.cac;
+            setUser(merged);
             _applyProfile(merged);
           }
         } catch(err) {
@@ -1559,7 +1572,7 @@
     const canvas = document.getElementById('avatarStudioCanvas');
     if (!canvas) return;
 
-    const dataURL = canvas.toDataURL('image/jpeg', 0.95);
+    const dataURL = canvas.toDataURL('image/jpeg', 0.92);
 
     saveUploadedFile('avatar', {
       name: 'profile_photo.jpg',
@@ -1570,7 +1583,11 @@
     const user = getUser();
     if (user) {
       user.avatar = dataURL;
+      user.avatar_uploaded = true;
       setUser(user);
+      if (window.sb && user.id) {
+        sb.from('profiles').update({ avatar: dataURL, updated_at: new Date().toISOString() }).eq('id', user.id).then(() => {}).catch(() => {});
+      }
     }
 
     _applyAvatarImage(dataURL);
@@ -1591,7 +1608,11 @@
       const user = getUser();
       if (user) {
         user.avatar = fileData.dataURL;
+        user.avatar_uploaded = true;
         setUser(user);
+        if (window.sb && user.id) {
+          sb.from('profiles').update({ avatar: fileData.dataURL, updated_at: new Date().toISOString() }).eq('id', user.id).then(() => {}).catch(() => {});
+        }
       }
       _applyAvatarImage(fileData.dataURL);
       if (typeof buildSidebar === 'function') buildSidebar('profile');
@@ -2422,7 +2443,7 @@
     // Header (Renders Tier 1 "c" logo or Tier 2 Shield logo automatically based on rating & verification state)
     const nameEl = document.getElementById('profileName');
     if (nameEl) {
-      const uName = prof.username ? '@' + prof.username : (prof.name || 'Professional');
+      const uName = prof.name || (prof.username ? '@' + prof.username : 'Professional');
       const badge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(22, prof) : '';
       nameEl.innerHTML = `<span style="vertical-align:middle;">${escapeHTML(uName)}</span>${badge}`;
     }
@@ -2529,8 +2550,22 @@
     const reviewsTab = document.getElementById('tab-reviews');
     if (!reviewsTab || !user) return;
 
-    const reviews = user.reviews || [];
-    const ratingVal = (user.rating != null && Number(user.rating) > 0) ? Number(user.rating).toFixed(1) : '0.0';
+    const ownerIdNorm = String(user.id || '').toLowerCase().trim();
+    const ownerEmailNorm = String(user.email || '').toLowerCase().trim();
+    const ownerNameNorm = String(user.name || user.company_name || '').toLowerCase().trim();
+
+    const reviews = (user.reviews || []).filter(r => {
+      if (!r) return false;
+      const revId = String(r.reviewer_id || '').toLowerCase().trim();
+      const revAuthor = String(r.author || r.reviewer_name || '').toLowerCase().trim();
+      if (revId && ((ownerIdNorm && revId === ownerIdNorm) || (ownerEmailNorm && revId === ownerEmailNorm))) return false;
+      if (revAuthor && ownerNameNorm && revAuthor === ownerNameNorm) return false;
+      return true;
+    });
+
+    const ratingVal = reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviews.length).toFixed(1)
+      : '0.0';
 
     if (reviews.length > 0) {
       const revHeaderHtml = `
@@ -2767,9 +2802,12 @@
 
     if (window.sb && user.id) {
       const updateData = { 
+        id: user.id,
+        email: user.email,
         role: 'professional',
         username, 
         name: updatedUser.name, 
+        full_name: updatedUser.name,
         first_name, 
         last_name, 
         other_name,
@@ -2784,13 +2822,43 @@
         bio, 
         location, 
         phone, 
+        linkedin_url,
+        linkedin_linked: !!linkedin_url,
         website, 
-        skills 
+        skills,
+        updated_at: new Date().toISOString()
       };
       try {
-        await sb.from('profiles').update(updateData).eq('id', user.id);
+        await sb.from('profiles').upsert(updateData, { onConflict: 'id' });
       } catch (e) {
-        console.warn("Supabase update notice:", e);
+        console.warn("Supabase profiles update notice:", e);
+      }
+      try {
+        await sb.from('professional_profiles').upsert({
+          user_id: user.id,
+          title: title || 'Independent Specialist',
+          discipline: sector || null,
+          location: location || null,
+          availability: availability || 'Available Now',
+          accreditation: accreditation || null,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+      } catch (e) {
+        console.warn("Supabase professional_profiles update notice:", e);
+      }
+      try {
+        await sb.auth.updateUser({
+          data: {
+            name: updatedUser.name,
+            full_name: updatedUser.name,
+            first_name,
+            last_name,
+            other_name,
+            title
+          }
+        });
+      } catch (e) {
+        console.warn("Supabase auth metadata update notice:", e);
       }
     }
 
@@ -2954,7 +3022,7 @@
     </div>
   </div>
 </div>
-<script src="settings-popup.js?v=160.0"></script>
+<script src="settings-popup.js?v=173.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>

@@ -696,7 +696,7 @@ function ensureKollyEngineLoaded(callback) {
     return;
   }
   const s = document.createElement('script');
-  s.src = 'kolly-engine.js?v=161.0';
+  s.src = 'kolly-engine.js?v=163.0';
   s.onload = () => callback();
   document.head.appendChild(s);
 }
@@ -1152,7 +1152,9 @@ function initCollektAICopilot() {
 
     function getActiveDrawerThread() {
       let threads = window.KollyEngine.getThreads();
-      let activeId = localStorage.getItem('kolly_chatgpt_active_thread_v2');
+      let activeId = window.KollyEngine.getActiveThreadId
+        ? window.KollyEngine.getActiveThreadId()
+        : localStorage.getItem('kolly_chatgpt_active_thread_v2');
       if (!threads.length) {
         const nt = window.KollyEngine.createNewThread();
         return nt;
@@ -1169,7 +1171,11 @@ function initCollektAICopilot() {
         row.className = 'kolly-hist-item' + (t.id === activeThread.id ? ' active' : '');
         row.innerHTML = `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.title || 'New chat'}</span>`;
         row.addEventListener('click', () => {
-          localStorage.setItem('kolly_chatgpt_active_thread_v2', t.id);
+          if (window.KollyEngine.setActiveThreadId) {
+            window.KollyEngine.setActiveThreadId(t.id);
+          } else {
+            localStorage.setItem('kolly_chatgpt_active_thread_v2', t.id);
+          }
           historyTray.style.display = 'none';
           renderDrawerMessages();
         });
@@ -1233,12 +1239,17 @@ function initCollektAICopilot() {
       const clean = (text || '').trim();
       if (!clean) return;
 
-      const threads = window.KollyEngine.getThreads();
-      let activeId = localStorage.getItem('kolly_chatgpt_active_thread_v2');
+      let threads = window.KollyEngine.getThreads();
+      let activeId = window.KollyEngine.getActiveThreadId
+        ? window.KollyEngine.getActiveThreadId()
+        : localStorage.getItem('kolly_chatgpt_active_thread_v2');
       let thread = threads.find(t => t.id === activeId) || threads[0];
       if (!thread) {
-        thread = window.KollyEngine.createNewThread();
+        const created = window.KollyEngine.createNewThread();
+        threads = window.KollyEngine.getThreads();
+        thread = threads.find(t => t.id === created.id) || threads[0];
       }
+      const targetThreadId = thread.id;
 
       if (!thread.messages.length) {
         thread.title = clean.length > 34 ? clean.slice(0, 34) + '...' : clean;
@@ -1250,6 +1261,7 @@ function initCollektAICopilot() {
         createdAt: new Date().toISOString()
       });
       thread.updatedAt = new Date().toISOString();
+      const historySnapshot = thread.messages.slice();
       window.KollyEngine.saveThreads(threads);
       renderDrawerMessages();
 
@@ -1267,15 +1279,20 @@ function initCollektAICopilot() {
       stream.appendChild(thinkingRow);
       stream.scrollTop = stream.scrollHeight;
 
-      const startMs = Date.now();
-      const replyText = await window.KollyEngine.generateReply(clean, thread.messages);
-      const elapsedMs = Date.now() - startMs;
-      if (elapsedMs < 2000) {
-        await new Promise(r => setTimeout(r, 2000 - elapsedMs));
+      let replyText = '';
+      try {
+        const startMs = Date.now();
+        replyText = await window.KollyEngine.generateReply(clean, historySnapshot);
+        const elapsedMs = Date.now() - startMs;
+        if (elapsedMs < 2000) {
+          await new Promise(r => setTimeout(r, 2000 - elapsedMs));
+        }
+      } catch (err) {
+        replyText = 'I am right here and ready to help! Please share the details of your RFQ, project scope, or Milestone Escrow question.';
       }
 
       const updatedThreads = window.KollyEngine.getThreads();
-      const target = updatedThreads.find(t => t.id === thread.id) || updatedThreads[0];
+      const target = updatedThreads.find(t => t.id === targetThreadId) || updatedThreads[0];
       if (target) {
         target.messages.push({
           role: 'assistant',
@@ -1366,3 +1383,4 @@ window.profileVendorTrust = async function(vendorDetails) {
   const prompt = `Profile vendor trust and risk metrics for: ${typeof vendorDetails === 'object' ? JSON.stringify(vendorDetails) : vendorDetails}.`;
   return await queryGeminiAI(prompt, '', 'trust_profile');
 };
+

@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=160.0">
-<link rel="stylesheet" href="shared.css?v=160.0">
-<link rel="stylesheet" href="glass.css?v=160.0">
+<link rel="stylesheet" href="style.css?v=173.0">
+<link rel="stylesheet" href="shared.css?v=173.0">
+<link rel="stylesheet" href="glass.css?v=173.0">
 <style>
 /* ═ PAGE ═ */
 body { background: var(--paper); }
@@ -666,9 +666,9 @@ body { background: var(--paper); }
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=160.0"></script>
-<script src="app.js?v=160.0"></script>
-<script src="settings-popup.js?v=160.0"></script>
+<script src="supabase.js?v=173.0"></script>
+<script src="app.js?v=173.0"></script>
+<script src="settings-popup.js?v=173.0"></script>
 <script>
   /* ═ TAB SWITCHER ═ */
   function switchPubTab(tab, el) {
@@ -710,7 +710,10 @@ body { background: var(--paper); }
   (async function applyProfileFromUrl() {
     const searchParams = new URLSearchParams(window.location.search);
     const targetId = searchParams.get("id") || searchParams.get("user") || searchParams.get("u") || searchParams.get("username") || searchParams.get("email") || searchParams.get("uid") || searchParams.get("name");
-    const me = typeof getUser === 'function' ? getUser() : null;
+    if (typeof syncUser === 'function') {
+      try { await syncUser(); } catch(e) {}
+    }
+    let me = typeof getUser === 'function' ? getUser() : null;
 
     // Strict Authentication Gate for viewing profiles
     if (!me) {
@@ -748,16 +751,58 @@ body { background: var(--paper); }
       }
     })();
 
-    const isMe = targetId === 'me' || (!targetId && me) || (me && (targetId === me.id || targetId === me.email || targetId === me.username));
+    const isMe = targetId === 'me' || (!targetId && me) || Boolean(me && targetId && (
+      (me.id && String(targetId).toLowerCase().trim() === String(me.id).toLowerCase().trim()) ||
+      (me.email && String(targetId).toLowerCase().trim() === String(me.email).toLowerCase().trim()) ||
+      (me.username && String(targetId).toLowerCase().trim() === String(me.username).toLowerCase().trim())
+    ));
+
+    function _injectPreviewBanner(ownerProfile) {
+      if (!document.getElementById('collektPublicPreviewBanner')) {
+        var banner = document.createElement('div');
+        banner.id = 'collektPublicPreviewBanner';
+        banner.style.cssText = 'background:linear-gradient(90deg, #0E3B35, #13756F); color:#fff; padding:10px 16px; text-align:center; font-size:12.5px; font-weight:700; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px 12px; position:relative; z-index:1000; box-shadow:0 4px 12px rgba(0,0,0,0.18); line-height:1.4;';
+        var backUrl = (ownerProfile && ownerProfile.role === 'company') ? 'company-profile.html' : 'profile.html';
+        banner.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">👁️ <strong>Public Profile Preview</strong> &mdash; This is how your profile appears to clients on Collekt.</span><a href="${backUrl}" style="background:#D4920B; color:#fff; padding:6px 14px; border-radius:99px; text-decoration:none; font-size:12px; font-weight:900; white-space:nowrap; flex-shrink:0;">&larr; Back to Edit Profile</a>`;
+        document.body.insertBefore(banner, document.body.firstChild);
+      }
+
+      ['connectBtn', 'messageBtn', 'hireBtn', 'leaveReviewBtn'].forEach(function(btnId) {
+        var el = document.getElementById(btnId);
+        if (!el) return;
+        el.removeAttribute('href');
+        el.setAttribute('aria-disabled', 'true');
+        el.style.opacity = '0.55';
+        el.style.cursor = 'not-allowed';
+        el.title = 'Disabled on your own profile — active for other users and companies.';
+        el.onclick = function(e) {
+          if (e) { e.preventDefault(); e.stopPropagation(); }
+          if (typeof showToast === 'function') {
+            showToast('👁️ Preview Mode: Action buttons are disabled on your own profile and only work when another user or company views your profile.', 'warning');
+          }
+          return false;
+        };
+      });
+    }
 
     if (isMe && me) {
-      // Inject Public View Preview Top Banner
-      var banner = document.createElement('div');
-      banner.style.cssText = 'background:linear-gradient(90deg, #0E3B35, #13756F); color:#fff; padding:10px 16px; text-align:center; font-size:12.5px; font-weight:700; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px 12px; position:sticky; top:0; z-index:1000; box-shadow:0 4px 12px rgba(0,0,0,0.18); line-height:1.4;';
-      var backUrl = me.role === 'company' ? 'company-profile.html' : 'profile.html';
-      banner.innerHTML = `<span style="display:inline-flex; align-items:center; gap:6px;">👁️ <strong>Public Profile Preview</strong> &mdash; This is how your profile appears to clients on Collekt.</span><a href="${backUrl}" style="background:#D4920B; color:#fff; padding:6px 14px; border-radius:99px; text-decoration:none; font-size:12px; font-weight:900; white-space:nowrap; flex-shrink:0;">&larr; Back to Edit Profile</a>`;
-      document.body.insertBefore(banner, document.body.firstChild);
-
+      if (window.sb && me.id) {
+        try {
+          const { data: freshMe } = await sb.from('profiles').select('*').eq('id', me.id).maybeSingle();
+          if (freshMe) {
+            const cleanFresh = {};
+            Object.keys(freshMe).forEach(k => {
+              if (freshMe[k] !== null && freshMe[k] !== undefined && freshMe[k] !== '') {
+                cleanFresh[k] = freshMe[k];
+              }
+            });
+            me = Object.assign({}, cleanFresh, me);
+            if (cleanFresh.name && (!me.name || me.name === 'User')) me.name = cleanFresh.name;
+            if (cleanFresh.title && (!me.title || me.title === 'professional Specialist')) me.title = cleanFresh.title;
+          }
+        } catch(e) {}
+      }
+      _injectPreviewBanner(me);
       await _hydrateAndRenderUser(me, true);
       return;
     }
@@ -781,13 +826,24 @@ body { background: var(--paper); }
     // Try Supabase lookup if not found or to get freshest data (queries public_profiles to protect sensitive KYC PII)
     if (targetId && window.sb && typeof sb.from === 'function') {
       try {
-        const { data: pData } = await sb.from("public_profiles")
-          .select("*")
-          .or(`id.eq.${targetId},email.eq.${targetId}`)
-          .maybeSingle();
+        const cleanTerm = String(targetId).trim();
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanTerm);
+        let query = sb.from("public_profiles").select("*");
+        if (isUuid) {
+          query = query.eq("id", cleanTerm);
+        } else {
+          query = query.or(`username.eq.${cleanTerm},name.ilike.${cleanTerm}`);
+        }
+        const { data: pData } = await query.maybeSingle();
 
         if (pData) {
-          targetUser = Object.assign({}, targetUser || {}, pData);
+          const mergedTarget = Object.assign({}, targetUser || {});
+          Object.keys(pData).forEach(k => {
+            if (pData[k] !== null && pData[k] !== undefined) {
+              mergedTarget[k] = pData[k];
+            }
+          });
+          targetUser = mergedTarget;
         }
       } catch(e) {
         console.warn('Supabase profile fetch notice:', e);
@@ -795,7 +851,14 @@ body { background: var(--paper); }
     }
 
     if (targetUser) {
-      await _hydrateAndRenderUser(targetUser, false);
+      const resolvedIsMe = Boolean(me && (
+        (me.id && targetUser.id && String(me.id).toLowerCase().trim() === String(targetUser.id).toLowerCase().trim()) ||
+        (me.email && targetUser.email && String(me.email).toLowerCase().trim() === String(targetUser.email).toLowerCase().trim())
+      ));
+      if (resolvedIsMe) {
+        _injectPreviewBanner(targetUser);
+      }
+      await _hydrateAndRenderUser(targetUser, resolvedIsMe);
       return;
     }
 
@@ -848,15 +911,25 @@ body { background: var(--paper); }
       }
     }
 
-    // Merge professional fields
+    const resolvedName = (user.role === 'company' ? (user.company_name || user.name || user.full_name) : (user.name || user.full_name))
+      || [user.first_name, user.other_name, user.last_name].filter(Boolean).join(' ')
+      || user.username
+      || 'Member';
+
+    const resolvedTitle = (user.title && user.title !== 'professional Specialist')
+      ? user.title
+      : ((proDetails.title && proDetails.title !== 'professional Specialist') ? proDetails.title : (user.title || proDetails.title));
+
+    // Merge professional fields (prioritizing user's saved profile fields)
     const enrichedUser = Object.assign({}, user, {
-      title: proDetails.title || user.title,
-      discipline: proDetails.discipline || user.discipline || user.industry,
+      name: resolvedName,
+      title: resolvedTitle,
+      discipline: user.sector || proDetails.discipline || user.discipline || user.industry,
       years_experience: proDetails.years_experience || user.years_experience,
       hourly_rate: proDetails.hourly_rate || user.hourly_rate || user.rate,
-      availability: proDetails.availability || user.availability,
-      accreditation: proDetails.accreditation || user.accreditation,
-      cv_url: proDetails.cv_url || user.cv_url
+      availability: user.availability || proDetails.availability,
+      accreditation: user.accreditation || proDetails.accreditation,
+      cv_url: user.cv_url || proDetails.cv_url
     });
 
     // 1. Gather Experience
@@ -901,7 +974,7 @@ body { background: var(--paper); }
     if (Array.isArray(enrichedUser.certifications) && enrichedUser.certifications.length > 0) {
       certFiles = enrichedUser.certifications;
     } else if (isMe && typeof getUploadedFiles === 'function') {
-      certFiles = getUploadedFiles('certifications').filter(f => f && (f.dataURL || f.fileUrl || (f.size && f.size > 0)));
+      certFiles = getUploadedFiles('certifications', enrichedUser).filter(f => f && (f.dataURL || f.fileUrl || (f.size && f.size > 0)));
     }
     // Add certifications from Supabase user_documents
     dbDocuments.filter(d => d.document_type === 'certifications' || d.document_type === 'certification').forEach(d => {
@@ -938,7 +1011,7 @@ body { background: var(--paper); }
     if (Array.isArray(enrichedUser.portfolio) && enrichedUser.portfolio.length > 0) {
       portFiles = enrichedUser.portfolio;
     } else if (isMe && typeof getUploadedFiles === 'function') {
-      portFiles = getUploadedFiles('portfolio');
+      portFiles = getUploadedFiles('portfolio', enrichedUser);
     }
     dbDocuments.filter(d => d.document_type === 'portfolio').forEach(d => {
       if (!portFiles.some(p => (p.name || p.title) === d.file_name || (p.title || p.name) === d.title)) {
@@ -989,16 +1062,30 @@ body { background: var(--paper); }
       });
     } catch(e){}
 
-    // 6. Gather Client Reviews
+    // 6. Gather Client Reviews (Strictly exclude any self-reviews)
+    const ownerIdNorm = String(enrichedUser.id || '').toLowerCase().trim();
+    const ownerEmailNorm = String(enrichedUser.email || '').toLowerCase().trim();
+    const ownerNameNorm = String(enrichedUser.name || enrichedUser.company_name || '').toLowerCase().trim();
+
+    function _isSelfReviewEntry(r) {
+      if (!r) return true;
+      const revId = String(r.reviewer_id || '').toLowerCase().trim();
+      const revAuthor = String(r.author || r.reviewer_name || '').toLowerCase().trim();
+      if (revId && ((ownerIdNorm && revId === ownerIdNorm) || (ownerEmailNorm && revId === ownerEmailNorm))) return true;
+      if (revAuthor && ownerNameNorm && revAuthor === ownerNameNorm) return true;
+      return false;
+    }
+
     let realReviews = [];
     if (Array.isArray(enrichedUser.reviews) && enrichedUser.reviews.length > 0) {
-      realReviews = enrichedUser.reviews;
+      realReviews = enrichedUser.reviews.filter(r => !_isSelfReviewEntry(r));
     }
     if (dbReviews.length > 0) {
       dbReviews.forEach(r => {
-        if (!realReviews.some(x => x.id === r.id)) {
+        if (!_isSelfReviewEntry(r) && !realReviews.some(x => x.id === r.id)) {
           realReviews.push({
             id: r.id,
+            reviewer_id: r.reviewer_id,
             author: r.reviewer_name || 'Client',
             role: r.reviewer_company || 'Project Client',
             rating: Number(r.rating) || 5,
@@ -1014,7 +1101,7 @@ body { background: var(--paper); }
       const r1 = JSON.parse(localStorage.getItem(rKey1) || '[]');
       const r2 = JSON.parse(localStorage.getItem(rKey2) || '[]');
       [...r1, ...r2].forEach(r => {
-        if (!realReviews.some(x => x.id === r.id || (x.author === r.author && x.text === r.text))) {
+        if (!_isSelfReviewEntry(r) && !realReviews.some(x => x.id === r.id || (x.author === r.author && x.text === r.text))) {
           realReviews.push(r);
         }
       });
@@ -1036,6 +1123,12 @@ body { background: var(--paper); }
   function _renderUserToPublicProfile(prof, isMe, deepData = {}) {
     if (!prof) return;
 
+    var currentViewer = typeof getUser === 'function' ? getUser() : null;
+    var isOwnProfile = Boolean(isMe || (currentViewer && (
+      (currentViewer.id && prof.id && String(currentViewer.id).toLowerCase().trim() === String(prof.id).toLowerCase().trim()) ||
+      (!currentViewer.id && currentViewer.email && prof.email && String(currentViewer.email).toLowerCase().trim() === String(prof.email).toLowerCase().trim())
+    )));
+
     var isCompany = prof.role === 'company' || prof.user_type === 'company';
     var expList = deepData.experienceList || [];
     var qualList = deepData.customQuals || [];
@@ -1044,10 +1137,10 @@ body { background: var(--paper); }
     var jobList = deepData.completedJobs || [];
     var revList = deepData.realReviews || [];
 
-    // Avatar / Logo
+    // Avatar / Logo — ONLY read local upload cache if viewing own profile
     var av = document.querySelector(".profile-avatar");
-    var savedLogo = isCompany && typeof getUploadedCompanyLogo === 'function' ? getUploadedCompanyLogo() : null;
-    var savedAvatar = !isCompany && typeof getUploadedAvatar === 'function' ? getUploadedAvatar() : null;
+    var savedLogo = (isOwnProfile && isCompany && typeof getUploadedCompanyLogo === 'function') ? getUploadedCompanyLogo(prof) : null;
+    var savedAvatar = (isOwnProfile && !isCompany && typeof getUploadedAvatar === 'function') ? getUploadedAvatar(prof) : null;
     
     if (av) {
       var displayImage = isCompany 
@@ -1062,13 +1155,17 @@ body { background: var(--paper); }
       }
     }
 
-    // Cover Photo Banner
-    var coverUrl = prof.cover_photo_url || localStorage.getItem('collekt_user_cover_photo');
+    // Cover Photo Banner — ONLY read local cover photo if viewing own profile
+    var coverUrl = prof.cover_photo_url || (isOwnProfile ? localStorage.getItem('collekt_user_cover_photo') : null);
     var banner = document.querySelector('.profile-hero-banner');
-    if (banner && coverUrl) {
-      banner.style.backgroundImage = 'url("' + coverUrl + '")';
-      banner.style.backgroundSize = 'cover';
-      banner.style.backgroundPosition = 'center';
+    if (banner) {
+      if (coverUrl) {
+        banner.style.backgroundImage = 'url("' + coverUrl + '")';
+        banner.style.backgroundSize = 'cover';
+        banner.style.backgroundPosition = 'center';
+      } else {
+        banner.style.backgroundImage = '';
+      }
     }
 
     // Dynamic Real-Time Stats Bar (Projects, Rating, Completion %, Earned ₦)
@@ -1186,28 +1283,119 @@ body { background: var(--paper); }
     var hireBtn = document.getElementById("hireBtn");
     var connectBtn = document.getElementById("connectBtn");
     var messageBtn = document.getElementById("messageBtn");
+    var leaveBtn = document.getElementById("leaveReviewBtn");
     var targetLink = "messages.html?user=" + encodeURIComponent(prof.id || prof.email);
 
     if (hireBtn) {
       hireBtn.innerHTML = isCompany ? "🤝 Partner With Us &rarr;" : "⚡ Hire Professional &rarr;";
-      hireBtn.href = targetLink;
+      if (isOwnProfile) {
+        hireBtn.removeAttribute("href");
+        hireBtn.setAttribute("aria-disabled", "true");
+        hireBtn.style.opacity = "0.55";
+        hireBtn.style.cursor = "not-allowed";
+        hireBtn.title = "Disabled on your own profile — active for other users and companies.";
+        hireBtn.onclick = function(e) {
+          if (e) { e.preventDefault(); e.stopPropagation(); }
+          if (typeof showToast === 'function') {
+            showToast('👁️ Preview Mode: You cannot hire yourself. This button only works when another user or company views your profile.', 'warning');
+          }
+          return false;
+        };
+      } else {
+        hireBtn.href = targetLink;
+        hireBtn.removeAttribute("aria-disabled");
+        hireBtn.style.opacity = "1";
+        hireBtn.style.cursor = "pointer";
+        hireBtn.title = "";
+        hireBtn.onclick = null;
+      }
     }
-    if (connectBtn) connectBtn.href = targetLink;
-    if (messageBtn) messageBtn.href = targetLink;
 
+    if (connectBtn) {
+      if (isOwnProfile) {
+        connectBtn.removeAttribute("href");
+        connectBtn.setAttribute("aria-disabled", "true");
+        connectBtn.style.opacity = "0.55";
+        connectBtn.style.cursor = "not-allowed";
+        connectBtn.title = "Disabled on your own profile — active for other users and companies.";
+        connectBtn.onclick = function(e) {
+          if (e) { e.preventDefault(); e.stopPropagation(); }
+          if (typeof showToast === 'function') {
+            showToast('👁️ Preview Mode: You cannot connect with yourself. This button only works when another user or company views your profile.', 'warning');
+          }
+          return false;
+        };
+      } else {
+        connectBtn.href = targetLink;
+        connectBtn.removeAttribute("aria-disabled");
+        connectBtn.style.opacity = "1";
+        connectBtn.style.cursor = "pointer";
+        connectBtn.title = "";
+        connectBtn.onclick = null;
+      }
+    }
 
-    var leaveBtn = document.getElementById("leaveReviewBtn");
+    if (messageBtn) {
+      if (isOwnProfile) {
+        messageBtn.removeAttribute("href");
+        messageBtn.setAttribute("aria-disabled", "true");
+        messageBtn.style.opacity = "0.55";
+        messageBtn.style.cursor = "not-allowed";
+        messageBtn.title = "Disabled on your own profile — active for other users and companies.";
+        messageBtn.onclick = function(e) {
+          if (e) { e.preventDefault(); e.stopPropagation(); }
+          if (typeof showToast === 'function') {
+            showToast('👁️ Preview Mode: You cannot message yourself. This button only works when another user or company views your profile.', 'warning');
+          }
+          return false;
+        };
+      } else {
+        messageBtn.href = targetLink;
+        messageBtn.removeAttribute("aria-disabled");
+        messageBtn.style.opacity = "1";
+        messageBtn.style.cursor = "pointer";
+        messageBtn.title = "";
+        messageBtn.onclick = null;
+      }
+    }
+
     if (leaveBtn) {
       var targetId = prof.id || prof.email;
       var targetName = prof.name || prof.company_name || "Member";
       leaveBtn.textContent = isCompany ? "⭐ Leave Company Review" : "⭐ Leave a Review";
-      leaveBtn.onclick = function() {
-        if (typeof openReviewSubmissionModal === 'function') {
-          openReviewSubmissionModal(targetId, targetName, isCompany ? "Completed Tender Contract" : "Completed Project");
-        } else if (typeof showToast === 'function') {
-          showToast('⭐ Review submissions are available upon completed milestone delivery with ' + targetName, 'info');
-        }
-      };
+      if (isOwnProfile) {
+        leaveBtn.setAttribute("aria-disabled", "true");
+        leaveBtn.style.opacity = "0.55";
+        leaveBtn.style.cursor = "not-allowed";
+        leaveBtn.title = "Disabled on your own profile — active for other users and companies.";
+        leaveBtn.onclick = function(e) {
+          if (e) { e.preventDefault(); e.stopPropagation(); }
+          if (typeof showToast === 'function') {
+            showToast('⚠️ You cannot leave a review for yourself. Only companies and other users can review your profile.', 'warning');
+          }
+          return false;
+        };
+      } else {
+        leaveBtn.removeAttribute("aria-disabled");
+        leaveBtn.style.opacity = "1";
+        leaveBtn.style.cursor = "pointer";
+        leaveBtn.title = "";
+        leaveBtn.onclick = function() {
+          var viewer = typeof getUser === 'function' ? getUser() : null;
+          if (!viewer || (!viewer.id && !viewer.email)) {
+            if (typeof showToast === 'function') {
+              showToast('🔒 Please log in as a company or registered user to leave a review.', 'warning');
+            }
+            setTimeout(function() { window.location.href = 'login.html'; }, 900);
+            return;
+          }
+          if (typeof openReviewSubmissionModal === 'function') {
+            openReviewSubmissionModal(targetId, targetName, isCompany ? "Completed Tender Contract" : "Completed Project");
+          } else if (typeof showToast === 'function') {
+            showToast('⭐ Review submissions are available upon completed milestone delivery with ' + targetName, 'info');
+          }
+        };
+      }
     }
 
     // ═ 1. OVERVIEW TAB: Bio, Skills, Discipline, Languages ═

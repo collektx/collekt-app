@@ -33,6 +33,39 @@ if (typeof supabase !== 'undefined' && supabase && typeof supabase.createClient 
 }
 
 /* -----------------------------------------------------
+   STRICT ACCOUNT ISOLATION HELPER
+------------------------------------------------------*/
+function clearAllUnscopedUserStorage() {
+  const unscopedKeys = [
+    'collekt_user',
+    'collekt_user_avatar',
+    'collekt_company_logo',
+    'collekt_user_cover_photo',
+    'collekt_user_cv',
+    'collekt_custom_quals',
+    'collekt_user_nin',
+    'collekt_uploads_default'
+  ];
+  unscopedKeys.forEach(k => {
+    try { localStorage.removeItem(k); } catch(e) {}
+  });
+}
+
+function purgeUnscopedUserStorageIfDifferent(newUserId, newEmail) {
+  try {
+    const prev = JSON.parse(localStorage.getItem('collekt_user') || 'null');
+    if (!prev) return;
+    const idMismatch = Boolean(newUserId && prev.id && String(prev.id).toLowerCase() !== String(newUserId).toLowerCase());
+    const emailMismatch = Boolean(newEmail && prev.email && String(prev.email).toLowerCase() !== String(newEmail).toLowerCase());
+    if (idMismatch || emailMismatch) {
+      clearAllUnscopedUserStorage();
+    }
+  } catch(e) {}
+}
+window.clearAllUnscopedUserStorage = clearAllUnscopedUserStorage;
+window.purgeUnscopedUserStorageIfDifferent = purgeUnscopedUserStorageIfDifferent;
+
+/* -----------------------------------------------------
    AUTH API: Manual Email & Password Sign Up
 ------------------------------------------------------*/
 async function signUpWithEmailPassword({ email, password, role, metadata = {} }) {
@@ -43,15 +76,20 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
   const cleanEmail = (email || '').trim().toLowerCase();
   const chosenRole = role || metadata.role || 'professional';
 
+  // Ensure any previous user's session/uploads on this browser are purged before signup
+  clearAllUnscopedUserStorage();
+
   // Merge full user metadata passed to Supabase Auth & PostgreSQL triggers
+  const composedName = metadata.name || [metadata.first_name, metadata.other_name, metadata.last_name].filter(Boolean).join(' ') || metadata.company_name || cleanEmail.split('@')[0];
   const userMetadata = {
     email: cleanEmail,
     role: chosenRole,
-    name: metadata.name || [metadata.first_name, metadata.other_name, metadata.last_name].filter(Boolean).join(' ') || metadata.company_name || cleanEmail.split('@')[0],
+    name: composedName,
+    full_name: composedName,
     first_name: metadata.first_name || '',
     last_name: metadata.last_name || '',
     other_name: metadata.other_name || '',
-    company_name: chosenRole === 'company' ? (metadata.company_name || metadata.name || cleanEmail.split('@')[0]) : '',
+    company_name: chosenRole === 'company' ? (metadata.company_name || composedName) : '',
     rep_first_name: metadata.rep_first_name || '',
     rep_last_name: metadata.rep_last_name || '',
     rep_other_name: metadata.rep_other_name || '',
@@ -105,6 +143,7 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
       id: authUser.id,
       email: cleanEmail,
       name: userMetadata.name,
+      full_name: userMetadata.name,
       first_name: userMetadata.first_name,
       last_name: userMetadata.last_name,
       other_name: userMetadata.other_name,
@@ -115,7 +154,10 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
       rep_other_name: userMetadata.rep_other_name,
       title: userMetadata.title,
       industry: userMetadata.industry,
+      sector: userMetadata.industry,
       cac: userMetadata.cac,
+      avatar: null,
+      avatar_uploaded: false,
       avatar_letter: (userMetadata.name || cleanEmail).charAt(0).toUpperCase(),
       wallet_balance: wallet ? Number(wallet.available_balance || 0) : 0,
       escrow_balance: wallet ? Number(wallet.escrow_balance || 0) : 0,
@@ -131,19 +173,49 @@ async function signUpWithEmailPassword({ email, password, role, metadata = {} })
     };
 
     try {
-      await sb.from('profiles').update({
+      await sb.from('profiles').upsert({
+        id: authUser.id,
+        email: cleanEmail,
+        name: userMetadata.name,
+        full_name: userMetadata.name,
+        first_name: userMetadata.first_name,
+        last_name: userMetadata.last_name,
+        other_name: userMetadata.other_name,
+        role: chosenRole,
+        company_name: userMetadata.company_name,
+        rep_first_name: userMetadata.rep_first_name,
+        rep_last_name: userMetadata.rep_last_name,
+        rep_other_name: userMetadata.rep_other_name,
+        title: userMetadata.title,
+        industry: userMetadata.industry,
+        sector: userMetadata.industry,
+        cac: userMetadata.cac,
+        cac_number: userMetadata.cac,
         otp_verified: false,
         email_verified: false,
         terms_accepted: true,
         terms_accepted_at: localUser.terms_accepted_at,
         terms_version: localUser.terms_version,
-        recaptcha_verified: localUser.recaptcha_verified
-      }).eq('id', authUser.id);
+        recaptcha_verified: localUser.recaptcha_verified,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
+
+      if (chosenRole === 'professional') {
+        await sb.from('professional_profiles').upsert({
+          user_id: authUser.id,
+          title: userMetadata.title,
+          discipline: userMetadata.industry,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+      }
     } catch(e) {}
 
     localStorage.setItem('collekt_user', JSON.stringify(localUser));
     localStorage.setItem('collekt_last_role', chosenRole);
     localStorage.setItem('collekt_last_user_email', cleanEmail);
+    if (typeof saveRegisteredUser === 'function') {
+      try { saveRegisteredUser(localUser); } catch(e) {}
+    }
 
     return { user: authUser, session: data.session, profile: localUser, error: null };
   } catch (err) {
@@ -166,6 +238,8 @@ async function signInWithEmailPassword({ email, password }) {
   }
 
   try {
+    purgeUnscopedUserStorageIfDifferent(null, cleanEmail);
+
     const { data, error } = await sb.auth.signInWithPassword({
       email: cleanEmail,
       password: password
@@ -180,6 +254,7 @@ async function signInWithEmailPassword({ email, password }) {
     }
 
     const userId = data.user.id;
+    purgeUnscopedUserStorageIfDifferent(userId, cleanEmail);
 
     // Fetch profile and wallet in parallel
     let profile = null;
@@ -202,22 +277,32 @@ async function signInWithEmailPassword({ email, password }) {
     }
 
     const role = (profile && profile.role) || data.user.user_metadata?.role || 'professional';
-    const name = (profile && profile.name) || data.user.user_metadata?.name || cleanEmail.split('@')[0];
+    const metaName = [data.user.user_metadata?.first_name, data.user.user_metadata?.other_name, data.user.user_metadata?.last_name].filter(Boolean).join(' ') || data.user.user_metadata?.name || data.user.user_metadata?.full_name || '';
+    const name = (profile && (profile.name || profile.full_name)) || metaName || cleanEmail.split('@')[0];
+    const title = (profile && profile.title && profile.title !== 'professional Specialist') ? profile.title : (data.user.user_metadata?.title || '');
 
     const localUser = {
+      ...(profile || {}),
       id: userId,
       email: cleanEmail,
       name: name,
+      full_name: name,
+      first_name: (profile && profile.first_name) || data.user.user_metadata?.first_name || '',
+      last_name: (profile && profile.last_name) || data.user.user_metadata?.last_name || '',
+      other_name: (profile && profile.other_name) || data.user.user_metadata?.other_name || '',
+      title: title,
       role: role,
       avatar_letter: (name || cleanEmail).charAt(0).toUpperCase(),
       wallet_balance: wallet ? Number(wallet.available_balance || 0) : 0,
-      escrow_balance: wallet ? Number(wallet.escrow_balance || 0) : 0,
-      ...(profile || {})
+      escrow_balance: wallet ? Number(wallet.escrow_balance || 0) : 0
     };
 
     localStorage.setItem('collekt_user', JSON.stringify(localUser));
     localStorage.setItem('collekt_last_role', role);
     localStorage.setItem('collekt_last_user_email', cleanEmail);
+    if (typeof saveRegisteredUser === 'function') {
+      try { saveRegisteredUser(localUser); } catch(e) {}
+    }
 
     if (role === 'admin') {
       const adminSession = {
@@ -360,7 +445,7 @@ async function signOutUser() {
   } catch (e) {
     console.warn('Supabase signout notice:', e);
   } finally {
-    localStorage.removeItem('collekt_user');
+    clearAllUnscopedUserStorage();
     window.location.replace('login.html');
   }
 }
@@ -374,6 +459,11 @@ async function syncUser() {
     const { data: { session } } = await sb.auth.getSession();
     if (session && session.user) {
       const userId = session.user.id;
+      const userEmail = session.user.email || '';
+
+      // If cached collekt_user belongs to a different user, purge all unscoped local storage immediately
+      purgeUnscopedUserStorageIfDifferent(userId, userEmail);
+
       const [profRes, wallRes] = await Promise.all([
         sb.from('profiles').select('*').eq('id', userId).maybeSingle(),
         sb.from('wallets').select('*').eq('user_id', userId).maybeSingle()
@@ -385,14 +475,23 @@ async function syncUser() {
       let localUser = {};
       try {
         const parsedLocal = JSON.parse(localStorage.getItem('collekt_user')) || {};
-        if (parsedLocal && parsedLocal.id === userId) {
+        if (parsedLocal && parsedLocal.id === userId && (!parsedLocal.email || !userEmail || parsedLocal.email.toLowerCase() === userEmail.toLowerCase())) {
           localUser = parsedLocal;
         }
       } catch(e){}
 
+      const metaFullName = [
+        session.user.user_metadata?.first_name || session.user.user_metadata?.given_name,
+        session.user.user_metadata?.other_name,
+        session.user.user_metadata?.last_name || session.user.user_metadata?.family_name
+      ].filter(Boolean).join(' ') || session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
+
       if (profile) {
-        profile.email = session.user.email;
-        profile.avatar_letter = (profile.name || profile.company_name || 'U').charAt(0).toUpperCase();
+        profile.email = userEmail;
+        const resolvedName = profile.name || profile.full_name || localUser.name || metaFullName || userEmail.split('@')[0];
+        profile.name = resolvedName;
+        profile.full_name = resolvedName;
+        profile.avatar_letter = (resolvedName || profile.company_name || 'U').charAt(0).toUpperCase();
 
         const realAvail = wallet ? Number(wallet.available_balance || 0) : 0;
         const realEscrow = wallet ? Number(wallet.escrow_balance || 0) : 0;
@@ -401,40 +500,23 @@ async function syncUser() {
         profile.escrow_balance = realEscrow;
 
         const existingWallet = (localUser && localUser.wallet) || {};
-        let dvaAccount = (wallet && wallet.paystack_dva_account) || existingWallet.paystack_dva_account || existingWallet.account_number || '';
-        let dvaBank = (wallet && wallet.paystack_dva_bank) || existingWallet.paystack_dva_bank || existingWallet.bank_name || 'Fidelity Bank';
-        let dvaName = (wallet && wallet.paystack_dva_name) || existingWallet.paystack_dva_name || '';
-
-        if (!dvaAccount) {
-          try {
-            const { data: vba } = await sb.from('virtual_accounts').select('*').eq('owner_id', userId).eq('status', 'active').maybeSingle();
-            if (vba && vba.account_number) {
-              dvaAccount = vba.account_number;
-              dvaBank = vba.bank_name || 'Fidelity Bank';
-              dvaName = vba.account_name || '';
-            }
-          } catch(e) {}
-        }
-
         profile.wallet = {
           ...existingWallet,
           balance: realAvail,
           available_balance: realAvail,
           escrow_balance: realEscrow,
           currency: (wallet && wallet.currency) || 'NGN',
-          paystack_dva_account: dvaAccount,
-          paystack_dva_bank: dvaBank,
-          paystack_dva_name: dvaName,
-          account_number: dvaAccount,
-          bank_name: dvaBank,
-          bank_assigned: !!dvaAccount,
-          is_live_dva: !!dvaAccount
+          paystack_dva_account: '',
+          paystack_dva_bank: '',
+          paystack_dva_name: '',
+          account_number: existingWallet.nova_linked ? (existingWallet.nova_account_number || '') : '',
+          bank_name: existingWallet.nova_linked ? 'NOVA Commercial Bank' : '',
+          bank_assigned: !!existingWallet.nova_linked,
+          is_live_dva: false
         };
-        if (dvaAccount) {
-          profile.dva_account = dvaAccount;
-          profile.dva_bank = dvaBank;
-          profile.dva_name = dvaName;
-        }
+        delete profile.dva_account;
+        delete profile.dva_bank;
+        delete profile.dva_name;
 
         const oauthProvider = session.user.app_metadata?.provider || '';
         const isGoogleUser = (localUser && (localUser.provider === 'google' || localUser.oauth_provider === 'google')) ||
@@ -448,16 +530,23 @@ async function syncUser() {
         const isOAuthUser = isGoogleUser || isLinkedInUser;
 
         const finalRole = (profile && profile.role) || (localUser && localUser.role) || localStorage.getItem('collekt_last_role') || 'professional';
+        const cleanDbTitle = (profile.title && profile.title !== 'Senior Proposal Manager & Technical Specialist' && profile.title !== 'professional Specialist') ? profile.title : '';
+        const resolvedTitle = cleanDbTitle || localUser.title || session.user.user_metadata?.title || '';
+
         const finalProfile = {
           ...localUser,
           ...profile,
           id: userId,
+          email: userEmail,
           role: finalRole,
-          name: profile.name || localUser.name || session.user.email.split('@')[0],
-          other_name: profile.other_name || '',
-          bio: profile.bio || '',
-          title: (profile.title && profile.title !== 'Senior Proposal Manager & Technical Specialist') ? profile.title : '',
-          skills: Array.isArray(profile.skills) ? profile.skills : []
+          name: resolvedName,
+          full_name: resolvedName,
+          first_name: profile.first_name || localUser.first_name || session.user.user_metadata?.first_name || session.user.user_metadata?.given_name || (finalRole === 'professional' ? resolvedName.split(' ')[0] : '') || '',
+          last_name: profile.last_name || localUser.last_name || session.user.user_metadata?.last_name || session.user.user_metadata?.family_name || (finalRole === 'professional' && resolvedName.includes(' ') ? resolvedName.split(' ').slice(1).join(' ') : '') || '',
+          other_name: profile.other_name || localUser.other_name || session.user.user_metadata?.other_name || '',
+          bio: profile.bio || localUser.bio || '',
+          title: resolvedTitle,
+          skills: Array.isArray(profile.skills) && profile.skills.length > 0 ? profile.skills : (Array.isArray(localUser.skills) ? localUser.skills : [])
         };
 
         const isAwaitingOtp = (sessionStorage.getItem('collekt_awaiting_otp') === 'true') && !isLinkedInUser;
@@ -465,14 +554,14 @@ async function syncUser() {
         // CRITICAL: NEVER allow verified flags to regress to false once verified locally or in DB!
         const isAlreadyOtpVerified = !isAwaitingOtp && (
                                      (profile && profile.otp_verified === true) || 
-                                     (localUser && localUser.otp_verified === true && localUser.email === session.user.email) || 
+                                     (localUser && localUser.otp_verified === true && localUser.email === userEmail) || 
                                      (sessionStorage.getItem('collekt_just_verified') === 'true') ||
                                      finalRole === 'admin' ||
                                      isLinkedInUser);
 
         const isAlreadyEmailVerified = !isAwaitingOtp && (
                                        (profile && profile.email_verified === true) || 
-                                       (localUser && localUser.email_verified === true && localUser.email === session.user.email) || 
+                                       (localUser && localUser.email_verified === true && localUser.email === userEmail) || 
                                        (sessionStorage.getItem('collekt_just_verified') === 'true') ||
                                        finalRole === 'admin' ||
                                        isLinkedInUser);
@@ -485,12 +574,18 @@ async function syncUser() {
           if (isLinkedInUser) finalProfile.provider = 'linkedin';
         }
 
-        // Keep Supabase DB in sync if local state is verified but DB is pending
-        if (isAlreadyOtpVerified && profile && (!profile.otp_verified || !profile.email_verified)) {
+        // Keep Supabase DB in sync if local state is verified or has fresher name/title
+        if ((isAlreadyOtpVerified && profile && (!profile.otp_verified || !profile.email_verified)) || (!profile.name && resolvedName)) {
           try {
             sb.from('profiles').update({
-              otp_verified: true,
-              email_verified: true,
+              name: resolvedName,
+              full_name: resolvedName,
+              first_name: finalProfile.first_name,
+              last_name: finalProfile.last_name,
+              other_name: finalProfile.other_name,
+              title: resolvedTitle || profile.title,
+              otp_verified: isAlreadyOtpVerified,
+              email_verified: isAlreadyEmailVerified,
               updated_at: new Date().toISOString()
             }).eq('id', userId).then(() => {});
           } catch(e) {}
@@ -514,6 +609,9 @@ async function syncUser() {
         localStorage.setItem('collekt_user', JSON.stringify(finalProfile));
         localStorage.setItem('collekt_last_role', finalProfile.role);
         localStorage.setItem('collekt_last_user_email', finalProfile.email);
+        if (typeof saveRegisteredUser === 'function') {
+          try { saveRegisteredUser(finalProfile); } catch(e) {}
+        }
 
         if (typeof syncUserProposalsFromSupabase === 'function') {
           try { await syncUserProposalsFromSupabase(finalProfile); } catch(e){}
@@ -531,15 +629,23 @@ async function syncUser() {
                                session.user.identities?.some(i => i.provider === 'linkedin_oidc' || i.provider === 'linkedin');
         const isOAuthUser = isGoogleUser || isLinkedInUser;
 
-        const role = localStorage.getItem('collekt_pending_oauth_role') || localUser.role || 'professional';
-        const name = session.user.user_metadata?.name || session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-        const isVerifiedNew = isLinkedInUser || role === 'admin' || (localUser && localUser.otp_verified === true && localUser.email === session.user.email) || (sessionStorage.getItem('collekt_just_verified') === 'true');
+        const role = localStorage.getItem('collekt_pending_oauth_role') || localUser.role || session.user.user_metadata?.role || 'professional';
+        const name = metaFullName || localUser.name || userEmail.split('@')[0];
+        const firstName = session.user.user_metadata?.first_name || session.user.user_metadata?.given_name || (role === 'professional' ? name.split(' ')[0] : '') || '';
+        const lastName = session.user.user_metadata?.last_name || session.user.user_metadata?.family_name || (role === 'professional' && name.includes(' ') ? name.split(' ').slice(1).join(' ') : '') || '';
+        const otherName = session.user.user_metadata?.other_name || '';
+        const title = session.user.user_metadata?.title || localUser.title || (role === 'company' ? 'Energy & EPC Enterprise' : 'Independent Specialist');
+        const isVerifiedNew = isLinkedInUser || role === 'admin' || (localUser && localUser.otp_verified === true && localUser.email === userEmail) || (sessionStorage.getItem('collekt_just_verified') === 'true');
         const newProfile = {
           id: session.user.id,
-          email: session.user.email,
+          email: userEmail,
           name: name,
+          full_name: name,
+          first_name: firstName,
+          last_name: lastName,
+          other_name: otherName,
           role: role,
-          title: role === 'company' ? 'Energy & EPC Enterprise' : 'Energy Specialist',
+          title: title,
           avatar: null,
           avatar_uploaded: false,
           oauth_avatar: session.user.user_metadata?.avatar_url || null,
@@ -559,13 +665,18 @@ async function syncUser() {
         const merged = { ...localUser, ...newProfile };
         localStorage.setItem('collekt_user', JSON.stringify(merged));
         localStorage.setItem('collekt_last_role', role);
+        localStorage.setItem('collekt_last_user_email', userEmail);
 
         // Also persist to Supabase profiles table
         try {
           await sb.from('profiles').upsert({
             id: session.user.id,
-            email: session.user.email,
+            email: userEmail,
             name: name,
+            full_name: name,
+            first_name: firstName,
+            last_name: lastName,
+            other_name: otherName,
             role: role,
             title: newProfile.title,
             country: 'Nigeria',
@@ -580,7 +691,7 @@ async function syncUser() {
             terms_accepted_at: newProfile.terms_accepted_at,
             terms_version: newProfile.terms_version,
             updated_at: new Date().toISOString()
-          });
+          }, { onConflict: 'id' });
         } catch (e) {}
 
         return merged;
@@ -747,6 +858,11 @@ async function handleOAuthSessionRouting(session) {
     if (currentFile === targetDashboard.toLowerCase()) {
       return; // Already on target dashboard, do not reload/replace
     }
+    try {
+      if (typeof window.dispatchLoginAlertIfEnabled === 'function' && user) {
+        window.dispatchLoginAlertIfEnabled(user);
+      }
+    } catch(e) {}
     // Replace URL to prevent back-button loops into OAuth hash
     window.location.replace(targetDashboard);
   }
@@ -762,28 +878,52 @@ async function fetchRealRegisteredUsers() {
     let data = null;
     let error = null;
 
-    // 1. Try secure Postgres RPC get_admin_directory()
+    // 1. Authoritative: Query public_profiles view FIRST (exposes full public fields: avatar, avatar_url, bio, about, title, sector, skills)
     try {
-      if (typeof sb.rpc === 'function') {
-        const rpcRes = await sb.rpc('get_admin_directory');
-        if (!rpcRes.error && Array.isArray(rpcRes.data) && rpcRes.data.length > 0) {
-          data = rpcRes.data;
-        }
+      const pubRes = await sb.from('public_profiles').select('*').order('created_at', { ascending: true });
+      if (!pubRes.error && Array.isArray(pubRes.data) && pubRes.data.length > 0) {
+        data = pubRes.data;
       }
     } catch(e) {}
 
-    // 2. Fallback to public_profiles view
+    // 2. Fallback to get_admin_directory RPC only if public_profiles returned nothing
     if (!data || data.length === 0) {
-      const pubRes = await sb.from('public_profiles').select('*').order('created_at', { ascending: true });
-      data = pubRes.data;
-      error = pubRes.error;
+      try {
+        if (typeof sb.rpc === 'function') {
+          const rpcRes = await sb.rpc('get_admin_directory');
+          if (!rpcRes.error && Array.isArray(rpcRes.data) && rpcRes.data.length > 0) {
+            data = rpcRes.data;
+          }
+        }
+      } catch(e) {}
     }
 
-    if (error) throw error;
     if (Array.isArray(data) && data.length > 0) {
+      const activeUser = typeof getUser === 'function' ? getUser() : null;
+      const localAvatar = (typeof resolveUserAvatarSrc === 'function' && activeUser) 
+        ? resolveUserAvatarSrc(activeUser) 
+        : (localStorage.getItem('collekt_user_avatar') || (activeUser && activeUser.avatar) || '');
+
       const realUsers = data.map(p => {
         const isCo = p.role === 'company';
         const dispName = p.name || p.company_name || p.full_name || p.email;
+        let avatarVal = (p.avatar || p.avatar_url || '').trim();
+
+        // If this row matches the active logged-in user and has no avatar in DB yet but activeUser has local avatar, adopt and sync it
+        if (!avatarVal && activeUser && localAvatar && (
+          (p.id && activeUser.id && String(p.id).toLowerCase() === String(activeUser.id).toLowerCase()) ||
+          (p.email && activeUser.email && String(p.email).toLowerCase() === String(activeUser.email).toLowerCase())
+        )) {
+          avatarVal = localAvatar;
+          try {
+            if (activeUser.id) {
+              sb.from('profiles').update({ avatar: localAvatar, avatar_url: localAvatar, updated_at: new Date().toISOString() }).eq('id', activeUser.id).then(() => {}).catch(() => {});
+            }
+          } catch(e) {}
+        }
+
+        const isVer = Boolean((p.is_verified === true || p.verified === true) && p.verification_status === 'verified');
+
         return {
           ...p,
           id: p.id,
@@ -791,9 +931,12 @@ async function fetchRealRegisteredUsers() {
           role: p.role || (isCo ? 'company' : 'professional'),
           name: dispName,
           company_name: isCo ? (p.company_name || dispName) : '',
+          avatar: avatarVal,
+          avatar_url: p.avatar_url || avatarVal,
           avatar_letter: (dispName || 'U').charAt(0).toUpperCase(),
-          verified: p.is_verified === true,
-          is_verified: p.is_verified === true
+          verified: isVer,
+          is_verified: isVer,
+          verification_status: p.verification_status || (isVer ? 'verified' : 'none')
         };
       });
       if (typeof syncRealUsersToDirectory === 'function') {
@@ -2171,93 +2314,8 @@ async function verifyWalletPayment(reference) {
  * 3. Fetch Dedicated Virtual Account (DVA) with direct Supabase database fallback
  */
 async function fetchDedicatedVirtualAccount(ownerId) {
-  try {
-    if (!ownerId) {
-      const u = typeof getUser === 'function' ? getUser() : JSON.parse(localStorage.getItem('collekt_user') || '{}');
-      ownerId = u?.id || u?.owner_id;
-    }
-    if (!ownerId) return { success: false, not_found: true };
-
-    // 1. Try serverless function first
-    try {
-      const res = await fetch(`/.netlify/functions/korapay-virtual-account?owner_id=${encodeURIComponent(ownerId)}`);
-      const parsed = await safeParseJsonResponse(res);
-      if (parsed.ok && parsed.data && (parsed.data.virtual_account || parsed.data.data)) {
-        const vba = parsed.data.virtual_account || parsed.data.data;
-        if (vba && vba.account_number && !String(vba.account_number).startsWith('07000') && vba.account_number !== '0167384649') {
-          return { success: true, data: vba };
-        }
-      }
-    } catch (e) {}
-    try {
-      const res = await fetch(`/.netlify/functions/paystack-dva?owner_id=${encodeURIComponent(ownerId)}`);
-      const parsed = await safeParseJsonResponse(res);
-      if (parsed.ok && parsed.data && parsed.data.virtual_account) {
-        const vba = parsed.data.virtual_account;
-        if (vba && vba.account_number && !String(vba.account_number).startsWith('07000') && vba.account_number !== '0167384649') {
-          return { success: true, data: vba };
-        }
-      }
-    } catch (e) {}
-
-    // 2. Direct Supabase Query (Fast & Resilient)
-    if (window.sb) {
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ownerId);
-      let query = window.sb.from('virtual_accounts').select('*');
-      if (isUUID) {
-        query = query.or(`owner_id.eq.${ownerId},user_id.eq.${ownerId}`);
-      } else {
-        query = query.eq('owner_id', ownerId);
-      }
-
-      const { data: vba } = await query.eq('status', 'active').maybeSingle();
-      if (vba && vba.account_number && !String(vba.account_number).startsWith('07000') && vba.account_number !== '0167384649') {
-        return {
-          success: true,
-          data: {
-            account_number: vba.account_number,
-            account_name: vba.account_name,
-            bank_name: vba.bank_name,
-            bank_code: vba.bank_code,
-            currency: vba.currency || 'NGN',
-            status: vba.status,
-            provider: vba.provider
-          }
-        };
-      }
-
-      // Check wallets table
-      const { data: w } = await window.sb.from('wallets').select('paystack_dva_account, paystack_dva_bank, paystack_dva_name').eq('owner_id', ownerId).maybeSingle();
-      if (w && w.paystack_dva_account && !String(w.paystack_dva_account).startsWith('07000') && w.paystack_dva_account !== '0167384649') {
-        return {
-          success: true,
-          data: {
-            account_number: w.paystack_dva_account,
-            account_name: w.paystack_dva_name || 'COLLEKT ACCOUNT',
-            bank_name: w.paystack_dva_bank || 'Fidelity Bank',
-            bank_code: '070',
-            currency: 'NGN',
-            status: 'active',
-            provider: 'korapay'
-          }
-        };
-      }
-    }
-
-    // 3. Check local user cache for real verified account
-    const u = typeof getUser === 'function' ? getUser() : JSON.parse(localStorage.getItem('collekt_user') || '{}');
-    if (typeof getDedicatedVirtualAccountForUser === 'function') {
-      const fallbackDva = getDedicatedVirtualAccountForUser(u);
-      if (fallbackDva) {
-        return { success: true, data: fallbackDva };
-      }
-    }
-
-    return { success: false, not_found: true };
-  } catch (err) {
-    console.error('fetchDedicatedVirtualAccount error:', err);
-    return { success: false, error: err.message };
-  }
+  // Dedicated Virtual Accounts & Fidelity Bank display disabled per platform configuration
+  return { success: false, not_found: true, disabled: true };
 }
 
 async function provisionDedicatedVirtualAccount(params) {
@@ -3036,22 +3094,26 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
     const fxRate = currency === 'USD' ? (details?.fx_rate || matchedProp?.fx_rate || matchedJob?.fx_rate || 1550) : null;
     const ngnTotalAmt = currency === 'USD' ? (typeof convertFx === 'function' ? convertFx(totalAmt, 'USD', 'NGN', fxRate) : totalAmt * 1550) : totalAmt;
 
-    const payMode = matchedJob?.payment_mode || (matchedJob?.milestones && matchedJob.milestones.length > 1 ? 'milestones' : 'lump_sum');
+    const rawSourceMilestones = (Array.isArray(details?.milestones) && details.milestones.length > 0)
+      ? details.milestones
+      : (Array.isArray(matchedJob?.milestones) ? matchedJob.milestones : []);
+    const payMode = details?.payment_mode || matchedJob?.payment_mode || (rawSourceMilestones.length > 1 ? 'milestones' : 'lump_sum');
     let contractMilestones = [];
 
     const totalCommission = Math.round(totalAmt * 0.15);
     const totalNetPayout = totalAmt - totalCommission;
 
-    if (payMode === 'milestones' && Array.isArray(matchedJob?.milestones) && matchedJob.milestones.length > 0) {
-      contractMilestones = matchedJob.milestones.map((m, idx) => {
-        const mAmt = totalAmt > 0 ? Math.round(totalAmt * ((Number(m.percentage) || 0) / 100)) : 0;
+    if (payMode === 'milestones' && rawSourceMilestones.length > 0) {
+      contractMilestones = rawSourceMilestones.map((m, idx) => {
+        const pct = Number(m.percentage) || Math.round(100 / rawSourceMilestones.length);
+        const mAmt = Number(m.amount) > 0 ? Number(m.amount) : (totalAmt > 0 ? Math.round(totalAmt * (pct / 100)) : 0);
         const mComm = Math.round(mAmt * 0.15);
         const mNet = mAmt - mComm;
         const mNgnAmt = currency === 'USD' ? (typeof convertFx === 'function' ? convertFx(mAmt, 'USD', 'NGN', fxRate) : mAmt * 1550) : mAmt;
         return {
           id: m.id || ('ms_' + (idx + 1)),
           name: m.name || (`Phase ${idx + 1}`),
-          percentage: Number(m.percentage) || 0,
+          percentage: pct,
           amount: mAmt,
           currency: currency,
           fx_rate: fxRate,
@@ -3059,13 +3121,13 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
           commission_rate: 0.15,
           commission: mComm,
           net_payout: mNet,
-          status: 'Funded in Escrow'
+          status: m.status || 'Funded in Escrow'
         };
       });
     } else {
       contractMilestones = [{
         id: 'ms_1',
-        name: '100% Full Project Completion & Approval',
+        name: '100% Lump-Sum Payout After Job Completion & Approval',
         percentage: 100,
         amount: totalAmt,
         currency: currency,
@@ -3148,21 +3210,27 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
 
       // Also mirror in collekt_awarded_contracts for legacy views
       const awardedList = JSON.parse(localStorage.getItem('collekt_awarded_contracts') || '[]');
-      if (!awardedList.some(c => c.id === 'CTR-' + proposalId)) {
-        awardedList.unshift({
-          id: 'CTR-' + proposalId,
-          proposalId: proposalId,
-          title: contractData.jobTitle,
-          amount: contractData.total_amount,
-          contractor: contractData.proName,
-          client: contractData.companyName,
-          payment_mode: payMode,
-          milestones: contractMilestones,
-          status: 'Active Escrow',
-          created_at: nowIso
-        });
-        localStorage.setItem('collekt_awarded_contracts', JSON.stringify(awardedList));
+      const awardedEntry = {
+        id: 'CTR-' + proposalId,
+        proposalId: proposalId,
+        title: contractData.jobTitle,
+        amount: contractData.total_amount,
+        currency: contractData.currency,
+        fx_rate: contractData.fx_rate,
+        contractor: contractData.proName,
+        client: contractData.companyName,
+        payment_mode: payMode,
+        milestones: contractMilestones,
+        status: 'Active Escrow',
+        created_at: nowIso
+      };
+      const awIdx = awardedList.findIndex(c => c.id === 'CTR-' + proposalId || c.proposalId === proposalId);
+      if (awIdx >= 0) {
+        awardedList[awIdx] = { ...awardedList[awIdx], ...awardedEntry };
+      } else {
+        awardedList.unshift(awardedEntry);
       }
+      localStorage.setItem('collekt_awarded_contracts', JSON.stringify(awardedList));
     } catch(e){}
 
     // 5. Automated Chat Workflow: Create/resolve conversation and log acceptance notification
@@ -3170,7 +3238,11 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
     const actualProId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(contractData.pro_id) : contractData.pro_id);
 
     if (actualCompanyId && actualProId && actualCompanyId !== actualProId) {
-      const acceptMsgText = `🎉 Collection request for "${contractData.jobTitle}" has been ACCEPTED by ${contractData.companyName}! Active project engagement has commenced.`;
+      const sym = currency === 'USD' ? '$' : '₦';
+      const msSummaryText = payMode === 'milestones' && contractMilestones.length > 1
+        ? `Escrow Payout Schedule (${contractMilestones.length} Milestones): ` + contractMilestones.map((m, i) => `M${i + 1}: ${m.name} (${m.percentage}% — ${sym}${Number(m.amount || 0).toLocaleString()})`).join(' | ')
+        : `Escrow Payout Schedule: 100% Lump-Sum Payout After Job Completion (${sym}${Number(totalAmt || 0).toLocaleString()})`;
+      const acceptMsgText = `🎉 Collection request for "${contractData.jobTitle}" has been ACCEPTED by ${contractData.companyName}! Active project engagement has commenced.\n🔒 ${msSummaryText}`;
 
       if (window.sb && typeof createSupabaseConversation === 'function') {
         try {

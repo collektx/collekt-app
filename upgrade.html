@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=160.0">
-<link rel="stylesheet" href="shared.css?v=160.0">
-<link rel="stylesheet" href="glass.css?v=160.0">
+<link rel="stylesheet" href="style.css?v=173.0">
+<link rel="stylesheet" href="shared.css?v=173.0">
+<link rel="stylesheet" href="glass.css?v=173.0">
 
 <style>
   body {
@@ -82,6 +82,8 @@
   /* Billing Toggle */
   .billing-toggle-wrap {
     display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
     background: var(--white);
     border: 1.5px solid var(--line);
@@ -93,19 +95,26 @@
   }
   html.dark .billing-toggle-wrap {
     background: #0f2220;
-    border-color: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.08);
+  }
+  @media (max-width: 640px) {
+    .billing-toggle-wrap {
+      border-radius: 20px;
+      padding: 6px;
+    }
   }
 
   .billing-toggle-btn {
     border: none;
     background: transparent;
-    padding: 8px 18px;
+    padding: 8px 16px;
     border-radius: 99px;
     font-size: 13px;
     font-weight: 800;
     color: var(--muted);
     cursor: pointer;
     transition: all 0.2s ease;
+    min-height: 38px;
   }
 
   .billing-toggle-btn.active {
@@ -122,6 +131,41 @@
     padding: 2px 7px;
     border-radius: 99px;
     margin-left: 4px;
+  }
+
+  /* Cycle Suggestion Breakdown Grid */
+  .cycle-suggestion-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 520px) {
+    .cycle-suggestion-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .cycle-suggestion-card {
+    border: 1.5px solid var(--line);
+    background: var(--paper);
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  html.dark .cycle-suggestion-card {
+    background: #091715;
+    border-color: rgba(255,255,255,0.07);
+  }
+  .cycle-suggestion-card.active {
+    border-color: var(--teal);
+    background: var(--teal-lt);
+    box-shadow: 0 4px 14px rgba(19,117,111,0.14);
+  }
+  html.dark .cycle-suggestion-card.active {
+    background: rgba(19,117,111,0.25);
+    border-color: var(--teal-mid);
   }
 
   /* 2-Column Layout */
@@ -338,7 +382,15 @@
 
         <!-- Upgrade Hero Header -->
         <div class="upgrade-hero fade-in">
-          <div class="upgrade-badge" id="tierBadge">
+          <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+            <button type="button" id="roleSwitchProBtn" onclick="setUpgradeRole('professional')" style="padding:6px 16px; border-radius:99px; font-weight:800; font-size:12.5px; cursor:pointer; border:1.5px solid rgba(212,146,11,0.4); background:rgba(212,146,11,0.16); color:var(--amber-dark, #b45309); transition:all 0.2s ease;">
+              ⚡ Professional Plus (₦19,999/mo)
+            </button>
+            <button type="button" id="roleSwitchCompanyBtn" onclick="setUpgradeRole('company')" style="padding:6px 16px; border-radius:99px; font-weight:800; font-size:12.5px; cursor:pointer; border:1.5px solid var(--line); background:var(--white); color:var(--muted); transition:all 0.2s ease;">
+              🏢 Company Enterprise (₦74,999/mo)
+            </button>
+          </div>
+          <div class="upgrade-badge" id="tierBadge" style="display:none;">
             <span>⭐</span> <span id="tierBadgeText">Professional Tier</span>
           </div>
           <h1 class="upgrade-title" id="pageMainTitle">Upgrade to Professional Plus</h1>
@@ -349,10 +401,16 @@
           <!-- Billing Interval Toggle -->
           <div class="billing-toggle-wrap">
             <button class="billing-toggle-btn active" id="toggleMonthlyBtn" onclick="setBillingCycle('monthly')">
-              Monthly Billing
+              Monthly
+            </button>
+            <button class="billing-toggle-btn" id="toggleQuarterlyBtn" onclick="setBillingCycle('quarterly')">
+              Quarterly <span class="save-pill">Save 5%</span>
+            </button>
+            <button class="billing-toggle-btn" id="toggleBiannualBtn" onclick="setBillingCycle('biannual')">
+              Bi-Annually <span class="save-pill">Save 10%</span>
             </button>
             <button class="billing-toggle-btn" id="toggleAnnualBtn" onclick="setBillingCycle('annual')">
-              Annual Billing <span class="save-pill">Save 17%</span>
+              Annual <span class="save-pill">Save 17%</span>
             </button>
           </div>
         </div>
@@ -366,13 +424,22 @@
               <div>
                 <div style="font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; opacity:.9;" id="planHeaderLabel">Selected Plan</div>
                 <h3 style="font-size:22px; font-weight:900; margin-top:2px;" id="planHeaderTitle">Professional Plus</h3>
-                <div style="font-size:12px; opacity:.85; margin-top:2px;" id="planHeaderRateNaira">₦22,500 / month</div>
+                <div style="font-size:12px; opacity:.85; margin-top:2px;" id="planHeaderRateNaira">₦19,999 / month &bull; Billed monthly</div>
               </div>
               <div class="plan-price-large">
-                <span style="font-size:24px; font-weight:900;">$</span>
-                <span id="planPriceNumber">15</span>
+                <span style="font-size:24px; font-weight:900;">₦</span>
+                <span id="planPriceNumber">19,999</span>
                 <span id="planPriceInterval">/mo</span>
               </div>
+            </div>
+
+            <!-- Interactive Billing Cycle & Suggested Discount Schedule -->
+            <div style="font-size:12px; font-weight:900; color:var(--muted); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em; display:flex; justify-content:space-between; align-items:center;">
+              <span>Suggested Billing Cycles &amp; Discounts</span>
+              <span style="color:var(--teal); font-size:11px;">Click to switch cycle</span>
+            </div>
+            <div class="cycle-suggestion-grid" id="cycleBreakdownGrid">
+              <!-- Populated dynamically -->
             </div>
 
             <div style="font-size:14px; font-weight:900; color:var(--ink); margin-bottom:18px; text-transform:uppercase; letter-spacing:0.04em;">
@@ -475,7 +542,11 @@
             <div class="order-summary-box">
               <div class="summary-row">
                 <span id="summaryItemLabel">Professional Plus (Monthly)</span>
-                <span id="summaryItemPrice" style="font-weight:700; color:var(--ink);">₦22,500</span>
+                <span id="summaryItemPrice" style="font-weight:700; color:var(--ink);">₦19,999</span>
+              </div>
+              <div class="summary-row" id="summaryDiscountRow" style="display:none;">
+                <span id="summaryDiscountLabel" style="color:#16a34a; font-weight:700;">Multi-Month Discount (10% Off)</span>
+                <span id="summaryDiscountValue" style="color:#16a34a; font-weight:800;">-₦6,000</span>
               </div>
               <div class="summary-row">
                 <span>Value Added Tax (VAT 0%)</span>
@@ -487,14 +558,14 @@
               </div>
               <div class="summary-row total">
                 <span>Total Due Now</span>
-                <span id="summaryTotalPrice" style="color:var(--forest); font-size:18px;">₦22,500 ($15.00)</span>
+                <span id="summaryTotalPrice" style="color:var(--forest); font-size:18px;">₦19,999</span>
               </div>
             </div>
 
             <!-- Main Payment Submission Button -->
             <button class="btn btn-primary" id="executePayBtn" onclick="processUpgradePayment()" 
                     style="width:100%; min-height:50px; font-size:15px; font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f); margin-top:20px; justify-content:center; box-shadow:0 8px 24px rgba(14,59,53,0.25);">
-              Pay ₦22,500 &amp; Upgrade Now ⚡
+              Pay ₦19,999 &amp; Upgrade Now ⚡
             </button>
 
             <div style="display:flex; justify-content:center; align-items:center; gap:16px; margin-top:16px; font-size:11px; color:var(--muted); font-weight:700;">
@@ -542,7 +613,7 @@
       </div>
       <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
         <span style="color:var(--muted);">Amount Paid:</span>
-        <strong id="receiptAmount" style="color:var(--forest);">₦22,500.00</strong>
+        <strong id="receiptAmount" style="color:var(--forest);">₦19,999.00</strong>
       </div>
       <div style="display:flex; justify-content:space-between;">
         <span style="color:var(--muted);">Valid Until:</span>
@@ -562,22 +633,64 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=160.0"></script>
-<script src="app.js?v=160.0"></script>
-<script src="settings-popup.js?v=160.0"></script>
+<script src="supabase.js?v=173.0"></script>
+<script src="app.js?v=173.0"></script>
+<script src="settings-popup.js?v=173.0"></script>
 
 <script>
   let activeRole = 'professional';
   let activeCycle = 'monthly';
   let activePaymentMethod = 'card';
 
+  const BILLING_CYCLES = {
+    monthly: {
+      key: 'monthly',
+      label: 'Monthly',
+      shortSuffix: '/mo',
+      months: 1,
+      days: 30,
+      discountPct: 0,
+      badge: 'Standard Rate'
+    },
+    quarterly: {
+      key: 'quarterly',
+      label: 'Quarterly (3 Months)',
+      shortSuffix: '/qtr',
+      months: 3,
+      days: 90,
+      discountPct: 5,
+      badge: 'Save 5%'
+    },
+    biannual: {
+      key: 'biannual',
+      label: 'Bi-Annually (6 Months)',
+      shortSuffix: '/6mo',
+      months: 6,
+      days: 180,
+      discountPct: 10,
+      badge: 'Save 10%'
+    },
+    annual: {
+      key: 'annual',
+      label: 'Annual (12 Months)',
+      shortSuffix: '/yr',
+      months: 12,
+      days: 365,
+      discountPct: 17,
+      badge: 'Save 17%'
+    }
+  };
+
   const PRICING = {
     professional: {
       tierName: 'Professional Plus',
-      monthlyUSD: 15,
-      annualUSD: 150,
-      monthlyNGN: 22500,
-      annualNGN: 225000,
+      monthlyNGN: 19999,
+      cycles: {
+        monthly:   { standardNGN: 19999,  effectiveMonthlyNGN: 19999, totalNGN: 19999,  savingsNGN: 0 },
+        quarterly: { standardNGN: 59997,  effectiveMonthlyNGN: 18999, totalNGN: 56997,  savingsNGN: 3000 },
+        biannual:  { standardNGN: 119994, effectiveMonthlyNGN: 17999, totalNGN: 107994, savingsNGN: 12000 },
+        annual:    { standardNGN: 239988, effectiveMonthlyNGN: 16599, totalNGN: 199188, savingsNGN: 40800 }
+      },
       badgeText: 'Professional Tier',
       title: 'Upgrade to Professional Plus',
       sub: 'Unlock top search placement, unlimited proposal submissions, and a reduced 7.5% platform commission rate across all contracts.',
@@ -592,10 +705,13 @@
     },
     company: {
       tierName: 'Company Enterprise',
-      monthlyUSD: 50,
-      annualUSD: 500,
-      monthlyNGN: 75000,
-      annualNGN: 750000,
+      monthlyNGN: 74999,
+      cycles: {
+        monthly:   { standardNGN: 74999,  effectiveMonthlyNGN: 74999, totalNGN: 74999,  savingsNGN: 0 },
+        quarterly: { standardNGN: 224997, effectiveMonthlyNGN: 71249, totalNGN: 213747, savingsNGN: 11250 },
+        biannual:  { standardNGN: 449994, effectiveMonthlyNGN: 67499, totalNGN: 404994, savingsNGN: 45000 },
+        annual:    { standardNGN: 899988, effectiveMonthlyNGN: 62249, totalNGN: 746988, savingsNGN: 153000 }
+      },
       badgeText: 'Company Enterprise Tier',
       title: 'Upgrade to Company Enterprise',
       sub: 'Post unlimited engineering tenders, access AI candidate matching, and receive verified enterprise status.',
@@ -610,16 +726,32 @@
     }
   };
 
+  function getActiveCyclePricing() {
+    const config = PRICING[activeRole] || PRICING.professional;
+    const cycleMeta = BILLING_CYCLES[activeCycle] || BILLING_CYCLES.monthly;
+    const cycleValues = config.cycles[activeCycle] || config.cycles.monthly;
+    return { config, cycleMeta, cycleValues };
+  }
+
   document.addEventListener('DOMContentLoaded', async () => {
     // 1. Determine active role from query param or session
     const urlParams = new URLSearchParams(window.location.search);
     const paramRole = urlParams.get('role');
+    const paramCycle = urlParams.get('cycle');
     const user = getUser() || {};
 
-    if (paramRole === 'company' || user.role === 'company') {
+    if (paramRole === 'company') {
+      activeRole = 'company';
+    } else if (paramRole === 'professional') {
+      activeRole = 'professional';
+    } else if (user.role === 'company') {
       activeRole = 'company';
     } else {
       activeRole = 'professional';
+    }
+
+    if (paramCycle && BILLING_CYCLES[paramCycle]) {
+      activeCycle = paramCycle;
     }
 
     // 2. Pre-fill cardholder name if available
@@ -636,7 +768,7 @@
     }
 
     // 4. Render UI
-    renderUpgradeView();
+    setBillingCycle(activeCycle);
     updateWalletDisplay();
 
     // 5. Build standard navigation
@@ -644,10 +776,24 @@
     try { buildTopbar(); } catch(e){}
   });
 
+  function setUpgradeRole(role) {
+    activeRole = role === 'company' ? 'company' : 'professional';
+    renderUpgradeView();
+  }
+
   function setBillingCycle(cycle) {
+    if (!BILLING_CYCLES[cycle]) cycle = 'monthly';
     activeCycle = cycle;
-    document.getElementById('toggleMonthlyBtn').classList.toggle('active', cycle === 'monthly');
-    document.getElementById('toggleAnnualBtn').classList.toggle('active', cycle === 'annual');
+    const btnMap = {
+      monthly: 'toggleMonthlyBtn',
+      quarterly: 'toggleQuarterlyBtn',
+      biannual: 'toggleBiannualBtn',
+      annual: 'toggleAnnualBtn'
+    };
+    Object.keys(btnMap).forEach(k => {
+      const el = document.getElementById(btnMap[k]);
+      if (el) el.classList.toggle('active', k === cycle);
+    });
     renderUpgradeView();
   }
 
@@ -662,13 +808,21 @@
   }
 
   function renderUpgradeView() {
-    const config = PRICING[activeRole];
-    const isAnnual = activeCycle === 'annual';
+    const { config, cycleMeta, cycleValues } = getActiveCyclePricing();
+    const priceNGN = cycleValues.totalNGN;
 
-    const priceUSD = isAnnual ? config.annualUSD : config.monthlyUSD;
-    const priceNGN = isAnnual ? config.annualNGN : config.monthlyNGN;
-    const intervalStr = isAnnual ? '/yr' : '/mo';
-    const cycleWord = isAnnual ? 'Annual' : 'Monthly';
+    // Update Role Switcher Buttons
+    const proBtn = document.getElementById('roleSwitchProBtn');
+    const coBtn = document.getElementById('roleSwitchCompanyBtn');
+    if (proBtn && coBtn) {
+      const isCo = activeRole === 'company';
+      proBtn.style.background = !isCo ? 'rgba(212,146,11,0.18)' : 'var(--white)';
+      proBtn.style.borderColor = !isCo ? 'rgba(212,146,11,0.5)' : 'var(--line)';
+      proBtn.style.color = !isCo ? 'var(--amber-dark, #b45309)' : 'var(--muted)';
+      coBtn.style.background = isCo ? 'rgba(19,117,111,0.18)' : 'var(--white)';
+      coBtn.style.borderColor = isCo ? 'var(--teal)' : 'var(--line)';
+      coBtn.style.color = isCo ? 'var(--teal)' : 'var(--muted)';
+    }
 
     // Top Hero
     document.getElementById('tierBadgeText').textContent = config.badgeText;
@@ -677,9 +831,43 @@
 
     // Header Banner
     document.getElementById('planHeaderTitle').textContent = config.tierName;
-    document.getElementById('planHeaderRateNaira').textContent = `₦${priceNGN.toLocaleString()} ${intervalStr}`;
-    document.getElementById('planPriceNumber').textContent = priceUSD;
-    document.getElementById('planPriceInterval').textContent = intervalStr;
+    if (cycleMeta.discountPct > 0) {
+      document.getElementById('planHeaderRateNaira').innerHTML =
+        `₦${cycleValues.effectiveMonthlyNGN.toLocaleString()} / mo effective &bull; <strong>Save ₦${cycleValues.savingsNGN.toLocaleString()} (${cycleMeta.discountPct}% off)</strong>`;
+    } else {
+      document.getElementById('planHeaderRateNaira').textContent =
+        `₦${config.monthlyNGN.toLocaleString()} / month • Billed monthly`;
+    }
+    document.getElementById('planPriceNumber').textContent = priceNGN.toLocaleString();
+    document.getElementById('planPriceInterval').textContent = cycleMeta.shortSuffix;
+
+    // Interactive Cycle Suggestion Breakdown Grid
+    const gridEl = document.getElementById('cycleBreakdownGrid');
+    if (gridEl) {
+      gridEl.innerHTML = Object.keys(BILLING_CYCLES).map(key => {
+        const meta = BILLING_CYCLES[key];
+        const val = config.cycles[key];
+        const isActive = key === activeCycle;
+        const badgeBg = meta.discountPct > 0 ? '#16a34a' : 'rgba(132,150,148,0.22)';
+        const badgeColor = meta.discountPct > 0 ? '#fff' : 'var(--ink)';
+        return `
+          <div class="cycle-suggestion-card ${isActive ? 'active' : ''}" onclick="setBillingCycle('${key}')">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <span style="font-size:12.5px; font-weight:800; color:var(--ink);">${meta.label}</span>
+              <span style="background:${badgeBg}; color:${badgeColor}; font-size:10px; font-weight:900; padding:2px 7px; border-radius:99px;">${meta.badge}</span>
+            </div>
+            <div style="font-size:16px; font-weight:900; color:var(--forest);">
+              ₦${val.effectiveMonthlyNGN.toLocaleString()}<span style="font-size:11.5px; font-weight:600; color:var(--muted);">/mo</span>
+            </div>
+            <div style="font-size:11px; color:var(--muted); margin-top:2px;">
+              ${meta.months === 1
+                ? `Billed ₦${val.totalNGN.toLocaleString()} monthly`
+                : `Billed ₦${val.totalNGN.toLocaleString()} (Save ₦${val.savingsNGN.toLocaleString()})`}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
 
     // Perks
     const perksContainer = document.getElementById('perksListContainer');
@@ -694,18 +882,29 @@
     `).join('');
 
     // Summary Box
-    document.getElementById('summaryItemLabel').textContent = `${config.tierName} (${cycleWord})`;
-    document.getElementById('summaryItemPrice').textContent = `₦${priceNGN.toLocaleString()}`;
-    document.getElementById('summaryTotalPrice').textContent = `₦${priceNGN.toLocaleString()} ($${priceUSD}.00)`;
+    document.getElementById('summaryItemLabel').textContent = `${config.tierName} (${cycleMeta.label})`;
+    document.getElementById('summaryItemPrice').textContent = `₦${cycleValues.standardNGN.toLocaleString()}`;
+
+    const discountRow = document.getElementById('summaryDiscountRow');
+    if (discountRow) {
+      if (cycleMeta.discountPct > 0) {
+        discountRow.style.display = 'flex';
+        document.getElementById('summaryDiscountLabel').textContent = `${cycleMeta.label} Discount (${cycleMeta.discountPct}% Off)`;
+        document.getElementById('summaryDiscountValue').textContent = `-₦${cycleValues.savingsNGN.toLocaleString()}`;
+      } else {
+        discountRow.style.display = 'none';
+      }
+    }
+
+    document.getElementById('summaryTotalPrice').textContent = `₦${priceNGN.toLocaleString()}`;
 
     updatePayButtonText();
     updateWalletDisplay();
   }
 
   function updatePayButtonText() {
-    const config = PRICING[activeRole];
-    const isAnnual = activeCycle === 'annual';
-    const priceNGN = isAnnual ? config.annualNGN : config.monthlyNGN;
+    const { cycleValues } = getActiveCyclePricing();
+    const priceNGN = cycleValues.totalNGN;
     const btn = document.getElementById('executePayBtn');
 
     if (activePaymentMethod === 'card') {
@@ -729,9 +928,8 @@
     const user = getUser() || {};
     const wallet = typeof getOrCreateUserWallet === 'function' ? getOrCreateUserWallet(user) : { balance: 0 };
     const currentBal = Number(user.wallet_balance ?? wallet.available_balance ?? wallet.balance ?? 0);
-    const config = PRICING[activeRole];
-    const isAnnual = activeCycle === 'annual';
-    const priceNGN = isAnnual ? config.annualNGN : config.monthlyNGN;
+    const { cycleValues } = getActiveCyclePricing();
+    const priceNGN = cycleValues.totalNGN;
 
     const balFormatted = `₦${currentBal.toLocaleString()}.00`;
     document.getElementById('pmWalletBalanceSub').textContent = `Balance: ${balFormatted}`;
@@ -788,10 +986,8 @@
 
   async function processUpgradePayment() {
     const user = getUser() || {};
-    const config = PRICING[activeRole];
-    const isAnnual = activeCycle === 'annual';
-    const priceNGN = isAnnual ? config.annualNGN : config.monthlyNGN;
-    const priceUSD = isAnnual ? config.annualUSD : config.monthlyUSD;
+    const { config, cycleMeta, cycleValues } = getActiveCyclePricing();
+    const priceNGN = cycleValues.totalNGN;
     const btn = document.getElementById('executePayBtn');
 
     // Validation
@@ -839,9 +1035,8 @@
           id: 'tx_sub_' + Date.now(),
           type: 'debit',
           category: 'subscription',
-          title: `${config.tierName} (${isAnnual ? 'Annual' : 'Monthly'})`,
+          title: `${config.tierName} (${cycleMeta.label})`,
           amount: priceNGN,
-          amount_usd: priceUSD,
           status: 'completed',
           date: new Date().toISOString(),
           reference: 'SUB-' + Math.floor(100000 + Math.random() * 900000)
@@ -851,7 +1046,7 @@
 
       // 2. Compute subscription expiration
       const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + (isAnnual ? 365 : 30));
+      expiryDate.setDate(expiryDate.getDate() + cycleMeta.days);
 
       const updatedUser = {
         ...user,
@@ -860,7 +1055,7 @@
         subscription_tier: activeRole === 'company' ? 'company_enterprise' : 'pro_plus',
         subscription_cycle: activeCycle,
         subscription_expiry: expiryDate.toISOString(),
-        subscription_amount_usd: priceUSD
+        subscription_amount_ngn: priceNGN
       };
 
       setUser(updatedUser);
@@ -879,8 +1074,8 @@
       // 4. Populate Success Modal
       const ref = 'SUB-' + Math.floor(100000 + Math.random() * 900000);
       document.getElementById('receiptRef').textContent = ref;
-      document.getElementById('receiptTier').textContent = config.tierName;
-      document.getElementById('receiptAmount').textContent = `₦${priceNGN.toLocaleString()}.00 ($${priceUSD}.00)`;
+      document.getElementById('receiptTier').textContent = `${config.tierName} (${cycleMeta.label})`;
+      document.getElementById('receiptAmount').textContent = `₦${priceNGN.toLocaleString()}.00`;
       
       const options = { year: 'numeric', month: 'long', day: 'numeric' };
       document.getElementById('receiptExpiry').textContent = expiryDate.toLocaleDateString('en-US', options);

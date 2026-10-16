@@ -4,8 +4,14 @@
 
 // -- PLATFORM FEE & SUBSCRIPTION PRICING CONSTANTS --
 const COLLEKT_COMMISSION_RATE = 0.15; // 15% Platform Commission Rate
-const COLLEKT_PROFESSIONAL_SUB_FEE = 15; // $15 / month
-const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
+const COLLEKT_PROFESSIONAL_SUB_FEE = 19999; // ₦19,999 / month
+const COLLEKT_COMPANY_SUB_FEE = 74999; // ₦74,999 / month
+const COLLEKT_SUBSCRIPTION_DISCOUNTS = {
+  monthly: 0,       // 0% off (₦19,999/mo Pro | ₦74,999/mo Company)
+  quarterly: 0.05,  // 5% off (₦18,999/mo Pro → ₦56,997/qtr | ₦71,249/mo Company → ₦213,747/qtr)
+  biannual: 0.10,   // 10% off (₦17,999/mo Pro → ₦107,994/6mo | ₦67,499/mo Company → ₦404,994/6mo)
+  annual: 0.17      // 17% off (₦16,599/mo Pro → ₦199,188/yr  | ₦62,249/mo Company → ₦746,988/yr)
+};
 
 // -- STRICT AUTHENTIC SESSIONS ENFORCER & CLEAN-SLATE GUARDIAN --
 (function enforceStrictAuthenticSessions() {
@@ -13,7 +19,6 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
     const DELETED_OLD_UUIDS = [
       'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
       '467c002d-124e-4a05-a62f-1cd7b11f666c',
-      'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
       '63b0edc5-1e8d-46b9-9ae8-d1800b817ee6',
       'c0788c56-6cde-40d0-90c8-541c8d3cf76c',
       'd1bcafac-9da0-4912-90da-467c8dc00d92',
@@ -152,10 +157,10 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
 
     const knownFakeTokens = [
       'adaeze okonkwo', 'kunle adeyemi', 'bashiru musa', 'joshua emeka',
-      'farouk abubakar', 'chidi nnamdi', 'chen pao', 'chenpao51@gmail.com',
+      'farouk abubakar', 'chidi nnamdi', 'chen pao',
       'grumpy luan', 'grumpyluan@gmail.com', 'bethel vwire', 'bethelvwire',
       'bethelvvwire', 'bethel_vwire', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com',
-      'officialthelma@gmail.com', 'patakhues', 'chairman of the board', 'chairmanoftheboard',
+      'officialthelma@gmail.com', 'patakhues',
       'usr_chairman_of_the_board', ...DELETED_OLD_UUIDS
     ];
 
@@ -169,6 +174,10 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
       // Check if synthetic mock ID or deleted UUID
       if (uId.startsWith('user_') || uId.startsWith('usr_') || DELETED_OLD_UUIDS.includes(uId)) return false;
 
+      // Never filter authentic registered users
+      const isAuthentic = ['admin@collekt.ng', 'ojeoweredave@gmail.com', 'patrickakhues@gmail.com', 'oluwafuntoomotayo@gmail.com', 'tessycelestine9@gmail.com', 'chenpao51@gmail.com', 'collektng@gmail.com'].includes(uEmail);
+      if (isAuthentic) return true;
+
       // Check known fake tokens
       const isFake = knownFakeTokens.some(tok => 
         uId === tok || uName === tok || uEmail === tok || uUsername === tok ||
@@ -179,7 +188,7 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
       return true;
     });
 
-    // 4. Ensure Master System Administrator is present in collekt_all_users (all other users sync live from Supabase)
+    // 4. Ensure Authentic System Users are present in collekt_all_users
     const authenticBaseUsers = [
       {
         id: 'a1111111-1111-4111-a111-111111111111',
@@ -201,6 +210,121 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
         total_earned: 0,
         created_at: '2026-09-09T22:12:39.961309+00:00',
         wallet: { balance: 0, escrow_balance: 0, bank_name: '', account_number: '', account_name: '', bank_assigned: false }
+      },
+      {
+        id: '8ed300fd-151c-4975-a56f-d1ebe071d347',
+        name: 'Dave Ojeowere',
+        email: 'ojeoweredave@gmail.com',
+        role: 'professional',
+        title: 'Energy Specialist',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        skills: ['EPC & Engineering', 'Pipeline & HAZOP', 'Subsea & Offshore', 'Bids & Tenders', 'AutoCAD'],
+        bio: 'Energy & EPC specialist with comprehensive experience in offshore pipeline installation, HAZOP safety studies, and multi-discipline engineering delivery.',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        status: 'active',
+        suspended: false,
+        created_at: '2026-10-10T12:09:19.943037+00:00'
+      },
+      {
+        id: 'ed1b2ea7-b8ef-4104-b9cb-cac5d3af1d4a',
+        name: 'Osagie Akhuemokhan',
+        email: 'patrickakhues@gmail.com',
+        role: 'professional',
+        title: 'Project Specialist',
+        sector: 'Oil & Gas',
+        skills: ['Pipeline & HAZOP', 'HSE & Compliance', 'Risk Assessment', 'Safety Audit', 'ISO 45001'],
+        bio: 'Health, Safety & Environmental specialist focused on HAZOP reviews, pipeline integrity assessments, and regulatory safety compliance across energy assets.',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        status: 'active',
+        suspended: false,
+        created_at: '2026-10-03T15:48:28.66575+00:00'
+      },
+      {
+        id: '282ebf89-80cb-4cec-8470-77ea7ce9c587',
+        name: 'Oluwafunto Omotayo',
+        email: 'oluwafuntoomotayo@gmail.com',
+        role: 'professional',
+        title: 'Project Specialist',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        skills: ['Subsea & Offshore', 'Solar & Renewables', 'EPC & Engineering', 'Deepwater Operations', 'Marine QA/QC'],
+        bio: 'Subsea and offshore systems specialist experienced in marine installations, subsea architecture, and hybrid solar renewable power integrations.',
+        location: 'Lagos State, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'unsubmitted',
+        status: 'active',
+        suspended: false,
+        created_at: '2026-10-12T21:28:22.343399+00:00'
+      },
+      {
+        id: 'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
+        name: 'Tessy Celestine',
+        email: 'tessycelestine9@gmail.com',
+        role: 'professional',
+        title: 'Energy Specialist',
+        sector: 'Oil & Gas Engineering',
+        skills: ['Legal & NOGICD', 'HSE & Compliance', 'EPC & Engineering', 'Regulatory Advisory', 'Local Content'],
+        bio: 'Energy regulatory and compliance specialist advising on NOGICD Nigerian content enforcement, EPC contract structures, and operational environmental safety.',
+        avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKyVCINoBf0ibtDkTaR5pRI1bhOcjp-y1CviHiHaC-qhdz7mA=s96-c',
+        avatar_url: 'https://lh3.googleusercontent.com/a/ACg8ocKyVCINoBf0ibtDkTaR5pRI1bhOcjp-y1CviHiHaC-qhdz7mA=s96-c',
+        oauth_avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKyVCINoBf0ibtDkTaR5pRI1bhOcjp-y1CviHiHaC-qhdz7mA=s96-c',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        status: 'active',
+        suspended: false,
+        created_at: '2026-10-01T16:41:32.309344+00:00'
+      },
+      {
+        id: 'bac75638-07e6-4987-b349-84c436fe2f83',
+        name: 'John Akpobome',
+        email: 'chenpao51@gmail.com',
+        role: 'professional',
+        title: 'Bid Specialist',
+        sector: 'Oil & Gas',
+        skills: ['Bids & Tenders', 'Commercial Proposals', 'RFP / RFQ Estimation', 'EPC Contract Bidding', 'Procurement & Contracts'],
+        bio: 'Tender bidding and commercial proposal specialist with expertise in preparing winning technical bids, RFP responses, and EPC contract pricing schedules.',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'unsubmitted',
+        status: 'active',
+        suspended: false,
+        created_at: '2026-10-13T12:38:57.669346+00:00'
+      },
+      {
+        id: 'f100a17f-f6a7-47ca-a775-4a2f66827550',
+        name: 'Collekt NG',
+        email: 'collektng@gmail.com',
+        role: 'company',
+        company_name: 'Collekt NG',
+        title: 'EPC Contractor',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'unsubmitted',
+        status: 'active',
+        suspended: false,
+        created_at: '2026-10-12T12:51:46.639091+00:00'
       }
     ];
 
@@ -210,11 +334,17 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
         dir.push(bu);
       } else {
         dir[idx] = { ...bu, ...dir[idx] };
+        if (!dir[idx].skills || dir[idx].skills.length === 0) dir[idx].skills = bu.skills;
+        if (!dir[idx].bio) dir[idx].bio = bu.bio;
+        if (!dir[idx].title) dir[idx].title = bu.title;
+        if (!dir[idx].sector) dir[idx].sector = bu.sector;
         dir[idx].suspended = false;
         dir[idx].status = 'active';
       }
     });
     localStorage.setItem('collekt_all_users', JSON.stringify(dir));
+    localStorage.setItem('collekt_directory_clean_v5', 'true');
+    localStorage.setItem('collekt_directory_clean_v4', 'true');
     localStorage.setItem('collekt_directory_clean_v3', 'true');
 
     // 5. Sanitize current user if stale mock balance exists
@@ -226,105 +356,42 @@ const COLLEKT_COMPANY_SUB_FEE = 50; // $50 / month
 })();
 
 
-// -- UNIVERSAL WALLET INITIALIZER (Only uses verified provider accounts, never generates fake NUBANs) --
+// -- UNIVERSAL WALLET INITIALIZER (Dedicated Virtual Account & Fidelity Bank display disabled) --
 function getDedicatedVirtualAccountForUser(user) {
-  if (!user) return null;
-  let displayName = '';
-  if (typeof getDisplayName === 'function') {
-    displayName = getDisplayName(user);
-  }
-  if (!displayName || displayName === 'Collekt Member' || displayName === 'User' || displayName === 'Guest') {
-    displayName = user.company_name || user.name || [user.first_name, user.other_name, user.last_name].filter(Boolean).join(' ') || (user.email ? user.email.split('@')[0] : 'ACCOUNT HOLDER');
-  }
-  const formattedAcctName = `COLLEKT / ${displayName.toUpperCase()}`;
-
-  let existingAcct = (user.wallet && (user.wallet.paystack_dva_account || user.wallet.account_number)) || user.dva_account || '';
-  existingAcct = String(existingAcct).trim();
-
-  // If missing or a known dummy/fake placeholder, do not return a fake account
-  const isInvalidOrFake = !/^\d{10}$/.test(existingAcct) || 
-    existingAcct === '0123456789' || 
-    existingAcct === '9800452109' || 
-    existingAcct.startsWith('012900') ||
-    existingAcct === '0167384649' ||
-    existingAcct.startsWith('07000') ||
-    existingAcct.startsWith('0777');
-
-  if (isInvalidOrFake) {
-    return null;
-  }
-
-  let bankName = (user.wallet && (user.wallet.paystack_dva_bank || user.wallet.bank_name)) || 'Fidelity Bank';
-
-  return {
-    account_number: existingAcct,
-    account_name: (user.wallet && user.wallet.paystack_dva_name) || formattedAcctName,
-    bank_name: bankName,
-    bank_code: (user.wallet && user.wallet.bank_code) || (bankName.includes('Wema') ? '035' : (bankName.includes('Moniepoint') ? '090405' : '070')),
-    currency: 'NGN',
-    status: 'active',
-    is_live_dva: true
-  };
+  return null;
 }
 
 (function sanitizeAllUserWalletsStartup() {
   try {
+    function cleanWalletDva(u) {
+      if (!u) return;
+      if (!u.wallet) u.wallet = {};
+      delete u.wallet.paystack_dva_account;
+      delete u.wallet.paystack_dva_bank;
+      delete u.wallet.paystack_dva_name;
+      u.wallet.is_live_dva = false;
+      if (!u.wallet.nova_linked) {
+        u.wallet.account_number = '';
+        u.wallet.bank_name = '';
+        u.wallet.account_name = '';
+        u.wallet.bank_assigned = false;
+      }
+      delete u.dva_account;
+      delete u.dva_bank;
+      delete u.dva_name;
+    }
+
     // 1. Sanitize collekt_user
     let curr = JSON.parse(localStorage.getItem('collekt_user') || 'null');
     if (curr) {
-      const dva = getDedicatedVirtualAccountForUser(curr);
-      if (!curr.wallet) curr.wallet = {};
-      if (dva) {
-        curr.wallet.paystack_dva_account = dva.account_number;
-        curr.wallet.paystack_dva_bank = dva.bank_name;
-        curr.wallet.paystack_dva_name = dva.account_name;
-        curr.wallet.account_number = dva.account_number;
-        curr.wallet.bank_name = dva.bank_name;
-        curr.wallet.account_name = dva.account_name;
-        curr.wallet.bank_assigned = true;
-        curr.wallet.is_live_dva = true;
-        curr.dva_account = dva.account_number;
-        curr.dva_bank = dva.bank_name;
-        curr.dva_name = dva.account_name;
-      } else {
-        // Clean out legacy fake accounts
-        if (curr.wallet.paystack_dva_account && !curr.wallet.nova_linked) {
-          const ac = String(curr.wallet.paystack_dva_account);
-          if (ac.startsWith('07') || ac.startsWith('0129') || ac === '0167384649') {
-            curr.wallet.paystack_dva_account = '';
-            curr.wallet.account_number = '';
-            curr.dva_account = '';
-          }
-        }
-      }
+      cleanWalletDva(curr);
       localStorage.setItem('collekt_user', JSON.stringify(curr));
     }
 
     // 2. Sanitize collekt_all_users
     let dir = JSON.parse(localStorage.getItem('collekt_all_users') || '[]');
     if (Array.isArray(dir)) {
-      dir.forEach(u => {
-        if (!u) return;
-        const dva = getDedicatedVirtualAccountForUser(u);
-        if (!u.wallet) u.wallet = {};
-        if (dva) {
-          u.wallet.paystack_dva_account = dva.account_number;
-          u.wallet.paystack_dva_bank = dva.bank_name;
-          u.wallet.paystack_dva_name = dva.account_name;
-          u.wallet.account_number = dva.account_number;
-          u.wallet.bank_name = dva.bank_name;
-          u.wallet.account_name = dva.account_name;
-        } else {
-          if (u.wallet.paystack_dva_account && !u.wallet.nova_linked) {
-            const ac = String(u.wallet.paystack_dva_account);
-            if (ac.startsWith('07') || ac.startsWith('0129') || ac === '0167384649') {
-              u.wallet.paystack_dva_account = '';
-              u.wallet.account_number = '';
-              u.dva_account = '';
-            }
-          }
-        }
-      });
+      dir.forEach(u => cleanWalletDva(u));
       localStorage.setItem('collekt_all_users', JSON.stringify(dir));
     }
   } catch(e) {}
@@ -344,17 +411,7 @@ function getUser() {
     let u = JSON.parse(localStorage.getItem('collekt_user'));
     if (!u || typeof u !== 'object' || (!u.id && !u.email && !u.role)) return null;
 
-    // Auto-correct any legacy other_name
-    if (u.other_name === 'Chukwuemeka') {
-      u.other_name = 'Oladapo';
-      try { localStorage.setItem('collekt_user', JSON.stringify(u)); } catch(e){}
-    }
-    if (u.name && u.name.includes('Chukwuemeka')) {
-      u.name = u.name.replace(/Chukwuemeka/g, 'Oladapo');
-      try { localStorage.setItem('collekt_user', JSON.stringify(u)); } catch(e){}
-    }
-
-    // Check if user has been deleted by admin (exempting protected Dave Ojeowere account)
+    // Check if user has been deleted by admin
     const uEmail = String(u.email || '').toLowerCase().trim();
     const uId = String(u.id || '').toLowerCase().trim();
     const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uId);
@@ -388,15 +445,14 @@ function getUser() {
       try { localStorage.setItem('collekt_user', JSON.stringify(u)); } catch(e){}
     }
 
-
     // Authoritative role comes strictly from the user's registered account role (u.role)
     const primaryRole = (u.role === 'company' || u.role === 'professional') 
       ? u.role 
       : (localStorage.getItem('collekt_last_role') === 'company' ? 'company' : 'professional');
 
-    // Merge saved directory profile attributes ONLY if directory entry has the exact same UUID
+    // Merge saved directory profile attributes ONLY if directory entry has the exact same UUID AND same email
     const rawDir = JSON.parse(localStorage.getItem('collekt_all_users')) || [];
-    const dirUser = rawDir.find(x => x && x.id && u.id && x.id === u.id);
+    const dirUser = rawDir.find(x => x && x.id && u.id && x.id === u.id && (!x.email || !u.email || x.email.toLowerCase() === u.email.toLowerCase()));
 
     let merged = dirUser ? { ...dirUser, ...u, role: primaryRole } : { ...u, role: primaryRole };
 
@@ -523,70 +579,14 @@ function updateGoogleModalRoleUI(role) {
   }
 }
 
-function executeGoogleSignIn(customEmail, customName) {
+function executeGoogleSignIn() {
   const role = selectedGoogleRole || 'professional';
   localStorage.setItem('collekt_last_role', role);
-  
-  const provName = pendingSocialProvider === 'linkedin' ? 'LinkedIn' : 'Google';
-  
-  // Resolve Google Account Details
-  let email = customEmail || 'ojeoweredave@gmail.com';
-  let name = customName || (email.toLowerCase().includes('dave') ? 'Dave Oladapo Ojeowere' : email.split('@')[0].replace(/[._-]/g, ' '));
-  
-  const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
-  let user = allUsers.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
-
-  if (!user) {
-    // Create new registered user with clean profile & unverified state
-    user = {
-      id: 'usr_' + pendingSocialProvider + '_' + Date.now(),
-      name: name,
-      first_name: name.split(' ')[0] || '',
-      last_name: name.split(' ').slice(-1)[0] || '',
-      other_name: name.split(' ').length > 2 ? name.split(' ')[1] : '',
-      email: email,
-      role: role,
-      title: role === 'company' ? 'Enterprise Client & Project Owner' : 'Senior Technical Consultant',
-      location: 'Lagos, Nigeria',
-      bio: '',
-      about: '',
-      avatar: null,
-      avatar_uploaded: false,
-      verified: false,
-      is_verified: false,
-      verification_status: 'none',
-      identity_verified: false,
-      auth_provider: pendingSocialProvider,
-      created_at: new Date().toISOString()
-    };
-    if (typeof saveRegisteredUser === 'function') {
-      saveRegisteredUser(user);
-    }
-  } else {
-    // If logging in as company but user was pro (or vice versa on explicit selection)
-    if (role && user.role !== role && (customEmail || window.location.search.includes('role='))) {
-      user.role = role;
-    }
+  localStorage.setItem('collekt_pending_oauth_role', role);
+  if (typeof closeGoogleAuthModal === 'function') closeGoogleAuthModal();
+  if (typeof signInWithGoogle === 'function') {
+    signInWithGoogle(role);
   }
-
-  // Ensure virtual wallet is active
-  if (typeof getOrCreateUserWallet === 'function') {
-    getOrCreateUserWallet(user);
-  }
-
-  setUser(user);
-  localStorage.setItem('collekt_last_user_email', user.email);
-
-  if (typeof showToast === 'function') {
-    showToast(`✅ Successfully signed in with ${provName} as a ${user.role === 'company' ? 'Company' : 'Professional'}!`);
-  }
-
-  closeGoogleAuthModal();
-
-  const targetPage = user.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
-  setTimeout(() => {
-    window.location.replace(targetPage);
-  }, 400);
 }
 
 function createGoogleAuthModalElement() {
@@ -609,7 +609,7 @@ function createGoogleAuthModalElement() {
       </div>
 
       <!-- Step 1: Select Account Role -->
-      <div style="margin-bottom:18px;">
+      <div style="margin-bottom:20px;">
         <label style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); display:block; margin-bottom:8px;">1. Select Account Type</label>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div id="gAuthRolePro" onclick="selectGoogleModalRole('professional')" style="border:2px solid var(--teal); background:rgba(19,117,111,0.08); border-radius:14px; padding:12px; cursor:pointer; transition:all 0.2s ease;">
@@ -625,35 +625,9 @@ function createGoogleAuthModalElement() {
         </div>
       </div>
 
-      <!-- Step 2: Choose Google Account -->
-      <div style="margin-bottom:20px;">
-        <label style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); display:block; margin-bottom:8px;">2. Choose Google Account</label>
-        
-        <!-- Primary Google Account Option -->
-        <div onclick="executeGoogleSignIn('ojeoweredave@gmail.com', 'Dave Oladapo Ojeowere')" style="display:flex; align-items:center; gap:12px; padding:12px 14px; border:1.5px solid var(--line); border-radius:14px; cursor:pointer; background:var(--white); margin-bottom:8px; transition:all 0.2s ease;" onmouseover="this.style.borderColor='var(--teal)';this.style.background='rgba(19,117,111,0.04)'" onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--white)'">
-          <div style="width:38px; height:38px; border-radius:50%; background:#0E3B35; color:#fff; font-weight:900; font-size:15px; display:grid; place-items:center; flex-shrink:0;">D</div>
-          <div style="flex:1; min-width:0;">
-            <div style="font-size:14px; font-weight:800; color:var(--ink);">Dave Oladapo Ojeowere</div>
-            <div style="font-size:12px; color:var(--muted); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">ojeoweredave@gmail.com</div>
-          </div>
-          <span style="font-size:11px; font-weight:800; color:var(--teal); background:rgba(19,117,111,0.1); padding:4px 8px; border-radius:999px;">Default</span>
-        </div>
-
-        <!-- Custom Account Entry Accordion -->
-        <details style="border:1px dashed var(--line); border-radius:12px; padding:10px 14px; background:var(--paper);">
-          <summary style="font-size:12px; font-weight:700; color:var(--teal); cursor:pointer;">Use another Google or Workspace account &rarr;</summary>
-          <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
-            <input class="form-input" type="text" id="gAuthCustomName" placeholder="Full Name (e.g. Engr. Aisha Bello)" style="font-size:13px;">
-            <input class="form-input" type="email" id="gAuthCustomEmail" placeholder="Google Email (e.g. aisha@gmail.com)" style="font-size:13px;">
-            <button onclick="const em=document.getElementById('gAuthCustomEmail').value.trim(); const nm=document.getElementById('gAuthCustomName').value.trim(); if(!em){alert('Please enter your Google email');return;} executeGoogleSignIn(em, nm);" class="btn btn-primary btn-sm" style="width:100%; justify-content:center; font-weight:800; margin-top:4px;">
-              Continue with this Google Account &rarr;
-            </button>
-          </div>
-        </details>
-      </div>
-
       <div style="display:flex; justify-content:flex-end; gap:10px;">
         <button onclick="closeGoogleAuthModal()" class="btn btn-outline btn-sm">Cancel</button>
+        <button onclick="executeGoogleSignIn()" class="btn btn-primary btn-sm" style="font-weight:800;">Continue with Google &rarr;</button>
       </div>
     </div>
   `;
@@ -662,53 +636,19 @@ function createGoogleAuthModalElement() {
 
 // Auto-check on startup for OAuth redirect callbacks from Supabase/Google
 async function checkOAuthCallback() {
-  if (window.sb && window.sb.auth) {
+  if (window.location.pathname.includes('auth-callback.html')) return;
+  if (window.sb && window.sb.auth && typeof syncUser === 'function') {
     try {
       const { data: { session } } = await window.sb.auth.getSession();
       if (session && session.user) {
-        const gEmail = session.user.email;
-        const gName = (session.user.user_metadata && (session.user.user_metadata.full_name || session.user.user_metadata.name)) || gEmail.split('@')[0];
-        const gAvatar = session.user.user_metadata && (session.user.user_metadata.avatar_url || session.user.user_metadata.picture);
-        
-        const allUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
-        let match = allUsers.find(u => u.email && u.email.toLowerCase() === gEmail.toLowerCase());
-        
-        const pendingRole = localStorage.getItem('collekt_pending_oauth_role') || (session.user.user_metadata && session.user.user_metadata.role) || 'professional';
-        
-        if (!match) {
-          match = {
-            id: 'usr_g_' + session.user.id.slice(0, 12),
-            name: gName,
-            email: gEmail,
-            avatar: null,
-            avatar_uploaded: false,
-            oauth_avatar: gAvatar || null,
-            role: pendingRole,
-            title: pendingRole === 'company' ? 'Enterprise Client & Project Owner' : 'Energy & Engineering Specialist',
-            location: 'Lagos, Nigeria',
-            bio: '',
-            about: '',
-            verified: false,
-            is_verified: false,
-            verification_status: 'none',
-            identity_verified: false,
-            auth_provider: 'google',
-            created_at: new Date().toISOString()
-          };
-          if (typeof saveRegisteredUser === 'function') saveRegisteredUser(match);
-        }
-        
-        if (typeof getOrCreateUserWallet === 'function') {
-          getOrCreateUserWallet(match);
-        }
-        
-        setUser(match);
-        localStorage.setItem('collekt_last_user_email', match.email);
-        localStorage.removeItem('collekt_pending_oauth_role');
-        
-        const target = match.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
-        if (window.location.pathname.includes('login.html') || window.location.pathname.includes('register.html')) {
-          window.location.replace(target);
+        const synced = await syncUser();
+        if (synced && (window.location.pathname.includes('login.html') || window.location.pathname.includes('register.html'))) {
+          const isJustVerified = sessionStorage.getItem('collekt_just_verified') === 'true';
+          const isLinkedIn = synced.linkedin_linked === true || synced.provider === 'linkedin' || synced.provider === 'linkedin_oidc';
+          if (synced.role === 'admin' || isLinkedIn || synced.otp_verified === true || isJustVerified) {
+            const target = synced.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
+            window.location.replace(target);
+          }
         }
       }
     } catch(e) {
@@ -1164,11 +1104,43 @@ function setUser(data) {
   // Read current session directly from localStorage to avoid getUser() directory merge
   let current = null;
   try { current = JSON.parse(localStorage.getItem('collekt_user')); } catch(e){}
+
+  const curId = String(current?.id || '').toLowerCase().trim();
+  const newId = String(data?.id || '').toLowerCase().trim();
+  const curEmail = String(current?.email || '').toLowerCase().trim();
+  const newEmail = String(data?.email || '').toLowerCase().trim();
+
+  const isDifferentUser = Boolean(
+    current && (
+      (curId && newId && curId !== newId) ||
+      (curEmail && newEmail && curEmail !== newEmail)
+    )
+  );
+
+  if (isDifferentUser) {
+    if (typeof purgeUnscopedUserStorageIfDifferent === 'function') {
+      purgeUnscopedUserStorageIfDifferent(data.id, data.email);
+    } else {
+      [
+        'collekt_user_avatar',
+        'collekt_company_logo',
+        'collekt_user_cover_photo',
+        'collekt_user_cv',
+        'collekt_custom_quals',
+        'collekt_user_nin',
+        'collekt_uploads_default'
+      ].forEach(k => { try { localStorage.removeItem(k); } catch(e){} });
+    }
+  }
+
+  const isSameUser = Boolean(
+    current && !isDifferentUser && (
+      (curId && newId && curId === newId) ||
+      (curEmail && newEmail && curEmail === newEmail)
+    )
+  );
   
-  const merged = (current && current.id && data.id && current.id === data.id) 
-    || (current && current.email && data.email && current.email.toLowerCase() === data.email.toLowerCase())
-    ? { ...current, ...data }
-    : data;
+  const merged = isSameUser ? { ...current, ...data } : { ...data };
   
   // CRITICAL: if data explicitly carries a role, it MUST win — never let stale merged data override
   if (data.role) {
@@ -1204,11 +1176,486 @@ function setUser(data) {
   try { syncUserDisplayEverywhere(); } catch(e){}
 }
 
+/* -- LOGIN ALERT SECURITY NOTIFICATION DISPATCHER -- */
+function dispatchLoginAlertIfEnabled(profile) {
+  if (!profile || !profile.email) return;
+
+  // 1. Strict check: ONLY send if login alerts is ON, do NOT send if turned OFF
+  let alertsOn = true;
+  try {
+    const sett = JSON.parse(localStorage.getItem('collekt_settings') || '{}');
+    if (sett.login_alerts === false) alertsOn = false;
+  } catch(e){}
+  if (profile.login_alerts === false) alertsOn = false;
+
+  if (!alertsOn) {
+    console.info('🔕 Login alert suppressed: Login Alerts are turned OFF.');
+    return;
+  }
+
+  // Throttle: avoid duplicate alert for same login within 15 seconds
+  const lastAlertKey = 'collekt_last_login_alert_' + profile.email.toLowerCase();
+  const lastAlertTime = parseInt(sessionStorage.getItem(lastAlertKey) || '0', 10);
+  if (Date.now() - lastAlertTime < 15000) return;
+  sessionStorage.setItem(lastAlertKey, String(Date.now()));
+
+  // 2. Extract device details
+  const ua = navigator.userAgent || '';
+  let devType = 'Desktop PC';
+  if (/mobile/i.test(ua)) devType = 'Mobile Phone';
+  if (/iphone|ipad|ipod/i.test(ua)) devType = 'Apple iOS Device';
+  else if (/android/i.test(ua)) devType = 'Android Mobile Device';
+  else if (/macintosh|mac os x/i.test(ua)) devType = 'Apple Mac';
+  else if (/windows/i.test(ua)) devType = 'Windows PC';
+
+  let browser = 'Web Browser';
+  if (/chrome|crios/i.test(ua) && !/edg/i.test(ua)) browser = 'Google Chrome';
+  else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = 'Safari';
+  else if (/firefox/i.test(ua)) browser = 'Mozilla Firefox';
+  else if (/edg/i.test(ua)) browser = 'Microsoft Edge';
+
+  const fullDevice = `${browser} on ${devType}`;
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Lagos, Nigeria';
+  const locStr = (tz.includes('Lagos') || tz.includes('Africa')) ? 'Lagos, Nigeria' : tz;
+
+  fetch('/api/auth-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    keepalive: true,
+    body: JSON.stringify({
+      action: 'login_alert',
+      email: profile.email,
+      name: profile.name || profile.full_name || profile.company_name || '',
+      device: fullDevice,
+      location: locStr
+    })
+  }).then(r => r.json()).then(d => {
+    if (d && d.success) {
+      console.info('🔔 Login alert email dispatched to:', profile.email);
+    }
+  }).catch(e => console.warn('Login alert trigger note:', e));
+}
+window.dispatchLoginAlertIfEnabled = dispatchLoginAlertIfEnabled;
+
+// ═══════════════════════════════════════════════════════════
+// PLATFORM NOTIFICATIONS ENGINE (In-App & Topbar Bell)
+// ═══════════════════════════════════════════════════════════
+
+function getUserNotificationKey(user) {
+  const u = user || (typeof getUser === 'function' ? getUser() : null);
+  if (!u) return 'collekt_notifications_guest';
+  return `collekt_notifications_${u.id || u.email || 'user'}`;
+}
+
+function getUserNotifications(user) {
+  const key = getUserNotificationKey(user);
+  try {
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  } catch(e) {
+    return [];
+  }
+}
+
+function saveUserNotifications(notifications, user) {
+  const key = getUserNotificationKey(user);
+  try {
+    localStorage.setItem(key, JSON.stringify(notifications));
+  } catch(e) {}
+}
+
+async function addUserNotification(notifData, targetUserId = null) {
+  const me = typeof getUser === 'function' ? getUser() : null;
+  const isTargetOther = targetUserId && me && targetUserId !== me.id && targetUserId !== me.email;
+
+  const notif = {
+    id: 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+    type: notifData.type || 'info', // 'welcome' | 'verification_reminder' | 'escrow_funding' | 'escrow_payout' | 'escrow_payin' | 'info'
+    title: notifData.title || 'Notification',
+    message: notifData.message || '',
+    link: notifData.link || '',
+    read: false,
+    metadata: notifData.metadata || {},
+    created_at: new Date().toISOString()
+  };
+
+  if (!isTargetOther) {
+    const list = getUserNotifications(me);
+    list.unshift(notif);
+    if (list.length > 50) list.length = 50;
+    saveUserNotifications(list, me);
+    updateLiveNotificationBadge();
+    const panel = document.getElementById('notifPanel');
+    if (panel && panel.classList.contains('open')) {
+      renderNotificationsPanel();
+    }
+  } else {
+    const targetKey = `collekt_notifications_${targetUserId}`;
+    try {
+      const targetList = JSON.parse(localStorage.getItem(targetKey) || '[]');
+      targetList.unshift(notif);
+      if (targetList.length > 50) targetList.length = 50;
+      localStorage.setItem(targetKey, JSON.stringify(targetList));
+    } catch(e) {}
+  }
+
+  // Also sync to Supabase if connected
+  if (window.sb && window.sb.from) {
+    try {
+      const recipientId = targetUserId || (me ? me.id : null);
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recipientId);
+      if (recipientId && isUUID) {
+        await window.sb.from('notifications').insert([{
+          user_id: recipientId,
+          type: notif.type,
+          title: notif.title,
+          message: notif.message,
+          link: notif.link,
+          read: false,
+          metadata: notif.metadata
+        }]);
+      }
+    } catch(err) {
+      console.warn('Supabase notification sync note:', err);
+    }
+  }
+
+  try { window.dispatchEvent(new CustomEvent('collekt_notification_added', { detail: notif })); } catch(e){}
+  return notif;
+}
+
+function markNotificationAsRead(notifId) {
+  const me = typeof getUser === 'function' ? getUser() : null;
+  const list = getUserNotifications(me);
+  const item = list.find(n => n.id === notifId);
+  if (item) {
+    item.read = true;
+    saveUserNotifications(list, me);
+    updateLiveNotificationBadge();
+    renderNotificationsPanel();
+  }
+  if (window.sb && window.sb.from && notifId) {
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(notifId);
+    if (isUUID) {
+      window.sb.from('notifications').update({ read: true }).eq('id', notifId).then(()=>{}).catch(()=>{});
+    }
+  }
+}
+
+function markAllNotificationsAsRead() {
+  const me = typeof getUser === 'function' ? getUser() : null;
+  const list = getUserNotifications(me);
+  list.forEach(n => n.read = true);
+  saveUserNotifications(list, me);
+  updateLiveNotificationBadge();
+  renderNotificationsPanel();
+
+  if (window.sb && window.sb.from && me && me.id) {
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(me.id);
+    if (isUUID) {
+      window.sb.from('notifications').update({ read: true }).eq('user_id', me.id).then(()=>{}).catch(()=>{});
+    }
+  }
+  if (typeof showToast === 'function') {
+    showToast('All notifications marked as read', 'success');
+  }
+}
+
+function updateLiveNotificationBadge() {
+  const me = typeof getUser === 'function' ? getUser() : null;
+  const list = getUserNotifications(me);
+  const unreadCount = list.filter(n => !n.read).length;
+
+  const badge = document.getElementById('notifBadge');
+  if (badge) {
+    if (unreadCount > 0) {
+      badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+      badge.style.display = 'grid';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+}
+
+function formatNotifTimeAgo(isoString) {
+  if (!isoString) return 'Just now';
+  const diffMs = Date.now() - new Date(isoString).getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  if (diffSec < 60) return 'Just now';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDays = Math.floor(diffHr / 24);
+  return `${diffDays}d ago`;
+}
+
+function renderNotificationsPanel() {
+  const container = document.getElementById('notifItemsContainer');
+  if (!container) return;
+
+  const me = typeof getUser === 'function' ? getUser() : null;
+  const list = getUserNotifications(me);
+
+  if (!list || list.length === 0) {
+    container.innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:36px 20px; text-align:center; color:var(--muted);">
+        <div style="font-size:28px; margin-bottom:8px;">🔔</div>
+        <div style="font-size:13px; font-weight:800; color:var(--ink); margin-bottom:4px;">No New Notifications</div>
+        <p style="font-size:11px; color:var(--muted); margin:0;">You're all caught up!</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = list.map(item => {
+    const timeAgo = formatNotifTimeAgo(item.created_at);
+    const unreadDot = !item.read ? `<div class="notif-dot-indicator"></div>` : `<div style="width:8px; height:8px; flex-shrink:0;"></div>`;
+
+    let icon = '🔔';
+    if (item.type === 'welcome') icon = '👋';
+    else if (item.type === 'verification_reminder') icon = '🛡️';
+    else if (item.type === 'escrow_funding') icon = '🔒';
+    else if (item.type === 'escrow_payout') icon = '💸';
+    else if (item.type === 'escrow_payin') icon = '💰';
+    else if (item.type === 'proposal') icon = '📄';
+    else if (item.type === 'message') icon = '💬';
+
+    const safeTitle = typeof escapeHTML === 'function' ? escapeHTML(item.title) : item.title;
+    const safeMsg = typeof escapeHTML === 'function' ? escapeHTML(item.message) : item.message;
+    const bgStyle = !item.read ? 'background: rgba(22, 163, 74, 0.05);' : '';
+
+    return `
+      <div class="notif-item" style="${bgStyle}" onclick="handleNotificationClick('${item.id}', '${item.link ? escapeHTML(item.link) : ''}')">
+        ${unreadDot}
+        <div style="font-size:18px; line-height:1; flex-shrink:0; margin-top:2px;">${icon}</div>
+        <div style="flex:1; min-width:0;">
+          <div class="notif-item-text">
+            <strong>${safeTitle}</strong><br>
+            <span style="font-size:12px; opacity:0.85;">${safeMsg}</span>
+          </div>
+          <div class="notif-item-time">${timeAgo}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function handleNotificationClick(notifId, link) {
+  markNotificationAsRead(notifId);
+  const panel = document.getElementById('notifPanel');
+  if (panel) panel.classList.remove('open');
+  if (link && link !== 'null' && link !== 'undefined' && link !== '') {
+    window.location.href = link;
+  }
+}
+
+async function syncNotificationsFromSupabase() {
+  const me = typeof getUser === 'function' ? getUser() : null;
+  if (!me || !me.id || !window.sb || !window.sb.from) return;
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(me.id);
+  if (!isUUID) return;
+
+  try {
+    const { data, error } = await window.sb
+      .from('notifications')
+      .select('*')
+      .eq('user_id', me.id)
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    if (!error && Array.isArray(data)) {
+      const local = getUserNotifications(me);
+      const mergedMap = new Map();
+      local.forEach(n => mergedMap.set(n.id || (n.title + n.created_at), n));
+      data.forEach(n => {
+        mergedMap.set(n.id, {
+          id: n.id,
+          type: n.type,
+          title: n.title,
+          message: n.message,
+          link: n.link,
+          read: !!n.read,
+          metadata: n.metadata || {},
+          created_at: n.created_at
+        });
+      });
+      const merged = Array.from(mergedMap.values()).sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+      saveUserNotifications(merged, me);
+      updateLiveNotificationBadge();
+    }
+  } catch(e) {
+    console.warn('Sync notifications note:', e);
+  }
+}
+
+function initNotificationsRealtime() {
+  const me = typeof getUser === 'function' ? getUser() : null;
+  if (!me || !me.id || !window.sb || !window.sb.channel) return;
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(me.id);
+  if (!isUUID) return;
+
+  try {
+    const channelName = 'notifs-' + me.id.substring(0, 8);
+    window.sb.channel(channelName)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${me.id}`
+      }, payload => {
+        if (payload && payload.new) {
+          const n = payload.new;
+          const local = getUserNotifications(me);
+          if (!local.some(item => item.id === n.id)) {
+            local.unshift({
+              id: n.id,
+              type: n.type,
+              title: n.title,
+              message: n.message,
+              link: n.link,
+              read: !!n.read,
+              metadata: n.metadata || {},
+              created_at: n.created_at
+            });
+            saveUserNotifications(local, me);
+            updateLiveNotificationBadge();
+            if (document.getElementById('notifPanel')?.classList.contains('open')) {
+              renderNotificationsPanel();
+            }
+            if (typeof showToast === 'function') {
+              showToast(`🔔 ${n.title}: ${n.message}`, 'info');
+            }
+          }
+        }
+      })
+      .subscribe();
+  } catch(e) {
+    console.warn('Realtime notifications note:', e);
+  }
+}
+
+function checkAndTriggerWelcomeAndVerificationNotifications() {
+  const user = typeof getUser === 'function' ? getUser() : null;
+  if (!user || (!user.id && !user.email)) return;
+
+  const uId = user.id || user.email;
+  const isCompany = user.role === 'company' || localStorage.getItem('collekt_last_role') === 'company';
+  const profileLink = isCompany ? 'company-profile.html' : 'profile.html';
+
+  // 1. Welcome Notification on first registration / initial visit
+  const welcomeKey = `collekt_welcomed_${uId}`;
+  if (!localStorage.getItem(welcomeKey)) {
+    localStorage.setItem(welcomeKey, Date.now().toString());
+    const welcomeMsg = isCompany
+      ? 'Welcome to Collekt! Explore top verified professionals across Nigeria, surf around our marketplace, and complete your company profile to get verified.'
+      : 'Welcome to Collekt! Explore open opportunities, surf around our marketplace, and complete your professional profile to get verified.';
+    addUserNotification({
+      type: 'welcome',
+      title: 'Welcome to Collekt! 👋',
+      message: welcomeMsg,
+      link: profileLink
+    });
+  }
+
+  // 2. 2-Day Profile Verification Reminder (every 48h until verified)
+  const isVerified = !!(user.verified || user.is_verified || user.badge === 'verified' || user.verification_status === 'verified');
+  if (!isVerified) {
+    const reminderKey = `collekt_last_verification_reminder_${uId}`;
+    const lastReminder = parseInt(localStorage.getItem(reminderKey) || '0', 10);
+    const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+    const welcomedTime = parseInt(localStorage.getItem(welcomeKey) || '0', 10);
+    const timeSinceWelcome = Date.now() - welcomedTime;
+
+    if ((lastReminder > 0 && (Date.now() - lastReminder >= TWO_DAYS_MS)) || (lastReminder === 0 && timeSinceWelcome >= TWO_DAYS_MS)) {
+      localStorage.setItem(reminderKey, Date.now().toString());
+      addUserNotification({
+        type: 'verification_reminder',
+        title: 'Complete Your Profile to Get Verified 🛡️',
+        message: 'Finish setting up your profile details and documents to receive your Verified Trust Badge and unlock full escrow privileges.',
+        link: profileLink
+      });
+    }
+  }
+}
+
+function dispatchEscrowFundingNotification({ companyName, professionalId, professionalName, amount, projectTitle }) {
+  const formattedAmount = typeof formatCurrency === 'function' ? formatCurrency(amount) : `₦${Number(amount).toLocaleString()}`;
+  
+  // For Company
+  addUserNotification({
+    type: 'escrow_funding',
+    title: 'Escrow Payment Successful',
+    message: `Your escrow deposit of ${formattedAmount} for "${projectTitle}" is secured in Collekt Trust Vault. Funds will only be released upon your milestone approval.`,
+    link: 'wallet.html',
+    metadata: { amount, projectTitle, role: 'company' }
+  });
+
+  // For Professional
+  if (professionalId) {
+    addUserNotification({
+      type: 'escrow_funding',
+      title: 'Escrow Payment Funded',
+      message: `${companyName || 'The company'} has secured an escrow payment of ${formattedAmount} for "${projectTitle}". You may begin work safely.`,
+      link: 'wallet.html',
+      metadata: { amount, projectTitle, role: 'professional' }
+    }, professionalId);
+  }
+}
+
+function dispatchEscrowPayoutNotification({ companyId, companyName, professionalId, professionalName, amount, projectTitle, milestoneTitle }) {
+  const formattedAmount = typeof formatCurrency === 'function' ? formatCurrency(amount) : `₦${Number(amount).toLocaleString()}`;
+  const label = milestoneTitle ? `"${milestoneTitle}" (${projectTitle})` : `"${projectTitle}"`;
+
+  // For Company
+  if (companyId) {
+    addUserNotification({
+      type: 'escrow_payout',
+      title: 'Milestone Escrow Payout Released',
+      message: `Payout of ${formattedAmount} for ${label} was released to ${professionalName || 'the specialist'}.`,
+      link: 'wallet.html',
+      metadata: { amount, projectTitle, milestoneTitle, role: 'company' }
+    }, companyId);
+  } else {
+    addUserNotification({
+      type: 'escrow_payout',
+      title: 'Milestone Escrow Payout Released',
+      message: `Payout of ${formattedAmount} for ${label} was released to ${professionalName || 'the specialist'}.`,
+      link: 'wallet.html',
+      metadata: { amount, projectTitle, milestoneTitle, role: 'company' }
+    });
+  }
+
+  // For Professional
+  if (professionalId) {
+    addUserNotification({
+      type: 'escrow_payin',
+      title: 'Payment Received (Pay-In)',
+      message: `${formattedAmount} has been paid into your wallet balance by ${companyName || 'the client'} for completing ${label}!`,
+      link: 'wallet.html',
+      metadata: { amount, projectTitle, milestoneTitle, role: 'professional' }
+    }, professionalId);
+  }
+}
+
+window.getUserNotifications = getUserNotifications;
+window.saveUserNotifications = saveUserNotifications;
+window.addUserNotification = addUserNotification;
+window.markNotificationAsRead = markNotificationAsRead;
+window.markAllNotificationsAsRead = markAllNotificationsAsRead;
+window.updateLiveNotificationBadge = updateLiveNotificationBadge;
+window.renderNotificationsPanel = renderNotificationsPanel;
+window.handleNotificationClick = handleNotificationClick;
+window.syncNotificationsFromSupabase = syncNotificationsFromSupabase;
+window.initNotificationsRealtime = initNotificationsRealtime;
+window.checkAndTriggerWelcomeAndVerificationNotifications = checkAndTriggerWelcomeAndVerificationNotifications;
+window.dispatchEscrowFundingNotification = dispatchEscrowFundingNotification;
+window.dispatchEscrowPayoutNotification = dispatchEscrowPayoutNotification;
+
 // -- USER DIRECTORY (shared registry of all platform accounts) --
 function registerUserInDirectory(user) {
   if (!user || (!user.id && !user.email)) return;
   const dir = getAllRegisteredUsers();
-  const idx = dir.findIndex(u => (user.id && u.id === user.id) || (user.email && u.email === user.email));
+  const idx = dir.findIndex(u => (user.id && u.id === user.id) || (!user.id && user.email && u.email === user.email));
   const entry = idx >= 0 ? { ...dir[idx], ...user } : { ...user };
   
   if (entry.role === 'professional') {
@@ -1243,7 +1690,6 @@ function syncRealUsersToDirectory(realProfiles) {
     const DELETED_OLD_UUIDS = [
       'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
       '467c002d-124e-4a05-a62f-1cd7b11f666c',
-      'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
       '63b0edc5-1e8d-46b9-9ae8-d1800b817ee6',
       'c0788c56-6cde-40d0-90c8-541c8d3cf76c',
       'd1bcafac-9da0-4912-90da-467c8dc00d92',
@@ -1253,10 +1699,10 @@ function syncRealUsersToDirectory(realProfiles) {
 
     const knownFakeTokens = [
       'adaeze okonkwo', 'kunle adeyemi', 'bashiru musa', 'joshua emeka',
-      'farouk abubakar', 'chidi nnamdi', 'chen pao', 'chenpao51@gmail.com',
+      'farouk abubakar', 'chidi nnamdi', 'chen pao',
       'grumpy luan', 'grumpyluan@gmail.com', 'bethel vwire', 'bethelvwire',
       'bethelvvwire', 'bethel_vwire', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com',
-      'officialthelma@gmail.com', 'patakhues', 'chairman of the board', 'chairmanoftheboard',
+      'officialthelma@gmail.com', 'patakhues',
       'usr_chairman_of_the_board', ...DELETED_OLD_UUIDS
     ];
 
@@ -1271,10 +1717,14 @@ function syncRealUsersToDirectory(realProfiles) {
 
       // Reject any synthetic or known fake/deleted tokens
       if (rpId.startsWith('user_') || rpId.startsWith('usr_') || DELETED_OLD_UUIDS.includes(rpId)) return;
-      const isFake = knownFakeTokens.some(tok => 
-        rpId === tok || rpName === tok || rpEmail === tok || rpName.includes(tok) || (rpEmail && rpEmail.includes(tok))
-      );
-      if (isFake) return;
+      // Never reject authentic registered users
+      const isAuthentic = ['admin@collekt.ng', 'ojeoweredave@gmail.com', 'patrickakhues@gmail.com', 'oluwafuntoomotayo@gmail.com', 'tessycelestine9@gmail.com', 'chenpao51@gmail.com', 'collektng@gmail.com'].includes(rpEmail);
+      if (!isAuthentic) {
+        const isFake = knownFakeTokens.some(tok => 
+          rpId === tok || rpName === tok || rpEmail === tok || rpName.includes(tok) || (rpEmail && rpEmail.includes(tok))
+        );
+        if (isFake) return;
+      }
 
       // Only merge existing local entry if it has the EXACT same UUID
       const existing = (rpId ? rawMap.get(rpId) : null) || {};
@@ -1309,6 +1759,7 @@ function syncRealUsersToDirectory(realProfiles) {
 
     const updated = Array.from(map.values());
     localStorage.setItem('collekt_all_users', JSON.stringify(updated));
+    localStorage.setItem('collekt_directory_clean_v4', 'true');
     localStorage.setItem('collekt_directory_clean_v3', 'true');
     try { window.dispatchEvent(new Event('collekt_users_updated')); } catch(e){}
   } catch(e){}
@@ -1319,7 +1770,6 @@ function getAllRegisteredUsers() {
     const DELETED_OLD_UUIDS = [
       'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91',
       '467c002d-124e-4a05-a62f-1cd7b11f666c',
-      'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
       '63b0edc5-1e8d-46b9-9ae8-d1800b817ee6',
       'c0788c56-6cde-40d0-90c8-541c8d3cf76c',
       'd1bcafac-9da0-4912-90da-467c8dc00d92',
@@ -1333,10 +1783,10 @@ function getAllRegisteredUsers() {
     // 1. Strict purge of legacy mock / fake / deleted accounts - ONLY authentic users allowed
     const fakeTokens = [
       'adaeze okonkwo', 'kunle adeyemi', 'bashiru musa', 'joshua emeka',
-      'farouk abubakar', 'chidi nnamdi', 'chen pao', 'chenpao51@gmail.com',
+      'farouk abubakar', 'chidi nnamdi', 'chen pao',
       'grumpy luan', 'grumpyluan@gmail.com', 'bethel vwire', 'bethelvwire',
       'bethelvvwire', 'bethel_vwire', 'bethelvwire@gmail.com', 'bethelvvwire@gmail.com',
-      'officialthelma@gmail.com', 'patakhues', 'chairman of the board', 'chairmanoftheboard',
+      'officialthelma@gmail.com', 'patakhues',
       'usr_chairman_of_the_board', ...DELETED_OLD_UUIDS
     ];
 
@@ -1346,6 +1796,10 @@ function getAllRegisteredUsers() {
       const n = String(u.name || '').toLowerCase().trim();
       const username = String(u.username || '').toLowerCase().trim();
       const email = String(u.email || '').toLowerCase().trim();
+
+      // Never reject authentic registered users
+      const isAuthentic = ['admin@collekt.ng', 'ojeoweredave@gmail.com', 'patrickakhues@gmail.com', 'oluwafuntoomotayo@gmail.com', 'tessycelestine9@gmail.com', 'chenpao51@gmail.com', 'collektng@gmail.com'].includes(email);
+      if (isAuthentic) return true;
 
       // Check fake/deleted tokens first
       const isFake = fakeTokens.some(token => 
@@ -1382,7 +1836,7 @@ function getAllRegisteredUsers() {
       }
     }
 
-    // 3. Guarantee Master System Administrator in directory
+    // 3. Guarantee Authentic Users in directory
     const authenticBaseUsers = [
       {
         id: 'a1111111-1111-4111-a111-111111111111',
@@ -1397,6 +1851,121 @@ function getAllRegisteredUsers() {
         is_verified: true,
         verification_status: 'verified',
         created_at: '2026-09-09T22:12:39.961309+00:00'
+      },
+      {
+        id: '8ed300fd-151c-4975-a56f-d1ebe071d347',
+        name: 'Dave Ojeowere',
+        email: 'ojeoweredave@gmail.com',
+        role: 'professional',
+        title: 'Energy Specialist',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        skills: ['EPC & Engineering', 'Pipeline & HAZOP', 'Subsea & Offshore', 'Bids & Tenders', 'AutoCAD'],
+        bio: 'Energy & EPC specialist with comprehensive experience in offshore pipeline installation, HAZOP safety studies, and multi-discipline engineering delivery.',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        status: 'active',
+        suspended: false,
+        created_at: '2026-10-10T12:09:19.943037+00:00'
+      },
+      {
+        id: 'ed1b2ea7-b8ef-4104-b9cb-cac5d3af1d4a',
+        name: 'Osagie Akhuemokhan',
+        email: 'patrickakhues@gmail.com',
+        role: 'professional',
+        title: 'Project Specialist',
+        sector: 'Oil & Gas',
+        skills: ['Pipeline & HAZOP', 'HSE & Compliance', 'Risk Assessment', 'Safety Audit', 'ISO 45001'],
+        bio: 'Health, Safety & Environmental specialist focused on HAZOP reviews, pipeline integrity assessments, and regulatory safety compliance across energy assets.',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        status: 'active',
+        suspended: false,
+        created_at: '2026-10-03T15:48:28.66575+00:00'
+      },
+      {
+        id: '282ebf89-80cb-4cec-8470-77ea7ce9c587',
+        name: 'Oluwafunto Omotayo',
+        email: 'oluwafuntoomotayo@gmail.com',
+        role: 'professional',
+        title: 'Project Specialist',
+        sector: 'Oil & Gas (Upstream/Midstream)',
+        skills: ['Subsea & Offshore', 'Solar & Renewables', 'EPC & Engineering', 'Deepwater Operations', 'Marine QA/QC'],
+        bio: 'Subsea and offshore systems specialist experienced in marine installations, subsea architecture, and hybrid solar renewable power integrations.',
+        location: 'Lagos State, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'unsubmitted',
+        status: 'active',
+        suspended: false,
+        created_at: '2026-10-12T21:28:22.343399+00:00'
+      },
+      {
+        id: 'a1995d38-3159-4e35-9dff-c6d5ee038ee9',
+        name: 'Tessy Celestine',
+        email: 'tessycelestine9@gmail.com',
+        role: 'professional',
+        title: 'Energy Specialist',
+        sector: 'Oil & Gas Engineering',
+        skills: ['Legal & NOGICD', 'HSE & Compliance', 'EPC & Engineering', 'Regulatory Advisory', 'Local Content'],
+        bio: 'Energy regulatory and compliance specialist advising on NOGICD Nigerian content enforcement, EPC contract structures, and operational environmental safety.',
+        avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKyVCINoBf0ibtDkTaR5pRI1bhOcjp-y1CviHiHaC-qhdz7mA=s96-c',
+        avatar_url: 'https://lh3.googleusercontent.com/a/ACg8ocKyVCINoBf0ibtDkTaR5pRI1bhOcjp-y1CviHiHaC-qhdz7mA=s96-c',
+        oauth_avatar: 'https://lh3.googleusercontent.com/a/ACg8ocKyVCINoBf0ibtDkTaR5pRI1bhOcjp-y1CviHiHaC-qhdz7mA=s96-c',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'none',
+        status: 'active',
+        suspended: false,
+        created_at: '2026-10-01T16:41:32.309344+00:00'
+      },
+      {
+        id: 'bac75638-07e6-4987-b349-84c436fe2f83',
+        name: 'John Akpobome',
+        email: 'chenpao51@gmail.com',
+        role: 'professional',
+        title: 'Bid Specialist',
+        sector: 'Oil & Gas',
+        skills: ['Bids & Tenders', 'Commercial Proposals', 'RFP / RFQ Estimation', 'EPC Contract Bidding', 'Procurement & Contracts'],
+        bio: 'Tender bidding and commercial proposal specialist with expertise in preparing winning technical bids, RFP responses, and EPC contract pricing schedules.',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'unsubmitted',
+        status: 'active',
+        suspended: false,
+        created_at: '2026-10-13T12:38:57.669346+00:00'
+      },
+      {
+        id: 'f100a17f-f6a7-47ca-a775-4a2f66827550',
+        name: 'Collekt NG',
+        email: 'collektng@gmail.com',
+        role: 'company',
+        company_name: 'Collekt NG',
+        title: 'EPC Contractor',
+        location: 'Lagos, Nigeria',
+        country: 'Nigeria',
+        state: 'Lagos',
+        verified: false,
+        is_verified: false,
+        verification_status: 'unsubmitted',
+        status: 'active',
+        suspended: false,
+        created_at: '2026-10-12T12:51:46.639091+00:00'
       }
     ];
 
@@ -1404,6 +1973,10 @@ function getAllRegisteredUsers() {
       const idx = raw.findIndex(u => (bu.id && u.id === bu.id) || (bu.email && u.email && u.email.toLowerCase() === bu.email.toLowerCase()));
       if (idx >= 0) {
         raw[idx] = { ...bu, ...raw[idx] };
+        if (!raw[idx].skills || raw[idx].skills.length === 0) raw[idx].skills = bu.skills;
+        if (!raw[idx].bio) raw[idx].bio = bu.bio;
+        if (!raw[idx].title) raw[idx].title = bu.title;
+        if (!raw[idx].sector) raw[idx].sector = bu.sector;
       } else {
         raw.push(bu);
       }
@@ -1450,6 +2023,86 @@ function getAllRegisteredUsers() {
   } catch(e) {
     return [];
   }
+}
+
+// -- UNIVERSAL USER VERIFICATION & DISPLAY PICTURE (DP) HELPERS --
+// STRICT RULE: Only users who are officially verified with verified check mark are addressed as verified.
+function isUserVerified(user) {
+  if (!user) return false;
+  if (user.id === 'a1111111-1111-4111-a111-111111111111' || user.email === 'admin@collekt.ng') return true;
+  const status = String(user.verification_status || '').toLowerCase().trim();
+  if (['rejected', 'unsubmitted', 'pending', 'none', ''].includes(status)) return false;
+  return Boolean((user.verified === true || user.is_verified === true) && status === 'verified');
+}
+
+// Universal Display Picture (DP) / Avatar Resolver
+function resolveUserAvatarSrc(user) {
+  if (!user) return '';
+  // 1. Direct explicit avatar string on user object (data URL, Supabase storage URL, Google OAuth, etc.)
+  if (user.avatar && typeof user.avatar === 'string' && user.avatar.trim() && !user.avatar.startsWith('data:image/svg')) {
+    return user.avatar.trim();
+  }
+  if (user.avatar_url && typeof user.avatar_url === 'string' && user.avatar_url.trim()) {
+    return user.avatar_url.trim();
+  }
+  if (user.photo_url && typeof user.photo_url === 'string' && user.photo_url.trim()) {
+    return user.photo_url.trim();
+  }
+  if (user.oauth_avatar && typeof user.oauth_avatar === 'string' && user.oauth_avatar.trim()) {
+    return user.oauth_avatar.trim();
+  }
+  if (user.picture && typeof user.picture === 'string' && user.picture.trim()) {
+    return user.picture.trim();
+  }
+  // 2. Company logo for company profiles
+  if (user.company_logo && typeof user.company_logo === 'string' && user.company_logo.trim()) {
+    return user.company_logo.trim();
+  }
+  // 3. Check uploaded files cache
+  try {
+    if (typeof getUploadedFiles === 'function') {
+      const isCo = user.role === 'company' || (!user.role && user.company_name);
+      const cat = isCo ? 'company-logo' : 'avatar';
+      const files = getUploadedFiles(cat, user);
+      if (Array.isArray(files) && files.length > 0) {
+        const last = files[files.length - 1];
+        if (last && (last.dataURL || last.url || last.src)) {
+          return last.dataURL || last.url || last.src;
+        }
+      }
+    }
+  } catch(e) {}
+  // 4. Check active user session if matching
+  try {
+    const cur = typeof getUser === 'function' ? getUser() : null;
+    if (cur && (
+      (user.id && cur.id && String(user.id).toLowerCase() === String(cur.id).toLowerCase()) ||
+      (user.email && cur.email && String(user.email).toLowerCase() === String(cur.email).toLowerCase())
+    )) {
+      if (cur.avatar && typeof cur.avatar === 'string' && cur.avatar.trim()) return cur.avatar.trim();
+      if (cur.avatar_url && typeof cur.avatar_url === 'string' && cur.avatar_url.trim()) return cur.avatar_url.trim();
+      if (cur.oauth_avatar && typeof cur.oauth_avatar === 'string' && cur.oauth_avatar.trim()) return cur.oauth_avatar.trim();
+      const localAv = localStorage.getItem('collekt_user_avatar') || localStorage.getItem('collekt_company_logo');
+      if (localAv && localAv.trim()) return localAv.trim();
+    }
+  } catch(e) {}
+  // 5. Scoped local storage keys
+  try {
+    if (user.id) {
+      const scoped = localStorage.getItem('collekt_user_avatar_' + user.id) || localStorage.getItem('collekt_user_avatar_' + String(user.id).toLowerCase());
+      if (scoped && scoped.trim()) return scoped.trim();
+    }
+    if (user.email) {
+      const scoped = localStorage.getItem('collekt_user_avatar_' + String(user.email).toLowerCase().trim());
+      if (scoped && scoped.trim()) return scoped.trim();
+    }
+  } catch(e) {}
+  return '';
+}
+
+if (typeof window !== 'undefined') {
+  window.isUserVerified = isUserVerified;
+  window.resolveUserAvatarSrc = resolveUserAvatarSrc;
 }
 
 // -- REAL-TIME USER METRICS ENGINE (100% REAL PLATFORM ACTIVITY) --
@@ -1520,22 +2173,32 @@ function getRealTimeUserMetrics(user) {
     successRate = totalProposals > 0 ? Math.min(100, Math.round((completedProjects / totalProposals) * 100)) : 100;
   }
 
-  // 4. Compute real reviews & rating
-  let reviews = [];
-  if (Array.isArray(user.reviews)) reviews = user.reviews;
+  // 4. Compute real reviews & rating (Strictly exclude self-reviews)
+  let rawReviews = [];
+  if (Array.isArray(user.reviews)) rawReviews = user.reviews;
   else {
     try {
       const rKey = 'collekt_reviews_' + (user.id || user.email);
-      reviews = JSON.parse(localStorage.getItem(rKey) || '[]');
+      rawReviews = JSON.parse(localStorage.getItem(rKey) || '[]');
     } catch(e){}
   }
+
+  const uNameNorm = String(user.name || user.company_name || '').toLowerCase().trim();
+  const reviews = rawReviews.filter(r => {
+    if (!r) return false;
+    const revId = String(r.reviewer_id || '').toLowerCase().trim();
+    const revAuthor = String(r.author || r.reviewer_name || '').toLowerCase().trim();
+    if (revId && ((uId && revId === uId) || (uEmail && revId === uEmail))) return false;
+    if (revAuthor && uNameNorm && revAuthor === uNameNorm) return false;
+    return true;
+  });
 
   let rating = 0.0;
   let reviewCount = reviews.length;
   if (reviewCount > 0) {
     const sum = reviews.reduce((acc, r) => acc + (Number(r.rating || r.stars) || 5), 0);
     rating = Number((sum / reviewCount).toFixed(1));
-  } else if (user.rating && Number(user.rating) > 0 && user.review_count > 0 && user.rating !== 5.0) {
+  } else if (!Array.isArray(user.reviews) && user.rating && Number(user.rating) > 0 && user.review_count > 0 && user.rating !== 5.0) {
     rating = Number(Number(user.rating).toFixed(1));
     reviewCount = Number(user.review_count);
   }
@@ -1887,13 +2550,24 @@ function updateLiveUnreadMessageBadges() {
           badge.style.cssText = 'background:#ef4444; color:#fff; font-size:10px; font-weight:800; padding:2px 7px; border-radius:99px; margin-left:auto; display:inline-block;';
           item.appendChild(badge);
         }
-        badge.textContent = count;
+        badge.textContent = count > 99 ? '99+' : count;
         badge.style.display = 'inline-block';
       } else if (badge) {
         badge.style.display = 'none';
       }
     }
   });
+
+  // Direct sidebar message badge element
+  const directSbBadge = document.getElementById('sidebarMsgBadge');
+  if (directSbBadge) {
+    if (count > 0) {
+      directSbBadge.textContent = count > 99 ? '99+' : count;
+      directSbBadge.style.display = 'inline-block';
+    } else {
+      directSbBadge.style.display = 'none';
+    }
+  }
 
   // 3. Any element with class .unread-msg-count
   document.querySelectorAll('.unread-msg-count').forEach(el => {
@@ -1904,7 +2578,7 @@ function updateLiveUnreadMessageBadges() {
   const liquidBadge = document.getElementById('liquidNavChatsBadge');
   if (liquidBadge) {
     if (count > 0) {
-      liquidBadge.textContent = count;
+      liquidBadge.textContent = count > 99 ? '99+' : count;
       liquidBadge.style.display = 'inline-flex';
     } else {
       liquidBadge.textContent = '0';
@@ -2218,36 +2892,25 @@ function getOrCreateUserWallet(user) {
 
   wallet = {
     ...wallet,
-    bank_assigned: !!dva || !!(wallet.nova_linked && wallet.nova_account_number),
-    is_live_dva: !!dva,
-    bank_name: dva ? dva.bank_name : (wallet.bank_name || ''),
-    bank_code: dva ? dva.bank_code : (wallet.bank_code || ''),
-    account_number: dva ? dva.account_number : (wallet.account_number || ''),
-    account_name: dva ? dva.account_name : (wallet.account_name || ''),
-    paystack_dva_account: dva ? dva.account_number : (wallet.paystack_dva_account || ''),
-    paystack_dva_bank: dva ? dva.bank_name : (wallet.paystack_dva_bank || ''),
-    paystack_dva_name: dva ? dva.account_name : (wallet.paystack_dva_name || ''),
+    bank_assigned: !!(wallet.nova_linked && wallet.nova_account_number),
+    is_live_dva: false,
+    bank_name: wallet.nova_linked ? 'NOVA Bank (Nova Commercial Bank)' : '',
+    bank_code: wallet.nova_linked ? '561' : '',
+    account_number: wallet.nova_linked ? (wallet.nova_account_number || '') : '',
+    account_name: wallet.nova_linked ? (wallet.nova_account_name || '') : '',
+    paystack_dva_account: '',
+    paystack_dva_bank: '',
+    paystack_dva_name: '',
     balance: authBal,
     available_balance: authBal,
     escrow_balance: Number(user.escrow_balance || wallet.escrow_balance || 0),
     hide_balance: !!wallet.hide_balance,
   };
 
-  // If user has explicitly linked their NOVA account, ensure it's mirrored
-  if (wallet.nova_linked && wallet.nova_account_number) {
-    wallet.bank_assigned = true;
-    wallet.account_number = wallet.nova_account_number;
-    wallet.bank_name = 'NOVA Bank (Nova Commercial Bank)';
-  }
-
   user.wallet = wallet;
-  if (dva) {
-    user.dva_account = dva.account_number;
-    user.dva_bank = dva.bank_name;
-    user.dva_name = dva.account_name;
-  } else if (!wallet.nova_linked) {
-    user.dva_account = '';
-  }
+  delete user.dva_account;
+  delete user.dva_bank;
+  delete user.dva_name;
   setUser(user);
 
   return user.wallet;
@@ -2328,16 +2991,24 @@ function unlinkUserNovaAccount(user) {
 
 // ── NOVA BANK EXCLUSIVE SETTLEMENT & ESCROW ENGINE ───────────
 function getMasterNovaAccount() {
+  const defaultMaster = {
+    bank_name: 'NOVA Bank (Nova Commercial Bank)',
+    account_number: '1001025797',
+    account_name: 'COLLEKT NG',
+    routing_code: '561'
+  };
   try {
     const saved = localStorage.getItem('collekt_master_nova_account');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.account_number && parsed.account_number !== '0129845011') {
+        return parsed;
+      }
+      // Migrate legacy placeholder to official COLLEKT NG account
+      localStorage.setItem('collekt_master_nova_account', JSON.stringify(defaultMaster));
+    }
   } catch(e) {}
-  return {
-    bank_name: 'NOVA Bank (Nova Commercial Bank)',
-    account_number: '0129845011',
-    account_name: 'COLLEKT ENTERPRISE / NOVA SETTLEMENT',
-    routing_code: '060003'
-  };
+  return defaultMaster;
 }
 
 function saveMasterNovaAccount(details) {
@@ -3230,12 +3901,17 @@ function goToDashboard() {
 
 // Helper: Check if user has explicitly uploaded a profile photo on Collekt
 function hasUserUploadedPhoto(user) {
-  const u = user || (typeof getUser === 'function' ? getUser() : null);
+  const activeUser = typeof getUser === 'function' ? getUser() : null;
+  const u = user || activeUser;
   if (!u) return false;
-  if (u.avatar_uploaded === true) return true;
-  const avatarFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('avatar') : [];
+  const isCurrentActiveUser = !user || (activeUser && (
+    (u.id && activeUser.id && String(u.id).toLowerCase() === String(activeUser.id).toLowerCase()) ||
+    (!u.id && u.email && activeUser.email && String(u.email).toLowerCase() === String(activeUser.email).toLowerCase())
+  ));
+  if (u.avatar_uploaded === true && u.avatar) return true;
+  const avatarFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('avatar', u) : [];
   if (avatarFiles && avatarFiles.length > 0) return true;
-  if (localStorage.getItem('collekt_user_avatar')) return true;
+  if (isCurrentActiveUser && localStorage.getItem('collekt_user_avatar')) return true;
   if (u.avatar && typeof u.avatar === 'string') {
     if (u.avatar.startsWith('data:image/')) return true;
     if (u.avatar.includes('/storage/v1/object/public/avatars/')) return true;
@@ -3247,12 +3923,17 @@ function hasUserUploadedPhoto(user) {
 
 // Helper: Check if company has explicitly uploaded a company logo on Collekt
 function hasCompanyUploadedLogo(user) {
-  const u = user || (typeof getUser === 'function' ? getUser() : null);
+  const activeUser = typeof getUser === 'function' ? getUser() : null;
+  const u = user || activeUser;
   if (!u) return false;
-  if (u.company_logo_uploaded === true) return true;
-  const logoFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('company-logo') : [];
+  const isCurrentActiveUser = !user || (activeUser && (
+    (u.id && activeUser.id && String(u.id).toLowerCase() === String(activeUser.id).toLowerCase()) ||
+    (!u.id && u.email && activeUser.email && String(u.email).toLowerCase() === String(activeUser.email).toLowerCase())
+  ));
+  if (u.company_logo_uploaded === true && u.company_logo) return true;
+  const logoFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('company-logo', u) : [];
   if (logoFiles && logoFiles.length > 0) return true;
-  if (localStorage.getItem('collekt_company_logo')) return true;
+  if (isCurrentActiveUser && localStorage.getItem('collekt_company_logo')) return true;
   if (u.company_logo && typeof u.company_logo === 'string') {
     if (u.company_logo.startsWith('data:image/')) return true;
     if (u.company_logo.includes('/storage/v1/object/public/')) return true;
@@ -3887,7 +4568,7 @@ window.quickAddSkill = function(skillName) {
 };
 
 // -------------------------------------------------------------------------
-// -- COLLEKT PREMIUM MEMBERSHIP SYSTEM ($15/Mo Pro, $50/Mo Company) --
+// -- COLLEKT PREMIUM MEMBERSHIP SYSTEM (₦19,999/Mo Pro, ₦74,999/Mo Company) --
 // -------------------------------------------------------------------------
 
 function openPremiumMembershipModal(forcedRole) {
@@ -3913,7 +4594,7 @@ function renderPremiumUpgradeCard(containerId, forcedRole) {
   }
 
   const isPremium = !!(user.is_premium || user.subscription_tier === (isCompany ? 'company_enterprise' : 'pro_plus'));
-  const priceDisplay = isCompany ? '$50 / Month' : '$15 / Month';
+  const priceDisplay = isCompany ? '₦74,999 / Month' : '₦19,999 / Month';
   const tierName = isCompany ? 'Company Enterprise' : 'Professional Plus';
   const bgGrad = isCompany 
     ? 'linear-gradient(135deg, var(--forest), #1a7a6f)' 
@@ -4545,11 +5226,16 @@ function buildSidebar(activePage) {
         ${navItems.map(item => `
           <a href="${item.href}" ${item.onclick ? `onclick="${item.onclick}"` : ''} class="sidebar-nav-item ${item.key === pageKey ? 'active' : ''}">
             <span class="nav-icon">${item.icon}</span>
-            ${item.label}
+            <span>${item.label}</span>
+            ${item.key === 'messages' ? `<span class="sidebar-msg-badge" id="sidebarMsgBadge" style="background:#ef4444; color:#fff; font-size:10px; font-weight:800; padding:2px 7px; border-radius:99px; margin-left:auto; display:none;"></span>` : ''}
           </a>
         `).join('')}
       </nav>
       <div class="sidebar-bottom">
+        <a class="sidebar-nav-item ${pageKey === 'upgrade' || currentPage.includes('upgrade') ? 'active' : ''}" href="upgrade.html?role=${isCompany ? 'company' : 'professional'}" style="background:linear-gradient(135deg, ${isCompany ? 'rgba(20,184,166,0.22), rgba(14,59,53,0.4)' : 'rgba(245,158,11,0.22), rgba(217,119,6,0.12)'}); border:1px solid ${isCompany ? 'rgba(20,184,166,0.35)' : 'rgba(245,158,11,0.35)'}; color:#fff; font-size:12.5px; font-weight:800; margin-bottom:6px; border-radius:12px;">
+          <span class="nav-icon">${isCompany ? '🏢' : '⚡'}</span>
+          <span>${activeUser.is_premium ? 'Manage Membership' : (isCompany ? 'Enterprise (₦74,999/mo)' : 'Pro Plus (₦19,999/mo)')}</span>
+        </a>
         <a class="sidebar-nav-item" href="javascript:void(0)" onclick="if(window.openSettingsModal) openSettingsModal(); else showToast('Settings opening...');" style="color:rgba(255,255,255,.45); font-size:13px;">
           <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Settings
         </a>
@@ -4574,6 +5260,11 @@ function buildSidebar(activePage) {
 
     // Build Liquid Glass Navigation (Docks in sidebar on desktop, floating pill on mobile)
     buildLiquidGlassNav(pageKey);
+
+    // Update live unread messages badge on sidebar
+    if (typeof updateLiveUnreadMessageBadges === 'function') {
+      updateLiveUnreadMessageBadges();
+    }
   } catch (err) {
     console.error("Error building sidebar:", err);
   }
@@ -4866,16 +5557,19 @@ function buildTopbar() {
       <div style="position:relative;">
         <div class="notif-btn" id="notifBtn" title="Notifications" role="button" tabindex="0" aria-label="Notifications" aria-expanded="false">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot" id="notifBadge" style="display:none;">0</span>
         </div>
         <div class="notif-panel" id="notifPanel">
           <div class="notif-head">
             <h4>Notifications</h4>
-            <span style="font-size:12px;color:var(--muted);cursor:pointer;font-weight:700;">Mark all read</span>
+            <span id="markAllNotifsReadBtn" onclick="if(window.markAllNotificationsAsRead) markAllNotificationsAsRead();" style="font-size:12px;color:var(--muted);cursor:pointer;font-weight:700;">Mark all read</span>
           </div>
-          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:36px 20px; text-align:center; color:var(--muted);">
-            <div style="font-size:28px; margin-bottom:8px;">🔔</div>
-            <div style="font-size:13px; font-weight:800; color:var(--ink); margin-bottom:4px;">No New Notifications</div>
-            <p style="font-size:11px; color:var(--muted); margin:0;">You're all caught up!</p>
+          <div id="notifItemsContainer" style="max-height:360px; overflow-y:auto;">
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:36px 20px; text-align:center; color:var(--muted);">
+              <div style="font-size:28px; margin-bottom:8px;">🔔</div>
+              <div style="font-size:13px; font-weight:800; color:var(--ink); margin-bottom:4px;">No New Notifications</div>
+              <p style="font-size:11px; color:var(--muted); margin:0;">You're all caught up!</p>
+            </div>
           </div>
         </div>
       </div>
@@ -4913,7 +5607,13 @@ function buildTopbar() {
 
   document.getElementById('notifBtn')?.addEventListener('click', e => {
     e.stopPropagation();
-    document.getElementById('notifPanel')?.classList.toggle('open');
+    const panel = document.getElementById('notifPanel');
+    if (panel) {
+      const isOpen = panel.classList.toggle('open');
+      if (isOpen && typeof renderNotificationsPanel === 'function') {
+        renderNotificationsPanel();
+      }
+    }
     document.getElementById('profileMenu')?.classList.remove('open');
   });
   document.getElementById('profileTrigger')?.addEventListener('click', e => {
@@ -4925,6 +5625,10 @@ function buildTopbar() {
     document.getElementById('notifPanel')?.classList.remove('open');
     document.getElementById('profileMenu')?.classList.remove('open');
   });
+
+  if (typeof updateLiveNotificationBadge === 'function') {
+    updateLiveNotificationBadge();
+  }
 }
 
 function toggleMobileSidebar(e) {
@@ -5038,8 +5742,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Stores uploaded file metadata (and small dataURLs) in localStorage per user.
 // Categories: 'avatar', 'cv', 'documents', 'portfolio', 'certifications', 'company-logo', 'company-docs'
 
-function _uploadsKey() {
-  const u = getUser();
+function _uploadsKey(passedUser) {
+  const u = passedUser || getUser();
   if (u && u.id) {
     return 'collekt_uploads_' + u.id;
   }
@@ -5049,8 +5753,8 @@ function _uploadsKey() {
   return 'collekt_uploads_default';
 }
 
-function _getAllUploads() {
-  const u = getUser();
+function _getAllUploads(passedUser) {
+  const u = passedUser || getUser();
   if (!u || (!u.id && !u.email)) return {};
   let merged = {};
   if (u.id) {
@@ -5075,8 +5779,8 @@ function _getAllUploads() {
   return merged;
 }
 
-function _saveAllUploads(data) {
-  const key = _uploadsKey();
+function _saveAllUploads(data, passedUser) {
+  const key = _uploadsKey(passedUser);
   try {
     localStorage.setItem(key, JSON.stringify(data));
   } catch (err) {
@@ -5171,7 +5875,7 @@ function scrubSyntheticUploads() {
 }
 
 function getUploadedFiles(category, passedUser) {
-  const all = _getAllUploads();
+  const all = _getAllUploads(passedUser);
   let files = all[category] || [];
   
   // Strictly filter out any legacy synthetic dummy entries
@@ -5182,13 +5886,17 @@ function getUploadedFiles(category, passedUser) {
   }
   
   // Backup lookups ONLY for genuine CV with authentic data
-  let u = passedUser || null;
-  if (!u) {
-    try { u = JSON.parse(localStorage.getItem('collekt_user')); } catch(e){}
-  }
+  const activeUser = typeof getUser === 'function' ? getUser() : null;
+  let u = passedUser || activeUser || null;
+  const isCurrentActiveUser = !passedUser || (activeUser && u && (
+    (u.id && activeUser.id && String(u.id).toLowerCase() === String(activeUser.id).toLowerCase()) ||
+    (!u.id && u.email && activeUser.email && String(u.email).toLowerCase() === String(activeUser.email).toLowerCase())
+  ));
   if (files.length === 0 && u && category === 'cv') {
     let cvObj = null;
-    try { cvObj = JSON.parse(localStorage.getItem('collekt_user_cv')); } catch(e){}
+    if (isCurrentActiveUser) {
+      try { cvObj = JSON.parse(localStorage.getItem('collekt_user_cv')); } catch(e){}
+    }
     if (cvObj && cvObj.name && (cvObj.dataURL || cvObj.fileUrl || (cvObj.size && cvObj.size !== 450000))) {
       files = [cvObj];
     } else if (u.cv_data || (typeof u.cv === 'string' && u.cv.startsWith('data:'))) {
@@ -5218,21 +5926,21 @@ function removeUploadedFile(category, index) {
   return all[category] || [];
 }
 
-function getUploadedAvatar() {
-  const user = typeof getUser === 'function' ? getUser() : null;
+function getUploadedAvatar(passedUser) {
+  const user = passedUser || (typeof getUser === 'function' ? getUser() : null);
   if (user && typeof hasUserUploadedPhoto === 'function' && hasUserUploadedPhoto(user) && user.avatar) {
     return { dataURL: user.avatar };
   }
-  const files = typeof getUploadedFiles === 'function' ? getUploadedFiles('avatar') : [];
+  const files = typeof getUploadedFiles === 'function' ? getUploadedFiles('avatar', user) : [];
   return files.length ? files[files.length - 1] : null;
 }
 
-function getUploadedCompanyLogo() {
-  const user = typeof getUser === 'function' ? getUser() : null;
+function getUploadedCompanyLogo(passedUser) {
+  const user = passedUser || (typeof getUser === 'function' ? getUser() : null);
   if (user && typeof hasCompanyUploadedLogo === 'function' && hasCompanyUploadedLogo(user) && user.company_logo) {
     return { dataURL: user.company_logo };
   }
-  const files = typeof getUploadedFiles === 'function' ? getUploadedFiles('company-logo') : [];
+  const files = typeof getUploadedFiles === 'function' ? getUploadedFiles('company-logo', user) : [];
   return files.length ? files[files.length - 1] : null;
 }
 
@@ -5721,10 +6429,22 @@ function triggerCanvasDownload(canvas, filename) {
   }
 }
 
-// Auto update live message badges on page load and storage changes
+// Auto update live message badges and notifications on page load and storage changes
 document.addEventListener('DOMContentLoaded', () => {
   if (typeof updateLiveUnreadMessageBadges === 'function') {
     updateLiveUnreadMessageBadges();
+  }
+  if (typeof checkAndTriggerWelcomeAndVerificationNotifications === 'function') {
+    checkAndTriggerWelcomeAndVerificationNotifications();
+  }
+  if (typeof syncNotificationsFromSupabase === 'function') {
+    syncNotificationsFromSupabase();
+  }
+  if (typeof initNotificationsRealtime === 'function') {
+    initNotificationsRealtime();
+  }
+  if (typeof updateLiveNotificationBadge === 'function') {
+    updateLiveNotificationBadge();
   }
 });
 window.addEventListener('storage', (e) => {
@@ -5732,6 +6452,24 @@ window.addEventListener('storage', (e) => {
     if (typeof updateLiveUnreadMessageBadges === 'function') {
       updateLiveUnreadMessageBadges();
     }
+  }
+  if (e.key && e.key.startsWith('collekt_notifications_')) {
+    if (typeof updateLiveNotificationBadge === 'function') {
+      updateLiveNotificationBadge();
+    }
+    const panel = document.getElementById('notifPanel');
+    if (panel && panel.classList.contains('open') && typeof renderNotificationsPanel === 'function') {
+      renderNotificationsPanel();
+    }
+  }
+});
+window.addEventListener('collekt_notification_added', () => {
+  if (typeof updateLiveNotificationBadge === 'function') {
+    updateLiveNotificationBadge();
+  }
+  const panel = document.getElementById('notifPanel');
+  if (panel && panel.classList.contains('open') && typeof renderNotificationsPanel === 'function') {
+    renderNotificationsPanel();
   }
 });
 
@@ -5885,6 +6623,534 @@ async function submitEscrowDispute() {
   if (typeof renderEscrowMilestones === 'function') renderEscrowMilestones();
 }
 
+/* ═════════════════════════════════════════════════════════
+   1B. CONTRACT AWARD & CUSTOM MILESTONE ESCROW BUILDER
+   ═════════════════════════════════════════════════════════ */
+let _awardModalState = {
+  proposalId: '',
+  jobId: '',
+  jobTitle: '',
+  proId: '',
+  proName: 'Specialist',
+  proSkills: [],
+  amount: 0,
+  currency: 'NGN',
+  fxRate: 1550,
+  paymentMode: 'milestones', // 'lump_sum' | 'milestones'
+  milestoneCount: 2,         // 2 or 3
+  milestones: [
+    { name: 'Milestone 1: Mobilization & Initial Deliverables', percentage: 50 },
+    { name: 'Milestone 2: Final Execution, Testing & Handover', percentage: 50 }
+  ],
+  onSuccess: null
+};
+
+function ensureAwardContractModalExists() {
+  let modal = document.getElementById('awardContractEscrowModal');
+  if (modal) return modal;
+
+  modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'awardContractEscrowModal';
+  modal.style.zIndex = '99995';
+  modal.innerHTML = `
+    <div class="modal-card" style="position:relative; max-width:600px; width:calc(100vw - 28px); max-height:92vh; overflow-y:auto; padding:24px 26px; border-radius:22px; background:var(--white); border:1px solid var(--line); box-shadow:0 24px 70px rgba(0,0,0,0.45); font-family:'Manrope',sans-serif;">
+      <button class="modal-close" onclick="closeModal('awardContractEscrowModal')" style="top:16px; right:16px; width:32px; height:32px; border-radius:50%;">&times;</button>
+
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <div style="width:44px; height:44px; border-radius:12px; background:rgba(19,117,111,0.14); color:var(--teal); display:grid; place-items:center; font-size:22px; flex-shrink:0;">🔒</div>
+        <div>
+          <div style="font-size:18px; font-weight:900; color:var(--ink); line-height:1.25;">Award Contract &amp; Configure Escrow</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:2px;" id="awardModalSubHeader">Define your milestone release schedule or choose lump-sum upon completion.</div>
+        </div>
+      </div>
+
+      <!-- Candidate & Project Banner -->
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px 16px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <div style="font-size:10.5px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.05em;">Selected Specialist</div>
+          <div style="font-size:14.5px; font-weight:900; color:var(--ink);" id="awardModalProName">Professional Specialist</div>
+          <div style="font-size:11.5px; color:var(--muted); margin-top:1px;" id="awardModalJobTitle">Project Opportunity</div>
+        </div>
+        <div style="text-align:right;">
+          <span style="font-size:10.5px; font-weight:800; background:rgba(22,163,74,0.12); color:#16a34a; padding:4px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
+            🛡️ Escrow Protected
+          </span>
+        </div>
+      </div>
+
+      <!-- Contract Value & Currency Row -->
+      <div style="display:grid; grid-template-columns:130px 1fr; gap:10px; margin-bottom:16px;">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Currency</label>
+          <select class="form-input form-select" id="awardModalCurrency" onchange="onAwardCurrencyOrAmountChange()" style="font-weight:800; font-size:13px; min-height:42px; padding:8px 10px; border-radius:10px;">
+            <option value="NGN">🇳🇬 NGN (₦)</option>
+            <option value="USD">🇺🇸 USD ($)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;" id="awardModalAmountLabel">Agreed Total Contract Value (₦)</label>
+          <input class="form-input" type="number" id="awardModalAmountInput" min="100" placeholder="e.g. 500000" oninput="onAwardCurrencyOrAmountChange()" style="font-weight:900; font-size:16px; color:var(--forest); min-height:42px; padding:8px 12px; border-radius:10px;">
+        </div>
+      </div>
+
+      <!-- Payout Mode Selector: 2 Custom Milestones | 3 Custom Milestones | Lump-Sum on Completion -->
+      <div style="margin-bottom:16px;">
+        <label class="form-label" style="font-size:12px; font-weight:800; margin-bottom:6px; display:block;">Select Escrow Payout Structure</label>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; background:var(--paper); padding:5px; border-radius:12px; border:1px solid var(--line);">
+          <button type="button" id="awardModeBtn2Ms" onclick="selectAwardPayoutStructure('milestones_2')" style="padding:9px 8px; border-radius:9px; border:none; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.2s;">
+            📊 2 Milestones
+          </button>
+          <button type="button" id="awardModeBtn3Ms" onclick="selectAwardPayoutStructure('milestones_3')" style="padding:9px 8px; border-radius:9px; border:none; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.2s;">
+            📊 3 Milestones
+          </button>
+          <button type="button" id="awardModeBtnLump" onclick="selectAwardPayoutStructure('lump_sum')" style="padding:9px 8px; border-radius:9px; border:none; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.2s;">
+            🎯 Lump-Sum (100%)
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW 1: Custom Milestones Builder (2 or 3 Milestones) -->
+      <div id="awardMilestonesBuilderWrap" style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
+          <div>
+            <div style="font-size:12.5px; font-weight:800; color:var(--ink);" id="awardMsBuilderHeading">Define 2 Custom Milestones</div>
+            <div style="font-size:11px; color:var(--muted);">Funds are held in escrow and disbursed only as you approve each completed milestone.</div>
+          </div>
+          <span id="awardModalTotalBadge" style="font-size:11px; font-weight:800; padding:4px 10px; border-radius:99px; background:rgba(22,163,74,0.12); color:#16a34a;">
+            ✓ Total: 100%
+          </span>
+        </div>
+
+        <!-- Quick Split Presets -->
+        <div id="awardPresetPillsRow" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"></div>
+
+        <!-- Dynamic Milestone Rows -->
+        <div id="awardModalMilestoneRows" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+
+      <!-- VIEW 2: Lump-Sum Payout Notice -->
+      <div id="awardLumpSumWrap" style="display:none; background:rgba(19,117,111,0.06); border:1px solid rgba(19,117,111,0.22); border-radius:14px; padding:14px 16px; margin-bottom:16px;">
+        <div style="display:flex; align-items:flex-start; gap:10px;">
+          <span style="font-size:20px; line-height:1;">🎯</span>
+          <div>
+            <div style="font-size:13px; font-weight:900; color:var(--ink); margin-bottom:3px;">100% Lump-Sum Payout After Job Completion</div>
+            <div style="font-size:12px; color:var(--muted); line-height:1.5;">
+              100% of the contract value (<strong style="color:var(--forest);" id="awardLumpSumAmtText">₦0</strong>) is held securely in Collekt Escrow and disbursed in a single lump-sum payout only after the entire job is completed and approved by your company.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Escrow Hold & NOVA Bank Settlement Summary -->
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px 16px; margin-bottom:18px; font-size:12px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+          <span style="color:var(--muted);">Total Held in Escrow:</span>
+          <strong style="color:var(--forest); font-size:13.5px;" id="awardSummaryGross">₦0.00</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+          <span style="color:var(--muted);">Collekt Escrow &amp; Platform Fee (15%):</span>
+          <span style="color:var(--muted); font-weight:700;" id="awardSummaryFee">₦0.00</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding-bottom:8px; margin-bottom:8px; border-bottom:1px solid var(--line);">
+          <span style="color:var(--ink); font-weight:800;">Net Specialist Payout (85%):</span>
+          <strong style="color:#16a34a; font-size:13.5px;" id="awardSummaryNet">₦0.00</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; color:var(--muted);">
+          <span>🏛️ <strong>Escrow Custody:</strong> NOVA Commercial Bank</span>
+          <span style="font-family:monospace; font-weight:800; color:var(--teal);">COLLEKT NG &bull; 1001025797</span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button type="button" class="btn btn-outline" onclick="closeModal('awardContractEscrowModal')" style="font-weight:800; border-radius:12px; padding:10px 18px;">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmAwardContract" onclick="confirmAndExecuteContractAward()" style="background:var(--teal); border:none; font-weight:900; border-radius:12px; padding:10px 22px; flex:1; max-width:320px;">
+          🔒 Award Job &amp; Lock Escrow Schedule
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function openAwardContractModal(options = {}) {
+  ensureAwardContractModalExists();
+
+  const proposalId = options.proposalId || '';
+  const jobId = options.jobId || '';
+
+  // Look up proposal and job details
+  const allProps = JSON.parse(localStorage.getItem('collekt_proposals') || '[]');
+  const prop = allProps.find(p => String(p.id) === String(proposalId)) || options.proposal || {};
+
+  const allJobs = (typeof getLiveJobsFromState === 'function' ? getLiveJobsFromState() : [])
+    .concat(JSON.parse(localStorage.getItem('collekt_jobs') || '[]'));
+  const job = allJobs.find(j => String(j.id) === String(jobId || prop.jobId || prop.project_id)) || {};
+
+  const proId = options.proId || prop.userId || prop.user_id || prop.pro_id || prop.userEmail || '';
+  const proName = options.proName || prop.userName || prop.name || 'Professional Specialist';
+  const proSkills = options.proSkills || prop.userSkills || prop.skills || [];
+  const jobTitle = options.jobTitle || prop.jobTitle || job.title || 'Marketplace Contract';
+  const currency = prop.currency || job.currency || 'NGN';
+  const fxRate = prop.fx_rate || job.fx_rate || 1550;
+  const rawAmt = Number(prop.bidAmount || prop.proposedAmount || job.budget || job.professional_fee || 250000);
+  const amount = rawAmt > 0 ? rawAmt : 250000;
+
+  // Determine initial payout mode and milestones from job if already set, otherwise default to 2 milestones
+  let initialMode = 'milestones_2';
+  let initialMilestones = [
+    { name: 'Milestone 1: Mobilization & Initial Deliverables', percentage: 50 },
+    { name: 'Milestone 2: Final Execution, Testing & Handover', percentage: 50 }
+  ];
+
+  if (job.payment_mode === 'lump_sum') {
+    initialMode = 'lump_sum';
+  } else if (Array.isArray(job.milestones) && job.milestones.length >= 2) {
+    const sliced = job.milestones.slice(0, 3).map((m, i) => ({
+      name: m.name || `Milestone ${i + 1}: Deliverables`,
+      percentage: Number(m.percentage) || (job.milestones.length === 3 ? (i === 0 ? 40 : 30) : 50)
+    }));
+    initialMilestones = sliced;
+    initialMode = sliced.length === 3 ? 'milestones_3' : 'milestones_2';
+  }
+
+  _awardModalState = {
+    proposalId,
+    jobId: jobId || prop.jobId || prop.project_id || job.id || '',
+    jobTitle,
+    proId,
+    proName,
+    proSkills,
+    amount,
+    currency,
+    fxRate,
+    paymentMode: initialMode === 'lump_sum' ? 'lump_sum' : 'milestones',
+    milestoneCount: initialMode === 'milestones_3' ? 3 : 2,
+    milestones: initialMilestones,
+    onSuccess: typeof options.onSuccess === 'function' ? options.onSuccess : null
+  };
+
+  const proNameEl = document.getElementById('awardModalProName');
+  const jobTitleEl = document.getElementById('awardModalJobTitle');
+  const curSel = document.getElementById('awardModalCurrency');
+  const amtInp = document.getElementById('awardModalAmountInput');
+
+  if (proNameEl) proNameEl.textContent = proName;
+  if (jobTitleEl) jobTitleEl.textContent = jobTitle;
+  if (curSel) curSel.value = currency;
+  if (amtInp) amtInp.value = amount;
+
+  selectAwardPayoutStructure(initialMode);
+  openModal('awardContractEscrowModal');
+}
+window.openAwardContractModal = openAwardContractModal;
+
+function selectAwardPayoutStructure(structure) {
+  const btn2 = document.getElementById('awardModeBtn2Ms');
+  const btn3 = document.getElementById('awardModeBtn3Ms');
+  const btnLump = document.getElementById('awardModeBtnLump');
+  const msWrap = document.getElementById('awardMilestonesBuilderWrap');
+  const lumpWrap = document.getElementById('awardLumpSumWrap');
+  const heading = document.getElementById('awardMsBuilderHeading');
+  const presetsRow = document.getElementById('awardPresetPillsRow');
+
+  [btn2, btn3, btnLump].forEach(b => {
+    if (!b) return;
+    b.style.background = 'transparent';
+    b.style.color = 'var(--muted)';
+    b.style.boxShadow = 'none';
+  });
+
+  if (structure === 'lump_sum') {
+    _awardModalState.paymentMode = 'lump_sum';
+    if (btnLump) {
+      btnLump.style.background = 'var(--forest)';
+      btnLump.style.color = '#fff';
+      btnLump.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+    }
+    if (msWrap) msWrap.style.display = 'none';
+    if (lumpWrap) lumpWrap.style.display = 'block';
+  } else if (structure === 'milestones_3') {
+    _awardModalState.paymentMode = 'milestones';
+    _awardModalState.milestoneCount = 3;
+    if (btn3) {
+      btn3.style.background = 'var(--forest)';
+      btn3.style.color = '#fff';
+      btn3.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+    }
+    if (msWrap) msWrap.style.display = 'block';
+    if (lumpWrap) lumpWrap.style.display = 'none';
+    if (heading) heading.textContent = 'Define 3 Custom Milestones (Must equal 100%)';
+
+    if (_awardModalState.milestones.length !== 3) {
+      _awardModalState.milestones = [
+        { name: _awardModalState.milestones[0]?.name || 'Milestone 1: Mobilization & Site Survey', percentage: 40 },
+        { name: 'Milestone 2: Mid-Project Execution & Inspection', percentage: 30 },
+        { name: _awardModalState.milestones[1]?.name || 'Milestone 3: Final Testing, Delivery & Handover', percentage: 30 }
+      ];
+    }
+
+    if (presetsRow) {
+      presetsRow.innerHTML = `
+        <span style="font-size:11px; color:var(--muted); font-weight:700; align-self:center;">Quick Splits:</span>
+        <button type="button" onclick="applyAwardMilestonePreset([40,30,30])" style="font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px; border:1px solid var(--line); background:var(--white); color:var(--ink); cursor:pointer;">40% / 30% / 30%</button>
+        <button type="button" onclick="applyAwardMilestonePreset([30,40,30])" style="font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px; border:1px solid var(--line); background:var(--white); color:var(--ink); cursor:pointer;">30% / 40% / 30%</button>
+        <button type="button" onclick="applyAwardMilestonePreset([50,25,25])" style="font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px; border:1px solid var(--line); background:var(--white); color:var(--ink); cursor:pointer;">50% / 25% / 25%</button>
+        <button type="button" onclick="applyAwardMilestonePreset([20,40,40])" style="font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px; border:1px solid var(--line); background:var(--white); color:var(--ink); cursor:pointer;">20% / 40% / 40%</button>
+      `;
+    }
+    renderAwardMilestoneRows();
+  } else {
+    // Default: 2 Milestones
+    _awardModalState.paymentMode = 'milestones';
+    _awardModalState.milestoneCount = 2;
+    if (btn2) {
+      btn2.style.background = 'var(--forest)';
+      btn2.style.color = '#fff';
+      btn2.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+    }
+    if (msWrap) msWrap.style.display = 'block';
+    if (lumpWrap) lumpWrap.style.display = 'none';
+    if (heading) heading.textContent = 'Define 2 Custom Milestones (Must equal 100%)';
+
+    if (_awardModalState.milestones.length !== 2) {
+      _awardModalState.milestones = [
+        { name: _awardModalState.milestones[0]?.name || 'Milestone 1: Mobilization & Initial Deliverables', percentage: 50 },
+        { name: _awardModalState.milestones[_awardModalState.milestones.length - 1]?.name || 'Milestone 2: Final Completion & Handover', percentage: 50 }
+      ];
+    }
+
+    if (presetsRow) {
+      presetsRow.innerHTML = `
+        <span style="font-size:11px; color:var(--muted); font-weight:700; align-self:center;">Quick Splits:</span>
+        <button type="button" onclick="applyAwardMilestonePreset([50,50])" style="font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px; border:1px solid var(--line); background:var(--white); color:var(--ink); cursor:pointer;">50% / 50%</button>
+        <button type="button" onclick="applyAwardMilestonePreset([30,70])" style="font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px; border:1px solid var(--line); background:var(--white); color:var(--ink); cursor:pointer;">30% / 70%</button>
+        <button type="button" onclick="applyAwardMilestonePreset([40,60])" style="font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px; border:1px solid var(--line); background:var(--white); color:var(--ink); cursor:pointer;">40% / 60%</button>
+        <button type="button" onclick="applyAwardMilestonePreset([60,40])" style="font-size:11px; font-weight:800; padding:3px 9px; border-radius:99px; border:1px solid var(--line); background:var(--white); color:var(--ink); cursor:pointer;">60% / 40%</button>
+      `;
+    }
+    renderAwardMilestoneRows();
+  }
+
+  updateAwardModalSummary();
+}
+window.selectAwardPayoutStructure = selectAwardPayoutStructure;
+
+function applyAwardMilestonePreset(pctArray) {
+  if (!Array.isArray(pctArray)) return;
+  pctArray.forEach((pct, idx) => {
+    if (_awardModalState.milestones[idx]) {
+      _awardModalState.milestones[idx].percentage = Number(pct) || 0;
+    }
+  });
+  renderAwardMilestoneRows();
+  updateAwardModalSummary();
+}
+window.applyAwardMilestonePreset = applyAwardMilestonePreset;
+
+function onAwardCurrencyOrAmountChange() {
+  const cur = document.getElementById('awardModalCurrency')?.value || 'NGN';
+  const amtRaw = Number(document.getElementById('awardModalAmountInput')?.value || 0);
+  _awardModalState.currency = cur;
+  _awardModalState.amount = amtRaw > 0 ? amtRaw : 0;
+
+  const lbl = document.getElementById('awardModalAmountLabel');
+  if (lbl) lbl.textContent = cur === 'USD' ? 'Agreed Total Contract Value ($ USD)' : 'Agreed Total Contract Value (₦ NGN)';
+
+  if (_awardModalState.paymentMode === 'milestones') {
+    renderAwardMilestoneRows();
+  }
+  updateAwardModalSummary();
+}
+window.onAwardCurrencyOrAmountChange = onAwardCurrencyOrAmountChange;
+
+function renderAwardMilestoneRows() {
+  const container = document.getElementById('awardModalMilestoneRows');
+  if (!container) return;
+
+  const cur = _awardModalState.currency || 'NGN';
+  const sym = cur === 'USD' ? '$' : '₦';
+  const totalAmt = Number(_awardModalState.amount || 0);
+
+  container.innerHTML = _awardModalState.milestones.map((m, idx) => {
+    const pct = Number(m.percentage) || 0;
+    const mAmt = totalAmt > 0 ? Math.round(totalAmt * (pct / 100)) : 0;
+    const mAmtFormatted = `${sym}${mAmt.toLocaleString()}`;
+    return `
+      <div style="background:var(--white); border:1px solid var(--line); border-radius:10px; padding:9px 12px; display:grid; grid-template-columns:1fr 82px 115px; gap:8px; align-items:center;">
+        <div>
+          <input class="form-input" type="text" value="${escapeHTML(m.name)}" placeholder="Milestone ${idx + 1} Deliverable" oninput="updateAwardMilestoneField(${idx}, 'name', this.value)" style="font-size:12px; font-weight:700; padding:7px 10px; border-radius:8px;">
+        </div>
+        <div style="position:relative;">
+          <input class="form-input" type="number" min="1" max="99" value="${pct}" oninput="updateAwardMilestoneField(${idx}, 'percentage', this.value)" style="font-size:12.5px; font-weight:900; padding:7px 22px 7px 8px; text-align:right; border-radius:8px;">
+          <span style="position:absolute; right:7px; top:50%; transform:translateY(-50%); font-size:11px; font-weight:800; color:var(--muted); pointer-events:none;">%</span>
+        </div>
+        <div id="awardMsRowAmt_${idx}" style="font-size:12.5px; font-weight:900; color:var(--forest); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+          ${mAmtFormatted}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateAwardMilestoneField(idx, field, val) {
+  if (!_awardModalState.milestones[idx]) return;
+  if (field === 'name') {
+    _awardModalState.milestones[idx].name = val;
+  } else if (field === 'percentage') {
+    _awardModalState.milestones[idx].percentage = Number(val) || 0;
+    const cur = _awardModalState.currency || 'NGN';
+    const sym = cur === 'USD' ? '$' : '₦';
+    const totalAmt = Number(_awardModalState.amount || 0);
+    const mAmt = totalAmt > 0 ? Math.round(totalAmt * ((Number(val) || 0) / 100)) : 0;
+    const amtEl = document.getElementById(`awardMsRowAmt_${idx}`);
+    if (amtEl) amtEl.textContent = `${sym}${mAmt.toLocaleString()}`;
+    updateAwardModalSummary();
+  }
+}
+window.updateAwardMilestoneField = updateAwardMilestoneField;
+
+function updateAwardModalSummary() {
+  const cur = _awardModalState.currency || 'NGN';
+  const sym = cur === 'USD' ? '$' : '₦';
+  const totalAmt = Number(_awardModalState.amount || 0);
+  const fee = Math.round(totalAmt * 0.15);
+  const net = totalAmt - fee;
+
+  const grossEl = document.getElementById('awardSummaryGross');
+  const feeEl = document.getElementById('awardSummaryFee');
+  const netEl = document.getElementById('awardSummaryNet');
+  const lumpAmtEl = document.getElementById('awardLumpSumAmtText');
+  const badgeEl = document.getElementById('awardModalTotalBadge');
+
+  if (grossEl) grossEl.textContent = `${sym}${totalAmt.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (feeEl) feeEl.textContent = `-${sym}${fee.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (netEl) netEl.textContent = `${sym}${net.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (lumpAmtEl) lumpAmtEl.textContent = `${sym}${totalAmt.toLocaleString()}`;
+
+  if (badgeEl && _awardModalState.paymentMode === 'milestones') {
+    const sum = _awardModalState.milestones.reduce((acc, m) => acc + (Number(m.percentage) || 0), 0);
+    if (sum === 100) {
+      badgeEl.style.background = 'rgba(22,163,74,0.12)';
+      badgeEl.style.color = '#16a34a';
+      badgeEl.textContent = `✓ Total: 100% (${sym}${totalAmt.toLocaleString()})`;
+    } else {
+      badgeEl.style.background = 'rgba(239,68,68,0.12)';
+      badgeEl.style.color = '#ef4444';
+      badgeEl.textContent = `⚠️ Total: ${sum}% (Must equal 100%)`;
+    }
+  }
+}
+
+async function confirmAndExecuteContractAward() {
+  const totalAmt = Number(_awardModalState.amount || 0);
+  if (!totalAmt || totalAmt < 100) {
+    if (typeof showToast === 'function') showToast('⚠️ Please enter a valid contract amount (minimum ₦100).', 'warning');
+    return;
+  }
+
+  let finalMilestones = [];
+  const cur = _awardModalState.currency || 'NGN';
+  const fxRate = cur === 'USD' ? (_awardModalState.fxRate || 1550) : null;
+
+  if (_awardModalState.paymentMode === 'milestones') {
+    const sum = _awardModalState.milestones.reduce((acc, m) => acc + (Number(m.percentage) || 0), 0);
+    if (sum !== 100) {
+      if (typeof showToast === 'function') showToast(`⚠️ Milestone percentages must equal 100% (currently ${sum}%).`, 'warning');
+      return;
+    }
+    finalMilestones = _awardModalState.milestones.map((m, idx) => {
+      const pct = Number(m.percentage) || 0;
+      const mAmt = Math.round(totalAmt * (pct / 100));
+      return {
+        id: 'ms_' + (idx + 1),
+        name: (m.name || '').trim() || `Milestone ${idx + 1}: Deliverables`,
+        percentage: pct,
+        amount: mAmt,
+        currency: cur,
+        fx_rate: fxRate,
+        ngn_amount: cur === 'USD' ? Math.round(mAmt * fxRate) : mAmt,
+        status: 'Funded in Escrow'
+      };
+    });
+  } else {
+    finalMilestones = [{
+      id: 'ms_1',
+      name: '100% Lump-Sum Payout After Job Completion & Approval',
+      percentage: 100,
+      amount: totalAmt,
+      currency: cur,
+      fx_rate: fxRate,
+      ngn_amount: cur === 'USD' ? Math.round(totalAmt * fxRate) : totalAmt,
+      status: 'Funded in Escrow'
+    }];
+  }
+
+  const btn = document.getElementById('btnConfirmAwardContract');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Locking Escrow Schedule...';
+  }
+
+  try {
+    if (typeof acceptCollectorProposalInSupabase === 'function') {
+      const res = await acceptCollectorProposalInSupabase(_awardModalState.proposalId, {
+        jobId: _awardModalState.jobId,
+        jobTitle: _awardModalState.jobTitle,
+        proId: _awardModalState.proId,
+        proName: _awardModalState.proName,
+        amount: totalAmt,
+        currency: cur,
+        fx_rate: fxRate,
+        payment_mode: _awardModalState.paymentMode,
+        milestones: finalMilestones
+      });
+
+      closeModal('awardContractEscrowModal');
+
+      if (res && res.success) {
+        const modeLabel = _awardModalState.paymentMode === 'milestones'
+          ? `${finalMilestones.length} Custom Milestones (${finalMilestones.map(m => m.percentage + '%').join(' / ')})`
+          : '100% Lump-Sum on Completion';
+        if (typeof showToast === 'function') {
+          showToast(`🎉 Contract Awarded! Escrow Schedule Locked: ${modeLabel}.`);
+        }
+        if (typeof dispatchEscrowFundingNotification === 'function') {
+          try {
+            const me = typeof getUser === 'function' ? getUser() : null;
+            dispatchEscrowFundingNotification({
+              companyName: me?.company_name || me?.name || 'Company Client',
+              professionalId: _awardModalState.proId,
+              professionalName: _awardModalState.proName,
+              amount: totalAmt,
+              projectTitle: _awardModalState.jobTitle || 'Contract'
+            });
+          } catch(notifErr) {
+            console.warn('Escrow funding notification note:', notifErr);
+          }
+        }
+        if (typeof _awardModalState.onSuccess === 'function') {
+          _awardModalState.onSuccess(res);
+        }
+      } else {
+        if (typeof showToast === 'function') {
+          showToast('⚠️ ' + (res?.error || 'Failed to award contract.'), 'error');
+        }
+      }
+    }
+  } catch (err) {
+    console.error('confirmAndExecuteContractAward error:', err);
+    if (typeof showToast === 'function') showToast('⚠️ Could not complete contract award.', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '🔒 Award Job &amp; Lock Escrow Schedule';
+    }
+  }
+}
+window.confirmAndExecuteContractAward = confirmAndExecuteContractAward;
+
 
 /* ═════════════════════════════════════════════════════════
    2. CLIENT & PROFESSIONAL RATING & REVIEW ENGINE
@@ -5892,7 +7158,41 @@ async function submitEscrowDispute() {
 let _activeReviewTarget = null;
 let _selectedStarRating = 5;
 
+function isSelfReviewTarget(user, targetId, targetName) {
+  if (!user) return false;
+  const tId = String(targetId || '').toLowerCase().trim();
+  const tName = String(targetName || '').toLowerCase().trim();
+  const uId = String(user.id || '').toLowerCase().trim();
+  const uEmail = String(user.email || '').toLowerCase().trim();
+  const uUsername = String(user.username || '').toLowerCase().trim();
+  const uName = String(user.name || '').toLowerCase().trim();
+  const uCompany = String(user.company_name || '').toLowerCase().trim();
+
+  if (tId === 'me') return true;
+  if (tId && ((uId && tId === uId) || (uEmail && tId === uEmail) || (uUsername && tId === uUsername))) return true;
+  if (tName && ((uName && tName === uName) || (uCompany && tName === uCompany))) return true;
+  return false;
+}
+
 function openReviewSubmissionModal(targetUserId, targetUserName = 'Contractor', projectTitle = 'Completed Contract') {
+  const currentUser = typeof getUser === 'function' ? getUser() : null;
+
+  // 1. Require authenticated user or company
+  if (!currentUser || (!currentUser.id && !currentUser.email)) {
+    if (typeof showToast === 'function') {
+      showToast('🔒 Please log in as a company or registered user to leave a review.', 'warning');
+    }
+    return;
+  }
+
+  // 2. Strictly block self-reviews (even in "View as" preview mode)
+  if (isSelfReviewTarget(currentUser, targetUserId, targetUserName)) {
+    if (typeof showToast === 'function') {
+      showToast('⚠️ You cannot leave a review for yourself. Only companies and other users can review your profile.', 'warning');
+    }
+    return;
+  }
+
   _activeReviewTarget = { id: targetUserId, name: targetUserName, projectTitle: projectTitle };
   _selectedStarRating = 5;
 
@@ -5920,8 +7220,8 @@ function openReviewSubmissionModal(targetUserId, targetUserName = 'Contractor', 
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
           <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label" style="font-size:12px; font-weight:700;">Your Name</label>
-            <input class="form-input" type="text" id="reviewAuthorName" placeholder="e.g. Chief Dave Ojeowere">
+            <label class="form-label" style="font-size:12px; font-weight:700;">Your Name (Verified Account)</label>
+            <input class="form-input" type="text" id="reviewAuthorName" readonly style="background:var(--paper); cursor:not-allowed; opacity:0.85;" placeholder="Verified Reviewer">
           </div>
           <div class="form-group" style="margin-bottom:0;">
             <label class="form-label" style="font-size:12px; font-weight:700;">Company / Role (Optional)</label>
@@ -5942,18 +7242,22 @@ function openReviewSubmissionModal(targetUserId, targetUserName = 'Contractor', 
     document.body.appendChild(modal);
   }
 
-  const currentUser = typeof getUser === 'function' ? getUser() : null;
   if (document.getElementById('reviewModalTitle')) {
     document.getElementById('reviewModalTitle').textContent = `Rate ${targetUserName}`;
   }
   if (document.getElementById('reviewModalSub')) {
     document.getElementById('reviewModalSub').textContent = `Project: ${projectTitle}`;
   }
-  if (document.getElementById('reviewAuthorName')) {
-    document.getElementById('reviewAuthorName').value = currentUser?.name || currentUser?.company_name || '';
+  const authorInput = document.getElementById('reviewAuthorName');
+  if (authorInput) {
+    authorInput.value = currentUser?.company_name || currentUser?.name || '';
+    authorInput.readOnly = true;
   }
   if (document.getElementById('reviewAuthorCompany')) {
     document.getElementById('reviewAuthorCompany').value = currentUser?.company_name || currentUser?.title || '';
+  }
+  if (document.getElementById('reviewCommentText')) {
+    document.getElementById('reviewCommentText').value = '';
   }
 
   setReviewStarRating(5);
@@ -5969,22 +7273,21 @@ function setReviewStarRating(stars) {
 }
 
 function addReviewToUserAccount(targetId, targetName, reviewRecord) {
+  const activeUser = typeof getUser === 'function' ? getUser() : null;
+  if (isSelfReviewTarget(activeUser, targetId, targetName)) {
+    return null;
+  }
+
   let allUsers = [];
   try {
     allUsers = JSON.parse(localStorage.getItem('collekt_all_users')) || [];
   } catch(e){}
-
-  const activeUser = typeof getUser === 'function' ? getUser() : null;
 
   // Search for matching target user by ID, email, or name
   let targetUser = allUsers.find(u => 
     (targetId && (u.id === targetId || u.email === targetId)) || 
     (targetName && u.name && u.name.toLowerCase() === targetName.toLowerCase())
   );
-
-  if (!targetUser && activeUser && (activeUser.id === targetId || activeUser.email === targetId || (targetName && activeUser.name && activeUser.name.toLowerCase() === targetName.toLowerCase()))) {
-    targetUser = activeUser;
-  }
 
   if (!targetUser) {
     targetUser = {
@@ -6002,6 +7305,7 @@ function addReviewToUserAccount(targetId, targetName, reviewRecord) {
 
   const newReviewEntry = {
     id: reviewRecord.id || ('rev_' + Date.now()),
+    reviewer_id: reviewRecord.reviewer_id || null,
     author: reviewRecord.reviewer_name || 'Verified Client',
     role: reviewRecord.reviewer_company || 'Project Client',
     rating: Number(reviewRecord.rating || 5),
@@ -6028,15 +7332,27 @@ function addReviewToUserAccount(targetId, targetName, reviewRecord) {
     localStorage.setItem('collekt_all_users', JSON.stringify(allUsers));
   } catch(e){}
 
-  if (activeUser && (activeUser.id === targetUser.id || activeUser.email === targetUser.email || (targetName && activeUser.name && activeUser.name.toLowerCase() === targetName.toLowerCase()))) {
-    if (typeof setUser === 'function') setUser(targetUser);
-  }
-
   return targetUser;
 }
 
 async function submitClientReview() {
-  const authorNameInput = document.getElementById('reviewAuthorName')?.value.trim();
+  const reviewer = typeof getUser === 'function' ? getUser() : null;
+  const targetId = _activeReviewTarget?.id;
+  const targetName = _activeReviewTarget?.name || 'Member';
+  const projectTitle = _activeReviewTarget?.projectTitle || 'Completed Project';
+
+  if (!reviewer || (!reviewer.id && !reviewer.email)) {
+    if (typeof showToast === 'function') showToast('🔒 You must be logged in as a company or user to leave a review.', 'warning');
+    closeModal('clientReviewModal');
+    return;
+  }
+
+  if (isSelfReviewTarget(reviewer, targetId, targetName)) {
+    if (typeof showToast === 'function') showToast('⚠️ You cannot leave a review for yourself. Only companies and other users can review your profile.', 'warning');
+    closeModal('clientReviewModal');
+    return;
+  }
+
   const authorCompanyInput = document.getElementById('reviewAuthorCompany')?.value.trim();
   const comment = document.getElementById('reviewCommentText')?.value.trim();
 
@@ -6045,18 +7361,15 @@ async function submitClientReview() {
     return;
   }
 
-  const reviewer = getUser();
-  const targetId = _activeReviewTarget?.id;
-  const targetName = _activeReviewTarget?.name || 'Member';
-
-  const finalAuthorName = authorNameInput || reviewer?.name || reviewer?.company_name || 'Verified Client';
+  const finalAuthorName = reviewer?.company_name || reviewer?.name || 'Verified Client';
   const finalAuthorCompany = authorCompanyInput || reviewer?.title || reviewer?.company_name || 'Project Client';
 
   const reviewRecord = {
-    id: 'rev_' + Date.now(),
+    id: (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') ? crypto.randomUUID() : ('rev_' + Date.now()),
     reviewer_id: reviewer?.id,
     reviewer_name: finalAuthorName,
     reviewer_company: finalAuthorCompany,
+    project_title: projectTitle,
     target_id: targetId,
     rating: _selectedStarRating,
     comment: comment,
@@ -6074,7 +7387,7 @@ async function submitClientReview() {
 
   // Immediately re-render UI on open pages
   if (typeof _renderUserToPublicProfile === 'function' && updatedTarget) {
-    _renderUserToPublicProfile(updatedTarget, false);
+    _renderUserToPublicProfile(updatedTarget, false, { realReviews: updatedTarget.reviews || [] });
   }
   if (typeof _applyProfile === 'function') {
     _applyProfile();
@@ -6106,14 +7419,28 @@ async function syncDisputeToSupabase(disputeRecord) {
 
 async function syncReviewToSupabase(reviewRecord) {
   if (!window.sb || !reviewRecord) return;
+  if (reviewRecord.reviewer_id && reviewRecord.target_id && String(reviewRecord.reviewer_id).toLowerCase() === String(reviewRecord.target_id).toLowerCase()) {
+    console.warn('Blocked self-review sync to Supabase.');
+    return;
+  }
   try {
-    await sb.from('reviews').insert({
-      id: reviewRecord.id,
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(String(reviewRecord.reviewer_id || '')) || !uuidRegex.test(String(reviewRecord.target_id || ''))) {
+      return;
+    }
+    const payload = {
       reviewer_id: reviewRecord.reviewer_id,
       target_id: reviewRecord.target_id,
+      reviewer_name: reviewRecord.reviewer_name || null,
+      reviewer_company: reviewRecord.reviewer_company || null,
+      project_title: reviewRecord.project_title || null,
       rating: reviewRecord.rating,
       comment: reviewRecord.comment
-    });
+    };
+    if (uuidRegex.test(String(reviewRecord.id || ''))) {
+      payload.id = reviewRecord.id;
+    }
+    await sb.from('reviews').insert(payload);
   } catch (err) {
     console.warn('Supabase review sync notice:', err);
   }
@@ -6684,7 +8011,7 @@ Overall Trust Score: <strong>96 / 100 &bull; EXCELLENT</strong> 🛡️<br><br>
 
   // Fallback PRD knowledge
   if (q.includes('price') || q.includes('subscription') || q.includes('fee') || q.includes('cost')) {
-    return `💰 <strong>Collekt Membership &amp; Pricing (PRD Specification)</strong>:<br>&bull; <strong>Professional Plus</strong>: $15 / month<br>&bull; <strong>Company Business</strong>: $50 / month<br>&bull; <strong>Platform Commission Fee</strong>: 15% on completed project engagements.`;
+    return `💰 <strong>Collekt Membership &amp; Pricing (PRD Specification)</strong>:<br>&bull; <strong>Professional Plus</strong>: ₦19,999 / month (Save 5% Quarterly, 10% Bi-Annually, 17% Annually)<br>&bull; <strong>Company Business</strong>: ₦74,999 / month (Save 5% Quarterly, 10% Bi-Annually, 17% Annually)<br>&bull; <strong>Platform Commission Fee</strong>: 15% on completed project engagements.`;
   }
 
   if (q.includes('verify') || q.includes('verification') || q.includes('shield') || q.includes('nin') || q.includes('cac')) {
@@ -7503,7 +8830,7 @@ function openLegalQuickView(type = 'terms') {
         <li><strong>Technology Marketplace Intermediary:</strong> Collekt Technologies Ltd operates strictly as a neutral technology marketplace, software venue, and escrow intermediary. Collekt is not an employer, general contractor, or engineering firm.</li>
         <li><strong>Milestone Escrow Security:</strong> Project funds are deposited via Korapay and Paystack payment rails into protected escrow custody and disbursed only upon verified milestone approval or 14-day lapse without dispute.</li>
         <li><strong>Automated NUBAN Payouts:</strong> Freelance professionals receive verified NIBSS instant bank transfers directly to their designated Nigerian commercial bank accounts.</li>
-        <li><strong>Platform Fees:</strong> Transparent 15% platform commission on completed project milestones, alongside optional Pro ($15/mo) and Enterprise ($50/mo) memberships.</li>
+        <li><strong>Platform Fees:</strong> Transparent 15% platform commission on completed project milestones, alongside optional Pro (₦19,999/mo) and Enterprise (₦74,999/mo) memberships.</li>
         <li><strong>COREN &amp; CAC Licensure:</strong> Engineers warrant valid COREN registration; corporate entities warrant valid CAC incorporation under CAMA 2020.</li>
         <li><strong>Workplace HSE Safe Harbor:</strong> Worksites, field safety, and physical compliance remain the exclusive duty of clients and executing contractors.</li>
         <li><strong>Limitation of Liability:</strong> Aggregate liability is strictly capped at platform commissions received (max NGN 50,000).</li>

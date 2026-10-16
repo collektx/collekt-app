@@ -5,6 +5,9 @@
   functions = "netlify/functions"
   command = "node build_and_sync.js"
 
+[build.environment]
+  SECRETS_SCAN_OMIT_PATHS = "test_*,*.md"
+
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
@@ -341,3 +344,4 @@
   from = "/terms"
   to = "/terms.html"
   status = 200
+

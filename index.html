@@ -89,9 +89,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=160.0">
-<link rel="stylesheet" href="shared.css?v=160.0">
-<link rel="stylesheet" href="glass.css?v=160.0">
+<link rel="stylesheet" href="style.css?v=173.0">
+<link rel="stylesheet" href="shared.css?v=173.0">
+<link rel="stylesheet" href="glass.css?v=173.0">
 <style>
 /* -- GLOBAL OVERRIDES ------------------------------- */
 html.dark body { background: #090d0c; }
@@ -185,16 +185,30 @@ html.dark body { background: #090d0c; }
 .hero-cta-row .btn { letter-spacing: .01em; }
 
 .hero-social-proof { display: flex; align-items: center; gap: 16px; }
-.avatars-stack { display: flex; }
+.avatars-stack { display: flex; align-items: center; }
 .avatars-stack .av {
   width: 36px; height: 36px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.15);
+  border: 2px solid rgba(255,255,255,.18);
   margin-left: -10px; display: grid; place-items: center;
   font-size: 12px; font-weight: 900; color: #fff;
   box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  user-select: none;
+}
+.avatars-stack .av:hover {
+  transform: translateY(-2px) scale(1.12);
+  box-shadow: 0 6px 16px rgba(0,0,0,.5);
+  border-color: var(--amber);
+  z-index: 10;
 }
 .avatars-stack .av:first-child { margin-left: 0; }
-.proof-text { font-size: 13px; color: rgba(255,255,255,.5); font-weight: 600; }
+.avatars-stack .av img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;
+}
+.proof-text { font-size: 13px; color: rgba(255,255,255,.6); font-weight: 600; }
 .proof-text strong { color: var(--amber); font-weight: 800; }
 
 /* hero divider tag */
@@ -786,15 +800,11 @@ html.dark .sec-h2 { color: #e2efed; }
         <a class='btn btn-amber' href='/register' style='min-height:52px; font-size:15px; padding:0 28px; box-shadow:0 8px 24px rgba(212,146,11,.35);'>👷 Join as a Professional &rarr;</a>
         <a class='btn btn-ghost' href='/register?role=company' style='min-height:52px; font-size:15px; padding:0 26px; border:1px solid rgba(255,255,255,0.3); color:#fff;'>🏢 Post a Tender / Enterprise</a>
       </div>
-      <div class="hero-social-proof">
-        <div class="avatars-stack">
-          <div class="av" style="background:#0E3B35;">J</div>
-          <div class="av" style="background:#B71C1C;">F</div>
-          <div class="av" style="background:#1A237E;">C</div>
-          <div class="av" style="background:#4A148C;">B</div>
-          <div class="av" style="background:#E65100;">E</div>
+      <div class="hero-social-proof" id="heroSocialProofWrap">
+        <div class="avatars-stack" id="heroAvatarsStack" aria-label="Registered Verified Professionals">
+          <!-- Populated in real-time with authentic registered professionals -->
         </div>
-        <div class="proof-text">Joined by <strong id="heroUserCount">verified</strong> Nigerian professionals</div>
+        <div class="proof-text" id="heroProofText">Joined by <strong id="heroUserCount">...</strong> registered Nigerian professionals</div>
       </div>
       <div class="hero-trust-strip">
         <div class="trust-item"><span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> Escrow Protected</div>
@@ -1137,7 +1147,7 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
 
     <!-- Review Category Filters -->
     <div style="display:flex; gap:10px; overflow-x:auto; padding-bottom:8px; margin-bottom:28px;" id="reviewFilterBar">
-      <button class="review-filter-pill active" onclick="filterReviews('all', this)">🌟 All Reviews (<span id="countAllReviews">4</span>)</button>
+      <button class="review-filter-pill active" onclick="filterReviews('all', this)">🌟 All Reviews (<span id="countAllReviews">0</span>)</button>
       <button class="review-filter-pill" onclick="filterReviews('performance', this)">⚡ Platform Speed &amp; Performance</button>
       <button class="review-filter-pill" onclick="filterReviews('pro', this)">💼 Professional Freelancers</button>
       <button class="review-filter-pill" onclick="filterReviews('company', this)">🏢 Company &amp; Hiring</button>
@@ -1340,9 +1350,9 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=160.0"></script>
-<script src="app.js?v=160.0"></script>
-<script src="settings-popup.js?v=160.0"></script>
+<script src="supabase.js?v=173.0"></script>
+<script src="app.js?v=173.0"></script>
+<script src="settings-popup.js?v=173.0"></script>
 <script>
   // Phone tab switcher & Mascot handler
   let currentPhoneRole = 'professional';
@@ -1561,15 +1571,149 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
     grid.style.transition = 'opacity .2s';
   }
 
-  // Dynamic real user count on hero
-  (function() {
+  // ═ HERO SOCIAL PROOF: REAL-TIME REGISTERED PROFESSIONALS ═
+  let liveHeroProfessionals = [];
+
+  function safeEscapeHtml(str) {
+    if (typeof escapeHTML === 'function') return escapeHTML(str);
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  async function renderLiveHeroProfessionals() {
+    const stackEl = document.getElementById('heroAvatarsStack');
+    const countEl = document.getElementById('heroUserCount');
+    if (!stackEl || !countEl) return;
+
+    // 1. Gather all authentic registered professionals from local directory
+    const dirUsers = typeof getAllRegisteredUsers === 'function' ? getAllRegisteredUsers() : [];
+    let pros = dirUsers.filter(u => u && (u.role === 'professional' || !u.role));
+
+    // 2. Fetch fresh live professionals from Supabase profiles
+    if (window.sb) {
+      try {
+        const { data, error } = await window.sb
+          .from('profiles')
+          .select('id, full_name, email, role, avatar_url, title, status, created_at')
+          .eq('role', 'professional')
+          .neq('status', 'deleted')
+          .order('created_at', { ascending: false });
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const map = new Map();
+          // Seed local directory first
+          pros.forEach(p => {
+            const key = String(p.email || p.id).toLowerCase().trim();
+            map.set(key, p);
+          });
+          // Update / override with authentic Supabase records
+          data.forEach(p => {
+            const key = String(p.email || p.id).toLowerCase().trim();
+            const prev = map.get(key) || {};
+            map.set(key, {
+              ...prev,
+              id: p.id,
+              name: p.full_name || prev.name || 'Verified Professional',
+              email: p.email,
+              role: 'professional',
+              avatar_url: p.avatar_url || prev.avatar_url || '',
+              title: p.title || prev.title || 'Energy Specialist',
+              status: p.status
+            });
+          });
+          pros = Array.from(map.values());
+        }
+      } catch(err) {
+        console.warn('Realtime pros sync note:', err);
+      }
+    }
+
+    // 3. Purge any deleted accounts under NDPA Section 34
+    let deletedUsers = [];
     try {
-      const all = JSON.parse(localStorage.getItem('collekt_all_users')) || [];
-      const count = all.filter(u => u && (u.id || u.email)).length;
-      const el = document.getElementById('heroUserCount');
-      if (el) el.textContent = count > 1 ? count + '+' : 'verified';
+      deletedUsers = (JSON.parse(localStorage.getItem('collekt_deleted_users') || '[]')).map(x => String(x).toLowerCase().trim());
     } catch(e) {}
-  })();
+
+    pros = pros.filter(p => {
+      if (!p) return false;
+      const id = String(p.id || '').toLowerCase().trim();
+      const email = String(p.email || '').toLowerCase().trim();
+      const name = String(p.name || '').toLowerCase().trim();
+      if (p.status === 'deleted') return false;
+      if (deletedUsers.some(d => d && (d === id || d === email || d === name))) return false;
+      return true;
+    });
+
+    liveHeroProfessionals = pros;
+    const totalCount = pros.length;
+
+    // Update count in hero badge
+    countEl.textContent = totalCount > 0 ? (totalCount >= 5 ? `${totalCount}+` : `${totalCount}`) : 'verified';
+
+    // Obsidian velvet palette for avatar initials
+    const bgPalette = ['#0E3B35', '#13756F', '#1A237E', '#065F46', '#0F766E', '#B45309', '#312E81', '#1E3A8A'];
+
+    // Display up to 5 real professionals in the stack
+    const displayPros = pros.slice(0, 5);
+
+    if (displayPros.length === 0) {
+      stackEl.innerHTML = `<div class="av" style="background:#0E3B35;" title="Join Collekt as a Professional">👷</div>`;
+      return;
+    }
+
+    stackEl.innerHTML = displayPros.map((p, idx) => {
+      const name = p.name || p.full_name || 'Professional';
+      const initial = name.trim().charAt(0).toUpperCase() || 'P';
+      const bg = bgPalette[idx % bgPalette.length];
+      const title = p.title || 'Engineering Specialist';
+      const avatarUrl = p.avatar_url || p.avatar || '';
+      const tooltip = `${name} • ${title} (Verified Professional)`;
+
+      if (avatarUrl && avatarUrl.startsWith('http')) {
+        return `
+          <div class="av" style="background:${bg};" title="${safeEscapeHtml(tooltip)}" onclick="window.location.href='/marketplace?q=${encodeURIComponent(name)}'">
+            <img src="${safeEscapeHtml(avatarUrl)}" alt="${safeEscapeHtml(name)}" onerror="this.remove(); this.parentElement.textContent='${initial}';">
+          </div>
+        `;
+      }
+
+      return `
+        <div class="av" style="background:${bg};" title="${safeEscapeHtml(tooltip)}" onclick="window.location.href='/marketplace?q=${encodeURIComponent(name)}'">
+          ${initial}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function initHeroProfessionalsRealtime() {
+    renderLiveHeroProfessionals();
+
+    if (window.sb && typeof window.sb.channel === 'function') {
+      try {
+        window.sb.channel('realtime_hero_pros')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+            renderLiveHeroProfessionals();
+          })
+          .subscribe();
+      } catch(e) {
+        console.warn('Hero realtime channel warning:', e);
+      }
+    }
+
+    // Cross-tab and local state listeners
+    window.addEventListener('collekt_users_updated', renderLiveHeroProfessionals);
+    window.addEventListener('collekt_user_deleted', renderLiveHeroProfessionals);
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'collekt_all_users' || e.key === 'collekt_deleted_users') {
+        renderLiveHeroProfessionals();
+      }
+    });
+  }
 
   // Navbar scroll effect
   const navbar = document.getElementById('navbar');
@@ -1592,99 +1736,134 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
   }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
   document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-  /* ═ COMMUNITY & PERFORMANCE REVIEW ENGINE ═ */
-  const defaultCommunityReviews = [
-    {
-      id: 'rev_1',
-      name: 'Dave Oladapo Ojeowere',
-      initial: 'D',
-      bg: '#0E3B35',
-      role: 'Senior Proposal Manager, Lagos',
-      category: 'performance',
-      categoryName: '⚡ Platform Performance',
-      rating: 5,
-      perfRating: 5,
-      title: 'Lightning fast response times & seamless proposal workflows',
-      quote: 'Creating my verified profile on Collekt opened doors I didn\'t know existed. Within weeks I was receiving serious project enquiries from IOCs and EPC companies. The platform response time and glass UI feel exceptionally responsive on both mobile and web.',
-      date: '2 days ago',
-      verified: true,
-      helpfulCount: 38
-    },
-    {
-      id: 'rev_2',
-      name: 'Engr. Babatunde Lawal',
-      initial: 'B',
-      bg: '#1A237E',
-      role: 'Enterprise Director, Energy Sector',
-      category: 'company',
-      categoryName: '🏢 Company Experience',
-      rating: 5,
-      perfRating: 5,
-      title: 'Shortlisted verified specialists in under 48 hours',
-      quote: 'We posted an EPC project brief and had qualified, verified proposals in under 48 hours. The calibre of professionals on this platform is exceptional. The NOVA Bank escrow system means we only pay when milestones are satisfactorily delivered.',
-      date: '5 days ago',
-      verified: true,
-      helpfulCount: 29
-    },
-    {
-      id: 'rev_3',
-      name: 'Chioma Adeyemi',
-      initial: 'C',
-      bg: '#4A148C',
-      role: 'HSE & QA/QC Specialist, Port Harcourt',
-      category: 'escrow',
-      categoryName: '🛡️ Escrow & Security',
-      rating: 5,
-      perfRating: 5,
-      title: 'Complete peace of mind with guaranteed escrow payouts',
-      quote: 'The escrow payment system gives me complete peace of mind. I know my milestone funds are locked before I even start work on site. Getting my profile verified and shield badge was fast and straightforward.',
-      date: '1 week ago',
-      verified: true,
-      helpfulCount: 42
-    },
-    {
-      id: 'rev_4',
-      name: 'Ibrahim Musa',
-      initial: 'I',
-      bg: '#006064',
-      role: 'Civil Infrastructure Consultant, Abuja',
-      category: 'pro',
-      categoryName: '💼 Professional Services',
-      rating: 5,
-      perfRating: 5,
-      title: 'Best digital platform for Nigerian engineering tenders',
-      quote: 'The tender search and milestone submission engine are top-tier. Finding institutional infrastructure RFPs has never been this smooth. The mobile experience with Kolly AI makes managing bids effortless on the go.',
-      date: '2 weeks ago',
-      verified: true,
-      helpfulCount: 21
-    }
-  ];
-
-  function getCommunityReviews() {
-    try {
-      const stored = JSON.parse(localStorage.getItem('collekt_user_reviews') || '[]');
-      if (Array.isArray(stored) && stored.length > 0) {
-        const all = [...stored];
-        defaultCommunityReviews.forEach(defRev => {
-          if (!all.some(r => r.id === defRev.id)) {
-            all.push(defRev);
-          }
-        });
-        return all;
-      }
-    } catch(e) {}
-    return defaultCommunityReviews;
-  }
-
-  function saveCommunityReviews(reviews) {
-    try {
-      localStorage.setItem('collekt_user_reviews', JSON.stringify(reviews));
-    } catch(e) {}
-  }
-
+  /* ═ COMMUNITY & PERFORMANCE REVIEW ENGINE (100% REAL & REALTIME) ═ */
+  let livePlatformReviews = [];
   let activeReviewCategory = 'all';
   let currentReviewRating = 5;
   let currentPerfRating = 5;
+
+  function purgeSyntheticReviews() {
+    try {
+      const raw = JSON.parse(localStorage.getItem('collekt_user_reviews') || '[]');
+      if (Array.isArray(raw) && raw.length > 0) {
+        const cleaned = raw.filter(r => {
+          if (!r) return false;
+          const id = String(r.id || '');
+          const name = String(r.name || r.author_name || '').toLowerCase();
+          const quote = String(r.quote || '').toLowerCase();
+          if (id === 'rev_1' || id === 'rev_2' || id === 'rev_3' || id === 'rev_4') return false;
+          if (name.includes('babatunde lawal') || name.includes('chioma adeyemi') || name.includes('ibrahim musa')) return false;
+          if (quote.includes('opened doors i didn\'t know existed')) return false;
+          return true;
+        });
+        localStorage.setItem('collekt_user_reviews', JSON.stringify(cleaned));
+        livePlatformReviews = cleaned;
+      } else {
+        livePlatformReviews = [];
+      }
+    } catch(e) {
+      livePlatformReviews = [];
+    }
+  }
+
+  function getReviewCategoryBadge(cat) {
+    const map = {
+      performance: '⚡ Platform Speed',
+      pro: '💼 Professional Services',
+      company: '🏢 Company Experience',
+      escrow: '🛡️ Escrow & Security',
+      general: '🌟 General Platform Feedback'
+    };
+    return map[cat] || '🌟 Community Review';
+  }
+
+  function formatReviewRelativeDate(dateStr) {
+    if (!dateStr) return 'Recent';
+    try {
+      const diffMs = Date.now() - new Date(dateStr).getTime();
+      const diffSec = Math.floor(diffMs / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHours = Math.floor(diffMin / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffMin < 2) return 'Just now';
+      if (diffMin < 60) return `${diffMin}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays === 1) return 'Yesterday';
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+      return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    } catch(e) {
+      return 'Recent';
+    }
+  }
+
+  async function syncPlatformReviewsFromSupabase() {
+    purgeSyntheticReviews();
+
+    if (window.sb) {
+      try {
+        const { data, error } = await window.sb
+          .from('platform_reviews')
+          .select('*')
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false });
+
+        if (!error && Array.isArray(data)) {
+          const bgPalette = ['#0E3B35', '#13756F', '#1A237E', '#065F46', '#0F766E', '#B45309'];
+          livePlatformReviews = data.map((r, idx) => ({
+            id: r.id,
+            name: r.author_name || 'Verified Member',
+            initial: (r.author_name || 'U').trim().charAt(0).toUpperCase(),
+            bg: bgPalette[idx % bgPalette.length],
+            role: r.author_role || 'Verified Member',
+            category: r.category || 'general',
+            categoryName: getReviewCategoryBadge(r.category),
+            rating: Number(r.rating) || 5,
+            perfRating: Number(r.perf_rating) || 5,
+            title: r.title || '',
+            quote: r.quote || '',
+            date: formatReviewRelativeDate(r.created_at),
+            created_at: r.created_at,
+            verified: Boolean(r.verified),
+            helpfulCount: Number(r.helpful_count) || 0,
+            authorAvatar: r.author_avatar || ''
+          }));
+          localStorage.setItem('collekt_user_reviews', JSON.stringify(livePlatformReviews));
+        }
+      } catch(err) {
+        console.warn('Sync platform reviews warning:', err);
+      }
+    }
+
+    renderCommunityReviews();
+  }
+
+  function initPlatformReviewsRealtime() {
+    syncPlatformReviewsFromSupabase();
+
+    if (window.sb && typeof window.sb.channel === 'function') {
+      try {
+        window.sb.channel('realtime_community_reviews')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'platform_reviews' }, (payload) => {
+            console.log('Realtime community reviews event:', payload.eventType);
+            syncPlatformReviewsFromSupabase();
+          })
+          .subscribe();
+      } catch(e) {
+        console.warn('Reviews realtime subscription error:', e);
+      }
+    }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'collekt_user_reviews') {
+        try {
+          livePlatformReviews = JSON.parse(e.newValue || '[]');
+          renderCommunityReviews();
+        } catch(err) {}
+      }
+    });
+  }
 
   const starDescriptions = {
     1: '1.0 — Needs Improvement',
@@ -1788,30 +1967,47 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
     renderCommunityReviews();
   }
 
-  function toggleReviewHelpful(revId) {
+  async function toggleReviewHelpful(revId) {
     let voted = [];
     try { voted = JSON.parse(localStorage.getItem('collekt_helpful_reviews') || '[]'); } catch(e) {}
     
-    const reviews = getCommunityReviews();
-    const target = reviews.find(r => r.id === revId);
-    if (!target) return;
-
     if (voted.includes(revId)) {
       if (typeof showToast === 'function') showToast('You already found this review helpful! 👍');
       return;
     }
 
+    const target = livePlatformReviews.find(r => r.id === revId);
+    if (!target) return;
+
     voted.push(revId);
     target.helpfulCount = (target.helpfulCount || 0) + 1;
-    saveCommunityReviews(reviews);
+    localStorage.setItem('collekt_user_reviews', JSON.stringify(livePlatformReviews));
     localStorage.setItem('collekt_helpful_reviews', JSON.stringify(voted));
     
     renderCommunityReviews();
     if (typeof showToast === 'function') showToast('👍 Thank you for your feedback!');
+
+    // Persist to Supabase if UUID
+    if (window.sb && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(revId)) {
+      try {
+        await window.sb
+          .from('platform_reviews')
+          .update({ helpful_count: target.helpfulCount })
+          .eq('id', revId);
+      } catch(err) {
+        console.warn('Helpful count update error:', err);
+      }
+    }
   }
 
-  function submitCommunityReview(e) {
+  async function submitCommunityReview(e) {
     e.preventDefault();
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Submitting Review...';
+    }
+
     const name = document.getElementById('reviewAuthorName').value.trim();
     const role = document.getElementById('reviewAuthorRole').value.trim();
     const category = document.getElementById('reviewCategoryInput').value;
@@ -1820,50 +2016,89 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
 
     if (!name || !title || !quote) {
       if (typeof showToast === 'function') showToast('⚠️ Please fill out all required review fields', 'warning');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = 'Submit Review ⭐'; }
       return;
     }
 
-    const catLabels = {
-      performance: '⚡ Platform Performance',
-      pro: '💼 Professional Services',
-      company: '🏢 Company Experience',
-      escrow: '🛡️ Escrow & Security',
-      general: '🌟 General Platform Feedback'
-    };
-
     const user = typeof getUser === 'function' ? getUser() : null;
-    const isVerified = user ? (user.verified || user.identity_verified || false) : true;
-    const initial = name.charAt(0).toUpperCase();
+    const isVerified = user ? (user.verified || user.is_verified || false) : true;
+    const authorAvatar = user ? (user.avatar_url || user.avatar || '') : '';
+    const authorId = user && user.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.id) ? user.id : null;
+
     const bgColors = ['#0E3B35', '#13756F', '#1A237E', '#4A148C', '#006064', '#B45309'];
     const randomBg = bgColors[Math.floor(Math.random() * bgColors.length)];
 
+    const tempId = 'rev_' + Date.now();
     const newReview = {
-      id: 'rev_' + Date.now(),
+      id: tempId,
       name: name,
-      initial: initial,
+      initial: name.charAt(0).toUpperCase(),
       bg: randomBg,
-      role: role,
+      role: role || (user && user.role === 'company' ? 'Enterprise Client' : 'Professional Specialist'),
       category: category,
-      categoryName: catLabels[category] || '🌟 Community Review',
+      categoryName: getReviewCategoryBadge(category),
       rating: currentReviewRating,
       perfRating: currentPerfRating,
       title: title,
       quote: quote,
       date: 'Just now',
       verified: isVerified,
-      helpfulCount: 1
+      helpfulCount: 0,
+      authorAvatar: authorAvatar
     };
 
-    const all = getCommunityReviews();
-    all.unshift(newReview);
-    saveCommunityReviews(all);
+    // Optimistic local update
+    livePlatformReviews.unshift(newReview);
+    localStorage.setItem('collekt_user_reviews', JSON.stringify(livePlatformReviews));
 
     closeReviewModal();
     renderCommunityReviews();
-    
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Submit Review ⭐';
+    }
+
     if (typeof showToast === 'function') {
       showToast('⭐ Thank you for your review! Your feedback is live.');
     }
+
+    // Persist to Supabase
+    if (window.sb) {
+      try {
+        const payload = {
+          author_id: authorId,
+          author_name: name,
+          author_role: newReview.role,
+          author_avatar: authorAvatar,
+          category: category,
+          rating: currentReviewRating,
+          perf_rating: currentPerfRating,
+          title: title,
+          quote: quote,
+          verified: isVerified,
+          helpful_count: 0,
+          status: 'approved'
+        };
+
+        const { data, error } = await window.sb
+          .from('platform_reviews')
+          .insert([payload])
+          .select();
+
+        if (error) {
+          console.warn('Supabase review insert warning:', error);
+        } else if (data && data[0]) {
+          newReview.id = data[0].id;
+          localStorage.setItem('collekt_user_reviews', JSON.stringify(livePlatformReviews));
+        }
+      } catch(err) {
+        console.warn('Review save exception:', err);
+      }
+    }
+
+    const form = document.getElementById('writeReviewForm');
+    if (form) form.reset();
 
     const testiSection = document.getElementById('testimonials');
     if (testiSection) {
@@ -1875,20 +2110,43 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
     const grid = document.getElementById('reviewsGridContainer');
     if (!grid) return;
 
-    const all = getCommunityReviews();
+    const all = Array.isArray(livePlatformReviews) ? livePlatformReviews : [];
     const filtered = (activeReviewCategory === 'all')
       ? all
       : all.filter(r => r.category === activeReviewCategory);
 
     // Update Overall Scorecard Metrics
-    const avgScore = (all.reduce((acc, r) => acc + (r.rating || 5), 0) / (all.length || 1)).toFixed(1);
+    const avgScore = all.length > 0
+      ? (all.reduce((acc, r) => acc + (Number(r.rating) || 5), 0) / all.length).toFixed(1)
+      : '5.0';
     const scoreEl = document.getElementById('overallReviewScore');
     const totalCountEl = document.getElementById('totalReviewsCountText');
     const countAllEl = document.getElementById('countAllReviews');
 
     if (scoreEl) scoreEl.textContent = avgScore;
-    if (totalCountEl) totalCountEl.textContent = `Based on ${all.length} Verified Reviews`;
+    if (totalCountEl) totalCountEl.textContent = all.length > 0 ? `Based on ${all.length} Verified Review${all.length > 1 ? 's' : ''}` : 'Authentic Reviews • Live';
     if (countAllEl) countAllEl.textContent = all.length;
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:48px 24px; text-align:center; max-width:680px; margin:0 auto; box-shadow:0 12px 32px rgba(0,0,0,0.15);">
+          <div style="display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%; background:rgba(212,146,11,0.12); border:1px solid rgba(212,146,11,0.25); color:var(--amber); font-size:28px; margin-bottom:18px;">
+            ⭐
+          </div>
+          <div style="display:inline-block; background:rgba(19,117,111,0.15); color:var(--teal); border:1px solid rgba(19,117,111,0.25); font-size:11px; font-weight:800; padding:4px 12px; border-radius:999px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">
+            🛡️ Real-Time &amp; Verified Only
+          </div>
+          <h3 style="font-size:20px; font-weight:900; color:var(--ink); margin-bottom:10px;">Authentic Community Feedback</h3>
+          <p style="font-size:14px; color:var(--muted); line-height:1.6; max-width:520px; margin:0 auto 24px;">
+            Collekt does not display fabricated testimonials. We only publish authentic, real-time reviews submitted by registered engineers, EPC contractors, and corporate clients.
+          </p>
+          <button onclick="openReviewModal()" class="btn btn-primary" style="background:var(--forest); border:1px solid var(--amber); font-weight:800; padding:12px 28px; border-radius:12px; box-shadow:0 8px 24px rgba(212,146,11,0.25); cursor:pointer;">
+            ✍️ Write the First Verified Review
+          </button>
+        </div>
+      `;
+      return;
+    }
 
     let voted = [];
     try { voted = JSON.parse(localStorage.getItem('collekt_helpful_reviews') || '[]'); } catch(e) {}
@@ -1911,7 +2169,7 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
               </div>
               <div style="display:flex; gap:6px; align-items:center;">
                 <span style="background:rgba(19,117,111,0.1); color:var(--teal); border:1px solid rgba(19,117,111,0.2); font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px;">
-                  ${escapeHTML(r.categoryName || '⚡ Performance')}
+                  ${safeEscapeHtml(r.categoryName || '⚡ Performance')}
                 </span>
                 ${r.perfRating ? `
                   <span style="background:rgba(212,146,11,0.12); color:var(--amber); border:1px solid rgba(212,146,11,0.25); font-size:10px; font-weight:800; padding:3px 7px; border-radius:999px;" title="Website UX & Speed Rating">
@@ -1922,24 +2180,29 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
             </div>
 
             <!-- Headline -->
-            ${r.title ? `<div style="font-size:15px; font-weight:800; color:var(--ink); margin-bottom:8px; line-height:1.4;">${escapeHTML(r.title)}</div>` : ''}
+            ${r.title ? `<div style="font-size:15px; font-weight:800; color:var(--ink); margin-bottom:8px; line-height:1.4;">${safeEscapeHtml(r.title)}</div>` : ''}
 
             <!-- Quote -->
             <div class="testi-quote" style="margin-bottom:20px; font-size:14px; line-height:1.65;">
-              "${escapeHTML(r.quote)}"
+              "${safeEscapeHtml(r.quote)}"
             </div>
           </div>
 
           <!-- Author footer & Helpful Button -->
           <div style="border-top:1px solid var(--line); padding-top:14px; display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px;">
             <div class="testi-author">
-              <div class="testi-av" style="background:${r.bg || '#0E3B35'};">${escapeHTML(r.initial || 'U')}</div>
+              <div class="testi-av" style="background:${r.bg || '#0E3B35'}; overflow:hidden;">
+                ${r.authorAvatar && r.authorAvatar.startsWith('http')
+                  ? `<img src="${safeEscapeHtml(r.authorAvatar)}" alt="${safeEscapeHtml(r.name)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.remove(); this.parentElement.textContent='${safeEscapeHtml(r.initial || 'U')}';">`
+                  : safeEscapeHtml(r.initial || 'U')
+                }
+              </div>
               <div>
                 <div class="testi-name" style="display:flex; align-items:center; gap:4px;">
-                  ${escapeHTML(r.name)}
+                  ${safeEscapeHtml(r.name)}
                   ${r.verified ? '<span title="Verified Collekt Member" style="font-size:11px;">🛡️</span>' : ''}
                 </div>
-                <div class="testi-role">${escapeHTML(r.role || 'Member')} &bull; <span style="opacity:0.75;">${escapeHTML(r.date || 'Recent')}</span></div>
+                <div class="testi-role">${safeEscapeHtml(r.role || 'Member')} &bull; <span style="opacity:0.75;">${safeEscapeHtml(r.date || 'Recent')}</span></div>
               </div>
             </div>
 
@@ -1952,9 +2215,10 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
     }).join('');
   }
 
-  // Initialize reviews on DOM load
+  // Initialize reviews and hero on DOM load
   document.addEventListener('DOMContentLoaded', () => {
-    renderCommunityReviews();
+    initHeroProfessionalsRealtime();
+    initPlatformReviewsRealtime();
 
     // Check for NDPA Section 34 account deletion redirect
     const urlParams = new URLSearchParams(window.location.search);
@@ -1968,6 +2232,8 @@ html.dark .ioc-name { color:rgba(255,255,255,.45); }
     }
   });
 
+  window.renderLiveHeroProfessionals = renderLiveHeroProfessionals;
+  window.syncPlatformReviewsFromSupabase = syncPlatformReviewsFromSupabase;
   window.openReviewModal = openReviewModal;
   window.closeReviewModal = closeReviewModal;
   window.filterReviews = filterReviews;

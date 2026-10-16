@@ -53,9 +53,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=160.0">
-<link rel="stylesheet" href="shared.css?v=160.0">
-<link rel="stylesheet" href="glass.css?v=160.0">
+<link rel="stylesheet" href="style.css?v=173.0">
+<link rel="stylesheet" href="shared.css?v=173.0">
+<link rel="stylesheet" href="glass.css?v=173.0">
 
 <style>
   /* Corporate Tax Invoice Print Styles */
@@ -645,17 +645,17 @@
           <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
             <div style="padding:20px; background:var(--paper); border:1px solid var(--line); border-radius:14px; text-align:center;">
               <div style="font-size:11px; font-weight:800; color:var(--muted);">FREE TIER</div>
-              <div style="font-size:24px; font-weight:900; color:var(--ink); margin:6px 0;">$0 / mo</div>
+              <div style="font-size:24px; font-weight:900; color:var(--ink); margin:6px 0;">₦0 / mo</div>
               <div style="font-size:14px; font-weight:800; color:var(--teal);" id="subFreeCount">0 Registered Users</div>
             </div>
             <div style="padding:20px; background:var(--paper); border:2px solid var(--teal); border-radius:14px; text-align:center;">
               <div style="font-size:11px; font-weight:800; color:var(--teal);">PRO PROFESSIONAL</div>
-              <div style="font-size:24px; font-weight:900; color:var(--ink); margin:6px 0;">$15 / mo</div>
+              <div style="font-size:24px; font-weight:900; color:var(--ink); margin:6px 0;">₦19,999 / mo</div>
               <div style="font-size:14px; font-weight:800; color:var(--teal);" id="subProCount">0 Active Pros</div>
             </div>
             <div style="padding:20px; background:var(--paper); border:2px solid var(--amber); border-radius:14px; text-align:center;">
               <div style="font-size:11px; font-weight:800; color:var(--amber);">CORPORATE ENTERPRISE</div>
-              <div style="font-size:24px; font-weight:900; color:var(--ink); margin:6px 0;">$50 / mo</div>
+              <div style="font-size:24px; font-weight:900; color:var(--ink); margin:6px 0;">₦74,999 / mo</div>
               <div style="font-size:14px; font-weight:800; color:var(--amber);" id="subCorpCount">0 Active Companies</div>
             </div>
           </div>
@@ -763,11 +763,11 @@
             </div>
             <div class="form-group" style="margin:0;">
               <label class="form-label" style="font-size:11.5px; font-weight:800;">Master NUBAN Account Number</label>
-              <input class="form-input" type="tel" id="adminMasterNovaAcct" maxlength="10" placeholder="e.g. 0129845011" style="font-family:monospace; font-size:15px; font-weight:900;">
+              <input class="form-input" type="tel" id="adminMasterNovaAcct" maxlength="10" placeholder="e.g. 1001025797" value="1001025797" style="font-family:monospace; font-size:15px; font-weight:900;">
             </div>
             <div class="form-group" style="margin:0;">
               <label class="form-label" style="font-size:11.5px; font-weight:800;">Official Account Holder Name</label>
-              <input class="form-input" type="text" id="adminMasterNovaName" placeholder="e.g. COLLEKT ENTERPRISE / NOVA ESCROW" style="font-weight:800; text-transform:uppercase;">
+              <input class="form-input" type="text" id="adminMasterNovaName" placeholder="e.g. COLLEKT NG" value="COLLEKT NG" style="font-weight:800; text-transform:uppercase;">
             </div>
           </div>
 
@@ -1124,8 +1124,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=160.0"></script>
-<script src="app.js?v=160.0"></script>
+<script src="supabase.js?v=173.0"></script>
+<script src="app.js?v=173.0"></script>
 <script>
   async function initAdminDashboard() {
     // 0. Sanitize local storage to purge any stale test rows or probe transactions
@@ -1213,7 +1213,7 @@
     // 2. Safe resilient remote user sync from Supabase database
     try {
       let remoteList = [];
-      const testTokens = ['chenpao51@gmail.com', 'grumpyluan@gmail.com', 'bethelvwire', 'officialthelma@gmail.com'];
+      const testTokens = ['grumpyluan@gmail.com', 'bethelvwire', 'officialthelma@gmail.com'];
 
       // Tier 1: Call secure Postgres RPC get_admin_directory()
       if (window.sb && typeof sb.rpc === 'function') {
@@ -1669,11 +1669,11 @@
   }
 
   function initAdminMasterNovaUI() {
-    const master = typeof getMasterNovaAccount === 'function' ? getMasterNovaAccount() : { account_number: '0129845011', account_name: 'COLLEKT ENTERPRISE / NOVA ESCROW' };
+    const master = typeof getMasterNovaAccount === 'function' ? getMasterNovaAccount() : { account_number: '1001025797', account_name: 'COLLEKT NG' };
     const acctInput = document.getElementById('adminMasterNovaAcct');
     const nameInput = document.getElementById('adminMasterNovaName');
-    if (acctInput && !acctInput.value) acctInput.value = master.account_number || '0129845011';
-    if (nameInput && !nameInput.value) nameInput.value = master.account_name || 'COLLEKT ENTERPRISE / NOVA ESCROW';
+    if (acctInput) acctInput.value = master.account_number || '1001025797';
+    if (nameInput) nameInput.value = master.account_name || 'COLLEKT NG';
   }
 
   function saveAdminMasterNovaAccount() {
