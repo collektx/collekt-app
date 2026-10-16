@@ -4596,17 +4596,17 @@ function renderPremiumUpgradeCard(containerId, forcedRole) {
   const isPremium = !!(user.is_premium || user.subscription_tier === (isCompany ? 'company_enterprise' : 'pro_plus'));
   const priceDisplay = isCompany ? '₦74,999 / Month' : '₦19,999 / Month';
   const tierName = isCompany ? 'Company Enterprise' : 'Professional Plus';
+  const tierTag = isCompany ? 'ENTERPRISE TIER' : 'PRO PLUS TIER';
   const bgGrad = isCompany 
     ? 'linear-gradient(135deg, var(--forest), #1a7a6f)' 
     : 'linear-gradient(135deg, var(--amber), #e8a612)';
-  const icon = isPremium ? '&#11088;' : (isCompany ? '&#127970;' : '&#9889;');
 
   targets.forEach(target => {
     if (isPremium) {
       target.innerHTML = `
         <div style="background:${bgGrad}; border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.12); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=${role}'">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <div style="font-size:24px;">${icon}</div>
+            <span style="font-size:10px; font-weight:800; letter-spacing:0.06em; opacity:0.85;">${tierTag}</span>
             <span style="background:rgba(255,255,255,0.25); color:#fff; font-size:11px; font-weight:800; padding:3px 10px; border-radius:99px;">ACTIVE SUBSCRIBER</span>
           </div>
           <h4 style="font-size:15px; font-weight:900; margin-bottom:4px;">${tierName} Active</h4>
@@ -4623,7 +4623,7 @@ function renderPremiumUpgradeCard(containerId, forcedRole) {
       target.innerHTML = `
         <div style="background:${bgGrad}; border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.12); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=${role}'">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <div style="font-size:24px;">${icon}</div>
+            <span style="font-size:10px; font-weight:800; letter-spacing:0.06em; opacity:0.85;">${tierTag}</span>
             <span style="background:rgba(255,255,255,0.28); color:#fff; font-size:11px; font-weight:900; padding:3px 8px; border-radius:99px; letter-spacing:0.3px;">${priceDisplay}</span>
           </div>
           <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Upgrade to ${isCompany ? 'Enterprise' : 'Pro'} (${priceDisplay})</h4>
@@ -5233,7 +5233,7 @@ function buildSidebar(activePage) {
       </nav>
       <div class="sidebar-bottom">
         <a class="sidebar-nav-item ${pageKey === 'upgrade' || currentPage.includes('upgrade') ? 'active' : ''}" href="upgrade.html?role=${isCompany ? 'company' : 'professional'}" style="background:linear-gradient(135deg, ${isCompany ? 'rgba(20,184,166,0.22), rgba(14,59,53,0.4)' : 'rgba(245,158,11,0.22), rgba(217,119,6,0.12)'}); border:1px solid ${isCompany ? 'rgba(20,184,166,0.35)' : 'rgba(245,158,11,0.35)'}; color:#fff; font-size:12.5px; font-weight:800; margin-bottom:6px; border-radius:12px;">
-          <span class="nav-icon">${isCompany ? '🏢' : '⚡'}</span>
+          <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
           <span>${activeUser.is_premium ? 'Manage Membership' : (isCompany ? 'Enterprise (₦74,999/mo)' : 'Pro Plus (₦19,999/mo)')}</span>
         </a>
         <a class="sidebar-nav-item" href="javascript:void(0)" onclick="if(window.openSettingsModal) openSettingsModal(); else showToast('Settings opening...');" style="color:rgba(255,255,255,.45); font-size:13px;">

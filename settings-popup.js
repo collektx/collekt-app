@@ -437,6 +437,12 @@
   /* -- MODAL HTML ------------------------------------ */
   function buildModal() {
     const isDark = getSetting('dark_mode', document.documentElement.classList.contains('dark'));
+    const currentUser = (typeof getUser === 'function' ? getUser() : null) || {};
+    const currentPage = (window.location.pathname.split('/').pop() || '').toLowerCase();
+    const isCompanyRole = (currentUser.role === 'company') || (localStorage.getItem('collekt_last_role') === 'company') || currentPage.includes('company');
+    const roleTierLabel = isCompanyRole ? 'Company Enterprise' : 'Professional Plus';
+    const roleTierFee = isCompanyRole ? '&#x20A6;74,999/mo' : '&#x20A6;19,999/mo';
+    const roleQuery = isCompanyRole ? 'company' : 'professional';
 
     const html = `
     <div class="settings-backdrop" id="settingsBackdrop" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
@@ -644,17 +650,15 @@
 
           <!-- 5b. MEMBERSHIP & SUBSCRIPTION BILLING -->
           <div class="settings-section">
-            <div class="settings-section-title">Membership &amp; Subscription Plans</div>
+            <div class="settings-section-title">Membership &amp; Subscription Plan</div>
             <div class="settings-row" style="align-items:center;">
               <div class="settings-row-info">
                 <div class="settings-row-label" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                  <span>⚡ Professional Plus: <strong>&#x20A6;19,999/mo</strong></span>
-                  <span style="color:#6B8280;">&bull;</span>
-                  <span>🏢 Company Enterprise: <strong>&#x20A6;74,999/mo</strong></span>
+                  <span>${roleTierLabel}: <strong>${roleTierFee}</strong></span>
                 </div>
-                <div class="settings-row-desc">Save 5% Quarterly, 10% Bi-Annually, or 17% Annually. Cancel or switch plans anytime.</div>
+                <div class="settings-row-desc">Save 5% Quarterly, 10% Bi-Annually, or 17% Annually. Cancel or switch billing cycle anytime.</div>
               </div>
-              <a href="upgrade.html" class="sett-btn sett-btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;">
+              <a href="upgrade.html?role=${roleQuery}" class="sett-btn sett-btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;">
                 Manage Plan &rarr;
               </a>
             </div>
@@ -666,12 +670,12 @@
             <div class="settings-row sett-review-row" style="align-items:center; cursor:pointer; padding:12px 14px; border-radius:14px;" onclick="openWebsiteReviewModal()">
               <div class="settings-row-info">
                 <div class="settings-row-label" style="display:flex; align-items:center; gap:6px;">
-                  Review Website &amp; Performance <span style="font-size:11px; padding:2px 8px; border-radius:10px; background:rgba(245,158,11,0.15); color:#d97706; font-weight:800;">⭐ Feedback</span>
+                  Review Website &amp; Performance <span style="font-size:11px; padding:2px 8px; border-radius:10px; background:rgba(245,158,11,0.15); color:#d97706; font-weight:800;">Feedback</span>
                 </div>
                 <div class="settings-row-desc">Share feedback on website speed, proposal workflows, or escrow payouts</div>
               </div>
               <button type="button" class="sett-btn sett-btn-outline" style="display:inline-flex; align-items:center; gap:6px; font-weight:800; cursor:pointer;" onclick="event.stopPropagation(); openWebsiteReviewModal();">
-                <span>✍️</span> Drop Review
+                Drop Review
               </button>
             </div>
           <!-- 6b. DATA PRIVACY & PORTABILITY (NDPA 2023) -->
@@ -685,7 +689,7 @@
                 <div class="settings-row-desc">Export a machine-readable JSON portfolio of your profile, wallet history, contracts, and proposals</div>
               </div>
               <button type="button" class="sett-btn sett-btn-outline" id="sett-export-data-btn" style="display:inline-flex; align-items:center; gap:6px; font-weight:800; cursor:pointer;" onclick="exportUserDataJSON()">
-                <span id="sett-export-icon">📥</span> <span id="sett-export-text">Export JSON</span>
+                <span id="sett-export-text">Export JSON</span>
               </button>
             </div>
           </div>

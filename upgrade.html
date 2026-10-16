@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=173.0">
-<link rel="stylesheet" href="shared.css?v=173.0">
-<link rel="stylesheet" href="glass.css?v=173.0">
+<link rel="stylesheet" href="style.css?v=174.0">
+<link rel="stylesheet" href="shared.css?v=174.0">
+<link rel="stylesheet" href="glass.css?v=174.0">
 
 <style>
   body {
@@ -382,16 +382,8 @@
 
         <!-- Upgrade Hero Header -->
         <div class="upgrade-hero fade-in">
-          <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
-            <button type="button" id="roleSwitchProBtn" onclick="setUpgradeRole('professional')" style="padding:6px 16px; border-radius:99px; font-weight:800; font-size:12.5px; cursor:pointer; border:1.5px solid rgba(212,146,11,0.4); background:rgba(212,146,11,0.16); color:var(--amber-dark, #b45309); transition:all 0.2s ease;">
-              ⚡ Professional Plus (₦19,999/mo)
-            </button>
-            <button type="button" id="roleSwitchCompanyBtn" onclick="setUpgradeRole('company')" style="padding:6px 16px; border-radius:99px; font-weight:800; font-size:12.5px; cursor:pointer; border:1.5px solid var(--line); background:var(--white); color:var(--muted); transition:all 0.2s ease;">
-              🏢 Company Enterprise (₦74,999/mo)
-            </button>
-          </div>
-          <div class="upgrade-badge" id="tierBadge" style="display:none;">
-            <span>⭐</span> <span id="tierBadgeText">Professional Tier</span>
+          <div class="upgrade-badge" id="tierBadge">
+            <span id="tierBadgeText">Professional Tier</span>
           </div>
           <h1 class="upgrade-title" id="pageMainTitle">Upgrade to Professional Plus</h1>
           <p class="upgrade-sub" id="pageMainSub">
@@ -451,7 +443,6 @@
             </div>
 
             <div style="background:var(--paper); border-radius:14px; padding:16px; margin-top:24px; display:flex; align-items:center; gap:12px; border:1px solid var(--line);">
-              <div style="font-size:24px;">🛡️</div>
               <div style="font-size:12px; color:var(--muted); line-height:1.4;">
                 <strong style="color:var(--ink);">Guaranteed Satisfaction:</strong> Subscriptions can be changed or cancelled anytime from your account settings with zero penalties.
               </div>
@@ -466,13 +457,11 @@
             <!-- Payment Method Tabs -->
             <div class="pm-tabs">
               <div class="pm-tab-btn active" id="pmTabCard" onclick="switchPaymentMethod('card')">
-                <div style="font-size:22px;">💳</div>
                 <div class="pm-title">Debit / Credit Card</div>
                 <div class="pm-sub">Korapay / Mastercard / Visa / Verve</div>
               </div>
 
               <div class="pm-tab-btn" id="pmTabWallet" onclick="switchPaymentMethod('wallet')">
-                <div style="font-size:22px;">💼</div>
                 <div class="pm-title">Collekt Wallet</div>
                 <div class="pm-sub" id="pmWalletBalanceSub">Balance: ₦0.00</div>
               </div>
@@ -489,7 +478,7 @@
                 <label class="form-label">Card Number</label>
                 <div style="position:relative;">
                   <input class="form-input" type="text" id="cardNumberInput" placeholder="5399 •••• •••• ••••" maxlength="19" oninput="formatCardNumberInput(this)" style="font-family:monospace; font-size:15px; font-weight:700; padding-right:45px; letter-spacing:0.08em;">
-                  <span class="card-brand-icon" id="cardBrandIcon">💳</span>
+                  <span class="card-brand-icon" id="cardBrandIcon" style="font-size:11px; font-weight:800; color:var(--muted);"></span>
                 </div>
               </div>
 
@@ -516,7 +505,7 @@
                 <div style="font-size:12px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;">Available Wallet Balance</div>
                 <div style="font-size:26px; font-weight:900; color:var(--forest); margin:4px 0;" id="walletBalanceDisplay">₦0.00</div>
                 <div id="walletSufficiencyPill" style="display:inline-block; font-size:11.5px; font-weight:800; padding:3px 12px; border-radius:99px; background:#dcfce7; color:#166534;">
-                  ✓ Sufficient Balance Available
+                  Sufficient Balance Available
                 </div>
               </div>
 
@@ -532,7 +521,7 @@
                 <strong>Insufficient wallet balance.</strong> You need an additional <span id="walletShortfallAmount" style="font-weight:800;">₦0</span> to complete this subscription.
                 <div style="margin-top:10px;">
                   <button type="button" class="btn btn-sm btn-primary" onclick="window.location.href='wallet.html'" style="background:#ea580c; font-size:12px; padding:6px 14px;">
-                    💳 Top Up Wallet Now &rarr;
+                    Top Up Wallet Now &rarr;
                   </button>
                 </div>
               </div>
@@ -565,15 +554,15 @@
             <!-- Main Payment Submission Button -->
             <button class="btn btn-primary" id="executePayBtn" onclick="processUpgradePayment()" 
                     style="width:100%; min-height:50px; font-size:15px; font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f); margin-top:20px; justify-content:center; box-shadow:0 8px 24px rgba(14,59,53,0.25);">
-              Pay ₦19,999 &amp; Upgrade Now ⚡
+              Pay ₦19,999 &amp; Upgrade Now
             </button>
 
             <div style="display:flex; justify-content:center; align-items:center; gap:16px; margin-top:16px; font-size:11px; color:var(--muted); font-weight:700;">
-              <span>🔒 256-Bit SSL Encrypted</span>
+              <span>256-Bit SSL Encrypted</span>
               <span>&bull;</span>
-              <span>🛡️ CBN Escrow Standard</span>
+              <span>CBN Escrow Standard</span>
               <span>&bull;</span>
-              <span>⚡ Instant Activation</span>
+              <span>Instant Activation</span>
             </div>
 
           </div>
@@ -588,7 +577,6 @@
 <!-- SUCCESS CONFIRMATION MODAL -->
 <div class="modal-overlay" id="upgradeSuccessModal" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(4,14,13,0.85); backdrop-filter:blur(12px); align-items:center; justify-content:center; padding:20px;">
   <div class="modal-card" style="max-width:520px; width:100%; text-align:center; padding:36px 28px; border-radius:28px; background:var(--white); border:1px solid var(--line); box-shadow:0 24px 80px rgba(0,0,0,0.4);">
-    <div style="font-size:56px; margin-bottom:14px; animation:bounce 1s infinite alternate;">🎉</div>
     
     <div style="display:inline-block; background:#dcfce7; color:#15803d; font-size:12px; font-weight:900; padding:4px 14px; border-radius:99px; margin-bottom:12px; letter-spacing:.05em;">
       SUBSCRIPTION ACTIVE &amp; VERIFIED
@@ -626,16 +614,16 @@
         Go to Dashboard &rarr;
       </button>
       <button class="btn btn-outline" onclick="goToProfileAfterUpgrade()" style="flex:1; font-weight:800; justify-content:center;">
-        View Profile 👤
+        View Profile
       </button>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=173.0"></script>
-<script src="app.js?v=173.0"></script>
-<script src="settings-popup.js?v=173.0"></script>
+<script src="supabase.js?v=174.0"></script>
+<script src="app.js?v=174.0"></script>
+<script src="settings-popup.js?v=174.0"></script>
 
 <script>
   let activeRole = 'professional';
@@ -681,6 +669,8 @@
     }
   };
 
+  const CHECK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--teal);"><polyline points="20 6 9 17 4 12"/></svg>`;
+
   const PRICING = {
     professional: {
       tierName: 'Professional Plus',
@@ -695,12 +685,12 @@
       title: 'Upgrade to Professional Plus',
       sub: 'Unlock top search placement, unlimited proposal submissions, and a reduced 7.5% platform commission rate across all contracts.',
       perks: [
-        { icon: '🌟', title: 'Top Ranked Placement & Search Boost', desc: 'Appear at the top of client search results when IOCs and EPCs search for specialists.' },
-        { icon: '⚡', title: 'Unlimited Proposal Submissions', desc: 'Apply to all open tenders on the live Energy Marketplace with zero monthly submission caps.' },
-        { icon: '💰', title: '50% Platform Fee Discount', desc: 'Your platform commission rate drops from 15% to just 7.5% on all paid milestones.' },
-        { icon: '🛡️', title: 'Golden Verified Pro Badge', desc: 'Pro badge displayed prominently on your profile, proposals, and marketplace bids.' },
-        { icon: '📊', title: 'Bid & Client Analytics', desc: 'Track which hiring managers view your profile and analyze competitor bidding patterns.' },
-        { icon: '💬', title: 'Direct Client Direct-Line & Support', desc: 'Direct message clients without proposal friction plus 24/7 dedicated dispute concierge.' }
+        { icon: CHECK_SVG, title: 'Top Ranked Placement & Search Boost', desc: 'Appear at the top of client search results when IOCs and EPCs search for specialists.' },
+        { icon: CHECK_SVG, title: 'Unlimited Proposal Submissions', desc: 'Apply to all open tenders on the live Energy Marketplace with zero monthly submission caps.' },
+        { icon: CHECK_SVG, title: '50% Platform Fee Discount', desc: 'Your platform commission rate drops from 15% to just 7.5% on all paid milestones.' },
+        { icon: CHECK_SVG, title: 'Verified Pro Badge', desc: 'Pro badge displayed prominently on your profile, proposals, and marketplace bids.' },
+        { icon: CHECK_SVG, title: 'Bid & Client Analytics', desc: 'Track which hiring managers view your profile and analyze competitor bidding patterns.' },
+        { icon: CHECK_SVG, title: 'Direct Client Line & Support', desc: 'Direct message clients without proposal friction plus 24/7 dedicated dispute concierge.' }
       ]
     },
     company: {
@@ -716,12 +706,12 @@
       title: 'Upgrade to Company Enterprise',
       sub: 'Post unlimited engineering tenders, access AI candidate matching, and receive verified enterprise status.',
       perks: [
-        { icon: '📋', title: 'Unlimited Tender & Project Postings', desc: 'Publish unlimited engineering RFPs, FEED studies, and infrastructure contracts.' },
-        { icon: '🤖', title: 'Kolly AI Candidate Matching', desc: 'Instant automated matching with the top 1% pre-screened technical project specialists.' },
-        { icon: '🏢', title: 'IOC Verified Enterprise Badge', desc: 'Verified enterprise shield displayed across all your public tenders and corporate profile.' },
-        { icon: '💸', title: '0% Surcharge on Escrow Payouts', desc: 'Zero payment processing fees on contractor disbursements and milestone settlements.' },
-        { icon: '📁', title: '100GB Secure Technical Vault', desc: 'Cloud document vault for CAD, engineering specifications, and confidential bid files.' },
-        { icon: '👔', title: 'Dedicated Account Executive', desc: 'Direct personal account manager with 24-hour turnaround SLA for milestone settlements.' }
+        { icon: CHECK_SVG, title: 'Unlimited Tender & Project Postings', desc: 'Publish unlimited engineering RFPs, FEED studies, and infrastructure contracts.' },
+        { icon: CHECK_SVG, title: 'Kolly AI Candidate Matching', desc: 'Instant automated matching with the top 1% pre-screened technical project specialists.' },
+        { icon: CHECK_SVG, title: 'IOC Verified Enterprise Badge', desc: 'Verified enterprise shield displayed across all your public tenders and corporate profile.' },
+        { icon: CHECK_SVG, title: '0% Surcharge on Escrow Payouts', desc: 'Zero payment processing fees on contractor disbursements and milestone settlements.' },
+        { icon: CHECK_SVG, title: '100GB Secure Technical Vault', desc: 'Cloud document vault for CAD, engineering specifications, and confidential bid files.' },
+        { icon: CHECK_SVG, title: 'Dedicated Account Executive', desc: 'Direct personal account manager with 24-hour turnaround SLA for milestone settlements.' }
       ]
     }
   };
@@ -734,17 +724,18 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Determine active role from query param or session
+    // 1. Determine active role strictly from logged-in user's role first, so professionals only see professional pricing and companies only see company pricing
     const urlParams = new URLSearchParams(window.location.search);
     const paramRole = urlParams.get('role');
     const paramCycle = urlParams.get('cycle');
     const user = getUser() || {};
+    const storedRole = localStorage.getItem('collekt_last_role');
 
-    if (paramRole === 'company') {
+    if (user.role === 'company') {
       activeRole = 'company';
-    } else if (paramRole === 'professional') {
+    } else if (user.role === 'professional') {
       activeRole = 'professional';
-    } else if (user.role === 'company') {
+    } else if (storedRole === 'company' || paramRole === 'company') {
       activeRole = 'company';
     } else {
       activeRole = 'professional';
@@ -776,11 +767,6 @@
     try { buildTopbar(); } catch(e){}
   });
 
-  function setUpgradeRole(role) {
-    activeRole = role === 'company' ? 'company' : 'professional';
-    renderUpgradeView();
-  }
-
   function setBillingCycle(cycle) {
     if (!BILLING_CYCLES[cycle]) cycle = 'monthly';
     activeCycle = cycle;
@@ -810,19 +796,6 @@
   function renderUpgradeView() {
     const { config, cycleMeta, cycleValues } = getActiveCyclePricing();
     const priceNGN = cycleValues.totalNGN;
-
-    // Update Role Switcher Buttons
-    const proBtn = document.getElementById('roleSwitchProBtn');
-    const coBtn = document.getElementById('roleSwitchCompanyBtn');
-    if (proBtn && coBtn) {
-      const isCo = activeRole === 'company';
-      proBtn.style.background = !isCo ? 'rgba(212,146,11,0.18)' : 'var(--white)';
-      proBtn.style.borderColor = !isCo ? 'rgba(212,146,11,0.5)' : 'var(--line)';
-      proBtn.style.color = !isCo ? 'var(--amber-dark, #b45309)' : 'var(--muted)';
-      coBtn.style.background = isCo ? 'rgba(19,117,111,0.18)' : 'var(--white)';
-      coBtn.style.borderColor = isCo ? 'var(--teal)' : 'var(--line)';
-      coBtn.style.color = isCo ? 'var(--teal)' : 'var(--muted)';
-    }
 
     // Top Hero
     document.getElementById('tierBadgeText').textContent = config.badgeText;
@@ -908,17 +881,17 @@
     const btn = document.getElementById('executePayBtn');
 
     if (activePaymentMethod === 'card') {
-      btn.innerHTML = `💳 Pay ₦${priceNGN.toLocaleString()} via Card &amp; Upgrade ⚡`;
+      btn.innerHTML = `Pay ₦${priceNGN.toLocaleString()} via Card &amp; Upgrade`;
       btn.disabled = false;
     } else {
       const user = getUser() || {};
       const wallet = typeof getOrCreateUserWallet === 'function' ? getOrCreateUserWallet(user) : { balance: 0 };
       const currentBal = Number(user.wallet_balance ?? wallet.available_balance ?? wallet.balance ?? 0);
       if (currentBal < priceNGN) {
-        btn.innerHTML = `⚠️ Insufficient Wallet Balance`;
+        btn.innerHTML = `Insufficient Wallet Balance`;
         btn.disabled = true;
       } else {
-        btn.innerHTML = `💼 Deduct ₦${priceNGN.toLocaleString()} from Wallet &amp; Upgrade ⚡`;
+        btn.innerHTML = `Deduct ₦${priceNGN.toLocaleString()} from Wallet &amp; Upgrade`;
         btn.disabled = false;
       }
     }
@@ -944,14 +917,14 @@
       pill.style.display = 'inline-block';
       pill.style.background = '#dcfce7';
       pill.style.color = '#166534';
-      pill.textContent = '✓ Sufficient Balance Available';
+      pill.textContent = 'Sufficient Balance Available';
       pinGroup.style.display = 'block';
       alertBox.style.display = 'none';
     } else {
       pill.style.display = 'inline-block';
       pill.style.background = '#fee2e2';
       pill.style.color = '#991b1b';
-      pill.textContent = '✕ Insufficient Funds';
+      pill.textContent = 'Insufficient Funds';
       pinGroup.style.display = 'none';
       alertBox.style.display = 'block';
       document.getElementById('walletShortfallAmount').textContent = `₦${(priceNGN - wallet.balance).toLocaleString()}`;
@@ -965,13 +938,13 @@
 
     const brandIcon = document.getElementById('cardBrandIcon');
     if (val.startsWith('4')) {
-      brandIcon.textContent = '💳 Visa';
+      brandIcon.textContent = 'VISA';
     } else if (/^(5[1-5]|2[2-7])/.test(val)) {
-      brandIcon.textContent = '💳 Mastercard';
+      brandIcon.textContent = 'MASTERCARD';
     } else if (/^(506|650|507)/.test(val)) {
-      brandIcon.textContent = '💳 Verve';
+      brandIcon.textContent = 'VERVE';
     } else {
-      brandIcon.textContent = '💳';
+      brandIcon.textContent = '';
     }
   }
 
@@ -998,32 +971,32 @@
       const name = document.getElementById('cardHolderName')?.value.trim() || '';
 
       if (!name) {
-        if (typeof showToast === 'function') showToast('⚠️ Please enter the cardholder name.', 'warning');
+        if (typeof showToast === 'function') showToast('Please enter the cardholder name.', 'warning');
         return;
       }
       if (cardNum.length < 12) {
-        if (typeof showToast === 'function') showToast('⚠️ Please enter a valid 16-digit card number.', 'warning');
+        if (typeof showToast === 'function') showToast('Please enter a valid 16-digit card number.', 'warning');
         return;
       }
       if (!/^\d{2}\/\d{2}$/.test(expiry)) {
-        if (typeof showToast === 'function') showToast('⚠️ Please enter a valid card expiry date (MM/YY).', 'warning');
+        if (typeof showToast === 'function') showToast('Please enter a valid card expiry date (MM/YY).', 'warning');
         return;
       }
       if (cvv.length < 3) {
-        if (typeof showToast === 'function') showToast('⚠️ Please enter a valid 3-digit CVV.', 'warning');
+        if (typeof showToast === 'function') showToast('Please enter a valid 3-digit CVV.', 'warning');
         return;
       }
     } else {
       const pin = document.getElementById('walletPinInput')?.value.trim() || '';
       if (pin.length !== 4) {
-        if (typeof showToast === 'function') showToast('⚠️ Please enter your 4-digit Wallet Transaction PIN.', 'warning');
+        if (typeof showToast === 'function') showToast('Please enter your 4-digit Wallet Transaction PIN.', 'warning');
         return;
       }
     }
 
     // Processing animation
     btn.disabled = true;
-    btn.innerHTML = 'Authorizing Payment &amp; Upgrading... ⏳';
+    btn.innerHTML = 'Authorizing Payment &amp; Upgrading...';
 
     setTimeout(async () => {
       // 1. Process wallet transaction if method is wallet
