@@ -81,9 +81,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=174.0">
-<link rel="stylesheet" href="shared.css?v=174.0">
-<link rel="stylesheet" href="glass.css?v=174.0">
+<link rel="stylesheet" href="style.css?v=175.0">
+<link rel="stylesheet" href="shared.css?v=175.0">
+<link rel="stylesheet" href="glass.css?v=175.0">
 
 <style>
   html, body {
@@ -392,7 +392,7 @@
           <!-- Company Documents -->
           <div class="content-card fade-in" style="margin-bottom:16px;">
             <div class="card-header">
-              <h3>&#x1F4C4; Recent Documents</h3>
+              <h3>Recent Documents</h3>
             </div>
             <div class="card-body" style="padding:12px 20px;">
               <div id="dashDocsList" style="display:flex; flex-direction:column; gap:8px;">
@@ -419,12 +419,50 @@
               </div>
               <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Company Enterprise (₦74,999 / Month)</h4>
               <p style="font-size:12px; opacity:.9; margin-bottom:14px; line-height:1.4;">Post unlimited RFPs &amp; tenders, access AI candidate matching, automated tax invoices, and verified enterprise badge.</p>
-              <a href="upgrade.html?role=company" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=company';" style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.4); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">Learn More &amp; Upgrade &rarr;</a>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <a href="upgrade.html?role=company" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=company';" style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.4); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">Learn More &amp; Upgrade &rarr;</a>
+                <button type="button" onclick="event.stopPropagation(); openAccountComparisonModal('company');" style="background:transparent; color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:10px; width:100%; min-height:34px; font-size:12px; font-weight:700; cursor:pointer; position:relative; z-index:20;">Compare Free vs. Paid Features</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- Free vs. Paid Account Comparison Table (Company Only) -->
+      <div id="accountComparisonSection" style="margin-top:24px; margin-bottom:24px;">
+        <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.04);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+            <div>
+              <div style="font-size:11px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">Account Tier Comparison</div>
+              <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Free Corporate Account vs. Company Enterprise</h3>
+              <div style="font-size:12px; color:var(--muted); margin-top:4px; font-weight:600;">Save 5% Quarterly (₦71,249/mo) &bull; 10% Bi-Annually (₦67,499/mo) &bull; 17% Annually (₦62,249/mo)</div>
+            </div>
+            <a href="upgrade.html?role=company" class="btn btn-primary btn-sm" style="background:var(--forest); font-weight:800; font-size:12px; text-decoration:none;">Upgrade to Company Enterprise (₦74,999/mo) &rarr;</a>
+          </div>
+          <div style="width:100%; overflow-x:auto; border:1px solid var(--line); border-radius:12px;">
+            <table style="width:100%; border-collapse:collapse; text-align:left; min-width:540px; font-size:12.5px;">
+              <thead>
+                <tr style="background:var(--paper); border-bottom:1px solid var(--line);">
+                  <th style="padding:12px 16px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); width:36%;">Feature / Capability</th>
+                  <th style="padding:12px 16px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); width:32%;">Free Corporate Account (₦0 / mo)</th>
+                  <th style="padding:12px 16px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--forest); background:rgba(19,117,111,0.1); width:32%;">Company Enterprise (₦74,999 / mo)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid var(--line);"><td style="padding:12px 16px; font-weight:800; color:var(--ink);">Monthly Subscription Fee</td><td style="padding:12px 16px; font-weight:600; color:var(--muted);">₦0 / month</td><td style="padding:12px 16px; font-weight:800; color:var(--ink); background:rgba(19,117,111,0.04);">₦74,999 / month (or ₦62,249/mo billed annually)</td></tr>
+                <tr style="border-bottom:1px solid var(--line);"><td style="padding:12px 16px; font-weight:800; color:var(--ink);">Multi-Month Billing Discounts</td><td style="padding:12px 16px; font-weight:600; color:var(--muted);">Not applicable</td><td style="padding:12px 16px; font-weight:800; color:var(--ink); background:rgba(19,117,111,0.04);">5% Off Quarterly &bull; 10% Off Bi-Annual &bull; 17% Off Annual</td></tr>
+                <tr style="border-bottom:1px solid var(--line);"><td style="padding:12px 16px; font-weight:800; color:var(--ink);">Project, RFP &amp; Tender Postings</td><td style="padding:12px 16px; font-weight:600; color:var(--muted);">Up to 2 active job postings</td><td style="padding:12px 16px; font-weight:800; color:var(--ink); background:rgba(19,117,111,0.04);">Unlimited engineering RFPs, tenders &amp; project postings</td></tr>
+                <tr style="border-bottom:1px solid var(--line);"><td style="padding:12px 16px; font-weight:800; color:var(--ink);">Kolly AI Candidate Matching</td><td style="padding:12px 16px; font-weight:600; color:var(--muted);">Manual marketplace search only</td><td style="padding:12px 16px; font-weight:800; color:var(--ink); background:rgba(19,117,111,0.04);">Automated Top 1% AI technical candidate screening &amp; ranking</td></tr>
+                <tr style="border-bottom:1px solid var(--line);"><td style="padding:12px 16px; font-weight:800; color:var(--ink);">Corporate Verification Status</td><td style="padding:12px 16px; font-weight:600; color:var(--muted);">Standard company profile</td><td style="padding:12px 16px; font-weight:800; color:var(--ink); background:rgba(19,117,111,0.04);">IOC / EPC Verified Enterprise Shield on all tenders</td></tr>
+                <tr style="border-bottom:1px solid var(--line);"><td style="padding:12px 16px; font-weight:800; color:var(--ink);">Escrow Disbursement Processing Fee</td><td style="padding:12px 16px; font-weight:600; color:var(--muted);">Standard gateway surcharge</td><td style="padding:12px 16px; font-weight:800; color:var(--ink); background:rgba(19,117,111,0.04);">0% surcharge on contractor milestone disbursements</td></tr>
+                <tr style="border-bottom:1px solid var(--line);"><td style="padding:12px 16px; font-weight:800; color:var(--ink);">Technical Specification &amp; CAD Vault</td><td style="padding:12px 16px; font-weight:600; color:var(--muted);">2 GB standard document storage</td><td style="padding:12px 16px; font-weight:800; color:var(--ink); background:rgba(19,117,111,0.04);">100 GB encrypted technical vault for bid packages</td></tr>
+                <tr style="border-bottom:1px solid var(--line);"><td style="padding:12px 16px; font-weight:800; color:var(--ink);">Tax &amp; Procurement Compliance</td><td style="padding:12px 16px; font-weight:600; color:var(--muted);">Standard payment receipts</td><td style="padding:12px 16px; font-weight:800; color:var(--ink); background:rgba(19,117,111,0.04);">Automated WHT / VAT audit-ready corporate tax invoices</td></tr>
+                <tr><td style="padding:12px 16px; font-weight:800; color:var(--ink);">Account Management &amp; SLA</td><td style="padding:12px 16px; font-weight:600; color:var(--muted);">Standard support queue</td><td style="padding:12px 16px; font-weight:800; color:var(--ink); background:rgba(19,117,111,0.04);">Dedicated Account Executive with 24-hour settlement SLA</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
       <!-- Recommended Professionals -->
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:20px; margin-bottom:12px;">
@@ -439,7 +477,7 @@
             <option value="z_a">Z-A</option>
           </select>
           <button class="btn btn-outline btn-sm" onclick="runKollyTalentMatchDashboard()" style="font-weight:800; font-size:12px; border-color:var(--teal); color:var(--teal); display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
-            <span>🦖</span> <span>Run Kolly AI Match</span>
+            <span>Run Kolly AI Match</span>
           </button>
         </div>
       </div>
@@ -456,7 +494,6 @@
   <div class="modal-card" style="position:relative; max-width:640px; width:100%; max-height:90vh; overflow-y:auto; border-radius:24px; padding:28px;">
     <button class="modal-close" onclick="closePostModal()">&times;</button>
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
-      <div style="width:44px; height:44px; border-radius:14px; background:rgba(212,146,11,0.15); color:var(--amber); display:grid; place-items:center; font-size:22px;">💼</div>
       <div>
         <div class="modal-title" style="font-size:19px; font-weight:900; color:var(--ink); margin-bottom:2px;">Post Opportunity</div>
         <div style="font-size:12px; color:var(--muted);">Publish openings, tenders, contracts, or consultant requests to the live marketplace</div>
@@ -632,9 +669,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=174.0"></script>
-<script src="app.js?v=174.0"></script>
-<script src="collekt-ai.js?v=174.0"></script>
+<script src="supabase.js?v=175.0"></script>
+<script src="app.js?v=175.0"></script>
+<script src="collekt-ai.js?v=175.0"></script>
 <script>
   requireCompany();
   
@@ -1903,7 +1940,7 @@
   </div>
 </div>
 
-<script src="settings-popup.js?v=174.0"></script>
+<script src="settings-popup.js?v=175.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>

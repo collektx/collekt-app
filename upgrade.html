@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=174.0">
-<link rel="stylesheet" href="shared.css?v=174.0">
-<link rel="stylesheet" href="glass.css?v=174.0">
+<link rel="stylesheet" href="style.css?v=175.0">
+<link rel="stylesheet" href="shared.css?v=175.0">
+<link rel="stylesheet" href="glass.css?v=175.0">
 
 <style>
   body {
@@ -362,6 +362,87 @@
     transform: translateY(-50%);
     font-size: 20px;
   }
+
+  /* Free vs Paid Comparison Table */
+  .comparison-section-card {
+    background: var(--white);
+    border: 1.5px solid var(--line);
+    border-radius: 24px;
+    padding: 32px;
+    margin-bottom: 32px;
+    box-shadow: 0 12px 40px rgba(14, 59, 53, 0.05);
+  }
+  html.dark .comparison-section-card {
+    background: #0d1f1d;
+    border-color: rgba(255,255,255,0.08);
+  }
+  .comparison-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+  }
+  html.dark .comparison-table-wrap {
+    border-color: rgba(255,255,255,0.08);
+  }
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 580px;
+  }
+  .comparison-table th,
+  .comparison-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  html.dark .comparison-table th,
+  html.dark .comparison-table td {
+    border-bottom-color: rgba(255,255,255,0.07);
+  }
+  .comparison-table tr:last-child td {
+    border-bottom: none;
+  }
+  .comparison-table thead th {
+    background: var(--paper);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+  html.dark .comparison-table thead th {
+    background: #091715;
+  }
+  .comparison-table th.paid-col-head {
+    background: rgba(19, 117, 111, 0.1);
+    color: var(--forest);
+  }
+  html.dark .comparison-table th.paid-col-head {
+    background: rgba(20, 184, 166, 0.16);
+    color: #2dd4bf;
+  }
+  .comparison-table td.feature-col {
+    font-weight: 800;
+    color: var(--ink);
+    width: 38%;
+  }
+  .comparison-table td.free-col {
+    color: var(--muted);
+    font-weight: 600;
+    width: 31%;
+  }
+  .comparison-table td.paid-col {
+    background: rgba(19, 117, 111, 0.04);
+    color: var(--ink);
+    font-weight: 800;
+    width: 31%;
+  }
+  html.dark .comparison-table td.paid-col {
+    background: rgba(20, 184, 166, 0.06);
+  }
 </style>
 </head>
 <body>
@@ -569,6 +650,34 @@
 
         </div>
 
+        <!-- Free vs. Paid Account Comparison Table -->
+        <div class="comparison-section-card fade-in" id="planComparisonSection" style="margin-top:32px; margin-bottom:0;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+            <div>
+              <div style="font-size:11.5px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;" id="comparisonPreTitle">Account Tier Comparison</div>
+              <h3 style="font-size:20px; font-weight:900; color:var(--ink); margin:0;" id="comparisonMainHeading">Free Account vs. Professional Plus</h3>
+            </div>
+            <div style="font-size:12.5px; color:var(--muted); font-weight:600;" id="comparisonSubNote">
+              Save 5% Quarterly &bull; 10% Bi-Annually &bull; 17% Annually
+            </div>
+          </div>
+
+          <div class="comparison-table-wrap">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Feature / Capability</th>
+                  <th id="compFreeHeader">Free Account (₦0 / mo)</th>
+                  <th class="paid-col-head" id="compPaidHeader">Professional Plus (₦19,999 / mo)</th>
+                </tr>
+              </thead>
+              <tbody id="comparisonTableBody">
+                <!-- Dynamically populated based on user role -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>
@@ -621,9 +730,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=174.0"></script>
-<script src="app.js?v=174.0"></script>
-<script src="settings-popup.js?v=174.0"></script>
+<script src="supabase.js?v=175.0"></script>
+<script src="app.js?v=175.0"></script>
+<script src="settings-popup.js?v=175.0"></script>
 
 <script>
   let activeRole = 'professional';
@@ -674,6 +783,7 @@
   const PRICING = {
     professional: {
       tierName: 'Professional Plus',
+      freeTierName: 'Free Professional Account',
       monthlyNGN: 19999,
       cycles: {
         monthly:   { standardNGN: 19999,  effectiveMonthlyNGN: 19999, totalNGN: 19999,  savingsNGN: 0 },
@@ -691,10 +801,22 @@
         { icon: CHECK_SVG, title: 'Verified Pro Badge', desc: 'Pro badge displayed prominently on your profile, proposals, and marketplace bids.' },
         { icon: CHECK_SVG, title: 'Bid & Client Analytics', desc: 'Track which hiring managers view your profile and analyze competitor bidding patterns.' },
         { icon: CHECK_SVG, title: 'Direct Client Line & Support', desc: 'Direct message clients without proposal friction plus 24/7 dedicated dispute concierge.' }
+      ],
+      comparisonRows: [
+        { feature: 'Monthly Subscription Fee', free: '₦0 / month', paid: '₦19,999 / month (or ₦16,599/mo billed annually)' },
+        { feature: 'Quarterly / Bi-Annual / Annual Discounts', free: 'Not applicable', paid: '5% Off (Quarterly) • 10% Off (Bi-Annual) • 17% Off (Annual)' },
+        { feature: 'Marketplace Proposal Submissions', free: 'Up to 5 proposals per month', paid: 'Unlimited proposal submissions' },
+        { feature: 'Platform Commission on Milestones', free: 'Standard 15% commission rate', paid: 'Reduced 7.5% commission rate (50% savings)' },
+        { feature: 'Client Search & Directory Ranking', free: 'Standard directory listing', paid: 'Top-ranked featured placement in IOC & EPC searches' },
+        { feature: 'Profile Verification Badge', free: 'Standard profile status', paid: 'Verified Pro Plus badge on profile & bids' },
+        { feature: 'Bid & Profile View Analytics', free: 'Basic proposal status only', paid: 'Full hiring manager view & bid competitiveness insights' },
+        { feature: 'Direct Client Messaging', free: 'Only after client shortlists bid', paid: 'Priority direct messaging & outreach' },
+        { feature: 'Escrow Payout & Dispute Support', free: 'Standard support queue', paid: 'Priority fast-track payout & 24/7 dispute concierge' }
       ]
     },
     company: {
       tierName: 'Company Enterprise',
+      freeTierName: 'Free Corporate Account',
       monthlyNGN: 74999,
       cycles: {
         monthly:   { standardNGN: 74999,  effectiveMonthlyNGN: 74999, totalNGN: 74999,  savingsNGN: 0 },
@@ -712,6 +834,17 @@
         { icon: CHECK_SVG, title: '0% Surcharge on Escrow Payouts', desc: 'Zero payment processing fees on contractor disbursements and milestone settlements.' },
         { icon: CHECK_SVG, title: '100GB Secure Technical Vault', desc: 'Cloud document vault for CAD, engineering specifications, and confidential bid files.' },
         { icon: CHECK_SVG, title: 'Dedicated Account Executive', desc: 'Direct personal account manager with 24-hour turnaround SLA for milestone settlements.' }
+      ],
+      comparisonRows: [
+        { feature: 'Monthly Subscription Fee', free: '₦0 / month', paid: '₦74,999 / month (or ₦62,249/mo billed annually)' },
+        { feature: 'Quarterly / Bi-Annual / Annual Discounts', free: 'Not applicable', paid: '5% Off (Quarterly) • 10% Off (Bi-Annual) • 17% Off (Annual)' },
+        { feature: 'Project, RFP & Tender Postings', free: 'Up to 2 active job postings', paid: 'Unlimited engineering RFPs, tenders & project postings' },
+        { feature: 'Kolly AI Candidate Matching', free: 'Manual marketplace search only', paid: 'Automated Top 1% AI technical candidate screening & ranking' },
+        { feature: 'Corporate Verification Status', free: 'Standard company profile', paid: 'IOC / EPC Verified Enterprise Shield on all tenders' },
+        { feature: 'Escrow Disbursement Processing Fee', free: 'Standard gateway surcharge', paid: '0% surcharge on contractor milestone disbursements' },
+        { feature: 'Technical Specification & CAD Vault', free: '2 GB standard document storage', paid: '100 GB encrypted technical vault for bid packages' },
+        { feature: 'Tax & Procurement Compliance', free: 'Standard payment receipts', paid: 'Automated WHT / VAT audit-ready corporate tax invoices' },
+        { feature: 'Account Management & SLA', free: 'Standard support queue', paid: 'Dedicated Account Executive with 24-hour settlement SLA' }
       ]
     }
   };
@@ -853,6 +986,30 @@
         </div>
       </div>
     `).join('');
+
+    // Free vs Paid Comparison Table
+    const compMainHeading = document.getElementById('comparisonMainHeading');
+    const compFreeHeader = document.getElementById('compFreeHeader');
+    const compPaidHeader = document.getElementById('compPaidHeader');
+    const compBody = document.getElementById('comparisonTableBody');
+    if (compMainHeading) {
+      compMainHeading.textContent = `${config.freeTierName} vs. ${config.tierName}`;
+    }
+    if (compFreeHeader) {
+      compFreeHeader.textContent = `${config.freeTierName} (₦0 / mo)`;
+    }
+    if (compPaidHeader) {
+      compPaidHeader.textContent = `${config.tierName} (₦${cycleValues.effectiveMonthlyNGN.toLocaleString()} / mo)`;
+    }
+    if (compBody && Array.isArray(config.comparisonRows)) {
+      compBody.innerHTML = config.comparisonRows.map(row => `
+        <tr>
+          <td class="feature-col">${row.feature}</td>
+          <td class="free-col">${row.free}</td>
+          <td class="paid-col">${row.paid}</td>
+        </tr>
+      `).join('');
+    }
 
     // Summary Box
     document.getElementById('summaryItemLabel').textContent = `${config.tierName} (${cycleMeta.label})`;

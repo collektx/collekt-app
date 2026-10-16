@@ -4579,6 +4579,117 @@ function openPremiumMembershipModal(forcedRole) {
   window.location.href = 'upgrade.html?role=' + role;
 }
 
+const COLLEKT_PLAN_COMPARISON_DATA = {
+  professional: {
+    freeTitle: 'Free Professional Account (₦0 / mo)',
+    paidTitle: 'Professional Plus (₦19,999 / mo)',
+    heading: 'Free Account vs. Professional Plus',
+    subNote: 'Save 5% Quarterly (₦18,999/mo) • 10% Bi-Annually (₦17,999/mo) • 17% Annually (₦16,599/mo)',
+    ctaUrl: 'upgrade.html?role=professional',
+    ctaLabel: 'Upgrade to Professional Plus (₦19,999/mo) →',
+    rows: [
+      { feature: 'Monthly Subscription Fee', free: '₦0 / month', paid: '₦19,999 / month (or ₦16,599/mo billed annually)' },
+      { feature: 'Multi-Month Billing Discounts', free: 'Not applicable', paid: '5% Off Quarterly • 10% Off Bi-Annual • 17% Off Annual' },
+      { feature: 'Marketplace Proposal Submissions', free: 'Up to 5 proposals per month', paid: 'Unlimited proposal submissions' },
+      { feature: 'Platform Commission on Milestones', free: 'Standard 15% commission rate', paid: 'Reduced 7.5% commission rate (50% savings)' },
+      { feature: 'Client Search & Directory Ranking', free: 'Standard directory listing', paid: 'Top-ranked featured placement in IOC & EPC searches' },
+      { feature: 'Profile Verification Badge', free: 'Standard profile status', paid: 'Verified Pro Plus badge on profile & bids' },
+      { feature: 'Bid & Profile View Analytics', free: 'Basic proposal status only', paid: 'Full hiring manager view & bid competitiveness insights' },
+      { feature: 'Direct Client Messaging', free: 'Only after client shortlists bid', paid: 'Priority direct messaging & outreach' },
+      { feature: 'Escrow Payout & Dispute Support', free: 'Standard support queue', paid: 'Priority fast-track payout & 24/7 dispute concierge' }
+    ]
+  },
+  company: {
+    freeTitle: 'Free Corporate Account (₦0 / mo)',
+    paidTitle: 'Company Enterprise (₦74,999 / mo)',
+    heading: 'Free Corporate Account vs. Company Enterprise',
+    subNote: 'Save 5% Quarterly (₦71,249/mo) • 10% Bi-Annually (₦67,499/mo) • 17% Annually (₦62,249/mo)',
+    ctaUrl: 'upgrade.html?role=company',
+    ctaLabel: 'Upgrade to Company Enterprise (₦74,999/mo) →',
+    rows: [
+      { feature: 'Monthly Subscription Fee', free: '₦0 / month', paid: '₦74,999 / month (or ₦62,249/mo billed annually)' },
+      { feature: 'Multi-Month Billing Discounts', free: 'Not applicable', paid: '5% Off Quarterly • 10% Off Bi-Annual • 17% Off Annual' },
+      { feature: 'Project, RFP & Tender Postings', free: 'Up to 2 active job postings', paid: 'Unlimited engineering RFPs, tenders & project postings' },
+      { feature: 'Kolly AI Candidate Matching', free: 'Manual marketplace search only', paid: 'Automated Top 1% AI technical candidate screening & ranking' },
+      { feature: 'Corporate Verification Status', free: 'Standard company profile', paid: 'IOC / EPC Verified Enterprise Shield on all tenders' },
+      { feature: 'Escrow Disbursement Processing Fee', free: 'Standard gateway surcharge', paid: '0% surcharge on contractor milestone disbursements' },
+      { feature: 'Technical Specification & CAD Vault', free: '2 GB standard document storage', paid: '100 GB encrypted technical vault for bid packages' },
+      { feature: 'Tax & Procurement Compliance', free: 'Standard payment receipts', paid: 'Automated WHT / VAT audit-ready corporate tax invoices' },
+      { feature: 'Account Management & SLA', free: 'Standard support queue', paid: 'Dedicated Account Executive with 24-hour settlement SLA' }
+    ]
+  }
+};
+
+function buildAccountComparisonTableHTML(role, includeCta) {
+  const data = COLLEKT_PLAN_COMPARISON_DATA[role === 'company' ? 'company' : 'professional'];
+  return `
+    <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.04);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+        <div>
+          <div style="font-size:11px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">Account Tier Comparison</div>
+          <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">${data.heading}</h3>
+          <div style="font-size:12px; color:var(--muted); margin-top:4px; font-weight:600;">${data.subNote}</div>
+        </div>
+        ${includeCta ? `<a href="${data.ctaUrl}" class="btn btn-primary btn-sm" style="background:var(--forest); font-weight:800; font-size:12px; text-decoration:none;">${data.ctaLabel}</a>` : ''}
+      </div>
+      <div style="width:100%; overflow-x:auto; border:1px solid var(--line); border-radius:12px;">
+        <table style="width:100%; border-collapse:collapse; text-align:left; min-width:540px; font-size:12.5px;">
+          <thead>
+            <tr style="background:var(--paper); border-bottom:1px solid var(--line);">
+              <th style="padding:12px 16px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); width:36%;">Feature / Capability</th>
+              <th style="padding:12px 16px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); width:32%;">${data.freeTitle}</th>
+              <th style="padding:12px 16px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--forest); background:rgba(19,117,111,0.1); width:32%;">${data.paidTitle}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.rows.map((r, idx) => `
+              <tr style="${idx < data.rows.length - 1 ? 'border-bottom:1px solid var(--line);' : ''}">
+                <td style="padding:12px 16px; font-weight:800; color:var(--ink);">${r.feature}</td>
+                <td style="padding:12px 16px; font-weight:600; color:var(--muted);">${r.free}</td>
+                <td style="padding:12px 16px; font-weight:800; color:var(--ink); background:rgba(19,117,111,0.04);">${r.paid}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderAccountComparisonTable(containerId, forcedRole) {
+  const user = (typeof getUser === 'function' ? getUser() : null) || {};
+  const currentPage = (window.location.pathname.split('/').pop() || '').toLowerCase();
+  const isCompany = (forcedRole === 'company') || (currentPage.includes('company')) || (user.role === 'company');
+  const role = isCompany ? 'company' : 'professional';
+  const el = document.getElementById((containerId || 'accountComparisonSection').replace(/^#/, ''));
+  if (el) {
+    el.innerHTML = buildAccountComparisonTableHTML(role, true);
+  }
+}
+
+function openAccountComparisonModal(forcedRole) {
+  const user = (typeof getUser === 'function' ? getUser() : null) || {};
+  const currentPage = (window.location.pathname.split('/').pop() || '').toLowerCase();
+  const isCompany = (forcedRole === 'company') || (currentPage.includes('company')) || (user.role === 'company');
+  const role = isCompany ? 'company' : 'professional';
+
+  let modal = document.getElementById('accountComparisonModalOverlay');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'accountComparisonModalOverlay';
+    modal.style.cssText = 'position:fixed; inset:0; z-index:99998; background:rgba(4,14,13,0.78); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; padding:20px;';
+    modal.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; };
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = `
+    <div style="max-width:860px; width:100%; max-height:90vh; overflow-y:auto; position:relative; border-radius:20px;">
+      <button type="button" onclick="document.getElementById('accountComparisonModalOverlay').style.display='none'" style="position:absolute; top:14px; right:14px; z-index:10; width:32px; height:32px; border-radius:50%; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-size:18px; font-weight:800; cursor:pointer; display:grid; place-items:center;">&times;</button>
+      ${buildAccountComparisonTableHTML(role, true)}
+    </div>
+  `;
+  modal.style.display = 'flex';
+}
+
 function renderPremiumUpgradeCard(containerId, forcedRole) {
   const user = (typeof getUser === 'function' ? getUser() : null) || {};
   const currentPage = (window.location.pathname.split('/').pop() || '').toLowerCase();
@@ -4611,12 +4722,18 @@ function renderPremiumUpgradeCard(containerId, forcedRole) {
           </div>
           <h4 style="font-size:15px; font-weight:900; margin-bottom:4px;">${tierName} Active</h4>
           <p style="font-size:12px; opacity:.9; margin-bottom:14px; line-height:1.4;">
-            Your account has active search boost, ${isCompany ? 'unlimited tender postings' : '5% commission discount'} and priority support.
+            Your account has active search boost, ${isCompany ? 'unlimited tender postings' : '50% commission discount'} and priority support.
           </p>
-          <a href="upgrade.html?role=${role}" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=${role}';"
-             style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.35); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">
-            Manage Membership &rarr;
-          </a>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <a href="upgrade.html?role=${role}" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=${role}';"
+               style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.35); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">
+              Manage Membership &rarr;
+            </a>
+            <button type="button" onclick="event.stopPropagation(); openAccountComparisonModal('${role}');"
+               style="background:transparent; color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:10px; width:100%; min-height:34px; font-size:12px; font-weight:700; cursor:pointer; position:relative; z-index:20;">
+              Compare Free vs. Paid Features
+            </button>
+          </div>
         </div>
       `;
     } else {
@@ -4630,16 +4747,24 @@ function renderPremiumUpgradeCard(containerId, forcedRole) {
           <p style="font-size:12px; opacity:.9; margin-bottom:14px; line-height:1.4;">
             ${isCompany 
               ? 'Post unlimited RFPs & tenders, access AI candidate matching and verified enterprise badge.' 
-              : 'Unlock featured placement, unlimited proposal submissions, 5% reduced fees, and analytics.'}
+              : 'Unlock featured placement, unlimited proposal submissions, 50% reduced fees, and analytics.'}
           </p>
-          <a href="upgrade.html?role=${role}" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=${role}';"
-             style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.4); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">
-            Learn More &amp; Upgrade &rarr;
-          </a>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <a href="upgrade.html?role=${role}" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=${role}';"
+               style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.4); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">
+              Learn More &amp; Upgrade &rarr;
+            </a>
+            <button type="button" onclick="event.stopPropagation(); openAccountComparisonModal('${role}');"
+               style="background:transparent; color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:10px; width:100%; min-height:34px; font-size:12px; font-weight:700; cursor:pointer; position:relative; z-index:20;">
+              Compare Free vs. Paid Features
+            </button>
+          </div>
         </div>
       `;
     }
   });
+
+  renderAccountComparisonTable('accountComparisonSection', role);
 }
 
 // -- PRD SECTION 34: CANDIDATE MATCHING ENGINE V1 (WEIGHTED MODEL) --
