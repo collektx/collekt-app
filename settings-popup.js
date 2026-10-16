@@ -440,7 +440,7 @@
     const currentUser = (typeof getUser === 'function' ? getUser() : null) || {};
     const currentPage = (window.location.pathname.split('/').pop() || '').toLowerCase();
     const isCompanyRole = (currentUser.role === 'company') || (localStorage.getItem('collekt_last_role') === 'company') || currentPage.includes('company');
-    const roleTierLabel = isCompanyRole ? 'Company Enterprise' : 'Professional Plus';
+    const roleTierLabel = isCompanyRole ? 'Company Subscription' : 'Professional Subscription';
     const roleTierFee = isCompanyRole ? '&#x20A6;74,999/mo' : '&#x20A6;19,999/mo';
     const roleQuery = isCompanyRole ? 'company' : 'professional';
 

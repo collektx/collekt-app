@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=175.0">
-<link rel="stylesheet" href="shared.css?v=175.0">
-<link rel="stylesheet" href="glass.css?v=175.0">
+<link rel="stylesheet" href="style.css?v=176.0">
+<link rel="stylesheet" href="shared.css?v=176.0">
+<link rel="stylesheet" href="glass.css?v=176.0">
 
 <style>
   body { background: var(--paper); }
@@ -212,15 +212,12 @@
           <div id="premiumUpgradeCard" style="margin-bottom:16px;">
             <div style="background:linear-gradient(135deg, var(--forest), #1a7a6f); border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.12); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=company'">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="font-size:10px; font-weight:800; letter-spacing:0.06em; opacity:0.85;">ENTERPRISE TIER</span>
+                <span style="font-size:10px; font-weight:800; letter-spacing:0.06em; opacity:0.85;">SUBSCRIPTION</span>
                 <span style="background:rgba(255,255,255,0.28); color:#fff; font-size:11px; font-weight:900; padding:3px 8px; border-radius:99px; letter-spacing:0.3px;">₦74,999 / Month</span>
               </div>
-              <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Company Enterprise (₦74,999 / Month)</h4>
+              <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Subscription (₦74,999 / Month)</h4>
               <p style="font-size:12px; opacity:.9; margin-bottom:14px; line-height:1.4;">Post unlimited RFPs &amp; tenders, access AI candidate matching, automated tax invoices, and verified enterprise badge.</p>
-              <div style="display:flex; flex-direction:column; gap:8px;">
-                <a href="upgrade.html?role=company" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=company';" style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.4); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">Learn More &amp; Upgrade &rarr;</a>
-                <button type="button" onclick="event.stopPropagation(); openAccountComparisonModal('company');" style="background:transparent; color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:10px; width:100%; min-height:34px; font-size:12px; font-weight:700; cursor:pointer; position:relative; z-index:20;">Compare Free vs. Paid Features</button>
-              </div>
+              <a href="upgrade.html?role=company" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=company';" style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.4); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; cursor:pointer; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">Subscribe Now &rarr;</a>
             </div>
           </div>
 
@@ -236,9 +233,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Free vs. Paid Account Comparison Table (Company Only) -->
-      <div id="accountComparisonSection" style="margin-top:20px; margin-bottom:20px;"></div>
 
       <!-- TAB 2: OPEN OPPORTUNITIES -->
       <div id="tab-projects" style="display:none;" class="fade-in">
@@ -788,10 +782,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=175.0"></script>
-<script src="app.js?v=175.0"></script>
-<script src="collekt-ai.js?v=175.0"></script>
-<script src="settings-popup.js?v=175.0"></script>
+<script src="supabase.js?v=176.0"></script>
+<script src="app.js?v=176.0"></script>
+<script src="collekt-ai.js?v=176.0"></script>
+<script src="settings-popup.js?v=176.0"></script>
 <script src="upload-modal.js"></script>
 <script>
   requireCompany();
