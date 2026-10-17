@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=176.0">
-<link rel="stylesheet" href="shared.css?v=176.0">
-<link rel="stylesheet" href="glass.css?v=176.0">
+<link rel="stylesheet" href="style.css?v=177.0">
+<link rel="stylesheet" href="shared.css?v=177.0">
+<link rel="stylesheet" href="glass.css?v=177.0">
 
 <style>
   body { background: var(--paper); }
@@ -323,10 +323,11 @@
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload CAC Certificate of Incorporation</label>
-                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('company-docs', window.onCacUploaded)">
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('cac-doc', window.onCacUploaded)">
                     <div style="font-size:22px; margin-bottom:2px;" id="cacFileIcon">📄</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="cacFileName">Upload CAC Certificate (PDF, JPG, PNG)</div>
                   </div>
+                  <div id="cacDocAccessWrap" style="margin-top:10px; display:none;"></div>
                 </div>
               </div>
 
@@ -341,10 +342,11 @@
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload FIRS Tax Clearance / Registration Certificate</label>
-                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('company-docs', window.onTinUploaded)">
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('tin-doc', window.onTinUploaded)">
                     <div style="font-size:22px; margin-bottom:2px;" id="tinFileIcon">🧾</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="tinFileName">Upload Tax Clearance Document</div>
                   </div>
+                  <div id="tinDocAccessWrap" style="margin-top:10px; display:none;"></div>
                 </div>
               </div>
             </div>
@@ -376,10 +378,11 @@
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload Director Government ID Document</label>
-                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('company-docs', window.onDirectorIdUploaded)">
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('director-id-doc', window.onDirectorIdUploaded)">
                     <div style="font-size:22px; margin-bottom:2px;" id="directorIdFileIcon">💳</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="directorIdFileName">Upload Director Passport / ID Scan</div>
                   </div>
+                  <div id="directorIdDocAccessWrap" style="margin-top:10px; display:none;"></div>
                 </div>
               </div>
 
@@ -782,10 +785,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=176.0"></script>
-<script src="app.js?v=176.0"></script>
-<script src="collekt-ai.js?v=176.0"></script>
-<script src="settings-popup.js?v=176.0"></script>
+<script src="supabase.js?v=177.0"></script>
+<script src="app.js?v=177.0"></script>
+<script src="collekt-ai.js?v=177.0"></script>
+<script src="settings-popup.js?v=177.0"></script>
 <script src="upload-modal.js"></script>
 <script>
   requireCompany();
@@ -970,15 +973,23 @@
     
     const user = getUser() || {};
     user.company_logo = dataURL;
+    user.avatar = dataURL;
+    user.avatar_uploaded = true;
+    user.company_logo_uploaded = true;
     setUser(user);
 
     if (typeof saveUploadedFile === 'function') {
       saveUploadedFile('company-logo', { name: 'company_logo.png', dataURL, timestamp: Date.now() });
     }
+    if (window.sb && user.id) {
+      sb.from('profiles').update({ company_logo: dataURL, avatar: dataURL, updated_at: new Date().toISOString() }).eq('id', user.id).then(() => {}).catch(() => {});
+    }
 
     _renderCompanyProfileToUI(user);
+    if (typeof buildSidebar === 'function') buildSidebar('profile');
+    if (typeof buildTopbar === 'function') buildTopbar();
     closeAvatarStudio();
-    showToast('📷 Profile photo edited and saved!');
+    showToast('📷 Company logo edited and saved!');
   }
 
   function _renderCompanyProfileToUI(user) {
@@ -1098,7 +1109,7 @@
 
     const initial = (user.name || 'C').charAt(0).toUpperCase();
     const logoFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('company-logo') : [];
-    const activeLogo = user.company_logo || (logoFiles.length ? logoFiles[logoFiles.length - 1].dataURL : null);
+    const activeLogo = user.company_logo || user.avatar || (logoFiles.length ? logoFiles[logoFiles.length - 1].dataURL : null) || (typeof resolveUserAvatarSrc === 'function' ? resolveUserAvatarSrc(user) : null);
 
     const logoEl = document.getElementById('coLogoInitial');
     if (logoEl) {
@@ -1327,30 +1338,112 @@
       }
       if (banner) banner.style.borderColor = 'var(--line)';
     }
+
+    _hydrateCoComplianceDocs(user);
+  }
+
+  function _getLatestCoDoc(slotKey, fallbackProp) {
+    const user = (typeof getUser === 'function') ? getUser() : null;
+    const files = (typeof getUploadedFiles === 'function') ? getUploadedFiles(slotKey) : [];
+    if (files && files.length > 0) return files[files.length - 1];
+    if (user && fallbackProp && user[fallbackProp] && typeof user[fallbackProp] === 'object') return user[fallbackProp];
+    return null;
+  }
+
+  function _renderCoDocAccessBar(containerId, docObj, labelText) {
+    const wrap = document.getElementById(containerId);
+    if (!wrap) return;
+    if (!docObj || (!docObj.dataURL && !docObj.fileUrl && !docObj.publicUrl && !docObj.signedUrl)) {
+      wrap.style.display = 'none';
+      wrap.innerHTML = '';
+      return;
+    }
+    window.coComplianceDocsRegistry = window.coComplianceDocsRegistry || {};
+    window.coComplianceDocsRegistry[containerId] = docObj;
+    const safeName = typeof escapeHTML === 'function' ? escapeHTML(docObj.name || labelText || 'Document') : (docObj.name || labelText || 'Document');
+    wrap.style.display = 'block';
+    wrap.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 12px; background:rgba(19,117,111,0.08); border:1px solid rgba(19,117,111,0.3); border-radius:10px;">
+        <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
+          <span style="font-size:16px;">📄</span>
+          <div style="min-width:0; flex:1;">
+            <div style="font-size:12px; font-weight:800; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${safeName}">${safeName}</div>
+            <div style="font-size:11px; color:var(--teal); font-weight:700;">Uploaded &amp; Accessible</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:6px; flex-shrink:0;">
+          <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800; border-color:var(--teal); color:var(--teal);" onclick="openDocumentViewer(window.coComplianceDocsRegistry['${containerId}'])">👁️ View</button>
+          <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800;" onclick="window.currentViewingDoc=window.coComplianceDocsRegistry['${containerId}']; openDocumentInNewTab();">↗ Open</button>
+          <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800;" onclick="window.currentViewingDoc=window.coComplianceDocsRegistry['${containerId}']; downloadWatermarkedDocument();">⬇ Download</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function _hydrateCoComplianceDocs(user) {
+    const cacDoc = _getLatestCoDoc('cac_doc', 'cac_doc');
+    if (cacDoc) {
+      const nameEl = document.getElementById('cacFileName');
+      const iconEl = document.getElementById('cacFileIcon');
+      if (nameEl) nameEl.textContent = '✅ ' + (cacDoc.name || 'CAC Certificate Uploaded');
+      if (iconEl) iconEl.textContent = '✅';
+      _renderCoDocAccessBar('cacDocAccessWrap', cacDoc, 'CAC Certificate');
+    }
+    const tinDoc = _getLatestCoDoc('tin_doc', 'tin_doc');
+    if (tinDoc) {
+      const nameEl = document.getElementById('tinFileName');
+      const iconEl = document.getElementById('tinFileIcon');
+      if (nameEl) nameEl.textContent = '✅ ' + (tinDoc.name || 'TIN Certificate Uploaded');
+      if (iconEl) iconEl.textContent = '✅';
+      _renderCoDocAccessBar('tinDocAccessWrap', tinDoc, 'TIN Certificate');
+    }
+    const dirDoc = _getLatestCoDoc('director_id_doc', 'director_id_doc');
+    if (dirDoc) {
+      const nameEl = document.getElementById('directorIdFileName');
+      const iconEl = document.getElementById('directorIdFileIcon');
+      if (nameEl) nameEl.textContent = '✅ ' + (dirDoc.name || 'Director ID Uploaded');
+      if (iconEl) iconEl.textContent = '✅';
+      _renderCoDocAccessBar('directorIdDocAccessWrap', dirDoc, 'Director ID');
+    }
   }
 
   window.onCacUploaded = function(fileData) {
-    const nameEl = document.getElementById('cacFileName');
-    const iconEl = document.getElementById('cacFileIcon');
-    if (nameEl && fileData) nameEl.textContent = '✅ ' + fileData.name;
-    if (iconEl) iconEl.textContent = '✅';
-    showToast('📜 CAC document attached.');
+    if (fileData && typeof saveUploadedFile === 'function') {
+      saveUploadedFile('cac_doc', fileData);
+      saveUploadedFile('company-docs', fileData);
+    }
+    const user = getUser() || {};
+    user.cac_doc = fileData;
+    setUser(user);
+    _hydrateCoComplianceDocs(user);
+    if (typeof renderCompanyDocs === 'function') renderCompanyDocs();
+    showToast('📜 CAC document uploaded! You can view or download it below.');
   };
 
   window.onTinUploaded = function(fileData) {
-    const nameEl = document.getElementById('tinFileName');
-    const iconEl = document.getElementById('tinFileIcon');
-    if (nameEl && fileData) nameEl.textContent = '✅ ' + fileData.name;
-    if (iconEl) iconEl.textContent = '✅';
-    showToast('🧾 FIRS Tax document attached.');
+    if (fileData && typeof saveUploadedFile === 'function') {
+      saveUploadedFile('tin_doc', fileData);
+      saveUploadedFile('company-docs', fileData);
+    }
+    const user = getUser() || {};
+    user.tin_doc = fileData;
+    setUser(user);
+    _hydrateCoComplianceDocs(user);
+    if (typeof renderCompanyDocs === 'function') renderCompanyDocs();
+    showToast('🧾 FIRS Tax document uploaded! You can view or download it below.');
   };
 
   window.onDirectorIdUploaded = function(fileData) {
-    const nameEl = document.getElementById('directorIdFileName');
-    const iconEl = document.getElementById('directorIdFileIcon');
-    if (nameEl && fileData) nameEl.textContent = '✅ ' + fileData.name;
-    if (iconEl) iconEl.textContent = '✅';
-    showToast('💳 Director ID scan attached.');
+    if (fileData && typeof saveUploadedFile === 'function') {
+      saveUploadedFile('director_id_doc', fileData);
+      saveUploadedFile('company-docs', fileData);
+    }
+    const user = getUser() || {};
+    user.director_id_doc = fileData;
+    setUser(user);
+    _hydrateCoComplianceDocs(user);
+    if (typeof renderCompanyDocs === 'function') renderCompanyDocs();
+    showToast('💳 Director ID scan uploaded! You can view or download it below.');
   };
 
   async function submitCorporateVerification() {
@@ -1683,7 +1776,21 @@
     const grid = document.getElementById('coDocsGrid');
     const empty = document.getElementById('coDocsEmpty');
     if (!grid) return;
-    const docs = typeof getUploadedFiles === 'function' ? getUploadedFiles('company-docs') : [];
+    const rawDocs = [
+      ...(typeof getUploadedFiles === 'function' ? getUploadedFiles('company-docs') : []),
+      ...(typeof getUploadedFiles === 'function' ? getUploadedFiles('cac_doc') : []),
+      ...(typeof getUploadedFiles === 'function' ? getUploadedFiles('tin_doc') : []),
+      ...(typeof getUploadedFiles === 'function' ? getUploadedFiles('director_id_doc') : [])
+    ];
+    const seen = new Set();
+    const docs = rawDocs.filter(d => {
+      if (!d || (!d.dataURL && !d.fileUrl && !d.publicUrl && !d.signedUrl)) return false;
+      const k = d.name || d.id || JSON.stringify(d).slice(0, 80);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+    window.companyVaultDocsRegistry = docs;
     if (!docs || docs.length === 0) {
       grid.style.display = 'none';
       if (empty) empty.style.display = 'block';
@@ -1692,20 +1799,23 @@
     grid.style.display = 'grid';
     if (empty) empty.style.display = 'none';
     grid.innerHTML = docs.map((d, i) => `
-      <div class="doc-item">
+      <div class="doc-item" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
         <span style="font-size:22px;">📄</span>
-        <div style="flex:1; overflow:hidden;">
+        <div style="flex:1; min-width:140px; overflow:hidden;">
           <div style="font-size:13px; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(d.name || 'Company_Document.pdf')}</div>
-          <div style="font-size:11px; color:var(--muted);">${d.size ? (d.size/1024).toFixed(1) + ' KB' : 'PDF Document'}</div>
+          <div style="font-size:11px; color:var(--muted);">${d.size ? (d.size/1024).toFixed(1) + ' KB' : 'Uploaded Document'}</div>
         </div>
-        <button class="btn btn-outline btn-xs" onclick="viewCompanyDoc(${i})">View</button>
-        <button class="btn btn-ghost btn-xs" onclick="removeCompanyDoc(${i})" style="color:#ef4444; padding:4px 8px; font-weight:800;" title="Delete Document">✕</button>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button class="btn btn-outline btn-xs" style="border-color:var(--teal); color:var(--teal); font-weight:800;" onclick="viewCompanyDoc(${i})">👁️ View</button>
+          <button class="btn btn-outline btn-xs" onclick="window.currentViewingDoc=window.companyVaultDocsRegistry[${i}]; downloadWatermarkedDocument();">⬇ Download</button>
+          <button class="btn btn-ghost btn-xs" onclick="removeCompanyDoc(${i})" style="color:#ef4444; padding:4px 8px; font-weight:800;" title="Delete Document">✕</button>
+        </div>
       </div>
     `).join('');
   }
 
   window.viewCompanyDoc = function(index) {
-    const docs = typeof getUploadedFiles === 'function' ? getUploadedFiles('company-docs') : [];
+    const docs = window.companyVaultDocsRegistry || (typeof getUploadedFiles === 'function' ? getUploadedFiles('company-docs') : []);
     const doc = docs[index];
     if (doc && typeof openDocumentViewer === 'function') {
       openDocumentViewer(doc);

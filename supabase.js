@@ -281,6 +281,18 @@ async function signInWithEmailPassword({ email, password }) {
     const name = (profile && (profile.name || profile.full_name)) || metaName || cleanEmail.split('@')[0];
     const title = (profile && profile.title && profile.title !== 'professional Specialist') ? profile.title : (data.user.user_metadata?.title || '');
 
+    const resolvedAvatar = (profile && (profile.avatar || profile.avatar_url)) ||
+                           data.user.user_metadata?.avatar_url ||
+                           data.user.user_metadata?.picture ||
+                           localStorage.getItem('collekt_user_avatar_' + userId) ||
+                           localStorage.getItem('collekt_user_avatar_' + cleanEmail) ||
+                           null;
+    const resolvedLogo = (profile && (profile.company_logo || profile.logo_url)) ||
+                         data.user.user_metadata?.company_logo ||
+                         localStorage.getItem('collekt_company_logo_' + userId) ||
+                         localStorage.getItem('collekt_company_logo_' + cleanEmail) ||
+                         null;
+
     const localUser = {
       ...(profile || {}),
       id: userId,
@@ -292,12 +304,21 @@ async function signInWithEmailPassword({ email, password }) {
       other_name: (profile && profile.other_name) || data.user.user_metadata?.other_name || '',
       title: title,
       role: role,
+      avatar: resolvedAvatar,
+      avatar_url: resolvedAvatar,
+      avatar_uploaded: Boolean(resolvedAvatar),
+      company_logo: resolvedLogo,
+      company_logo_uploaded: Boolean(resolvedLogo),
       avatar_letter: (name || cleanEmail).charAt(0).toUpperCase(),
       wallet_balance: wallet ? Number(wallet.available_balance || 0) : 0,
       escrow_balance: wallet ? Number(wallet.escrow_balance || 0) : 0
     };
 
-    localStorage.setItem('collekt_user', JSON.stringify(localUser));
+    if (typeof setUser === 'function') {
+      setUser(localUser);
+    } else {
+      localStorage.setItem('collekt_user', JSON.stringify(localUser));
+    }
     localStorage.setItem('collekt_last_role', role);
     localStorage.setItem('collekt_last_user_email', cleanEmail);
     if (typeof saveRegisteredUser === 'function') {
@@ -464,13 +485,17 @@ async function syncUser() {
       // If cached collekt_user belongs to a different user, purge all unscoped local storage immediately
       purgeUnscopedUserStorageIfDifferent(userId, userEmail);
 
-      const [profRes, wallRes] = await Promise.all([
+      const [profRes, wallRes, mediaRes, docsRes] = await Promise.all([
         sb.from('profiles').select('*').eq('id', userId).maybeSingle(),
-        sb.from('wallets').select('*').eq('user_id', userId).maybeSingle()
+        sb.from('wallets').select('*').eq('user_id', userId).maybeSingle(),
+        sb.from('media_assets').select('*').eq('user_id', userId).in('asset_type', ['avatar', 'company_logo', 'company-logo']).order('created_at', { ascending: false }).limit(5),
+        sb.from('user_documents').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(50)
       ]);
 
       const profile = profRes.data;
       const wallet = wallRes.data;
+      const mediaAssets = Array.isArray(mediaRes?.data) ? mediaRes.data : [];
+      const remoteDocs = Array.isArray(docsRes?.data) ? docsRes.data : [];
 
       let localUser = {};
       try {
@@ -533,6 +558,16 @@ async function syncUser() {
         const cleanDbTitle = (profile.title && profile.title !== 'Senior Proposal Manager & Technical Specialist' && profile.title !== 'professional Specialist') ? profile.title : '';
         const resolvedTitle = cleanDbTitle || localUser.title || session.user.user_metadata?.title || '';
 
+        // Resolve Display Picture (DP) and Company Logo across DB, media_assets, Auth metadata, and local storage
+        const mediaAvatar = mediaAssets.find(m => m.asset_type === 'avatar' && m.file_url)?.file_url || '';
+        const mediaLogo = mediaAssets.find(m => (m.asset_type === 'company_logo' || m.asset_type === 'company-logo') && m.file_url)?.file_url || '';
+        const emLower = userEmail.toLowerCase().trim();
+        const localScopedAvatar = localStorage.getItem('collekt_user_avatar_' + userId) || (emLower ? localStorage.getItem('collekt_user_avatar_' + emLower) : '') || '';
+        const localScopedLogo = localStorage.getItem('collekt_company_logo_' + userId) || (emLower ? localStorage.getItem('collekt_company_logo_' + emLower) : '') || '';
+
+        const bestAvatar = profile.avatar || profile.avatar_url || mediaAvatar || localUser.avatar || localUser.avatar_url || localScopedAvatar || session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || null;
+        const bestLogo = profile.company_logo || profile.logo_url || mediaLogo || localUser.company_logo || localScopedLogo || session.user.user_metadata?.company_logo || null;
+
         const finalProfile = {
           ...localUser,
           ...profile,
@@ -546,7 +581,13 @@ async function syncUser() {
           other_name: profile.other_name || localUser.other_name || session.user.user_metadata?.other_name || '',
           bio: profile.bio || localUser.bio || '',
           title: resolvedTitle,
-          skills: Array.isArray(profile.skills) && profile.skills.length > 0 ? profile.skills : (Array.isArray(localUser.skills) ? localUser.skills : [])
+          skills: Array.isArray(profile.skills) && profile.skills.length > 0 ? profile.skills : (Array.isArray(localUser.skills) ? localUser.skills : []),
+          avatar: bestAvatar,
+          avatar_url: bestAvatar,
+          avatar_uploaded: Boolean(bestAvatar),
+          company_logo: bestLogo,
+          company_logo_uploaded: Boolean(bestLogo),
+          verification_submitted_at: profile.verification_submitted_at || localUser.verification_submitted_at || null
         };
 
         const isAwaitingOtp = (sessionStorage.getItem('collekt_awaiting_otp') === 'true') && !isLinkedInUser;
@@ -574,10 +615,14 @@ async function syncUser() {
           if (isLinkedInUser) finalProfile.provider = 'linkedin';
         }
 
-        // Keep Supabase DB in sync if local state is verified or has fresher name/title
-        if ((isAlreadyOtpVerified && profile && (!profile.otp_verified || !profile.email_verified)) || (!profile.name && resolvedName)) {
+        // Keep Supabase DB in sync if local state is verified or has fresher name/title/avatar
+        const needsDbSync = (isAlreadyOtpVerified && profile && (!profile.otp_verified || !profile.email_verified)) ||
+                            (!profile.name && resolvedName) ||
+                            (bestAvatar && (!profile.avatar || !profile.avatar_url)) ||
+                            (bestLogo && !profile.company_logo);
+        if (needsDbSync) {
           try {
-            sb.from('profiles').update({
+            const dbUpdate = {
               name: resolvedName,
               full_name: resolvedName,
               first_name: finalProfile.first_name,
@@ -587,26 +632,84 @@ async function syncUser() {
               otp_verified: isAlreadyOtpVerified,
               email_verified: isAlreadyEmailVerified,
               updated_at: new Date().toISOString()
-            }).eq('id', userId).then(() => {});
+            };
+            if (bestAvatar) {
+              dbUpdate.avatar = bestAvatar;
+              dbUpdate.avatar_url = bestAvatar;
+            }
+            if (bestLogo) {
+              dbUpdate.company_logo = bestLogo;
+            }
+            sb.from('profiles').update(dbUpdate).eq('id', userId).then(() => {});
           } catch(e) {}
         }
 
-        // Ensure clean unverified profile state for non-identities
-        if (finalProfile.avatar && typeof finalProfile.avatar === 'string' && (finalProfile.avatar.includes('googleusercontent.com') || finalProfile.avatar.includes('licdn.com'))) {
-          finalProfile.oauth_avatar = finalProfile.avatar;
-          finalProfile.avatar = null;
-          finalProfile.avatar_uploaded = false;
-        }
         if (profile.is_verified == null || !profile.is_verified) {
-          finalProfile.is_verified = false;
-          finalProfile.verified = false;
-          finalProfile.identity_verified = false;
-          if (finalProfile.verification_status !== 'under_review') {
+          if (localUser.verification_status === 'under_review' || finalProfile.verification_submitted_at) {
+            finalProfile.verification_status = 'under_review';
+          } else if (finalProfile.verification_status !== 'under_review') {
+            finalProfile.is_verified = false;
+            finalProfile.verified = false;
+            finalProfile.identity_verified = false;
             finalProfile.verification_status = 'none';
           }
         }
 
-        localStorage.setItem('collekt_user', JSON.stringify(finalProfile));
+        // Hydrate uploaded documents from Supabase user_documents into local uploads cache so user can view them anywhere
+        if (remoteDocs.length > 0 && typeof _getAllUploads === 'function' && typeof _saveAllUploads === 'function') {
+          try {
+            const allUp = _getAllUploads(finalProfile);
+            remoteDocs.forEach(doc => {
+              const docObj = {
+                id: doc.id,
+                name: doc.file_name || doc.title || 'Uploaded_Document.pdf',
+                title: doc.title || doc.file_name || 'Document',
+                size: doc.file_size || 0,
+                type: doc.mime_type || 'application/pdf',
+                dataURL: doc.file_url || '',
+                fileUrl: doc.file_url || '',
+                file_url: doc.file_url || '',
+                file_path: doc.file_path || '',
+                storage_bucket: doc.storage_bucket || 'documents',
+                category: doc.document_type || 'documents',
+                timestamp: doc.created_at || new Date().toISOString()
+              };
+              const docType = (doc.document_type || '').toLowerCase();
+              let cat = 'documents';
+              if (docType === 'cv' || docType === 'resume') cat = 'cv';
+              else if (docType === 'certification' || docType === 'certifications' || docType === 'certificate') cat = 'certifications';
+              else if (docType === 'portfolio') cat = 'portfolio';
+              else if (docType === 'nin_doc' || docType === 'gov_id_doc' || docType === 'address_doc' || docType === 'facial_selfie' || docType === 'cac_doc' || docType === 'tin_doc' || docType === 'director_id_doc') cat = docType;
+
+              if (!Array.isArray(allUp[cat])) allUp[cat] = [];
+              const exists = allUp[cat].some(existing => existing && (existing.id === docObj.id || existing.name === docObj.name));
+              if (!exists) {
+                allUp[cat].push(docObj);
+              }
+              if (cat !== 'documents' && cat !== 'cv') {
+                if (!Array.isArray(allUp.documents)) allUp.documents = [];
+                if (!allUp.documents.some(existing => existing && (existing.id === docObj.id || existing.name === docObj.name))) {
+                  allUp.documents.push(docObj);
+                }
+              }
+            });
+            _saveAllUploads(allUp, finalProfile);
+          } catch(e) {}
+        }
+
+        // Persist avatar in local uploads cache as well
+        if (bestAvatar && typeof saveUploadedFile === 'function') {
+          try {
+            localStorage.setItem('collekt_user_avatar_' + userId, bestAvatar);
+            if (emLower) localStorage.setItem('collekt_user_avatar_' + emLower, bestAvatar);
+          } catch(e) {}
+        }
+
+        if (typeof setUser === 'function') {
+          setUser(finalProfile);
+        } else {
+          localStorage.setItem('collekt_user', JSON.stringify(finalProfile));
+        }
         localStorage.setItem('collekt_last_role', finalProfile.role);
         localStorage.setItem('collekt_last_user_email', finalProfile.email);
         if (typeof saveRegisteredUser === 'function') {
@@ -636,6 +739,14 @@ async function syncUser() {
         const otherName = session.user.user_metadata?.other_name || '';
         const title = session.user.user_metadata?.title || localUser.title || (role === 'company' ? 'Energy & EPC Enterprise' : 'Independent Specialist');
         const isVerifiedNew = isLinkedInUser || role === 'admin' || (localUser && localUser.otp_verified === true && localUser.email === userEmail) || (sessionStorage.getItem('collekt_just_verified') === 'true');
+        const emLowerNew = (userEmail || '').toLowerCase();
+        const existingLocalAvatar = localUser?.avatar || localUser?.avatar_url ||
+          localStorage.getItem('collekt_user_avatar_' + session.user.id) ||
+          (emLowerNew ? localStorage.getItem('collekt_user_avatar_' + emLowerNew) : null) ||
+          session.user.user_metadata?.avatar_url || null;
+        const existingCompanyLogo = localUser?.company_logo ||
+          localStorage.getItem('collekt_company_logo_' + session.user.id) ||
+          (emLowerNew ? localStorage.getItem('collekt_company_logo_' + emLowerNew) : null) || null;
         const newProfile = {
           id: session.user.id,
           email: userEmail,
@@ -646,8 +757,10 @@ async function syncUser() {
           other_name: otherName,
           role: role,
           title: title,
-          avatar: null,
-          avatar_uploaded: false,
+          avatar: existingLocalAvatar,
+          avatar_url: existingLocalAvatar,
+          company_logo: existingCompanyLogo,
+          avatar_uploaded: Boolean(existingLocalAvatar || existingCompanyLogo),
           oauth_avatar: session.user.user_metadata?.avatar_url || null,
           is_verified: false,
           verification_status: 'none',
@@ -663,7 +776,11 @@ async function syncUser() {
         };
 
         const merged = { ...localUser, ...newProfile };
-        localStorage.setItem('collekt_user', JSON.stringify(merged));
+        if (typeof setUser === 'function') {
+          setUser(merged);
+        } else {
+          localStorage.setItem('collekt_user', JSON.stringify(merged));
+        }
         localStorage.setItem('collekt_last_role', role);
         localStorage.setItem('collekt_last_user_email', userEmail);
 
@@ -682,7 +799,9 @@ async function syncUser() {
             country: 'Nigeria',
             state: 'Lagos',
             location: 'Lagos, Nigeria',
-            avatar: null,
+            avatar: existingLocalAvatar,
+            avatar_url: existingLocalAvatar,
+            company_logo: existingCompanyLogo,
             is_verified: false,
             verification_status: 'none',
             otp_verified: isVerifiedNew,
@@ -1784,10 +1903,21 @@ async function uploadAndSaveUserDocument({ file, documentType, title, relatedEnt
   const filePath = `${userId}/${documentType || 'docs'}/${Date.now()}_${cleanName}`;
   const mimeType = file.type || (ext === 'pdf' ? 'application/pdf' : ext === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/octet-stream');
 
+  let finalViewUrl = '';
   const uploadRes = await uploadFileToSupabaseStorage('documents', filePath, file, mimeType);
-  if (uploadRes.error) return { error: uploadRes.error };
-
-  const finalViewUrl = uploadRes.signedUrl || uploadRes.publicUrl || '';
+  if (uploadRes && !uploadRes.error) {
+    finalViewUrl = uploadRes.signedUrl || uploadRes.publicUrl || '';
+  } else {
+    // Fallback to DataURL so the user can always view & access their document across devices
+    try {
+      finalViewUrl = await new Promise((resolve) => {
+        const r = new FileReader();
+        r.onload = (e) => resolve(e.target.result || '');
+        r.onerror = () => resolve('');
+        r.readAsDataURL(file);
+      });
+    } catch (e) {}
+  }
 
   const docRecord = await saveUserDocumentRecord({
     user_id: userId,
@@ -1820,7 +1950,7 @@ async function uploadAndSaveUserDocument({ file, documentType, title, relatedEnt
     } catch(e) { console.warn('CV profile sync warning:', e); }
   }
 
-  return { data: docRecord.data, publicUrl: finalViewUrl, signedUrl: uploadRes.signedUrl, filePath: filePath, path: filePath, error: null };
+  return { data: docRecord.data, publicUrl: finalViewUrl, signedUrl: uploadRes?.signedUrl || finalViewUrl, filePath: filePath, path: filePath, error: null };
 }
 
 /**
@@ -1876,6 +2006,7 @@ async function uploadAndSaveMediaAsset({ file, dataUrl, assetType = 'avatar', ti
   let uploadBlob = file;
   let mimeType = file ? file.type : 'image/png';
   let rawName = file ? file.name : `${assetType}_${Date.now()}.png`;
+  let resolvedDataUrl = dataUrl || null;
 
   // If dataUrl was provided instead of File
   if (!uploadBlob && dataUrl) {
@@ -1896,19 +2027,31 @@ async function uploadAndSaveMediaAsset({ file, dataUrl, assetType = 'avatar', ti
     }
   }
 
-  if (!uploadBlob) return { error: { message: 'No image file or Data URL provided' } };
+  if (!uploadBlob && !resolvedDataUrl) return { error: { message: 'No image file or Data URL provided' } };
 
-  const assetExt = (rawName.split('.').pop() || 'png').toLowerCase();
-  const validation = await validateFileSignature(uploadBlob, assetExt);
-  if (!validation.valid) {
-    return { error: { message: validation.error } };
+  if (uploadBlob) {
+    const assetExt = (rawName.split('.').pop() || 'png').toLowerCase();
+    const validation = await validateFileSignature(uploadBlob, assetExt);
+    if (!validation.valid) {
+      return { error: { message: validation.error } };
+    }
+    if (!resolvedDataUrl) {
+      try {
+        resolvedDataUrl = await new Promise((resolve) => {
+          const r = new FileReader();
+          r.onload = (e) => resolve(e.target.result || null);
+          r.onerror = () => resolve(null);
+          r.readAsDataURL(uploadBlob);
+        });
+      } catch (e) {}
+    }
   }
 
   const cleanName = rawName.replace(/[^a-zA-Z0-9._-]/g, '_');
   const filePath = `${userId}/${assetType}/${Date.now()}_${cleanName}`;
 
-  const uploadRes = await uploadFileToSupabaseStorage('media', filePath, uploadBlob, mimeType);
-  if (uploadRes.error) return { error: uploadRes.error };
+  const uploadRes = uploadBlob ? await uploadFileToSupabaseStorage('media', filePath, uploadBlob, mimeType) : { error: true };
+  const finalAssetUrl = (uploadRes && !uploadRes.error && uploadRes.publicUrl) ? uploadRes.publicUrl : (resolvedDataUrl || '');
 
   const assetRecord = await saveMediaAssetRecord({
     user_id: userId,
@@ -1918,10 +2061,10 @@ async function uploadAndSaveMediaAsset({ file, dataUrl, assetType = 'avatar', ti
     generator_model: generatorModel || null,
     storage_bucket: 'media',
     file_path: filePath,
-    file_url: uploadRes.publicUrl,
+    file_url: finalAssetUrl,
     file_name: cleanName,
     mime_type: mimeType,
-    file_size: uploadBlob.size || 0,
+    file_size: uploadBlob?.size || 0,
     dimensions: dimensions || { width: 0, height: 0 },
     related_entity_type: relatedEntityType,
     related_entity_id: relatedEntityId,
@@ -1929,29 +2072,36 @@ async function uploadAndSaveMediaAsset({ file, dataUrl, assetType = 'avatar', ti
   });
 
   // Sync profile avatars or company logos
-  if (assetType === 'avatar') {
+  if (assetType === 'avatar' && finalAssetUrl) {
     try {
-      await window.sb.from('profiles').update({ avatar_url: uploadRes.publicUrl, avatar: uploadRes.publicUrl }).eq('id', userId);
+      await window.sb.from('profiles').update({ avatar_url: finalAssetUrl, avatar: finalAssetUrl }).eq('id', userId);
       if (user) {
-        user.avatar = uploadRes.publicUrl;
-        user.avatar_url = uploadRes.publicUrl;
+        user.avatar = finalAssetUrl;
+        user.avatar_url = finalAssetUrl;
+        user.avatar_uploaded = true;
         if (typeof setUser === 'function') setUser(user);
       }
+      localStorage.setItem('collekt_user_avatar_' + userId, finalAssetUrl);
+      if (user?.email) localStorage.setItem('collekt_user_avatar_' + user.email.toLowerCase(), finalAssetUrl);
     } catch(e){}
-  } else if (assetType === 'company_logo') {
+  } else if (assetType === 'company_logo' && finalAssetUrl) {
     try {
       await Promise.all([
-        window.sb.from('profiles').update({ company_logo: uploadRes.publicUrl }).eq('id', userId),
-        window.sb.from('companies').update({ company_logo: uploadRes.publicUrl }).eq('user_id', userId)
+        window.sb.from('profiles').update({ company_logo: finalAssetUrl, avatar: finalAssetUrl }).eq('id', userId),
+        window.sb.from('companies').update({ company_logo: finalAssetUrl }).eq('user_id', userId)
       ]);
       if (user) {
-        user.company_logo = uploadRes.publicUrl;
+        user.company_logo = finalAssetUrl;
+        user.avatar = finalAssetUrl;
+        user.avatar_uploaded = true;
         if (typeof setUser === 'function') setUser(user);
       }
+      localStorage.setItem('collekt_company_logo_' + userId, finalAssetUrl);
+      if (user?.email) localStorage.setItem('collekt_company_logo_' + user.email.toLowerCase(), finalAssetUrl);
     } catch(e){}
   }
 
-  return { data: assetRecord.data, publicUrl: uploadRes.publicUrl, error: null };
+  return { data: assetRecord.data, publicUrl: finalAssetUrl, error: null };
 }
 
 /**

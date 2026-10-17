@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=176.0">
-<link rel="stylesheet" href="shared.css?v=176.0">
-<link rel="stylesheet" href="glass.css?v=176.0">
+<link rel="stylesheet" href="style.css?v=177.0">
+<link rel="stylesheet" href="shared.css?v=177.0">
+<link rel="stylesheet" href="glass.css?v=177.0">
 
 <style>
   body { background: var(--paper); }
@@ -309,18 +309,21 @@
       <div id="tab-identity" style="display:none;" role="tabpanel" aria-labelledby="tab-btn-identity" aria-hidden="true">
         <div class="content-section">
           <!-- Header Status Banner -->
-          <div id="identityBannerWrap" style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
+          <div id="identityBannerWrap" style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:16px;">
               <div id="identityIconBox" style="width:48px; height:48px; border-radius:12px; background:#f1f5f9; display:grid; place-items:center; font-size:24px; flex-shrink:0;">🛡️</div>
               <div>
                 <div style="font-size:16px; font-weight:900; color:var(--ink);" id="identityStatusTitle">Identity Verification Pending</div>
-                <div style="font-size:13px; color:var(--muted); margin-top:2px;" id="identityStatusSub">Verify your National ID &amp; Biometrics to unlock verified status and earn your green verified badge.</div>
+                <div style="font-size:13px; color:var(--muted); margin-top:2px;" id="identityStatusSub">Submit all required verification documents to open the 2 – 24 hours verification window.</div>
               </div>
             </div>
             <div id="identityBadgePill" style="padding:6px 14px; border-radius:99px; background:#f1f5f9; color:var(--muted); font-size:12px; font-weight:800;">
               ○ Unverified
             </div>
           </div>
+
+          <!-- 2 - 24 Hours Verification Window Status Box -->
+          <div id="verificationWindowProgressBox" style="display:none; background:rgba(20,184,166,0.08); border:1.5px solid rgba(20,184,166,0.35); border-radius:var(--r-lg); padding:16px 20px; margin-bottom:24px;"></div>
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
             <!-- Left Column: NIN & Facial Recognition -->
@@ -339,10 +342,11 @@
 
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload NIN Slip / Digital ID Card Scan</label>
-                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('document', onNinUploaded)">
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('nin-doc', onNinUploaded)">
                     <div style="font-size:22px; margin-bottom:2px;" id="ninFileIcon">📄</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="ninFileName">Upload NIN Document (PDF, JPG, PNG)</div>
                   </div>
+                  <div id="ninDocAccessWrap" style="margin-top:10px; display:none;"></div>
                 </div>
               </div>
 
@@ -378,6 +382,7 @@
                   <button class="btn btn-outline btn-sm" id="btnStartCamera" onclick="startFacialCamera()" style="flex:1;">📹 Open Camera</button>
                   <button class="btn btn-primary btn-sm" id="btnCaptureFace" onclick="captureFacialSnapshot()" style="flex:1; background:var(--teal);" disabled>📸 Capture Snapshot</button>
                 </div>
+                <div id="facialDocAccessWrap" style="margin-top:10px; display:none;"></div>
               </div>
             </div>
 
@@ -406,10 +411,11 @@
 
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload Government ID Document</label>
-                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('document', onGovIdUploaded)">
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('gov-id-doc', onGovIdUploaded)">
                     <div style="font-size:22px; margin-bottom:2px;" id="govIdFileIcon">💳</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="govIdFileName">Upload ID Scan (PDF, JPG, PNG)</div>
                   </div>
+                  <div id="govIdDocAccessWrap" style="margin-top:10px; display:none;"></div>
                 </div>
               </div>
 
@@ -432,22 +438,34 @@
 
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload Address Document</label>
-                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('document', onAddressDocUploaded)">
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('address-doc', onAddressDocUploaded)">
                     <div style="font-size:22px; margin-bottom:2px;" id="addressFileIcon">🧾</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="addressFileName">Upload Utility Bill / Statement</div>
                   </div>
+                  <div id="addressDocAccessWrap" style="margin-top:10px; display:none;"></div>
                 </div>
               </div>
 
               <!-- Submit Verification Action Box -->
               <div style="background:linear-gradient(135deg, var(--teal), #0a2925); border-radius:var(--r); padding:20px; color:#fff;">
-                <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Ready to Submit Identity Verification?</h4>
-                <p style="font-size:12px; opacity:0.85; margin-bottom:16px; line-height:1.5;">Once submitted, our AI &amp; compliance verification system checks your NIN and facial biometrics to activate your Verified Professional Status instantly.</p>
-                <button class="btn btn-primary" onclick="submitIdentityVerification()" style="width:100%; min-height:44px; font-weight:900; background:var(--amber); color:#fff; border:none; box-shadow:0 6px 20px rgba(212,146,11,0.3);">
-                  🛡️ Submit &amp; Activate Identity Verification
+                <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;" id="submitVerifyBoxTitle">Submit All Verification Documents</h4>
+                <p style="font-size:12px; opacity:0.88; margin-bottom:16px; line-height:1.55;" id="submitVerifyBoxDesc">When all verification documents (NIN Slip, Government ID, Proof of Address, and Facial Biometrics) are submitted, a <strong>2 – 24 hours verification window</strong> opens before your professional account can be verified.</p>
+                <button class="btn btn-primary" id="btnSubmitIdentityVerify" onclick="submitIdentityVerification()" style="width:100%; min-height:44px; font-weight:900; background:var(--amber); color:#fff; border:none; box-shadow:0 6px 20px rgba(212,146,11,0.3);">
+                  🛡️ Submit Documents &amp; Open 2 – 24h Verification Window
                 </button>
               </div>
             </div>
+          </div>
+
+          <!-- Uploaded Documents Vault (Direct Access to All Uploaded Files) -->
+          <div style="margin-top:24px; background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+              <div>
+                <div style="font-size:15px; font-weight:900; color:var(--ink);">📂 My Uploaded Documents</div>
+                <div style="font-size:12px; color:var(--muted); margin-top:2px;">Access, preview, open in a new tab, or download any document you have uploaded to your account.</div>
+              </div>
+            </div>
+            <div id="allUploadedDocsVault" style="display:flex; flex-direction:column; gap:10px;"></div>
           </div>
         </div>
       </div>
@@ -1061,9 +1079,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=176.0"></script>
-<script src="app.js?v=176.0"></script>
-<script src="collekt-ai.js?v=176.0"></script>
+<script src="supabase.js?v=177.0"></script>
+<script src="app.js?v=177.0"></script>
+<script src="collekt-ai.js?v=177.0"></script>
 <script>
   requireAuth();
 
@@ -1121,10 +1139,10 @@
     // Apply saved user profile data IMMEDIATELY from localStorage
     _applyProfile(user);
 
-    // Load saved avatar & cover photo
-    const savedAvatar = getUploadedAvatar();
-    if (savedAvatar && savedAvatar.dataURL) {
-      _applyAvatarImage(savedAvatar.dataURL);
+    // Load saved avatar & cover photo from all persistent stores
+    const resolvedStartupAvatar = (typeof resolveUserAvatarSrc === 'function' ? resolveUserAvatarSrc(user) : '') || (getUploadedAvatar() && getUploadedAvatar().dataURL) || user.avatar || user.avatar_url || '';
+    if (resolvedStartupAvatar) {
+      _applyAvatarImage(resolvedStartupAvatar);
     }
     _applyCoverPhoto(getSavedCoverPhoto());
 
@@ -1155,6 +1173,13 @@
               delete cleanProf.title;
             }
             const merged = { ...user, ...cleanProf, role: 'professional' };
+            // Never lose avatar from local or cloud
+            const bestMergedAvatar = cleanProf.avatar || cleanProf.avatar_url || user.avatar || user.avatar_url || (typeof resolveUserAvatarSrc === 'function' ? resolveUserAvatarSrc(merged) : null);
+            if (bestMergedAvatar) {
+              merged.avatar = bestMergedAvatar;
+              merged.avatar_url = bestMergedAvatar;
+              merged.avatar_uploaded = true;
+            }
             if (user.name && user.name !== 'User' && (!cleanProf.name || cleanProf.name === 'User')) {
               merged.name = user.name;
             }
@@ -1166,6 +1191,8 @@
             delete merged.cac;
             setUser(merged);
             _applyProfile(merged);
+            renderIdentityStatus();
+            renderCertifications();
           }
         } catch(err) {
           console.warn('Supabase profile load notice:', err);
@@ -1183,12 +1210,172 @@
 
 
   /* ═ IDENTITY & BIOMETRIC VERIFICATION SYSTEM ═ */
-    let verificationTicker = null;
+  let verificationTicker = null;
   let facialStream = null;
   let capturedFacialDataURL = null;
   let uploadedNinFileData = null;
   let uploadedGovIdFileData = null;
   let uploadedAddressFileData = null;
+
+  function _getLatestSlotDoc(slotKey, fallbackProp) {
+    const user = (typeof getUser === 'function') ? getUser() : null;
+    const slotFiles = (typeof getUploadedFiles === 'function') ? getUploadedFiles(slotKey) : [];
+    if (slotFiles && slotFiles.length > 0) {
+      return slotFiles[slotFiles.length - 1];
+    }
+    if (user && fallbackProp && user[fallbackProp] && typeof user[fallbackProp] === 'object') {
+      return user[fallbackProp];
+    }
+    return null;
+  }
+
+  function _renderDocAccessBar(containerId, docObj, labelText) {
+    const wrap = document.getElementById(containerId);
+    if (!wrap) return;
+    if (!docObj || (!docObj.dataURL && !docObj.fileUrl && !docObj.publicUrl && !docObj.signedUrl)) {
+      wrap.style.display = 'none';
+      wrap.innerHTML = '';
+      return;
+    }
+    window.identityDocsRegistry = window.identityDocsRegistry || {};
+    window.identityDocsRegistry[containerId] = docObj;
+    const safeName = typeof escapeHTML === 'function' ? escapeHTML(docObj.name || labelText || 'Uploaded Document') : (docObj.name || labelText || 'Uploaded Document');
+    wrap.style.display = 'block';
+    wrap.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 12px; background:rgba(19,117,111,0.08); border:1px solid rgba(19,117,111,0.3); border-radius:10px;">
+        <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
+          <span style="font-size:16px;">📄</span>
+          <div style="min-width:0; flex:1;">
+            <div style="font-size:12px; font-weight:800; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${safeName}">${safeName}</div>
+            <div style="font-size:11px; color:var(--teal); font-weight:700;">Uploaded &amp; Accessible</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:6px; flex-shrink:0;">
+          <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800; border-color:var(--teal); color:var(--teal);" onclick="openDocumentViewer(window.identityDocsRegistry['${containerId}'])">👁️ View</button>
+          <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800;" onclick="if(typeof openDocumentInNewTab==='function'){window.currentViewingDoc=window.identityDocsRegistry['${containerId}'];openDocumentInNewTab();}else{openDocumentViewer(window.identityDocsRegistry['${containerId}']);}">↗ Open</button>
+          <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800;" onclick="window.currentViewingDoc=window.identityDocsRegistry['${containerId}']; downloadWatermarkedDocument();">⬇ Download</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAllUploadedDocsVault() {
+    const vaultEl = document.getElementById('allUploadedDocsVault');
+    if (!vaultEl) return;
+
+    const user = (typeof getUser === 'function') ? getUser() : {};
+    const allItems = [];
+    const seenKeys = new Set();
+
+    const addItem = (doc, categoryLabel) => {
+      if (!doc || (!doc.dataURL && !doc.fileUrl && !doc.publicUrl && !doc.signedUrl)) return;
+      const key = `${categoryLabel}::${doc.name || doc.fileName || 'doc'}`;
+      if (seenKeys.has(key)) return;
+      seenKeys.add(key);
+      allItems.push({
+        doc: {
+          ...doc,
+          name: doc.name || doc.fileName || `${categoryLabel}.pdf`,
+          dataURL: doc.dataURL || doc.fileUrl || doc.publicUrl || doc.signedUrl
+        },
+        categoryLabel
+      });
+    };
+
+    const cvList = (typeof getUploadedFiles === 'function') ? getUploadedFiles('cv') : [];
+    cvList.forEach(d => addItem(d, 'CV / Resume'));
+
+    const customQuals = JSON.parse(localStorage.getItem('collekt_custom_quals') || '[]');
+    customQuals.forEach(q => {
+      if (q && (q.dataURL || q.fileUrl)) addItem(q, q.category || 'Academic Qualification');
+    });
+
+    const certList = (typeof getUploadedFiles === 'function') ? getUploadedFiles('certifications') : [];
+    certList.forEach(d => addItem(d, 'Certification'));
+
+    const ninDoc = uploadedNinFileData || _getLatestSlotDoc('nin_doc', 'nin_doc');
+    if (ninDoc) addItem(ninDoc, 'NIN Slip / National ID');
+
+    const govIdDoc = uploadedGovIdFileData || _getLatestSlotDoc('gov_id_doc', 'gov_id_doc');
+    if (govIdDoc) addItem(govIdDoc, user.id_gov_type || 'Government ID');
+
+    const addrDoc = uploadedAddressFileData || _getLatestSlotDoc('address_doc', 'address_doc');
+    if (addrDoc) addItem(addrDoc, user.id_address_type || 'Proof of Address');
+
+    const facialDoc = _getLatestSlotDoc('facial_selfie', 'facial_selfie_doc') ||
+      (capturedFacialDataURL ? { name: 'Facial_Biometric_Selfie.jpg', type: 'image/jpeg', dataURL: capturedFacialDataURL } : null) ||
+      (typeof user.facial_biometric === 'string' && user.facial_biometric.startsWith('data:') ? { name: 'Facial_Biometric_Selfie.jpg', type: 'image/jpeg', dataURL: user.facial_biometric } : null);
+    if (facialDoc) addItem(facialDoc, 'Facial Biometric Selfie');
+
+    const otherDocs = [
+      ...((typeof getUploadedFiles === 'function') ? getUploadedFiles('document') : []),
+      ...((typeof getUploadedFiles === 'function') ? getUploadedFiles('documents') : [])
+    ];
+    otherDocs.forEach(d => addItem(d, 'Uploaded Document'));
+
+    window.vaultDocsRegistry = allItems.map(item => item.doc);
+
+    if (allItems.length === 0) {
+      vaultEl.innerHTML = `<div style="padding:18px; text-align:center; color:var(--muted); font-size:13px; border:1px dashed var(--line); border-radius:10px;">No documents uploaded yet. Any document you upload (CV, Certificates, NIN Slip, Government ID, Proof of Address, or Selfie) will appear here for instant viewing and download.</div>`;
+      return;
+    }
+
+    vaultEl.innerHTML = allItems.map((item, idx) => {
+      const d = item.doc;
+      const safeName = typeof escapeHTML === 'function' ? escapeHTML(d.name) : d.name;
+      const safeCat = typeof escapeHTML === 'function' ? escapeHTML(item.categoryLabel) : item.categoryLabel;
+      const sizeStr = d.size && typeof formatFileSize === 'function' ? formatFileSize(d.size) : '';
+      return `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 16px; background:var(--white); border:1px solid var(--line); border-radius:12px;">
+          <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
+            <div style="font-size:22px; flex-shrink:0;">📄</div>
+            <div style="min-width:0; flex:1;">
+              <div style="font-size:13px; font-weight:800; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${safeName}</div>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">
+                <span style="color:var(--teal); font-weight:800;">${safeCat}</span>
+                ${sizeStr ? ` &bull; <span>${sizeStr}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; flex-shrink:0;">
+            <button type="button" class="btn btn-outline btn-sm" style="padding:6px 12px; font-size:12px; font-weight:800; border-color:var(--teal); color:var(--teal);" onclick="openDocumentViewer(window.vaultDocsRegistry[${idx}])">👁️ View Document</button>
+            <button type="button" class="btn btn-outline btn-sm" style="padding:6px 12px; font-size:12px; font-weight:700;" onclick="window.currentViewingDoc=window.vaultDocsRegistry[${idx}]; openDocumentInNewTab();">↗ Open in Tab</button>
+            <button type="button" class="btn btn-outline btn-sm" style="padding:6px 12px; font-size:12px; font-weight:700;" onclick="window.currentViewingDoc=window.vaultDocsRegistry[${idx}]; downloadWatermarkedDocument();">⬇ Download</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function _checkAndAutoOpenVerificationWindow(user) {
+    if (!user) return false;
+    const ninVal = (document.getElementById('idNinNumber')?.value.trim() || user.nin || localStorage.getItem('collekt_user_nin') || '').trim();
+    const ninDoc = uploadedNinFileData || _getLatestSlotDoc('nin_doc', 'nin_doc');
+    const govDoc = uploadedGovIdFileData || _getLatestSlotDoc('gov_id_doc', 'gov_id_doc');
+    const addrDoc = uploadedAddressFileData || _getLatestSlotDoc('address_doc', 'address_doc');
+    const hasFacial = Boolean(capturedFacialDataURL || user.facial_biometric || user.facial_verified || _getLatestSlotDoc('facial_selfie', 'facial_selfie_doc'));
+
+    const allDocsReady = Boolean(ninVal.length >= 11 && (ninDoc || user.nin_uploaded) && (govDoc || user.gov_id_uploaded) && (addrDoc || user.address_doc_uploaded) && hasFacial);
+    if (allDocsReady) {
+      user.nin = ninVal;
+      user.nin_uploaded = true;
+      user.gov_id_uploaded = true;
+      user.address_doc_uploaded = true;
+      user.facial_verified = true;
+      user.all_verification_docs_submitted = true;
+      if (!user.verification_submitted_at) {
+        user.verification_submitted_at = new Date().toISOString();
+      }
+      user.verification_window_min_hours = 2;
+      user.verification_window_max_hours = 24;
+      if (user.verification_status !== 'verified') {
+        user.verification_status = 'under_review';
+      }
+      setUser(user);
+      return true;
+    }
+    return false;
+  }
 
   function renderIdentityStatus() {
     const user = getUser();
@@ -1199,14 +1386,124 @@
     const badgeEl = document.getElementById('identityBadgePill');
     const iconBox = document.getElementById('identityIconBox');
     const bannerWrap = document.getElementById('identityBannerWrap');
+    const winBox = document.getElementById('verificationWindowProgressBox');
 
-    const isVerified = (user.verification_status === 'verified' && (user.is_verified === true || user.identity_verified === true));
-    const isUnderReview = (user.verification_status === 'under_review');
-    const isRejected = (user.verification_status === 'rejected');
-
+    // Hydrate saved documents into UI slots so user can always access them
     const savedNin = localStorage.getItem('collekt_user_nin') || user.nin || '';
     if (savedNin && document.getElementById('idNinNumber')) {
       document.getElementById('idNinNumber').value = savedNin;
+    }
+    if (user.id_gov_type && document.getElementById('idGovType')) {
+      document.getElementById('idGovType').value = user.id_gov_type;
+    }
+    if (user.id_gov_number && document.getElementById('idGovNumber')) {
+      document.getElementById('idGovNumber').value = user.id_gov_number;
+    }
+    if (user.id_address_type && document.getElementById('idAddressType')) {
+      document.getElementById('idAddressType').value = user.id_address_type;
+    }
+
+    const ninDoc = uploadedNinFileData || _getLatestSlotDoc('nin_doc', 'nin_doc');
+    if (ninDoc) {
+      uploadedNinFileData = ninDoc;
+      const fname = document.getElementById('ninFileName');
+      const icon = document.getElementById('ninFileIcon');
+      if (fname) fname.textContent = '✅ ' + (ninDoc.name || 'NIN Slip Uploaded');
+      if (icon) icon.textContent = '✅';
+      _renderDocAccessBar('ninDocAccessWrap', ninDoc, 'NIN Slip');
+    }
+
+    const govDoc = uploadedGovIdFileData || _getLatestSlotDoc('gov_id_doc', 'gov_id_doc');
+    if (govDoc) {
+      uploadedGovIdFileData = govDoc;
+      const fname = document.getElementById('govIdFileName');
+      const icon = document.getElementById('govIdFileIcon');
+      if (fname) fname.textContent = '✅ ' + (govDoc.name || 'Government ID Uploaded');
+      if (icon) icon.textContent = '✅';
+      _renderDocAccessBar('govIdDocAccessWrap', govDoc, 'Government ID');
+    }
+
+    const addrDoc = uploadedAddressFileData || _getLatestSlotDoc('address_doc', 'address_doc');
+    if (addrDoc) {
+      uploadedAddressFileData = addrDoc;
+      const fname = document.getElementById('addressFileName');
+      const icon = document.getElementById('addressFileIcon');
+      if (fname) fname.textContent = '✅ ' + (addrDoc.name || 'Proof of Address Uploaded');
+      if (icon) icon.textContent = '✅';
+      _renderDocAccessBar('addressDocAccessWrap', addrDoc, 'Proof of Address');
+    }
+
+    const facialDoc = _getLatestSlotDoc('facial_selfie', 'facial_selfie_doc') ||
+      (capturedFacialDataURL ? { name: 'Facial_Biometric_Selfie.jpg', type: 'image/jpeg', dataURL: capturedFacialDataURL } : null) ||
+      (typeof user.facial_biometric === 'string' && user.facial_biometric.startsWith('data:') ? { name: 'Facial_Biometric_Selfie.jpg', type: 'image/jpeg', dataURL: user.facial_biometric } : null);
+    if (facialDoc && facialDoc.dataURL) {
+      capturedFacialDataURL = facialDoc.dataURL;
+      const capturedImg = document.getElementById('facialCapturedImg');
+      const placeholder = document.getElementById('facialPlaceholder');
+      const badge = document.getElementById('facialCapturedBadge');
+      if (capturedImg) {
+        capturedImg.src = facialDoc.dataURL;
+        capturedImg.style.display = 'block';
+      }
+      if (placeholder) placeholder.style.display = 'none';
+      if (badge) badge.style.display = 'flex';
+      _renderDocAccessBar('facialDocAccessWrap', facialDoc, 'Facial Biometric Selfie');
+    }
+
+    renderAllUploadedDocsVault();
+
+    const winStatus = typeof getVerificationWindowStatus === 'function'
+      ? getVerificationWindowStatus(user)
+      : { allDocsSubmitted: false, submittedAt: user.verification_submitted_at || null, elapsedHours: 0, minWindowElapsed: false, windowComplete: false, isWithinWindow: false, remainingMinHours: 2, remainingMaxHours: 24 };
+
+    // Auto-complete verification if 24h window has elapsed after all documents were submitted
+    if (winStatus.allDocsSubmitted && winStatus.windowComplete && user.verification_status === 'under_review') {
+      user.verification_status = 'verified';
+      user.is_verified = true;
+      user.identity_verified = true;
+      setUser(user);
+    }
+
+    const isVerified = typeof isUserVerified === 'function' ? isUserVerified(user) : (user.verification_status === 'verified' && winStatus.minWindowElapsed);
+    const isUnderReview = (user.verification_status === 'under_review' || (winStatus.allDocsSubmitted && !isVerified));
+    const isRejected = (user.verification_status === 'rejected');
+
+    if (winBox) {
+      if (winStatus.submittedAt && (isUnderReview || !winStatus.minWindowElapsed)) {
+        const subDate = new Date(winStatus.submittedAt);
+        const minDate = new Date(subDate.getTime() + 2 * 3600000);
+        const maxDate = new Date(subDate.getTime() + 24 * 3600000);
+        const pct = Math.min(100, Math.max(5, Math.round((winStatus.elapsedHours / 24) * 100)));
+        const minRemMins = Math.max(0, Math.ceil((2 - winStatus.elapsedHours) * 60));
+        const remHrs = Math.floor(minRemMins / 60);
+        const remMins = minRemMins % 60;
+        const statusLine = !winStatus.minWindowElapsed
+          ? `Mandatory 2-hour minimum window active (${remHrs}h ${remMins}m remaining before verification eligibility)`
+          : `Minimum 2-hour window passed — in active 2 to 24 hours verification window (${Math.ceil(winStatus.remainingMaxHours)}h remaining to max 24h SLA)`;
+
+        winBox.style.display = 'block';
+        winBox.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
+            <div>
+              <div style="font-size:14px; font-weight:900; color:var(--ink);">⏳ 2 – 24 Hours Verification Window Open</div>
+              <div style="font-size:12px; color:var(--muted); margin-top:2px;">All verification documents have been submitted. A mandatory <strong>2 to 24 hours window</strong> is open before your professional account can be verified.</div>
+            </div>
+            <span style="padding:4px 10px; border-radius:99px; background:rgba(20,184,166,0.16); color:var(--teal); font-size:11px; font-weight:800;">Window: 2h – 24h</span>
+          </div>
+          <div style="height:8px; background:rgba(14,59,53,0.12); border-radius:99px; overflow:hidden; margin-bottom:10px;">
+            <div style="height:100%; width:${pct}%; background:linear-gradient(90deg, var(--amber), var(--teal)); border-radius:99px; transition:width 0.4s;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:11px; color:var(--muted); font-weight:700;">
+            <span>Submitted: <strong style="color:var(--ink);">${subDate.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</strong></span>
+            <span>Earliest Verification (2h): <strong style="color:var(--ink);">${minDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong></span>
+            <span>Max Window (24h): <strong style="color:var(--ink);">${maxDate.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</strong></span>
+          </div>
+          <div style="margin-top:8px; font-size:12px; font-weight:800; color:var(--teal);">${statusLine}</div>
+        `;
+      } else {
+        winBox.style.display = 'none';
+        winBox.innerHTML = '';
+      }
     }
 
     const profStrength = typeof calculateUserProfileStrength === 'function' ? calculateUserProfileStrength(user) : null;
@@ -1241,12 +1538,12 @@
         if (bannerWrap) bannerWrap.style.borderColor = 'var(--amber)';
       }
     } else if (isUnderReview) {
-      if (titleEl) titleEl.textContent = '⏳ Identity Verification Under Review';
-      if (subEl) subEl.textContent = 'Your NIN, Government ID & Biometrics have been submitted and are currently being reviewed by Collekt Compliance officers.';
+      if (titleEl) titleEl.textContent = '⏳ 2 – 24 Hours Verification Window Open';
+      if (subEl) subEl.textContent = 'All required verification documents have been submitted. Your account is now in the 2 – 24 hours verification window before verification takes effect.';
       if (badgeEl) {
         badgeEl.style.background = '#e0f2fe';
         badgeEl.style.color = '#0369a1';
-        badgeEl.innerHTML = '⏳ Under Review';
+        badgeEl.innerHTML = '⏳ 2 – 24h Verification Window';
       }
       if (iconBox) {
         iconBox.style.background = '#e0f2fe';
@@ -1268,7 +1565,7 @@
       if (bannerWrap) bannerWrap.style.borderColor = '#ef4444';
     } else {
       if (titleEl) titleEl.textContent = '🛡️ Identity Verification Pending';
-      if (subEl) subEl.textContent = 'Verify your National ID & Biometrics to earn verified specialist status on Collekt.';
+      if (subEl) subEl.textContent = 'Submit your NIN Slip, Government ID, Proof of Address, and Facial Biometrics to open the 2 – 24 hours verification window.';
       if (badgeEl) {
         badgeEl.style.background = '#fef3c7';
         badgeEl.style.color = '#b45309';
@@ -1279,6 +1576,14 @@
         iconBox.textContent = '🛡️';
       }
       if (bannerWrap) bannerWrap.style.borderColor = 'var(--line)';
+    }
+
+    if (!verificationTicker) {
+      verificationTicker = setInterval(() => {
+        if (document.getElementById('tab-identity')?.classList.contains('active')) {
+          renderIdentityStatus();
+        }
+      }, 30000);
     }
   }
 
@@ -1343,7 +1648,7 @@
       capturedImg.style.display = 'block';
     }
     if (video) video.style.display = 'none';
-    if (overlay) overlay.style.display = 'none'; // Remove darkening overlay for 100% crystal clear view!
+    if (overlay) overlay.style.display = 'none';
     if (badge) badge.style.display = 'flex';
 
     if (facialStream) {
@@ -1354,34 +1659,85 @@
     const btnStart = document.getElementById('btnStartCamera');
     if (btnStart) btnStart.textContent = '🔄 Retake Snapshot';
 
-    showToast('📸 Clear facial biometric snapshot captured!');
+    const facialDocObj = {
+      name: 'Facial_Biometric_Selfie.jpg',
+      type: 'image/jpeg',
+      size: Math.round((capturedFacialDataURL.length * 3) / 4),
+      dataURL: capturedFacialDataURL,
+      timestamp: new Date().toISOString()
+    };
+    if (typeof saveUploadedFile === 'function') {
+      saveUploadedFile('facial_selfie', facialDocObj);
+    }
+    const user = getUser() || {};
+    user.facial_biometric = capturedFacialDataURL;
+    user.facial_verified = true;
+    user.facial_selfie_doc = facialDocObj;
+    setUser(user);
+    _checkAndAutoOpenVerificationWindow(user);
+    renderIdentityStatus();
+    renderProfileStrength();
+
+    showToast('📸 Clear facial biometric snapshot captured & saved!');
   }
 
   window.onNinUploaded = function(fileData) {
     uploadedNinFileData = fileData;
-    const fname = document.getElementById('ninFileName');
-    const icon = document.getElementById('ninFileIcon');
-    if (fname && fileData) fname.textContent = '✅ ' + fileData.name;
-    if (icon) icon.textContent = '✅';
-    showToast('📄 NIN document attached.');
+    if (fileData && typeof saveUploadedFile === 'function') {
+      saveUploadedFile('nin_doc', fileData);
+    }
+    const user = getUser() || {};
+    user.nin_uploaded = true;
+    user.nin_doc = fileData;
+    const ninInput = document.getElementById('idNinNumber')?.value.trim();
+    if (ninInput) user.nin = ninInput;
+    setUser(user);
+    if (_checkAndAutoOpenVerificationWindow(user)) {
+      showToast('⏳ All verification documents received! 2 – 24 hours verification window is now open.');
+    } else {
+      showToast('📄 NIN document uploaded! You can view or download it anytime below.');
+    }
+    renderIdentityStatus();
+    renderProfileStrength();
   };
 
   window.onGovIdUploaded = function(fileData) {
     uploadedGovIdFileData = fileData;
-    const fname = document.getElementById('govIdFileName');
-    const icon = document.getElementById('govIdFileIcon');
-    if (fname && fileData) fname.textContent = '✅ ' + fileData.name;
-    if (icon) icon.textContent = '✅';
-    showToast('💳 Government ID scan attached.');
+    if (fileData && typeof saveUploadedFile === 'function') {
+      saveUploadedFile('gov_id_doc', fileData);
+    }
+    const user = getUser() || {};
+    user.gov_id_uploaded = true;
+    user.gov_id_doc = fileData;
+    user.id_gov_type = document.getElementById('idGovType')?.value || user.id_gov_type || 'Government ID';
+    user.id_gov_number = document.getElementById('idGovNumber')?.value.trim() || user.id_gov_number || '';
+    setUser(user);
+    if (_checkAndAutoOpenVerificationWindow(user)) {
+      showToast('⏳ All verification documents received! 2 – 24 hours verification window is now open.');
+    } else {
+      showToast('💳 Government ID scan uploaded! You can view or download it anytime below.');
+    }
+    renderIdentityStatus();
+    renderProfileStrength();
   };
 
   window.onAddressDocUploaded = function(fileData) {
     uploadedAddressFileData = fileData;
-    const fname = document.getElementById('addressFileName');
-    const icon = document.getElementById('addressFileIcon');
-    if (fname && fileData) fname.textContent = '✅ ' + fileData.name;
-    if (icon) icon.textContent = '✅';
-    showToast('🧾 Proof of address attached.');
+    if (fileData && typeof saveUploadedFile === 'function') {
+      saveUploadedFile('address_doc', fileData);
+    }
+    const user = getUser() || {};
+    user.address_doc_uploaded = true;
+    user.address_doc = fileData;
+    user.id_address_type = document.getElementById('idAddressType')?.value || user.id_address_type || 'Proof of Address';
+    setUser(user);
+    if (_checkAndAutoOpenVerificationWindow(user)) {
+      showToast('⏳ All verification documents received! 2 – 24 hours verification window is now open.');
+    } else {
+      showToast('🧾 Proof of address uploaded! You can view or download it anytime below.');
+    }
+    renderIdentityStatus();
+    renderProfileStrength();
   };
 
   function submitIdentityVerification() {
@@ -1392,10 +1748,39 @@
     }
 
     const user = getUser() || {};
+    const ninDoc = uploadedNinFileData || _getLatestSlotDoc('nin_doc', 'nin_doc');
+    const govDoc = uploadedGovIdFileData || _getLatestSlotDoc('gov_id_doc', 'gov_id_doc');
+    const addrDoc = uploadedAddressFileData || _getLatestSlotDoc('address_doc', 'address_doc');
+    const hasFacial = Boolean(capturedFacialDataURL || user.facial_biometric || user.facial_verified || _getLatestSlotDoc('facial_selfie', 'facial_selfie_doc'));
+
+    if (!ninDoc && !user.nin_uploaded) {
+      showToast('⚠️ Please upload your NIN Slip / Digital ID Card Scan first.', 'warning');
+      return;
+    }
+    if (!govDoc && !user.gov_id_uploaded) {
+      showToast('⚠️ Please upload your secondary Official Government ID document first.', 'warning');
+      return;
+    }
+    if (!addrDoc && !user.address_doc_uploaded) {
+      showToast('⚠️ Please upload your Proof of Residential Address document first.', 'warning');
+      return;
+    }
+    if (!hasFacial) {
+      showToast('⚠️ Please capture your Facial Recognition Biometric Snapshot first.', 'warning');
+      return;
+    }
+
     user.nin = nin;
+    user.nin_uploaded = true;
+    user.gov_id_uploaded = true;
+    user.address_doc_uploaded = true;
+    user.facial_verified = true;
+    user.all_verification_docs_submitted = true;
     user.verification_status = 'under_review';
-    user.verification_submitted_at = new Date().toISOString();
-    user.facial_biometric = capturedFacialDataURL || true;
+    user.verification_submitted_at = user.verification_submitted_at || new Date().toISOString();
+    user.verification_window_min_hours = 2;
+    user.verification_window_max_hours = 24;
+    user.facial_biometric = capturedFacialDataURL || user.facial_biometric || true;
     user.id_gov_type = document.getElementById('idGovType')?.value;
     user.id_gov_number = document.getElementById('idGovNumber')?.value;
     user.id_address_type = document.getElementById('idAddressType')?.value;
@@ -1405,7 +1790,11 @@
 
     if (window.sb && user.id) {
       try {
-        sb.from('profiles').update({ nin, verification_status: 'under_review' }).eq('id', user.id);
+        sb.from('profiles').update({
+          nin,
+          verification_status: 'under_review',
+          verification_submitted_at: user.verification_submitted_at
+        }).eq('id', user.id).then(() => {}).catch(() => {});
       } catch(e) {}
     }
 
@@ -1414,11 +1803,12 @@
     if (typeof buildTopbar === 'function') buildTopbar();
     renderProfileStrength();
 
-    showToast('⏳ Identity Verification Submitted! Verification will take place on or before 24 hours.');
+    showToast('⏳ All documents submitted! A 2 – 24 hours verification window is now open before your profile is verified.');
   }
 
   // -- Avatar upload handling --
   function _applyAvatarImage(dataURL) {
+    if (!dataURL) return;
     const inner = document.getElementById('avatarInner');
     if (inner) {
       inner.innerHTML = `<img src="${dataURL}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;" alt="Profile photo" loading="lazy" decoding="async">`;
@@ -2053,6 +2443,10 @@
       });
     }
 
+    if (typeof renderAllUploadedDocsVault === 'function') {
+      renderAllUploadedDocsVault();
+    }
+
     if (customQuals.length === 0 && certFiles.length === 0 && docFiles.length === 0) {
       container.innerHTML = `<div style="font-size:13px; color:var(--muted); font-style:italic; padding:20px; text-align:center; background:var(--paper); border-radius:var(--r); border:1px dashed var(--line);">No academic degrees, certifications or documents added yet. Use the buttons below to add a degree or upload your certificates.</div>`;
       return;
@@ -2462,7 +2856,10 @@
       }
     }
 
-    if (!getUploadedAvatar()) {
+    const resolvedAv = (typeof resolveUserAvatarSrc === 'function' ? resolveUserAvatarSrc(prof) : '') || prof.avatar || prof.avatar_url || (getUploadedAvatar() && getUploadedAvatar().dataURL) || '';
+    if (resolvedAv) {
+      _applyAvatarImage(resolvedAv);
+    } else {
       const inner = document.getElementById('avatarInner');
       if (inner && !inner.querySelector('img')) {
         inner.textContent = (prof.username || prof.name || 'P').charAt(0).toUpperCase();
@@ -3022,7 +3419,7 @@
     </div>
   </div>
 </div>
-<script src="settings-popup.js?v=176.0"></script>
+<script src="settings-popup.js?v=177.0"></script>
 <script src="upload-modal.js"></script>
 </body>
 </html>

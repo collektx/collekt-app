@@ -37,60 +37,11 @@ const COLLEKT_SUBSCRIPTION_DISCOUNTS = {
         'collekt_engagements',
         'collekt_transactions',
         'collekt_conversations',
-        'collekt_all_messages',
-        'collekt_custom_quals',
-        'collekt_user_cv',
-        'collekt_user_avatar',
-        'collekt_company_logo',
-        'collekt_uploads_default',
-        'collekt_all_users'
+        'collekt_all_messages'
       ];
       staleKeysToPurge.forEach(k => {
         try { localStorage.removeItem(k); } catch(e){}
       });
-
-      // Remove all legacy collekt_uploads_* keys from deleted/prior accounts
-      try {
-        const allStorageKeys = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith('collekt_uploads_')) {
-            allStorageKeys.push(k);
-          }
-        }
-        allStorageKeys.forEach(k => localStorage.removeItem(k));
-      } catch(e){}
-
-      // Sanitize active collekt_user if contaminated by old hardcoded profile attributes
-      try {
-        const rawCurr = JSON.parse(localStorage.getItem('collekt_user'));
-        if (rawCurr) {
-          if (rawCurr.id === 'cb203a95-b9d1-4ae4-a4e5-76bf9e0f0d91' && String(rawCurr.email || '').toLowerCase() === 'ojeoweredave@gmail.com') {
-            rawCurr.id = '8ed300fd-151c-4975-a56f-d1ebe071d347';
-          }
-          if (rawCurr.other_name === 'Oladapo' || rawCurr.name === 'Dave Oladapo Ojeowere') {
-            rawCurr.other_name = '';
-            rawCurr.name = 'Dave Ojeowere';
-            rawCurr.first_name = 'Dave';
-            rawCurr.last_name = 'Ojeowere';
-          }
-          if (rawCurr.title === 'Senior Proposal Manager & Technical Specialist') {
-            rawCurr.title = '';
-          }
-          if (rawCurr.bio && rawCurr.bio.includes('Senior Proposal Manager and Technical Commercial Specialist')) {
-            rawCurr.bio = '';
-          }
-          if (Array.isArray(rawCurr.skills) && rawCurr.skills.includes('Proposal Management') && rawCurr.skills.includes('EPC Tendering')) {
-            rawCurr.skills = [];
-          }
-          rawCurr.avatar = null;
-          rawCurr.avatar_uploaded = false;
-          rawCurr.cv_name = '';
-          rawCurr.cv_data = null;
-          rawCurr.cv_size = 0;
-          localStorage.setItem('collekt_user', JSON.stringify(rawCurr));
-        }
-      } catch(e){}
 
       localStorage.setItem('collekt_clean_reset_v157', 'true');
     }
@@ -476,16 +427,70 @@ function getUser() {
       merged.dva_account = '';
     }
 
-    // 2. Remove external OAuth avatar from avatar property so it does not count as uploaded photo
-    if (merged.avatar && typeof merged.avatar === 'string' && (merged.avatar.includes('googleusercontent.com') || merged.avatar.includes('licdn.com'))) {
-      merged.oauth_avatar = merged.avatar;
-      merged.avatar = null;
-      merged.avatar_uploaded = false;
+    // 2. Self-heal Display Picture (DP) and Company Logo from all persistent stores so uploaded DPs never disappear
+    if (!merged.avatar || typeof merged.avatar !== 'string' || !merged.avatar.trim()) {
+      const candidateAv = merged.avatar_url || merged.photo_url || merged.oauth_avatar || (dirUser && (dirUser.avatar || dirUser.avatar_url || dirUser.photo_url)) || '';
+      if (candidateAv && typeof candidateAv === 'string' && candidateAv.trim()) {
+        merged.avatar = candidateAv.trim();
+        merged.avatar_uploaded = true;
+      } else {
+        try {
+          const uid = merged.id ? String(merged.id).trim() : '';
+          const em = merged.email ? String(merged.email).toLowerCase().trim() : '';
+          let storedAv = (uid && (localStorage.getItem('collekt_user_avatar_' + uid) || localStorage.getItem('collekt_user_avatar_' + uid.toLowerCase()))) ||
+                         (em && localStorage.getItem('collekt_user_avatar_' + em)) ||
+                         localStorage.getItem('collekt_user_avatar') || '';
+          if (!storedAv && uid) {
+            const up = JSON.parse(localStorage.getItem('collekt_uploads_' + uid) || '{}');
+            if (Array.isArray(up.avatar) && up.avatar.length > 0) {
+              const lastAv = up.avatar[up.avatar.length - 1];
+              storedAv = (lastAv && (lastAv.dataURL || lastAv.publicUrl || lastAv.fileUrl || lastAv.url)) || '';
+            }
+          }
+          if (!storedAv && em) {
+            const upEm = JSON.parse(localStorage.getItem('collekt_uploads_' + em) || '{}');
+            if (Array.isArray(upEm.avatar) && upEm.avatar.length > 0) {
+              const lastAv = upEm.avatar[upEm.avatar.length - 1];
+              storedAv = (lastAv && (lastAv.dataURL || lastAv.publicUrl || lastAv.fileUrl || lastAv.url)) || '';
+            }
+          }
+          if (storedAv && typeof storedAv === 'string' && storedAv.trim()) {
+            merged.avatar = storedAv.trim();
+            merged.avatar_uploaded = true;
+          }
+        } catch(e) {}
+      }
+    } else {
+      merged.avatar_uploaded = true;
     }
-    if (merged.company_logo && typeof merged.company_logo === 'string' && (merged.company_logo.includes('googleusercontent.com') || merged.company_logo.includes('licdn.com'))) {
-      merged.oauth_company_logo = merged.company_logo;
-      merged.company_logo = null;
-      merged.company_logo_uploaded = false;
+
+    if (!merged.company_logo || typeof merged.company_logo !== 'string' || !merged.company_logo.trim()) {
+      const candidateLogo = merged.logo_url || merged.oauth_company_logo || (dirUser && (dirUser.company_logo || dirUser.logo_url)) || '';
+      if (candidateLogo && typeof candidateLogo === 'string' && candidateLogo.trim()) {
+        merged.company_logo = candidateLogo.trim();
+        merged.company_logo_uploaded = true;
+      } else {
+        try {
+          const uid = merged.id ? String(merged.id).trim() : '';
+          const em = merged.email ? String(merged.email).toLowerCase().trim() : '';
+          let storedLogo = (uid && localStorage.getItem('collekt_company_logo_' + uid)) ||
+                           (em && localStorage.getItem('collekt_company_logo_' + em)) ||
+                           localStorage.getItem('collekt_company_logo') || '';
+          if (!storedLogo && uid) {
+            const up = JSON.parse(localStorage.getItem('collekt_uploads_' + uid) || '{}');
+            if (Array.isArray(up['company-logo']) && up['company-logo'].length > 0) {
+              const lastLg = up['company-logo'][up['company-logo'].length - 1];
+              storedLogo = (lastLg && (lastLg.dataURL || lastLg.publicUrl || lastLg.fileUrl || lastLg.url)) || '';
+            }
+          }
+          if (storedLogo && typeof storedLogo === 'string' && storedLogo.trim()) {
+            merged.company_logo = storedLogo.trim();
+            merged.company_logo_uploaded = true;
+          }
+        } catch(e) {}
+      }
+    } else {
+      merged.company_logo_uploaded = true;
     }
 
     return merged;
@@ -1090,6 +1095,14 @@ function syncUserDisplayEverywhere() {
     const badge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(14, u) : '';
     el.innerHTML = `${escapeHTML(name)} ${badge}`;
   });
+
+  // 4. Sync Display Picture (DP) / Company Logo across Topbar and Sidebar
+  const avatarSrc = typeof resolveUserAvatarSrc === 'function' ? resolveUserAvatarSrc(u) : (u.avatar || u.avatar_url || u.company_logo || '');
+  if (avatarSrc) {
+    document.querySelectorAll('.topbar-avatar, .sidebar-avatar').forEach(el => {
+      el.innerHTML = `<img src="${avatarSrc}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    });
+  }
 }
 
 function escapeHTML(str) {
@@ -1159,16 +1172,41 @@ function setUser(data) {
     localStorage.setItem('collekt_last_role', 'company');
   }
 
-  // Sanitize external OAuth avatars for all accounts
-  if (merged.avatar && typeof merged.avatar === 'string' && (merged.avatar.includes('googleusercontent.com') || merged.avatar.includes('licdn.com'))) {
-    merged.oauth_avatar = merged.avatar;
-    merged.avatar = null;
-    merged.avatar_uploaded = false;
+  // Never allow a partial update or null DB field to wipe an existing uploaded DP or company logo
+  if (isSameUser && current && !data._clearAvatar) {
+    if ((!merged.avatar || typeof merged.avatar !== 'string' || !merged.avatar.trim()) && current.avatar) {
+      merged.avatar = current.avatar;
+      merged.avatar_uploaded = true;
+    }
+    if ((!merged.avatar_url || typeof merged.avatar_url !== 'string' || !merged.avatar_url.trim()) && (current.avatar_url || current.avatar)) {
+      merged.avatar_url = current.avatar_url || current.avatar;
+    }
+    if ((!merged.company_logo || typeof merged.company_logo !== 'string' || !merged.company_logo.trim()) && current.company_logo) {
+      merged.company_logo = current.company_logo;
+      merged.company_logo_uploaded = true;
+    }
   }
-  if (merged.company_logo && typeof merged.company_logo === 'string' && (merged.company_logo.includes('googleusercontent.com') || merged.company_logo.includes('licdn.com'))) {
-    merged.oauth_company_logo = merged.company_logo;
-    merged.company_logo = null;
-    merged.company_logo_uploaded = false;
+
+  // Normalize & back up avatar / company_logo to user-scoped localStorage so DPs never disappear
+  if (!merged.avatar && merged.avatar_url && typeof merged.avatar_url === 'string' && merged.avatar_url.trim()) {
+    merged.avatar = merged.avatar_url.trim();
+  }
+  if (merged.avatar && typeof merged.avatar === 'string' && merged.avatar.trim()) {
+    merged.avatar_uploaded = true;
+    if (!merged.avatar_url) merged.avatar_url = merged.avatar;
+    try {
+      if (merged.id) localStorage.setItem('collekt_user_avatar_' + merged.id, merged.avatar);
+      if (merged.email) localStorage.setItem('collekt_user_avatar_' + String(merged.email).toLowerCase().trim(), merged.avatar);
+      localStorage.setItem('collekt_user_avatar', merged.avatar);
+    } catch(e) {}
+  }
+  if (merged.company_logo && typeof merged.company_logo === 'string' && merged.company_logo.trim()) {
+    merged.company_logo_uploaded = true;
+    try {
+      if (merged.id) localStorage.setItem('collekt_company_logo_' + merged.id, merged.company_logo);
+      if (merged.email) localStorage.setItem('collekt_company_logo_' + String(merged.email).toLowerCase().trim(), merged.company_logo);
+      localStorage.setItem('collekt_company_logo', merged.company_logo);
+    } catch(e) {}
   }
   
   localStorage.setItem('collekt_user', JSON.stringify(merged));
@@ -2026,13 +2064,147 @@ function getAllRegisteredUsers() {
 }
 
 // -- UNIVERSAL USER VERIFICATION & DISPLAY PICTURE (DP) HELPERS --
-// STRICT RULE: Only users who are officially verified with verified check mark are addressed as verified.
+// Computes the 2 - 24 hours verification window state after all documents are submitted
+function getVerificationWindowStatus(user) {
+  const u = user || (typeof getUser === 'function' ? getUser() : null);
+  if (!u) {
+    return {
+      allDocsSubmitted: false,
+      submittedAt: null,
+      opensAt: null,
+      closesAt: null,
+      elapsedMs: 0,
+      elapsedHours: 0,
+      isWindowOpen: false,
+      isBeforeMin2Hours: false,
+      isWithin2To24Hours: false,
+      hasCompleted24Hours: false,
+      canBeVerifiedNow: false,
+      remainingToMinText: '',
+      remainingToMaxText: '',
+      windowSummaryText: 'Submit all required verification documents to open the 2 – 24 hours verification window.'
+    };
+  }
+
+  const hasNin = Boolean((u.nin && String(u.nin).trim().length >= 11) && (u.nin_uploaded || u.nin_doc));
+  const hasGovId = Boolean(u.gov_id_uploaded || u.gov_id_doc || (u.gov_id_num && String(u.gov_id_num).trim().length >= 3));
+  const hasAddress = Boolean(u.address_doc_uploaded || u.address_doc || (u.res_address && String(u.res_address).trim().length >= 5));
+  const hasFacial = Boolean(u.facial_verified || u.facial_selfie_doc);
+  const allDocsSubmitted = Boolean(
+    u.all_verification_docs_submitted === true ||
+    u.verification_submitted_at ||
+    (hasNin && hasGovId && hasAddress && hasFacial)
+  );
+
+  const rawSubmitted = u.verification_submitted_at || u.kyc_submitted_at || null;
+  if (!rawSubmitted) {
+    return {
+      allDocsSubmitted,
+      hasNin,
+      hasGovId,
+      hasAddress,
+      hasFacial,
+      submittedAt: null,
+      opensAt: null,
+      closesAt: null,
+      elapsedMs: 0,
+      elapsedHours: 0,
+      isWindowOpen: false,
+      isBeforeMin2Hours: false,
+      isWithin2To24Hours: false,
+      hasCompleted24Hours: false,
+      canBeVerifiedNow: Boolean(u.is_verified === true && u.verification_status === 'verified'),
+      remainingToMinText: '2h 0m',
+      remainingToMaxText: '24h 0m',
+      windowSummaryText: allDocsSubmitted
+        ? 'All documents ready — click Submit for Verification to start the 2 – 24 hours verification window.'
+        : 'Upload all required identity documents to start the 2 – 24 hours verification window.'
+    };
+  }
+
+  const submittedMs = new Date(rawSubmitted).getTime();
+  const minWindowMs = 2 * 60 * 60 * 1000;   // 2 hours minimum
+  const maxWindowMs = 24 * 60 * 60 * 1000;  // 24 hours maximum
+  const opensAtMs = submittedMs + minWindowMs;
+  const closesAtMs = submittedMs + maxWindowMs;
+  const nowMs = Date.now();
+  const elapsedMs = Math.max(0, nowMs - submittedMs);
+  const elapsedHours = elapsedMs / (1000 * 60 * 60);
+
+  const isBeforeMin2Hours = nowMs < opensAtMs;
+  const isWithin2To24Hours = nowMs >= opensAtMs && nowMs <= closesAtMs;
+  const hasCompleted24Hours = nowMs > closesAtMs;
+  const isWindowOpen = (u.verification_status !== 'verified' && u.verification_status !== 'rejected') || isBeforeMin2Hours;
+
+  const formatDuration = (ms) => {
+    const safeMs = Math.max(0, ms);
+    const totalMins = Math.ceil(safeMs / 60000);
+    const hrs = Math.floor(totalMins / 60);
+    const mins = totalMins % 60;
+    if (hrs <= 0) return `${mins}m`;
+    return `${hrs}h ${mins}m`;
+  };
+
+  const remainingToMinText = isBeforeMin2Hours ? formatDuration(opensAtMs - nowMs) : '0m';
+  const remainingToMaxText = !hasCompleted24Hours ? formatDuration(closesAtMs - nowMs) : '0m';
+
+  // A professional cannot be verified before the 2-hour window opens (unless master admin override)
+  const canBeVerifiedNow = !isBeforeMin2Hours || u.admin_verified_override === true;
+
+  let windowSummaryText = '';
+  if (isBeforeMin2Hours) {
+    windowSummaryText = `2 – 24 Hours Verification Window Open: Earliest verification unlocks in ${remainingToMinText} (up to ${remainingToMaxText} remaining in 24h window).`;
+  } else if (isWithin2To24Hours) {
+    windowSummaryText = `2 – 24 Hours Verification Window Active: 2-hour minimum met. Finalizing verification (${remainingToMaxText} remaining in 24-hour window).`;
+  } else {
+    windowSummaryText = `2 – 24 Hours Verification Window Completed.`;
+  }
+
+  return {
+    allDocsSubmitted: true,
+    hasNin,
+    hasGovId,
+    hasAddress,
+    hasFacial,
+    submittedAt: new Date(submittedMs).toISOString(),
+    opensAt: new Date(opensAtMs).toISOString(),
+    closesAt: new Date(closesAtMs).toISOString(),
+    elapsedMs,
+    elapsedHours,
+    isWindowOpen,
+    isBeforeMin2Hours,
+    isWithin2To24Hours,
+    hasCompleted24Hours,
+    canBeVerifiedNow,
+    remainingToMinText,
+    remainingToMaxText,
+    windowSummaryText
+  };
+}
+
+// STRICT RULE: Only users who are officially verified AND have passed the minimum 2-hour window (of the 2-24h window) are verified.
 function isUserVerified(user) {
   if (!user) return false;
   if (user.id === 'a1111111-1111-4111-a111-111111111111' || user.email === 'admin@collekt.ng') return true;
   const status = String(user.verification_status || '').toLowerCase().trim();
-  if (['rejected', 'unsubmitted', 'pending', 'none', ''].includes(status)) return false;
-  return Boolean((user.verified === true || user.is_verified === true) && status === 'verified');
+  if (['rejected', 'unsubmitted', 'none', ''].includes(status)) return false;
+
+  const win = getVerificationWindowStatus(user);
+  // Enforce the 2 - 24 hours window whenverification_submitted_at is present
+  if (user.verification_submitted_at && win.isBeforeMin2Hours && user.admin_verified_override !== true) {
+    return false;
+  }
+
+  // If the 24-hour window has completed after submitting all documents (and not rejected), auto-complete verification
+  if (user.verification_submitted_at && win.hasCompleted24Hours && status === 'under_review') {
+    user.verification_status = 'verified';
+    user.is_verified = true;
+    user.verified = true;
+    user.identity_verified = true;
+    return true;
+  }
+
+  return Boolean((user.verified === true || user.is_verified === true || user.identity_verified === true) && status === 'verified');
 }
 
 // Universal Display Picture (DP) / Avatar Resolver
@@ -2058,7 +2230,10 @@ function resolveUserAvatarSrc(user) {
   if (user.company_logo && typeof user.company_logo === 'string' && user.company_logo.trim()) {
     return user.company_logo.trim();
   }
-  // 3. Check uploaded files cache
+  if (user.logo_url && typeof user.logo_url === 'string' && user.logo_url.trim()) {
+    return user.logo_url.trim();
+  }
+  // 3. Check uploaded files cache (both ID and email keys)
   try {
     if (typeof getUploadedFiles === 'function') {
       const isCo = user.role === 'company' || (!user.role && user.company_name);
@@ -2066,41 +2241,46 @@ function resolveUserAvatarSrc(user) {
       const files = getUploadedFiles(cat, user);
       if (Array.isArray(files) && files.length > 0) {
         const last = files[files.length - 1];
-        if (last && (last.dataURL || last.url || last.src)) {
-          return last.dataURL || last.url || last.src;
+        if (last && (last.dataURL || last.publicUrl || last.fileUrl || last.url || last.src)) {
+          return last.dataURL || last.publicUrl || last.fileUrl || last.url || last.src;
         }
       }
     }
   } catch(e) {}
-  // 4. Check active user session if matching
-  try {
-    const cur = typeof getUser === 'function' ? getUser() : null;
-    if (cur && (
-      (user.id && cur.id && String(user.id).toLowerCase() === String(cur.id).toLowerCase()) ||
-      (user.email && cur.email && String(user.email).toLowerCase() === String(cur.email).toLowerCase())
-    )) {
-      if (cur.avatar && typeof cur.avatar === 'string' && cur.avatar.trim()) return cur.avatar.trim();
-      if (cur.avatar_url && typeof cur.avatar_url === 'string' && cur.avatar_url.trim()) return cur.avatar_url.trim();
-      if (cur.oauth_avatar && typeof cur.oauth_avatar === 'string' && cur.oauth_avatar.trim()) return cur.oauth_avatar.trim();
-      const localAv = localStorage.getItem('collekt_user_avatar') || localStorage.getItem('collekt_company_logo');
-      if (localAv && localAv.trim()) return localAv.trim();
-    }
-  } catch(e) {}
-  // 5. Scoped local storage keys
+  // 4. Scoped local storage keys for this specific user ID or email
   try {
     if (user.id) {
-      const scoped = localStorage.getItem('collekt_user_avatar_' + user.id) || localStorage.getItem('collekt_user_avatar_' + String(user.id).toLowerCase());
+      const scoped = localStorage.getItem('collekt_user_avatar_' + user.id) ||
+                     localStorage.getItem('collekt_user_avatar_' + String(user.id).toLowerCase()) ||
+                     localStorage.getItem('collekt_company_logo_' + user.id);
       if (scoped && scoped.trim()) return scoped.trim();
     }
     if (user.email) {
-      const scoped = localStorage.getItem('collekt_user_avatar_' + String(user.email).toLowerCase().trim());
+      const emKey = String(user.email).toLowerCase().trim();
+      const scoped = localStorage.getItem('collekt_user_avatar_' + emKey) ||
+                     localStorage.getItem('collekt_company_logo_' + emKey);
       if (scoped && scoped.trim()) return scoped.trim();
+    }
+  } catch(e) {}
+  // 5. Check active user session if matching
+  try {
+    const rawCur = JSON.parse(localStorage.getItem('collekt_user') || 'null');
+    if (rawCur && (
+      (user.id && rawCur.id && String(user.id).toLowerCase() === String(rawCur.id).toLowerCase()) ||
+      (user.email && rawCur.email && String(user.email).toLowerCase() === String(rawCur.email).toLowerCase())
+    )) {
+      if (rawCur.avatar && typeof rawCur.avatar === 'string' && rawCur.avatar.trim()) return rawCur.avatar.trim();
+      if (rawCur.avatar_url && typeof rawCur.avatar_url === 'string' && rawCur.avatar_url.trim()) return rawCur.avatar_url.trim();
+      if (rawCur.company_logo && typeof rawCur.company_logo === 'string' && rawCur.company_logo.trim()) return rawCur.company_logo.trim();
+      const localAv = localStorage.getItem('collekt_user_avatar') || localStorage.getItem('collekt_company_logo');
+      if (localAv && localAv.trim()) return localAv.trim();
     }
   } catch(e) {}
   return '';
 }
 
 if (typeof window !== 'undefined') {
+  window.getVerificationWindowStatus = getVerificationWindowStatus;
   window.isUserVerified = isUserVerified;
   window.resolveUserAvatarSrc = resolveUserAvatarSrc;
 }
@@ -3899,46 +4079,35 @@ function goToDashboard() {
   window.location.replace(user.role === 'company' ? 'company-dashboard.html' : 'dashboard.html');
 }
 
-// Helper: Check if user has explicitly uploaded a profile photo on Collekt
+// Helper: Check if user has a profile photo on Collekt
 function hasUserUploadedPhoto(user) {
   const activeUser = typeof getUser === 'function' ? getUser() : null;
   const u = user || activeUser;
   if (!u) return false;
-  const isCurrentActiveUser = !user || (activeUser && (
-    (u.id && activeUser.id && String(u.id).toLowerCase() === String(activeUser.id).toLowerCase()) ||
-    (!u.id && u.email && activeUser.email && String(u.email).toLowerCase() === String(activeUser.email).toLowerCase())
-  ));
-  if (u.avatar_uploaded === true && u.avatar) return true;
+  if (typeof resolveUserAvatarSrc === 'function') {
+    const src = resolveUserAvatarSrc(u);
+    if (src && src.trim()) return true;
+  }
+  if (u.avatar && typeof u.avatar === 'string' && u.avatar.trim()) return true;
+  if (u.avatar_url && typeof u.avatar_url === 'string' && u.avatar_url.trim()) return true;
   const avatarFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('avatar', u) : [];
   if (avatarFiles && avatarFiles.length > 0) return true;
-  if (isCurrentActiveUser && localStorage.getItem('collekt_user_avatar')) return true;
-  if (u.avatar && typeof u.avatar === 'string') {
-    if (u.avatar.startsWith('data:image/')) return true;
-    if (u.avatar.includes('/storage/v1/object/public/avatars/')) return true;
-    // Disallow external OAuth provider URLs from counting as uploaded photo
-    if (u.avatar.includes('googleusercontent.com') || u.avatar.includes('licdn.com')) return false;
-  }
   return false;
 }
 
-// Helper: Check if company has explicitly uploaded a company logo on Collekt
+// Helper: Check if company has a company logo on Collekt
 function hasCompanyUploadedLogo(user) {
   const activeUser = typeof getUser === 'function' ? getUser() : null;
   const u = user || activeUser;
   if (!u) return false;
-  const isCurrentActiveUser = !user || (activeUser && (
-    (u.id && activeUser.id && String(u.id).toLowerCase() === String(activeUser.id).toLowerCase()) ||
-    (!u.id && u.email && activeUser.email && String(u.email).toLowerCase() === String(activeUser.email).toLowerCase())
-  ));
-  if (u.company_logo_uploaded === true && u.company_logo) return true;
+  if (u.company_logo && typeof u.company_logo === 'string' && u.company_logo.trim()) return true;
+  if (u.logo_url && typeof u.logo_url === 'string' && u.logo_url.trim()) return true;
+  if (typeof resolveUserAvatarSrc === 'function') {
+    const src = resolveUserAvatarSrc(u);
+    if (src && src.trim()) return true;
+  }
   const logoFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('company-logo', u) : [];
   if (logoFiles && logoFiles.length > 0) return true;
-  if (isCurrentActiveUser && localStorage.getItem('collekt_company_logo')) return true;
-  if (u.company_logo && typeof u.company_logo === 'string') {
-    if (u.company_logo.startsWith('data:image/')) return true;
-    if (u.company_logo.includes('/storage/v1/object/public/')) return true;
-    if (u.company_logo.includes('googleusercontent.com') || u.company_logo.includes('licdn.com')) return false;
-  }
   return false;
 }
 
@@ -3989,10 +4158,12 @@ function calculateUserProfileStrength(user) {
     customQuals.length > 0
   );
 
-  // Identity verification requires authentic approved verification status
+  // Identity verification is completed when verified or when all documents are submitted into the 2-24h verification window
+  const winStatus = typeof getVerificationWindowStatus === 'function' ? getVerificationWindowStatus(u) : null;
   const hasIdentity = !!(
-    (u.verification_status === 'verified' && (u.is_verified === true || u.identity_verified === true)) &&
-    (u.nin || localStorage.getItem('collekt_user_nin') || (typeof getUploadedFiles === 'function' && getUploadedFiles('document').length > 0))
+    isUserVerified(u) ||
+    (u.verification_status === 'under_review' && u.verification_submitted_at) ||
+    (winStatus && winStatus.allDocsSubmitted && u.verification_submitted_at)
   );
 
   const checks = [
@@ -4008,8 +4179,9 @@ function calculateUserProfileStrength(user) {
   const doneWeight = checks.filter(c => c.done).reduce((sum, c) => sum + c.weight, 0);
   const percent = Math.min(100, doneWeight);
   let level = 'Beginner';
-  const isFullyVerified = (u.verification_status === 'verified' && (u.is_verified === true || u.identity_verified === true));
+  const isFullyVerified = isUserVerified(u);
   if (percent >= 100 && isFullyVerified) level = 'Fully Verified';
+  else if (u.verification_status === 'under_review' && u.verification_submitted_at) level = 'Verification Window (2–24h)';
   else if (percent >= 100) level = '100% Profile Complete';
   else if (percent >= 80) level = 'Advanced';
   else if (percent >= 45) level = 'Intermediate';
@@ -5864,67 +6036,99 @@ function _getAllUploads(passedUser) {
   const u = passedUser || getUser();
   if (!u || (!u.id && !u.email)) return {};
   let merged = {};
+  const mergeSource = (srcObj) => {
+    if (!srcObj || typeof srcObj !== 'object') return;
+    for (const cat in srcObj) {
+      if (Array.isArray(srcObj[cat]) && srcObj[cat].length) {
+        if (!merged[cat] || !merged[cat].length) {
+          merged[cat] = srcObj[cat].slice();
+        } else {
+          const existingNames = new Set(merged[cat].map(f => f && (f.id || f.name || f.dataURL)));
+          srcObj[cat].forEach(item => {
+            const k = item && (item.id || item.name || item.dataURL);
+            if (item && (!k || !existingNames.has(k))) {
+              merged[cat].push(item);
+            }
+          });
+        }
+      }
+    }
+  };
   if (u.id) {
     try {
-      const idUploads = JSON.parse(localStorage.getItem('collekt_uploads_' + u.id)) || {};
-      for (const cat in idUploads) {
-        if (Array.isArray(idUploads[cat]) && idUploads[cat].length) {
-          merged[cat] = idUploads[cat];
-        }
-      }
+      mergeSource(JSON.parse(localStorage.getItem('collekt_uploads_' + u.id) || '{}'));
     } catch(e){}
-  } else if (u.email) {
+  }
+  if (u.email) {
     try {
-      const emUploads = JSON.parse(localStorage.getItem('collekt_uploads_' + u.email)) || {};
-      for (const cat in emUploads) {
-        if (Array.isArray(emUploads[cat]) && emUploads[cat].length) {
-          merged[cat] = emUploads[cat];
-        }
-      }
+      mergeSource(JSON.parse(localStorage.getItem('collekt_uploads_' + u.email) || '{}'));
+      mergeSource(JSON.parse(localStorage.getItem('collekt_uploads_' + String(u.email).toLowerCase().trim()) || '{}'));
     } catch(e){}
   }
   return merged;
 }
 
 function _saveAllUploads(data, passedUser) {
-  const key = _uploadsKey(passedUser);
-  try {
-    localStorage.setItem(key, JSON.stringify(data));
-  } catch (err) {
-    console.warn('LocalStorage quota notice. Compacting non-essential document payloads.', err);
+  const u = passedUser || getUser();
+  const key = _uploadsKey(u);
+  const writeSafe = (storageKey, payload) => {
     try {
-      const sanitized = JSON.parse(JSON.stringify(data));
-      for (const cat in sanitized) {
-        if (Array.isArray(sanitized[cat])) {
-          sanitized[cat].forEach(item => {
-            // ALWAYS keep avatar, logo, and CV dataURLs intact for previews
-            if (cat !== 'avatar' && cat !== 'company-logo' && cat !== 'cv' && item.size > 2 * 1024 * 1024) {
-              delete item.dataURL;
-            }
-          });
+      localStorage.setItem(storageKey, JSON.stringify(payload));
+    } catch (err) {
+      console.warn('LocalStorage quota notice. Compacting non-essential document payloads.', err);
+      try {
+        const sanitized = JSON.parse(JSON.stringify(payload));
+        for (const cat in sanitized) {
+          if (Array.isArray(sanitized[cat])) {
+            sanitized[cat].forEach(item => {
+              // ALWAYS keep avatar, logo, and CV dataURLs intact for previews
+              if (cat !== 'avatar' && cat !== 'company-logo' && cat !== 'cv' && item.size > 2 * 1024 * 1024 && (item.publicUrl || item.fileUrl || item.file_url)) {
+                delete item.dataURL;
+              }
+            });
+          }
         }
+        localStorage.setItem(storageKey, JSON.stringify(sanitized));
+      } catch (e) {
+        console.error('Failed to persist uploads metadata:', e);
       }
-      localStorage.setItem(key, JSON.stringify(sanitized));
-    } catch (e) {
-      console.error('Failed to persist uploads metadata:', e);
     }
+  };
+  writeSafe(key, data);
+  if (u && u.id && u.email) {
+    const emailKey = 'collekt_uploads_' + String(u.email).toLowerCase().trim();
+    if (emailKey !== key) writeSafe(emailKey, data);
   }
 }
 
 function saveUploadedFile(category, fileData) {
   if (!fileData) return [];
+  const normCategory = category === 'document' ? 'documents' : category;
   const all = _getAllUploads();
-  if (!all[category]) all[category] = [];
-  // For avatar, company-logo, and CV, replace with latest single file
-  if (category === 'avatar' || category === 'company-logo' || category === 'cv') {
-    all[category] = [fileData];
+  if (!all[normCategory]) all[normCategory] = [];
+
+  const singleSlotCategories = ['avatar', 'company-logo', 'cv', 'nin_doc', 'gov_id_doc', 'address_doc', 'facial_selfie', 'cac_doc', 'tin_doc', 'director_id_doc'];
+  if (singleSlotCategories.includes(normCategory)) {
+    all[normCategory] = [fileData];
   } else {
-    all[category].push(fileData);
+    const idx = all[normCategory].findIndex(f => f && ((fileData.doc_slot && f.doc_slot === fileData.doc_slot) || (fileData.name && f.name === fileData.name)));
+    if (idx !== -1) all[normCategory][idx] = fileData;
+    else all[normCategory].push(fileData);
   }
+
+  // Mirror identity & corporate verification docs into 'documents' vault so user can access all uploaded docs in one place
+  if (['nin_doc', 'gov_id_doc', 'address_doc', 'facial_selfie', 'cac_doc', 'tin_doc', 'director_id_doc'].includes(normCategory)) {
+    if (!Array.isArray(all.documents)) all.documents = [];
+    const docEntry = Object.assign({}, fileData, { doc_slot: normCategory });
+    const dIdx = all.documents.findIndex(d => d && (d.doc_slot === normCategory || (d.name && d.name === fileData.name)));
+    if (dIdx !== -1) all.documents[dIdx] = docEntry;
+    else all.documents.push(docEntry);
+  }
+
   _saveAllUploads(all);
 
   // Dedicated fail-safe backup for CV
-  if (category === 'cv') {
+  if (normCategory === 'cv') {
     try {
       localStorage.setItem('collekt_user_cv', JSON.stringify(fileData));
     } catch(e) {}
@@ -5933,29 +6137,43 @@ function saveUploadedFile(category, fileData) {
   // Sync to collekt_user session as well
   const user = getUser();
   if (user && fileData) {
-    if (category === 'avatar' && fileData.dataURL) user.avatar = fileData.dataURL;
-    if (category === 'company-logo' && fileData.dataURL) user.company_logo = fileData.dataURL;
-    if (category === 'cv') {
+    const bestUrl = fileData.dataURL || fileData.publicUrl || fileData.fileUrl || fileData.file_url || null;
+    if (normCategory === 'avatar' && bestUrl) {
+      user.avatar = bestUrl;
+      user.avatar_url = bestUrl;
+      user.avatar_uploaded = true;
+    }
+    if (normCategory === 'company-logo' && bestUrl) {
+      user.company_logo = bestUrl;
+      user.company_logo_uploaded = true;
+    }
+    if (normCategory === 'cv') {
       user.cv_name = fileData.name;
       user.cv_size = fileData.size;
-      user.cv_data = fileData.dataURL || null;
+      user.cv_data = bestUrl;
     }
+    if (normCategory === 'nin_doc') user.nin_doc = fileData;
+    if (normCategory === 'gov_id_doc') user.gov_id_doc = fileData;
+    if (normCategory === 'address_doc') user.address_doc = fileData;
+    if (normCategory === 'facial_selfie') user.facial_selfie_doc = fileData;
+    if (normCategory === 'cac_doc') user.cac_doc = fileData;
+    if (normCategory === 'tin_doc') user.tin_doc = fileData;
+    if (normCategory === 'director_id_doc') user.director_id_doc = fileData;
     setUser(user);
   }
 
-  return all[category];
+  return all[normCategory];
 }
 
 function scrubSyntheticUploads() {
   try {
-    const key = _uploadsKey();
     const all = _getAllUploads();
     let changed = false;
     ['certifications', 'portfolio', 'cv', 'documents'].forEach(cat => {
       if (Array.isArray(all[cat])) {
         const originalLen = all[cat].length;
         // Keep ONLY real files (with valid dataURL, publicUrl, fileUrl, or genuine non-synthetic size)
-        all[cat] = all[cat].filter(f => f && (f.dataURL || f.fileUrl || f.publicUrl || (f.size && f.size !== 250000 && f.size !== 350000 && f.size !== 450000)));
+        all[cat] = all[cat].filter(f => f && (f.dataURL || f.fileUrl || f.file_url || f.publicUrl || (f.size && f.size !== 250000 && f.size !== 350000 && f.size !== 450000)));
         if (all[cat].length !== originalLen) changed = true;
       }
     });
@@ -5982,73 +6200,104 @@ function scrubSyntheticUploads() {
 }
 
 function getUploadedFiles(category, passedUser) {
+  const normCategory = category === 'document' ? 'documents' : category;
   const all = _getAllUploads(passedUser);
-  let files = all[category] || [];
+  let files = all[normCategory] || (category === 'documents' ? all['document'] : []) || [];
   
   // Strictly filter out any legacy synthetic dummy entries
   if (Array.isArray(files)) {
-    files = files.filter(f => f && (f.dataURL || f.fileUrl || f.publicUrl || (f.size && f.size !== 250000 && f.size !== 350000 && f.size !== 450000)));
+    files = files.filter(f => f && (f.dataURL || f.fileUrl || f.file_url || f.publicUrl || (f.size && f.size !== 250000 && f.size !== 350000 && f.size !== 450000)));
   } else {
     files = [];
   }
   
-  // Backup lookups ONLY for genuine CV with authentic data
+  // Backup lookups ONLY for genuine user files with authentic data
   const activeUser = typeof getUser === 'function' ? getUser() : null;
   let u = passedUser || activeUser || null;
   const isCurrentActiveUser = !passedUser || (activeUser && u && (
     (u.id && activeUser.id && String(u.id).toLowerCase() === String(activeUser.id).toLowerCase()) ||
     (!u.id && u.email && activeUser.email && String(u.email).toLowerCase() === String(activeUser.email).toLowerCase())
   ));
-  if (files.length === 0 && u && category === 'cv') {
+  if (files.length === 0 && u && normCategory === 'cv') {
     let cvObj = null;
     if (isCurrentActiveUser) {
       try { cvObj = JSON.parse(localStorage.getItem('collekt_user_cv')); } catch(e){}
     }
-    if (cvObj && cvObj.name && (cvObj.dataURL || cvObj.fileUrl || (cvObj.size && cvObj.size !== 450000))) {
+    if (cvObj && cvObj.name && (cvObj.dataURL || cvObj.fileUrl || cvObj.publicUrl || (cvObj.size && cvObj.size !== 450000))) {
       files = [cvObj];
-    } else if (u.cv_data || (typeof u.cv === 'string' && u.cv.startsWith('data:'))) {
+    } else if (u.cv_data || u.cv_url || (typeof u.cv === 'string' && (u.cv.startsWith('data:') || u.cv.startsWith('http')))) {
       files = [{
         name: u.cv_name || 'Uploaded_CV.pdf',
         size: u.cv_size || 0,
         type: 'application/pdf',
-        dataURL: u.cv_data || u.cv,
+        dataURL: u.cv_data || u.cv_url || u.cv,
         timestamp: new Date().toISOString()
       }];
     }
   }
+  if (files.length === 0 && u) {
+    const slotMap = {
+      nin_doc: u.nin_doc,
+      gov_id_doc: u.gov_id_doc,
+      address_doc: u.address_doc,
+      facial_selfie: u.facial_selfie_doc,
+      cac_doc: u.cac_doc,
+      tin_doc: u.tin_doc,
+      director_id_doc: u.director_id_doc
+    };
+    if (slotMap[normCategory] && typeof slotMap[normCategory] === 'object') {
+      files = [slotMap[normCategory]];
+    }
+  }
 
-  // Never synthesize fake files for certifications, portfolio, or documents!
   return files;
 }
 
 function removeUploadedFile(category, index) {
+  const normCategory = category === 'document' ? 'documents' : category;
   const all = _getAllUploads();
   if (index === undefined) {
-    all[category] = [];
+    all[normCategory] = [];
     _saveAllUploads(all);
-  } else if (all[category] && all[category][index] !== undefined) {
-    all[category].splice(index, 1);
+  } else if (all[normCategory] && all[normCategory][index] !== undefined) {
+    all[normCategory].splice(index, 1);
     _saveAllUploads(all);
   }
-  return all[category] || [];
+  return all[normCategory] || [];
 }
 
 function getUploadedAvatar(passedUser) {
   const user = passedUser || (typeof getUser === 'function' ? getUser() : null);
-  if (user && typeof hasUserUploadedPhoto === 'function' && hasUserUploadedPhoto(user) && user.avatar) {
+  if (user && typeof resolveUserAvatarSrc === 'function') {
+    const resolved = resolveUserAvatarSrc(user);
+    if (resolved) return { dataURL: resolved };
+  }
+  if (user && user.avatar) {
     return { dataURL: user.avatar };
   }
   const files = typeof getUploadedFiles === 'function' ? getUploadedFiles('avatar', user) : [];
-  return files.length ? files[files.length - 1] : null;
+  if (files.length) {
+    const last = files[files.length - 1];
+    return { ...last, dataURL: last.dataURL || last.publicUrl || last.fileUrl || last.url };
+  }
+  return null;
 }
 
 function getUploadedCompanyLogo(passedUser) {
   const user = passedUser || (typeof getUser === 'function' ? getUser() : null);
-  if (user && typeof hasCompanyUploadedLogo === 'function' && hasCompanyUploadedLogo(user) && user.company_logo) {
+  if (user && user.company_logo) {
     return { dataURL: user.company_logo };
   }
+  if (user && typeof resolveUserAvatarSrc === 'function') {
+    const resolved = resolveUserAvatarSrc(user);
+    if (resolved) return { dataURL: resolved };
+  }
   const files = typeof getUploadedFiles === 'function' ? getUploadedFiles('company-logo', user) : [];
-  return files.length ? files[files.length - 1] : null;
+  if (files.length) {
+    const last = files[files.length - 1];
+    return { ...last, dataURL: last.dataURL || last.publicUrl || last.fileUrl || last.url };
+  }
+  return null;
 }
 
 // Helper: format file size for display
@@ -6204,16 +6453,17 @@ document.addEventListener('DOMContentLoaded', () => {
   observeSidebarToggle();
 });
 
-/* ═ WATERMARKED DOCUMENT VIEWER & SAVER SYSTEM ═ */
+/* ═ DOCUMENT VIEWER & SAVER SYSTEM (UNWATERMARKED ORIGINAL ACCESS) ═ */
 
 async function openDocumentViewer(docData) {
   if (!docData) return;
 
   // Resolve authentic time-limited signed URL for private documents if required
-  let resolvedUrl = docData.dataURL || docData.file_url || docData.fileUrl || null;
+  let resolvedUrl = docData.dataURL || docData.file_url || docData.fileUrl || docData.publicUrl || docData.url || null;
   if (typeof window.getOrGenerateDocumentViewUrl === 'function') {
     try {
-      resolvedUrl = await window.getOrGenerateDocumentViewUrl(docData, 300);
+      const signed = await window.getOrGenerateDocumentViewUrl(docData, 600);
+      if (signed) resolvedUrl = signed;
     } catch(e) {
       console.warn('[DocViewer] Could not generate signed URL:', e);
     }
@@ -6230,8 +6480,8 @@ async function openDocumentViewer(docData) {
     document.body.appendChild(modal);
   }
 
-  const title = activeDocData.name || activeDocData.title || 'Document Preview';
-  const category = activeDocData.category || activeDocData.cat || activeDocData.label || 'Candidate Credential';
+  const title = activeDocData.name || activeDocData.file_name || activeDocData.title || 'Uploaded Document';
+  const category = activeDocData.category || activeDocData.cat || activeDocData.label || 'Uploaded Document';
   const sizeStr = activeDocData.size ? (typeof formatFileSize === 'function' ? formatFileSize(activeDocData.size) : Math.round(activeDocData.size/1024) + ' KB') : '';
 
   const isPdf = (activeDocData.type === 'application/pdf') || (activeDocData.name && activeDocData.name.toLowerCase().endsWith('.pdf')) || (activeDocData.dataURL && (activeDocData.dataURL.startsWith('data:application/pdf') || activeDocData.dataURL.includes('.pdf') || activeDocData.dataURL.includes('application%2Fpdf') || activeDocData.dataURL.includes('/documents/')));
@@ -6241,28 +6491,14 @@ async function openDocumentViewer(docData) {
 
   if (activeDocData.dataURL && isImage) {
     bodyHTML = `
-      <div style="position:relative; width:min(680px, 100%); max-height:560px; overflow:hidden; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,0.22); border:2px solid #d1e3e1; display:flex; align-items:center; justify-content:center; background:#1e293b;">
-        <img src="${activeDocData.dataURL}" style="max-width:100%; max-height:540px; object-fit:contain; display:block;" alt="Uploaded Document">
-        <!-- Center COLLEKT Watermark Overlay -->
-        <div style="position:absolute; inset:0; pointer-events:none; display:flex; align-items:center; justify-content:center; z-index:10; background:rgba(255,255,255,0.03);">
-          <div style="transform:rotate(-30deg); font-size:min(76px, 14vw); font-weight:900; color:rgba(19,117,111,0.52); text-shadow:0 2px 14px rgba(14,59,53,0.3); letter-spacing:0.06em; font-family:'Manrope', sans-serif; text-align:center; user-select:none;">
-            COLLEKT<br>
-            <span style="font-size:min(14px, 3vw); font-weight:800; color:rgba(212,146,11,0.85); letter-spacing:0.1em; display:block; margin-top:6px;">COLLEKT PROTECTED • VERIFIED CANDIDATE DOCUMENT</span>
-          </div>
-        </div>
+      <div style="position:relative; width:min(720px, 100%); max-height:580px; overflow:auto; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,0.22); border:1px solid #d1e3e1; display:flex; align-items:center; justify-content:center; background:#1e293b;">
+        <img src="${activeDocData.dataURL}" style="max-width:100%; max-height:560px; object-fit:contain; display:block;" alt="${escapeHTML(title)}">
       </div>
     `;
   } else if (activeDocData.dataURL && isPdf) {
     bodyHTML = `
-      <div style="position:relative; width:100%; height:550px; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,0.22); border:2px solid #d1e3e1; overflow:hidden; background:#334155;">
-        <iframe src="${activeDocData.dataURL}#toolbar=0" style="width:100%; height:100%; border:none;"></iframe>
-        <!-- Center COLLEKT Watermark Overlay -->
-        <div style="position:absolute; inset:0; pointer-events:none; display:flex; align-items:center; justify-content:center; z-index:10;">
-          <div style="transform:rotate(-30deg); font-size:min(76px, 14vw); font-weight:900; color:rgba(19,117,111,0.52); text-shadow:0 2px 14px rgba(14,59,53,0.3); letter-spacing:0.06em; font-family:'Manrope', sans-serif; text-align:center; user-select:none;">
-            COLLEKT<br>
-            <span style="font-size:min(14px, 3vw); font-weight:800; color:rgba(212,146,11,0.85); letter-spacing:0.1em; display:block; margin-top:6px;">COLLEKT PROTECTED • VERIFIED CANDIDATE DOCUMENT</span>
-          </div>
-        </div>
+      <div style="position:relative; width:100%; height:560px; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,0.22); border:1px solid #d1e3e1; overflow:hidden; background:#334155;">
+        <iframe src="${activeDocData.dataURL}" style="width:100%; height:100%; border:none;" title="${escapeHTML(title)}"></iframe>
       </div>
     `;
   } else {
@@ -6274,27 +6510,19 @@ async function openDocumentViewer(docData) {
   }
 
   modal.innerHTML = `
-    <div style="width:min(760px, 100%); max-height:92vh; background:var(--white, #fff); border-radius:20px; box-shadow:0 32px 80px rgba(0,0,0,.5); overflow:hidden; display:flex; flex-direction:column; animation:fadeIn .3s;">
+    <div style="width:min(780px, 100%); max-height:92vh; background:var(--white, #fff); border-radius:20px; box-shadow:0 32px 80px rgba(0,0,0,.5); overflow:hidden; display:flex; flex-direction:column; animation:fadeIn .3s;">
       
       <!-- Header -->
       <div style="padding:18px 24px; border-bottom:1px solid var(--line, #e2eae9); display:flex; justify-content:space-between; align-items:center; background:var(--white, #fff);">
         <div>
           <div style="font-size:16px; font-weight:900; color:var(--ink, #0D1F1E); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:480px;">
-            📄 ${escapeHTML(title)}
+            ${escapeHTML(title)}
           </div>
           <div style="font-size:12px; color:var(--muted, #6B8280); margin-top:2px;">
-            ${escapeHTML(category)} ${sizeStr ? '• ' + sizeStr : ''} &bull; Exact Uploaded Document Preview
+            ${escapeHTML(category)} ${sizeStr ? '• ' + sizeStr : ''} &bull; Uploaded Document
           </div>
         </div>
         <button onclick="closeDocumentViewer()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted, #888); width:36px; height:36px; border-radius:50%; display:grid; place-items:center;">✕</button>
-      </div>
-
-      <!-- Watermark Banner -->
-      <div style="padding:10px 24px; background:rgba(19,117,111,0.08); border-bottom:1px solid rgba(19,117,111,0.2); color:var(--teal, #0E3B35); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-        <span style="display:flex; align-items:center; gap:6px;">
-          🛡️ <strong>COLLEKT WATERMARK ACTIVE</strong> — Exact Uploaded File Preview
-        </span>
-        <span style="font-size:11px; background:rgba(19,117,111,0.15); color:var(--teal, #0E3B35); padding:2px 8px; border-radius:99px; font-weight:900;">COLLEKT</span>
       </div>
 
       <!-- Document Body Viewport -->
@@ -6303,14 +6531,19 @@ async function openDocumentViewer(docData) {
       </div>
 
       <!-- Actions Footer -->
-      <div style="padding:16px 24px; border-top:1px solid var(--line, #e2eae9); background:var(--paper, #f8fffe); display:flex; justify-content:space-between; align-items:center; gap:12px;">
+      <div style="padding:16px 24px; border-top:1px solid var(--line, #e2eae9); background:var(--paper, #f8fffe); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
         <div style="font-size:12px; color:var(--muted, #6B8280); font-weight:600;">
-          🔒 Stamped with center COLLEKT watermark
+          Original uploaded document (Unwatermarked)
         </div>
-        <div style="display:flex; gap:10px;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <button onclick="closeDocumentViewer()" class="btn btn-outline btn-sm" style="padding:10px 18px; font-size:13px; cursor:pointer;">Close</button>
+          ${activeDocData.dataURL ? `
+            <button id="openDocNewTabBtn" class="btn btn-outline btn-sm" style="padding:10px 18px; font-size:13px; font-weight:700; cursor:pointer;">
+              Open in New Tab
+            </button>
+          ` : ''}
           <button id="downloadDocBtn" class="btn btn-primary btn-sm" style="padding:10px 20px; font-size:13px; font-weight:800; background:var(--teal, #0E3B35); cursor:pointer; display:flex; align-items:center; gap:6px;">
-            📥 Save / Download Document
+            Download Document
           </button>
         </div>
       </div>
@@ -6324,12 +6557,42 @@ async function openDocumentViewer(docData) {
     renderDocCanvas(activeDocData);
   }
 
+  const newTabBtn = document.getElementById('openDocNewTabBtn');
+  if (newTabBtn && activeDocData.dataURL) {
+    newTabBtn.onclick = function() {
+      openDocumentInNewTab(activeDocData);
+    };
+  }
+
   const dlBtn = document.getElementById('downloadDocBtn');
   if (dlBtn) {
     dlBtn.onclick = function() {
       downloadWatermarkedDocument(activeDocData);
     };
   }
+}
+
+function openDocumentInNewTab(docData) {
+  if (!docData || !docData.dataURL) return;
+  const url = docData.dataURL;
+  if (url.startsWith('data:')) {
+    try {
+      const parts = url.split(',');
+      const mimeMatch = parts[0].match(/:(.*?);/);
+      const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+      const bstr = atob(parts[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      const blob = new Blob([u8arr], { type: mime });
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank', 'noopener');
+      return;
+    } catch(e) {}
+  }
+  window.open(url, '_blank', 'noopener');
 }
 
 function closeDocumentViewer() {
@@ -6362,16 +6625,13 @@ function renderDocCanvas(docData) {
       const x = (w - nw) / 2;
       const y = (h - nh) / 2 + 10;
       ctx.drawImage(img, x, y, nw, nh);
-      applyConfidentialWatermark(ctx, w, h, docData);
     };
     img.onerror = function() {
       renderDocTextTemplate(ctx, w, h, docData);
-      applyConfidentialWatermark(ctx, w, h, docData);
     };
     img.src = docData.dataURL;
   } else {
     renderDocTextTemplate(ctx, w, h, docData);
-    applyConfidentialWatermark(ctx, w, h, docData);
   }
 }
 
@@ -6381,11 +6641,11 @@ function renderDocTextTemplate(ctx, w, h, docData) {
 
   ctx.fillStyle = '#ffffff';
   ctx.font = '900 20px "Manrope", sans-serif';
-  ctx.fillText('COLLEKT VERIFIED CREDENTIAL VAULT', 40, 52);
+  ctx.fillText('UPLOADED DOCUMENT RECORD', 40, 52);
 
   ctx.fillStyle = '#13756F';
   ctx.font = '700 12px sans-serif';
-  ctx.fillText('OFFICIAL CANDIDATE DOCUMENT RECORD', 40, 72);
+  ctx.fillText('OFFICIAL CANDIDATE DOCUMENT', 40, 72);
 
   ctx.fillStyle = '#0D1F1E';
   ctx.font = '900 22px "Manrope", sans-serif';
@@ -6394,69 +6654,51 @@ function renderDocTextTemplate(ctx, w, h, docData) {
 
   ctx.fillStyle = '#6B8280';
   ctx.font = '600 14px sans-serif';
-  ctx.fillText('Category: ' + (docData.category || docData.cat || docData.label || 'Academic / Professional Qualification'), 40, 170);
-  ctx.fillText('Verified Date: ' + (docData.timestamp ? new Date(docData.timestamp).toLocaleDateString() : new Date().toLocaleDateString()), 40, 195);
-  ctx.fillText('Issuing Body: ' + (docData.issuer || 'Verified Educational Board / Professional Body'), 40, 220);
+  ctx.fillText('Category: ' + (docData.category || docData.cat || docData.label || 'Qualification / Document'), 40, 170);
+  ctx.fillText('Date: ' + (docData.timestamp ? new Date(docData.timestamp).toLocaleDateString() : new Date().toLocaleDateString()), 40, 195);
+  ctx.fillText('Issuing Body: ' + (docData.issuer || 'Candidate Uploaded Record'), 40, 220);
 
   ctx.fillStyle = '#e2eae9';
   ctx.fillRect(40, 245, w - 80, 2);
 
   ctx.fillStyle = '#334155';
   ctx.font = '14px sans-serif';
-  ctx.fillText('This official document record has been uploaded by the candidate and verified on', 40, 280);
-  ctx.fillText('Collekt Energy & Professional Talent Infrastructure.', 40, 305);
+  ctx.fillText('This document record was uploaded by the account holder on Collekt.', 40, 280);
 
-  ctx.fillText('Details & Status:', 40, 345);
+  ctx.fillText('Document Details:', 40, 330);
   ctx.fillStyle = '#64748b';
   ctx.font = '13px sans-serif';
-  ctx.fillText('• Document Type: ' + (docData.type || 'PDF / Electronic Credential Record'), 60, 375);
-  ctx.fillText('• Verification Status: Collekt Authenticated Credential ✓', 60, 400);
-  ctx.fillText('• Security Clearance: Level-1 Review Copy', 60, 425);
-
-  ctx.fillStyle = '#f8fafc';
-  ctx.fillRect(40, 465, w - 80, 220);
-  ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(40, 465, w - 80, 220);
-
-  ctx.fillStyle = '#475569';
-  ctx.font = '700 15px sans-serif';
-  ctx.fillText('OFFICIAL SEAL & VERIFICATION SUMMARY', 60, 500);
-  ctx.font = '12px sans-serif';
-  ctx.fillText('Subject: ' + (docData.name || 'Candidate Credential'), 60, 530);
-  ctx.fillText('Verification Code: CLK-SEC-' + Math.floor(100000 + Math.random() * 899999), 60, 555);
-  ctx.fillText('Access Restrictions: Internal Client / Employer Evaluation Only', 60, 580);
+  ctx.fillText('• File Name: ' + (docData.name || docData.title || 'Uploaded File'), 60, 360);
+  ctx.fillText('• Document Type: ' + (docData.type || 'PDF / Credential Record'), 60, 385);
 }
 
+// Watermark disabled per platform policy
 function applyConfidentialWatermark(ctx, w, h, docData) {
-  ctx.save();
-  ctx.translate(w / 2, h / 2);
-  ctx.rotate(-32 * Math.PI / 180);
-
-  ctx.font = '900 92px "Inter", "Manrope", sans-serif';
-  ctx.fillStyle = 'rgba(19, 117, 111, 0.42)';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('COLLEKT', 0, 0);
-
-  ctx.strokeStyle = 'rgba(212, 146, 11, 0.45)';
-  ctx.lineWidth = 3;
-  ctx.strokeText('COLLEKT', 0, 0);
-
-  ctx.font = '800 15px "Manrope", sans-serif';
-  ctx.fillStyle = 'rgba(14, 59, 53, 0.5)';
-  ctx.fillText('COLLEKT PROTECTED • VERIFIED DOCUMENT • DO NOT DISTRIBUTE', 0, 56);
-
-  ctx.restore();
-
-  ctx.save();
-  ctx.fillStyle = '#13756f';
-  ctx.font = '900 13px sans-serif';
-  ctx.fillText('★ COLLEKT WATERMARKED DOCUMENT — VERIFIED MARKETPLACE CREDENTIAL', 40, h - 35);
-  ctx.restore();
+  return;
 }
 
 function downloadWatermarkedDocument(docData) {
+  if (!docData) return;
+  const rawUrl = docData.dataURL || docData.file_url || docData.fileUrl || docData.publicUrl || docData.url || '';
+  const origName = docData.name || docData.file_name || docData.title || 'uploaded_document';
+
+  // Directly download the original unwatermarked file whenever a dataURL or URL exists
+  if (rawUrl) {
+    const link = document.createElement('a');
+    link.href = rawUrl;
+    link.download = origName;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    if (typeof showToast === 'function') {
+      showToast('Document download started');
+    }
+    return;
+  }
+
+  // Fallback for metadata-only records without a file blob
   const canvas = document.createElement('canvas');
   canvas.width = 1200;
   canvas.height = 1600;
@@ -6469,70 +6711,24 @@ function downloadWatermarkedDocument(docData) {
   ctx.lineWidth = 14;
   ctx.strokeRect(30, 30, 1140, 1540);
 
-  if (docData.dataURL && (docData.type?.startsWith('image/') || docData.dataURL.startsWith('data:image'))) {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = function() {
-      const scale = Math.min(1080 / img.width, 1400 / img.height);
-      const nw = img.width * scale;
-      const nh = img.height * scale;
-      const x = (1200 - nw) / 2;
-      const y = (1600 - nh) / 2;
-      ctx.drawImage(img, x, y, nw, nh);
-      applyConfidentialWatermarkHighRes(ctx, 1200, 1600, docData);
-      triggerCanvasDownload(canvas, docData.name || 'document.png');
-    };
-    img.onerror = function() {
-      renderDocTextTemplate(ctx, 1200, 1600, docData);
-      applyConfidentialWatermarkHighRes(ctx, 1200, 1600, docData);
-      triggerCanvasDownload(canvas, docData.name || 'document.png');
-    };
-    img.src = docData.dataURL;
-  } else {
-    renderDocTextTemplate(ctx, 1200, 1600, docData);
-    applyConfidentialWatermarkHighRes(ctx, 1200, 1600, docData);
-    triggerCanvasDownload(canvas, docData.name || 'document.png');
-  }
+  renderDocTextTemplate(ctx, 1200, 1600, docData);
+  triggerCanvasDownload(canvas, origName);
 }
 
 function applyConfidentialWatermarkHighRes(ctx, w, h, docData) {
-  ctx.save();
-  ctx.translate(w / 2, h / 2);
-  ctx.rotate(-32 * Math.PI / 180);
-
-  ctx.font = '900 155px "Inter", "Manrope", sans-serif';
-  ctx.fillStyle = 'rgba(19, 117, 111, 0.42)';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('COLLEKT', 0, 0);
-
-  ctx.strokeStyle = 'rgba(212, 146, 11, 0.48)';
-  ctx.lineWidth = 5;
-  ctx.strokeText('COLLEKT', 0, 0);
-
-  ctx.font = '800 26px "Manrope", sans-serif';
-  ctx.fillStyle = 'rgba(14, 59, 53, 0.55)';
-  ctx.fillText('COLLEKT PROTECTED • VERIFIED CANDIDATE DOCUMENT • FOR REVIEW ONLY', 0, 95);
-
-  ctx.restore();
-
-  ctx.save();
-  ctx.fillStyle = '#13756f';
-  ctx.font = '900 20px sans-serif';
-  ctx.fillText('★ COLLEKT WATERMARKED DOCUMENT — VERIFIED MARKETPLACE SYSTEM', 60, h - 60);
-  ctx.restore();
+  return;
 }
 
 function triggerCanvasDownload(canvas, filename) {
   const link = document.createElement('a');
-  const safeName = 'collekt_verified_' + (filename || 'document').replace(/[^a-z0-9_\.]/gi, '_');
+  const safeName = (filename || 'document').replace(/[^a-z0-9_\.-]/gi, '_');
   link.download = safeName.endsWith('.png') ? safeName : safeName + '.png';
   link.href = canvas.toDataURL('image/png');
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   if (typeof showToast === 'function') {
-    showToast('📥 Watermarked document saved!');
+    showToast('Document saved');
   }
 }
 

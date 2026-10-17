@@ -318,12 +318,72 @@
     document: {
       title: 'Upload Document',
       icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
-      accept: '.pdf,.doc,.docx,.xlsx,.pptx',
-      formats: 'PDF, DOC, DOCX, XLSX, PPTX',
+      accept: '.pdf,.doc,.docx,.xlsx,.pptx,.jpg,.jpeg,.png,.webp,image/*',
+      formats: 'PDF, DOC, DOCX, JPG, PNG, WebP',
       maxMB: 50,
       maxBytes: 50 * 1024 * 1024,
       previewType: 'cv',
       storageCategory: 'documents',
+    },
+    'nin-doc': {
+      title: 'Upload NIN Slip / National ID',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h2"/><path d="M15 12h2"/><path d="M7 16h10"/></svg>',
+      accept: '.pdf,.jpg,.jpeg,.png,.webp,image/*',
+      formats: 'PDF, JPG, PNG, WebP',
+      maxMB: 50,
+      maxBytes: 50 * 1024 * 1024,
+      previewType: 'cv',
+      storageCategory: 'nin_doc',
+    },
+    'gov-id-doc': {
+      title: 'Upload Government ID Document',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h2"/><path d="M15 12h2"/><path d="M7 16h10"/></svg>',
+      accept: '.pdf,.jpg,.jpeg,.png,.webp,image/*',
+      formats: 'PDF, JPG, PNG, WebP',
+      maxMB: 50,
+      maxBytes: 50 * 1024 * 1024,
+      previewType: 'cv',
+      storageCategory: 'gov_id_doc',
+    },
+    'address-doc': {
+      title: 'Upload Proof of Address Document',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+      accept: '.pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,image/*',
+      formats: 'PDF, JPG, PNG, DOC',
+      maxMB: 50,
+      maxBytes: 50 * 1024 * 1024,
+      previewType: 'cv',
+      storageCategory: 'address_doc',
+    },
+    'cac-doc': {
+      title: 'Upload CAC Certificate / Status Report',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>',
+      accept: '.pdf,.doc,.docx,.jpg,.jpeg,.png,image/*',
+      formats: 'PDF, DOC, JPG, PNG',
+      maxMB: 50,
+      maxBytes: 50 * 1024 * 1024,
+      previewType: 'cv',
+      storageCategory: 'cac_doc',
+    },
+    'tin-doc': {
+      title: 'Upload Tax Clearance / TIN Certificate',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>',
+      accept: '.pdf,.doc,.docx,.jpg,.jpeg,.png,image/*',
+      formats: 'PDF, DOC, JPG, PNG',
+      maxMB: 50,
+      maxBytes: 50 * 1024 * 1024,
+      previewType: 'cv',
+      storageCategory: 'tin_doc',
+    },
+    'director-id-doc': {
+      title: 'Upload Director Government ID',
+      icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h2"/><path d="M15 12h2"/><path d="M7 16h10"/></svg>',
+      accept: '.pdf,.jpg,.jpeg,.png,.webp,image/*',
+      formats: 'PDF, JPG, PNG, WebP',
+      maxMB: 50,
+      maxBytes: 50 * 1024 * 1024,
+      previewType: 'cv',
+      storageCategory: 'director_id_doc',
     },
     portfolio: {
       title: 'Upload Portfolio Item',
@@ -818,15 +878,23 @@
             size: file.size,
             type: file.type || 'application/pdf',
             dataURL: _selectedDataURL || null,
+            fileUrl: _selectedDataURL || null,
+            category: cfg?.storageCategory || 'documents',
             timestamp: new Date().toISOString(),
           };
 
           // Synchronize to Supabase Storage & database tables if user signed in
           if (typeof window.uploadAndSaveUserDocument === 'function' && typeof window.uploadAndSaveMediaAsset === 'function') {
-            const isImage = (cfg?.previewType === 'avatar' || (file.type && file.type.startsWith('image/')));
-            if (isImage) {
-              const assetType = cfg?.previewType === 'avatar' ? 'avatar' : (cfg?.storageCategory === 'company-logo' ? 'company_logo' : 'portfolio_image');
-              window.uploadAndSaveMediaAsset({ file, assetType, title: file.name }).then(res => {
+            const storageCat = cfg?.storageCategory || '';
+            const isMediaAsset = (
+              storageCat === 'avatar' ||
+              storageCat === 'company-logo' ||
+              storageCat === 'cover-photo' ||
+              (storageCat === 'portfolio' && file.type && file.type.startsWith('image/'))
+            );
+            if (isMediaAsset) {
+              const assetType = storageCat === 'company-logo' ? 'company_logo' : (storageCat === 'avatar' ? 'avatar' : 'portfolio_image');
+              window.uploadAndSaveMediaAsset({ file, dataUrl: _selectedDataURL, assetType, title: file.name }).then(res => {
                 if (res && res.publicUrl) {
                   fileData.publicUrl = res.publicUrl;
                   fileData.fileUrl = res.publicUrl;
@@ -839,9 +907,9 @@
               const docType = cfg?.storageCategory === 'cv' ? 'cv' : (cfg?.storageCategory || 'document');
               window.uploadAndSaveUserDocument({ file, documentType: docType, title: file.name }).then(res => {
                 if (res) {
-                  fileData.publicUrl = res.publicUrl || res.signedUrl || null;
-                  fileData.fileUrl = res.publicUrl || res.signedUrl || null;
-                  fileData.signedUrl = res.signedUrl || null;
+                  fileData.publicUrl = res.publicUrl || res.signedUrl || fileData.dataURL || null;
+                  fileData.fileUrl = res.publicUrl || res.signedUrl || fileData.dataURL || null;
+                  fileData.signedUrl = res.signedUrl || fileData.dataURL || null;
                   fileData.filePath = res.filePath || res.data?.file_path || null;
                   fileData.storageBucket = 'documents';
                   if (typeof window.saveUploadedFile === 'function') {
