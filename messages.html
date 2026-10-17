@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=177.0">
-<link rel="stylesheet" href="shared.css?v=177.0">
-<link rel="stylesheet" href="glass.css?v=177.0">
+<link rel="stylesheet" href="style.css?v=178.0">
+<link rel="stylesheet" href="shared.css?v=178.0">
+<link rel="stylesheet" href="glass.css?v=178.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -730,10 +730,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=177.0"></script>
-<script src="app.js?v=177.0"></script>
-<script src="collekt-ai.js?v=177.0"></script>
-<script src="settings-popup.js?v=177.0"></script>
+<script src="supabase.js?v=178.0"></script>
+<script src="app.js?v=178.0"></script>
+<script src="collekt-ai.js?v=178.0"></script>
+<script src="settings-popup.js?v=178.0"></script>
 <script>
   requireAuth();
 
@@ -1351,9 +1351,14 @@
     }
   }
 
-  async function handleChatFileUpload(input) {
-    if (!input || !input.files || input.files.length === 0) return;
-    const file = input.files[0];
+  async function handleChatFileUpload(inputOrFile) {
+    let file = null;
+    if (inputOrFile instanceof File || inputOrFile instanceof Blob) {
+      file = inputOrFile;
+    } else if (inputOrFile && inputOrFile.files && inputOrFile.files.length > 0) {
+      file = inputOrFile.files[0];
+    }
+    if (!file) return;
     if (!activeConvId) {
       if (typeof showToast === 'function') showToast('⚠️ Please select a conversation first');
       return;
@@ -1364,10 +1369,11 @@
       return;
     }
 
-    const isImage = file.type.startsWith('image/');
+    const fileName = file.name || ('attachment_' + Date.now() + '.png');
+    const isImage = (file.type || '').startsWith('image/');
     const sizeKB = (file.size >= 1024 * 1024) ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' : (file.size / 1024).toFixed(1) + ' KB';
     
-    if (typeof showToast === 'function') showToast(`⏳ Uploading ${file.name}...`, 'info');
+    if (typeof showToast === 'function') showToast(`⏳ Uploading ${fileName}...`, 'info');
 
     let fileUrl = null;
 
@@ -1375,7 +1381,7 @@
     if (window.sb && window.sb.storage) {
       try {
         const bucket = isImage ? 'media' : 'documents';
-        const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const cleanName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
         const storagePath = `chat_${Date.now()}_${cleanName}`;
         
         const { data, error } = await window.sb.storage.from(bucket).upload(storagePath, file, {
@@ -1411,9 +1417,9 @@
 
     let msgBody = '';
     if (isImage) {
-      msgBody = `📷 Attached Image: ${file.name} (HD Quality • ${sizeKB}) [HD_IMAGE] ${fileUrl}`;
+      msgBody = `📷 Attached Image: ${fileName} (HD Quality • ${sizeKB}) [HD_IMAGE] ${fileUrl}`;
     } else {
-      msgBody = `📎 Attached File: ${file.name} (${sizeKB}) [FILE_ATTACHMENT] ${fileUrl}`;
+      msgBody = `📎 Attached File: ${fileName} (${sizeKB}) [FILE_ATTACHMENT] ${fileUrl}`;
     }
 
     if (typeof sendMessage === 'function') {
@@ -1422,8 +1428,58 @@
       renderContacts();
       if (typeof showToast === 'function') showToast(`✅ ${isImage ? 'HD Image' : 'File'} attached & sent!`);
     }
-    input.value = '';
+    if (inputOrFile && typeof inputOrFile.value !== 'undefined') {
+      inputOrFile.value = '';
+    }
   }
+
+  // Enable Drag-and-Drop and Copy-and-Paste (Ctrl+V) of files/images directly into Chat
+  document.addEventListener('DOMContentLoaded', () => {
+    const chatPane = document.getElementById('chatPane') || document.body;
+    chatPane.addEventListener('dragover', (e) => {
+      if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) {
+        e.preventDefault();
+        chatPane.style.outline = '2px dashed #13756F';
+        chatPane.style.outlineOffset = '-4px';
+      }
+    });
+    chatPane.addEventListener('dragleave', (e) => {
+      if (!chatPane.contains(e.relatedTarget)) {
+        chatPane.style.outline = '';
+      }
+    });
+    chatPane.addEventListener('drop', (e) => {
+      chatPane.style.outline = '';
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleChatFileUpload(e.dataTransfer.files[0]);
+      }
+    });
+    document.addEventListener('paste', (e) => {
+      const cd = e.clipboardData || window.clipboardData;
+      if (!cd) return;
+      let pastedFile = null;
+      if (cd.files && cd.files.length > 0) {
+        pastedFile = cd.files[0];
+      } else if (cd.items) {
+        for (let i = 0; i < cd.items.length; i++) {
+          if (cd.items[i].kind === 'file') {
+            const blob = cd.items[i].getAsFile();
+            if (blob) {
+              const ext = (blob.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+              pastedFile = new File([blob], 'pasted_document_' + Date.now() + '.' + ext, { type: blob.type || 'image/png' });
+              break;
+            }
+          }
+        }
+      }
+      if (pastedFile) {
+        e.preventDefault();
+        handleChatFileUpload(pastedFile);
+      }
+    });
+  });
 
   /* ═ AUDIO & VIDEO PLAYER CONTROLLERS (LEGACY COMPATIBILITY) ═ */
   function toggleAudioPlayback(audioId, btnEl) {

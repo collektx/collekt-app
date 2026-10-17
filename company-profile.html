@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=177.0">
-<link rel="stylesheet" href="shared.css?v=177.0">
-<link rel="stylesheet" href="glass.css?v=177.0">
+<link rel="stylesheet" href="style.css?v=178.0">
+<link rel="stylesheet" href="shared.css?v=178.0">
+<link rel="stylesheet" href="glass.css?v=178.0">
 
 <style>
   body { background: var(--paper); }
@@ -279,15 +279,15 @@
 
       <!-- TAB 4: DOCUMENTS -->
       <div id="tab-documents" style="display:none;" class="fade-in">
-        <div class="content-section">
+        <div class="content-section" data-upload-type="company-docs">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
             <div class="section-title-sm" style="margin-bottom:0;">Company Compliance Vault</div>
             <button class="btn btn-amber btn-sm" onclick="openUploadModal('company-docs', onDocUploaded)" style="font-weight:800;">+ Upload Document</button>
           </div>
           <div id="coDocsGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:14px;"></div>
-          <div id="coDocsEmpty" style="text-align:center; padding:40px 20px; border:2px dashed var(--line); border-radius:var(--r); color:var(--muted); margin-top:12px;">
+          <div id="coDocsEmpty" data-upload-type="company-docs" onclick="openUploadModal('company-docs', onDocUploaded)" style="text-align:center; padding:40px 20px; border:2px dashed var(--line); border-radius:var(--r); color:var(--muted); margin-top:12px; cursor:pointer; transition:all 0.2s;">
             <div style="font-size:28px; margin-bottom:8px;">📄</div>
-            <div style="font-size:14px; font-weight:800; color:var(--ink);">No custom documents uploaded yet</div>
+            <div style="font-size:14px; font-weight:800; color:var(--ink);">Click, Drag &amp; Drop, or Paste (Ctrl+V) to Upload Documents</div>
             <div style="font-size:13px; margin-top:4px;">Upload company brochures, certificates, or compliance documents.</div>
           </div>
         </div>
@@ -323,9 +323,10 @@
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload CAC Certificate of Incorporation</label>
-                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('cac-doc', window.onCacUploaded)">
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white); transition:all 0.2s;" data-upload-type="cac-doc" onclick="openUploadModal('cac-doc', window.onCacUploaded)">
                     <div style="font-size:22px; margin-bottom:2px;" id="cacFileIcon">📄</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="cacFileName">Upload CAC Certificate (PDF, JPG, PNG)</div>
+                    <div style="font-size:10px; color:var(--muted); margin-top:3px; font-weight:600;">Click, Drag &amp; Drop, or Paste (Ctrl+V)</div>
                   </div>
                   <div id="cacDocAccessWrap" style="margin-top:10px; display:none;"></div>
                 </div>
@@ -342,9 +343,10 @@
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload FIRS Tax Clearance / Registration Certificate</label>
-                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('tin-doc', window.onTinUploaded)">
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white); transition:all 0.2s;" data-upload-type="tin-doc" onclick="openUploadModal('tin-doc', window.onTinUploaded)">
                     <div style="font-size:22px; margin-bottom:2px;" id="tinFileIcon">🧾</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="tinFileName">Upload Tax Clearance Document</div>
+                    <div style="font-size:10px; color:var(--muted); margin-top:3px; font-weight:600;">Click, Drag &amp; Drop, or Paste (Ctrl+V)</div>
                   </div>
                   <div id="tinDocAccessWrap" style="margin-top:10px; display:none;"></div>
                 </div>
@@ -378,9 +380,10 @@
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload Director Government ID Document</label>
-                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('director-id-doc', window.onDirectorIdUploaded)">
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white); transition:all 0.2s;" data-upload-type="director-id-doc" onclick="openUploadModal('director-id-doc', window.onDirectorIdUploaded)">
                     <div style="font-size:22px; margin-bottom:2px;" id="directorIdFileIcon">💳</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="directorIdFileName">Upload Director Passport / ID Scan</div>
+                    <div style="font-size:10px; color:var(--muted); margin-top:3px; font-weight:600;">Click, Drag &amp; Drop, or Paste (Ctrl+V)</div>
                   </div>
                   <div id="directorIdDocAccessWrap" style="margin-top:10px; display:none;"></div>
                 </div>
@@ -785,11 +788,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=177.0"></script>
-<script src="app.js?v=177.0"></script>
-<script src="collekt-ai.js?v=177.0"></script>
-<script src="settings-popup.js?v=177.0"></script>
-<script src="upload-modal.js"></script>
+<script src="supabase.js?v=178.0"></script>
+<script src="app.js?v=178.0"></script>
+<script src="collekt-ai.js?v=178.0"></script>
+<script src="settings-popup.js?v=178.0"></script>
+<script src="upload-modal.js?v=178.0"></script>
 <script>
   requireCompany();
 

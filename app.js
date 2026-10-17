@@ -6470,6 +6470,7 @@ async function openDocumentViewer(docData) {
   }
 
   const activeDocData = Object.assign({}, docData, { dataURL: resolvedUrl });
+  window.currentViewingDoc = activeDocData;
 
   let modal = document.getElementById('collektDocViewerModal');
   if (!modal) {
@@ -6572,9 +6573,15 @@ async function openDocumentViewer(docData) {
   }
 }
 
+window.previewDocument = function(name, dataURL) {
+  openDocumentViewer({ name: name || 'Uploaded Document', dataURL: dataURL });
+};
+
 function openDocumentInNewTab(docData) {
-  if (!docData || !docData.dataURL) return;
-  const url = docData.dataURL;
+  docData = docData || window.currentViewingDoc;
+  if (!docData) return;
+  const url = docData.dataURL || docData.file_url || docData.fileUrl || docData.publicUrl || docData.url || '';
+  if (!url) return;
   if (url.startsWith('data:')) {
     try {
       const parts = url.split(',');
@@ -6678,6 +6685,7 @@ function applyConfidentialWatermark(ctx, w, h, docData) {
 }
 
 function downloadWatermarkedDocument(docData) {
+  docData = docData || window.currentViewingDoc;
   if (!docData) return;
   const rawUrl = docData.dataURL || docData.file_url || docData.fileUrl || docData.publicUrl || docData.url || '';
   const origName = docData.name || docData.file_name || docData.title || 'uploaded_document';

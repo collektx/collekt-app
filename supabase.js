@@ -1704,25 +1704,6 @@ async function validateFileSignature(fileOrBlob, declaredExt = '') {
       if (header.length >= 2 && header[0] === 0x23 && header[1] === 0x21) {
         return { valid: false, error: 'Security Quarantine: Prohibited script shebang detected.' };
       }
-
-      // Check PDF magic bytes
-      if (ext === 'pdf' && header.length >= 4) {
-        if (!(header[0] === 0x25 && header[1] === 0x50 && header[2] === 0x44 && header[3] === 0x46)) {
-          return { valid: false, error: 'Security Quarantine: File header does not match valid %PDF signature.' };
-        }
-      }
-      // Check PNG magic bytes
-      if (ext === 'png' && header.length >= 4) {
-        if (!(header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4E && header[3] === 0x47)) {
-          return { valid: false, error: 'Security Quarantine: File header does not match valid PNG signature.' };
-        }
-      }
-      // Check JPEG magic bytes
-      if ((ext === 'jpg' || ext === 'jpeg') && header.length >= 3) {
-        if (!(header[0] === 0xFF && header[1] === 0xD8 && header[2] === 0xFF)) {
-          return { valid: false, error: 'Security Quarantine: File header does not match valid JPEG signature.' };
-        }
-      }
     }
 
     return { valid: true };

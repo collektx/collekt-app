@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=177.0">
-<link rel="stylesheet" href="shared.css?v=177.0">
-<link rel="stylesheet" href="glass.css?v=177.0">
+<link rel="stylesheet" href="style.css?v=178.0">
+<link rel="stylesheet" href="shared.css?v=178.0">
+<link rel="stylesheet" href="glass.css?v=178.0">
 
 <style>
   body { background: var(--paper); }
@@ -342,9 +342,10 @@
 
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload NIN Slip / Digital ID Card Scan</label>
-                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('nin-doc', onNinUploaded)">
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white); transition:all 0.2s;" data-upload-type="nin-doc" onclick="openUploadModal('nin-doc', onNinUploaded)">
                     <div style="font-size:22px; margin-bottom:2px;" id="ninFileIcon">📄</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="ninFileName">Upload NIN Document (PDF, JPG, PNG)</div>
+                    <div style="font-size:10px; color:var(--muted); margin-top:3px; font-weight:600;">Click, Drag &amp; Drop, or Paste (Ctrl+V)</div>
                   </div>
                   <div id="ninDocAccessWrap" style="margin-top:10px; display:none;"></div>
                 </div>
@@ -411,9 +412,10 @@
 
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload Government ID Document</label>
-                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('gov-id-doc', onGovIdUploaded)">
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white); transition:all 0.2s;" data-upload-type="gov-id-doc" onclick="openUploadModal('gov-id-doc', onGovIdUploaded)">
                     <div style="font-size:22px; margin-bottom:2px;" id="govIdFileIcon">💳</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="govIdFileName">Upload ID Scan (PDF, JPG, PNG)</div>
+                    <div style="font-size:10px; color:var(--muted); margin-top:3px; font-weight:600;">Click, Drag &amp; Drop, or Paste (Ctrl+V)</div>
                   </div>
                   <div id="govIdDocAccessWrap" style="margin-top:10px; display:none;"></div>
                 </div>
@@ -438,9 +440,10 @@
 
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload Address Document</label>
-                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white);" onclick="openUploadModal('address-doc', onAddressDocUploaded)">
+                  <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white); transition:all 0.2s;" data-upload-type="address-doc" onclick="openUploadModal('address-doc', onAddressDocUploaded)">
                     <div style="font-size:22px; margin-bottom:2px;" id="addressFileIcon">🧾</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="addressFileName">Upload Utility Bill / Statement</div>
+                    <div style="font-size:10px; color:var(--muted); margin-top:3px; font-weight:600;">Click, Drag &amp; Drop, or Paste (Ctrl+V)</div>
                   </div>
                   <div id="addressDocAccessWrap" style="margin-top:10px; display:none;"></div>
                 </div>
@@ -970,11 +973,21 @@
     <!-- Upload Document / Certificate File Space -->
     <div class="form-group" style="margin-top:8px;">
       <label class="form-label">Attach Supporting Certificate / Document (PDF, Image, DOC)</label>
-      <div style="border:2px dashed var(--line); border-radius:14px; padding:16px 18px; text-align:center; background:var(--paper); cursor:pointer; position:relative; transition:all 0.2s;" id="qualDropzone" onclick="document.getElementById('qualFileInput').click()" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="if(!selectedQualFileName)this.style.borderColor='var(--line)'">
-        <input type="file" id="qualFileInput" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp" style="display:none;" onchange="handleQualFileSelect(this)">
+      <input type="file" id="qualFileInput" accept="*/*" style="display:none !important;" onchange="handleQualFileSelect(this)">
+      <div style="border:2px dashed var(--line); border-radius:14px; padding:16px 18px; text-align:center; background:var(--paper); cursor:pointer; position:relative; transition:all 0.2s;" id="qualDropzone"
+           onclick="if(!event.target.closest('#qualPasteBtn')) document.getElementById('qualFileInput').click()"
+           ondragover="event.preventDefault(); this.style.borderColor='var(--teal)'; this.style.background='var(--teal-lt)';"
+           ondragleave="if(!selectedQualFileName){this.style.borderColor='var(--line)'; this.style.background='var(--paper)';}"
+           ondrop="event.preventDefault(); event.stopPropagation(); if(event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) window.handleQualDirectFile(event.dataTransfer.files[0]);"
+           onmouseover="this.style.borderColor='var(--teal)'"
+           onmouseout="if(!selectedQualFileName)this.style.borderColor='var(--line)'">
         <div style="font-size:26px; margin-bottom:4px;" id="qualFileIcon">📁</div>
-        <div style="font-size:13px; font-weight:800; color:var(--ink);" id="qualFileName">Click or Drag &amp; Drop Certificate File</div>
-        <div style="font-size:11px; color:var(--muted); margin-top:2px;" id="qualFileSize">Supported formats: PDF, JPG, PNG, DOC (Max 50MB)</div>
+        <div style="font-size:13px; font-weight:800; color:var(--ink);" id="qualFileName">Click, Drag &amp; Drop, or Paste Certificate File</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:2px;" id="qualFileSize">Supported formats: PDF, JPG, PNG, DOC (Max 50MB) &bull; Or press Ctrl+V</div>
+        <div style="margin-top:10px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline btn-sm" style="padding:5px 12px; font-size:11px; font-weight:800;">Choose File</button>
+          <button type="button" id="qualPasteBtn" class="btn btn-outline btn-sm" style="padding:5px 12px; font-size:11px; font-weight:800;" onclick="event.stopPropagation(); window.pasteQualFileFromClipboard()">📋 Paste from Clipboard</button>
+        </div>
       </div>
     </div>
 
@@ -1079,9 +1092,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=177.0"></script>
-<script src="app.js?v=177.0"></script>
-<script src="collekt-ai.js?v=177.0"></script>
+<script src="supabase.js?v=178.0"></script>
+<script src="app.js?v=178.0"></script>
+<script src="collekt-ai.js?v=178.0"></script>
 <script>
   requireAuth();
 
@@ -2115,17 +2128,16 @@
   let selectedQualFileName = null;
   let selectedQualFileSize = 0;
   let selectedQualFileType = null;
+  let selectedQualReadPromise = null;
 
-  function handleQualFileSelect(input) {
-    if (!input.files || !input.files[0]) return;
-    const file = input.files[0];
+  window.handleQualDirectFile = function(file) {
+    if (!file) return;
     if (file.size > 50 * 1024 * 1024) {
       showToast('⚠️ Maximum file size is 50MB', 'warning');
-      input.value = '';
       return;
     }
 
-    selectedQualFileName = file.name;
+    selectedQualFileName = file.name || ('certificate_' + Date.now() + '.png');
     selectedQualFileSize = file.size;
     selectedQualFileType = file.type || 'application/pdf';
 
@@ -2134,24 +2146,58 @@
     const iconEl = document.getElementById('qualFileIcon');
     const dropzone = document.getElementById('qualDropzone');
 
-    if (nameEl) nameEl.textContent = '📄 ' + file.name;
-    if (sizeEl) sizeEl.textContent = (typeof formatFileSize === 'function' ? formatFileSize(file.size) : Math.round(file.size/1024) + ' KB') + ' • File ready for attachment';
+    if (nameEl) nameEl.textContent = '📄 ' + selectedQualFileName;
+    if (sizeEl) sizeEl.textContent = (typeof formatFileSize === 'function' ? formatFileSize(file.size) : Math.round(file.size/1024) + ' KB') + ' • Loaded & Ready';
     if (iconEl) iconEl.textContent = '✅';
     if (dropzone) {
-      dropzone.style.borderColor = 'var(--teal)';
-      dropzone.style.background = 'var(--teal-lt)';
+      dropzone.style.borderColor = '#16a34a';
+      dropzone.style.background = '#f0fdf4';
     }
 
-    try {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        selectedQualDataURL = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    } catch(e) {
-      console.warn('File read notice:', e);
+    selectedQualReadPromise = new Promise((resolve) => {
+      try {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          selectedQualDataURL = e.target.result;
+          resolve(selectedQualDataURL);
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      } catch(e) {
+        console.warn('File read notice:', e);
+        resolve(null);
+      }
+    });
+
+    if (typeof showToast === 'function') {
+      showToast('📄 Loaded "' + selectedQualFileName + '" — ready to save.');
     }
+  };
+
+  function handleQualFileSelect(input) {
+    if (!input || !input.files || !input.files[0]) return;
+    window.handleQualDirectFile(input.files[0]);
   }
+
+  window.pasteQualFileFromClipboard = async function() {
+    if (navigator.clipboard && typeof navigator.clipboard.read === 'function') {
+      try {
+        const items = await navigator.clipboard.read();
+        for (const item of items) {
+          for (const type of item.types) {
+            if (type.startsWith('image/') || type === 'application/pdf') {
+              const blob = await item.getType(type);
+              const ext = type === 'application/pdf' ? 'pdf' : (type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+              const pastedFile = new File([blob], 'pasted_certificate_' + Date.now() + '.' + ext, { type });
+              window.handleQualDirectFile(pastedFile);
+              return;
+            }
+          }
+        }
+      } catch (err) {}
+    }
+    showToast('Press Ctrl+V (or Cmd+V) while this window is open to paste a copied file or screenshot.');
+  };
 
   window.handleIssuerChange = function(sel) {
     const wrap = document.getElementById('qualIssuerCustomWrap');
@@ -2164,7 +2210,7 @@
     }
   };
 
-  function saveQualification() {
+  async function saveQualification() {
     const title = document.getElementById('qualName')?.value.trim();
     const issuerSelect = document.getElementById('qualIssuer');
     let issuer = issuerSelect ? issuerSelect.value.trim() : '';
@@ -2185,6 +2231,10 @@
     if (!year) {
       showToast('⚠️ Please select the year obtained', 'warning');
       return;
+    }
+
+    if (selectedQualReadPromise && !selectedQualDataURL) {
+      try { await selectedQualReadPromise; } catch (e) {}
     }
 
     const qualObj = {
@@ -2208,13 +2258,14 @@
     selectedQualFileName = null;
     selectedQualFileSize = 0;
     selectedQualFileType = null;
+    selectedQualReadPromise = null;
 
     const fileInput = document.getElementById('qualFileInput');
     if (fileInput) fileInput.value = '';
     const nameEl = document.getElementById('qualFileName');
-    if (nameEl) nameEl.textContent = 'Click or Drag & Drop Certificate File';
+    if (nameEl) nameEl.textContent = 'Click, Drag & Drop, or Paste Certificate File';
     const sizeEl = document.getElementById('qualFileSize');
-    if (sizeEl) sizeEl.textContent = 'Supported formats: PDF, JPG, PNG, DOC (Max 50MB)';
+    if (sizeEl) sizeEl.textContent = 'Supported formats: PDF, JPG, PNG, DOC (Max 50MB) • Or press Ctrl+V';
     const iconEl = document.getElementById('qualFileIcon');
     if (iconEl) iconEl.textContent = '📁';
     const dropzone = document.getElementById('qualDropzone');
@@ -3419,8 +3470,8 @@
     </div>
   </div>
 </div>
-<script src="settings-popup.js?v=177.0"></script>
-<script src="upload-modal.js"></script>
+<script src="settings-popup.js?v=178.0"></script>
+<script src="upload-modal.js?v=178.0"></script>
 </body>
 </html>
 
