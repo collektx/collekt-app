@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=182.0">
-<link rel="stylesheet" href="shared.css?v=182.0">
-<link rel="stylesheet" href="glass.css?v=182.0">
+<link rel="stylesheet" href="style.css?v=183.0">
+<link rel="stylesheet" href="shared.css?v=183.0">
+<link rel="stylesheet" href="glass.css?v=183.0">
 
 <style>
   body {
@@ -847,9 +847,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=182.0"></script>
-<script src="app.js?v=182.0"></script>
-<script src="settings-popup.js?v=182.0"></script>
+<script src="supabase.js?v=183.0"></script>
+<script src="app.js?v=183.0"></script>
+<script src="settings-popup.js?v=183.0"></script>
 
 <script>
   let activeRole = 'professional';
@@ -1028,19 +1028,11 @@
   async function initPromoState() {
     const user = getUser() || {};
 
-    // 1. Check if user already has an active trial or redeemed pass
+    // 1. Check if user already has an active trial
     if (user.is_premium && user.trial_ends_at) {
       const trialMs = new Date(user.trial_ends_at).getTime() - Date.now();
       const daysLeft = Math.max(0, Math.ceil(trialMs / (1000 * 60 * 60 * 24)));
       if (daysLeft > 0) {
-        appliedPromo = {
-          code: user.promo_code_used || 'COLLEKT60',
-          trialDays: 60,
-          discountPercent: 100,
-          isAlreadyActive: true,
-          daysLeft: daysLeft
-        };
-
         const banner = document.getElementById('promoTrialBanner');
         if (banner) {
           banner.style.display = 'block';
@@ -1050,35 +1042,37 @@
               <strong style="color:#15803d; font-size:13.5px;">Active Founding Member Free Trial (${daysLeft} Days Remaining)</strong>
             </div>
             <div style="font-size:12px; color:var(--ink); line-height:1.4;">
-              Your 60-day complimentary pass (Code: <strong>${user.promo_code_used || 'COLLEKT60'}</strong>) is currently active. All premium tier privileges are fully unlocked!
+              Your 60-day complimentary pass is currently active. All premium tier privileges are fully unlocked!
             </div>
           `;
         }
-        const promoInput = document.getElementById('promoCodeInput');
-        if (promoInput) {
-          promoInput.value = user.promo_code_used || 'COLLEKT60';
-          promoInput.disabled = true;
-        }
-        const applyBtn = document.getElementById('applyPromoBtn');
-        if (applyBtn) applyBtn.style.display = 'none';
-        const removeBtn = document.getElementById('removePromoBtn');
-        if (removeBtn) removeBtn.style.display = 'none';
-        const promoFeedback = document.getElementById('promoFeedbackMsg');
-        if (promoFeedback) {
-          promoFeedback.style.display = 'block';
-          promoFeedback.style.color = '#15803d';
-          promoFeedback.innerHTML = `✓ Active trial pass (${user.promo_code_used || 'COLLEKT60'}) is linked to this account.`;
-        }
-        renderUpgradeView();
-        return;
       }
     }
 
-    // 2. Early Launch Founding Member Auto-Activation (Default ₦0.00 for Early Users)
-    // Automatically apply the 60-day free trial pass COLLEKT60 so Total Due is ₦0.00!
-    if (!user.promo_code_used) {
-      setPromoSuccessState('COLLEKT60', 60, true);
+    // 2. The promo code input space is left completely empty for users to write the promo code
+    appliedPromo = null;
+    const promoInput = document.getElementById('promoCodeInput');
+    if (promoInput) {
+      promoInput.value = '';
+      promoInput.disabled = false;
     }
+    const applyBtn = document.getElementById('applyPromoBtn');
+    if (applyBtn) {
+      applyBtn.style.display = 'inline-block';
+      applyBtn.disabled = false;
+      applyBtn.textContent = 'Apply';
+    }
+    const removeBtn = document.getElementById('removePromoBtn');
+    if (removeBtn) removeBtn.style.display = 'none';
+    const promoFeedback = document.getElementById('promoFeedbackMsg');
+    if (promoFeedback) {
+      promoFeedback.style.display = 'none';
+      promoFeedback.textContent = '';
+    }
+    const zeroNotice = document.getElementById('promoCardZeroDueNotice');
+    if (zeroNotice) zeroNotice.style.display = 'none';
+    const cardFields = document.getElementById('cardFieldsWrap');
+    if (cardFields) cardFields.style.display = 'block';
   }
 
   async function applyPromoCode() {
