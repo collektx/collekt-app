@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=181.0">
-<link rel="stylesheet" href="shared.css?v=181.0">
-<link rel="stylesheet" href="glass.css?v=181.0">
+<link rel="stylesheet" href="style.css?v=182.0">
+<link rel="stylesheet" href="shared.css?v=182.0">
+<link rel="stylesheet" href="glass.css?v=182.0">
 
 <style>
   body {
@@ -618,34 +618,45 @@
 
             <!-- PAYMENT FORM 1: DEBIT / CREDIT CARD -->
             <div id="formCardSection">
-              <div class="form-group" style="margin-bottom:16px;">
-                <label class="form-label">Cardholder Full Name</label>
-                <input class="form-input" type="text" id="cardHolderName" placeholder="e.g. Dave Oladapo Ojeowere" value="">
+              <!-- Zero-Due Notice Banner when Promo Trial is Active -->
+              <div id="promoCardZeroDueNotice" style="display:none; background:rgba(34,197,94,0.08); border:1.5px solid rgba(34,197,94,0.3); border-radius:16px; padding:18px 20px; margin-bottom:20px; text-align:center;">
+                <div style="font-size:24px; margin-bottom:6px;">🎉</div>
+                <div style="font-size:14px; font-weight:800; color:#15803d; margin-bottom:4px;">Zero Cost &bull; No Card Required</div>
+                <p style="font-size:12px; color:var(--muted); margin:0; line-height:1.4;">
+                  Your 60-Day Free Trial pass is applied! Total due now is <strong>₦0.00</strong>. No credit or debit card is needed to activate.
+                </p>
               </div>
 
-              <div class="form-group" style="margin-bottom:16px;">
-                <label class="form-label">Card Number</label>
-                <div style="position:relative;">
-                  <input class="form-input" type="text" id="cardNumberInput" placeholder="5399 •••• •••• ••••" maxlength="19" oninput="formatCardNumberInput(this)" style="font-family:monospace; font-size:15px; font-weight:700; padding-right:45px; letter-spacing:0.08em;">
-                  <span class="card-brand-icon" id="cardBrandIcon" style="font-size:11px; font-weight:800; color:var(--muted);"></span>
+              <div id="cardFieldsWrap">
+                <div class="form-group" style="margin-bottom:16px;">
+                  <label class="form-label">Cardholder Full Name</label>
+                  <input class="form-input" type="text" id="cardHolderName" placeholder="e.g. Dave Oladapo Ojeowere" value="">
                 </div>
-              </div>
 
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
-                <div class="form-group">
-                  <label class="form-label">Expiry Date</label>
-                  <input class="form-input" type="text" id="cardExpiryInput" placeholder="MM / YY" maxlength="5" oninput="formatExpiryInput(this)" style="font-family:monospace; text-align:center; font-weight:700;">
+                <div class="form-group" style="margin-bottom:16px;">
+                  <label class="form-label">Card Number</label>
+                  <div style="position:relative;">
+                    <input class="form-input" type="text" id="cardNumberInput" placeholder="5399 •••• •••• ••••" maxlength="19" oninput="formatCardNumberInput(this)" style="font-family:monospace; font-size:15px; font-weight:700; padding-right:45px; letter-spacing:0.08em;">
+                    <span class="card-brand-icon" id="cardBrandIcon" style="font-size:11px; font-weight:800; color:var(--muted);"></span>
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label class="form-label">CVV / CVC</label>
-                  <input class="form-input" type="password" id="cardCvvInput" placeholder="•••" maxlength="4" style="font-family:monospace; text-align:center; font-weight:700;">
-                </div>
-              </div>
 
-              <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--muted); font-weight:600; cursor:pointer; margin-bottom:20px;">
-                <input type="checkbox" id="saveCardCheckbox" checked style="accent-color:var(--teal); width:16px; height:16px;">
-                <span>Save card securely for seamless renewals (Cancel anytime)</span>
-              </label>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
+                  <div class="form-group">
+                    <label class="form-label">Expiry Date</label>
+                    <input class="form-input" type="text" id="cardExpiryInput" placeholder="MM / YY" maxlength="5" oninput="formatExpiryInput(this)" style="font-family:monospace; text-align:center; font-weight:700;">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">CVV / CVC</label>
+                    <input class="form-input" type="password" id="cardCvvInput" placeholder="•••" maxlength="4" style="font-family:monospace; text-align:center; font-weight:700;">
+                  </div>
+                </div>
+
+                <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--muted); font-weight:600; cursor:pointer; margin-bottom:20px;">
+                  <input type="checkbox" id="saveCardCheckbox" checked style="accent-color:var(--teal); width:16px; height:16px;">
+                  <span>Save card securely for seamless renewals (Cancel anytime)</span>
+                </label>
+              </div>
             </div>
 
             <!-- PAYMENT FORM 2: COLLEGKT WALLET BALANCE -->
@@ -836,9 +847,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=181.0"></script>
-<script src="app.js?v=181.0"></script>
-<script src="settings-popup.js?v=181.0"></script>
+<script src="supabase.js?v=182.0"></script>
+<script src="app.js?v=182.0"></script>
+<script src="settings-popup.js?v=182.0"></script>
 
 <script>
   let activeRole = 'professional';
@@ -998,12 +1009,12 @@
       backLink.textContent = activeRole === 'company' ? '← Back to Company Dashboard' : '← Back to Dashboard';
     }
 
-    // 4. Render UI
+    // 4. Initialize Promo Engine first so Founding Member Pass is active
+    await initPromoState();
+
+    // 5. Render UI
     setBillingCycle(activeCycle);
     updateWalletDisplay();
-
-    // 5. Initialize Promo Engine and verify slot quotas
-    initPromoState();
 
     // 6. Build standard navigation
     try { buildSidebar('upgrade'); } catch(e){}
@@ -1022,6 +1033,14 @@
       const trialMs = new Date(user.trial_ends_at).getTime() - Date.now();
       const daysLeft = Math.max(0, Math.ceil(trialMs / (1000 * 60 * 60 * 24)));
       if (daysLeft > 0) {
+        appliedPromo = {
+          code: user.promo_code_used || 'COLLEKT60',
+          trialDays: 60,
+          discountPercent: 100,
+          isAlreadyActive: true,
+          daysLeft: daysLeft
+        };
+
         const banner = document.getElementById('promoTrialBanner');
         if (banner) {
           banner.style.display = 'block';
@@ -1042,16 +1061,24 @@
         }
         const applyBtn = document.getElementById('applyPromoBtn');
         if (applyBtn) applyBtn.style.display = 'none';
+        const removeBtn = document.getElementById('removePromoBtn');
+        if (removeBtn) removeBtn.style.display = 'none';
         const promoFeedback = document.getElementById('promoFeedbackMsg');
         if (promoFeedback) {
           promoFeedback.style.display = 'block';
           promoFeedback.style.color = '#15803d';
           promoFeedback.innerHTML = `✓ Active trial pass (${user.promo_code_used || 'COLLEKT60'}) is linked to this account.`;
         }
+        renderUpgradeView();
+        return;
       }
     }
 
-    // 2. Verified promo status initialized quietly without leaking quotas or codes
+    // 2. Early Launch Founding Member Auto-Activation (Default ₦0.00 for Early Users)
+    // Automatically apply the 60-day free trial pass COLLEKT60 so Total Due is ₦0.00!
+    if (!user.promo_code_used) {
+      setPromoSuccessState('COLLEKT60', 60, true);
+    }
   }
 
   async function applyPromoCode() {
@@ -1122,7 +1149,7 @@
     }
   }
 
-  function setPromoSuccessState(code, trialDays = 60) {
+  function setPromoSuccessState(code, trialDays = 60, isAutoApplied = false) {
     appliedPromo = {
       code: code,
       trialDays: trialDays,
@@ -1149,7 +1176,9 @@
     if (feedback) {
       feedback.style.display = 'block';
       feedback.style.color = '#15803d';
-      feedback.innerHTML = `✓ Promo code applied! 100% off for ${trialDays} Days (₦0.00 due).`;
+      feedback.innerHTML = isAutoApplied
+        ? `✓ Founding Member Pass applied! 100% off for ${trialDays} Days (₦0.00 due).`
+        : `✓ Promo code applied! 100% off for ${trialDays} Days (₦0.00 due).`;
     }
 
     const box = document.getElementById('promoCodeBox');
@@ -1159,10 +1188,21 @@
     }
 
     const banner = document.getElementById('promoTrialBanner');
-    if (banner) banner.style.display = 'block';
+    if (banner && (!appliedPromo || !appliedPromo.isAlreadyActive)) {
+      banner.style.display = 'block';
+      banner.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span style="font-size:18px;">🎉</span>
+          <strong style="color:#15803d; font-size:13.5px;">60-Day Free Trial Pass Applied (₦0.00 Due)</strong>
+        </div>
+        <div style="font-size:12px; color:var(--ink); line-height:1.4;">
+          Your 100% waived 60-day complimentary pass is active on this checkout. Click below to activate your free trial with zero card charges!
+        </div>
+      `;
+    }
 
     renderUpgradeView();
-    if (typeof showToast === 'function') {
+    if (!isAutoApplied && typeof showToast === 'function') {
       showToast(`🎉 60-Day Free Trial activated! 100% waived.`, 'success');
     }
   }
@@ -1200,6 +1240,12 @@
 
     const banner = document.getElementById('promoTrialBanner');
     if (banner) banner.style.display = 'none';
+
+    const zeroNotice = document.getElementById('promoCardZeroDueNotice');
+    if (zeroNotice) zeroNotice.style.display = 'none';
+
+    const cardFields = document.getElementById('cardFieldsWrap');
+    if (cardFields) cardFields.style.display = 'block';
 
     renderUpgradeView();
     if (typeof showToast === 'function') {
@@ -1335,22 +1381,31 @@
 
     const promoRow = document.getElementById('summaryPromoRow');
     const summaryTotal = document.getElementById('summaryTotalPrice');
+    const zeroNotice = document.getElementById('promoCardZeroDueNotice');
+    const cardFields = document.getElementById('cardFieldsWrap');
+
     if (appliedPromo) {
       if (promoRow) {
         promoRow.style.display = 'flex';
-        document.getElementById('summaryPromoLabel').textContent = `Founding Member Pass: -₦${priceNGN.toLocaleString()} (100% off for 60 Days)`;
+        document.getElementById('summaryPromoLabel').textContent = appliedPromo.isAlreadyActive
+          ? `Active Founding Member Pass: -₦${priceNGN.toLocaleString()} (100% off)`
+          : `Founding Member Pass: -₦${priceNGN.toLocaleString()} (100% off for 60 Days)`;
         document.getElementById('summaryPromoValue').textContent = `-₦${priceNGN.toLocaleString()}`;
       }
       if (summaryTotal) {
         summaryTotal.textContent = '₦0.00';
         summaryTotal.style.color = '#16a34a';
       }
+      if (zeroNotice) zeroNotice.style.display = 'block';
+      if (cardFields) cardFields.style.display = 'none';
     } else {
       if (promoRow) promoRow.style.display = 'none';
       if (summaryTotal) {
         summaryTotal.textContent = `₦${priceNGN.toLocaleString()}`;
         summaryTotal.style.color = 'var(--forest)';
       }
+      if (zeroNotice) zeroNotice.style.display = 'none';
+      if (cardFields) cardFields.style.display = 'block';
     }
 
     updatePayButtonText();
@@ -1364,6 +1419,13 @@
     if (!btn) return;
 
     if (appliedPromo) {
+      if (appliedPromo.isAlreadyActive) {
+        btn.innerHTML = `✓ 60-Day Free Trial Active (${appliedPromo.daysLeft || 60} Days Remaining)`;
+        btn.style.background = 'linear-gradient(135deg, #15803d, #16a34a)';
+        btn.style.boxShadow = '0 8px 24px rgba(22,163,74,0.3)';
+        btn.disabled = true;
+        return;
+      }
       btn.innerHTML = 'Activate 60-Day Free Trial 🎉 (no card required)';
       btn.style.background = 'linear-gradient(135deg, #15803d, #16a34a)';
       btn.style.boxShadow = '0 8px 24px rgba(22,163,74,0.3)';

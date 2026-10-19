@@ -41,7 +41,7 @@ exports.handler = async (event, context) => {
         headers,
         body: JSON.stringify({
           valid: false,
-          error: 'Invalid promo code. Please check the code and try again (e.g. COLLEKT60).'
+          error: 'Invalid promo code. Please check the code and try again.'
         })
       };
     }
