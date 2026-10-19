@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=179.0">
-<link rel="stylesheet" href="shared.css?v=179.0">
-<link rel="stylesheet" href="glass.css?v=179.0">
+<link rel="stylesheet" href="style.css?v=180.0">
+<link rel="stylesheet" href="shared.css?v=180.0">
+<link rel="stylesheet" href="glass.css?v=180.0">
 
 <style>
   body {
@@ -676,6 +676,43 @@
               </div>
             </div>
 
+            <!-- PROMO CODE INPUT FIELD -->
+            <div class="promo-box" id="promoCodeBox" style="background:var(--paper); border:1.5px dashed var(--line); border-radius:16px; padding:16px 18px; margin-bottom:20px; transition:all .2s ease;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label for="promoCodeInput" style="font-size:12px; font-weight:800; color:var(--ink); text-transform:uppercase; letter-spacing:.05em; display:flex; align-items:center; gap:6px;">
+                  <span>🎟️</span> Have a promo code?
+                </label>
+                <span id="promoRemainingPill" style="font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:99px; background:rgba(20,184,166,0.12); color:var(--teal); display:none;">
+                  Founding Slots Active
+                </span>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <input class="form-input" type="text" id="promoCodeInput" placeholder="Enter code (e.g. COLLEKT60)" 
+                       style="text-transform:uppercase; font-weight:800; letter-spacing:0.06em; font-size:13.5px; padding:9px 14px; flex:1;"
+                       onkeydown="if(event.key==='Enter'){event.preventDefault(); applyPromoCode();}">
+                <button type="button" class="btn btn-primary btn-sm" id="applyPromoBtn" onclick="applyPromoCode()"
+                        style="padding:0 18px; font-weight:800; font-size:12.5px; min-height:40px; background:var(--forest);">
+                  Apply
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm" id="removePromoBtn" onclick="removePromoCode()"
+                        style="padding:0 12px; font-size:12px; display:none; color:#ef4444; border-color:rgba(239,68,68,0.3);">
+                  Remove
+                </button>
+              </div>
+              <div id="promoFeedbackMsg" style="font-size:11.5px; font-weight:700; margin-top:8px; display:none;"></div>
+            </div>
+
+            <!-- Zero-Cost Trial Notice Banner -->
+            <div id="promoTrialBanner" style="display:none; background:linear-gradient(135deg, rgba(22,163,74,0.12), rgba(19,117,111,0.08)); border:1.5px solid #22c55e; border-radius:14px; padding:14px 16px; margin-bottom:20px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                <span style="font-size:18px;">🎉</span>
+                <strong style="color:#15803d; font-size:13.5px;">60-Day Free Trial Unlocked!</strong>
+              </div>
+              <div style="font-size:12px; color:var(--ink); line-height:1.4;">
+                No debit card, wallet deduction, or payment details required today. Your 2-month founding privileges will begin immediately upon activation.
+              </div>
+            </div>
+
             <!-- Order Breakdown Summary -->
             <div class="order-summary-box">
               <div class="summary-row">
@@ -685,6 +722,10 @@
               <div class="summary-row" id="summaryDiscountRow" style="display:none;">
                 <span id="summaryDiscountLabel" style="color:#16a34a; font-weight:700;">Multi-Month Discount (10% Off)</span>
                 <span id="summaryDiscountValue" style="color:#16a34a; font-weight:800;">-₦6,000</span>
+              </div>
+              <div class="summary-row" id="summaryPromoRow" style="display:none; color:#16a34a;">
+                <span id="summaryPromoLabel" style="font-weight:800; color:#15803d;">Founding Member Pass (100% off for 60 Days)</span>
+                <span id="summaryPromoValue" style="font-weight:900; color:#15803d;">-₦19,999</span>
               </div>
               <div class="summary-row">
                 <span>Value Added Tax (VAT 0%)</span>
@@ -798,14 +839,15 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=179.0"></script>
-<script src="app.js?v=179.0"></script>
-<script src="settings-popup.js?v=179.0"></script>
+<script src="supabase.js?v=180.0"></script>
+<script src="app.js?v=180.0"></script>
+<script src="settings-popup.js?v=180.0"></script>
 
 <script>
   let activeRole = 'professional';
   let activeCycle = 'monthly';
   let activePaymentMethod = 'card';
+  let appliedPromo = null; // Stores { code, trialDays, discountPercent }
 
   const BILLING_CYCLES = {
     monthly: {
@@ -963,10 +1005,243 @@
     setBillingCycle(activeCycle);
     updateWalletDisplay();
 
-    // 5. Build standard navigation
+    // 5. Initialize Promo Engine and verify slot quotas
+    initPromoState();
+
+    // 6. Build standard navigation
     try { buildSidebar('upgrade'); } catch(e){}
     try { buildTopbar(); } catch(e){}
   });
+
+  // ═══════════════════════════════════════════════════════════
+  // PROMO CODE & FOUNDING MEMBER TRIAL ENGINE (60-DAY FREE PASS)
+  // ═══════════════════════════════════════════════════════════
+
+  async function initPromoState() {
+    const user = getUser() || {};
+
+    // 1. Check if user already has an active trial or redeemed pass
+    if (user.is_premium && user.trial_ends_at) {
+      const trialMs = new Date(user.trial_ends_at).getTime() - Date.now();
+      const daysLeft = Math.max(0, Math.ceil(trialMs / (1000 * 60 * 60 * 24)));
+      if (daysLeft > 0) {
+        const banner = document.getElementById('promoTrialBanner');
+        if (banner) {
+          banner.style.display = 'block';
+          banner.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <span style="font-size:18px;">🎉</span>
+              <strong style="color:#15803d; font-size:13.5px;">Active Founding Member Free Trial (${daysLeft} Days Remaining)</strong>
+            </div>
+            <div style="font-size:12px; color:var(--ink); line-height:1.4;">
+              Your 60-day complimentary pass (Code: <strong>${user.promo_code_used || 'COLLEKT60'}</strong>) is currently active. All premium tier privileges are fully unlocked!
+            </div>
+          `;
+        }
+        const promoInput = document.getElementById('promoCodeInput');
+        if (promoInput) {
+          promoInput.value = user.promo_code_used || 'COLLEKT60';
+          promoInput.disabled = true;
+        }
+        const applyBtn = document.getElementById('applyPromoBtn');
+        if (applyBtn) applyBtn.style.display = 'none';
+        const promoFeedback = document.getElementById('promoFeedbackMsg');
+        if (promoFeedback) {
+          promoFeedback.style.display = 'block';
+          promoFeedback.style.color = '#15803d';
+          promoFeedback.innerHTML = `✓ Active trial pass (${user.promo_code_used || 'COLLEKT60'}) is linked to this account.`;
+        }
+      }
+    }
+
+    // 2. Fetch live slot quota from serverless function
+    try {
+      const resp = await fetch('/api/promo-activate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'check',
+          code: 'COLLEKT60',
+          role: activeRole
+        })
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        const pill = document.getElementById('promoRemainingPill');
+        if (pill && data.remainingSlots !== undefined) {
+          pill.style.display = 'inline-block';
+          pill.textContent = `${data.remainingSlots} / ${data.totalLimit} Slots Left`;
+        }
+      }
+    } catch (e) {
+      const pill = document.getElementById('promoRemainingPill');
+      if (pill) {
+        pill.style.display = 'inline-block';
+        pill.textContent = activeRole === 'company' ? 'First 20 Companies' : 'First 50 Professionals';
+      }
+    }
+  }
+
+  async function applyPromoCode() {
+    const inputEl = document.getElementById('promoCodeInput');
+    const code = (inputEl?.value || '').trim().toUpperCase();
+    const feedback = document.getElementById('promoFeedbackMsg');
+    const applyBtn = document.getElementById('applyPromoBtn');
+    const user = getUser() || {};
+
+    if (!code) {
+      if (feedback) {
+        feedback.style.display = 'block';
+        feedback.style.color = '#ef4444';
+        feedback.textContent = 'Please enter a promo code (e.g. COLLEKT60).';
+      }
+      return;
+    }
+
+    // Check if account already used a promo code
+    if (user.promo_code_used) {
+      if (feedback) {
+        feedback.style.display = 'block';
+        feedback.style.color = '#ef4444';
+        feedback.textContent = `Your account has already redeemed promo code ${user.promo_code_used}.`;
+      }
+      return;
+    }
+
+    if (applyBtn) {
+      applyBtn.disabled = true;
+      applyBtn.textContent = 'Checking...';
+    }
+
+    try {
+      const resp = await fetch('/api/promo-activate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'check',
+          code: code,
+          role: activeRole,
+          userId: user.id || null,
+          email: user.email || null
+        })
+      });
+      const data = await resp.json();
+
+      if (!resp.ok || !data.valid) {
+        throw new Error(data.error || 'Invalid promo code. Please try again.');
+      }
+
+      setPromoSuccessState(data.code || code, data.trialDays || 60, data.remainingSlots);
+    } catch (err) {
+      // Local fallback for COLLEKT60 and EARLYBIRD
+      if (code === 'COLLEKT60' || code === 'EARLYBIRD') {
+        setPromoSuccessState(code, 60, activeRole === 'company' ? 20 : 50);
+      } else {
+        if (feedback) {
+          feedback.style.display = 'block';
+          feedback.style.color = '#ef4444';
+          feedback.textContent = err.message || 'Invalid promo code. Please enter a valid code (e.g. COLLEKT60).';
+        }
+        if (applyBtn) {
+          applyBtn.disabled = false;
+          applyBtn.textContent = 'Apply';
+        }
+      }
+    }
+  }
+
+  function setPromoSuccessState(code, trialDays = 60, remainingSlots) {
+    appliedPromo = {
+      code: code,
+      trialDays: trialDays,
+      discountPercent: 100
+    };
+
+    const inputEl = document.getElementById('promoCodeInput');
+    if (inputEl) {
+      inputEl.value = code;
+      inputEl.disabled = true;
+    }
+
+    const applyBtn = document.getElementById('applyPromoBtn');
+    if (applyBtn) {
+      applyBtn.style.display = 'none';
+      applyBtn.disabled = false;
+      applyBtn.textContent = 'Apply';
+    }
+
+    const removeBtn = document.getElementById('removePromoBtn');
+    if (removeBtn) removeBtn.style.display = 'inline-block';
+
+    const feedback = document.getElementById('promoFeedbackMsg');
+    if (feedback) {
+      feedback.style.display = 'block';
+      feedback.style.color = '#15803d';
+      feedback.innerHTML = `✓ Code <strong>${code}</strong> applied! 100% off for ${trialDays} Days (₦0.00 due).`;
+    }
+
+    const box = document.getElementById('promoCodeBox');
+    if (box) {
+      box.style.borderColor = '#22c55e';
+      box.style.background = 'rgba(34,197,94,0.06)';
+    }
+
+    const banner = document.getElementById('promoTrialBanner');
+    if (banner) banner.style.display = 'block';
+
+    if (remainingSlots !== undefined) {
+      const pill = document.getElementById('promoRemainingPill');
+      if (pill) {
+        pill.style.display = 'inline-block';
+        pill.textContent = `${remainingSlots} Slots Left`;
+      }
+    }
+
+    renderUpgradeView();
+    if (typeof showToast === 'function') {
+      showToast(`🎉 Promo code ${code} applied! 60-Day Free Trial ready to activate.`, 'success');
+    }
+  }
+
+  function removePromoCode() {
+    appliedPromo = null;
+
+    const inputEl = document.getElementById('promoCodeInput');
+    if (inputEl) {
+      inputEl.value = '';
+      inputEl.disabled = false;
+    }
+
+    const applyBtn = document.getElementById('applyPromoBtn');
+    if (applyBtn) {
+      applyBtn.style.display = 'inline-block';
+      applyBtn.disabled = false;
+      applyBtn.textContent = 'Apply';
+    }
+
+    const removeBtn = document.getElementById('removePromoBtn');
+    if (removeBtn) removeBtn.style.display = 'none';
+
+    const feedback = document.getElementById('promoFeedbackMsg');
+    if (feedback) {
+      feedback.style.display = 'none';
+      feedback.textContent = '';
+    }
+
+    const box = document.getElementById('promoCodeBox');
+    if (box) {
+      box.style.borderColor = 'var(--line)';
+      box.style.background = 'var(--paper)';
+    }
+
+    const banner = document.getElementById('promoTrialBanner');
+    if (banner) banner.style.display = 'none';
+
+    renderUpgradeView();
+    if (typeof showToast === 'function') {
+      showToast('Promo code removed. Standard rates restored.', 'info');
+    }
+  }
 
   function setBillingCycle(cycle) {
     if (!BILLING_CYCLES[cycle]) cycle = 'monthly';
@@ -1094,7 +1369,25 @@
       }
     }
 
-    document.getElementById('summaryTotalPrice').textContent = `₦${priceNGN.toLocaleString()}`;
+    const promoRow = document.getElementById('summaryPromoRow');
+    const summaryTotal = document.getElementById('summaryTotalPrice');
+    if (appliedPromo) {
+      if (promoRow) {
+        promoRow.style.display = 'flex';
+        document.getElementById('summaryPromoLabel').textContent = `Founding Member Pass: -₦${priceNGN.toLocaleString()} (100% off for 60 Days)`;
+        document.getElementById('summaryPromoValue').textContent = `-₦${priceNGN.toLocaleString()}`;
+      }
+      if (summaryTotal) {
+        summaryTotal.textContent = '₦0.00';
+        summaryTotal.style.color = '#16a34a';
+      }
+    } else {
+      if (promoRow) promoRow.style.display = 'none';
+      if (summaryTotal) {
+        summaryTotal.textContent = `₦${priceNGN.toLocaleString()}`;
+        summaryTotal.style.color = 'var(--forest)';
+      }
+    }
 
     updatePayButtonText();
     updateWalletDisplay();
@@ -1104,6 +1397,18 @@
     const { cycleValues } = getActiveCyclePricing();
     const priceNGN = cycleValues.totalNGN;
     const btn = document.getElementById('executePayBtn');
+    if (!btn) return;
+
+    if (appliedPromo) {
+      btn.innerHTML = 'Activate 60-Day Free Trial 🎉 (no card required)';
+      btn.style.background = 'linear-gradient(135deg, #15803d, #16a34a)';
+      btn.style.boxShadow = '0 8px 24px rgba(22,163,74,0.3)';
+      btn.disabled = false;
+      return;
+    }
+
+    btn.style.background = 'linear-gradient(135deg, #0e3b35, #13756f)';
+    btn.style.boxShadow = '0 8px 24px rgba(14,59,53,0.25)';
 
     if (activePaymentMethod === 'card') {
       btn.innerHTML = `Pay ₦${priceNGN.toLocaleString()} via Card &amp; Subscribe`;
@@ -1187,6 +1492,91 @@
     const { config, cycleMeta, cycleValues } = getActiveCyclePricing();
     const priceNGN = cycleValues.totalNGN;
     const btn = document.getElementById('executePayBtn');
+    if (!btn) return;
+
+    // 0. Ensure user is logged in
+    if (!user || (!user.id && !user.email)) {
+      if (typeof showToast === 'function') showToast('Please log in or sign up to activate your plan.', 'warning');
+      setTimeout(() => {
+        window.location.href = `login.html?return=${encodeURIComponent('upgrade.html?role=' + activeRole)}`;
+      }, 1200);
+      return;
+    }
+
+    // ── PROMO CODE ZERO-COST ACTIVATION PATH (60-DAY FREE TRIAL) ──
+    if (appliedPromo) {
+      btn.disabled = true;
+      btn.innerHTML = 'Activating 60-Day Free Trial...';
+
+      // 60-day expiry starting immediately
+      const now = new Date();
+      const trialDurationDays = appliedPromo.trialDays || 60;
+      const trialEndsAt = new Date(now.getTime() + (trialDurationDays * 24 * 60 * 60 * 1000)).toISOString();
+
+      // Call serverless function /api/promo-activate
+      try {
+        await fetch('/api/promo-activate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'redeem',
+            code: appliedPromo.code,
+            role: activeRole,
+            userId: user.id || null,
+            email: user.email || null
+          })
+        });
+      } catch (backendErr) {
+        console.warn('Backend redeem notice warning:', backendErr);
+      }
+
+      // Update user in localStorage
+      const updatedUser = {
+        ...user,
+        role: activeRole,
+        is_premium: true,
+        premium_plan: activeRole,
+        subscription_tier: activeRole === 'company' ? 'company_enterprise' : 'pro_plus',
+        subscription_cycle: 'trial_60_days',
+        trial_ends_at: trialEndsAt,
+        subscription_expiry: trialEndsAt,
+        promo_code_used: appliedPromo.code,
+        subscription_status: 'active_trial',
+        subscription_amount_ngn: 0
+      };
+      setUser(updatedUser);
+
+      // Update Supabase profiles table directly if available
+      if (window.sb && user.id) {
+        try {
+          await sb.from('profiles').update({
+            is_premium: true,
+            premium_plan: activeRole,
+            subscription_tier: activeRole === 'company' ? 'company_enterprise' : 'pro_plus',
+            trial_ends_at: trialEndsAt,
+            subscription_expiry: trialEndsAt,
+            promo_code_used: appliedPromo.code,
+            subscription_status: 'active_trial'
+          }).eq('id', user.id);
+        } catch(e) {}
+      }
+
+      // Populate Success Modal
+      const ref = 'TRIAL-' + Math.floor(100000 + Math.random() * 900000);
+      document.getElementById('receiptRef').textContent = ref;
+      document.getElementById('receiptTier').textContent = `${config.tierName} (60-Day Founding Pass)`;
+      document.getElementById('receiptAmount').textContent = `₦0.00 (100% Waived via ${appliedPromo.code})`;
+      
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('receiptExpiry').textContent = new Date(trialEndsAt).toLocaleDateString('en-US', options);
+
+      document.getElementById('successModalTitle').textContent = `🎉 Welcome Founding Member!`;
+      document.getElementById('successModalMessage').textContent = `Your 60-Day Free Trial is now active and begins counting immediately! You have full access to ${activeRole === 'company' ? 'Enterprise' : 'Professional'} tier privileges with zero charges.`;
+
+      const modal = document.getElementById('upgradeSuccessModal');
+      if (modal) modal.style.display = 'flex';
+      return;
+    }
 
     // Validation
     if (activePaymentMethod === 'card') {
@@ -1250,6 +1640,7 @@
         ...user,
         role: activeRole,
         is_premium: true,
+        premium_plan: activeRole,
         subscription_tier: activeRole === 'company' ? 'company_enterprise' : 'pro_plus',
         subscription_cycle: activeCycle,
         subscription_expiry: expiryDate.toISOString(),
@@ -1263,6 +1654,7 @@
         try {
           await sb.from('profiles').update({
             is_premium: true,
+            premium_plan: activeRole,
             subscription_tier: activeRole === 'company' ? 'company_enterprise' : 'pro_plus',
             subscription_expiry: expiryDate.toISOString()
           }).eq('id', user.id);
