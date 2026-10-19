@@ -1361,37 +1361,67 @@ async function addUserNotification(notifData, targetUserId = null) {
   return notif;
 }
 
-function markNotificationAsRead(notifId) {
-  const me = typeof getUser === 'function' ? getUser() : null;
-  const list = getUserNotifications(me);
-  const item = list.find(n => n.id === notifId);
-  if (item) {
-    item.read = true;
-    saveUserNotifications(list, me);
-    updateLiveNotificationBadge();
-    renderNotificationsPanel();
+function getReadNotificationIds(user) {
+  const u = user || (typeof getUser === 'function' ? getUser() : null);
+  const key = `collekt_read_notifs_${u ? (u.id || u.email || 'user') : 'guest'}`;
+  try {
+    return new Set(JSON.parse(localStorage.getItem(key) || '[]'));
+  } catch(e) {
+    return new Set();
   }
-  if (window.sb && window.sb.from && notifId) {
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(notifId);
-    if (isUUID) {
-      window.sb.from('notifications').update({ read: true }).eq('id', notifId).then(()=>{}).catch(()=>{});
+}
+
+function saveReadNotificationId(notifId, user) {
+  if (!notifId) return;
+  const u = user || (typeof getUser === 'function' ? getUser() : null);
+  const key = `collekt_read_notifs_${u ? (u.id || u.email || 'user') : 'guest'}`;
+  try {
+    const s = getReadNotificationIds(u);
+    s.add(String(notifId));
+    localStorage.setItem(key, JSON.stringify(Array.from(s)));
+  } catch(e) {}
+}
+
+function markNotificationAsRead(notifId) {
+  if (!notifId) return;
+  const me = typeof getUser === 'function' ? getUser() : null;
+  saveReadNotificationId(notifId, me);
+
+  const list = getUserNotifications(me);
+  let changed = false;
+  list.forEach(n => {
+    if (String(n.id) === String(notifId) || n.id == notifId) {
+      if (!n.read) changed = true;
+      n.read = true;
     }
+  });
+
+  saveUserNotifications(list, me);
+  updateLiveNotificationBadge();
+  renderNotificationsPanel();
+
+  if (window.sb && window.sb.from && notifId) {
+    try {
+      window.sb.from('notifications').update({ read: true }).eq('id', notifId).then(()=>{}).catch(()=>{});
+    } catch(e){}
   }
 }
 
 function markAllNotificationsAsRead() {
   const me = typeof getUser === 'function' ? getUser() : null;
   const list = getUserNotifications(me);
-  list.forEach(n => n.read = true);
+  list.forEach(n => {
+    n.read = true;
+    saveReadNotificationId(n.id, me);
+  });
   saveUserNotifications(list, me);
   updateLiveNotificationBadge();
   renderNotificationsPanel();
 
   if (window.sb && window.sb.from && me && me.id) {
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(me.id);
-    if (isUUID) {
+    try {
       window.sb.from('notifications').update({ read: true }).eq('user_id', me.id).then(()=>{}).catch(()=>{});
-    }
+    } catch(e){}
   }
   if (typeof showToast === 'function') {
     showToast('All notifications marked as read', 'success');
@@ -1401,7 +1431,8 @@ function markAllNotificationsAsRead() {
 function updateLiveNotificationBadge() {
   const me = typeof getUser === 'function' ? getUser() : null;
   const list = getUserNotifications(me);
-  const unreadCount = list.filter(n => !n.read).length;
+  const readIds = getReadNotificationIds(me);
+  const unreadCount = list.filter(n => !n.read && !readIds.has(String(n.id))).length;
 
   const badge = document.getElementById('notifBadge');
   if (badge) {
@@ -1409,6 +1440,7 @@ function updateLiveNotificationBadge() {
       badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
       badge.style.display = 'grid';
     } else {
+      badge.textContent = '0';
       badge.style.display = 'none';
     }
   }
@@ -1433,6 +1465,7 @@ function renderNotificationsPanel() {
 
   const me = typeof getUser === 'function' ? getUser() : null;
   const list = getUserNotifications(me);
+  const readIds = getReadNotificationIds(me);
 
   if (!list || list.length === 0) {
     container.innerHTML = `
@@ -1446,8 +1479,9 @@ function renderNotificationsPanel() {
   }
 
   container.innerHTML = list.map(item => {
+    const isRead = !!(item.read || readIds.has(String(item.id)));
     const timeAgo = formatNotifTimeAgo(item.created_at);
-    const unreadDot = !item.read ? `<div class="notif-dot-indicator"></div>` : `<div style="width:8px; height:8px; flex-shrink:0;"></div>`;
+    const unreadDot = !isRead ? `<div class="notif-dot-indicator"></div>` : `<div style="width:8px; height:8px; flex-shrink:0;"></div>`;
 
     let icon = '🔔';
     if (item.type === 'welcome') icon = '👋';
@@ -1460,10 +1494,12 @@ function renderNotificationsPanel() {
 
     const safeTitle = typeof escapeHTML === 'function' ? escapeHTML(item.title) : item.title;
     const safeMsg = typeof escapeHTML === 'function' ? escapeHTML(item.message) : item.message;
-    const bgStyle = !item.read ? 'background: rgba(22, 163, 74, 0.05);' : '';
+    const bgStyle = !isRead ? 'background: rgba(22, 163, 74, 0.06);' : 'opacity: 0.72;';
+    const safeId = String(item.id || '').replace(/'/g, "\\'");
+    const safeLink = String(item.link || '').replace(/'/g, "\\'");
 
     return `
-      <div class="notif-item" style="${bgStyle}" onclick="handleNotificationClick('${item.id}', '${item.link ? escapeHTML(item.link) : ''}')">
+      <div class="notif-item" style="${bgStyle}; cursor:pointer;" onclick="handleNotificationClick('${safeId}', '${safeLink}', event)">
         ${unreadDot}
         <div style="font-size:18px; line-height:1; flex-shrink:0; margin-top:2px;">${icon}</div>
         <div style="flex:1; min-width:0;">
@@ -1478,12 +1514,20 @@ function renderNotificationsPanel() {
   }).join('');
 }
 
-function handleNotificationClick(notifId, link) {
+function handleNotificationClick(notifId, link, event) {
+  if (event && typeof event.stopPropagation === 'function') {
+    event.stopPropagation();
+  }
+  // 1. Immediately mark as read and reduce badge number
   markNotificationAsRead(notifId);
-  const panel = document.getElementById('notifPanel');
-  if (panel) panel.classList.remove('open');
-  if (link && link !== 'null' && link !== 'undefined' && link !== '') {
-    window.location.href = link;
+
+  // 2. If item has a destination link, close panel and navigate smoothly
+  if (link && link !== 'null' && link !== 'undefined' && link !== '' && link !== '#' && !link.startsWith('javascript:')) {
+    const panel = document.getElementById('notifPanel');
+    if (panel) panel.classList.remove('open');
+    setTimeout(() => {
+      window.location.href = link;
+    }, 120);
   }
 }
 
@@ -1503,16 +1547,25 @@ async function syncNotificationsFromSupabase() {
 
     if (!error && Array.isArray(data)) {
       const local = getUserNotifications(me);
+      const readIds = getReadNotificationIds(me);
       const mergedMap = new Map();
-      local.forEach(n => mergedMap.set(n.id || (n.title + n.created_at), n));
+      local.forEach(n => {
+        const key = String(n.id || (n.title + n.created_at));
+        if (readIds.has(String(n.id))) n.read = true;
+        mergedMap.set(key, n);
+      });
+
       data.forEach(n => {
-        mergedMap.set(n.id, {
+        const strId = String(n.id);
+        const localExisting = mergedMap.get(strId) || mergedMap.get(n.title + n.created_at);
+        const isRead = readIds.has(strId) || (localExisting && localExisting.read) || !!n.read;
+        mergedMap.set(strId, {
           id: n.id,
           type: n.type,
           title: n.title,
           message: n.message,
           link: n.link,
-          read: !!n.read,
+          read: isRead,
           metadata: n.metadata || {},
           created_at: n.created_at
         });

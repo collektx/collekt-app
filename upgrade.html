@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=180.0">
-<link rel="stylesheet" href="shared.css?v=180.0">
-<link rel="stylesheet" href="glass.css?v=180.0">
+<link rel="stylesheet" href="style.css?v=181.0">
+<link rel="stylesheet" href="shared.css?v=181.0">
+<link rel="stylesheet" href="glass.css?v=181.0">
 
 <style>
   body {
@@ -678,16 +678,13 @@
 
             <!-- PROMO CODE INPUT FIELD -->
             <div class="promo-box" id="promoCodeBox" style="background:var(--paper); border:1.5px dashed var(--line); border-radius:16px; padding:16px 18px; margin-bottom:20px; transition:all .2s ease;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <div style="margin-bottom:8px;">
                 <label for="promoCodeInput" style="font-size:12px; font-weight:800; color:var(--ink); text-transform:uppercase; letter-spacing:.05em; display:flex; align-items:center; gap:6px;">
                   <span>🎟️</span> Have a promo code?
                 </label>
-                <span id="promoRemainingPill" style="font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:99px; background:rgba(20,184,166,0.12); color:var(--teal); display:none;">
-                  Founding Slots Active
-                </span>
               </div>
               <div style="display:flex; gap:8px;">
-                <input class="form-input" type="text" id="promoCodeInput" placeholder="Enter code (e.g. COLLEKT60)" 
+                <input class="form-input" type="text" id="promoCodeInput" placeholder="Enter promo code" 
                        style="text-transform:uppercase; font-weight:800; letter-spacing:0.06em; font-size:13.5px; padding:9px 14px; flex:1;"
                        onkeydown="if(event.key==='Enter'){event.preventDefault(); applyPromoCode();}">
                 <button type="button" class="btn btn-primary btn-sm" id="applyPromoBtn" onclick="applyPromoCode()"
@@ -839,9 +836,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=180.0"></script>
-<script src="app.js?v=180.0"></script>
-<script src="settings-popup.js?v=180.0"></script>
+<script src="supabase.js?v=181.0"></script>
+<script src="app.js?v=181.0"></script>
+<script src="settings-popup.js?v=181.0"></script>
 
 <script>
   let activeRole = 'professional';
@@ -1054,32 +1051,7 @@
       }
     }
 
-    // 2. Fetch live slot quota from serverless function
-    try {
-      const resp = await fetch('/api/promo-activate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'check',
-          code: 'COLLEKT60',
-          role: activeRole
-        })
-      });
-      if (resp.ok) {
-        const data = await resp.json();
-        const pill = document.getElementById('promoRemainingPill');
-        if (pill && data.remainingSlots !== undefined) {
-          pill.style.display = 'inline-block';
-          pill.textContent = `${data.remainingSlots} / ${data.totalLimit} Slots Left`;
-        }
-      }
-    } catch (e) {
-      const pill = document.getElementById('promoRemainingPill');
-      if (pill) {
-        pill.style.display = 'inline-block';
-        pill.textContent = activeRole === 'company' ? 'First 20 Companies' : 'First 50 Professionals';
-      }
-    }
+    // 2. Verified promo status initialized quietly without leaking quotas or codes
   }
 
   async function applyPromoCode() {
@@ -1093,7 +1065,7 @@
       if (feedback) {
         feedback.style.display = 'block';
         feedback.style.color = '#ef4444';
-        feedback.textContent = 'Please enter a promo code (e.g. COLLEKT60).';
+        feedback.textContent = 'Please enter a promo code.';
       }
       return;
     }
@@ -1103,7 +1075,7 @@
       if (feedback) {
         feedback.style.display = 'block';
         feedback.style.color = '#ef4444';
-        feedback.textContent = `Your account has already redeemed promo code ${user.promo_code_used}.`;
+        feedback.textContent = `Your account has already redeemed a founding member pass.`;
       }
       return;
     }
@@ -1128,19 +1100,19 @@
       const data = await resp.json();
 
       if (!resp.ok || !data.valid) {
-        throw new Error(data.error || 'Invalid promo code. Please try again.');
+        throw new Error(data.error || 'Invalid promo code. Please check and try again.');
       }
 
-      setPromoSuccessState(data.code || code, data.trialDays || 60, data.remainingSlots);
+      setPromoSuccessState(data.code || code, data.trialDays || 60);
     } catch (err) {
       // Local fallback for COLLEKT60 and EARLYBIRD
       if (code === 'COLLEKT60' || code === 'EARLYBIRD') {
-        setPromoSuccessState(code, 60, activeRole === 'company' ? 20 : 50);
+        setPromoSuccessState(code, 60);
       } else {
         if (feedback) {
           feedback.style.display = 'block';
           feedback.style.color = '#ef4444';
-          feedback.textContent = err.message || 'Invalid promo code. Please enter a valid code (e.g. COLLEKT60).';
+          feedback.textContent = err.message || 'Invalid promo code. Please check and try again.';
         }
         if (applyBtn) {
           applyBtn.disabled = false;
@@ -1150,7 +1122,7 @@
     }
   }
 
-  function setPromoSuccessState(code, trialDays = 60, remainingSlots) {
+  function setPromoSuccessState(code, trialDays = 60) {
     appliedPromo = {
       code: code,
       trialDays: trialDays,
@@ -1177,7 +1149,7 @@
     if (feedback) {
       feedback.style.display = 'block';
       feedback.style.color = '#15803d';
-      feedback.innerHTML = `✓ Code <strong>${code}</strong> applied! 100% off for ${trialDays} Days (₦0.00 due).`;
+      feedback.innerHTML = `✓ Promo code applied! 100% off for ${trialDays} Days (₦0.00 due).`;
     }
 
     const box = document.getElementById('promoCodeBox');
@@ -1189,17 +1161,9 @@
     const banner = document.getElementById('promoTrialBanner');
     if (banner) banner.style.display = 'block';
 
-    if (remainingSlots !== undefined) {
-      const pill = document.getElementById('promoRemainingPill');
-      if (pill) {
-        pill.style.display = 'inline-block';
-        pill.textContent = `${remainingSlots} Slots Left`;
-      }
-    }
-
     renderUpgradeView();
     if (typeof showToast === 'function') {
-      showToast(`🎉 Promo code ${code} applied! 60-Day Free Trial ready to activate.`, 'success');
+      showToast(`🎉 60-Day Free Trial activated! 100% waived.`, 'success');
     }
   }
 
