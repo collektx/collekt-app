@@ -29,9 +29,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=183.0">
-<link rel="stylesheet" href="shared.css?v=183.0">
-<link rel="stylesheet" href="glass.css?v=183.0">
+<link rel="stylesheet" href="style.css?v=184.0">
+<link rel="stylesheet" href="shared.css?v=184.0">
+<link rel="stylesheet" href="glass.css?v=184.0">
 <style>
 html, body {
   background: var(--paper);
@@ -204,7 +204,7 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
             <p class="prop-sub">Track submitted Collektions, review client contract status, and manage active engineering bids.</p>
           </div>
           <a href="marketplace.html" class="btn btn-amber" style="font-weight:800; padding:10px 22px;">
-            🔍 Browse Live Tenders &rarr;
+            Browse Live Tenders &rarr;
           </a>
         </div>
       </div>
@@ -233,10 +233,10 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
       <div class="prop-filter-bar">
         <div class="prop-pills-wrap" id="propPills">
           <div class="prop-pill active" onclick="filterProposals('all', this)">All Collektions</div>
-          <div class="prop-pill" onclick="filterProposals('review', this)">⏳ Under Review</div>
-          <div class="prop-pill" onclick="filterProposals('accepted', this)">✅ Accepted / Engaged</div>
-          <div class="prop-pill" onclick="filterProposals('completed', this)">🏆 Jobs Collekted</div>
-          <div class="prop-pill" onclick="filterProposals('declined', this)">❌ Declined / Uncollekted</div>
+          <div class="prop-pill" onclick="filterProposals('review', this)">Under Review</div>
+          <div class="prop-pill" onclick="filterProposals('accepted', this)">Accepted / Engaged</div>
+          <div class="prop-pill" onclick="filterProposals('completed', this)">Jobs Collekted</div>
+          <div class="prop-pill" onclick="filterProposals('declined', this)">Declined / Uncollekted</div>
         </div>
 
         <div style="display:flex; align-items:center; gap:10px; min-width:240px;">
@@ -255,10 +255,10 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=183.0"></script>
-<script src="app.js?v=183.0"></script>
-<script src="collekt-ai.js?v=183.0"></script>
-<script src="settings-popup.js?v=183.0"></script>
+<script src="supabase.js?v=184.0"></script>
+<script src="app.js?v=184.0"></script>
+<script src="collekt-ai.js?v=184.0"></script>
+<script src="settings-popup.js?v=184.0"></script>
 <script>
   /* ═════════════════════════════════════════════════════════
      COLLEKTIONS PAGE ENGINE v1.0
@@ -357,7 +357,7 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
     if (filtered.length === 0) {
       container.innerHTML = `
         <div style="background:var(--white); border:2px dashed var(--line); border-radius:20px; padding:60px 24px; text-align:center;">
-          <div style="font-size:48px; margin-bottom:12px;">📝</div>
+          <div style="margin-bottom:12px; display:flex; justify-content:center; color:var(--muted);"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
           <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:6px;">No Collektions Match Your View</div>
           <div style="font-size:13px; color:var(--muted); margin-bottom:20px;">Collekt open energy tenders in the marketplace to see them here.</div>
           <a href="marketplace.html" class="btn btn-amber btn-sm" style="font-weight:800; padding:8px 20px;">Browse Live Tenders</a>
@@ -372,21 +372,21 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
       const isUncoll = isProposalUncollekted(p);
       const isDeclined = isProposalDeclined(p);
 
-      let statusBadge = `<span class="prop-status-badge badge-review">⏳ Under Review</span>`;
-      let clientReviewText = 'Reviewing Collektion ⏳';
+      let statusBadge = `<span class="prop-status-badge badge-review">Under Review</span>`;
+      let clientReviewText = 'Reviewing Collektion';
 
       if (isCompleted) {
-        statusBadge = `<span class="prop-status-badge badge-awarded">🏆 Jobs Collekted</span>`;
-        clientReviewText = 'Completed & Collekted ✅';
+        statusBadge = `<span class="prop-status-badge badge-awarded">Jobs Collekted</span>`;
+        clientReviewText = 'Completed & Collekted';
       } else if (isAwarded) {
-        statusBadge = `<span class="prop-status-badge badge-awarded">✅ Accepted &bull; Active Engagement</span>`;
-        clientReviewText = 'Accepted ✅ &bull; Active';
+        statusBadge = `<span class="prop-status-badge badge-awarded">Accepted &bull; Active Engagement</span>`;
+        clientReviewText = 'Accepted &bull; Active';
       } else if (isUncoll) {
-        statusBadge = `<span class="prop-status-badge badge-declined">🗑️ Uncollekted</span>`;
-        clientReviewText = 'Uncollekted 🗑️';
+        statusBadge = `<span class="prop-status-badge badge-declined">Uncollekted</span>`;
+        clientReviewText = 'Uncollekted';
       } else if (isDeclined) {
-        statusBadge = `<span class="prop-status-badge badge-declined">❌ Declined</span>`;
-        clientReviewText = 'Declined ❌';
+        statusBadge = `<span class="prop-status-badge badge-declined">Declined</span>`;
+        clientReviewText = 'Declined';
       }
 
       const bidFormatted = p.bidAmount ? (typeof formatNaira === 'function' ? formatNaira(p.bidAmount, false) : '₦' + p.bidAmount) : 'Negotiable';
@@ -403,7 +403,7 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
             <div>
               <div class="prop-card-title">${escapeHTML(p.jobTitle || 'Engineering Tender Bid')}</div>
               <div class="prop-company-line">
-                <span>🏢 Client: <strong>${escapeHTML(p.companyName || 'Verified Energy Enterprise')}</strong></span>
+                <span>Client: <strong>${escapeHTML(p.companyName || 'Verified Energy Enterprise')}</strong></span>
                 ${badge}
                 <span>&bull; Submitted: ${dateStr}</span>
               </div>
@@ -437,14 +437,14 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
 
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <a href="messages.html" class="btn btn-outline btn-sm" style="font-weight:800; font-size:12px;">
-                💬 Message Client
+                Message Client
               </a>
               ${canUncollekt ? `
                 <button class="btn btn-primary btn-sm" style="font-weight:800; font-size:12px; background:var(--teal);" onclick="openAIProposalGeneratorModal('${encodeURIComponent(p.jobTitle || 'Tender Proposal')}', '${encodeURIComponent(p.pitchText || '')}')">
-                  ✨ Improve Pitch with AI
+                  Improve Pitch with AI
                 </button>
                 <button class="btn btn-outline btn-sm" style="color:#b91c1c; border-color:#fca5a5; font-weight:800; font-size:12px;" onclick="uncollektProposal('${p.id}')">
-                  🗑️ UNCOLLEKT
+                  UNCOLLEKT
                 </button>
               ` : ''}
             </div>
@@ -473,7 +473,7 @@ html.dark .prop-pitch-text { background: rgba(255,255,255,0.04); color: #cbd5e1;
       } catch(e){}
     }
 
-    if (typeof showToast === 'function') showToast('🗑️ Proposal uncollekted successfully');
+    if (typeof showToast === 'function') showToast('Proposal uncollekted successfully');
     renderProposalsList();
   }
 

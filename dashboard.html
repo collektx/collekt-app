@@ -31,7 +31,7 @@
       navHistory.push(now);
       sessionStorage.setItem('collekt_nav_history', JSON.stringify(navHistory));
       if (navHistory.length >= 5) {
-        console.warn('🛑 Circuit-breaker tripped: halting automatic redirects to stabilize dashboard.');
+        console.warn('[Circuit-breaker tripped: halting automatic redirects to stabilize dashboard.]');
         return;
       }
     } catch(e) {}
@@ -81,9 +81,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=183.0">
-<link rel="stylesheet" href="shared.css?v=183.0">
-<link rel="stylesheet" href="glass.css?v=183.0">
+<link rel="stylesheet" href="style.css?v=184.0">
+<link rel="stylesheet" href="shared.css?v=184.0">
+<link rel="stylesheet" href="glass.css?v=184.0">
 
 <style>
   body { background: var(--paper); }
@@ -271,10 +271,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=183.0"></script>
-<script src="app.js?v=183.0"></script>
-<script src="collekt-ai.js?v=183.0"></script>
-<script src="settings-popup.js?v=183.0"></script>
+<script src="supabase.js?v=184.0"></script>
+<script src="app.js?v=184.0"></script>
+<script src="collekt-ai.js?v=184.0"></script>
+<script src="settings-popup.js?v=184.0"></script>
 <script>
   requireAuth();
 
@@ -316,7 +316,7 @@
     
     window.dashboardDocsRegistry = recent;
     list.innerHTML = recent.map((f, idx) => {
-      const icon = typeof getFileTypeIcon === 'function' ? getFileTypeIcon(f.type, f.name) : '📄';
+      const icon = typeof getFileTypeIcon === 'function' ? getFileTypeIcon(f.type, f.name) : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
       const name = f.name.length > 25 ? f.name.substring(0,25) + '...' : f.name;
       const size = typeof formatFileSize === 'function' ? formatFileSize(f.size) : f.size;
       return `
@@ -326,7 +326,7 @@
             <div style="font-size:13px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</div>
             <div style="font-size:11px; color:var(--muted);">${size} &bull; <span style="text-transform:capitalize;">${f.category}</span></div>
           </div>
-          <button style="padding:4px 10px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--teal); font-size:11px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); openDocumentViewer(window.dashboardDocsRegistry[${idx}])">👁️ Preview</button>
+          <button style="padding:4px 10px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--teal); font-size:11px; font-weight:700; cursor:pointer;" onclick="event.stopPropagation(); openDocumentViewer(window.dashboardDocsRegistry[${idx}])">Preview</button>
         </div>
       `;
     }).join('');
@@ -363,10 +363,10 @@
     if (proposals.length === 0) {
       container.innerHTML = `
         <div style="padding:40px 20px; text-align:center;">
-          <div style="font-size:32px; margin-bottom:12px;">📋</div>
+          <div style="margin-bottom:12px; display:flex; justify-content:center; color:var(--muted);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
           <h3 style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Collektions Submitted Yet</h3>
           <p style="font-size:14px; color:var(--muted); max-width:400px; margin:0 auto; line-height:1.5;">Your active Collektions will appear here. Browse open tenders on the Marketplace to submit your first Collektion.</p>
-          <a href="marketplace.html" class="btn btn-primary btn-sm" style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;">🔍 Browse Marketplace &rarr;</a>
+          <a href="marketplace.html" class="btn btn-primary btn-sm" style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;">Browse Marketplace &rarr;</a>
         </div>
       `;
     } else {
@@ -424,7 +424,7 @@
       grid.style.display = 'block'; // override grid if empty state
       grid.innerHTML = `
         <div style="border:1px solid var(--line); border-radius:var(--r-lg); background:var(--white); padding:40px 20px; text-align:center;">
-          <div style="font-size:32px; margin-bottom:12px;">🏗️</div>
+          <div style="margin-bottom:12px; display:flex; justify-content:center; color:var(--muted);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
           <h3 style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Open Tenders Listed Yet</h3>
           <p style="font-size:14px; color:var(--muted); max-width:400px; margin:0 auto; line-height:1.5;">Companies post new engineering and energy tenders regularly. Check back soon or visit the Marketplace.</p>
         </div>
@@ -476,10 +476,10 @@
       const isFiltered = filterVal !== 'all';
       container.innerHTML = `
         <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:60px 20px; text-align:center;">
-          <div style="font-size:48px; margin-bottom:16px;">${isFiltered ? '🔍' : '📝'}</div>
+          <div style="margin-bottom:16px; display:flex; justify-content:center; color:var(--muted);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
           <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:8px;">${isFiltered ? 'No Matching Proposals' : 'No Proposals Yet'}</h3>
           <p style="font-size:14px; color:var(--muted); max-width:420px; margin:0 auto 20px; line-height:1.6;">${isFiltered ? 'No proposals match the selected filter. Try changing the status filter above.' : 'You haven\'t submitted any proposals or bids yet. Browse the Marketplace to find projects and submit your first proposal.'}</p>
-          ${isFiltered ? '' : '<a href="marketplace.html" class="btn btn-primary btn-sm" style="display:inline-flex; align-items:center; gap:6px;">🔍 Browse Marketplace →</a>'}
+          ${isFiltered ? '' : '<a href="marketplace.html" class="btn btn-primary btn-sm" style="display:inline-flex; align-items:center; gap:6px;">Browse Marketplace →</a>'}
         </div>
       `;
       if (document.documentElement.classList.contains('dark') && container.firstElementChild) {
@@ -505,14 +505,14 @@
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px; flex-wrap:wrap;">
             <div style="flex:1; min-width:0;">
               <h3 style="font-size:15px; font-weight:800; color:var(--ink); margin-bottom:4px;">${title}</h3>
-              <p style="font-size:13px; color:var(--muted);">🏢 ${company}</p>
+              <p style="font-size:13px; color:var(--muted);">${company}</p>
             </div>
             <span class="proposal-status ${statusClass}">${statusLabel}</span>
           </div>
           ${preview ? `<p style="font-size:13px; color:var(--slate); line-height:1.5; margin-bottom:12px; padding:12px; background:var(--paper); border-radius:var(--r);">${escapeHTML(preview)}</p>` : ''}
           <div style="display:flex; align-items:center; gap:20px; font-size:12px; color:var(--muted); font-weight:600; flex-wrap:wrap;">
-            <span>📅 ${dateStr}</span>
-            <span>💰 ${budget}</span>
+            <span>${dateStr}</span>
+            <span>${budget}</span>
           </div>
         </div>
       `;
@@ -586,7 +586,7 @@
     if (balEl) balEl.textContent = (typeof formatNaira === 'function') ? formatNaira(avail, true) : '₦' + avail.toLocaleString();
   }
 </script>
-<script src="upload-modal.js?v=183.0"></script>
+<script src="upload-modal.js?v=184.0"></script>
 </body>
 </html>
 

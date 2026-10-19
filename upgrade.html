@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=183.0">
-<link rel="stylesheet" href="shared.css?v=183.0">
-<link rel="stylesheet" href="glass.css?v=183.0">
+<link rel="stylesheet" href="style.css?v=184.0">
+<link rel="stylesheet" href="shared.css?v=184.0">
+<link rel="stylesheet" href="glass.css?v=184.0">
 
 <style>
   body {
@@ -620,7 +620,6 @@
             <div id="formCardSection">
               <!-- Zero-Due Notice Banner when Promo Trial is Active -->
               <div id="promoCardZeroDueNotice" style="display:none; background:rgba(34,197,94,0.08); border:1.5px solid rgba(34,197,94,0.3); border-radius:16px; padding:18px 20px; margin-bottom:20px; text-align:center;">
-                <div style="font-size:24px; margin-bottom:6px;">🎉</div>
                 <div style="font-size:14px; font-weight:800; color:#15803d; margin-bottom:4px;">Zero Cost &bull; No Card Required</div>
                 <p style="font-size:12px; color:var(--muted); margin:0; line-height:1.4;">
                   Your 60-Day Free Trial pass is applied! Total due now is <strong>₦0.00</strong>. No credit or debit card is needed to activate.
@@ -691,7 +690,7 @@
             <div class="promo-box" id="promoCodeBox" style="background:var(--paper); border:1.5px dashed var(--line); border-radius:16px; padding:16px 18px; margin-bottom:20px; transition:all .2s ease;">
               <div style="margin-bottom:8px;">
                 <label for="promoCodeInput" style="font-size:12px; font-weight:800; color:var(--ink); text-transform:uppercase; letter-spacing:.05em; display:flex; align-items:center; gap:6px;">
-                  <span>🎟️</span> Have a promo code?
+                  Have a promo code?
                 </label>
               </div>
               <div style="display:flex; gap:8px;">
@@ -713,8 +712,7 @@
             <!-- Zero-Cost Trial Notice Banner -->
             <div id="promoTrialBanner" style="display:none; background:linear-gradient(135deg, rgba(22,163,74,0.12), rgba(19,117,111,0.08)); border:1.5px solid #22c55e; border-radius:14px; padding:14px 16px; margin-bottom:20px;">
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                <span style="font-size:18px;">🎉</span>
-                <strong style="color:#15803d; font-size:13.5px;">60-Day Free Trial Unlocked!</strong>
+                <strong style="color:#15803d; font-size:13.5px;">60-Day Free Trial Unlocked</strong>
               </div>
               <div style="font-size:12px; color:var(--ink); line-height:1.4;">
                 No debit card, wallet deduction, or payment details required today. Your 2-month founding privileges will begin immediately upon activation.
@@ -847,9 +845,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=183.0"></script>
-<script src="app.js?v=183.0"></script>
-<script src="settings-popup.js?v=183.0"></script>
+<script src="supabase.js?v=184.0"></script>
+<script src="app.js?v=184.0"></script>
+<script src="settings-popup.js?v=184.0"></script>
 
 <script>
   let activeRole = 'professional';
@@ -1038,7 +1036,6 @@
           banner.style.display = 'block';
           banner.innerHTML = `
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-              <span style="font-size:18px;">🎉</span>
               <strong style="color:#15803d; font-size:13.5px;">Active Founding Member Free Trial (${daysLeft} Days Remaining)</strong>
             </div>
             <div style="font-size:12px; color:var(--ink); line-height:1.4;">
@@ -1171,8 +1168,8 @@
       feedback.style.display = 'block';
       feedback.style.color = '#15803d';
       feedback.innerHTML = isAutoApplied
-        ? `✓ Founding Member Pass applied! 100% off for ${trialDays} Days (₦0.00 due).`
-        : `✓ Promo code applied! 100% off for ${trialDays} Days (₦0.00 due).`;
+        ? `Founding Member Pass applied! 100% off for ${trialDays} Days (₦0.00 due).`
+        : `Promo code applied! 100% off for ${trialDays} Days (₦0.00 due).`;
     }
 
     const box = document.getElementById('promoCodeBox');
@@ -1186,7 +1183,6 @@
       banner.style.display = 'block';
       banner.innerHTML = `
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-          <span style="font-size:18px;">🎉</span>
           <strong style="color:#15803d; font-size:13.5px;">60-Day Free Trial Pass Applied (₦0.00 Due)</strong>
         </div>
         <div style="font-size:12px; color:var(--ink); line-height:1.4;">
@@ -1197,7 +1193,7 @@
 
     renderUpgradeView();
     if (!isAutoApplied && typeof showToast === 'function') {
-      showToast(`🎉 60-Day Free Trial activated! 100% waived.`, 'success');
+      showToast(`60-Day Free Trial activated! 100% waived.`, 'success');
     }
   }
 
@@ -1414,13 +1410,13 @@
 
     if (appliedPromo) {
       if (appliedPromo.isAlreadyActive) {
-        btn.innerHTML = `✓ 60-Day Free Trial Active (${appliedPromo.daysLeft || 60} Days Remaining)`;
+        btn.innerHTML = `60-Day Free Trial Active (${appliedPromo.daysLeft || 60} Days Remaining)`;
         btn.style.background = 'linear-gradient(135deg, #15803d, #16a34a)';
         btn.style.boxShadow = '0 8px 24px rgba(22,163,74,0.3)';
         btn.disabled = true;
         return;
       }
-      btn.innerHTML = 'Activate 60-Day Free Trial 🎉 (no card required)';
+      btn.innerHTML = 'Activate 60-Day Free Trial (No Card Required)';
       btn.style.background = 'linear-gradient(135deg, #15803d, #16a34a)';
       btn.style.boxShadow = '0 8px 24px rgba(22,163,74,0.3)';
       btn.disabled = false;
@@ -1590,7 +1586,7 @@
       const options = { year: 'numeric', month: 'long', day: 'numeric' };
       document.getElementById('receiptExpiry').textContent = new Date(trialEndsAt).toLocaleDateString('en-US', options);
 
-      document.getElementById('successModalTitle').textContent = `🎉 Welcome Founding Member!`;
+      document.getElementById('successModalTitle').textContent = `Welcome Founding Member!`;
       document.getElementById('successModalMessage').textContent = `Your 60-Day Free Trial is now active and begins counting immediately! You have full access to ${activeRole === 'company' ? 'Enterprise' : 'Professional'} tier privileges with zero charges.`;
 
       const modal = document.getElementById('upgradeSuccessModal');

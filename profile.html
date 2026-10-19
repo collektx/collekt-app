@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=183.0">
-<link rel="stylesheet" href="shared.css?v=183.0">
-<link rel="stylesheet" href="glass.css?v=183.0">
+<link rel="stylesheet" href="style.css?v=184.0">
+<link rel="stylesheet" href="shared.css?v=184.0">
+<link rel="stylesheet" href="glass.css?v=184.0">
 
 <style>
   body { background: var(--paper); }
@@ -184,15 +184,15 @@
           <div class="ps-stat"><div class="val" id="statProjectsDone">0</div><div class="lbl">Projects Done</div></div>
           <div class="ps-stat"><div class="val" id="statTotalEarned">&#x20A6;0</div><div class="lbl">Total Earned</div></div>
           <div class="ps-stat"><div class="val" id="statSuccessRate">0%</div><div class="lbl">Success Rate</div></div>
-          <div class="ps-stat"><div class="val" id="statRating" style="color:var(--amber); font-weight:900;">★ 0.0</div><div class="lbl" id="statRatingCount">Rating (0 reviews)</div></div>
+          <div class="ps-stat"><div class="val" id="statRating" style="color:var(--amber); font-weight:900;">0.0</div><div class="lbl" id="statRatingCount">Rating (0 reviews)</div></div>
         </div>
 
         <div class="profile-tabs-bar" role="tablist" aria-label="Profile sections">
-          <div class="profile-tab active" role="tab" id="tab-btn-overview" aria-controls="tab-overview" aria-selected="true" tabindex="0" onclick="switchTab('overview', this)">👤 Overview</div>
-          <div class="profile-tab" role="tab" id="tab-btn-portfolio" aria-controls="tab-portfolio" aria-selected="false" tabindex="-1" onclick="switchTab('portfolio', this)">💼 Portfolio</div>
-          <div class="profile-tab" role="tab" id="tab-btn-reviews" aria-controls="tab-reviews" aria-selected="false" tabindex="-1" onclick="switchTab('reviews', this)">⭐ Reviews</div>
-          <div class="profile-tab" role="tab" id="tab-btn-certifications" aria-controls="tab-certifications" aria-selected="false" tabindex="-1" onclick="switchTab('certifications', this)">🎓 Certifications</div>
-          <div class="profile-tab" role="tab" id="tab-btn-identity" aria-controls="tab-identity" aria-selected="false" tabindex="-1" onclick="switchTab('identity', this)">🛡️ Identity</div>
+          <div class="profile-tab active" role="tab" id="tab-btn-overview" aria-controls="tab-overview" aria-selected="true" tabindex="0" onclick="switchTab('overview', this)">Overview</div>
+          <div class="profile-tab" role="tab" id="tab-btn-portfolio" aria-controls="tab-portfolio" aria-selected="false" tabindex="-1" onclick="switchTab('portfolio', this)">Portfolio</div>
+          <div class="profile-tab" role="tab" id="tab-btn-reviews" aria-controls="tab-reviews" aria-selected="false" tabindex="-1" onclick="switchTab('reviews', this)">Reviews</div>
+          <div class="profile-tab" role="tab" id="tab-btn-certifications" aria-controls="tab-certifications" aria-selected="false" tabindex="-1" onclick="switchTab('certifications', this)">Certifications</div>
+          <div class="profile-tab" role="tab" id="tab-btn-identity" aria-controls="tab-identity" aria-selected="false" tabindex="-1" onclick="switchTab('identity', this)">Identity</div>
         </div>
       </div>
 
@@ -217,14 +217,14 @@
 
             <!-- Popular Quick-Add Suggestions -->
             <div style="margin-top:12px;">
-              <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;">💡 Suggested for you (1-Click Add):</div>
+              <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;">Suggested for you (1-Click Add):</div>
               <div class="quick-skills-container">
-                <span class="quick-skill-chip" onclick="quickAddSkill('Critical Thinking & Problem Solving')">+ 🧠 Critical Thinking</span>
-                <span class="quick-skill-chip" onclick="quickAddSkill('Commercial Negotiation & Deal Structuring')">+ 🤝 Negotiation</span>
-                <span class="quick-skill-chip" onclick="quickAddSkill('Cross-Functional Team Leadership')">+ 👥 Leadership</span>
-                <span class="quick-skill-chip" onclick="quickAddSkill('Commercial Solar PV Design & Installation')">+ ☀️ Solar PV</span>
-                <span class="quick-skill-chip" onclick="quickAddSkill('Pipeline Integrity & Maintenance')">+ 🛢️ Pipeline Integrity</span>
-                <span class="quick-skill-chip" onclick="quickAddSkill('BOQ (Bill of Quantities) & Cost Estimation')">+ 📊 BOQ Estimation</span>
+                <span class="quick-skill-chip" onclick="quickAddSkill('Critical Thinking & Problem Solving')">+ Critical Thinking</span>
+                <span class="quick-skill-chip" onclick="quickAddSkill('Commercial Negotiation & Deal Structuring')">+ Negotiation</span>
+                <span class="quick-skill-chip" onclick="quickAddSkill('Cross-Functional Team Leadership')">+ Leadership</span>
+                <span class="quick-skill-chip" onclick="quickAddSkill('Commercial Solar PV Design & Installation')">+ Solar PV</span>
+                <span class="quick-skill-chip" onclick="quickAddSkill('Pipeline Integrity & Maintenance')">+ Pipeline Integrity</span>
+                <span class="quick-skill-chip" onclick="quickAddSkill('BOQ (Bill of Quantities) & Cost Estimation')">+ BOQ Estimation</span>
                 <span class="quick-skill-chip" onclick="openSkillPickerModal()" style="background:var(--teal-lt); border-color:var(--teal); font-weight:800;">+ Browse All (50+) &rarr;</span>
               </div>
             </div>
@@ -275,7 +275,7 @@
         <div class="content-section">
           <div class="section-title-sm">Client Reviews</div>
           <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 24px; text-align:center; background:var(--paper); border-radius:var(--r); border:1px dashed var(--line);">
-            <div style="font-size:32px; margin-bottom:12px;">⭐</div>
+            
             <div style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Reviews Yet</div>
             <p style="font-size:14px; color:var(--muted); max-width:400px; line-height:1.6;">Client ratings and feedback will appear here after you win proposals and complete contracts on Collekt.</p>
           </div>
@@ -286,7 +286,7 @@
         <div class="content-section">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
             <div class="section-title-sm" style="margin-bottom:0;">Certifications & Qualifications</div>
-            <button class="btn btn-primary btn-sm" onclick="openModal('addQualModal')">🎓 + Add Degree / Qualification</button>
+            <button class="btn btn-primary btn-sm" onclick="openModal('addQualModal')">+ Add Degree / Qualification</button>
           </div>
           <div style="display:flex; flex-direction:column; gap:12px;">
             <!-- Uploaded certifications & listed qualifications -->
@@ -294,15 +294,15 @@
             <!-- Upload buttons -->
             <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-top:4px;">
               <div style="border:2px dashed var(--line); border-radius:var(--r); padding:16px; text-align:center; cursor:pointer; transition:all .2s;" onclick="openModal('addQualModal')" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--line)'">
-                <div style="font-size:22px; margin-bottom:4px;">🎓</div>
+                
                 <span style="font-size:12px; color:var(--muted); font-weight:700;">Add Degree</span>
               </div>
               <div style="border:2px dashed var(--line); border-radius:var(--r); padding:16px; text-align:center; cursor:pointer; transition:all .2s;" onclick="openUploadModal('cv', onCvUploaded)" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--line)'">
-                <div style="font-size:22px; margin-bottom:4px;">📄</div>
+                
                 <span style="font-size:12px; color:var(--muted); font-weight:700;">Upload CV</span>
               </div>
               <div style="border:2px dashed var(--line); border-radius:var(--r); padding:16px; text-align:center; cursor:pointer; transition:all .2s;" onclick="openUploadModal('certifications', onCertUploaded)" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--line)'">
-                <div style="font-size:22px; margin-bottom:4px;">🏅</div>
+                
                 <span style="font-size:12px; color:var(--muted); font-weight:700;">Upload Certificate</span>
               </div>
             </div>
@@ -316,7 +316,7 @@
           <!-- Header Status Banner -->
           <div id="identityBannerWrap" style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:16px;">
-              <div id="identityIconBox" style="width:48px; height:48px; border-radius:12px; background:#f1f5f9; display:grid; place-items:center; font-size:24px; flex-shrink:0;">🛡️</div>
+              <div id="identityIconBox" style="width:48px; height:48px; border-radius:12px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
               <div>
                 <div style="font-size:16px; font-weight:900; color:var(--ink);" id="identityStatusTitle">Identity Verification Pending</div>
                 <div style="font-size:13px; color:var(--muted); margin-top:2px;" id="identityStatusSub">Submit all required verification documents to open the 2 – 24 hours verification window.</div>
@@ -336,7 +336,7 @@
               <!-- 1. NIN Section -->
               <div style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:20px;">
                 <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-                  <span>🆔</span> National Identification Number (NIN)
+                  National Identification Number (NIN)
                 </div>
                 <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Enter your 11-digit NIN issued by NIMC for identity verification.</p>
                 
@@ -348,7 +348,7 @@
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload NIN Slip / Digital ID Card Scan</label>
                   <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white); transition:all 0.2s;" data-upload-type="nin-doc" onclick="openUploadModal('nin-doc', onNinUploaded)">
-                    <div style="font-size:22px; margin-bottom:2px;" id="ninFileIcon">📄</div>
+                    <div style="font-size:12px; font-weight:800; color:var(--teal); margin-bottom:2px;" id="ninFileIcon">NIN</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="ninFileName">Upload NIN Document (PDF, JPG, PNG)</div>
                     <div style="font-size:10px; color:var(--muted); margin-top:3px; font-weight:600;">Click, Drag &amp; Drop, or Paste (Ctrl+V)</div>
                   </div>
@@ -359,7 +359,7 @@
               <!-- 2. Facial Recognition & Liveness Selfie -->
               <div style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:20px;">
                 <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-                  <span>📸</span> Facial Recognition &amp; Biometric Scan
+                  Facial Recognition &amp; Biometric Scan
                 </div>
                 <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Align your face within the frame and capture a live selfie for AI facial match.</p>
 
@@ -375,18 +375,18 @@
 
                   <!-- Captured Photo Success Badge -->
                   <div id="facialCapturedBadge" style="position:absolute; top:12px; right:12px; background:rgba(22,163,74,0.9); color:#fff; padding:4px 12px; border-radius:99px; font-size:11px; font-weight:800; display:none; align-items:center; gap:4px; backdrop-filter:blur(4px); box-shadow:0 2px 8px rgba(0,0,0,0.3);">
-                    <span>✅ Biometric Match Captured</span>
+                    <span>Biometric Match Captured</span>
                   </div>
 
                   <div id="facialPlaceholder" style="text-align:center; color:rgba(255,255,255,0.7); padding:20px; z-index:2;">
-                    <div style="font-size:36px; margin-bottom:6px;">👤</div>
+                    
                     <div style="font-size:12px; font-weight:700;">Camera Idle</div>
                   </div>
                 </div>
 
                 <div style="display:flex; gap:10px; margin-top:12px;">
-                  <button class="btn btn-outline btn-sm" id="btnStartCamera" onclick="startFacialCamera()" style="flex:1;">📹 Open Camera</button>
-                  <button class="btn btn-primary btn-sm" id="btnCaptureFace" onclick="captureFacialSnapshot()" style="flex:1; background:var(--teal);" disabled>📸 Capture Snapshot</button>
+                  <button class="btn btn-outline btn-sm" id="btnStartCamera" onclick="startFacialCamera()" style="flex:1;">Open Camera</button>
+                  <button class="btn btn-primary btn-sm" id="btnCaptureFace" onclick="captureFacialSnapshot()" style="flex:1; background:var(--teal);" disabled>Capture Snapshot</button>
                 </div>
                 <div id="facialDocAccessWrap" style="margin-top:10px; display:none;"></div>
               </div>
@@ -397,7 +397,7 @@
               <!-- 3. Other Official Government ID -->
               <div style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:20px;">
                 <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-                  <span>🪪</span> Other Official Government ID
+                  Other Official Government ID
                 </div>
                 <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Select your secondary valid government ID type and upload clear front/back scans.</p>
 
@@ -418,7 +418,7 @@
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload Government ID Document</label>
                   <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white); transition:all 0.2s;" data-upload-type="gov-id-doc" onclick="openUploadModal('gov-id-doc', onGovIdUploaded)">
-                    <div style="font-size:22px; margin-bottom:2px;" id="govIdFileIcon">💳</div>
+                    <div style="font-size:12px; font-weight:800; color:var(--teal); margin-bottom:2px;" id="govIdFileIcon">ID</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="govIdFileName">Upload ID Scan (PDF, JPG, PNG)</div>
                     <div style="font-size:10px; color:var(--muted); margin-top:3px; font-weight:600;">Click, Drag &amp; Drop, or Paste (Ctrl+V)</div>
                   </div>
@@ -429,7 +429,7 @@
               <!-- 4. Proof of Address -->
               <div style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:20px;">
                 <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-                  <span>🏠</span> Proof of Residential Address
+                  Proof of Residential Address
                 </div>
                 <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Upload a recent utility bill or bank statement showing your residential address.</p>
 
@@ -446,7 +446,7 @@
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload Address Document</label>
                   <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white); transition:all 0.2s;" data-upload-type="address-doc" onclick="openUploadModal('address-doc', onAddressDocUploaded)">
-                    <div style="font-size:22px; margin-bottom:2px;" id="addressFileIcon">🧾</div>
+                    <div style="font-size:12px; font-weight:800; color:var(--teal); margin-bottom:2px;" id="addressFileIcon">BILL</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="addressFileName">Upload Utility Bill / Statement</div>
                     <div style="font-size:10px; color:var(--muted); margin-top:3px; font-weight:600;">Click, Drag &amp; Drop, or Paste (Ctrl+V)</div>
                   </div>
@@ -459,7 +459,7 @@
                 <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;" id="submitVerifyBoxTitle">Submit All Verification Documents</h4>
                 <p style="font-size:12px; opacity:0.88; margin-bottom:16px; line-height:1.55;" id="submitVerifyBoxDesc">When all verification documents (NIN Slip, Government ID, Proof of Address, and Facial Biometrics) are submitted, a <strong>2 – 24 hours verification window</strong> opens before your professional account can be verified.</p>
                 <button class="btn btn-primary" id="btnSubmitIdentityVerify" onclick="submitIdentityVerification()" style="width:100%; min-height:44px; font-weight:900; background:var(--amber); color:#fff; border:none; box-shadow:0 6px 20px rgba(212,146,11,0.3);">
-                  🛡️ Submit Documents &amp; Open 2 – 24h Verification Window
+                  Submit Documents &amp; Open 2 – 24h Verification Window
                 </button>
               </div>
             </div>
@@ -469,7 +469,7 @@
           <div style="margin-top:24px; background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
               <div>
-                <div style="font-size:15px; font-weight:900; color:var(--ink);">📂 My Uploaded Documents</div>
+                <div style="font-size:15px; font-weight:900; color:var(--ink);">My Uploaded Documents</div>
                 <div style="font-size:12px; color:var(--muted); margin-top:2px;">Access, preview, open in a new tab, or download any document you have uploaded to your account.</div>
               </div>
             </div>
@@ -535,16 +535,16 @@
       <div class="form-group">
         <label class="form-label">Country</label>
         <select class="form-input" id="editCountry" onchange="onCountryChange(this.value)">
-          <option value="Nigeria" selected>Nigeria 🇳🇬</option>
-          <option value="Ghana">Ghana 🇬🇭</option>
-          <option value="United Kingdom">United Kingdom 🇬🇧</option>
-          <option value="United States">United States 🇺🇸</option>
-          <option value="Canada">Canada 🇨🇦</option>
-          <option value="United Arab Emirates">United Arab Emirates 🇦🇪</option>
-          <option value="South Africa">South Africa 🇿🇦</option>
-          <option value="Kenya">Kenya 🇰🇪</option>
-          <option value="Germany">Germany 🇩🇪</option>
-          <option value="Netherlands">Netherlands 🇳🇱</option>
+          <option value="Nigeria" selected>Nigeria</option>
+          <option value="Ghana">Ghana</option>
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="United States">United States</option>
+          <option value="Canada">Canada</option>
+          <option value="United Arab Emirates">United Arab Emirates</option>
+          <option value="South Africa">South Africa</option>
+          <option value="Kenya">Kenya</option>
+          <option value="Germany">Germany</option>
+          <option value="Netherlands">Netherlands</option>
           <option value="Other">Other Country</option>
         </select>
       </div>
@@ -649,7 +649,7 @@
           <div style="font-size:11.5px; color:var(--muted);">Select from 50+ oil &amp; gas, renewables, EPC, and soft skill disciplines.</div>
         </div>
         <button type="button" class="btn btn-outline btn-sm" onclick="openSkillPickerModal()" style="font-weight:800; font-size:11.5px; padding:6px 14px; white-space:nowrap; display:inline-flex; align-items:center; gap:6px;">
-          📋 Select Skills
+          Select Skills
         </button>
       </div>
     </div>
@@ -683,7 +683,7 @@
       <select class="form-input" id="qualIssuer" onchange="handleIssuerChange(this)">
         <option value="">Select Awarding Institution</option>
         
-        <optgroup label="🏛️ Federal Universities (Nigeria)">
+        <optgroup label="Federal Universities (Nigeria)">
           <option value="University of Lagos (UNILAG)">University of Lagos (UNILAG)</option>
           <option value="University of Ibadan (UI)">University of Ibadan (UI)</option>
           <option value="Obafemi Awolowo University (OAU), Ile-Ife">Obafemi Awolowo University (OAU), Ile-Ife</option>
@@ -726,7 +726,7 @@
           <option value="National Open University of Nigeria (NOUN)">National Open University of Nigeria (NOUN)</option>
         </optgroup>
 
-        <optgroup label="🏢 State Universities (Nigeria)">
+        <optgroup label="State Universities (Nigeria)">
           <option value="Lagos State University (LASU), Ojo">Lagos State University (LASU), Ojo</option>
           <option value="Lagos State University of Science and Technology (LASUSTECH)">Lagos State University of Science and Technology (LASUSTECH)</option>
           <option value="Lagos State University of Education (LASUED)">Lagos State University of Education (LASUED)</option>
@@ -776,7 +776,7 @@
           <option value="Borno State University, Maiduguri (BOSU)">Borno State University, Maiduguri (BOSU)</option>
         </optgroup>
 
-        <optgroup label="🎓 Private Universities (Nigeria)">
+        <optgroup label="Private Universities (Nigeria)">
           <option value="Covenant University, Ota">Covenant University, Ota</option>
           <option value="Babcock University, Ilishan-Remo">Babcock University, Ilishan-Remo</option>
           <option value="Afe Babalola University (ABUAD), Ado-Ekiti">Afe Babalola University (ABUAD), Ado-Ekiti</option>
@@ -826,7 +826,7 @@
           <option value="Western Delta University, Oghara">Western Delta University, Oghara</option>
         </optgroup>
 
-        <optgroup label="⚙️ Polytechnics & Colleges of Technology (Nigeria)">
+        <optgroup label="Polytechnics & Colleges of Technology (Nigeria)">
           <option value="Yaba College of Technology (YABATECH), Lagos">Yaba College of Technology (YABATECH), Lagos</option>
           <option value="The Polytechnic, Ibadan">The Polytechnic, Ibadan</option>
           <option value="Federal Polytechnic, Ilaro">Federal Polytechnic, Ilaro</option>
@@ -864,7 +864,7 @@
           <option value="Maritime Academy of Nigeria (MAN), Oron">Maritime Academy of Nigeria (MAN), Oron</option>
         </optgroup>
 
-        <optgroup label="🎖️ Professional Bodies & Certification Institutes">
+        <optgroup label="Professional Bodies & Certification Institutes">
           <option value="Council for the Regulation of Engineering in Nigeria (COREN)">Council for the Regulation of Engineering in Nigeria (COREN)</option>
           <option value="Nigerian Society of Engineers (NSE)">Nigerian Society of Engineers (NSE)</option>
           <option value="Institute of Chartered Accountants of Nigeria (ICAN)">Institute of Chartered Accountants of Nigeria (ICAN)</option>
@@ -885,7 +885,7 @@
           <option value="Health, Safety and Environment (HSE / NEBOSH / IOSH)">Health, Safety and Environment (HSE / NEBOSH / IOSH)</option>
         </optgroup>
 
-        <optgroup label="🌍 Other / International Bodies">
+        <optgroup label="Other / International Bodies">
           <option value="OTHER_CUSTOM">Other Institution / Foreign Body (Specify Below)</option>
         </optgroup>
       </select>
@@ -986,12 +986,12 @@
            ondrop="event.preventDefault(); event.stopPropagation(); if(event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) window.handleQualDirectFile(event.dataTransfer.files[0]);"
            onmouseover="this.style.borderColor='var(--teal)'"
            onmouseout="if(!selectedQualFileName)this.style.borderColor='var(--line)'">
-        <div style="font-size:26px; margin-bottom:4px;" id="qualFileIcon">📁</div>
+        
         <div style="font-size:13px; font-weight:800; color:var(--ink);" id="qualFileName">Click, Drag &amp; Drop, or Paste Certificate File</div>
         <div style="font-size:11px; color:var(--muted); margin-top:2px;" id="qualFileSize">Supported formats: PDF, JPG, PNG, DOC (Max 50MB) &bull; Or press Ctrl+V</div>
         <div style="margin-top:10px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
           <button type="button" class="btn btn-outline btn-sm" style="padding:5px 12px; font-size:11px; font-weight:800;">Choose File</button>
-          <button type="button" id="qualPasteBtn" class="btn btn-outline btn-sm" style="padding:5px 12px; font-size:11px; font-weight:800;" onclick="event.stopPropagation(); window.pasteQualFileFromClipboard()">📋 Paste from Clipboard</button>
+          <button type="button" id="qualPasteBtn" class="btn btn-outline btn-sm" style="padding:5px 12px; font-size:11px; font-weight:800;" onclick="event.stopPropagation(); window.pasteQualFileFromClipboard()">Paste from Clipboard</button>
         </div>
       </div>
     </div>
@@ -1037,7 +1037,7 @@
       
       <!-- Drag hint overlay -->
       <div id="coverDragHint" style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.72); color:#fff; font-size:10px; font-weight:800; padding:3px 12px; border-radius:99px; pointer-events:none; backdrop-filter:blur(4px); display:flex; align-items:center; gap:5px;">
-        <span>✋</span> Drag to adjust position &amp; crop
+        Drag to adjust position &amp; crop
       </div>
     </div>
 
@@ -1045,10 +1045,10 @@
     <div style="width:100%; margin-bottom:12px; display:flex; flex-direction:column; gap:10px; background:var(--paper); padding:10px 14px; border-radius:12px; border:1px solid var(--line);">
       <div style="display:flex; align-items:center; gap:8px;">
         <span style="font-size:11px; font-weight:800; color:var(--ink); min-width:42px;">Zoom:</span>
-        <button class="btn btn-xs btn-outline" onclick="changeCoverZoom(-0.15)" style="padding:2px 8px; font-size:11px; font-weight:800;">🔍 -</button>
+        <button class="btn btn-xs btn-outline" onclick="changeCoverZoom(-0.15)" style="padding:2px 8px; font-size:11px; font-weight:800;">-</button>
         <input type="range" id="coverZoomRange" min="1" max="3.5" step="0.05" value="1" style="flex:1; accent-color:var(--teal); cursor:pointer; height:4px;" oninput="onCoverZoomInput(this.value)">
-        <button class="btn btn-xs btn-outline" onclick="changeCoverZoom(0.15)" style="padding:2px 8px; font-size:11px; font-weight:800;">🔍 +</button>
-        <button class="btn btn-xs btn-outline" onclick="rotateCoverImage()" title="Rotate 90 degrees" style="padding:2px 8px; font-size:11px; font-weight:800;">🔄 90°</button>
+        <button class="btn btn-xs btn-outline" onclick="changeCoverZoom(0.15)" style="padding:2px 8px; font-size:11px; font-weight:800;">+</button>
+        <button class="btn btn-xs btn-outline" onclick="rotateCoverImage()" title="Rotate 90 degrees" style="padding:2px 8px; font-size:11px; font-weight:800;">Rotate 90°</button>
       </div>
 
       <!-- Color Filters -->
@@ -1056,11 +1056,11 @@
         <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px;">Banner Color Filters</div>
         <div style="display:flex; flex-wrap:wrap; gap:6px; padding-bottom:2px;" id="coverFilterChips">
           <button class="filter-chip active" onclick="setCoverFilter('none', this)" style="padding:3px 10px; font-size:11px;">Original</button>
-          <button class="filter-chip" onclick="setCoverFilter('warm', this)" style="padding:3px 10px; font-size:11px;">🌅 Warm Sunset</button>
-          <button class="filter-chip" onclick="setCoverFilter('cool', this)" style="padding:3px 10px; font-size:11px;">🧊 Cool Emerald</button>
-          <button class="filter-chip" onclick="setCoverFilter('bw', this)" style="padding:3px 10px; font-size:11px;">📷 B&amp;W Studio</button>
-          <button class="filter-chip" onclick="setCoverFilter('vintage', this)" style="padding:3px 10px; font-size:11px;">📻 Vintage</button>
-          <button class="filter-chip" onclick="setCoverFilter('contrast', this)" style="padding:3px 10px; font-size:11px;">⚡ Crisp</button>
+          <button class="filter-chip" onclick="setCoverFilter('warm', this)" style="padding:3px 10px; font-size:11px;">Warm Sunset</button>
+          <button class="filter-chip" onclick="setCoverFilter('cool', this)" style="padding:3px 10px; font-size:11px;">Cool Emerald</button>
+          <button class="filter-chip" onclick="setCoverFilter('bw', this)" style="padding:3px 10px; font-size:11px;">B&amp;W Studio</button>
+          <button class="filter-chip" onclick="setCoverFilter('vintage', this)" style="padding:3px 10px; font-size:11px;">Vintage</button>
+          <button class="filter-chip" onclick="setCoverFilter('contrast', this)" style="padding:3px 10px; font-size:11px;">Crisp</button>
         </div>
       </div>
     </div>
@@ -1069,13 +1069,13 @@
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
       <div>
         <button onclick="document.getElementById('coverFileInput').click()" class="btn btn-outline" style="width:100%; font-size:12px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px;">
-          📁 Choose Custom Image
+          Choose Custom Image
         </button>
         <input type="file" id="coverFileInput" accept="image/*" style="display:none;" onchange="handleCoverFileSelect(this)">
       </div>
       <div>
         <button onclick="togglePresetCoverPicker()" class="btn btn-outline" style="width:100%; font-size:12px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px;">
-          🏙️ HD Energy Presets
+          HD Energy Presets
         </button>
       </div>
     </div>
@@ -1087,7 +1087,7 @@
     </div>
 
     <div style="display:flex; gap:8px; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:12px; margin-top:4px;">
-      <button class="btn btn-outline btn-xs" onclick="removeCoverPhoto()" style="color:#ef4444; border-color:rgba(239,68,68,0.3); font-weight:700;">🗑️ Reset</button>
+      <button class="btn btn-outline btn-xs" onclick="removeCoverPhoto()" style="color:#ef4444; border-color:rgba(239,68,68,0.3); font-weight:700;">Reset</button>
       <div style="display:flex; gap:8px;">
         <button class="btn btn-outline btn-xs" onclick="closeModal('coverPhotoStudioModal')" style="font-weight:700; padding:6px 14px;">Cancel</button>
         <button class="btn btn-primary btn-xs" onclick="saveCoverPhotoFromStudio()" style="font-weight:800; background:var(--teal); padding:6px 18px;">Save Cover Photo</button>
@@ -1097,9 +1097,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=183.0"></script>
-<script src="app.js?v=183.0"></script>
-<script src="collekt-ai.js?v=183.0"></script>
+<script src="supabase.js?v=184.0"></script>
+<script src="app.js?v=184.0"></script>
+<script src="collekt-ai.js?v=184.0"></script>
 <script>
   requireAuth();
 
@@ -1262,14 +1262,14 @@
     wrap.innerHTML = `
       <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 12px; background:rgba(19,117,111,0.08); border:1px solid rgba(19,117,111,0.3); border-radius:10px;">
         <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
-          <span style="font-size:16px;">📄</span>
+          
           <div style="min-width:0; flex:1;">
             <div style="font-size:12px; font-weight:800; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${safeName}">${safeName}</div>
             <div style="font-size:11px; color:var(--teal); font-weight:700;">Uploaded &amp; Accessible</div>
           </div>
         </div>
         <div style="display:flex; gap:6px; flex-shrink:0;">
-          <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800; border-color:var(--teal); color:var(--teal);" onclick="openDocumentViewer(window.identityDocsRegistry['${containerId}'])">👁️ View</button>
+          <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800; border-color:var(--teal); color:var(--teal);" onclick="openDocumentViewer(window.identityDocsRegistry['${containerId}'])">View</button>
           <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800;" onclick="if(typeof openDocumentInNewTab==='function'){window.currentViewingDoc=window.identityDocsRegistry['${containerId}'];openDocumentInNewTab();}else{openDocumentViewer(window.identityDocsRegistry['${containerId}']);}">↗ Open</button>
           <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800;" onclick="window.currentViewingDoc=window.identityDocsRegistry['${containerId}']; downloadWatermarkedDocument();">⬇ Download</button>
         </div>
@@ -1346,7 +1346,7 @@
       return `
         <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 16px; background:var(--white); border:1px solid var(--line); border-radius:12px;">
           <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
-            <div style="font-size:22px; flex-shrink:0;">📄</div>
+            
             <div style="min-width:0; flex:1;">
               <div style="font-size:13px; font-weight:800; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${safeName}</div>
               <div style="font-size:11px; color:var(--muted); margin-top:2px;">
@@ -1356,7 +1356,7 @@
             </div>
           </div>
           <div style="display:flex; gap:8px; flex-shrink:0;">
-            <button type="button" class="btn btn-outline btn-sm" style="padding:6px 12px; font-size:12px; font-weight:800; border-color:var(--teal); color:var(--teal);" onclick="openDocumentViewer(window.vaultDocsRegistry[${idx}])">👁️ View Document</button>
+            <button type="button" class="btn btn-outline btn-sm" style="padding:6px 12px; font-size:12px; font-weight:800; border-color:var(--teal); color:var(--teal);" onclick="openDocumentViewer(window.vaultDocsRegistry[${idx}])">View Document</button>
             <button type="button" class="btn btn-outline btn-sm" style="padding:6px 12px; font-size:12px; font-weight:700;" onclick="window.currentViewingDoc=window.vaultDocsRegistry[${idx}]; openDocumentInNewTab();">↗ Open in Tab</button>
             <button type="button" class="btn btn-outline btn-sm" style="padding:6px 12px; font-size:12px; font-weight:700;" onclick="window.currentViewingDoc=window.vaultDocsRegistry[${idx}]; downloadWatermarkedDocument();">⬇ Download</button>
           </div>
@@ -1426,8 +1426,8 @@
       uploadedNinFileData = ninDoc;
       const fname = document.getElementById('ninFileName');
       const icon = document.getElementById('ninFileIcon');
-      if (fname) fname.textContent = '✅ ' + (ninDoc.name || 'NIN Slip Uploaded');
-      if (icon) icon.textContent = '✅';
+      if (fname) fname.textContent = (ninDoc.name || 'NIN Slip Uploaded');
+      if (icon) icon.textContent = 'Uploaded';
       _renderDocAccessBar('ninDocAccessWrap', ninDoc, 'NIN Slip');
     }
 
@@ -1436,8 +1436,8 @@
       uploadedGovIdFileData = govDoc;
       const fname = document.getElementById('govIdFileName');
       const icon = document.getElementById('govIdFileIcon');
-      if (fname) fname.textContent = '✅ ' + (govDoc.name || 'Government ID Uploaded');
-      if (icon) icon.textContent = '✅';
+      if (fname) fname.textContent = (govDoc.name || 'Government ID Uploaded');
+      if (icon) icon.textContent = 'Uploaded';
       _renderDocAccessBar('govIdDocAccessWrap', govDoc, 'Government ID');
     }
 
@@ -1446,8 +1446,8 @@
       uploadedAddressFileData = addrDoc;
       const fname = document.getElementById('addressFileName');
       const icon = document.getElementById('addressFileIcon');
-      if (fname) fname.textContent = '✅ ' + (addrDoc.name || 'Proof of Address Uploaded');
-      if (icon) icon.textContent = '✅';
+      if (fname) fname.textContent = (addrDoc.name || 'Proof of Address Uploaded');
+      if (icon) icon.textContent = 'Uploaded';
       _renderDocAccessBar('addressDocAccessWrap', addrDoc, 'Proof of Address');
     }
 
@@ -1503,7 +1503,7 @@
         winBox.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
             <div>
-              <div style="font-size:14px; font-weight:900; color:var(--ink);">⏳ 2 – 24 Hours Verification Window Open</div>
+              <div style="font-size:14px; font-weight:900; color:var(--ink);">2 – 24 Hours Verification Window Open</div>
               <div style="font-size:12px; color:var(--muted); margin-top:2px;">All verification documents have been submitted. A mandatory <strong>2 to 24 hours window</strong> is open before your professional account can be verified.</div>
             </div>
             <span style="padding:4px 10px; border-radius:99px; background:rgba(20,184,166,0.16); color:var(--teal); font-size:11px; font-weight:800;">Window: 2h – 24h</span>
@@ -1529,60 +1529,60 @@
 
     if (isVerified) {
       if (is100) {
-        if (titleEl) titleEl.textContent = '✅ Identity Verified & Verified Shield Badge Active';
+        if (titleEl) titleEl.textContent = 'Identity Verified & Verified Shield Badge Active';
         if (subEl) subEl.textContent = 'Your National ID, Facial Biometrics, and Address documents have been verified. Your 100% complete profile now displays the green verified badge.';
         if (badgeEl) {
           badgeEl.style.background = '#dcfce7';
           badgeEl.style.color = '#15803d';
-          badgeEl.innerHTML = '✅ Identity Verified';
+          badgeEl.innerHTML = 'Identity Verified';
         }
         if (iconBox) {
           iconBox.style.background = '#dcfce7';
-          iconBox.textContent = '🛡️';
+          iconBox.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>';
         }
         if (bannerWrap) bannerWrap.style.borderColor = '#16a34a';
       } else {
-        if (titleEl) titleEl.textContent = '✅ Identity Documents Verified';
+        if (titleEl) titleEl.textContent = 'Identity Documents Verified';
         if (subEl) subEl.textContent = `Your ID documents are verified. Complete the remaining steps in Profile Strength (${profStrength ? profStrength.percent : 0}%) to activate your public verified shield badge.`;
         if (badgeEl) {
           badgeEl.style.background = 'rgba(212,146,11,0.15)';
           badgeEl.style.color = 'var(--amber)';
-          badgeEl.innerHTML = `⚠️ Profile Setup ${profStrength ? profStrength.percent : 0}% / 100%`;
+          badgeEl.innerHTML = `Profile Setup ${profStrength ? profStrength.percent : 0}% / 100%`;
         }
         if (iconBox) {
           iconBox.style.background = 'rgba(212,146,11,0.15)';
-          iconBox.textContent = '📋';
+          iconBox.textContent = '';
         }
         if (bannerWrap) bannerWrap.style.borderColor = 'var(--amber)';
       }
     } else if (isUnderReview) {
-      if (titleEl) titleEl.textContent = '⏳ 2 – 24 Hours Verification Window Open';
+      if (titleEl) titleEl.textContent = '2 – 24 Hours Verification Window Open';
       if (subEl) subEl.textContent = 'All required verification documents have been submitted. Your account is now in the 2 – 24 hours verification window before verification takes effect.';
       if (badgeEl) {
         badgeEl.style.background = '#e0f2fe';
         badgeEl.style.color = '#0369a1';
-        badgeEl.innerHTML = '⏳ 2 – 24h Verification Window';
+        badgeEl.innerHTML = '2 – 24h Verification Window';
       }
       if (iconBox) {
         iconBox.style.background = '#e0f2fe';
-        iconBox.textContent = '⏳';
+        iconBox.textContent = '';
       }
       if (bannerWrap) bannerWrap.style.borderColor = '#0284c7';
     } else if (isRejected) {
-      if (titleEl) titleEl.textContent = '❌ Identity Verification Not Approved';
+      if (titleEl) titleEl.textContent = 'Identity Verification Not Approved';
       if (subEl) subEl.textContent = 'Your verification submission could not be approved. Please check your documents and resubmit.';
       if (badgeEl) {
         badgeEl.style.background = '#fee2e2';
         badgeEl.style.color = '#991b1b';
-        badgeEl.innerHTML = '❌ Action Required';
+        badgeEl.innerHTML = 'Action Required';
       }
       if (iconBox) {
         iconBox.style.background = '#fee2e2';
-        iconBox.textContent = '❌';
+        iconBox.textContent = '';
       }
       if (bannerWrap) bannerWrap.style.borderColor = '#ef4444';
     } else {
-      if (titleEl) titleEl.textContent = '🛡️ Identity Verification Pending';
+      if (titleEl) titleEl.textContent = 'Identity Verification Pending';
       if (subEl) subEl.textContent = 'Submit your NIN Slip, Government ID, Proof of Address, and Facial Biometrics to open the 2 – 24 hours verification window.';
       if (badgeEl) {
         badgeEl.style.background = '#fef3c7';
@@ -1591,7 +1591,7 @@
       }
       if (iconBox) {
         iconBox.style.background = '#f1f5f9';
-        iconBox.textContent = '🛡️';
+        iconBox.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>';
       }
       if (bannerWrap) bannerWrap.style.borderColor = 'var(--line)';
     }
@@ -1615,7 +1615,7 @@
     const badge = document.getElementById('facialCapturedBadge');
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      showToast('⚠️ Camera access not supported in this browser.', 'warning');
+      showToast('Camera access not supported in this browser.', 'warning');
       return;
     }
 
@@ -1629,12 +1629,12 @@
       if (capturedImg) capturedImg.style.display = 'none';
       if (overlay) overlay.style.display = 'flex';
       if (badge) badge.style.display = 'none';
-      if (btnStart) btnStart.textContent = '🔄 Retake Camera';
+      if (btnStart) btnStart.textContent = 'Retake Camera';
       if (btnCap) btnCap.removeAttribute('disabled');
-      showToast('📹 Camera active. Align your face in the oval frame.');
+      showToast('Camera active. Align your face in the oval frame.');
     } catch(err) {
       console.warn('Camera stream notice:', err);
-      showToast('⚠️ Unable to access camera. Please allow camera permissions.', 'warning');
+      showToast('Unable to access camera. Please allow camera permissions.', 'warning');
     }
   }
 
@@ -1675,7 +1675,7 @@
     }
 
     const btnStart = document.getElementById('btnStartCamera');
-    if (btnStart) btnStart.textContent = '🔄 Retake Snapshot';
+    if (btnStart) btnStart.textContent = 'Retake Snapshot';
 
     const facialDocObj = {
       name: 'Facial_Biometric_Selfie.jpg',
@@ -1696,7 +1696,7 @@
     renderIdentityStatus();
     renderProfileStrength();
 
-    showToast('📸 Clear facial biometric snapshot captured & saved!');
+    showToast('Clear facial biometric snapshot captured & saved!');
   }
 
   window.onNinUploaded = function(fileData) {
@@ -1711,9 +1711,9 @@
     if (ninInput) user.nin = ninInput;
     setUser(user);
     if (_checkAndAutoOpenVerificationWindow(user)) {
-      showToast('⏳ All verification documents received! 2 – 24 hours verification window is now open.');
+      showToast('All verification documents received! 2 – 24 hours verification window is now open.');
     } else {
-      showToast('📄 NIN document uploaded! You can view or download it anytime below.');
+      showToast('NIN document uploaded! You can view or download it anytime below.');
     }
     renderIdentityStatus();
     renderProfileStrength();
@@ -1731,9 +1731,9 @@
     user.id_gov_number = document.getElementById('idGovNumber')?.value.trim() || user.id_gov_number || '';
     setUser(user);
     if (_checkAndAutoOpenVerificationWindow(user)) {
-      showToast('⏳ All verification documents received! 2 – 24 hours verification window is now open.');
+      showToast('All verification documents received! 2 – 24 hours verification window is now open.');
     } else {
-      showToast('💳 Government ID scan uploaded! You can view or download it anytime below.');
+      showToast('Government ID scan uploaded! You can view or download it anytime below.');
     }
     renderIdentityStatus();
     renderProfileStrength();
@@ -1750,9 +1750,9 @@
     user.id_address_type = document.getElementById('idAddressType')?.value || user.id_address_type || 'Proof of Address';
     setUser(user);
     if (_checkAndAutoOpenVerificationWindow(user)) {
-      showToast('⏳ All verification documents received! 2 – 24 hours verification window is now open.');
+      showToast('All verification documents received! 2 – 24 hours verification window is now open.');
     } else {
-      showToast('🧾 Proof of address uploaded! You can view or download it anytime below.');
+      showToast('Proof of address uploaded! You can view or download it anytime below.');
     }
     renderIdentityStatus();
     renderProfileStrength();
@@ -1761,7 +1761,7 @@
   function submitIdentityVerification() {
     const nin = document.getElementById('idNinNumber')?.value.trim();
     if (!nin || nin.length < 11) {
-      showToast('⚠️ Please enter a valid 11-digit NIN Number', 'warning');
+      showToast('Please enter a valid 11-digit NIN Number', 'warning');
       return;
     }
 
@@ -1772,19 +1772,19 @@
     const hasFacial = Boolean(capturedFacialDataURL || user.facial_biometric || user.facial_verified || _getLatestSlotDoc('facial_selfie', 'facial_selfie_doc'));
 
     if (!ninDoc && !user.nin_uploaded) {
-      showToast('⚠️ Please upload your NIN Slip / Digital ID Card Scan first.', 'warning');
+      showToast('Please upload your NIN Slip / Digital ID Card Scan first.', 'warning');
       return;
     }
     if (!govDoc && !user.gov_id_uploaded) {
-      showToast('⚠️ Please upload your secondary Official Government ID document first.', 'warning');
+      showToast('Please upload your secondary Official Government ID document first.', 'warning');
       return;
     }
     if (!addrDoc && !user.address_doc_uploaded) {
-      showToast('⚠️ Please upload your Proof of Residential Address document first.', 'warning');
+      showToast('Please upload your Proof of Residential Address document first.', 'warning');
       return;
     }
     if (!hasFacial) {
-      showToast('⚠️ Please capture your Facial Recognition Biometric Snapshot first.', 'warning');
+      showToast('Please capture your Facial Recognition Biometric Snapshot first.', 'warning');
       return;
     }
 
@@ -1821,7 +1821,7 @@
     if (typeof buildTopbar === 'function') buildTopbar();
     renderProfileStrength();
 
-    showToast('⏳ All documents submitted! A 2 – 24 hours verification window is now open before your profile is verified.');
+    showToast('All documents submitted! A 2 – 24 hours verification window is now open before your profile is verified.');
   }
 
   // -- Avatar upload handling --
@@ -2002,7 +2002,7 @@
     if (typeof buildSidebar === 'function') buildSidebar('profile');
     if (typeof buildTopbar === 'function') buildTopbar();
 
-    showToast('✨ Profile photo updated and saved!');
+    showToast('Profile photo updated and saved!');
     renderProfileStrength();
     closeAvatarStudio();
   }
@@ -2025,7 +2025,7 @@
       _applyAvatarImage(fileData.dataURL);
       if (typeof buildSidebar === 'function') buildSidebar('profile');
       if (typeof buildTopbar === 'function') buildTopbar();
-      showToast('✅ Profile photo updated across all pages!');
+      showToast('Profile photo updated across all pages!');
       renderProfileStrength();
     }
   };
@@ -2042,22 +2042,22 @@
       html += `<div style="background:var(--paper);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;position:relative;transition:all .2s;cursor:pointer;" onclick="openDocumentViewer(window.uploadedPortfolioRegistry[${i}])" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
         ${isImage && f.dataURL
           ? `<div style="height:140px;background:url('${f.dataURL}') center/cover;position:relative;">
-               <div style="position:absolute;top:8px;left:8px;background:rgba(14,59,53,0.85);color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;backdrop-filter:blur(2px);">👁️ Preview</div>
+               <div style="position:absolute;top:8px;left:8px;background:rgba(14,59,53,0.85);color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;backdrop-filter:blur(2px);">Preview</div>
              </div>`
           : `<div style="height:140px;display:grid;place-items:center;background:linear-gradient(135deg,var(--forest),var(--teal));color:#fff;font-size:48px;position:relative;">
                ${getFileTypeIcon(f.type, f.name)}
-               <div style="position:absolute;top:8px;left:8px;background:rgba(14,59,53,0.85);color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;backdrop-filter:blur(2px);">👁️ Preview</div>
+               <div style="position:absolute;top:8px;left:8px;background:rgba(14,59,53,0.85);color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;backdrop-filter:blur(2px);">Preview</div>
              </div>`}
         <div style="padding:12px;">
           <div style="font-size:13px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</div>
           <div style="font-size:11px;color:var(--muted);margin-top:2px;">${formatFileSize(f.size)} &bull; Click to Preview</div>
-          <button onclick="event.stopPropagation(); deletePortfolioItem(${i})" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:12px;display:grid;place-items:center;opacity:.7;transition:.2s;" onmouseover="this.style.opacity='1';this.style.background='#dc2626'" onmouseout="this.style.opacity='.7';this.style.background='rgba(0,0,0,.6)'" title="Remove">✕</button>
+          <button onclick="event.stopPropagation(); deletePortfolioItem(${i})" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:12px;display:grid;place-items:center;opacity:.7;transition:.2s;" onmouseover="this.style.opacity='1';this.style.background='#dc2626'" onmouseout="this.style.opacity='.7';this.style.background='rgba(0,0,0,.6)'" title="Remove"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
         </div>
       </div>`;
     });
     // Add upload card
     html += `<div style="background:var(--paper);border:2px dashed var(--line);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;transition:all .2s;" onclick="openUploadModal('portfolio', onPortfolioUploaded)" onmouseover="this.style.borderColor='var(--teal)';this.style.background='var(--teal-lt)'" onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--paper)'">
-      <div style="font-size:36px;margin-bottom:8px;">📁</div>
+      
       <div style="font-size:13px;font-weight:700;">Add Portfolio Item</div>
       <div style="font-size:11px;margin-top:4px;">Images, PDFs, Documents</div>
     </div>`;
@@ -2066,7 +2066,7 @@
 
   window.onPortfolioUploaded = function(fileData) {
     renderPortfolio();
-    showToast('✅ Portfolio item added!');
+    showToast('Portfolio item added!');
     renderProfileStrength();
   };
 
@@ -2138,7 +2138,7 @@
   window.handleQualDirectFile = function(file) {
     if (!file) return;
     if (file.size > 50 * 1024 * 1024) {
-      showToast('⚠️ Maximum file size is 50MB', 'warning');
+      showToast('Maximum file size is 50MB', 'warning');
       return;
     }
 
@@ -2151,9 +2151,9 @@
     const iconEl = document.getElementById('qualFileIcon');
     const dropzone = document.getElementById('qualDropzone');
 
-    if (nameEl) nameEl.textContent = '📄 ' + selectedQualFileName;
+    if (nameEl) nameEl.textContent = selectedQualFileName;
     if (sizeEl) sizeEl.textContent = (typeof formatFileSize === 'function' ? formatFileSize(file.size) : Math.round(file.size/1024) + ' KB') + ' • Loaded & Ready';
-    if (iconEl) iconEl.textContent = '✅';
+    if (iconEl) iconEl.textContent = '';
     if (dropzone) {
       dropzone.style.borderColor = '#16a34a';
       dropzone.style.background = '#f0fdf4';
@@ -2175,7 +2175,7 @@
     });
 
     if (typeof showToast === 'function') {
-      showToast('📄 Loaded "' + selectedQualFileName + '" — ready to save.');
+      showToast('Loaded "' + selectedQualFileName + '" — ready to save.');
     }
   };
 
@@ -2226,15 +2226,15 @@
     const year = document.getElementById('qualYear')?.value.trim();
 
     if (!title) {
-      showToast('⚠️ Please enter a qualification title', 'warning');
+      showToast('Please enter a qualification title', 'warning');
       return;
     }
     if (!issuer) {
-      showToast('⚠️ Please select or specify an awarding institution', 'warning');
+      showToast('Please select or specify an awarding institution', 'warning');
       return;
     }
     if (!year) {
-      showToast('⚠️ Please select the year obtained', 'warning');
+      showToast('Please select the year obtained', 'warning');
       return;
     }
 
@@ -2272,7 +2272,7 @@
     const sizeEl = document.getElementById('qualFileSize');
     if (sizeEl) sizeEl.textContent = 'Supported formats: PDF, JPG, PNG, DOC (Max 50MB) • Or press Ctrl+V';
     const iconEl = document.getElementById('qualFileIcon');
-    if (iconEl) iconEl.textContent = '📁';
+    if (iconEl) iconEl.textContent = '';
     const dropzone = document.getElementById('qualDropzone');
     if (dropzone) {
       dropzone.style.borderColor = 'var(--line)';
@@ -2281,7 +2281,7 @@
 
     renderCertifications();
     renderProfileStrength();
-    showToast('🎓 Qualification & Certificate document saved!');
+    showToast('Qualification & Certificate document saved!');
     closeModal('addQualModal');
     if (document.getElementById('qualName')) document.getElementById('qualName').value = '';
     if (document.getElementById('qualIssuer')) document.getElementById('qualIssuer').value = '';
@@ -2309,7 +2309,7 @@
       container.innerHTML = `
         <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--paper); border:2px dashed var(--line); border-radius:var(--r); gap:12px; flex-wrap:wrap;">
           <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
-            <div style="font-size:28px; flex-shrink:0;">📄</div>
+            
             <div style="min-width:0; flex:1;">
               <div style="font-size:14px; font-weight:800; color:var(--ink);">No CV Uploaded Yet</div>
               <div style="font-size:12px; color:var(--muted); margin-top:2px;">Upload your CV / Resume to boost your profile strength and rank higher for client proposals.</div>
@@ -2329,19 +2329,19 @@
     container.innerHTML = `
       <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:var(--paper); border:1.5px solid var(--teal); border-radius:var(--r); transition:all 0.2s; flex-wrap:wrap; gap:12px;">
         <div style="display:flex; align-items:center; gap:14px; min-width:0; flex:1;">
-          <div style="font-size:30px; flex-shrink:0;">${typeof getFileTypeIcon === 'function' ? getFileTypeIcon(latestCv.type, latestCv.name) : '📄'}</div>
+          <div style="font-size:12px; font-weight:800; color:var(--teal); flex-shrink:0;">CV</div>
           <div style="min-width:0; flex:1;">
             <div style="font-size:14px; font-weight:800; color:var(--ink); word-break:break-word; line-height:1.4;" title="${escapeHTML(latestCv.name)}">${escapeHTML(latestCv.name)}</div>
             <div style="font-size:12px; color:var(--muted); margin-top:2px; display:flex; flex-wrap:wrap; align-items:center; gap:6px;">
               <span>${sizeStr}</span> &bull; 
-              <span style="color:var(--teal); font-weight:800;">✅ Active Resume</span> &bull; 
+              <span style="color:var(--teal); font-weight:800;">Active Resume</span> &bull; 
               <span>Uploaded ${dateStr}</span>
             </div>
           </div>
         </div>
         <div style="display:flex; gap:8px; flex-shrink:0;">
-          <button class="btn btn-outline btn-sm" style="color:var(--teal); border-color:var(--line); padding:6px 12px; font-size:12px; font-weight:700;" onclick="openDocumentViewer(window.currentCvDoc)">👁️ Preview CV</button>
-          <button class="btn btn-outline btn-sm" style="padding:6px 12px; font-size:12px;" onclick="openUploadModal('cv', onCvUploaded)">🔄 Replace</button>
+          <button class="btn btn-outline btn-sm" style="color:var(--teal); border-color:var(--line); padding:6px 12px; font-size:12px; font-weight:700;" onclick="openDocumentViewer(window.currentCvDoc)">Preview CV</button>
+          <button class="btn btn-outline btn-sm" style="padding:6px 12px; font-size:12px;" onclick="openUploadModal('cv', onCvUploaded)">Replace</button>
         </div>
       </div>
     `;
@@ -2362,7 +2362,7 @@
       const file = input.files?.[0];
       if (!file) return;
       if (file.size > 50 * 1024 * 1024) {
-        showToast('⚠️ File is too large (max 50MB)', 'warning');
+        showToast('File is too large (max 50MB)', 'warning');
         return;
       }
       const reader = new FileReader();
@@ -2377,7 +2377,7 @@
           localStorage.setItem('collekt_custom_quals', JSON.stringify(quals));
           renderCertifications();
           renderProfileStrength();
-          showToast(`✅ Certificate attached to ${quals[index].name}!`);
+          showToast(`Certificate attached to ${quals[index].name}!`);
         }
       };
       reader.readAsDataURL(file);
@@ -2417,22 +2417,22 @@
         html += `
           <div class="cert-card-row">
             <div class="cert-card-main">
-              <div class="cert-card-icon">🎓</div>
+              <div class="cert-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg></div>
               <div class="cert-card-text">
                 <div class="cert-card-title">${escapeHTML(q.name)}</div>
                 <div class="cert-card-sub">
                   <span>${escapeHTML(q.issuer || 'Academic Institution')}</span> &bull; 
                   <span>${escapeHTML(q.category || 'Academic Degree')}</span> &bull; 
                   <span>${escapeHTML(String(q.year || ''))}</span>
-                  ${hasAttachedFile ? `<span class="cert-attachment-pill">📎 ${escapeHTML(q.fileName)} (${typeof formatFileSize === 'function' ? formatFileSize(q.size) : Math.round(q.size/1024) + ' KB'})</span>` : ''}
+                  ${hasAttachedFile ? `<span class="cert-attachment-pill">${escapeHTML(q.fileName)} (${typeof formatFileSize === 'function' ? formatFileSize(q.size) : Math.round(q.size/1024) + ' KB'})</span>` : ''}
                 </div>
               </div>
             </div>
             <div class="cert-card-actions">
               ${hasAttachedFile
-                ? `<button class="btn btn-outline btn-sm" style="padding:5px 12px; border-color:var(--teal); color:var(--teal); font-size:12px; font-weight:800; border-radius:6px; cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${regIdx}])" title="Preview Attached Certificate">👁️ Preview</button>`
-                : `<button class="btn btn-outline btn-sm" style="padding:5px 12px; border-color:var(--teal); color:var(--teal); font-size:12px; font-weight:800; border-radius:6px; cursor:pointer;" onclick="triggerDegreeFileUpload(${i})" title="Upload your authentic degree or certificate file">📎 Attach Certificate</button>`}
-              <button class="cert-btn-del" onclick="deleteCustomQual(${i})" title="Remove Qualification">✕</button>
+                ? `<button class="btn btn-outline btn-sm" style="padding:5px 12px; border-color:var(--teal); color:var(--teal); font-size:12px; font-weight:800; border-radius:6px; cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${regIdx}])" title="Preview Attached Certificate">Preview</button>`
+                : `<button class="btn btn-outline btn-sm" style="padding:5px 12px; border-color:var(--teal); color:var(--teal); font-size:12px; font-weight:800; border-radius:6px; cursor:pointer;" onclick="triggerDegreeFileUpload(${i})" title="Upload your authentic degree or certificate file">Attach Certificate</button>`}
+              <button class="cert-btn-del" onclick="deleteCustomQual(${i})" title="Remove Qualification"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </div>
           </div>
         `;
@@ -2452,19 +2452,19 @@
         html += `
           <div class="cert-card-row">
             <div class="cert-card-main">
-              <div class="cert-card-icon">${typeof getFileTypeIcon === 'function' ? getFileTypeIcon(f.type, f.name) : '🏅'}</div>
+              <div class="cert-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg></div>
               <div class="cert-card-text">
                 <div class="cert-card-title">${escapeHTML(f.name)}</div>
                 <div class="cert-card-sub">
                   <span>${typeof formatFileSize === 'function' ? formatFileSize(f.size) : Math.round(f.size/1024) + ' KB'}</span> &bull; 
-                  <span style="color:var(--teal); font-weight:800;">🏅 Uploaded Certificate</span> &bull; 
+                  <span style="color:var(--teal); font-weight:800;">Uploaded Certificate</span> &bull; 
                   <span>${f.timestamp ? new Date(f.timestamp).toLocaleDateString() : 'Recently'}</span>
                 </div>
               </div>
             </div>
             <div class="cert-card-actions">
-              <button class="btn btn-outline btn-sm" style="padding:5px 12px; border-color:var(--teal); color:var(--teal); font-size:12px; font-weight:800; border-radius:6px; cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${regIdx}])" title="Preview Certificate">👁️ Preview</button>
-              <button class="cert-btn-del" onclick="deleteCertFile('certifications', ${idx})" title="Remove File">✕</button>
+              <button class="btn btn-outline btn-sm" style="padding:5px 12px; border-color:var(--teal); color:var(--teal); font-size:12px; font-weight:800; border-radius:6px; cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${regIdx}])" title="Preview Certificate">Preview</button>
+              <button class="cert-btn-del" onclick="deleteCertFile('certifications', ${idx})" title="Remove File"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </div>
           </div>
         `;
@@ -2480,7 +2480,7 @@
         html += `
           <div class="cert-card-row">
             <div class="cert-card-main">
-              <div class="cert-card-icon">${typeof getFileTypeIcon === 'function' ? getFileTypeIcon(f.type, f.name) : '📄'}</div>
+              <div class="cert-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div>
               <div class="cert-card-text">
                 <div class="cert-card-title">${escapeHTML(f.name)}</div>
                 <div class="cert-card-sub">
@@ -2491,8 +2491,8 @@
               </div>
             </div>
             <div class="cert-card-actions">
-              <button class="btn btn-outline btn-sm" style="padding:5px 12px; border-color:var(--teal); color:var(--teal); font-size:12px; font-weight:800; border-radius:6px; cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${regIdx}])" title="Preview Document">👁️ Preview</button>
-              <button class="cert-btn-del" onclick="deleteCertFile('document', ${idx})" title="Remove File">✕</button>
+              <button class="btn btn-outline btn-sm" style="padding:5px 12px; border-color:var(--teal); color:var(--teal); font-size:12px; font-weight:800; border-radius:6px; cursor:pointer;" onclick="openDocumentViewer(window.uploadedDocsRegistry[${regIdx}])" title="Preview Document">Preview</button>
+              <button class="cert-btn-del" onclick="deleteCertFile('document', ${idx})" title="Remove File"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </div>
           </div>
         `;
@@ -2514,7 +2514,7 @@
   window.onCvUploaded = function(fileData) {
     renderCvCard();
     renderCertifications();
-    showToast('✅ CV uploaded successfully!');
+    showToast('CV uploaded successfully!');
     renderProfileStrength();
     if (fileData) {
       setTimeout(() => {
@@ -2526,7 +2526,7 @@
   };
   window.onCoverLetterUploaded = function(fileData) {
     renderCertifications();
-    showToast('✅ Master Cover Letter uploaded successfully!');
+    showToast('Master Cover Letter uploaded successfully!');
     renderProfileStrength();
     if (fileData) {
       setTimeout(() => {
@@ -2538,7 +2538,7 @@
   };
   window.onCertUploaded = function(fileData) {
     renderCertifications();
-    showToast('✅ Certification uploaded successfully!');
+    showToast('Certification uploaded successfully!');
     renderProfileStrength();
   };
 
@@ -2562,12 +2562,12 @@
     const grid = document.getElementById('presetCoverGrid');
     if (grid && !grid.children.length) {
       const presets = [
-        { name: 'Solar Farm', url: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80', icon: '☀️' },
-        { name: 'Offshore Rig', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80', icon: '🛢️' },
-        { name: 'Substation', url: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1200&q=80', icon: '⚡' },
-        { name: 'Civil EPC', url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=1200&q=80', icon: '🏗️' },
-        { name: 'Teal Tech', url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80', icon: '🌊' },
-        { name: 'Cyber Mesh', url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80', icon: '🌌' }
+        { name: 'Solar Farm', url: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80', icon: '' },
+        { name: 'Offshore Rig', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80', icon: '' },
+        { name: 'Substation', url: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1200&q=80', icon: '' },
+        { name: 'Civil EPC', url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=1200&q=80', icon: '' },
+        { name: 'Teal Tech', url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80', icon: '' },
+        { name: 'Cyber Mesh', url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80', icon: '' }
       ];
 
       grid.innerHTML = presets.map(p => `
@@ -2647,7 +2647,7 @@
     if (!input.files || !input.files[0]) return;
     const file = input.files[0];
     if (file.size > 20 * 1024 * 1024) {
-      showToast('⚠️ Banner image size must be under 20MB', 'warning');
+      showToast('Banner image size must be under 20MB', 'warning');
       input.value = '';
       return;
     }
@@ -2741,7 +2741,7 @@
     }
 
     if (!dataURL) {
-      showToast('⚠️ Could not save cover image. Please choose another image.', 'warning');
+      showToast('Could not save cover image. Please choose another image.', 'warning');
       return;
     }
 
@@ -2758,7 +2758,7 @@
       } catch(e) {}
     }
 
-    showToast('✨ Cover photo edited and saved!');
+    showToast('Cover photo edited and saved!');
     closeModal('coverPhotoStudioModal');
   };
 
@@ -2798,7 +2798,7 @@
   window._applyCoverPhoto = _applyCoverPhoto;
   window.onDocUploaded = function(fileData) {
     renderCertifications();
-    showToast('✅ Document uploaded successfully!');
+    showToast('Document uploaded successfully!');
     renderProfileStrength();
   };
 
@@ -2822,7 +2822,7 @@
 
       setTimeout(() => {
         if (typeof showToast === 'function') {
-          showToast('✅ Real LinkedIn Account Successfully Linked & Verified! 🔗');
+          showToast('Real LinkedIn Account Successfully Linked & Verified!');
         }
         if (typeof renderProfileStrength === 'function') renderProfileStrength();
         if (typeof _applyProfile === 'function' && user) _applyProfile(user);
@@ -2867,7 +2867,7 @@
   window.confirmLinkLinkedInFromModal = function() {
     const val = document.getElementById('modalLinkedInInput')?.value.trim();
     if (!val) {
-      showToast('⚠️ Please enter your LinkedIn profile link or username', 'warning');
+      showToast('Please enter your LinkedIn profile link or username', 'warning');
       return;
     }
     closeModal('linkLinkedInModal');
@@ -2900,7 +2900,7 @@
     const titleEl = document.getElementById('profileTitle');
     if (titleEl) titleEl.textContent = prof.title || 'Independent Specialist';
     const locEl = document.querySelector('.profile-location');
-    if (locEl) locEl.innerHTML = '📍 ' + (prof.location || (prof.state ? prof.state + ', ' + (prof.country || 'Nigeria') : 'Nigeria'));
+    if (locEl) locEl.innerHTML = (prof.location || (prof.state ? prof.state + ', ' + (prof.country || 'Nigeria') : 'Nigeria'));
 
     const lBadgeWrap = document.getElementById('profileLinkedInBadgeWrap');
     if (lBadgeWrap) {
@@ -2942,7 +2942,7 @@
     if (pSuccEl) pSuccEl.textContent = metrics.success_rate + '%';
 
     const pRatingEl = document.getElementById('statRating');
-    if (pRatingEl) pRatingEl.textContent = metrics.rating > 0 ? '★ ' + metrics.rating.toFixed(1) : '★ 0.0';
+    if (pRatingEl) pRatingEl.textContent = metrics.rating > 0 ? metrics.rating.toFixed(1) : '0.0';
 
     const pRatingCountEl = document.getElementById('statRatingCount');
     if (pRatingCountEl) pRatingCountEl.textContent = `Rating (${metrics.review_count} reviews)`;
@@ -2987,7 +2987,7 @@
     const lBtn = document.getElementById('btnConnectLinkedIn');
     if (lBtn) {
       if (prof.linkedin_linked && prof.linkedin_url) {
-        lBtn.innerHTML = '<span style="color:#fff;">✓</span> Real LinkedIn Connected';
+        lBtn.innerHTML = 'Real LinkedIn Connected';
         lBtn.style.background = '#16a34a';
         lBtn.onclick = function() { openLinkedInModal(); };
       } else {
@@ -3028,7 +3028,7 @@
             <div style="display:flex; align-items:center; gap:8px;">
               <span style="font-size:28px; font-weight:900; color:var(--ink);">${ratingVal}</span>
               <div>
-                <div style="color:var(--amber); font-size:15px; letter-spacing:2px;">★ ${reviews.length} review${reviews.length > 1 ? 's' : ''}</div>
+                <div style="color:var(--amber); font-size:15px; letter-spacing:2px;">${reviews.length} review${reviews.length > 1 ? 's' : ''}</div>
               </div>
             </div>
           </div>
@@ -3041,7 +3041,7 @@
               <div style="font-size:14px; font-weight:800; color:var(--ink);">${escapeHTML(r.author || r.reviewer_name || 'Client')}</div>
               <div style="font-size:12px; color:var(--muted);">${escapeHTML(r.role || r.reviewer_company || 'Project Client')}</div>
             </div>
-            <div style="color:var(--amber); font-weight:900; font-size:14px;">★ ${r.rating || 5}.0</div>
+            <div style="color:var(--amber); font-weight:900; font-size:14px;">${r.rating || 5}.0</div>
           </div>
           <p style="font-size:13px; color:var(--ink); line-height:1.6; margin-bottom:6px;">"${escapeHTML(r.text || r.comment || '')}"</p>
           <div style="font-size:11px; color:var(--muted);">${r.date || 'Recent'}</div>
@@ -3054,7 +3054,7 @@
         <div class="content-section">
           <div class="section-title-sm">Client Reviews</div>
           <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 24px; text-align:center; background:var(--paper); border-radius:var(--r); border:1px dashed var(--line);">
-            <div style="font-size:32px; margin-bottom:12px;">⭐</div>
+            
             <div style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Reviews Yet</div>
             <p style="font-size:14px; color:var(--muted); max-width:400px; line-height:1.6;">Client ratings and feedback will appear here as contracts are awarded and completed on Collekt.</p>
           </div>
@@ -3069,7 +3069,7 @@
     if (!input) return;
     const skillName = input.value.trim();
     if (!skillName) {
-      showToast('⚠️ Please enter a skill name first', 'warning');
+      showToast('Please enter a skill name first', 'warning');
       return;
     }
 
@@ -3089,7 +3089,7 @@
     });
 
     if (existing.includes(skillName.toLowerCase())) {
-      showToast('⚠️ Skill already added!', 'warning');
+      showToast('Skill already added!', 'warning');
       input.value = '';
       return;
     }
@@ -3105,7 +3105,7 @@
 
     // Save to user object immediately
     _persistSkillsFromUI();
-    showToast('✨ Skill added to profile!');
+    showToast('Skill added to profile!');
   }
 
   function removeSkill(removeBtn) {
@@ -3316,7 +3316,7 @@
     }
 
 
-    showToast('✅ Profile saved successfully!');
+    showToast('Profile saved successfully!');
     if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
     closeModal('editModal');
   }
@@ -3336,9 +3336,9 @@
     <!-- Modal Header -->
     <div style="padding:20px 24px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; background:var(--white);">
       <div style="font-size:18px; font-weight:900; color:var(--ink); display:flex; align-items:center; gap:8px;">
-        <span>📷</span> Edit Profile Photo
+        Edit Profile Photo
       </div>
-      <button onclick="closeAvatarStudio()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted); width:36px; height:36px; border-radius:50%; display:grid; place-items:center;">✕</button>
+      <button onclick="closeAvatarStudio()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted); width:36px; height:36px; border-radius:50%; display:grid; place-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
 
     <div style="padding:24px; display:flex; flex-direction:column; align-items:center;">
@@ -3358,7 +3358,7 @@
         
         <!-- Drag instructions hint overlay -->
         <div id="dragHint" style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.65); color:#fff; font-size:11px; font-weight:700; padding:4px 12px; border-radius:99px; pointer-events:none; backdrop-filter:blur(2px);">
-          ✋ Drag photo to adjust position
+          Drag photo to adjust position
         </div>
       </div>
 
@@ -3366,10 +3366,10 @@
       <div style="width:100%; margin-top:20px; display:flex; flex-direction:column; gap:14px;">
         <div style="display:flex; align-items:center; gap:10px;">
           <span style="font-size:13px; font-weight:700; color:var(--muted);">Zoom:</span>
-          <button class="btn btn-sm btn-outline" onclick="changeAvatarZoom(-0.15)" style="padding:4px 10px; font-size:12px; font-weight:700;">🔍 -</button>
+          <button class="btn btn-sm btn-outline" onclick="changeAvatarZoom(-0.15)" style="padding:4px 10px; font-size:12px; font-weight:700;">-</button>
           <input type="range" id="avatarZoomRange" min="1" max="3.5" step="0.05" value="1" style="flex:1; accent-color:var(--teal); cursor:pointer;" oninput="onAvatarZoomInput(this.value)">
-          <button class="btn btn-sm btn-outline" onclick="changeAvatarZoom(0.15)" style="padding:4px 10px; font-size:12px; font-weight:700;">🔍 +</button>
-          <button class="btn btn-sm btn-outline" onclick="rotateAvatarImage()" title="Rotate 90 degrees" style="padding:4px 10px; font-size:12px; font-weight:700;">🔄 90°</button>
+          <button class="btn btn-sm btn-outline" onclick="changeAvatarZoom(0.15)" style="padding:4px 10px; font-size:12px; font-weight:700;">+</button>
+          <button class="btn btn-sm btn-outline" onclick="rotateAvatarImage()" title="Rotate 90 degrees" style="padding:4px 10px; font-size:12px; font-weight:700;">Rotate 90°</button>
         </div>
 
         <!-- Filter Presets -->
@@ -3377,11 +3377,11 @@
           <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Color Filters</div>
           <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding-bottom:6px;" id="avatarFilterChips">
             <button class="filter-chip active" onclick="setAvatarFilter('none', this)">Original</button>
-            <button class="filter-chip" onclick="setAvatarFilter('warm', this)">🌅 Warm</button>
-            <button class="filter-chip" onclick="setAvatarFilter('cool', this)">🧊 Cool Emerald</button>
-            <button class="filter-chip" onclick="setAvatarFilter('bw', this)">📷 B&W Studio</button>
-            <button class="filter-chip" onclick="setAvatarFilter('vintage', this)">📻 Vintage</button>
-            <button class="filter-chip" onclick="setAvatarFilter('contrast', this)">⚡ Crisp</button>
+            <button class="filter-chip" onclick="setAvatarFilter('warm', this)">Warm</button>
+            <button class="filter-chip" onclick="setAvatarFilter('cool', this)">Cool Emerald</button>
+            <button class="filter-chip" onclick="setAvatarFilter('bw', this)">B&W Studio</button>
+            <button class="filter-chip" onclick="setAvatarFilter('vintage', this)">Vintage</button>
+            <button class="filter-chip" onclick="setAvatarFilter('contrast', this)">Crisp</button>
           </div>
         </div>
       </div>
@@ -3392,7 +3392,7 @@
     <div style="padding:16px 24px; border-top:1px solid var(--line); background:var(--paper); display:flex; justify-content:space-between; align-items:center; gap:12px;">
       <div style="display:flex; gap:8px;">
         <button onclick="document.getElementById('studioFileInput').click()" class="btn btn-outline btn-sm" style="font-size:13px; font-weight:700;">
-          📁 Replace Photo
+          Replace Photo
         </button>
         <input type="file" id="studioFileInput" accept="image/*" style="display:none;" onchange="loadNewFileIntoStudio(this.files[0])">
       </div>
@@ -3427,7 +3427,7 @@
     <div id="linkedInConnectedBox" style="display:none; background:rgba(22,163,74,0.08); border:1.5px solid rgba(22,163,74,0.3); border-radius:14px; padding:16px; margin-bottom:18px;">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
         <div style="display:flex; align-items:center; gap:8px; color:#15803d; font-size:13px; font-weight:800;">
-          <span>✅</span> Real LinkedIn Account Linked
+          Real LinkedIn Account Linked
         </div>
         <span style="font-size:11px; background:#15803d; color:#fff; font-weight:800; padding:2px 8px; border-radius:99px;">Verified</span>
       </div>
@@ -3475,8 +3475,8 @@
     </div>
   </div>
 </div>
-<script src="settings-popup.js?v=183.0"></script>
-<script src="upload-modal.js?v=183.0"></script>
+<script src="settings-popup.js?v=184.0"></script>
+<script src="upload-modal.js?v=184.0"></script>
 </body>
 </html>
 

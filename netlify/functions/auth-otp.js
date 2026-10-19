@@ -131,33 +131,33 @@ async function syncResendContact({ email, firstName, lastName }) {
  */
 function getOtpEmailContent({ code, firstName, purpose }) {
   const greetingName = firstName ? ` ${firstName}` : '';
-  let subject = `Your Collekt Verification Code: ${code} 🔐`;
-  let title = 'Verify Your Collekt Account 🔐';
+  let subject = `Your Collekt Verification Code: ${code}`;
+  let title = 'Verify Your Collekt Account';
   let bannerSub = 'One-Time Email Verification Code';
   let intro = `Hi${greetingName ? ' <strong>' + greetingName + '</strong>' : ''}, welcome to Collekt. Use the verification code below to verify your email address and activate access to your dashboard:`;
   let textIntro = `Thank you for signing up for Collekt. To complete your registration and access your dashboard, please enter this 6-digit verification code:`;
 
   if (purpose === 'pin_setup' || purpose === 'create_pin') {
-    subject = `Your Collekt Transaction PIN Setup Code: ${code} 🔐`;
-    title = 'Authorize Transaction PIN Setup 🔐';
+    subject = `Your Collekt Transaction PIN Setup Code: ${code}`;
+    title = 'Authorize Transaction PIN Setup';
     bannerSub = 'Transaction PIN Authorization';
     intro = `Hi${greetingName ? ' <strong>' + greetingName + '</strong>' : ''}, you requested to set up or change your confidential 4-digit Transaction PIN. Use the verification code below to authorize this financial security configuration:`;
     textIntro = `You requested to set up or change your 4-digit Transaction PIN. Use this 6-digit verification code to proceed:`;
   } else if (purpose === '2fa_setup' || purpose === 'two_factor') {
-    subject = `Your Collekt Two-Factor Authentication Code: ${code} 🛡️`;
-    title = 'Enable Two-Factor Authentication 🛡️';
+    subject = `Your Collekt Two-Factor Authentication Code: ${code}`;
+    title = 'Enable Two-Factor Authentication';
     bannerSub = 'Two-Factor Authentication Setup';
     intro = `Hi${greetingName ? ' <strong>' + greetingName + '</strong>' : ''}, you requested to enable Two-Factor Authentication on your Collekt account. Use the verification code below to confirm and activate this security layer:`;
     textIntro = `You requested to enable Two-Factor Authentication. Use this 6-digit verification code to confirm:`;
   } else if (purpose === 'password_change' || purpose === 'change_password') {
-    subject = `Your Collekt Password Change Code: ${code} 🔑`;
-    title = 'Authorize Password Change 🔑';
+    subject = `Your Collekt Password Change Code: ${code}`;
+    title = 'Authorize Password Change';
     bannerSub = 'Password Change Security Authorization';
     intro = `Hi${greetingName ? ' <strong>' + greetingName + '</strong>' : ''}, you requested to change your Collekt account password. Use the verification code below to authorize this password update:`;
     textIntro = `You requested to change your Collekt account password. Use this 6-digit verification code to authorize:`;
   } else if (purpose === 'pin_reset') {
-    subject = `Your Collekt Transaction PIN Reset Code: ${code} 🔐`;
-    title = 'Reset Your Transaction PIN 🔐';
+    subject = `Your Collekt Transaction PIN Reset Code: ${code}`;
+    title = 'Reset Your Transaction PIN';
     bannerSub = 'Transaction PIN Reset Authorization';
     intro = `Hi${greetingName ? ' <strong>' + greetingName + '</strong>' : ''}, you requested to reset your 4-digit Transaction PIN. Use the verification code below to authorize setting a new PIN:`;
     textIntro = `You requested to reset your Transaction PIN. Use this 6-digit verification code to proceed:`;
@@ -181,7 +181,7 @@ function getOtpEmailContent({ code, firstName, purpose }) {
           <tr>
             <td style="background: linear-gradient(135deg, #040F0E 0%, #0E3B35 60%, #13756F 100%); padding: 36px 32px 30px; text-align: center;">
               <span style="display: inline-block; background: rgba(212, 146, 11, 0.2); border: 1px solid rgba(212, 146, 11, 0.4); color: #D4920B; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">
-                🇳🇬 Nigeria's Project &amp; Tender Infrastructure
+                Nigeria's Project &amp; Tender Infrastructure
               </span>
               <h1 style="color: #ffffff; font-size: 26px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.02em;">Collekt Security</h1>
               <p style="color: rgba(255, 255, 255, 0.8); font-size: 13.5px; margin: 0; font-weight: 500;">
@@ -213,7 +213,7 @@ function getOtpEmailContent({ code, firstName, purpose }) {
                         ${code}
                       </div>
                       <div style="color: #D4920B; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-                        ⏱ Valid for 10 minutes
+                        Valid for 10 minutes
                       </div>
                     </div>
                   </td>
@@ -256,7 +256,7 @@ function getOtpEmailContent({ code, firstName, purpose }) {
  */
 function getLoginAlertEmailContent({ name, email, location, device, ip, time, resetUrl }) {
   const greetingName = name ? ` ${name}` : '';
-  const subject = `🔔 Security Alert: New sign-in to your Collekt account (${location})`;
+  const subject = `Security Alert: New sign-in to your Collekt account (${location})`;
 
   const text = `Security Alert: New Sign-In to Collekt\n\nHi${greetingName},\n\nWe detected a new sign-in to your Collekt account (${email}).\n\nSign-in details:\n- Date & Time: ${time}\n- Device / Browser: ${device}\n- Approximate Location: ${location}\n- IP Address: ${ip}\n\nWas this you?\nIf you recently signed in, you can safely ignore this email.\n\nWas this NOT you?\nIf you did not sign in or suspect unauthorized activity, someone else may have accessed your account. Change your password immediately to protect your funds and profile:\n\n${resetUrl}\n\nBest regards,\nCollekt Security Team\nCollekt Technologies Ltd. Lagos, Nigeria`;
 
@@ -276,7 +276,7 @@ function getLoginAlertEmailContent({ name, email, location, device, ip, time, re
           <tr>
             <td style="background: linear-gradient(135deg, #040F0E 0%, #0E3B35 60%, #13756F 100%); padding: 36px 32px 30px; text-align: center;">
               <span style="display: inline-block; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.45); color: #FBBF24; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">
-                🛡️ Account Security Alert
+                Account Security Alert
               </span>
               <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.02em;">New Sign-In Detected</h1>
               <p style="color: rgba(255, 255, 255, 0.85); font-size: 13.5px; margin: 0; font-weight: 500;">
@@ -304,11 +304,11 @@ function getLoginAlertEmailContent({ name, email, location, device, ip, time, re
                 </tr>
                 <tr>
                   <td style="padding: 12px 18px; border-bottom: 1px solid #E2EAE9; font-size: 13px; color: #718096;">Location</td>
-                  <td style="padding: 12px 18px; border-bottom: 1px solid #E2EAE9; font-size: 13px; font-weight: 700; color: #0E3B35;">📍 ${location}</td>
+                  <td style="padding: 12px 18px; border-bottom: 1px solid #E2EAE9; font-size: 13px; font-weight: 700; color: #0E3B35;">${location}</td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 18px; border-bottom: 1px solid #E2EAE9; font-size: 13px; color: #718096;">Device / Browser</td>
-                  <td style="padding: 12px 18px; border-bottom: 1px solid #E2EAE9; font-size: 13px; font-weight: 700; color: #0D1F1E;">💻 ${device}</td>
+                  <td style="padding: 12px 18px; border-bottom: 1px solid #E2EAE9; font-size: 13px; font-weight: 700; color: #0D1F1E;">${device}</td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 18px; font-size: 13px; color: #718096;">IP Address</td>
@@ -319,14 +319,14 @@ function getLoginAlertEmailContent({ name, email, location, device, ip, time, re
               <!-- Action Card -->
               <div style="background-color: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;">
                 <div style="color: #92400E; font-size: 13.5px; font-weight: 700; margin-bottom: 4px;">
-                  ⚠️ Was this NOT you?
+                  Was this NOT you?
                 </div>
                 <p style="color: #78350F; font-size: 13px; line-height: 1.5; margin: 0 0 14px 0;">
                   If you did not initiate this sign-in, your account credentials may have been compromised. Change your password immediately to secure your account, earnings, and escrow funds.
                 </p>
                 <div style="text-align: center;">
                   <a href="${resetUrl}" style="display: inline-block; background-color: #B45309; color: #ffffff; text-decoration: none; font-weight: 800; font-size: 13px; padding: 12px 24px; border-radius: 10px; box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);">
-                    🔑 Change Your Password Immediately &rarr;
+                    Change Your Password Immediately &rarr;
                   </a>
                 </div>
               </div>
@@ -365,9 +365,9 @@ function getWelcomeEmailContent({ firstName, role }) {
   const greetingName = firstName || 'Collektor';
   const isCompany = role === 'company';
   const targetDashboardUrl = isCompany ? 'https://collektng.com/company-dashboard.html' : 'https://collektng.com/dashboard.html';
-  const subject = `Welcome to Collekt, ${greetingName}! 🇳🇬 (Account Verified)`;
+  const subject = `Welcome to Collekt, ${greetingName}! (Account Verified)`;
 
-  const text = `Welcome to Collekt! 🇳🇬\n\nHi ${greetingName},\n\nWelcome to the Collekt Family! I'm Kolly from Collekt, and your account email has now been verified.\n\nCollekt is built specifically for verified Nigerian energy, EPC, engineering, and project specialists and companies.\n\nHere is what you can do right away:\n- Explore Verified Tenders & Projects: Discover curated engineering, EPC, oil & gas, and infrastructure opportunities in the Marketplace.\n- Complete Your Professional Profile: Showcase your credentials, COREN / industry certifications, and project track record.\n- Structured Project Milestones: Collaborate seamlessly with verified companies and professionals across Nigeria.\n\nGo to your dashboard: ${targetDashboardUrl}\n\nIf you ever have questions or need assistance, simply reply directly to this email (${ 'Kolly@collektng.com' }).\n\nKind regards,\nKolly from Collekt\nCollekt Technologies Ltd. Lagos, Nigeria`;
+  const text = `Welcome to Collekt!\n\nHi ${greetingName},\n\nWelcome to the Collekt Family! I'm Kolly from Collekt, and your account email has now been verified.\n\nCollekt is built specifically for verified Nigerian energy, EPC, engineering, and project specialists and companies.\n\nHere is what you can do right away:\n- Explore Verified Tenders & Projects: Discover curated engineering, EPC, oil & gas, and infrastructure opportunities in the Marketplace.\n- Complete Your Professional Profile: Showcase your credentials, COREN / industry certifications, and project track record.\n- Structured Project Milestones: Collaborate seamlessly with verified companies and professionals across Nigeria.\n\nGo to your dashboard: ${targetDashboardUrl}\n\nIf you ever have questions or need assistance, simply reply directly to this email (${ 'Kolly@collektng.com' }).\n\nKind regards,\nKolly from Collekt\nCollekt Technologies Ltd. Lagos, Nigeria`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -384,10 +384,10 @@ function getWelcomeEmailContent({ firstName, role }) {
       <img src="https://resend-attachments.s3.amazonaws.com/cedf0c5f-1108-47d6-ae7c-ccfbfd20a6ae" alt="Collekt" width="96" style="display: inline-block; border-radius: 8px; margin-bottom: 12px; border: none; outline: none;" />
       <div style="display: block;">
         <span style="display: inline-block; background: rgba(212, 146, 11, 0.2); border: 1px solid rgba(212, 146, 11, 0.45); color: #FBBF24; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 99px; letter-spacing: 0.05em;">
-          ✓ ACCOUNT VERIFIED &bull; WELCOME ABOARD
+          ACCOUNT VERIFIED &bull; WELCOME ABOARD
         </span>
       </div>
-      <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 12px 0 4px 0; letter-spacing: -0.02em;">Welcome to the Collekt Family! 🇳🇬</h1>
+      <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 12px 0 4px 0; letter-spacing: -0.02em;">Welcome to the Collekt Family!</h1>
       <p style="color: rgba(255, 255, 255, 0.82); font-size: 13.5px; margin: 0; font-weight: 500;">
         Nigeria's Project, EPC &amp; Engineering Infrastructure
       </p>
@@ -747,7 +747,7 @@ exports.handler = async (event) => {
       const welcomeContent = getWelcomeEmailContent({ firstName: resolvedFirstName, role: resolvedRole });
       const welcomeSendResult = await sendResendEmail({
         to: email,
-        subject: welcomeContent.subject || 'Welcome to Collekt! 🇳🇬 (Account Verified)',
+        subject: welcomeContent.subject || 'Welcome to Collekt! (Account Verified)',
         html: welcomeContent.html,
         text: welcomeContent.text
       });
@@ -805,7 +805,7 @@ exports.handler = async (event) => {
       const welcomeContent = getWelcomeEmailContent({ firstName: resolvedFirstName, role: resolvedRole });
       const welcomeSendResult = await sendResendEmail({
         to: email,
-        subject: welcomeContent.subject || 'Welcome to Collekt! 🇳🇬 (Account Verified)',
+        subject: welcomeContent.subject || 'Welcome to Collekt! (Account Verified)',
         html: welcomeContent.html,
         text: welcomeContent.text
       });
@@ -890,7 +890,7 @@ exports.handler = async (event) => {
           <tr>
             <td style="background: linear-gradient(135deg, #040F0E 0%, #0E3B35 60%, #13756F 100%); padding: 34px 32px 28px; text-align: center;">
               <span style="display: inline-block; background: rgba(212, 146, 11, 0.2); border: 1px solid rgba(212, 146, 11, 0.4); color: #D4920B; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">
-                🔐 Account Security &amp; Password Recovery
+                Account Security &amp; Password Recovery
               </span>
               <h1 style="color: #ffffff; font-size: 25px; font-weight: 800; margin: 0 0 6px 0;">Reset Your Password</h1>
               <p style="color: rgba(255, 255, 255, 0.82); font-size: 13.5px; margin: 0;">
@@ -914,7 +914,7 @@ exports.handler = async (event) => {
                         ${code}
                       </div>
                       <div style="color: #D4920B; font-size: 12px; font-weight: 700;">
-                        ⏱ Valid for 10 minutes
+                        Valid for 10 minutes
                       </div>
                     </div>
                   </td>
@@ -946,7 +946,7 @@ exports.handler = async (event) => {
 
       const sendResult = await sendResendEmail({
         to: email,
-        subject: `Reset Your Collekt Password (Code: ${code}) 🔐`,
+        subject: `Reset Your Collekt Password (Code: ${code})`,
         html: resetHtml,
         text: resetText
       });

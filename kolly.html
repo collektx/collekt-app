@@ -516,7 +516,7 @@
         <span style="width:24px; height:24px; border-radius:50%; background:#10a37f; color:#fff; display:inline-grid; place-items:center; font-size:12px; font-weight:700;">K</span>
         <span>New chat</span>
       </span>
-      <span style="font-size:16px;">✎</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
     </button>
 
     <div class="history-label">Chat History</div>
@@ -524,15 +524,15 @@
 
     <div class="sidebar-footer">
       <div class="memory-pill">
-        <span>👤 Preferred Name</span>
+        <span>Preferred Name</span>
         <strong id="userNameBadge" style="color:#fbbf24;">Ask me</strong>
       </div>
       <div class="memory-pill">
-        <span>🧠 Questions Learned</span>
+        <span>Questions Learned</span>
         <strong id="learnedCount" style="color:#34d399;">0</strong>
       </div>
       <button type="button" id="btnMemoryGovernance" style="margin-top:4px;padding:7px 10px;border-radius:8px;border:1px solid var(--border-subtle);background:transparent;color:var(--text-muted);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-family:inherit;">
-        <span>🛡️ Memory &amp; Privacy</span>
+        <span>Memory &amp; Privacy</span>
         <span id="memoryConsentDot" style="color:#34d399;font-weight:700;">ON</span>
       </button>
     </div>
@@ -542,14 +542,14 @@
   <main class="main">
     <header class="topbar">
       <div class="topbar-left">
-        <button class="icon-btn" id="btnToggleSidebar" title="Toggle chat history sidebar">☰</button>
+        <button class="icon-btn" id="btnToggleSidebar" title="Toggle chat history sidebar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <div class="model-title">
           <span>Kolly</span>
           <span class="model-badge">Collekt AI</span>
         </div>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
-        <button type="button" id="btnResearchToggle" class="collekt-link" style="background:transparent;cursor:pointer;font-family:inherit;" title="Toggle Grounded Web & Regulatory Research Mode">🌐 Research: OFF</button>
+        <button type="button" id="btnResearchToggle" class="collekt-link" style="background:transparent;cursor:pointer;font-family:inherit;" title="Toggle Grounded Web & Regulatory Research Mode">Research: OFF</button>
         <a href="index.html" id="backToCollektLink" class="collekt-link">← Back to Collekt</a>
       </div>
     </header>
@@ -560,12 +560,12 @@
 
     <div class="input-area">
       <div id="attachedDocBanner" style="display:none;max-width:760px;margin:0 auto 6px;padding:6px 14px;border-radius:12px;background:rgba(16,163,127,0.14);border:1px solid rgba(16,163,127,0.35);font-size:12.5px;color:#34d399;align-items:center;justify-content:space-between;">
-        <span id="attachedDocLabel">📄 Attached Tender / RFQ Document</span>
+        <span id="attachedDocLabel">Attached Tender / RFQ Document</span>
         <button type="button" id="btnClearDoc" style="background:none;border:none;color:#ececec;cursor:pointer;font-size:14px;">×</button>
       </div>
       <form id="chatForm" class="input-box-wrap">
         <input type="file" id="docFileInput" accept=".txt,.md,.csv,.json,.xml,.html" style="display:none;" />
-        <button type="button" id="btnAttachDoc" title="Attach Tender / RFQ / Scope Document for Compliance Analysis" style="background:none;border:none;font-size:17px;cursor:pointer;padding:2px 4px;color:#333;">📎</button>
+        <button type="button" id="btnAttachDoc" title="Attach Tender / RFQ / Scope Document for Compliance Analysis" style="background:none;border:none;font-size:17px;cursor:pointer;padding:2px 4px;color:#333;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
         <textarea
           id="chatInput"
           class="chat-textarea"
@@ -584,7 +584,7 @@
   <div id="memoryModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:1000;place-items:center;padding:16px;">
     <div style="background:#1e1e1e;border:1px solid var(--border-subtle);border-radius:16px;max-width:520px;width:100%;padding:20px;color:var(--text-main);">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <strong style="font-size:16px;">🧠 Personal Memory &amp; Privacy Governance</strong>
+        <strong style="font-size:16px;">Personal Memory &amp; Privacy Governance</strong>
         <button type="button" id="btnCloseMemoryModal" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">×</button>
       </div>
       <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:12px;line-height:1.5;">
@@ -594,12 +594,12 @@
       <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;">
         <button type="button" id="btnToggleConsent" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border-subtle);background:#2a2a2a;color:#fff;font-size:12.5px;cursor:pointer;">Toggle Memory Consent</button>
         <button type="button" id="btnExportMemory" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border-subtle);background:#2a2a2a;color:#34d399;font-size:12.5px;cursor:pointer;">⬇ Export JSON</button>
-        <button type="button" id="btnClearMemory" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.12);color:#f87171;font-size:12.5px;cursor:pointer;">🗑 Reset Memory</button>
+        <button type="button" id="btnClearMemory" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.12);color:#f87171;font-size:12.5px;cursor:pointer;">Reset Memory</button>
       </div>
     </div>
   </div>
 
-  <script src="kolly-engine.js?v=183.0"></script>
+  <script src="kolly-engine.js?v=184.0"></script>
   <script>
     const sidebar = document.getElementById('sidebar');
     const btnToggleSidebar = document.getElementById('btnToggleSidebar');
@@ -812,14 +812,14 @@
             <div class="assistant-content">
               ${formatMarkdown(msg.content)}
               <div class="msg-actions">
-                <button class="msg-action-btn copy-btn">📋 Copy</button>
+                <button class="msg-action-btn copy-btn">Copy</button>
               </div>
             </div>
           `;
           row.querySelector('.copy-btn').addEventListener('click', function () {
             navigator.clipboard.writeText(msg.content);
-            this.textContent = '✓ Copied';
-            setTimeout(() => { this.textContent = '📋 Copy'; }, 2000);
+            this.textContent = 'Copied';
+            setTimeout(() => { this.textContent = 'Copy'; }, 2000);
           });
           chatContainer.appendChild(row);
         }
@@ -925,7 +925,7 @@
     if (btnResearchToggle) {
       btnResearchToggle.addEventListener('click', () => {
         researchModeActive = !researchModeActive;
-        btnResearchToggle.textContent = researchModeActive ? '🌐 Research: ON' : '🌐 Research: OFF';
+        btnResearchToggle.textContent = researchModeActive ? 'Research: ON' : 'Research: OFF';
         btnResearchToggle.style.borderColor = researchModeActive ? '#10a37f' : 'var(--border-subtle)';
         btnResearchToggle.style.color = researchModeActive ? '#34d399' : 'var(--text-muted)';
       });
@@ -940,7 +940,7 @@
         reader.onload = function (ev) {
           pendingDocumentText = String(ev.target.result || '').slice(0, 35000);
           pendingDocumentName = file.name;
-          if (attachedDocLabel) attachedDocLabel.textContent = `📄 Attached: ${file.name}`;
+          if (attachedDocLabel) attachedDocLabel.textContent = `Attached: ${file.name}`;
           if (attachedDocBanner) attachedDocBanner.style.display = 'flex';
         };
         reader.readAsText(file);

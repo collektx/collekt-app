@@ -28,9 +28,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=183.0">
-<link rel="stylesheet" href="shared.css?v=183.0">
-<link rel="stylesheet" href="glass.css?v=183.0">
+<link rel="stylesheet" href="style.css?v=184.0">
+<link rel="stylesheet" href="shared.css?v=184.0">
+<link rel="stylesheet" href="glass.css?v=184.0">
 
 <style>
   body { background: var(--paper); }
@@ -298,7 +298,7 @@
 
               <!-- FX Safeguard dynamic preview pill -->
               <div id="postFxPreviewPill" style="display:none; margin-top:-6px; margin-bottom:14px; background:rgba(19,117,111,0.08); border:1px solid rgba(19,117,111,0.25); border-radius:10px; padding:8px 12px; font-size:11.5px; color:var(--teal); font-weight:700; align-items:center; justify-content:space-between;">
-                <span>🔒 <strong>FX Safeguard Active:</strong> <span id="postFxConvertedText">~₦0 NGN @ ₦1,550/$</span></span>
+                <span><strong>FX Safeguard Active:</strong> <span id="postFxConvertedText">~₦0 NGN @ ₦1,550/$</span></span>
                 <span style="font-size:10px; opacity:0.85; background:var(--teal); color:#fff; padding:2px 7px; border-radius:4px;">Locked at Escrow Deposit</span>
               </div>
 
@@ -312,7 +312,7 @@
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
                   <div>
                     <label class="form-label" style="font-weight:800; font-size:13px; margin-bottom:2px; display:flex; align-items:center; gap:6px;">
-                      <span>🔒</span> Escrow Payout Schedule
+                      Escrow Payout Schedule
                     </label>
                     <div style="font-size:11.5px; color:var(--muted);">Choose whether funds are released in one lump sum or in custom milestone phases.</div>
                   </div>
@@ -331,7 +331,7 @@
                 <!-- Mode 1: 100% Lump Sum Upon Completion (Default) -->
                 <div id="lumpSumNoticeBox" style="font-size:12px; color:var(--muted); line-height:1.55; padding:12px 14px; border-radius:10px; background:rgba(19,117,111,0.06); border:1px solid rgba(19,117,111,0.18);">
                   <div style="display:flex; align-items:flex-start; gap:8px;">
-                    <span style="font-size:16px; line-height:1;">✅</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     <div>
                       <strong style="color:var(--ink);">100% Single Escrow Release:</strong> 
                       The entire contract sum is deposited into Nova Bank Escrow and held safely in trust. <strong>100% of the funds will be released</strong> to the professional specialist in a single payout once the job is fully delivered and approved by your team.
@@ -344,7 +344,7 @@
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <span style="font-size:12px; font-weight:800; color:var(--ink);">List Milestone Deliverables &amp; Release Percentages</span>
                     <span id="milestoneTotalBadge" style="font-size:11px; font-weight:800; padding:4px 10px; border-radius:99px; background:rgba(22,163,74,0.12); color:#16a34a;">
-                      ✓ Total: 100%
+                      Total: 100%
                     </span>
                   </div>
 
@@ -403,7 +403,7 @@
 
             <!-- Empty State Placeholder (Clean state when form is untouched) -->
             <div id="prevEmptyPlaceholder" style="background:var(--paper, rgba(255,255,255,0.03)); border:2px dashed var(--line, rgba(255,255,255,0.12)); border-radius:16px; padding:44px 20px; text-align:center;">
-              <div style="font-size:36px; margin-bottom:12px; opacity:0.7;">📝</div>
+              <div style="margin-bottom:12px; opacity:0.7; display:flex; justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
               <div style="font-size:14px; font-weight:800; color:var(--ink); margin-bottom:6px;">Clean Slate &mdash; No Active Draft</div>
               <p style="font-size:12.5px; color:var(--muted); line-height:1.5; max-width:300px; margin:0 auto;">
                 Start typing your opportunity title and scope on the left. Your live marketplace preview card will appear right here as you draft.
@@ -441,7 +441,7 @@
                   </div>
 
                   <div id="prevMilestonePill" style="font-size:11px; font-weight:800; color:var(--teal); margin-bottom:12px; display:flex; align-items:center; gap:6px; background:rgba(19,117,111,0.08); padding:6px 12px; border-radius:8px;">
-                    <span>🔒</span> <span id="prevMilestoneTxt">100% Escrow on Completion</span>
+                    <span id="prevMilestoneTxt">100% Escrow on Completion</span>
                   </div>
                 </div>
 
@@ -451,7 +451,7 @@
                     <span class="tender-budget-val" id="prevBudget" style="font-size:16px; font-weight:900;">Price not specified</span>
                   </div>
                   <button type="button" class="btn btn-primary btn-sm" onclick="openLiveCardFullPreview()" style="font-weight:800; font-size:12px; cursor:pointer;">
-                    👁️ Preview
+                    Preview
                   </button>
                 </div>
               </div>
@@ -502,7 +502,7 @@
 
     <div id="prevModalEscrowSection" style="background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:20px;">
       <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
-        <span>🔒</span> Escrow Payment Schedule
+        Escrow Payment Schedule
       </div>
       <div id="prevModalMilestonesList" style="display:flex; flex-direction:column; gap:8px;">
         <!-- Populated dynamically -->
@@ -511,7 +511,7 @@
 
     <div style="border-top:1px solid var(--line); padding-top:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
       <div style="font-size:12px; color:var(--muted);">
-        👁️ <strong>Company Preview Mode:</strong> This is how verified professionals see your opportunity in the live marketplace.
+        <strong>Company Preview Mode:</strong> This is how verified professionals see your opportunity in the live marketplace.
       </div>
       <button class="btn btn-primary btn-sm" onclick="closeModal('opportunityPreviewModal')" style="font-weight:800;">
         Close Preview
@@ -521,10 +521,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=183.0"></script>
-<script src="app.js?v=183.0"></script>
-<script src="collekt-ai.js?v=183.0"></script>
-<script src="settings-popup.js?v=183.0"></script>
+<script src="supabase.js?v=184.0"></script>
+<script src="app.js?v=184.0"></script>
+<script src="collekt-ai.js?v=184.0"></script>
+<script src="settings-popup.js?v=184.0"></script>
 
 <script>
   let editingJobId = null;
@@ -538,7 +538,7 @@
     const compEl = document.getElementById('prevCompany');
     if (compEl) {
       const badge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(14, user) : '';
-      compEl.innerHTML = `🏢 ${escapeHTML(compName)} ${badge}`;
+      compEl.innerHTML = `${escapeHTML(compName)} ${badge}`;
     }
 
     // Check if in edit mode
@@ -614,9 +614,9 @@
           </div>
           <div style="text-align:center;">
             ${currentMilestones.length > 2 ? `
-              <button type="button" onclick="removeMilestoneRow(${idx})" style="background:none; border:none; color:#ef4444; font-size:14px; cursor:pointer; padding:2px 6px;" title="Remove Phase">✕</button>
+              <button type="button" onclick="removeMilestoneRow(${idx})" style="background:none; border:none; color:#ef4444; font-size:14px; cursor:pointer; padding:2px 6px;" title="Remove Phase">&times;</button>
             ` : `
-              <span style="opacity:0.25; font-size:13px; cursor:not-allowed;">✕</span>
+              <span style="opacity:0.25; font-size:13px; cursor:not-allowed;">&times;</span>
             `}
           </div>
         </div>
@@ -628,7 +628,7 @@
 
   function addMilestoneRow() {
     if (currentMilestones.length >= 3) {
-      if (typeof showToast === 'function') showToast('ℹ️ Companies can define 2 or 3 custom milestones per job.', 'info');
+      if (typeof showToast === 'function') showToast('Companies can define 2 or 3 custom milestones per job.', 'info');
       return;
     }
     currentMilestones = [
@@ -642,7 +642,7 @@
 
   function removeMilestoneRow(idx) {
     if (currentMilestones.length <= 2) {
-      if (typeof showToast === 'function') showToast('⚠️ Minimum 2 milestones required for phased escrow schedule.', 'warning');
+      if (typeof showToast === 'function') showToast('Minimum 2 milestones required for phased escrow schedule.', 'warning');
       return;
     }
     currentMilestones.splice(idx, 1);
@@ -681,11 +681,11 @@
         badge.style.background = 'rgba(22,163,74,0.12)';
         badge.style.color = '#16a34a';
         const formattedTotal = typeof formatCurrency === 'function' ? formatCurrency(budget, currency) : (currency === 'USD' ? '$' : '₦') + budget.toLocaleString();
-        badge.innerHTML = `✓ Total: 100% ${budget > 0 ? '(' + formattedTotal + ')' : ''}`;
+        badge.innerHTML = `Total: 100% ${budget > 0 ? '(' + formattedTotal + ')' : ''}`;
       } else {
         badge.style.background = 'rgba(239,68,68,0.12)';
         badge.style.color = '#ef4444';
-        badge.innerHTML = `⚠️ Total: ${sum}% (Must equal 100%)`;
+        badge.innerHTML = `Total: ${sum}% (Must equal 100%)`;
       }
     }
   }
@@ -699,7 +699,7 @@
     }
     const job = allJobs.find(j => String(j.id) === String(jobId));
     if (!job) {
-      if (typeof showToast === 'function') showToast('⚠️ Opportunity not found.', 'warning');
+      if (typeof showToast === 'function') showToast('Opportunity not found.', 'warning');
       return;
     }
 
@@ -747,7 +747,7 @@
 
     const submitBtn = document.getElementById('submitJobBtn');
     if (submitBtn) {
-      submitBtn.innerHTML = '💾 Save Changes &amp; Update Live';
+      submitBtn.innerHTML = 'Save Changes &amp; Update Live';
     }
 
     const headingEl = document.querySelector('.post-header-banner h1');
@@ -913,7 +913,7 @@
     }
     if (document.getElementById('prevModalCompanyLine')) {
       const badge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(15, user) : '';
-      document.getElementById('prevModalCompanyLine').innerHTML = `🏢 ${escapeHTML(compName)} ${badge} &bull; 📍 ${escapeHTML(loc)}`;
+      document.getElementById('prevModalCompanyLine').innerHTML = `${escapeHTML(compName)} ${badge} &bull; ${escapeHTML(loc)}`;
     }
     if (document.getElementById('prevModalScope')) {
       document.getElementById('prevModalScope').textContent = desc;
@@ -990,7 +990,7 @@
     const paymentMode    = document.getElementById('postPaymentMode')?.value || 'lump_sum';
 
     if (!title || !desc) {
-      if (typeof showToast === 'function') showToast('⚠️ Please enter opportunity title and description / scope.', 'warning');
+      if (typeof showToast === 'function') showToast('Please enter opportunity title and description / scope.', 'warning');
       return;
     }
 
@@ -998,7 +998,7 @@
     if (paymentMode === 'milestones') {
       const sum = currentMilestones.reduce((acc, m) => acc + (Number(m.percentage) || 0), 0);
       if (sum !== 100) {
-        if (typeof showToast === 'function') showToast('⚠️ Milestone percentages must total exactly 100% (currently ' + sum + '%). Please adjust.', 'warning');
+        if (typeof showToast === 'function') showToast('Milestone percentages must total exactly 100% (currently ' + sum + '%). Please adjust.', 'warning');
         return;
       }
       jobMilestones = currentMilestones.map((m, idx) => {
@@ -1065,13 +1065,13 @@
       if (editingJobId) {
         if (typeof updatePostedJob === 'function') updatePostedJob(editingJobId, jobData);
         if (typeof updateJobInSupabase === 'function') await updateJobInSupabase(editingJobId, jobData);
-        if (typeof showToast === 'function') showToast('🎉 Opportunity updated successfully!');
+        if (typeof showToast === 'function') showToast('Opportunity updated successfully!');
       } else {
         if (typeof savePostedJob === 'function') savePostedJob(jobData);
         if (typeof publishJobToSupabase === 'function') {
           await publishJobToSupabase(jobData);
         }
-        if (typeof showToast === 'function') showToast('🎉 Opportunity published live to the Marketplace!');
+        if (typeof showToast === 'function') showToast('Opportunity published live to the Marketplace!');
       }
 
       setTimeout(() => {
@@ -1084,7 +1084,7 @@
         window.location.href = 'marketplace.html';
       }, 800);
     } finally {
-      if (btn) { btn.innerHTML = '🚀 Publish to Marketplace'; btn.disabled = false; }
+      if (btn) { btn.innerHTML = 'Publish to Marketplace'; btn.disabled = false; }
     }
   }
 </script>

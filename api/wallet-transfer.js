@@ -115,7 +115,7 @@ module.exports = async (req, res) => {
         });
 
         await supabase.from('conversations').update({
-          last_message_preview: `💸 Transferred ₦${amount.toLocaleString('en-NG')}`,
+          last_message_preview: `Transferred ₦${amount.toLocaleString('en-NG')}`,
           last_message_at: new Date().toISOString()
         }).eq('id', conversationId);
       } catch (msgErr) {

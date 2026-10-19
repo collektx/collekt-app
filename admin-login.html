@@ -11,9 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=183.0">
-<link rel="stylesheet" href="shared.css?v=183.0">
-<link rel="stylesheet" href="glass.css?v=183.0">
+<link rel="stylesheet" href="style.css?v=184.0">
+<link rel="stylesheet" href="shared.css?v=184.0">
+<link rel="stylesheet" href="glass.css?v=184.0">
 
 <style>
   :root {
@@ -456,7 +456,7 @@
     </div>
     <div class="active-session-actions">
       <a href="admin-dashboard.html" class="admin-submit-btn" style="text-decoration:none; padding:10px 14px; font-size:12.5px; flex:1;">
-        🚀 Enter Command Dashboard
+        Enter Command Dashboard
       </a>
       <button type="button" onclick="clearCurrentAdminSession()" class="admin-secondary-btn">
         Sign Out
@@ -539,14 +539,14 @@
   </form>
 
   <footer class="admin-footer-meta">
-    🔒 <strong>Master Administrator Access Authorized</strong> &bull; Complete Platform Oversight<br>
+    <strong>Master Administrator Access Authorized</strong> &bull; Complete Platform Oversight<br>
     All administrative actions are cryptographically signed and stored in immutable WORM audit ledgers.
   </footer>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=183.0"></script>
-<script src="app.js?v=183.0"></script>
+<script src="supabase.js?v=184.0"></script>
+<script src="app.js?v=184.0"></script>
 <script>
   const MAX_FAILED_ATTEMPTS = 5;
   const LOCKOUT_DURATION_MS = 300 * 1000; // 5 minutes
@@ -614,7 +614,7 @@
       const secs = secLeft % 60;
       const formatted = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
       showAlert(`
-        <div>⏳ <strong>Security Lockout Active:</strong> Too many failed attempts. Administrative access temporarily suspended. Please wait <strong>${formatted}</strong> before re-attempting.</div>
+        <div><strong>Security Lockout Active:</strong> Too many failed attempts. Administrative access temporarily suspended. Please wait <strong>${formatted}</strong> before re-attempting.</div>
       `, 'warning');
     };
 
@@ -630,7 +630,7 @@
         if (btn) btn.disabled = false;
         if (emailField) emailField.disabled = false;
         if (passField) passField.disabled = false;
-        showAlert('✅ Security lockout period ended. You may now attempt to authenticate.', 'info');
+        showAlert('Security lockout period ended. You may now attempt to authenticate.', 'info');
       } else {
         updateMsg();
       }
@@ -700,7 +700,7 @@
     const btn = document.getElementById('adminLoginBtn');
 
     if (!rawInput || !password) {
-      showAlert('⚠️ Please enter both your admin username/email and password.', 'error');
+      showAlert('Please enter both your admin username/email and password.', 'error');
       return;
     }
 
@@ -850,7 +850,7 @@
         }
       } catch(e) {}
 
-      showAlert('✅ <strong>Access Authorized!</strong> Initializing Operational Command Dashboard...', 'success');
+      showAlert('<strong>Access Authorized!</strong> Initializing Operational Command Dashboard...', 'success');
 
       setTimeout(() => {
         window.location.replace('admin-dashboard.html');
@@ -864,12 +864,12 @@
     if (passField) passField.value = '';
 
     if (isNetworkOffline) {
-      showAlert('⚠️ Network offline. Please check your internet connection and retry.', 'error');
+      showAlert('Network offline. Please check your internet connection and retry.', 'error');
     } else {
       const fails = recordFailedAttempt();
       if (fails !== true) {
         const remainingTries = MAX_FAILED_ATTEMPTS - fails;
-        showAlert(`⚠️ <strong>Invalid administrative credentials.</strong> ${remainingTries > 0 ? `(${remainingTries} attempts remaining before security lockout)` : ''}`, 'error');
+        showAlert(`<strong>Invalid administrative credentials.</strong> ${remainingTries > 0 ? `(${remainingTries} attempts remaining before security lockout)` : ''}`, 'error');
       }
     }
 
@@ -913,7 +913,7 @@
     checkActiveAdminSession();
 
     if (p.get('reason') === 'timeout') {
-      showAlert('🔒 Administrative session closed after 15 minutes of inactivity for regulatory compliance and treasury protection.', 'info');
+      showAlert('Administrative session closed after 15 minutes of inactivity for regulatory compliance and treasury protection.', 'info');
     }
   })();
 </script>

@@ -38,7 +38,7 @@ try {
       NETLIFY_SITE_ID: SITE_ID
     }
   });
-  console.log('🚀 LIVE DEPLOYMENT COMPLETE! All functions & static assets are live at https://collektng.com');
+  console.log('[LIVE DEPLOYMENT COMPLETE]! All functions & static assets are live at https://collektng.com');
 } catch (err) {
   console.error('Deployment failed:', err.message);
   process.exit(1);

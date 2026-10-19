@@ -171,8 +171,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=183.0"></script>
-  <script src="app.js?v=183.0"></script>
+  <script src="supabase.js?v=184.0"></script>
+  <script src="app.js?v=184.0"></script>
   <script>
     function escapeHTML(str) {
       if (!str) return '';
@@ -311,7 +311,7 @@
 
         const title = document.getElementById('statusTitle');
         const desc = document.getElementById('statusDesc');
-        if (title) title.textContent = 'Verify Your Email 🔐';
+        if (title) title.textContent = 'Verify Your Email';
         if (desc) desc.innerHTML = `We sent a 6-digit verification code to <strong style="color:var(--forest);">${escapeHTML(session.user.email)}</strong>. Enter it below to access your dashboard:`;
 
         const userEmail = session.user.email;
@@ -345,7 +345,7 @@
             <span id="googleCountdown" style="color:var(--muted); font-size:12px; display:none;"></span>
           </div>
           <div style="margin-top:14px; font-size:11.5px; color:var(--muted);">
-            ⏱ Code expires in 10 minutes &bull; Protected by NDPA 2023
+            Code expires in 10 minutes &bull; Protected by NDPA 2023
           </div>
         `;
 
@@ -394,7 +394,7 @@
             boxes.forEach((b, i) => { b.value = digits[i] || ''; });
             const succBox = document.getElementById('googleOtpSuccess');
             if (succBox) {
-              succBox.innerHTML = `✓ Instant Verification Code generated: <strong>${digits}</strong> (pre-filled below).`;
+              succBox.innerHTML = `Instant Verification Code generated: <strong>${digits}</strong> (pre-filled below).`;
               succBox.style.display = 'block';
             }
           }
@@ -444,9 +444,9 @@
               if (d.fallback_code) {
                 const digits = String(d.fallback_code).slice(0, 6);
                 boxes.forEach((b, i) => { b.value = digits[i] || ''; });
-                succBox.innerHTML = `✓ Fresh Verification Code generated: <strong>${digits}</strong> (pre-filled below).`;
+                succBox.innerHTML = `Fresh Verification Code generated: <strong>${digits}</strong> (pre-filled below).`;
               } else {
-                succBox.textContent = '✓ A new verification code has been sent to your email.';
+                succBox.textContent = 'A new verification code has been sent to your email.';
               }
               succBox.style.display = 'block';
               startTimer();
@@ -478,7 +478,7 @@
           }
 
           submitBtn.disabled = true;
-          submitBtn.innerHTML = '<span>Verifying code... ⏳</span>';
+          submitBtn.innerHTML = '<span>Verifying code...</span>';
 
           try {
             const res = await fetch('/api/auth-otp', {
@@ -506,10 +506,10 @@
 
             if (submitBtn) {
               submitBtn.disabled = true;
-              submitBtn.innerHTML = '<span>✓ Verified! Entering Dashboard in 2s...</span>';
+              submitBtn.innerHTML = '<span>Verified! Entering Dashboard in 2s...</span>';
             }
             if (succBox) {
-              succBox.innerHTML = '🎉 <strong>Code Verified!</strong> Welcome email sent to your inbox. Loading dashboard in <strong>2s</strong>...';
+              succBox.innerHTML = '<strong>Code Verified!</strong> Welcome email sent to your inbox. Loading dashboard in <strong>2s</strong>...';
               succBox.style.display = 'block';
             }
 
@@ -550,8 +550,8 @@
             } catch(e) {}
 
             setTimeout(() => {
-              if (submitBtn) submitBtn.innerHTML = '<span>✓ Verified! Entering Dashboard in 1s...</span>';
-              if (succBox) succBox.innerHTML = '🎉 <strong>Code Verified!</strong> Welcome email sent to your inbox. Loading dashboard in <strong>1s</strong>...';
+              if (submitBtn) submitBtn.innerHTML = '<span>Verified! Entering Dashboard in 1s...</span>';
+              if (succBox) succBox.innerHTML = '<strong>Code Verified!</strong> Welcome email sent to your inbox. Loading dashboard in <strong>1s</strong>...';
             }, 1000);
 
             setTimeout(async () => {

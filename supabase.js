@@ -273,7 +273,7 @@ async function signInWithEmailPassword({ email, password }) {
     // Check account status
     if (profile && (profile.suspended === true || profile.status === 'suspended')) {
       await sb.auth.signOut();
-      return { error: { message: '⛔ Your account has been suspended by Collekt administration. Please contact support@collekt.ng.' } };
+      return { error: { message: 'Your account has been suspended by Collekt administration. Please contact support@collekt.ng.' } };
     }
 
     const role = (profile && profile.role) || data.user.user_metadata?.role || 'professional';
@@ -965,7 +965,7 @@ async function handleOAuthSessionRouting(session) {
   if (isAuthPage) {
     if (!isOtpVerified) {
       if (path.includes('register') || path.includes('auth-callback')) {
-        console.log('🔒 Holding dashboard redirect: OTP verification required before dashboard access.');
+        console.log('[Auth] Holding dashboard redirect: OTP verification required before dashboard access.');
         return;
       }
       if (path.includes('login')) {
@@ -2254,7 +2254,7 @@ async function generateAndSaveFinalPDF({
   const cleanBaseName = (filename || `${title.replace(/[^a-zA-Z0-9_-]/g, '_')}_${Date.now()}.pdf`).replace(/\.pdf$/i, '') + '.pdf';
 
   try {
-    if (typeof showToast === 'function') showToast('📄 Compiling PDF document with Collekt engine...');
+    if (typeof showToast === 'function') showToast('Compiling PDF document with Collekt engine...');
     await loadHtml2PdfLibrary();
 
     let targetElement = element;
@@ -2326,7 +2326,7 @@ async function generateAndSaveFinalPDF({
       if (!uploadRes.error) {
         publicUrl = uploadRes.publicUrl;
         docRecord = uploadRes.data;
-        if (typeof showToast === 'function') showToast('✅ PDF successfully saved to your Collekt database!');
+        if (typeof showToast === 'function') showToast('PDF successfully saved to your Collekt database!');
       }
     }
 
@@ -2345,7 +2345,7 @@ async function generateAndSaveFinalPDF({
     return { success: true, blob: pdfBlob, publicUrl, data: docRecord, error: null };
   } catch (err) {
     console.error('PDF generation error:', err);
-    if (typeof showToast === 'function') showToast('⚠️ Could not compile PDF: ' + err.message, 'warning');
+    if (typeof showToast === 'function') showToast('Could not compile PDF: ' + err.message, 'warning');
     return { success: false, error: err };
   }
 }
@@ -3011,7 +3011,7 @@ async function submitCollectionRequestToSupabase(req) {
     const actualProId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(proId) : proId);
 
     if (actualCompanyId && actualProId && actualCompanyId !== actualProId) {
-      const sysMsgText = `⚡ ${proposalData.userName} submitted a collection request for "${proposalData.jobTitle}". (Status: Pending Review)`;
+      const sysMsgText = `${proposalData.userName} submitted a collection request for "${proposalData.jobTitle}". (Status: Pending Review)`;
       
       if (window.sb && typeof createSupabaseConversation === 'function') {
         try {
@@ -3034,7 +3034,7 @@ async function submitCollectionRequestToSupabase(req) {
               }
             });
             await sb.from('conversations').update({
-              last_message_preview: `⚡ Collection request: ${proposalData.jobTitle.slice(0, 40)}`,
+              last_message_preview: `Collection request: ${proposalData.jobTitle.slice(0, 40)}`, 
               last_message_at: nowIso
             }).eq('id', conv.id);
           }
@@ -3373,7 +3373,7 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
       const msSummaryText = payMode === 'milestones' && contractMilestones.length > 1
         ? `Escrow Payout Schedule (${contractMilestones.length} Milestones): ` + contractMilestones.map((m, i) => `M${i + 1}: ${m.name} (${m.percentage}% — ${sym}${Number(m.amount || 0).toLocaleString()})`).join(' | ')
         : `Escrow Payout Schedule: 100% Lump-Sum Payout After Job Completion (${sym}${Number(totalAmt || 0).toLocaleString()})`;
-      const acceptMsgText = `🎉 Collection request for "${contractData.jobTitle}" has been ACCEPTED by ${contractData.companyName}! Active project engagement has commenced.\n🔒 ${msSummaryText}`;
+      const acceptMsgText = `Collection request for "${contractData.jobTitle}" has been ACCEPTED by ${contractData.companyName}! Active project engagement has commenced.\n${msSummaryText}`;
 
       if (window.sb && typeof createSupabaseConversation === 'function') {
         try {
@@ -3398,7 +3398,7 @@ async function acceptCollectorProposalInSupabase(proposalId, details) {
               }
             });
             await sb.from('conversations').update({
-              last_message_preview: `🎉 Accepted: ${contractData.jobTitle.slice(0, 40)}`,
+              last_message_preview: `Accepted: ${contractData.jobTitle.slice(0, 40)}`, 
               last_message_at: nowIso
             }).eq('id', conv.id);
           }
@@ -3504,7 +3504,7 @@ async function declineCollectorProposalInSupabase(proposalId) {
     const actualProId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(proId) : proId);
 
     if (actualCompanyId && actualProId && actualCompanyId !== actualProId) {
-      const declineMsgText = `ℹ️ Collection request for "${jobTitle}" has been declined by ${companyName}.`;
+      const declineMsgText = `Collection request for "${jobTitle}" has been declined by ${companyName}.`;
 
       if (window.sb && typeof createSupabaseConversation === 'function') {
         try {
@@ -3525,7 +3525,7 @@ async function declineCollectorProposalInSupabase(proposalId) {
               }
             });
             await sb.from('conversations').update({
-              last_message_preview: `ℹ️ Declined: ${jobTitle.slice(0, 40)}`,
+              last_message_preview: `Declined: ${jobTitle.slice(0, 40)}`, 
               last_message_at: nowIso
             }).eq('id', conv.id);
           }
@@ -3958,9 +3958,7 @@ function openAiMessageModal(options = {}) {
     <div class="modal-card" style="max-width:580px; width:100%; border-radius:22px; padding:26px; background:var(--white); border:1px solid var(--line); font-family:'Manrope',sans-serif; box-shadow:0 20px 50px rgba(0,0,0,0.18);">
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
         <div style="display:flex; align-items:center; gap:10px;">
-          <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #0f766e, #134e4a); display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; box-shadow:0 4px 12px rgba(15,118,110,0.25);">
-            ✨
-          </div>
+          <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #0f766e, #134e4a); display:flex; align-items:center; justify-content:center; color:#fff; box-shadow:0 4px 12px rgba(15,118,110,0.25);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <div>
             <div style="font-size:17px; font-weight:900; color:var(--ink); line-height:1.2;">Message Specialist</div>
             <div style="font-size:12px; color:var(--muted); margin-top:2px;">Contextual AI Drafter &bull; Zero-Fabrication Assured</div>
@@ -3972,7 +3970,7 @@ function openAiMessageModal(options = {}) {
       <!-- Real Facts Context Card -->
       <div style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:16px; font-size:12px;">
         <div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--teal); margin-bottom:8px; display:flex; align-items:center; gap:5px;">
-          <span>🔒 Verified Interaction Context</span>
+          <span>Verified Interaction Context</span>
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px 12px;">
           <div><span style="color:var(--muted);">Professional:</span> <strong style="color:var(--ink);">${escapeHTML(proName)}</strong></div>
@@ -3989,10 +3987,10 @@ function openAiMessageModal(options = {}) {
       <div style="margin-bottom:14px;">
         <label style="font-size:11.5px; font-weight:800; color:var(--ink); display:block; margin-bottom:6px;">Drafting Intent</label>
         <div style="display:flex; flex-wrap:wrap; gap:6px;" id="aiMsgIntentPills">
-          <button type="button" class="btn btn-sm" onclick="setAiMessageIntent('acceptance_kickoff')" data-intent="acceptance_kickoff" style="font-size:11px; font-weight:800; border-radius:99px; padding:4px 12px; background:#0e3b35; color:#fff; border:1.5px solid #0e3b35;">🚀 Project Kickoff</button>
-          <button type="button" class="btn btn-sm" onclick="setAiMessageIntent('request_clarification')" data-intent="request_clarification" style="font-size:11px; font-weight:700; border-radius:99px; padding:4px 12px; background:var(--paper); color:var(--ink); border:1.5px solid var(--line);">📋 Request Details</button>
-          <button type="button" class="btn btn-sm" onclick="setAiMessageIntent('scope_discussion')" data-intent="scope_discussion" style="font-size:11px; font-weight:700; border-radius:99px; padding:4px 12px; background:var(--paper); color:var(--ink); border:1.5px solid var(--line);">🔍 Scope Alignment</button>
-          <button type="button" class="btn btn-sm" onclick="setAiMessageIntent('general')" data-intent="general" style="font-size:11px; font-weight:700; border-radius:99px; padding:4px 12px; background:var(--paper); color:var(--ink); border:1.5px solid var(--line);">💬 General Note</button>
+          <button type="button" class="btn btn-sm" onclick="setAiMessageIntent('acceptance_kickoff')" data-intent="acceptance_kickoff" style="font-size:11px; font-weight:800; border-radius:99px; padding:4px 12px; background:#0e3b35; color:#fff; border:1.5px solid #0e3b35;">Project Kickoff</button>
+          <button type="button" class="btn btn-sm" onclick="setAiMessageIntent('request_clarification')" data-intent="request_clarification" style="font-size:11px; font-weight:700; border-radius:99px; padding:4px 12px; background:var(--paper); color:var(--ink); border:1.5px solid var(--line);">Request Details</button>
+          <button type="button" class="btn btn-sm" onclick="setAiMessageIntent('scope_discussion')" data-intent="scope_discussion" style="font-size:11px; font-weight:700; border-radius:99px; padding:4px 12px; background:var(--paper); color:var(--ink); border:1.5px solid var(--line);">Scope Alignment</button>
+          <button type="button" class="btn btn-sm" onclick="setAiMessageIntent('general')" data-intent="general" style="font-size:11px; font-weight:700; border-radius:99px; padding:4px 12px; background:var(--paper); color:var(--ink); border:1.5px solid var(--line);">General Note</button>
         </div>
       </div>
 
@@ -4010,7 +4008,7 @@ function openAiMessageModal(options = {}) {
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <label style="font-size:12px; font-weight:800; color:var(--ink);">Review &amp; Edit Message Draft</label>
           <button type="button" class="btn btn-outline btn-sm" id="btnAiRegenerate" onclick="regenerateAiMessageDraft()" style="font-size:11px; padding:3px 10px; border-radius:8px; display:inline-flex; align-items:center; gap:4px;">
-            <span>🔄 Regenerate</span>
+            <span>Regenerate</span>
           </button>
         </div>
         <textarea id="aiMessageDraftArea" class="form-textarea" rows="6" style="width:100%; font-size:13px; line-height:1.55; padding:12px; border-radius:12px; border:1.5px solid var(--line); font-family:inherit; resize:vertical; background:var(--white);" placeholder="Generating draft..."></textarea>
@@ -4024,7 +4022,7 @@ function openAiMessageModal(options = {}) {
       <div style="display:flex; justify-content:flex-end; gap:10px; align-items:center; padding-top:10px; border-top:1px solid var(--line);">
         <button type="button" class="btn btn-outline btn-sm" onclick="closeAiMessageModal()" style="font-weight:700; font-size:12px; padding:8px 16px;">Cancel</button>
         <button type="button" class="btn btn-primary btn-sm" id="btnSendAiMsg" onclick="sendAiMessageFromModal()" style="font-weight:800; font-size:12.5px; padding:8px 20px; background:var(--teal); box-shadow:0 4px 14px rgba(19,117,111,0.3);">
-          🚀 Send Message to ${escapeHTML(proName.split(' ')[0] || 'Specialist')}
+          Send Message to ${escapeHTML(proName.split(' ')[0] || 'Specialist')}
         </button>
       </div>
     </div>
@@ -4078,11 +4076,11 @@ async function regenerateAiMessageDraft() {
   
   if (draftArea) {
     draftArea.disabled = true;
-    draftArea.placeholder = '✨ Kolly AI is drafting a factual message...';
+    draftArea.placeholder = 'Kolly AI is drafting a factual message...';
   }
   if (btnRegen) {
     btnRegen.disabled = true;
-    btnRegen.innerHTML = '<span>⏳ Drafting...</span>';
+    btnRegen.innerHTML = '<span>Drafting...</span>';
   }
 
   try {
@@ -4118,7 +4116,7 @@ async function regenerateAiMessageDraft() {
   } finally {
     if (btnRegen) {
       btnRegen.disabled = false;
-      btnRegen.innerHTML = '<span>🔄 Regenerate</span>';
+      btnRegen.innerHTML = '<span>Regenerate</span>';
     }
   }
 }
@@ -4129,14 +4127,14 @@ async function sendAiMessageFromModal() {
   const text = draftArea ? draftArea.value.trim() : '';
 
   if (!text) {
-    if (typeof showToast === 'function') showToast('⚠️ Message body cannot be empty', 'warning');
+    if (typeof showToast === 'function') showToast('Message body cannot be empty', 'warning');
     return;
   }
 
   const btnSend = document.getElementById('btnSendAiMsg');
   if (btnSend) {
     btnSend.disabled = true;
-    btnSend.innerHTML = '<span>⏳ Sending...</span>';
+    btnSend.innerHTML = '<span>Sending...</span>';
   }
 
   try {
@@ -4154,7 +4152,7 @@ async function sendAiMessageFromModal() {
       closeAiMessageModal();
 
       if (typeof showToast === 'function') {
-        showToast(`✅ Message sent to ${proName}!`);
+        showToast(`Message sent to ${proName}!`);
       }
 
       // Show temporary notification card with link to conversation
@@ -4162,7 +4160,7 @@ async function sendAiMessageFromModal() {
       toastEl.className = 'collekt-toast';
       toastEl.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:9999999; background:#0f2b26; color:#fff; padding:16px 20px; border-radius:14px; border:1px solid #134e4a; box-shadow:0 10px 30px rgba(0,0,0,0.3); font-family:sans-serif; display:flex; align-items:center; gap:12px;';
       toastEl.innerHTML = `
-        <span style="font-size:20px;">💬</span>
+        <span style="display:inline-flex; align-items:center; color:#14b8a6;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
         <div>
           <div style="font-weight:800; font-size:13px;">Message delivered to ${escapeHTML(proName)}</div>
           <div style="font-size:11px; opacity:0.8; margin-top:2px;">Visible in real-time in Messages inbox</div>
@@ -4175,19 +4173,19 @@ async function sendAiMessageFromModal() {
       setTimeout(() => { toastEl.remove(); }, 6000);
     } else {
       if (typeof showToast === 'function') {
-        showToast('⚠️ ' + (res.error || 'Failed to send message'), 'error');
+        showToast((res.error || 'Failed to send message'), 'error');
       }
       if (btnSend) {
         btnSend.disabled = false;
-        btnSend.innerHTML = '🚀 Send Message';
+        btnSend.innerHTML = 'Send Message';
       }
     }
   } catch(err) {
     console.error('sendAiMessageFromModal error:', err);
-    if (typeof showToast === 'function') showToast('⚠️ An error occurred while sending', 'error');
+    if (typeof showToast === 'function') showToast('An error occurred while sending', 'error');
     if (btnSend) {
       btnSend.disabled = false;
-      btnSend.innerHTML = '🚀 Send Message';
+      btnSend.innerHTML = 'Send Message';
     }
   }
 }

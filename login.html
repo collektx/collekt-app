@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=183.0">
-<link rel="stylesheet" href="shared.css?v=183.0">
-<link rel="stylesheet" href="glass.css?v=183.0">
+<link rel="stylesheet" href="style.css?v=184.0">
+<link rel="stylesheet" href="shared.css?v=184.0">
+<link rel="stylesheet" href="glass.css?v=184.0">
 
 <style>
   body { background: var(--paper); }
@@ -108,7 +108,7 @@
     <div style="display:flex; align-items:center; gap:20px; margin-bottom:28px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); padding:18px 24px; border-radius:20px; backdrop-filter:blur(10px); position:relative; z-index:2;">
       <img src="kolly-mascot-clean.png" alt="Kolly Collekt Mascot" style="height:110px; width:auto; filter:drop-shadow(0 8px 18px rgba(0,0,0,0.5)); flex-shrink:0;" loading="lazy" decoding="async">
       <div>
-        <div style="font-size:20px; font-weight:900; color:#fff; margin-bottom:4px;">Hi, I'm Kolly! 🦖</div>
+        <div style="font-size:20px; font-weight:900; color:#fff; margin-bottom:4px;">Hi, I'm Kolly!</div>
         <div style="font-size:13px; color:rgba(255,255,255,0.75); line-height:1.4;">Welcome to Collekt. Log in to manage your tenders, contract professionals, and grow your projects!</div>
       </div>
     </div>
@@ -131,10 +131,10 @@
       <!-- Role Selection Tabs -->
       <div class="login-role-tabs" style="display:flex; gap:8px; margin-bottom:18px; background:var(--paper); padding:4px; border-radius:12px; border:1px solid var(--line);">
         <button type="button" id="tabRolePro" onclick="setLoginRoleTab('professional')" style="flex:1; border:none; border-radius:8px; font-weight:800; font-size:13px; padding:10px; cursor:pointer; transition:all .2s; background:var(--forest); color:#fff;">
-          👷 Professional
+          Professional
         </button>
         <button type="button" id="tabRoleCompany" onclick="setLoginRoleTab('company')" style="flex:1; border:none; border-radius:8px; font-weight:800; font-size:13px; padding:10px; cursor:pointer; transition:all .2s; background:transparent; color:var(--muted);">
-          🏢 Company
+          Company
         </button>
       </div>
 
@@ -201,8 +201,8 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=183.0"></script>
-<script src="app.js?v=183.0"></script>
+<script src="supabase.js?v=184.0"></script>
+<script src="app.js?v=184.0"></script>
 <script>
   // Detect if arriving from OAuth callback & show immediate feedback
   const oauthHash = window.location.hash || '';
@@ -239,14 +239,14 @@
       if (coBtn) { coBtn.style.background = 'var(--forest)'; coBtn.style.color = '#fff'; }
       if (proBtn) { proBtn.style.background = 'transparent'; proBtn.style.color = 'var(--muted)'; }
       if (indicator && !isOAuthReturn) {
-        indicator.textContent = '🏢 Signing in to Company Portal';
+        indicator.textContent = 'Signing in to Company Portal';
         indicator.style.display = 'block';
       }
     } else {
       if (proBtn) { proBtn.style.background = 'var(--forest)'; proBtn.style.color = '#fff'; }
       if (coBtn) { coBtn.style.background = 'transparent'; coBtn.style.color = 'var(--muted)'; }
       if (indicator && !isOAuthReturn) {
-        indicator.textContent = '👤 Signing in to Professional Portal';
+        indicator.textContent = 'Signing in to Professional Portal';
         indicator.style.display = 'block';
       }
     }
@@ -261,7 +261,7 @@
         errEl.innerHTML = `
           <div style="background:rgba(19,117,111,0.08); border:1.5px solid rgba(19,117,111,0.4); color:var(--teal, #0E3B35); padding:14px 16px; border-radius:12px; font-size:13px; line-height:1.5; text-align:left; margin-bottom:14px; box-shadow:0 4px 12px rgba(19,117,111,0.1);">
             <div style="font-weight:900; font-size:14px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-              <span>🔒</span> Session Timeout &mdash; Security Safeguard
+              Session Timeout &mdash; Security Safeguard
             </div>
             Your session was safely locked after 15 minutes of inactivity in compliance with CBN Cybersecurity and OWASP financial guidelines. Please sign in again to continue.
           </div>
@@ -285,7 +285,7 @@
         errEl.innerHTML = `
           <div style="background:rgba(19,117,111,0.08); border:1.5px solid rgba(19,117,111,0.4); color:var(--teal, #0E3B35); padding:12px 14px; border-radius:12px; font-size:13px; line-height:1.5; text-align:left; margin-bottom:14px;">
             <div style="font-weight:900; font-size:13px; margin-bottom:2px; display:flex; align-items:center; gap:6px;">
-              <span>🏢</span> Switched to ${actTitle} Portal
+              Switched to ${actTitle} Portal
             </div>
             You are signing into your <strong>${actTitle}</strong> account workspace.
           </div>
@@ -313,7 +313,7 @@
         const isCo = currentUser.role === 'company';
         const targetDash = isCo ? 'company-dashboard.html' : 'dashboard.html';
         const badge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(14, currentUser) : '';
-        indicator.innerHTML = `👋 Active session: <strong>${escapeHTML(currentUser.name)}</strong> (${isCo ? 'Company' : 'Professional'}) ${badge} &bull; <a href="${targetDash}" style="color:var(--teal); font-weight:800; text-decoration:underline;">Go to Dashboard &rarr;</a> or sign in below:`;
+        indicator.innerHTML = `Active session: <strong>${escapeHTML(currentUser.name)}</strong> (${isCo ? 'Company' : 'Professional'}) ${badge} &bull; <a href="${targetDash}" style="color:var(--teal); font-weight:800; text-decoration:underline;">Go to Dashboard &rarr;</a> or sign in below:`;
         indicator.style.display = 'block';
       }
     }
@@ -373,7 +373,7 @@
 
     const btn = document.getElementById('loginBtn');
     if (btn) {
-      btn.innerHTML = 'Signing in... ⏳'; 
+      btn.innerHTML = 'Signing in...'; 
       btn.disabled = true;
     }
 
@@ -386,9 +386,9 @@
         if (errEl) {
           let msg = authError.message || 'Invalid login credentials.';
           if (msg.toLowerCase().includes('invalid login credentials') || msg.toLowerCase().includes('invalid grant')) {
-            msg = '⚠️ Invalid email or password. Please check your details and try again.';
+            msg = 'Invalid email or password. Please check your details and try again.';
           } else if (msg.toLowerCase().includes('email not confirmed')) {
-            msg = '⚠️ Email address has not been confirmed. Please check your email inbox.';
+            msg = 'Email address has not been confirmed. Please check your email inbox.';
           }
           errEl.textContent = msg;
           errEl.style.display = 'block';
@@ -411,7 +411,7 @@
 
         if (profile.suspended === true || profile.status === 'suspended') {
           if (errEl) {
-            errEl.textContent = '⛔ Your account has been suspended by Collekt administration. Please contact support@collekt.ng.';
+            errEl.textContent = 'Your account has been suspended by Collekt administration. Please contact support@collekt.ng.';
             errEl.style.display = 'block';
           }
           if (btn) { btn.innerHTML = 'Log In'; btn.disabled = false; }
@@ -446,7 +446,7 @@
       }
 
       if (errEl) {
-        errEl.textContent = '⚠️ Could not load profile for this account. Please contact support.';
+        errEl.textContent = 'Could not load profile for this account. Please contact support.';
         errEl.style.display = 'block';
       }
       if (btn) { btn.innerHTML = 'Log In'; btn.disabled = false; }
@@ -454,7 +454,7 @@
     } catch (err) {
       console.error('Login error:', err);
       if (errEl) {
-        errEl.textContent = '⚠️ An unexpected error occurred. Please try again.';
+        errEl.textContent = 'An unexpected error occurred. Please try again.';
         errEl.style.display = 'block';
       }
       if (btn) { btn.innerHTML = 'Log In'; btn.disabled = false; }
@@ -466,7 +466,7 @@
     if (new URLSearchParams(window.location.search).get('suspended')) {
       const err = document.getElementById('loginError');
       if (err) {
-        err.textContent = '⛔ Your session has ended because this account has been suspended by administration. Contact support@collekt.ng.';
+        err.textContent = 'Your session has ended because this account has been suspended by administration. Contact support@collekt.ng.';
         err.style.display = 'block';
       }
     }
@@ -483,7 +483,7 @@
         <div style="max-width:450px; width:100%; border-radius:20px; padding:28px 24px; background:var(--white, #ffffff); border:1.5px solid var(--line, rgba(20,184,166,0.28)); position:relative; font-family:'Plus Jakarta Sans','Manrope',sans-serif; box-shadow:0 24px 70px rgba(0,0,0,0.55); text-align:center;">
           <button type="button" onclick="closePasswordResetModal()" style="position:absolute; top:14px; right:14px; width:32px; height:32px; border-radius:50%; border:1px solid var(--line, #e2e8f0); background:transparent; color:var(--muted, #64748b); font-size:16px; cursor:pointer; display:grid; place-items:center;">&times;</button>
 
-          <div style="width:48px; height:48px; border-radius:50%; background:rgba(20,184,166,0.12); border:1.5px solid rgba(20,184,166,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:22px;">🔐</div>
+          <div style="width:48px; height:48px; border-radius:50%; background:rgba(20,184,166,0.12); border:1.5px solid rgba(20,184,166,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; color:var(--teal);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
 
           <div style="display:inline-block; margin:0 auto 6px; font-size:10px; font-weight:800; color:var(--amber, #D4920B); background:rgba(212,146,11,0.14); border:1px solid rgba(212,146,11,0.3); padding:3px 12px; border-radius:99px; text-transform:uppercase; letter-spacing:0.06em;">
             Account Recovery &bull; Email &amp; Google
@@ -533,7 +533,7 @@
           </button>
 
           <div style="margin-top:12px; font-size:11px; color:var(--muted, #64748b); line-height:1.4;">
-            💡 Works for both standard Email accounts and Google Sign-In accounts.
+            Works for both standard Email accounts and Google Sign-In accounts.
           </div>
         </div>
       </div>
@@ -604,15 +604,15 @@
           const digits = String(data.fallback_code).slice(0, 6);
           document.querySelectorAll('.reset-otp-box').forEach((b, i) => { b.value = digits[i] || ''; });
           if (succBox) {
-            succBox.innerHTML = `✓ Recovery code generated: <strong>${digits}</strong> (pre-filled).`;
+            succBox.innerHTML = `Recovery code generated: <strong>${digits}</strong> (pre-filled).`;
             succBox.style.display = 'block';
           }
         } else if (succBox) {
-          succBox.innerHTML = `✓ 6-digit recovery code sent to <strong>${email}</strong>. Check your inbox!`;
+          succBox.innerHTML = `6-digit recovery code sent to <strong>${email}</strong>. Check your inbox!`;
           succBox.style.display = 'block';
         }
         if (typeof showToast === 'function') {
-          showToast('✅ Recovery code sent to ' + email, 'success');
+          showToast('Recovery code sent to ' + email, 'success');
         }
       } else {
         const msg = (data && data.error) || 'Could not send recovery email. Please try again.';
@@ -668,7 +668,7 @@
 
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Updating password... ⏳</span>';
+      submitBtn.innerHTML = '<span>Updating password...</span>';
     }
 
     try {
@@ -696,11 +696,11 @@
       }
 
       if (succBox) {
-        succBox.innerHTML = '🎉 <strong>Password Updated!</strong> Signing you into your dashboard...';
+        succBox.innerHTML = '<strong>Password Updated!</strong> Signing you into your dashboard...';
         succBox.style.display = 'block';
       }
       if (typeof showToast === 'function') {
-        showToast('✅ Password updated! Signing you in...', 'success');
+        showToast('Password updated! Signing you in...', 'success');
       }
 
       // Auto-sign the user in with their new password

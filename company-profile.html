@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=183.0">
-<link rel="stylesheet" href="shared.css?v=183.0">
-<link rel="stylesheet" href="glass.css?v=183.0">
+<link rel="stylesheet" href="style.css?v=184.0">
+<link rel="stylesheet" href="shared.css?v=184.0">
+<link rel="stylesheet" href="glass.css?v=184.0">
 
 <style>
   body { background: var(--paper); }
@@ -161,14 +161,14 @@
             <div style="font-size:14px; color:var(--muted); margin-bottom:10px; font-weight:600;" id="coSubIndustry">Energy Enterprise</div>
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
               <div class="verified-badge" id="coVerifiedBadge" style="display:none;"></div>
-              <div style="display:flex; align-items:center; gap:4px; font-size:13px; color:var(--muted); font-weight:600;" id="coMetaLocation">📍 Location not specified</div>
-              <div style="display:flex; align-items:center; gap:4px; font-size:13px; color:var(--muted); font-weight:600;" id="coMetaWebsite">🔗 Website not added</div>
+              <div style="display:flex; align-items:center; gap:4px; font-size:13px; color:var(--muted); font-weight:600;" id="coMetaLocation">Location not specified</div>
+              <div style="display:flex; align-items:center; gap:4px; font-size:13px; color:var(--muted); font-weight:600;" id="coMetaWebsite">Website not added</div>
             </div>
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm" onclick="openEditModal()" style="font-weight:700;">✏️ Edit Profile</button>
-            <a class="btn btn-primary btn-sm" href="public-profile.html?id=me" target="_blank" style="text-decoration:none; font-weight:800;">👁️ View as Public</a>
-            <button class="btn btn-amber btn-sm" onclick="location.href='company-dashboard.html'" style="font-weight:800;">🏠 Dashboard</button>
+            <button class="btn btn-outline btn-sm" onclick="openEditModal()" style="font-weight:700;">Edit Profile</button>
+            <a class="btn btn-primary btn-sm" href="public-profile.html?id=me" target="_blank" style="text-decoration:none; font-weight:800;">View as Public</a>
+            <button class="btn btn-amber btn-sm" onclick="location.href='company-dashboard.html'" style="font-weight:800;">Dashboard</button>
           </div>
         </div>
 
@@ -177,17 +177,17 @@
           <div style="text-align:center;"><div id="statProjects" style="font-size:22px; font-weight:900; color:var(--ink);">0</div><div style="font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-top:2px;">Projects Posted</div></div>
           <div style="text-align:center;"><div id="statActiveContracts" style="font-size:22px; font-weight:900; color:var(--ink);">0</div><div style="font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-top:2px;">Active Contracts</div></div>
           <div style="text-align:center;"><div id="statTotalContracted" style="font-size:22px; font-weight:900; color:var(--ink);">₦0</div><div style="font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-top:2px;">Total Contracted</div></div>
-          <div style="text-align:center;"><div id="statAvgRating" style="font-size:22px; font-weight:900; color:var(--ink);">0.0 ★</div><div style="font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-top:2px;">Avg. Pro Rating</div></div>
+          <div style="text-align:center;"><div id="statAvgRating" style="font-size:22px; font-weight:900; color:var(--ink);">0.0</div><div style="font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-top:2px;">Avg. Pro Rating</div></div>
         </div>
 
         <!-- Tabs -->
         <div class="profile-tabs-bar">
-          <div class="profile-tab active" data-tab="overview" onclick="switchTab('overview',this)">🏢 Overview</div>
-          <div class="profile-tab" data-tab="projects" onclick="switchTab('projects',this)">📋 Open Jobs &amp; Opportunities</div>
-          <div class="profile-tab" data-tab="team" onclick="switchTab('team',this)">👥 Team &amp; Access</div>
-          <div class="profile-tab" data-tab="reviews" onclick="switchTab('reviews',this)">⭐ Reviews</div>
-          <div class="profile-tab" data-tab="documents" onclick="switchTab('documents',this)">📄 Documents</div>
-          <div class="profile-tab" data-tab="identity" onclick="switchTab('identity',this)">🛡️ Identity &amp; Verification</div>
+          <div class="profile-tab active" data-tab="overview" onclick="switchTab('overview',this)">Overview</div>
+          <div class="profile-tab" data-tab="projects" onclick="switchTab('projects',this)">Open Jobs &amp; Opportunities</div>
+          <div class="profile-tab" data-tab="team" onclick="switchTab('team',this)">Team &amp; Access</div>
+          <div class="profile-tab" data-tab="reviews" onclick="switchTab('reviews',this)">Reviews</div>
+          <div class="profile-tab" data-tab="documents" onclick="switchTab('documents',this)">Documents</div>
+          <div class="profile-tab" data-tab="identity" onclick="switchTab('identity',this)">Identity &amp; Verification</div>
         </div>
       </div>
 
@@ -213,7 +213,7 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
               <div class="section-title-sm" style="margin-bottom:0;">Core Operations &amp; Capability Scope</div>
               <button class="btn btn-outline btn-sm" onclick="openSkillPickerModal({ targetWrapId:'coCapabilitiesContainer', mode:'chips' })" style="font-weight:800; font-size:11.5px; padding:4px 12px; display:inline-flex; align-items:center; gap:6px;">
-                📋 Choose from Library
+                Choose from Library
               </button>
             </div>
             <div style="display:flex; flex-wrap:wrap; gap:8px;" id="coCapabilitiesContainer">
@@ -286,8 +286,8 @@
           <div class="section-title-sm">Reviews from Certified Professionals</div>
           <div id="coReviewsContainer">
             <div style="text-align:center; padding:40px 20px; border:2px dashed var(--line); border-radius:var(--r); color:var(--muted);">
-              <div style="font-size:28px; margin-bottom:8px;">💬</div>
-              <div style="font-size:15px; font-weight:800; color:var(--ink);">5.0 ★ Rating &bull; Excellent Employer</div>
+              
+              <div style="font-size:15px; font-weight:800; color:var(--ink);">5.0 Rating &bull; Excellent Employer</div>
               <div style="font-size:13px; margin-top:4px;">Reviews from professionals and contractors who have completed tenders with your company will appear here.</div>
             </div>
           </div>
@@ -303,7 +303,7 @@
           </div>
           <div id="coDocsGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:14px;"></div>
           <div id="coDocsEmpty" data-upload-type="company-docs" onclick="openUploadModal('company-docs', onDocUploaded)" style="text-align:center; padding:40px 20px; border:2px dashed var(--line); border-radius:var(--r); color:var(--muted); margin-top:12px; cursor:pointer; transition:all 0.2s;">
-            <div style="font-size:28px; margin-bottom:8px;">📄</div>
+            
             <div style="font-size:14px; font-weight:800; color:var(--ink);">Click, Drag &amp; Drop, or Paste (Ctrl+V) to Upload Documents</div>
             <div style="font-size:13px; margin-top:4px;">Upload company brochures, certificates, or compliance documents.</div>
           </div>
@@ -315,14 +315,14 @@
         <div class="content-section">
           <div id="coIdentityBanner" style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:16px;">
-              <div id="coIdentityIconBox" style="width:48px; height:48px; border-radius:12px; background:#f1f5f9; display:grid; place-items:center; font-size:24px; flex-shrink:0;">🏢</div>
+              <div id="coIdentityIconBox" style="width:48px; height:48px; border-radius:12px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg></div>
               <div>
                 <div style="font-size:16px; font-weight:900; color:var(--ink);" id="coIdentityTitle">Corporate Compliance Verification Pending</div>
                 <div style="font-size:13px; color:var(--muted); margin-top:2px;" id="coIdentitySub">Submit your CAC Registration &amp; FIRS Tax Identification Number (TIN) to earn verified company status.</div>
               </div>
             </div>
             <div id="coIdentityBadgePill" style="padding:6px 14px; border-radius:99px; background:#fef3c7; color:#b45309; font-size:12px; font-weight:800;">
-              ⏳ Pending Verification
+              Pending Verification
             </div>
           </div>
 
@@ -331,7 +331,7 @@
             <div style="display:flex; flex-direction:column; gap:20px;">
               <div style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:20px;">
                 <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-                  <span>📜</span> Corporate Affairs Commission (CAC) Registration
+                  Corporate Affairs Commission (CAC) Registration
                 </div>
                 <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Enter your official CAC RC or Business Name Number &amp; attach Certificate of Incorporation.</p>
                 <div class="form-group" style="margin-bottom:12px;">
@@ -341,7 +341,7 @@
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload CAC Certificate of Incorporation</label>
                   <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white); transition:all 0.2s;" data-upload-type="cac-doc" onclick="openUploadModal('cac-doc', window.onCacUploaded)">
-                    <div style="font-size:22px; margin-bottom:2px;" id="cacFileIcon">📄</div>
+                    <div style="font-size:12px; font-weight:800; color:var(--teal); margin-bottom:2px;" id="cacFileIcon">CAC</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="cacFileName">Upload CAC Certificate (PDF, JPG, PNG)</div>
                     <div style="font-size:10px; color:var(--muted); margin-top:3px; font-weight:600;">Click, Drag &amp; Drop, or Paste (Ctrl+V)</div>
                   </div>
@@ -351,7 +351,7 @@
 
               <div style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:20px;">
                 <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-                  <span>🏛️</span> Tax Identification Number (TIN - FIRS)
+                  Tax Identification Number (TIN - FIRS)
                 </div>
                 <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Enter your 10-digit FIRS Corporate Tax Identification Number &amp; Tax Clearance.</p>
                 <div class="form-group" style="margin-bottom:12px;">
@@ -361,7 +361,7 @@
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload FIRS Tax Clearance / Registration Certificate</label>
                   <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white); transition:all 0.2s;" data-upload-type="tin-doc" onclick="openUploadModal('tin-doc', window.onTinUploaded)">
-                    <div style="font-size:22px; margin-bottom:2px;" id="tinFileIcon">🧾</div>
+                    <div style="font-size:12px; font-weight:800; color:var(--teal); margin-bottom:2px;" id="tinFileIcon">TIN</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="tinFileName">Upload Tax Clearance Document</div>
                     <div style="font-size:10px; color:var(--muted); margin-top:3px; font-weight:600;">Click, Drag &amp; Drop, or Paste (Ctrl+V)</div>
                   </div>
@@ -374,7 +374,7 @@
             <div style="display:flex; flex-direction:column; gap:20px;">
               <div style="background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:20px;">
                 <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-                  <span>👤</span> Authorized Company Director NIN &amp; ID
+                  Authorized Company Director NIN &amp; ID
                 </div>
                 <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Provide full details of the Managing Director or Authorized Company Officer.</p>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
@@ -398,7 +398,7 @@
                 <div class="form-group" style="margin-bottom:0;">
                   <label class="form-label">Upload Director Government ID Document</label>
                   <div style="border:2px dashed var(--line); border-radius:12px; padding:14px; text-align:center; cursor:pointer; background:var(--white); transition:all 0.2s;" data-upload-type="director-id-doc" onclick="openUploadModal('director-id-doc', window.onDirectorIdUploaded)">
-                    <div style="font-size:22px; margin-bottom:2px;" id="directorIdFileIcon">💳</div>
+                    <div style="font-size:12px; font-weight:800; color:var(--teal); margin-bottom:2px;" id="directorIdFileIcon">ID</div>
                     <div style="font-size:12px; font-weight:700; color:var(--ink);" id="directorIdFileName">Upload Director Passport / ID Scan</div>
                     <div style="font-size:10px; color:var(--muted); margin-top:3px; font-weight:600;">Click, Drag &amp; Drop, or Paste (Ctrl+V)</div>
                   </div>
@@ -410,7 +410,7 @@
                 <h4 style="font-size:15px; font-weight:900; margin-bottom:6px;">Submit Corporate Compliance Package</h4>
                 <p style="font-size:12px; opacity:0.85; margin-bottom:16px; line-height:1.5;">Submitting your CAC, TIN, and Director NIN verifies your company account, allowing you to award high-value EPC contracts on Collekt.</p>
                 <button class="btn btn-primary" onclick="submitCorporateVerification()" style="width:100%; min-height:44px; font-weight:900; background:var(--amber); color:#fff; border:none; box-shadow:0 6px 20px rgba(212,146,11,0.3);">
-                  🏢 Submit &amp; Verify Corporate Entity
+                  Submit &amp; Verify Corporate Entity
                 </button>
               </div>
             </div>
@@ -426,7 +426,7 @@
 <div class="modal-overlay" id="editModal">
   <div class="modal-card" style="position:relative; max-width:620px; width:100%; max-height:90vh; overflow-y:auto;">
     <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
-    <div class="modal-title" style="font-size:18px; font-weight:900; margin-bottom:14px;">✏️ Edit Company Profile</div>
+    <div class="modal-title" style="font-size:18px; font-weight:900; margin-bottom:14px;">Edit Company Profile</div>
     
     <div class="form-group">
       <label class="form-label">Company Legal Name</label>
@@ -596,7 +596,7 @@
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
         <label class="form-label" style="margin-bottom:0;">Core Operations &amp; Capabilities <span style="font-size:11px; color:var(--muted);">(Comma separated)</span></label>
         <button type="button" class="btn btn-outline btn-sm" onclick="openSkillPickerModal({ targetWrapId:'editCapabilities', mode:'comma_input' })" style="font-weight:800; font-size:11px; padding:3px 10px; display:inline-flex; align-items:center; gap:4px;">
-          📋 Select from Library
+          Select from Library
         </button>
       </div>
       <input class="form-input" type="text" id="editCapabilities" placeholder="e.g. EPC Contracting, Pipeline Integrity, Subsea Engineering, Commercial Negotiation">
@@ -613,21 +613,21 @@
 <div class="modal-overlay" id="logoOptionsModal">
   <div class="modal-card" style="position:relative; max-width:420px; width:100%; text-align:center; padding:28px 24px;">
     <button class="modal-close" onclick="closeModal('logoOptionsModal')">&times;</button>
-    <div style="font-size:36px; margin-bottom:8px;">🏢</div>
+    
     <div class="modal-title" style="font-size:18px; font-weight:900; margin-bottom:4px;">Company Logo Options</div>
     <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">Select whether to upload a new logo file, edit/crop the current photo, or reset to default initial.</p>
     
     <div style="display:flex; flex-direction:column; gap:12px;">
       <button class="btn btn-primary" onclick="closeModal('logoOptionsModal'); openUploadModal('company-logo', onLogoUploaded)" style="display:flex; align-items:center; justify-content:center; gap:10px; min-height:46px; font-weight:800; background:var(--teal);">
-        <span>📤</span> Upload New Logo File
+        Upload New Logo File
       </button>
       
       <button class="btn btn-outline" onclick="closeModal('logoOptionsModal'); openAvatarStudioForCompany()" style="display:flex; align-items:center; justify-content:center; gap:10px; min-height:46px; font-weight:800; border-color:var(--line);">
-        <span>✏️</span> Edit &amp; Crop Current Photo
+        Edit &amp; Crop Current Photo
       </button>
 
       <button class="btn btn-outline" onclick="removeCompanyLogo()" style="display:flex; align-items:center; justify-content:center; gap:10px; min-height:40px; font-size:12px; font-weight:700; color:#dc2626; border-color:#fee2e2; background:#fff5f5;">
-        <span>🗑️</span> Reset to Default Logo
+        Reset to Default Logo
       </button>
     </div>
   </div>
@@ -640,9 +640,9 @@
     <!-- Modal Header -->
     <div style="padding:20px 24px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; background:var(--white);">
       <div style="font-size:18px; font-weight:900; color:var(--ink); display:flex; align-items:center; gap:8px;">
-        <span>📷</span> Edit &amp; Crop Company Photo
+        Edit &amp; Crop Company Photo
       </div>
-      <button onclick="closeAvatarStudio()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted); width:36px; height:36px; border-radius:50%; display:grid; place-items:center;">✕</button>
+      <button onclick="closeAvatarStudio()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted); width:36px; height:36px; border-radius:50%; display:grid; place-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
 
     <div style="padding:24px; display:flex; flex-direction:column; align-items:center;">
@@ -662,7 +662,7 @@
         
         <!-- Drag instructions hint overlay -->
         <div id="dragHint" style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.65); color:#fff; font-size:11px; font-weight:700; padding:4px 12px; border-radius:99px; pointer-events:none; backdrop-filter:blur(2px);">
-          ✋ Drag photo to adjust position
+          Drag photo to adjust position
         </div>
       </div>
 
@@ -670,10 +670,10 @@
       <div style="width:100%; margin-top:20px; display:flex; flex-direction:column; gap:14px;">
         <div style="display:flex; align-items:center; gap:10px;">
           <span style="font-size:13px; font-weight:700; color:var(--muted);">Zoom:</span>
-          <button class="btn btn-sm btn-outline" onclick="changeAvatarZoom(-0.15)" style="padding:4px 10px; font-size:12px; font-weight:700;">🔍 -</button>
+          <button class="btn btn-sm btn-outline" onclick="changeAvatarZoom(-0.15)" style="padding:4px 10px; font-size:12px; font-weight:700;">-</button>
           <input type="range" id="avatarZoomRange" min="1" max="3.5" step="0.05" value="1" style="flex:1; accent-color:var(--teal); cursor:pointer;" oninput="onAvatarZoomInput(this.value)">
-          <button class="btn btn-sm btn-outline" onclick="changeAvatarZoom(0.15)" style="padding:4px 10px; font-size:12px; font-weight:700;">🔍 +</button>
-          <button class="btn btn-sm btn-outline" onclick="rotateAvatarImage()" title="Rotate 90 degrees" style="padding:4px 10px; font-size:12px; font-weight:700;">🔄 90°</button>
+          <button class="btn btn-sm btn-outline" onclick="changeAvatarZoom(0.15)" style="padding:4px 10px; font-size:12px; font-weight:700;">+</button>
+          <button class="btn btn-sm btn-outline" onclick="rotateAvatarImage()" title="Rotate 90 degrees" style="padding:4px 10px; font-size:12px; font-weight:700;">Rotate 90°</button>
         </div>
 
         <!-- Filter Presets -->
@@ -681,11 +681,11 @@
           <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">Color Filters</div>
           <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding-bottom:6px;" id="avatarFilterChips">
             <button class="filter-chip active" onclick="setAvatarFilter('none', this)">Original</button>
-            <button class="filter-chip" onclick="setAvatarFilter('warm', this)">🌅 Warm</button>
-            <button class="filter-chip" onclick="setAvatarFilter('cool', this)">🧊 Cool Emerald</button>
-            <button class="filter-chip" onclick="setAvatarFilter('bw', this)">📷 B&amp;W Studio</button>
-            <button class="filter-chip" onclick="setAvatarFilter('vintage', this)">📻 Vintage</button>
-            <button class="filter-chip" onclick="setAvatarFilter('contrast', this)">⚡ Crisp</button>
+            <button class="filter-chip" onclick="setAvatarFilter('warm', this)">Warm</button>
+            <button class="filter-chip" onclick="setAvatarFilter('cool', this)">Cool Emerald</button>
+            <button class="filter-chip" onclick="setAvatarFilter('bw', this)">B&amp;W Studio</button>
+            <button class="filter-chip" onclick="setAvatarFilter('vintage', this)">Vintage</button>
+            <button class="filter-chip" onclick="setAvatarFilter('contrast', this)">Crisp</button>
           </div>
         </div>
       </div>
@@ -696,7 +696,7 @@
     <div style="padding:16px 24px; border-top:1px solid var(--line); background:var(--paper); display:flex; justify-content:space-between; align-items:center; gap:12px;">
       <div style="display:flex; gap:8px;">
         <button onclick="document.getElementById('studioFileInput').click()" class="btn btn-outline btn-sm" style="font-size:13px; font-weight:700;">
-          📁 Replace Photo
+          Replace Photo
         </button>
         <input type="file" id="studioFileInput" accept="image/*" style="display:none;" onchange="loadNewFileIntoStudio(this.files[0])">
       </div>
@@ -745,7 +745,7 @@
       
       <!-- Drag hint overlay -->
       <div id="coverDragHint" style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.72); color:#fff; font-size:10px; font-weight:800; padding:3px 12px; border-radius:99px; pointer-events:none; backdrop-filter:blur(4px); display:flex; align-items:center; gap:5px;">
-        <span>✋</span> Drag to adjust position &amp; crop
+        Drag to adjust position &amp; crop
       </div>
     </div>
 
@@ -753,10 +753,10 @@
     <div style="width:100%; margin-bottom:12px; display:flex; flex-direction:column; gap:10px; background:var(--paper); padding:10px 14px; border-radius:12px; border:1px solid var(--line);">
       <div style="display:flex; align-items:center; gap:8px;">
         <span style="font-size:11px; font-weight:800; color:var(--ink); min-width:42px;">Zoom:</span>
-        <button class="btn btn-xs btn-outline" onclick="changeCoverZoom(-0.15)" style="padding:2px 8px; font-size:11px; font-weight:800;">🔍 -</button>
+        <button class="btn btn-xs btn-outline" onclick="changeCoverZoom(-0.15)" style="padding:2px 8px; font-size:11px; font-weight:800;">-</button>
         <input type="range" id="coverZoomRange" min="1" max="3.5" step="0.05" value="1" style="flex:1; accent-color:var(--teal); cursor:pointer; height:4px;" oninput="onCoverZoomInput(this.value)">
-        <button class="btn btn-xs btn-outline" onclick="changeCoverZoom(0.15)" style="padding:2px 8px; font-size:11px; font-weight:800;">🔍 +</button>
-        <button class="btn btn-xs btn-outline" onclick="rotateCoverImage()" title="Rotate 90 degrees" style="padding:2px 8px; font-size:11px; font-weight:800;">🔄 90°</button>
+        <button class="btn btn-xs btn-outline" onclick="changeCoverZoom(0.15)" style="padding:2px 8px; font-size:11px; font-weight:800;">+</button>
+        <button class="btn btn-xs btn-outline" onclick="rotateCoverImage()" title="Rotate 90 degrees" style="padding:2px 8px; font-size:11px; font-weight:800;">Rotate 90°</button>
       </div>
 
       <!-- Color Filters -->
@@ -764,11 +764,11 @@
         <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px;">Banner Color Filters</div>
         <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;" id="coverFilterChips">
           <button class="filter-chip active" onclick="setCoverFilter('none', this)" style="padding:3px 10px; font-size:11px;">Original</button>
-          <button class="filter-chip" onclick="setCoverFilter('warm', this)" style="padding:3px 10px; font-size:11px;">🌅 Warm Sunset</button>
-          <button class="filter-chip" onclick="setCoverFilter('cool', this)" style="padding:3px 10px; font-size:11px;">🧊 Cool Emerald</button>
-          <button class="filter-chip" onclick="setCoverFilter('bw', this)" style="padding:3px 10px; font-size:11px;">📷 B&amp;W Studio</button>
-          <button class="filter-chip" onclick="setCoverFilter('vintage', this)" style="padding:3px 10px; font-size:11px;">📻 Vintage</button>
-          <button class="filter-chip" onclick="setCoverFilter('contrast', this)" style="padding:3px 10px; font-size:11px;">⚡ Crisp</button>
+          <button class="filter-chip" onclick="setCoverFilter('warm', this)" style="padding:3px 10px; font-size:11px;">Warm Sunset</button>
+          <button class="filter-chip" onclick="setCoverFilter('cool', this)" style="padding:3px 10px; font-size:11px;">Cool Emerald</button>
+          <button class="filter-chip" onclick="setCoverFilter('bw', this)" style="padding:3px 10px; font-size:11px;">B&amp;W Studio</button>
+          <button class="filter-chip" onclick="setCoverFilter('vintage', this)" style="padding:3px 10px; font-size:11px;">Vintage</button>
+          <button class="filter-chip" onclick="setCoverFilter('contrast', this)" style="padding:3px 10px; font-size:11px;">Crisp</button>
         </div>
       </div>
     </div>
@@ -777,13 +777,13 @@
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
       <div>
         <button onclick="document.getElementById('coverFileInput').click()" class="btn btn-outline" style="width:100%; font-size:12px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px;">
-          📁 Choose Custom Image
+          Choose Custom Image
         </button>
         <input type="file" id="coverFileInput" accept="image/*" style="display:none;" onchange="handleCoverFileSelect(this)">
       </div>
       <div>
         <button onclick="togglePresetCoverPicker()" class="btn btn-outline" style="width:100%; font-size:12px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px;">
-          🏙️ HD Energy Presets
+          HD Energy Presets
         </button>
       </div>
     </div>
@@ -795,7 +795,7 @@
     </div>
 
     <div style="display:flex; gap:8px; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:12px; margin-top:4px;">
-      <button class="btn btn-outline btn-xs" onclick="removeCoverPhoto()" style="color:#ef4444; border-color:rgba(239,68,68,0.3); font-weight:700;">🗑️ Reset</button>
+      <button class="btn btn-outline btn-xs" onclick="removeCoverPhoto()" style="color:#ef4444; border-color:rgba(239,68,68,0.3); font-weight:700;">Reset</button>
       <div style="display:flex; gap:8px;">
         <button class="btn btn-outline btn-xs" onclick="closeModal('coverPhotoStudioModal')" style="font-weight:700; padding:6px 14px;">Cancel</button>
         <button class="btn btn-primary btn-xs" onclick="saveCoverPhotoFromStudio()" style="font-weight:800; background:var(--teal); padding:6px 18px;">Save Cover Photo</button>
@@ -805,11 +805,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=183.0"></script>
-<script src="app.js?v=183.0"></script>
-<script src="collekt-ai.js?v=183.0"></script>
-<script src="settings-popup.js?v=183.0"></script>
-<script src="upload-modal.js?v=183.0"></script>
+<script src="supabase.js?v=184.0"></script>
+<script src="app.js?v=184.0"></script>
+<script src="collekt-ai.js?v=184.0"></script>
+<script src="settings-popup.js?v=184.0"></script>
+<script src="upload-modal.js?v=184.0"></script>
 <script>
   requireCompany();
 
@@ -1009,7 +1009,7 @@
     if (typeof buildSidebar === 'function') buildSidebar('profile');
     if (typeof buildTopbar === 'function') buildTopbar();
     closeAvatarStudio();
-    showToast('📷 Company logo edited and saved!');
+    showToast('Company logo edited and saved!');
   }
 
   function _renderCompanyProfileToUI(user) {
@@ -1055,8 +1055,8 @@
           switchTab('identity', tab); 
         };
         badgeEl.innerHTML = (user.verification_status === 'under_review' || (user.cac && !isVerified))
-          ? `⏳ Verification Under Review`
-          : `⚠️ Complete Corporate Verification &rarr;`;
+          ? `Verification Under Review`
+          : `Complete Corporate Verification &rarr;`;
       }
     }
     if (document.getElementById('coContactName')) {
@@ -1078,14 +1078,14 @@
       document.getElementById('coSubIndustry').textContent = user.tagline || user.industry || (user.title || 'Energy Enterprise');
     }
     if (document.getElementById('coMetaLocation')) {
-      document.getElementById('coMetaLocation').innerHTML = user.location ? '📍 ' + escapeHTML(user.location) : '📍 Location not specified';
+      document.getElementById('coMetaLocation').innerHTML = user.location ? escapeHTML(user.location) : 'Location not specified';
     }
     if (document.getElementById('coMetaWebsite')) {
       if (user.website) {
         const webHref = user.website.startsWith('http') ? user.website : 'https://' + user.website;
-        document.getElementById('coMetaWebsite').innerHTML = `🔗 <a href="${escapeHTML(webHref)}" target="_blank" style="color:inherit; text-decoration:underline;">${escapeHTML(user.website)}</a>`;
+        document.getElementById('coMetaWebsite').innerHTML = `<a href="${escapeHTML(webHref)}" target="_blank" style="color:inherit; text-decoration:underline;">${escapeHTML(user.website)}</a>`;
       } else {
-        document.getElementById('coMetaWebsite').innerHTML = '🔗 Website not added';
+        document.getElementById('coMetaWebsite').innerHTML = 'Website not added';
       }
     }
     if (document.getElementById('coDetailIndustry')) {
@@ -1104,7 +1104,7 @@
       document.getElementById('coDetailCac').textContent = user.cac ? (user.cac.toUpperCase().startsWith('RC') || user.cac.toUpperCase().startsWith('BN') ? user.cac : `RC ${user.cac}`) : 'Not registered yet';
     }
     if (document.getElementById('coDetailDpr')) {
-      document.getElementById('coDetailDpr').textContent = user.dpr_license || (isVerified ? 'Verified ✓' : 'Not specified');
+      document.getElementById('coDetailDpr').textContent = user.dpr_license || (isVerified ? 'Verified' : 'Not specified');
     }
     
     // Core Operations & Capability Scope
@@ -1115,7 +1115,7 @@
         skillsArr = user.capabilities.split(',').map(s=>s.trim()).filter(Boolean);
       }
       if (skillsArr.length > 0) {
-        capsContainer.innerHTML = skillsArr.map(s => `<span class="skill-chip">⚙️ ${escapeHTML(s)}</span>`).join('');
+        capsContainer.innerHTML = skillsArr.map(s => `<span class="skill-chip">${escapeHTML(s)}</span>`).join('');
       } else {
         capsContainer.innerHTML = `<span style="font-size:13px; color:var(--muted); font-style:italic;">No core operations specified yet. Click 'Edit Profile' to add.</span>`;
       }
@@ -1124,7 +1124,7 @@
     if (document.getElementById('statAvgRating')) {
       const metrics = typeof getRealTimeUserMetrics === 'function' ? getRealTimeUserMetrics(user) : { rating: 0 };
       const r = metrics.rating > 0 ? metrics.rating.toFixed(1) : '0.0';
-      document.getElementById('statAvgRating').textContent = `${r} ★`;
+      document.getElementById('statAvgRating').textContent = `${r}`;
     }
 
     const initial = (user.name || 'C').charAt(0).toUpperCase();
@@ -1134,7 +1134,7 @@
     const logoEl = document.getElementById('coLogoInitial');
     if (logoEl) {
       const overlayHTML = `<div class="avatar-hover-overlay">
-          <span style="font-size:22px; line-height:1;">📷</span>
+          
           <span style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; margin-top:2px;">Edit / Upload</span>
         </div>`;
       if (activeLogo) {
@@ -1171,7 +1171,7 @@
         <div style="background:var(--white); border:1px solid var(--line); border-radius:var(--r); padding:20px; margin-bottom:16px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
             <div style="font-size:16px; font-weight:800; color:var(--ink);">Ratings &amp; Reviews</div>
-            <div style="font-size:24px; font-weight:900; color:var(--ink);">${ratingVal} <span style="color:var(--amber); font-size:18px;">★ (${reviews.length})</span></div>
+            <div style="font-size:24px; font-weight:900; color:var(--ink);">${ratingVal} <span style="color:var(--amber); font-size:18px;">(${reviews.length})</span></div>
           </div>
           <div style="display:flex; flex-direction:column; gap:14px;">
             ${reviews.map(r => `
@@ -1181,7 +1181,7 @@
                     <div style="font-size:13px; font-weight:800; color:var(--ink);">${escapeHTML(r.author || r.reviewer_name || 'Professional')}</div>
                     <div style="font-size:11px; color:var(--muted);">${escapeHTML(r.role || r.reviewer_company || 'Certified Contractor')}</div>
                   </div>
-                  <div style="color:var(--amber); font-weight:900; font-size:13px;">★ ${(r.rating || 5).toFixed(1)}</div>
+                  <div style="color:var(--amber); font-weight:900; font-size:13px;">${(r.rating || 5).toFixed(1)}</div>
                 </div>
                 <p style="font-size:13px; color:var(--ink); line-height:1.5;">"${escapeHTML(r.text || r.comment || '')}"</p>
                 <div style="font-size:11px; color:var(--muted); margin-top:4px;">${r.date || 'Recent'}</div>
@@ -1193,7 +1193,6 @@
     } else {
       container.innerHTML = `
         <div style="text-align:center; padding:40px 20px; border:2px dashed var(--line); border-radius:var(--r); color:var(--muted);">
-          <div style="font-size:28px; margin-bottom:8px;">💬</div>
           <div style="font-size:15px; font-weight:800; color:var(--ink);">No Reviews Yet</div>
           <div style="font-size:13px; margin-top:4px;">Reviews from professionals and contractors who have completed tenders with your company will appear here.</div>
         </div>
@@ -1208,7 +1207,7 @@
     if (!jobs || jobs.length === 0) {
       container.innerHTML = `
         <div style="grid-column: 1 / -1; text-align:center; padding:40px 20px; border:2px dashed var(--line); border-radius:var(--r); color:var(--muted);">
-          <div style="font-size:28px; margin-bottom:8px;">💼</div>
+          
           <div style="font-size:15px; font-weight:800; color:var(--ink);">No Published Opportunities Yet</div>
           <div style="font-size:13px; margin-top:4px;">Click '+ Post Opportunity' to publish openings and tenders to the live marketplace.</div>
         </div>`;
@@ -1304,16 +1303,16 @@
     const isUnderReview = (user.verification_status === 'under_review' || (user.cac && !isVerified));
 
     if (isVerified) {
-      if (titleEl) titleEl.textContent = '✅ Corporate Account Verified';
+      if (titleEl) titleEl.textContent = 'Corporate Account Verified';
       if (subEl) subEl.textContent = 'CAC Registration & TIN Compliance verified. Your company profile displays corporate verification status across Collekt.';
       if (badgeEl) {
         badgeEl.style.background = '#dcfce7';
         badgeEl.style.color = '#15803d';
-        badgeEl.innerHTML = '✅ Corporate Verified';
+        badgeEl.innerHTML = 'Corporate Verified';
       }
       if (iconBox) {
         iconBox.style.background = '#dcfce7';
-        iconBox.textContent = '🏢';
+        iconBox.textContent = '';
       }
       if (banner) banner.style.borderColor = '#16a34a';
       if (submitCard) {
@@ -1323,16 +1322,16 @@
         `;
       }
     } else if (isUnderReview) {
-      if (titleEl) titleEl.textContent = '⏳ Corporate Compliance Verification Under Review';
+      if (titleEl) titleEl.textContent = 'Corporate Compliance Verification Under Review';
       if (subEl) subEl.textContent = 'Your CAC, TIN, and Director credentials have been submitted and are under review by Collekt Compliance officers.';
       if (badgeEl) {
         badgeEl.style.background = '#fef3c7';
         badgeEl.style.color = '#b45309';
-        badgeEl.innerHTML = '⏳ Under Review';
+        badgeEl.innerHTML = 'Under Review';
       }
       if (iconBox) {
         iconBox.style.background = '#fef3c7';
-        iconBox.textContent = '⏳';
+        iconBox.textContent = '';
       }
       if (banner) banner.style.borderColor = 'var(--amber)';
       if (submitCard) {
@@ -1350,11 +1349,11 @@
       if (badgeEl) {
         badgeEl.style.background = '#fef3c7';
         badgeEl.style.color = '#b45309';
-        badgeEl.innerHTML = '⏳ Pending Verification';
+        badgeEl.innerHTML = 'Pending Verification';
       }
       if (iconBox) {
         iconBox.style.background = '#f1f5f9';
-        iconBox.textContent = '🏢';
+        iconBox.textContent = '';
       }
       if (banner) banner.style.borderColor = 'var(--line)';
     }
@@ -1385,14 +1384,14 @@
     wrap.innerHTML = `
       <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 12px; background:rgba(19,117,111,0.08); border:1px solid rgba(19,117,111,0.3); border-radius:10px;">
         <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
-          <span style="font-size:16px;">📄</span>
+          
           <div style="min-width:0; flex:1;">
             <div style="font-size:12px; font-weight:800; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${safeName}">${safeName}</div>
             <div style="font-size:11px; color:var(--teal); font-weight:700;">Uploaded &amp; Accessible</div>
           </div>
         </div>
         <div style="display:flex; gap:6px; flex-shrink:0;">
-          <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800; border-color:var(--teal); color:var(--teal);" onclick="openDocumentViewer(window.coComplianceDocsRegistry['${containerId}'])">👁️ View</button>
+          <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800; border-color:var(--teal); color:var(--teal);" onclick="openDocumentViewer(window.coComplianceDocsRegistry['${containerId}'])">View</button>
           <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800;" onclick="window.currentViewingDoc=window.coComplianceDocsRegistry['${containerId}']; openDocumentInNewTab();">↗ Open</button>
           <button type="button" class="btn btn-outline btn-sm" style="padding:5px 10px; font-size:11px; font-weight:800;" onclick="window.currentViewingDoc=window.coComplianceDocsRegistry['${containerId}']; downloadWatermarkedDocument();">⬇ Download</button>
         </div>
@@ -1405,24 +1404,24 @@
     if (cacDoc) {
       const nameEl = document.getElementById('cacFileName');
       const iconEl = document.getElementById('cacFileIcon');
-      if (nameEl) nameEl.textContent = '✅ ' + (cacDoc.name || 'CAC Certificate Uploaded');
-      if (iconEl) iconEl.textContent = '✅';
+      if (nameEl) nameEl.textContent = (cacDoc.name || 'CAC Certificate Uploaded');
+      if (iconEl) iconEl.textContent = '';
       _renderCoDocAccessBar('cacDocAccessWrap', cacDoc, 'CAC Certificate');
     }
     const tinDoc = _getLatestCoDoc('tin_doc', 'tin_doc');
     if (tinDoc) {
       const nameEl = document.getElementById('tinFileName');
       const iconEl = document.getElementById('tinFileIcon');
-      if (nameEl) nameEl.textContent = '✅ ' + (tinDoc.name || 'TIN Certificate Uploaded');
-      if (iconEl) iconEl.textContent = '✅';
+      if (nameEl) nameEl.textContent = (tinDoc.name || 'TIN Certificate Uploaded');
+      if (iconEl) iconEl.textContent = '';
       _renderCoDocAccessBar('tinDocAccessWrap', tinDoc, 'TIN Certificate');
     }
     const dirDoc = _getLatestCoDoc('director_id_doc', 'director_id_doc');
     if (dirDoc) {
       const nameEl = document.getElementById('directorIdFileName');
       const iconEl = document.getElementById('directorIdFileIcon');
-      if (nameEl) nameEl.textContent = '✅ ' + (dirDoc.name || 'Director ID Uploaded');
-      if (iconEl) iconEl.textContent = '✅';
+      if (nameEl) nameEl.textContent = (dirDoc.name || 'Director ID Uploaded');
+      if (iconEl) iconEl.textContent = '';
       _renderCoDocAccessBar('directorIdDocAccessWrap', dirDoc, 'Director ID');
     }
   }
@@ -1437,7 +1436,7 @@
     setUser(user);
     _hydrateCoComplianceDocs(user);
     if (typeof renderCompanyDocs === 'function') renderCompanyDocs();
-    showToast('📜 CAC document uploaded! You can view or download it below.');
+    showToast('CAC document uploaded! You can view or download it below.');
   };
 
   window.onTinUploaded = function(fileData) {
@@ -1450,7 +1449,7 @@
     setUser(user);
     _hydrateCoComplianceDocs(user);
     if (typeof renderCompanyDocs === 'function') renderCompanyDocs();
-    showToast('🧾 FIRS Tax document uploaded! You can view or download it below.');
+    showToast('FIRS Tax document uploaded! You can view or download it below.');
   };
 
   window.onDirectorIdUploaded = function(fileData) {
@@ -1463,7 +1462,7 @@
     setUser(user);
     _hydrateCoComplianceDocs(user);
     if (typeof renderCompanyDocs === 'function') renderCompanyDocs();
-    showToast('💳 Director ID scan uploaded! You can view or download it below.');
+    showToast('Director ID scan uploaded! You can view or download it below.');
   };
 
   async function submitCorporateVerification() {
@@ -1476,11 +1475,11 @@
     const directorNin       = document.getElementById('coDirectorNin')?.value.trim();
 
     if (!cac) {
-      showToast('⚠️ Please enter your CAC RC or BN Number', 'warning');
+      showToast('Please enter your CAC RC or BN Number', 'warning');
       return;
     }
     if (!tin) {
-      showToast('⚠️ Please enter your FIRS Tax Identification Number (TIN)', 'warning');
+      showToast('Please enter your FIRS Tax Identification Number (TIN)', 'warning');
       return;
     }
 
@@ -1521,7 +1520,7 @@
     if (typeof buildSidebar === 'function') buildSidebar('profile');
     if (typeof buildTopbar === 'function') buildTopbar();
 
-    showToast('📜 Corporate Compliance Package submitted for review! You will be notified once verified.');
+    showToast('Corporate Compliance Package submitted for review! You will be notified once verified.');
   }
 
   function openEditModal() {
@@ -1709,7 +1708,7 @@
         updateProfileCompletion();
       }
       if (typeof showToast === 'function') {
-        showToast('✅ Company Profile saved successfully!');
+        showToast('Company Profile saved successfully!');
       }
 
       if (window.sb && user && user.id) {
@@ -1760,7 +1759,7 @@
       }
     } catch (err) {
       console.error("Error saving profile:", err);
-      if (typeof showToast === 'function') showToast('⚠️ Saved profile changes locally');
+      if (typeof showToast === 'function') showToast('Saved profile changes locally');
     } finally {
       if (btn) { btn.textContent = 'Save Profile'; btn.disabled = false; }
       closeModal('editModal');
@@ -1781,13 +1780,13 @@
         sb.from('profiles').update({ company_logo: fileData.dataURL, avatar: fileData.dataURL, updated_at: new Date().toISOString() }).eq('id', user.id).then(() => {}).catch(() => {});
       }
       _renderCompanyProfileToUI(user);
-      showToast('📷 Company logo updated!');
+      showToast('Company logo updated!');
     }
   }
 
   function onDocUploaded(fileData) {
     if (fileData) {
-      showToast('📄 Document added to Company Vault.');
+      showToast('Document added to Company Vault.');
       renderCompanyDocs();
     }
   }
@@ -1820,15 +1819,15 @@
     if (empty) empty.style.display = 'none';
     grid.innerHTML = docs.map((d, i) => `
       <div class="doc-item" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <span style="font-size:22px;">📄</span>
+        
         <div style="flex:1; min-width:140px; overflow:hidden;">
           <div style="font-size:13px; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(d.name || 'Company_Document.pdf')}</div>
           <div style="font-size:11px; color:var(--muted);">${d.size ? (d.size/1024).toFixed(1) + ' KB' : 'Uploaded Document'}</div>
         </div>
         <div style="display:flex; gap:6px; align-items:center;">
-          <button class="btn btn-outline btn-xs" style="border-color:var(--teal); color:var(--teal); font-weight:800;" onclick="viewCompanyDoc(${i})">👁️ View</button>
+          <button class="btn btn-outline btn-xs" style="border-color:var(--teal); color:var(--teal); font-weight:800;" onclick="viewCompanyDoc(${i})">View</button>
           <button class="btn btn-outline btn-xs" onclick="window.currentViewingDoc=window.companyVaultDocsRegistry[${i}]; downloadWatermarkedDocument();">⬇ Download</button>
-          <button class="btn btn-ghost btn-xs" onclick="removeCompanyDoc(${i})" style="color:#ef4444; padding:4px 8px; font-weight:800;" title="Delete Document">✕</button>
+          <button class="btn btn-ghost btn-xs" onclick="removeCompanyDoc(${i})" style="color:#ef4444; padding:4px 8px; font-weight:800;" title="Delete Document"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
         </div>
       </div>
     `).join('');
@@ -1879,12 +1878,12 @@
     const grid = document.getElementById('presetCoverGrid');
     if (grid && !grid.children.length) {
       const presets = [
-        { name: 'Solar Farm', url: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80', icon: '☀️' },
-        { name: 'Offshore Rig', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80', icon: '🛢️' },
-        { name: 'Substation', url: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1200&q=80', icon: '⚡' },
-        { name: 'Civil EPC', url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=1200&q=80', icon: '🏗️' },
-        { name: 'Teal Tech', url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80', icon: '🌊' },
-        { name: 'Cyber Mesh', url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80', icon: '🌌' }
+        { name: 'Solar Farm', url: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80', icon: '' },
+        { name: 'Offshore Rig', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80', icon: '' },
+        { name: 'Substation', url: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1200&q=80', icon: '' },
+        { name: 'Civil EPC', url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=1200&q=80', icon: '' },
+        { name: 'Teal Tech', url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80', icon: '' },
+        { name: 'Cyber Mesh', url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80', icon: '' }
       ];
 
       grid.innerHTML = presets.map(p => `
@@ -1957,7 +1956,7 @@
     if (!input.files || !input.files[0]) return;
     const file = input.files[0];
     if (file.size > 20 * 1024 * 1024) {
-      showToast('⚠️ Banner image size must be under 20MB', 'warning');
+      showToast('Banner image size must be under 20MB', 'warning');
       input.value = '';
       return;
     }
@@ -2051,7 +2050,7 @@
     }
 
     if (!dataURL) {
-      showToast('⚠️ Could not save cover image. Please choose another image.', 'warning');
+      showToast('Could not save cover image. Please choose another image.', 'warning');
       return;
     }
 
@@ -2062,7 +2061,7 @@
     localStorage.setItem('collekt_user_cover_photo', dataURL);
     _applyCoverPhoto(dataURL);
 
-    showToast('✨ Corporate cover photo edited and saved!');
+    showToast('Corporate cover photo edited and saved!');
     closeModal('coverPhotoStudioModal');
   };
 
@@ -2143,7 +2142,7 @@
       if (_coProfileTeamCache.length === 0) {
         container.innerHTML = `
           <div style="text-align:center; padding:32px 16px; border:1.5px dashed var(--line); border-radius:14px; color:var(--muted); background:rgba(255,255,255,0.02);">
-            <div style="font-size:32px; margin-bottom:8px;">👥</div>
+            
             <div style="font-weight:800; font-size:14px; color:var(--ink);">No team members yet.</div>
             <div style="font-size:12px; margin-top:4px; max-width:320px; margin-left:auto; margin-right:auto; line-height:1.4;">
               ${hasAdminRights ? 'Click "+ Add Member" above to invite real colleagues and assign administrative roles.' : 'Authorized team members will appear here.'}
@@ -2154,11 +2153,11 @@
       }
 
       const roleBadges = {
-        owner: '<span style="background:rgba(212,146,11,0.15); color:var(--amber); font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Owner 👑</span>',
-        admin: '<span style="background:rgba(20,184,166,0.15); color:var(--teal); font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Admin ⚡</span>',
-        finance: '<span style="background:rgba(34,197,94,0.15); color:#16a34a; font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Finance 💳</span>',
-        member: '<span style="background:rgba(59,130,246,0.15); color:#2563eb; font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Member 👤</span>',
-        viewer: '<span style="background:rgba(107,114,128,0.15); color:var(--muted); font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Viewer 👁️</span>'
+        owner: '<span style="background:rgba(212,146,11,0.15); color:var(--amber); font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Owner</span>',
+        admin: '<span style="background:rgba(20,184,166,0.15); color:var(--teal); font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Admin</span>',
+        finance: '<span style="background:rgba(34,197,94,0.15); color:#16a34a; font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Finance</span>',
+        member: '<span style="background:rgba(59,130,246,0.15); color:#2563eb; font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Member</span>',
+        viewer: '<span style="background:rgba(107,114,128,0.15); color:var(--muted); font-size:10.5px; font-weight:900; padding:3px 10px; border-radius:99px; text-transform:uppercase;">Viewer</span>'
       };
 
       container.innerHTML = _coProfileTeamCache.map(m => {
@@ -2183,16 +2182,16 @@
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
               ${hasAdminRights && !isOwnerRow ? `
                 <select class="form-select form-input" onchange="changeCompanyProfileMemberRole('${m.id}', this.value)" style="padding:4px 10px; font-size:11.5px; font-weight:800; border-radius:8px; width:auto; min-width:110px;">
-                  <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>Admin ⚡</option>
-                  <option value="finance" ${m.role === 'finance' ? 'selected' : ''}>Finance 💳</option>
-                  <option value="member" ${m.role === 'member' ? 'selected' : ''}>Member 👤</option>
-                  <option value="viewer" ${m.role === 'viewer' ? 'selected' : ''}>Viewer 👁️</option>
+                  <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>Admin</option>
+                  <option value="finance" ${m.role === 'finance' ? 'selected' : ''}>Finance</option>
+                  <option value="member" ${m.role === 'member' ? 'selected' : ''}>Member</option>
+                  <option value="viewer" ${m.role === 'viewer' ? 'selected' : ''}>Viewer</option>
                 </select>
               ` : (roleBadges[m.role] || roleBadges.member)}
               
               ${hasAdminRights && !isOwnerRow ? `
-                <button class="btn btn-ghost btn-xs" onclick="removeCompanyProfileMember('${m.id}', '${escapeHtmlSafeProfile(m.name || m.email)}')" title="Remove member" style="color:#ef4444; font-size:13px; font-weight:800; padding:4px 8px; border-radius:6px;">
-                  ✕
+                <button class="btn btn-ghost btn-xs" onclick="removeCompanyProfileMember('${m.id}', '${escapeHtmlSafeProfile(m.name || m.email)}')" title="Remove member" style="color:#ef4444; padding:4px 8px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
               ` : ''}
             </div>
@@ -2233,13 +2232,13 @@
     const role = roleEl?.value || 'member';
 
     if (!name) {
-      if (typeof showToast === 'function') showToast('⚠️ Please enter the member full name', 'warning');
+      if (typeof showToast === 'function') showToast('Please enter the member full name', 'warning');
       nameEl?.focus();
       return;
     }
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      if (typeof showToast === 'function') showToast('⚠️ Please enter a valid email address', 'warning');
+      if (typeof showToast === 'function') showToast('Please enter a valid email address', 'warning');
       emailEl?.focus();
       return;
     }
@@ -2259,7 +2258,7 @@
         : { success: false, error: 'Invite function not loaded' };
 
       if (!res.success) {
-        if (typeof showToast === 'function') showToast(`⚠️ ${res.error || 'Failed to send invitation'}`, 'error');
+        if (typeof showToast === 'function') showToast(`${res.error || 'Failed to send invitation'}`, 'error');
         if (btnSubmit) {
           btnSubmit.disabled = false;
           btnSubmit.innerHTML = '+ Send Invitation';
@@ -2268,7 +2267,7 @@
       }
 
       if (typeof showToast === 'function') {
-        showToast(`🎉 Invitation sent to ${name} (${role.toUpperCase()})!`);
+        showToast(`Invitation sent to ${name} (${role.toUpperCase()})!`);
       }
 
       closeInviteTeamModal();
@@ -2277,7 +2276,7 @@
       await loadCompanyProfileTeam();
     } catch(e) {
       console.error('saveCompanyMember error:', e);
-      if (typeof showToast === 'function') showToast(`⚠️ ${e.message || 'An error occurred'}`, 'error');
+      if (typeof showToast === 'function') showToast(`${e.message || 'An error occurred'}`, 'error');
     } finally {
       if (btnSubmit) {
         btnSubmit.disabled = false;
@@ -2301,7 +2300,7 @@
         if (typeof showToast === 'function') showToast('Member removed from company team.');
         await loadCompanyProfileTeam();
       } else {
-        if (typeof showToast === 'function') showToast(`⚠️ ${res.error || 'Failed to remove member'}`, 'error');
+        if (typeof showToast === 'function') showToast(`${res.error || 'Failed to remove member'}`, 'error');
       }
     } catch(e) {
       console.error('removeCompanyProfileMember error:', e);
@@ -2322,7 +2321,7 @@
         if (typeof showToast === 'function') showToast(`Member access role updated to ${newRole.toUpperCase()}.`);
         await loadCompanyProfileTeam();
       } else {
-        if (typeof showToast === 'function') showToast(`⚠️ ${res.error || 'Failed to update role'}`, 'error');
+        if (typeof showToast === 'function') showToast(`${res.error || 'Failed to update role'}`, 'error');
       }
     } catch(e) {
       console.error('changeCompanyProfileMemberRole error:', e);
@@ -2339,7 +2338,7 @@
   <div class="modal-card" style="position:relative; max-width:480px; width:100%; border-radius:24px; padding:28px; background:var(--white); border:1px solid var(--line); box-shadow:0 30px 80px rgba(0,0,0,0.4);">
     <button class="modal-close" onclick="closeInviteTeamModal()" style="position:absolute; right:20px; top:20px; font-size:24px; border:none; background:none; cursor:pointer; color:var(--muted);">&times;</button>
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
-      <div style="width:44px; height:44px; border-radius:14px; background:rgba(20,184,166,0.15); color:var(--teal); display:grid; place-items:center; font-size:22px;">👥</div>
+      <div style="width:44px; height:44px; border-radius:14px; background:rgba(20,184,166,0.15); color:var(--teal); display:flex; align-items:center; justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
       <div>
         <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:2px;">Add Company Team Member</h3>
         <div style="font-size:12px; color:var(--muted);">Assign role-based access permissions for company operations</div>

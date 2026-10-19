@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=183.0">
-<link rel="stylesheet" href="shared.css?v=183.0">
-<link rel="stylesheet" href="glass.css?v=183.0">
+<link rel="stylesheet" href="style.css?v=184.0">
+<link rel="stylesheet" href="shared.css?v=184.0">
+<link rel="stylesheet" href="glass.css?v=184.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
@@ -60,7 +60,7 @@
   html.dark .msg-search { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); color: #e2efed; }
   .msg-search:focus { border-color: var(--teal-mid); }
   .search-wrap-msg { position: relative; }
-  .search-wrap-msg::before { content: '🔍'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; }
+  .search-wrap-msg input { padding-left: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B8280' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 12px center; }
   .msg-list { flex: 1; overflow-y: auto; }
   .msg-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); cursor: pointer; transition: background .15s; border-left: 3px solid transparent; }
   .msg-item:hover { background: var(--paper); }
@@ -551,7 +551,7 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <h2 style="margin:0;">Messages</h2>
               <button class="btn btn-primary btn-sm" onclick="openNewMessageModal()" style="font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f); border-radius:10px; font-size:12px; padding:6px 14px; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(14,59,53,0.25);">
-                <span>✏️</span> New Message
+                New Message
               </button>
             </div>
             <div class="search-wrap-msg">
@@ -580,11 +580,11 @@
 
             <div class="wa-attach-popup" id="waAttachPopup">
               <button class="wa-attach-item" onclick="document.getElementById('chatDocFileInput').click(); closeWaAttachMenu();">
-                <div class="wa-attach-icon" style="background:#7f66ff;">📄</div>
+                <div class="wa-attach-icon" style="background:#7f66ff; display:flex; align-items:center; justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div>
                 <span>Document</span>
               </button>
               <button class="wa-attach-item" onclick="document.getElementById('chatMediaFileInput').click(); closeWaAttachMenu();">
-                <div class="wa-attach-icon" style="background:#007bfc;">🖼️</div>
+                <div class="wa-attach-icon" style="background:#007bfc; display:flex; align-items:center; justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg></div>
                 <span>Photos &amp; videos</span>
               </button>
             </div>
@@ -596,26 +596,6 @@
             <button class="attach-btn" id="emojiBtn" title="Emoji Picker" onclick="toggleEmojiPicker(event)">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
             </button>
-
-            <!-- Modern WhatsApp Desktop Emoji Picker Popup -->
-            <div class="emoji-picker-popup" id="emojiPickerPopup">
-              <div class="emoji-cat-bar">
-                <button class="emoji-cat-btn active" onclick="switchEmojiCategory('smileys', this)" title="Smileys &amp; People">😀</button>
-                <button class="emoji-cat-btn" onclick="switchEmojiCategory('animals', this)" title="Animals &amp; Nature">🐶</button>
-                <button class="emoji-cat-btn" onclick="switchEmojiCategory('food', this)" title="Food &amp; Drink">☕</button>
-                <button class="emoji-cat-btn" onclick="switchEmojiCategory('activities', this)" title="Activities">⚽</button>
-                <button class="emoji-cat-btn" onclick="switchEmojiCategory('travel', this)" title="Travel &amp; Places">🚗</button>
-                <button class="emoji-cat-btn" onclick="switchEmojiCategory('objects', this)" title="Objects">💡</button>
-                <button class="emoji-cat-btn" onclick="switchEmojiCategory('symbols', this)" title="Symbols">🔣</button>
-              </div>
-              <div class="emoji-search-wrap">
-                <span style="position:absolute; left:22px; top:50%; transform:translateY(-50%); font-size:12px; color:#8696a0;">🔍</span>
-                <input type="text" class="emoji-search-input" id="emojiSearchInput" placeholder="Search emoji" oninput="filterEmojis(this.value)">
-              </div>
-              <div class="emoji-picker-body" id="emojiPickerBody">
-                <!-- Rendered dynamically by JS -->
-              </div>
-            </div>
 
             <input type="text" id="chatInput" placeholder="Type a message">
 
@@ -636,7 +616,7 @@
     <button class="modal-close" onclick="closeModal('newMessageModal')" style="position:absolute; top:18px; right:18px; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:var(--paper); cursor:pointer; font-size:16px; display:grid; place-items:center;">&times;</button>
     
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
-      <div style="width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg, #0E3B35, #13756F); color:#fff; display:grid; place-items:center; font-size:20px; box-shadow:0 4px 14px rgba(14,59,53,0.25);">✏️</div>
+      <div style="width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg, #0E3B35, #13756F); color:#fff; display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></div>
       <div>
         <div style="font-size:18px; font-weight:900; color:var(--ink);">New Message</div>
         <div style="font-size:12px; color:var(--muted); margin-top:2px;" id="newMsgModalSubtitle">Search and message registered professionals and enterprises</div>
@@ -651,8 +631,8 @@
     <!-- Category Role Filter Pills -->
     <div style="display:flex; gap:8px; margin-bottom:14px;">
       <button class="msg-role-pill" data-role="all" onclick="setNewMsgRoleFilter('all')" style="font-size:11px; font-weight:800; padding:6px 14px; border-radius:99px; border:1px solid #0e3b35; background:#0e3b35; color:#fff; cursor:pointer;">All Accounts</button>
-      <button class="msg-role-pill" data-role="professional" onclick="setNewMsgRoleFilter('professional')" style="font-size:11px; font-weight:800; padding:6px 14px; border-radius:99px; border:1px solid var(--line); background:var(--paper); color:var(--ink); cursor:pointer;">👷 Professionals</button>
-      <button class="msg-role-pill" data-role="company" onclick="setNewMsgRoleFilter('company')" style="font-size:11px; font-weight:800; padding:6px 14px; border-radius:99px; border:1px solid var(--line); background:var(--paper); color:var(--ink); cursor:pointer;">🏢 Companies</button>
+      <button class="msg-role-pill" data-role="professional" onclick="setNewMsgRoleFilter('professional')" style="font-size:11px; font-weight:800; padding:6px 14px; border-radius:99px; border:1px solid var(--line); background:var(--paper); color:var(--ink); cursor:pointer;">Professionals</button>
+      <button class="msg-role-pill" data-role="company" onclick="setNewMsgRoleFilter('company')" style="font-size:11px; font-weight:800; padding:6px 14px; border-radius:99px; border:1px solid var(--line); background:var(--paper); color:var(--ink); cursor:pointer;">Companies</button>
     </div>
 
     <!-- Users List Container -->
@@ -670,7 +650,7 @@
     <button class="modal-close" onclick="closeModal('chatTransferModal')" style="position:absolute; top:18px; right:18px; width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:var(--paper); cursor:pointer; font-size:16px; display:grid; place-items:center;">&times;</button>
     
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
-      <div style="width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg, #0E3B35, #13756F); color:#fff; display:grid; place-items:center; font-size:22px; box-shadow:0 4px 14px rgba(14,59,53,0.25);">💸</div>
+      <div style="width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg, #0E3B35, #13756F); color:#fff; display:flex; align-items:center; justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg></div>
       <div>
         <div style="font-size:18px; font-weight:900; color:var(--ink);">In-Chat Wallet Transfer</div>
         <div style="font-size:12px; color:var(--muted); margin-top:2px;">Disburse funds directly to recipient's Collekt wallet &amp; NUBAN account</div>
@@ -683,17 +663,17 @@
         <div style="font-size:10px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;">Your Available Balance</div>
         <div style="font-size:18px; font-weight:900; color:var(--forest);" id="chatTransferSenderBalance">NGN 0.00</div>
       </div>
-      <div style="font-size:11px; font-weight:800; color:var(--teal); background:var(--teal-lt); padding:4px 10px; border-radius:99px;">🔒 Escrow Protected</div>
+      <div style="font-size:11px; font-weight:800; color:var(--teal); background:var(--teal-lt); padding:4px 10px; border-radius:99px;">Escrow Protected</div>
     </div>
 
     <!-- Recipient Account Summary Card -->
     <div id="chatTransferRecipientCard" style="background:linear-gradient(135deg, #09201d, #0e3b35); border:1.5px solid #22c55e; border-radius:14px; padding:14px 16px; margin-bottom:14px; color:#fff; box-shadow:0 8px 24px rgba(14,59,53,0.3);">
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:6px;">
         <div>
-          <div style="font-size:10px; font-weight:800; color:#4ade80; text-transform:uppercase; letter-spacing:.06em;">🛡️ RECIPIENT VERIFIED WALLET</div>
+          <div style="font-size:10px; font-weight:800; color:#4ade80; text-transform:uppercase; letter-spacing:.06em;">RECIPIENT VERIFIED WALLET</div>
           <div style="font-size:14px; font-weight:900; color:#fff; margin-top:2px;" id="chatRecipName">Recipient Name</div>
         </div>
-        <span style="background:rgba(34,197,94,0.25); color:#4ade80; border:1px solid rgba(34,197,94,0.5); font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px;">Verified 🛡️</span>
+        <span style="background:rgba(34,197,94,0.25); color:#4ade80; border:1px solid rgba(34,197,94,0.5); font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px;">Verified</span>
       </div>
 
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:11px;">
@@ -735,17 +715,17 @@
     <div style="display:flex; gap:10px; justify-content:flex-end; border-top:1px solid var(--line); padding-top:14px;">
       <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('chatTransferModal')" style="font-weight:700;">Cancel</button>
       <button type="button" class="btn btn-primary btn-sm" id="confirmChatTransferBtn" onclick="executeInChatTransfer()" style="font-weight:900; background:linear-gradient(135deg, #0e3b35, #13756f); min-width:160px;">
-        💸 Confirm &amp; Transfer
+        Confirm &amp; Transfer
       </button>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=183.0"></script>
-<script src="app.js?v=183.0"></script>
-<script src="collekt-ai.js?v=183.0"></script>
-<script src="settings-popup.js?v=183.0"></script>
+<script src="supabase.js?v=184.0"></script>
+<script src="app.js?v=184.0"></script>
+<script src="collekt-ai.js?v=184.0"></script>
+<script src="settings-popup.js?v=184.0"></script>
 <script>
   requireAuth();
 
@@ -788,11 +768,11 @@
     if (convs.length === 0) {
       list.innerHTML = `
         <div style="padding:48px 18px; text-align:center;">
-          <div style="width:52px; height:52px; border-radius:50%; background:var(--paper); display:grid; place-items:center; margin:0 auto 14px; font-size:24px; border:1px solid var(--line);">💬</div>
+          <div style="width:52px; height:52px; border-radius:50%; background:var(--paper); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; color:var(--teal); border:1px solid var(--line);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
           <div style="font-size:15px; font-weight:900; color:var(--ink); margin-bottom:6px;">No conversations yet</div>
           <p style="font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:18px;">When you start a chat or receive messages, your conversations will appear here.</p>
           <button onclick="openNewConversationModal()" class="btn btn-primary btn-sm" style="font-size:12px; font-weight:800; padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:6px;">
-            <span>✏️</span> New Message
+            New Message
           </button>
         </div>
       `;
@@ -839,7 +819,7 @@
     if (area) {
       area.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:32px; color:var(--muted);">
-          <div style="font-size:48px; margin-bottom:14px;">✉️</div>
+          <div style="width:56px; height:56px; border-radius:16px; background:rgba(19,117,111,0.1); color:var(--teal); display:flex; align-items:center; justify-content:center; margin:0 auto 14px auto;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
           <h3 style="font-size:18px; font-weight:800; color:var(--ink); margin-bottom:8px;">Select a Conversation</h3>
           <p style="font-size:13px; color:var(--muted); max-width:380px; line-height:1.6;">Choose a conversation from the left or start a new one to begin messaging.</p>
         </div>
@@ -869,24 +849,24 @@
       return `
         <div style="background:linear-gradient(135deg, #09201d, #0e3b35); color:#fff; border:1.5px solid #22c55e; border-radius:14px; padding:12px 14px; min-width:240px; box-shadow:0 6px 20px rgba(0,0,0,0.25);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:4px;">
-            <span style="font-size:10px; font-weight:800; color:#4ade80; text-transform:uppercase; letter-spacing:0.06em;">💸 WALLET DISBURSAL RECEIPT</span>
-            <span style="background:rgba(34,197,94,0.25); color:#4ade80; font-size:9.5px; font-weight:800; padding:1px 6px; border-radius:999px;">Completed 🛡️</span>
+            <span style="font-size:10px; font-weight:800; color:#4ade80; text-transform:uppercase; letter-spacing:0.06em;">WALLET DISBURSAL RECEIPT</span>
+            <span style="background:rgba(34,197,94,0.25); color:#4ade80; font-size:9.5px; font-weight:800; padding:1px 6px; border-radius:999px;">Completed</span>
           </div>
           <div style="font-size:18px; font-weight:900; color:#facc15; margin-bottom:2px;">${escapeHTML(amountStr)}</div>
           <div style="font-size:11px; color:#e2efed; font-weight:700; margin-bottom:2px;">${escapeHTML(noteStr)}</div>
           <div style="font-size:10px; color:#94a3b8; margin-bottom:6px;">${escapeHTML(refStr)}</div>
           <div style="font-size:9.5px; color:#4ade80; font-weight:800; background:rgba(255,255,255,0.06); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:4px;">
-            🔒 Verified transfer credited to Collekt wallet & NUBAN.
+            Verified transfer credited to Collekt wallet & NUBAN.
           </div>
         </div>
       `;
     }
 
     const safeText = escapeHTML(raw);
-    const isVoice = msg.type === 'voice_note' || raw.includes('[VOICE_NOTE]') || raw.startsWith('🎙️ Voice Note');
-    const isVideo = msg.type === 'video_note' || raw.includes('[VIDEO_NOTE]') || raw.startsWith('📹 Video Note');
-    const isFile = raw.includes('[FILE_ATTACHMENT]') || raw.startsWith('📎 Attached File:') || raw.includes('Promissory_Note') || raw.includes('.pdf') || raw.includes('.docx');
-    const isHDImage = raw.includes('[HD_IMAGE]') || raw.startsWith('📷 Attached Image:');
+    const isVoice = msg.type === 'voice_note' || raw.includes('[VOICE_NOTE]') || raw.includes('Voice Note');
+    const isVideo = msg.type === 'video_note' || raw.includes('[VIDEO_NOTE]') || raw.includes('Video Note');
+    const isFile = raw.includes('[FILE_ATTACHMENT]') || raw.startsWith('Attached File:') || raw.includes('Promissory_Note') || raw.includes('.pdf') || raw.includes('.docx');
+    const isHDImage = raw.includes('[HD_IMAGE]') || raw.startsWith('Attached Image:');
 
     const parts = raw.split(/\s+/);
     const dataUrl = parts.find(p => p.startsWith('data:') || p.startsWith('http://') || p.startsWith('https://')) || msg.media_url || '';
@@ -933,7 +913,7 @@
             ? `<img src="${dataUrl}" class="wa-circular-video" loading="lazy" decoding="async">`
             : `<video id="vidNote_${msg.id}" src="${dataUrl}" class="wa-circular-video" loop playsinline onclick="toggleVideoPlayback('vidNote_${msg.id}', this)"></video>
                <button class="wa-vid-overlay-btn" id="vidOverlay_${msg.id}" onclick="toggleVideoPlayback('vidNote_${msg.id}', this)">▶</button>`)
-            : `<div style="font-size:13px; font-weight:700; color:#fff; text-align:center;">📹 Video Note</div>`}
+            : `<div style="font-size:13px; font-weight:700; color:#fff; text-align:center;">Video Note</div>`}
         </div>
       `;
     }
@@ -944,10 +924,10 @@
           ${dataUrl ? `
             <img src="${dataUrl}" style="max-width:280px; width:100%; max-height:300px; object-fit:cover; border-radius:8px; display:block; margin:4px 0; cursor:pointer;" onclick="openDocumentViewer({dataURL:'${dataUrl.replace(/'/g, "\\'")}', name:'HD Image', type:'image/png'})" loading="lazy" decoding="async">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-              <span style="font-size:10px; font-weight:800; opacity:0.8;">✨ HD Image</span>
-              <a href="${dataUrl}" download="Collekt_HD_Image.png" style="font-size:10.5px; font-weight:800; color:inherit; text-decoration:underline;">📥 Download</a>
+              <span style="font-size:10px; font-weight:800; opacity:0.8;">HD Image</span>
+              <a href="${dataUrl}" download="Collekt_HD_Image.png" style="font-size:10.5px; font-weight:800; color:inherit; text-decoration:underline;">Download</a>
             </div>
-          ` : `<div style="font-size:13px; font-weight:700;">📷 Attached HD Image</div>`}
+          ` : `<div style="font-size:13px; font-weight:700;">Attached HD Image</div>`}
         </div>
       `;
     }
@@ -966,7 +946,7 @@
       return `
         <div style="min-width:210px; max-width:260px; padding:2px 0 4px 0;">
           <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:36px; height:36px; border-radius:8px; background:rgba(0,168,132,0.18); display:grid; place-items:center; color:#00a884; font-size:18px; flex-shrink:0;">📄</div>
+            <div style="width:36px; height:36px; border-radius:8px; background:rgba(0,168,132,0.18); display:flex; align-items:center; justify-content:center; color:#00a884; flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div>
             <div style="min-width:0; flex:1;">
               <div style="font-weight:800; font-size:13px; color:inherit; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(fileName)}</div>
               <div style="font-size:11px; opacity:0.75; font-weight:600; margin-top:2px;">${fileSize ? escapeHTML(fileSize) : 'Document Attachment'}</div>
@@ -974,8 +954,8 @@
           </div>
           ${dataUrl ? `
             <div style="display:flex; gap:6px; margin-top:6px; padding-top:6px; border-top:1px solid rgba(0,0,0,0.08);">
-              <a href="${dataUrl}" download="${escapeHTML(fileName)}" class="btn btn-amber btn-sm" style="font-size:10.5px; padding:3px 10px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:4px; border-radius:6px;">📥 Download</a>
-              <button onclick="openDocumentViewer({dataURL:'${dataUrl.replace(/'/g, "\\'")}', name:'${escapeHTML(fileName)}', type:'application/pdf'})" class="btn btn-outline btn-sm" style="font-size:10.5px; padding:3px 10px; font-weight:800; border-color:rgba(0,0,0,0.15); color:inherit; border-radius:6px;">👁️ Preview</button>
+              <a href="${dataUrl}" download="${escapeHTML(fileName)}" class="btn btn-amber btn-sm" style="font-size:10.5px; padding:3px 10px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:4px; border-radius:6px;">Download</a>
+              <button onclick="openDocumentViewer({dataURL:'${dataUrl.replace(/'/g, "\\'")}', name:'${escapeHTML(fileName)}', type:'application/pdf'})" class="btn btn-outline btn-sm" style="font-size:10.5px; padding:3px 10px; font-weight:800; border-color:rgba(0,0,0,0.15); color:inherit; border-radius:6px;">Preview</button>
             </div>
           ` : ''}
         </div>
@@ -1025,7 +1005,7 @@
             <span style="opacity:0.4;">&bull;</span>
             <span style="color:#22c55e; font-weight:800; display:inline-flex; align-items:center; gap:4px;"><span style="width:6px; height:6px; border-radius:50%; background:#22c55e; display:inline-block;"></span> Active Now</span>
             <span style="opacity:0.4;">&bull;</span>
-            <span style="color:var(--teal); font-weight:700;">👁️ View Profile &rarr;</span>
+            <span style="color:var(--teal); font-weight:700;">View Profile &rarr;</span>
           </div>
         </div>
       </div>
@@ -1042,7 +1022,7 @@
     if (msgs.length === 0) {
       area.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:32px; color:var(--muted);">
-          <div style="font-size:36px; margin-bottom:12px;">👋</div>
+          
           <h4 style="font-size:15px; font-weight:800; color:var(--ink); margin-bottom:6px;">Start the conversation</h4>
           <p style="font-size:12px; color:var(--muted); line-height:1.5;">Send your first message to ${escapeHTML(other.name)}</p>
         </div>
@@ -1063,7 +1043,7 @@
       
       const isCallLog = msg.body && (msg.body.includes('call ended') || msg.body.includes('Voice call') || msg.body.includes('Video call'));
       const isSystemEvent = msg.metadata?.is_system || msg.is_system || 
-        (typeof msg.body === 'string' && (msg.body.startsWith('⚡') || msg.body.startsWith('🎉') || msg.body.startsWith('ℹ️') || msg.body.startsWith('🔒')));
+        (typeof msg.body === 'string' && (msg.body.startsWith('\u26A1') || msg.body.startsWith('\uD83C\uDF89') || msg.body.startsWith('\u2139') || msg.body.startsWith('\uD83D\uDD12')));
 
       if (isCallLog) {
         html += `
@@ -1077,16 +1057,16 @@
         let borderCol = 'rgba(212, 146, 11, 0.4)';
         let tagCol = '#facc15';
         let bgGrad = 'linear-gradient(135deg, rgba(14,59,53,0.92), rgba(7,18,16,0.95))';
-        let eventLabel = '⚡ Market Activity';
+        let eventLabel = 'Market Activity';
 
-        if (msg.body.startsWith('🎉') || msg.metadata?.event_type === 'COLLECTION_REQUEST_ACCEPTED') {
+        if (msg.body.startsWith('\uD83C\uDF89') || msg.metadata?.event_type === 'COLLECTION_REQUEST_ACCEPTED') {
           borderCol = 'rgba(34, 197, 94, 0.5)';
           tagCol = '#4ade80';
-          eventLabel = '🎉 Engagement Activated';
-        } else if (msg.body.startsWith('ℹ️') || msg.metadata?.event_type === 'COLLECTION_REQUEST_DECLINED') {
+          eventLabel = 'Engagement Activated';
+        } else if (msg.body.startsWith('\u2139') || msg.metadata?.event_type === 'COLLECTION_REQUEST_DECLINED') {
           borderCol = 'rgba(239, 68, 68, 0.4)';
           tagCol = '#f87171';
-          eventLabel = 'ℹ️ Opportunity Notice';
+          eventLabel = 'Opportunity Notice';
         }
 
         html += `
@@ -1106,7 +1086,7 @@
         html += `
           <div class="bubble-wrap ${isMine ? 'sent' : 'received'}">
             <div class="bubble ${isMine ? 'sent' : 'received'} recalled-bubble">
-              🚫 <em>This message was recalled</em>
+              <em>This message was recalled</em>
             </div>
             <div class="bubble-time">${time}</div>
           </div>
@@ -1127,15 +1107,15 @@
               
               <div class="msg-dropdown" id="msgDrop_${msg.id}">
                 <div style="display:flex; gap:6px; padding:6px 8px; justify-content:space-around; background:var(--paper); border-radius:8px; margin-bottom:4px;">
-                  <span style="cursor:pointer; font-size:18px; transition:transform .1s;" onmouseover="this.style.transform='scale(1.3)'" onmouseout="this.style.transform='scale(1)'" onclick="reactToMsg('${conv.id}', '${msg.id}', '👍')">👍</span>
-                  <span style="cursor:pointer; font-size:18px; transition:transform .1s;" onmouseover="this.style.transform='scale(1.3)'" onmouseout="this.style.transform='scale(1)'" onclick="reactToMsg('${conv.id}', '${msg.id}', '❤️')">❤️</span>
-                  <span style="cursor:pointer; font-size:18px; transition:transform .1s;" onmouseover="this.style.transform='scale(1.3)'" onmouseout="this.style.transform='scale(1)'" onclick="reactToMsg('${conv.id}', '${msg.id}', '😂')">😂</span>
-                  <span style="cursor:pointer; font-size:18px; transition:transform .1s;" onmouseover="this.style.transform='scale(1.3)'" onmouseout="this.style.transform='scale(1)'" onclick="reactToMsg('${conv.id}', '${msg.id}', '🔥')">🔥</span>
+                  
+                  
+                  
+                  
                 </div>
                 <div class="msg-dropdown-divider"></div>
-                <button onclick="copyMsgText('${escapeHTML(msg.body).replace(/'/g, "\\'")}')">📋 Copy Text</button>
-                ${isMine ? `<button onclick="recallMsg('${conv.id}', '${msg.id}')">↩️ Recall (Unsend)</button>` : ''}
-                <button onclick="deleteMsg('${conv.id}', '${msg.id}')" class="danger">🗑️ Delete Message</button>
+                <button onclick="copyMsgText('${escapeHTML(msg.body).replace(/'/g, "\\'")}')">Copy Text</button>
+                ${isMine ? `<button onclick="recallMsg('${conv.id}', '${msg.id}')">Recall (Unsend)</button>` : ''}
+                <button onclick="deleteMsg('${conv.id}', '${msg.id}')" class="danger">Delete Message</button>
               </div>
             </div>
           </div>
@@ -1154,15 +1134,7 @@
   }
 
   // -- WHATSAPP DESKTOP EMOJI PICKER & ACTION ENGINE --
-  const EMOJI_CATEGORIES = {
-    smileys: { name: 'Smileys & People', icon: '😀', emojis: ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','🙁','😮','😯','😲','😳','🥺','😦','😧','👏','👍','👎','👊','✊','🤛','🤜','🤞','✌️','🤟','🤘','👌','👈','👉','👆','👇','☝️','✋','🤚','🖐️','🖖','👋','🤙','💪','🙏','🤝'] },
-    animals: { name: 'Animals & Nature', icon: '🐶', emojis: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🕷️','🦂','🐢','🐍','🦎','🐙','🦑','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈'] },
-    food: { name: 'Food & Drink', icon: '☕', emojis: ['🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🥑','🥦','🥬','🥒','🌶️','🌽','🥕','🧄','🧅','🥔','🍠','🥐','🥯','🍞','🥖','🥨','🧀','🥚','🍳','🥞','🧇','🥓','🥩','🍗','🍖','🌭','🍔','🍕','🥪','🥙','🧆','🌮','🌯','🥗','🥘','🥫','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🦪','🍤','🍙','🍚','🍘','🍥','🥠','🥮','🍢','🍡','🍧','🍨','🍦','🥧','🧁','🍰','🎂','🍮','🍭','🍬','🍫','🍿','🍩','🍪','🌰','🥜','🍯','🥛','🍼','☕','🍵','🧃','🥤','🍶','🍺','🍻','🥂','🍷','🥃','🍸','🍹','🧉','🍾'] },
-    activities: { name: 'Activities', icon: '⚽', emojis: ['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍','🏏','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛼','🛷','⛸️','🥌','🎿','⛷️','🏂','🏋️','🤼','🤸','⛹️','🤺','🤾','🏌️','🏇','🧘','🏄','🏊','🤽','🚣','🧗','🚴','🚵'] },
-    travel: { name: 'Travel & Places', icon: '🚗', emojis: ['🚗','🚕','🚙','🚌','🏣','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🦯','🦽','🦼','🛴','🚲','🛵','🏍️','🛺','🚨','🚔','🚘','🚖','🚡','🚟','🚃','🚝','🚆','🚇','🚈','✈️','🛫','🛬','🛩️','💺','🛰️','🚀','🛸','🚁','🛶','⛵','🚤','🛥️','🛳️','🚢'] },
-    objects: { name: 'Objects', icon: '💡', emojis: ['⌚','📱','📲','💻','⌨️','🖥️','🖨️','🖱️','🖲️','🕹️','🗜️','💽','💾','💿','📀','📷','📸','📹','🎥','📽️','🎞️','📞','☎️','📟','📠','📺','📻','🎙️','🎚️','🎛️','🧭','⏱️','⏰','🕵️','💡','🔦','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','🗞️','📑','🔖','🏷️','💰','🪙','💴','💵','💶','💷','💸','💳','🧾','✉️','📧','📨','📩','📤','📥','📦','📫','📮','🗺️','🏷️','📅','📆','🗓️','📈','📉','📊','📋','📌','📍','📎','📏','📐','✂️','🗂️','📂','📁','🗑️','🔒','🔓','🔏','🔐','🔑','🗝️'] },
-    symbols: { name: 'Symbols', icon: '🔣', emojis: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','✴️','🆚','💮','🉐','🅰️','🅱️','🆎','🆑','🅾️','🆘','❌','⭕','🛑','⛔','🚫','💯','💢','♨️','🚷','🚯','🚳','🚱','🔞','❗','❕','❓','👵','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♨️','♻️','✅','🈯','📊','💹','❇️','✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🈳','🈂️','🛂','🛃','🛄','🛅'] }
-  };
+  const EMOJI_CATEGORIES = {};
   let activeEmojiCategory = 'smileys';
 
   function toggleEmojiPicker(e) {
@@ -1264,7 +1236,7 @@
     const ok = recallMessage(convId, msgId);
     if (ok) {
       renderContacts();
-      showToast('↩️ Message recalled (unsent)');
+      showToast('Message recalled (unsent)');
     }
   }
 
@@ -1272,7 +1244,7 @@
     const ok = deleteMessage(convId, msgId);
     if (ok) {
       renderContacts();
-      showToast('🗑️ Message deleted');
+      showToast('Message deleted');
     }
   }
 
@@ -1289,14 +1261,14 @@
       deleteEntireConversation(convId);
       activeConvId = null;
       renderContacts();
-      showToast('🗑️ Conversation thread deleted');
+      showToast('Conversation thread deleted');
     }
   }
 
   function copyMsgText(text) {
     try {
       navigator.clipboard.writeText(text);
-      showToast('📋 Message text copied!');
+      showToast('Message text copied!');
     } catch(e){}
   }
 
@@ -1372,7 +1344,7 @@
     }
     if (!file) return;
     if (!activeConvId) {
-      if (typeof showToast === 'function') showToast('⚠️ Please select a conversation first');
+      if (typeof showToast === 'function') showToast('Please select a conversation first');
       return;
     }
 
@@ -1385,7 +1357,7 @@
     const isImage = (file.type || '').startsWith('image/');
     const sizeKB = (file.size >= 1024 * 1024) ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' : (file.size / 1024).toFixed(1) + ' KB';
     
-    if (typeof showToast === 'function') showToast(`⏳ Uploading ${fileName}...`, 'info');
+    if (typeof showToast === 'function') showToast(`Uploading ${fileName}...`, 'info');
 
     let fileUrl = null;
 
@@ -1422,23 +1394,23 @@
           reader.readAsDataURL(file);
         });
       } catch(readErr) {
-        if (typeof showToast === 'function') showToast('⚠️ Could not process file attachment', 'error');
+        if (typeof showToast === 'function') showToast('Could not process file attachment', 'error');
         return;
       }
     }
 
     let msgBody = '';
     if (isImage) {
-      msgBody = `📷 Attached Image: ${fileName} (HD Quality • ${sizeKB}) [HD_IMAGE] ${fileUrl}`;
+      msgBody = `Attached Image: ${fileName} (HD Quality • ${sizeKB}) [HD_IMAGE] ${fileUrl}`;
     } else {
-      msgBody = `📎 Attached File: ${fileName} (${sizeKB}) [FILE_ATTACHMENT] ${fileUrl}`;
+      msgBody = `Attached File: ${fileName} (${sizeKB}) [FILE_ATTACHMENT] ${fileUrl}`;
     }
 
     if (typeof sendMessage === 'function') {
       _shouldScrollToBottom = true;
       sendMessage(activeConvId, msgBody, fileUrl);
       renderContacts();
-      if (typeof showToast === 'function') showToast(`✅ ${isImage ? 'HD Image' : 'File'} attached & sent!`);
+      if (typeof showToast === 'function') showToast(`${isImage ? 'HD Image' : 'File'} attached & sent!`);
     }
     if (inputOrFile && typeof inputOrFile.value !== 'undefined') {
       inputOrFile.value = '';
@@ -1505,10 +1477,10 @@
 
     if (audio.paused) {
       audio.play();
-      if (btnEl) btnEl.textContent = '❚❚';
+      if (btnEl) btnEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
     } else {
       audio.pause();
-      if (btnEl) btnEl.textContent = '▶';
+      if (btnEl) btnEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
     }
   }
 
@@ -1576,7 +1548,7 @@
 
 
   function insertQuickEmoji() {
-    const emojis = ['😊', '👍', '💼', '✅', '🚀', '🙌', '🤝', '🎉'];
+    const emojis = [];
     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
     const input = document.getElementById('chatInput');
     if (input) {
@@ -1662,7 +1634,7 @@
     if (filtered.length === 0) {
       container.innerHTML = `
         <div style="padding:24px 16px; text-align:center; color:var(--muted);">
-          <div style="font-size:28px; margin-bottom:8px;">🔍</div>
+          
           <div style="font-size:13px; font-weight:800; color:var(--ink);">No Registered Accounts Found</div>
           <p style="font-size:11px; margin-top:2px;">Try searching for a different name, email, skill, or role category.</p>
         </div>
@@ -1684,7 +1656,7 @@
             <div>
               <div style="font-size:14px; font-weight:800; color:var(--ink); display:flex; align-items:center; gap:4px;">${escapeHTML(displayName)} ${badge}</div>
               <div style="font-size:11px; color:var(--muted); margin-top:1px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                <span>${u.role === 'company' ? '🏢 Company Enterprise' : '👷 Professional Specialist'}</span>
+                <span>${u.role === 'company' ? 'Company Enterprise' : 'Professional Specialist'}</span>
                 <span style="opacity:0.4;">&bull;</span>
                 <span style="color:#22c55e; font-weight:800; display:inline-flex; align-items:center; gap:3px;"><span style="width:5px; height:5px; border-radius:50%; background:#22c55e; display:inline-block;"></span> Active &amp; Ready</span>
                 <span style="opacity:0.4;">&bull;</span>
@@ -1692,7 +1664,7 @@
               </div>
             </div>
           </div>
-          <button class="btn btn-primary btn-sm" style="font-size:11px; font-weight:800; padding:6px 12px; border-radius:8px;" onclick="event.stopPropagation(); startConversationWith('${u.id || u.email}');">💬 Message</button>
+          <button class="btn btn-primary btn-sm" style="font-size:11px; font-weight:800; padding:6px 12px; border-radius:8px;" onclick="event.stopPropagation(); startConversationWith('${u.id || u.email}');">Message</button>
         </div>
       `;
     }).join('');
@@ -1700,7 +1672,7 @@
 
   window.openChatTransferModal = function() {
     if (!activeConvId) {
-      showToast('⚠️ Please select a conversation first.', 'warning');
+      showToast('Please select a conversation first.', 'warning');
       return;
     }
 
@@ -1757,7 +1729,7 @@
     const confirmBtn = document.getElementById('confirmChatTransferBtn');
 
     if (!amount || amount <= 0) {
-      showToast('⚠️ Please enter a valid transfer amount.', 'warning');
+      showToast('Please enter a valid transfer amount.', 'warning');
       return;
     }
 
@@ -1766,13 +1738,13 @@
     const recipientId = (typeof getCanonicalUserId === 'function' ? getCanonicalUserId(other.id || other.email) : other.id) || other.id;
 
     if (!senderId || !recipientId) {
-      showToast('⚠️ Unable to resolve sender or recipient account.', 'error');
+      showToast('Unable to resolve sender or recipient account.', 'error');
       return;
     }
 
     if (confirmBtn) {
       confirmBtn.disabled = true;
-      confirmBtn.innerHTML = '<span>⏳ Processing Live Transfer...</span>';
+      confirmBtn.innerHTML = '<span>Processing Live Transfer...</span>';
     }
 
     try {
@@ -1794,10 +1766,10 @@
 
       if (!transferResult || !transferResult.success) {
         const errorMsg = transferResult?.error || 'Transfer failed. Please check your available balance.';
-        showToast('⚠️ ' + errorMsg, 'error');
+        showToast(errorMsg, 'error');
         if (confirmBtn) {
           confirmBtn.disabled = false;
-          confirmBtn.innerHTML = '💸 Confirm &amp; Transfer';
+          confirmBtn.innerHTML = 'Confirm &amp; Transfer';
         }
         return;
       }
@@ -1823,15 +1795,15 @@
 
       _shouldScrollToBottom = true;
       renderContacts();
-      showToast(`🎉 Verified: ₦${amount.toLocaleString()} transferred to ${other.name}!`);
+      showToast(`Verified: ₦${amount.toLocaleString()} transferred to ${other.name}!`);
 
     } catch (err) {
       console.error('executeInChatTransfer error:', err);
-      showToast('⚠️ Transfer execution error: ' + (err.message || 'Network error'), 'error');
+      showToast('Transfer execution error: ' + (err.message || 'Network error'), 'error');
     } finally {
       if (confirmBtn) {
         confirmBtn.disabled = false;
-        confirmBtn.innerHTML = '💸 Confirm &amp; Transfer';
+        confirmBtn.innerHTML = 'Confirm &amp; Transfer';
       }
     }
   };
@@ -1918,7 +1890,7 @@
 
   window.openChatAiDraftModal = function() {
     if (!activeConvId) {
-      if (typeof showToast === 'function') showToast('⚠️ Please select a conversation first');
+      if (typeof showToast === 'function') showToast('Please select a conversation first');
       return;
     }
     const convs = getMyConversations();

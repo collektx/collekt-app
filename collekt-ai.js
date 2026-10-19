@@ -23,7 +23,7 @@ function openGeminiApiKeyModal() {
       <div class="modal-card" style="position:relative; max-width:480px; width:100%; border-radius:20px; padding:24px; background:var(--white); font-family:'Manrope',sans-serif;">
         <button class="modal-close" onclick="closeModal('geminiApiKeyModal')">&times;</button>
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-          <span style="font-size:24px;">⚙️</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           <div style="font-size:18px; font-weight:900; color:var(--ink);">Google Gemini API Settings</div>
         </div>
         <p style="font-size:12px; color:var(--muted); margin-bottom:16px; line-height:1.5;">
@@ -65,9 +65,9 @@ function saveGeminiApiKeyFromModal() {
   saveGeminiApiKey(val);
   closeModal('geminiApiKeyModal');
   if (val) {
-    if (typeof showToast === 'function') showToast('✨ Google Gemini API Key saved! Live AI activated.');
+    if (typeof showToast === 'function') showToast('Google Gemini API Key saved! Live AI activated.');
   } else {
-    if (typeof showToast === 'function') showToast('ℹ️ Gemini API Key cleared. Using built-in Collekt AI.');
+    if (typeof showToast === 'function') showToast('Gemini API Key cleared. Using built-in Collekt AI.');
   }
 }
 
@@ -153,27 +153,27 @@ function generateCollektSmartFallback(prompt, user = null, action = 'chat') {
 
   // Skills Handlers
   if (action === 'draft_escrow' || p.includes('escrow') || p.includes('milestone agreement')) {
-    return `📜 **Collekt Smart Escrow Agreement (Nigerian Jurisdiction)**\n\n` +
+    return `**Collekt Smart Escrow Agreement (Nigerian Jurisdiction)**\n\n` +
       `**Governing Law**: Arbitration & Mediation Act 2023 (Lagos, Nigeria)\n` +
       `**Escrow Agent**: Collekt Technologies Ltd\n\n` +
       `• **Phase 1: Mobilization & Site Setup (30%)** — Technical scoping memo and approved schedule.\n` +
       `• **Phase 2: Execution & Quality Inspection (50%)** — Milestone deliverables and FAT/SAT testing logs.\n` +
       `• **Phase 3: Final Closeout & Warranty (20%)** — Stamped handover certificate & 48-hour inspection grace period.\n\n` +
-      `🔒 *Escrow Guarantee*: Funds remain secured in platform escrow until formal buyer sign-off or resolution by Collekt Arbitration.`;
+      `*Escrow Guarantee*: Funds remain secured in platform escrow until formal buyer sign-off or resolution by Collekt Arbitration.`;
   }
 
   if (action === 'estimate_boq' || p.includes('boq') || p.includes('bill of quant')) {
-    return `📊 **Collekt Engineering BOQ & Cost Projection**\n\n` +
+    return `**Collekt Engineering BOQ & Cost Projection**\n\n` +
       `• **Tier-1 Materials & Certified Equipment**: 55% of budget\n` +
       `• **Licensed COREN Engineering Labor & Supervision**: 20% of budget\n` +
       `• **Nigerian Logistics & Transport**: 8% of budget\n` +
       `• **Statutory Contingency & Regulatory Compliance**: 7% of budget\n` +
       `• **Recommended Contractor Profit Margin**: 10% – 15%\n\n` +
-      `💡 *Bidding Tip*: Ensure your quotation specifies that payments are securely escrowed on Collekt for guaranteed milestone release.`;
+      `*Bidding Tip*: Ensure your quotation specifies that payments are securely escrowed on Collekt for guaranteed milestone release.`;
   }
 
   if (action === 'dispute_review' || p.includes('dispute') || p.includes('arbitrat')) {
-    return `⚖️ **Collekt Escrow Dispute Arbitration Summary**\n\n` +
+    return `**Collekt Escrow Dispute Arbitration Summary**\n\n` +
       `1. **Evidence Assessment**: Evaluated signed transport waybills, FAT logs, and timestamped communications.\n` +
       `2. **Escrow Safeguard**: Disputed milestone funds are immediately locked against automated release.\n` +
       `3. **Mandatory 5-Day Remediation Period**: The supplying party is provided 5 business days to inspect and remedy defects.\n` +
@@ -181,43 +181,43 @@ function generateCollektSmartFallback(prompt, user = null, action = 'chat') {
   }
 
   if (action === 'tax_calc' || p.includes('wht') || p.includes('withholding tax') || p.includes('vat')) {
-    return `🧮 **Nigerian Tax & Escrow Fee Reference**\n\n` +
+    return `**Nigerian Tax & Escrow Fee Reference**\n\n` +
       `• **Withholding Tax (WHT)**: 5% (Individual Vendors / Supplies) or 10% (Corporate Engineering / Technical Services)\n` +
       `• **Value Added Tax (VAT)**: 7.5% remitted to the Federal Inland Revenue Service (FIRS)\n` +
       `• **Collekt Platform Fee**: 15% on completed milestone values\n\n` +
-      `🧾 Official tax credit notes are linked to the verified corporate TIN upon payout confirmation.`;
+      `Official tax credit notes are linked to the verified corporate TIN upon payout confirmation.`;
   }
 
   if (action === 'trust_profile' || p.includes('trust score') || p.includes('risk profile')) {
-    return `🛡️ **Collekt Vendor Trust & Safety Profile**\n\n` +
+    return `**Collekt Vendor Trust & Safety Profile**\n\n` +
       `• **CAC Status**: Verified Corporate Affairs Commission Active Registration\n` +
       `• **FIRS TIN**: Validated Corporate Tax ID\n` +
       `• **Director NIN**: Verified Biometric Identity Check\n` +
       `• **Dispute Index**: 0% Default / Excellent Fulfillment Track Record\n\n` +
-      `🏆 **Status**: *Shield Verified Partner 🛡️* — Eligible for Instant Escrow Payouts.`;
+      `**Status**: *Shield Verified Partner* — Eligible for Instant Escrow Payouts.`;
   }
 
   if (p.includes('paystack') || p.includes('fund') || p.includes('wallet') || p.includes('bank transfer')) {
-    return `💳 **Collekt Wallet & Paystack Funding System**:\n\nHello **${name}**! Here is how to manage your wallet:\n\n1. Open your **Wallet** tab from the main menu.\n2. Click **Fund Wallet**.\n3. **Option 1 (Instant Paystack Bank Transfer)**: Transfer directly to your assigned dedicated NUBAN account (Wema / Sterling Bank). Your balance is credited automatically in seconds!\n4. **Option 2 (Paystack Checkout)**: Use your Debit Card, USSD, or Bank QR Code for instant funding.`;
+    return `**Collekt Wallet & Paystack Funding System**:\n\nHello **${name}**! Here is how to manage your wallet:\n\n1. Open your **Wallet** tab from the main menu.\n2. Click **Fund Wallet**.\n3. **Option 1 (Instant Paystack Bank Transfer)**: Transfer directly to your assigned dedicated NUBAN account (Wema / Sterling Bank). Your balance is credited automatically in seconds!\n4. **Option 2 (Paystack Checkout)**: Use your Debit Card, USSD, or Bank QR Code for instant funding.`;
   }
   if (p.includes('withdraw') || p.includes('bank account') || p.includes('mfb') || p.includes('nova')) {
-    return `🏦 **Instant Bank Withdrawals**:\n\n1. Go to your **Wallet** and click **Withdraw Funds**.\n2. Select your destination Nigerian bank (Commercial Bank or Microfinance Bank like Moniepoint, Kuda, OPay, PalmPay, Nova Bank, etc.).\n3. Enter your 10-digit NUBAN account number.\n4. Enter security OTP code and confirm. Withdrawals are processed instantly via NIBSS/Paystack rails!`;
+    return `**Instant Bank Withdrawals**:\n\n1. Go to your **Wallet** and click **Withdraw Funds**.\n2. Select your destination Nigerian bank (Commercial Bank or Microfinance Bank like Moniepoint, Kuda, OPay, PalmPay, Nova Bank, etc.).\n3. Enter your 10-digit NUBAN account number.\n4. Enter security OTP code and confirm. Withdrawals are processed instantly via NIBSS/Paystack rails!`;
   }
   if (p.includes('verification') || p.includes('identity') || p.includes('nin') || p.includes('cac') || p.includes('tin')) {
-    return `🛡️ **Collekt Corporate & Identity Verification**:\n\n• **For Companies**: Go to **Company Profile → Corporate Compliance**, enter your CAC RC/BN Number, FIRS TIN, and Director NIN. Upon submission, your account automatically receives the **Collekt Shield Verification Mark** (green transparent shield with white 'c' logo).\n• **For Professionals**: Go to **Profile → Identity**, submit your 11-digit NIN, attach your Government ID, and complete live facial verification.`;
+    return `**Collekt Corporate & Identity Verification**:\n\n• **For Companies**: Go to **Company Profile → Corporate Compliance**, enter your CAC RC/BN Number, FIRS TIN, and Director NIN. Upon submission, your account automatically receives the **Collekt Shield Verification Mark** (green transparent shield with white 'c' logo).\n• **For Professionals**: Go to **Profile → Identity**, submit your 11-digit NIN, attach your Government ID, and complete live facial verification.`;
   }
   if (p.includes('proposal') || p.includes('pitch') || p.includes('bid') || p.includes('tender')) {
-    return `📝 **Proposal & Tender Submission Guidelines**:\n\n1. Browse open tenders in the **Marketplace**.\n2. Click **"✨ Generate Proposal with AI"** on any project to automatically write a 3-paragraph pitch tailored to your technical skills.\n3. Attach your verified certifications and CV.\n4. Submit your proposal with your proposed milestone budget and completion timeline!`;
+    return `**Proposal & Tender Submission Guidelines**:\n\n1. Browse open tenders in the **Marketplace**.\n2. Click **"Generate Proposal with AI"** on any project to automatically write a 3-paragraph pitch tailored to your technical skills.\n3. Attach your verified certifications and CV.\n4. Submit your proposal with your proposed milestone budget and completion timeline!`;
   }
   if (p.includes('nogicd') || p.includes('nuprc') || p.includes('dpr') || p.includes('compliance') || p.includes('ncdmb')) {
-    return `🏛️ **Regulatory Compliance (NUPRC & NCDMB / NOGICD Act)**:\n\nCollekt is compliant with the Nigerian Oil & Gas Industry Content Development (NOGICD) Act. Verified local companies and licensed engineering professionals receive top priority badge rankings for EPC tender awards.`;
+    return `**Regulatory Compliance (NUPRC & NCDMB / NOGICD Act)**:\n\nCollekt is compliant with the Nigerian Oil & Gas Industry Content Development (NOGICD) Act. Verified local companies and licensed engineering professionals receive top priority badge rankings for EPC tender awards.`;
   }
   if (p.includes('who are you') || p.includes('what can you do') || p.includes('hello') || p.includes('hi')) {
-    return `✨ **Greetings ${name}! I am your Collekt AI Copilot**.\n\nI can assist you with:\n• 📜 **Drafting Milestone Escrow Agreements**\n• 📊 **Engineering BOQ Cost Estimations**\n• ⚖️ **Escrow Dispute Mediation**\n• 🧮 **Nigerian Tax & WHT Calculations**\n• 🛡️ **CAC, TIN, NIN & Corporate Verification**\n• 💳 **Wallet Funding & Instant Bank Withdrawals**\n\nType your request or use the quick skills toolbar!`;
+    return `**Greetings ${name}! I am your Collekt AI Copilot**.\n\nI can assist you with:\n• **Drafting Milestone Escrow Agreements**\n• **Engineering BOQ Cost Estimations**\n• **Escrow Dispute Mediation**\n• **Nigerian Tax & WHT Calculations**\n• **CAC, TIN, NIN & Corporate Verification**\n• **Wallet Funding & Instant Bank Withdrawals**\n\nType your request or use the quick skills toolbar!`;
   }
 
   // Dynamic structured AI response for custom questions
-  return `✨ **Collekt AI Insights**:\n\nRegarding your inquiry: *"_${prompt}_"*\n\n1. **Overview**: Collekt provides end-to-end engineering, procurement, and talent matching with secure escrow for Nigerian business.\n2. **Actionable Step**: You can draft milestone contracts, estimate BOQs, or verify vendor credentials using our embedded AI skills.\n3. **Pro Tip**: To connect live Gemini AI models, click **⚙️ Settings** in the AI header to paste your **Google Gemini API Key**!`;
+  return `**Collekt AI Insights**:\n\nRegarding your inquiry: *"_${prompt}_"*\n\n1. **Overview**: Collekt provides end-to-end engineering, procurement, and talent matching with secure escrow for Nigerian business.\n2. **Actionable Step**: You can draft milestone contracts, estimate BOQs, or verify vendor credentials using our embedded AI skills.\n3. **Pro Tip**: To connect live Gemini AI models, click **Settings** in the AI header to paste your **Google Gemini API Key**!`;
 }
 
 /**
@@ -385,7 +385,7 @@ function openAIProposalGeneratorModal(projectTitle = '', projectDesc = '') {
       <div class="modal-card" style="position:relative; max-width:540px; width:100%; border-radius:24px; padding:28px; background:var(--white); font-family:'Manrope',sans-serif;">
         <button class="modal-close" onclick="closeModal('aiProposalModal')">&times;</button>
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-          <span style="font-size:24px;">✨</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
           <div style="font-size:18px; font-weight:900; color:var(--ink);">Google Gemini AI Proposal Writer</div>
         </div>
         <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">Generate a high-converting, professional proposal pitch tailored for Nigerian energy &amp; EPC projects.</p>
@@ -401,15 +401,15 @@ function openAIProposalGeneratorModal(projectTitle = '', projectDesc = '') {
         </div>
 
         <button class="btn btn-primary" onclick="generateAIPropClick()" style="width:100%; background:linear-gradient(135deg,#0E3B35,#13756F); min-height:44px; font-weight:800; border:none; box-shadow:0 6px 20px rgba(19,117,111,0.25); margin-bottom:16px;">
-          ✨ Generate Proposal Pitch with Gemini AI
+          Generate Proposal Pitch with Gemini AI
         </button>
 
         <div style="display:none;" id="aiPropOutputBox">
           <label class="form-label" style="font-size:12px; font-weight:700; color:var(--teal);">Generated AI Pitch:</label>
           <textarea class="form-input" id="aiPropResultText" rows="6" style="font-size:13px; line-height:1.6; background:var(--paper); color:var(--ink); margin-bottom:12px;"></textarea>
           <div style="display:flex; gap:8px;">
-            <button class="btn btn-outline btn-sm" style="flex:1;" onclick="copyAIPitchText()">📋 Copy Pitch</button>
-            <button class="btn btn-primary btn-sm" style="flex:1; background:var(--teal); font-weight:800;" onclick="exportAIPitchAsPDF()">📄 Export to PDF</button>
+            <button class="btn btn-outline btn-sm" style="flex:1;" onclick="copyAIPitchText()">Copy Pitch</button>
+            <button class="btn btn-primary btn-sm" style="flex:1; background:var(--teal); font-weight:800;" onclick="exportAIPitchAsPDF()">Export to PDF</button>
             <button class="btn btn-outline btn-sm" style="flex:0.8;" onclick="closeModal('aiProposalModal')">Done</button>
           </div>
         </div>
@@ -435,11 +435,11 @@ async function generateAIPropClick() {
   const resultText = document.getElementById('aiPropResultText');
 
   if (!title) {
-    if (typeof showToast === 'function') showToast('⚠️ Please enter a project title', 'warning');
+    if (typeof showToast === 'function') showToast('Please enter a project title', 'warning');
     return;
   }
 
-  if (resultText) resultText.value = '✨ Gemini AI is generating your proposal pitch...';
+  if (resultText) resultText.value = 'Gemini AI is generating your proposal pitch...';
   if (outputBox) outputBox.style.display = 'block';
 
   const user = typeof getUser === 'function' ? getUser() : null;
@@ -464,7 +464,7 @@ function copyAIPitchText() {
   const textEl = document.getElementById('aiPropResultText');
   if (textEl && textEl.value) {
     navigator.clipboard.writeText(textEl.value);
-    if (typeof showToast === 'function') showToast('📋 Proposal pitch copied to clipboard!');
+    if (typeof showToast === 'function') showToast('Proposal pitch copied to clipboard!');
   }
 }
 
@@ -473,8 +473,8 @@ async function exportAIPitchAsPDF() {
   const desc = document.getElementById('aiPropProjectDesc')?.value.trim() || '';
   const pitch = document.getElementById('aiPropResultText')?.value.trim();
 
-  if (!pitch || pitch.startsWith('✨ Gemini AI is generating')) {
-    if (typeof showToast === 'function') showToast('⚠️ Please generate a proposal pitch first', 'warning');
+  if (!pitch || pitch.startsWith('Gemini AI is generating')) {
+    if (typeof showToast === 'function') showToast('Please generate a proposal pitch first', 'warning');
     return;
   }
 
@@ -992,7 +992,7 @@ function initCollektAICopilot() {
           <div style="display:flex;align-items:center;gap:6px;">
             <button type="button" class="kolly-hdr-btn" id="kollyBtnNew" title="Start a new chat">+ New</button>
             <button type="button" class="kolly-hdr-btn" id="kollyBtnHist" title="View saved chat history">History</button>
-            <a href="kolly.html" class="kolly-hdr-btn" title="Open full-screen view">⛶ Full</a>
+            <a href="kolly.html" class="kolly-hdr-btn" title="Open full-screen view">Full</a>
             <button type="button" id="kollyBtnClose" style="background:none;border:none;color:#b4b4b4;font-size:20px;cursor:pointer;padding:0 4px;line-height:1;">&times;</button>
           </div>
         </div>

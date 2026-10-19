@@ -87,7 +87,7 @@ const COLLEKT_SUBSCRIPTION_DISCOUNTS = {
       const isSuspended = curr.suspended === true || curr.status === 'suspended';
 
       if (isSyntheticMock || isSuspended) {
-        console.warn('⛔ Security Guardian: Terminated synthetic/suspended session for:', cEmail || cId);
+        console.warn('Security Guardian: Terminated synthetic/suspended session for:', cEmail || cId);
         localStorage.removeItem('collekt_user');
         localStorage.removeItem('collekt_last_user_email');
         localStorage.removeItem('collekt_admin_auth');
@@ -548,7 +548,7 @@ if (typeof window !== 'undefined' && window.addEventListener) {
         getOrCreateUserWallet(user);
       }
       if (typeof showToast === 'function') {
-        showToast(`✅ Signed in as ${user.name} (${user.email})!`);
+        showToast(`Signed in as ${user.name} (${user.email})!`);
       }
       const targetPage = user.role === 'company' ? 'company-dashboard.html' : 'dashboard.html';
       setTimeout(() => {
@@ -618,12 +618,12 @@ function createGoogleAuthModalElement() {
         <label style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); display:block; margin-bottom:8px;">1. Select Account Type</label>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div id="gAuthRolePro" onclick="selectGoogleModalRole('professional')" style="border:2px solid var(--teal); background:rgba(19,117,111,0.08); border-radius:14px; padding:12px; cursor:pointer; transition:all 0.2s ease;">
-            <div style="font-size:20px; margin-bottom:4px;">👤</div>
+            <div style="font-size:14px; font-weight:800; color:var(--teal); margin-bottom:4px;">PRO</div>
             <div style="font-size:13px; font-weight:800; color:var(--ink);">Professional</div>
             <div style="font-size:11px; color:var(--muted);">Submit bids &amp; win tenders</div>
           </div>
           <div id="gAuthRoleCo" onclick="selectGoogleModalRole('company')" style="border:2px solid var(--line); background:var(--white); border-radius:14px; padding:12px; cursor:pointer; transition:all 0.2s ease;">
-            <div style="font-size:20px; margin-bottom:4px;">🏢</div>
+            <div style="font-size:14px; font-weight:800; color:var(--teal); margin-bottom:4px;">CORP</div>
             <div style="font-size:13px; font-weight:800; color:var(--ink);">Company</div>
             <div style="font-size:11px; color:var(--muted);">Post RFPs &amp; hire specialists</div>
           </div>
@@ -670,7 +670,7 @@ if (typeof document !== 'undefined') {
 async function connectRealLinkedInAccount() {
   const user = (typeof getUser === 'function') ? getUser() : null;
   if (!user) {
-    if (typeof showToast === 'function') showToast('⚠️ Please log in before connecting LinkedIn', 'warning');
+    if (typeof showToast === 'function') showToast('Please log in before connecting LinkedIn', 'warning');
     else alert('Please log in before connecting LinkedIn');
     return false;
   }
@@ -685,7 +685,7 @@ async function connectRealLinkedInAccount() {
   const redirectUri = window.location.origin + '/auth-callback.html?link_identity=linkedin';
 
   if (typeof showToast === 'function') {
-    showToast('🔗 Redirecting to LinkedIn for secure authorization...', 'info');
+    showToast('Redirecting to LinkedIn for secure authorization...', 'info');
   }
 
   if (window.sb && window.sb.auth) {
@@ -718,7 +718,7 @@ async function connectRealLinkedInAccount() {
 
       if (error) {
         console.error('LinkedIn authorization error:', error);
-        if (typeof showToast === 'function') showToast('⚠️ LinkedIn authorization notice: ' + error.message, 'error');
+        if (typeof showToast === 'function') showToast('LinkedIn authorization notice: ' + error.message, 'error');
         else alert('LinkedIn authorization notice: ' + error.message);
         return false;
       }
@@ -729,7 +729,7 @@ async function connectRealLinkedInAccount() {
       }
     } catch (err) {
       console.error('connectRealLinkedInAccount exception:', err);
-      if (typeof showToast === 'function') showToast('⚠️ Could not connect to LinkedIn. Please try again.', 'error');
+      if (typeof showToast === 'function') showToast('Could not connect to LinkedIn. Please try again.', 'error');
       return false;
     }
   } else {
@@ -786,7 +786,7 @@ async function disconnectLinkedInAccount() {
 async function linkLinkedInAccount(inputUrl) {
   const user = getUser();
   if (!user) {
-    if (typeof showToast === 'function') showToast('⚠️ Please log in to link your LinkedIn account', 'warning');
+    if (typeof showToast === 'function') showToast('Please log in to link your LinkedIn account', 'warning');
     return false;
   }
 
@@ -824,14 +824,14 @@ async function linkLinkedInAccount(inputUrl) {
 
   const connectBtn = document.getElementById('btnConnectLinkedIn');
   if (connectBtn) {
-    connectBtn.innerHTML = '<span>✓</span> Linked';
+    connectBtn.innerHTML = 'Linked';
     connectBtn.style.background = '#16a34a';
   }
 
   if (typeof showToast === 'function') {
-    showToast('✅ LinkedIn profile saved! 🔗');
+    showToast('LinkedIn profile saved!');
   } else {
-    alert('✅ LinkedIn profile saved!');
+    alert('LinkedIn profile saved!');
   }
 
   if (typeof renderProfileStrength === 'function') renderProfileStrength();
@@ -1227,7 +1227,7 @@ function dispatchLoginAlertIfEnabled(profile) {
   if (profile.login_alerts === false) alertsOn = false;
 
   if (!alertsOn) {
-    console.info('🔕 Login alert suppressed: Login Alerts are turned OFF.');
+    console.info('Login alert suppressed: Login Alerts are turned OFF.');
     return;
   }
 
@@ -1269,7 +1269,7 @@ function dispatchLoginAlertIfEnabled(profile) {
     })
   }).then(r => r.json()).then(d => {
     if (d && d.success) {
-      console.info('🔔 Login alert email dispatched to:', profile.email);
+      console.info('Login alert email dispatched to:', profile.email);
     }
   }).catch(e => console.warn('Login alert trigger note:', e));
 }
@@ -1470,7 +1470,7 @@ function renderNotificationsPanel() {
   if (!list || list.length === 0) {
     container.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:36px 20px; text-align:center; color:var(--muted);">
-        <div style="font-size:28px; margin-bottom:8px;">🔔</div>
+        <div style="width:40px; height:40px; border-radius:12px; background:rgba(19,117,111,0.08); display:flex; align-items:center; justify-content:center; margin-bottom:10px; color:var(--teal);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div>
         <div style="font-size:13px; font-weight:800; color:var(--ink); margin-bottom:4px;">No New Notifications</div>
         <p style="font-size:11px; color:var(--muted); margin:0;">You're all caught up!</p>
       </div>
@@ -1483,14 +1483,18 @@ function renderNotificationsPanel() {
     const timeAgo = formatNotifTimeAgo(item.created_at);
     const unreadDot = !isRead ? `<div class="notif-dot-indicator"></div>` : `<div style="width:8px; height:8px; flex-shrink:0;"></div>`;
 
-    let icon = '🔔';
-    if (item.type === 'welcome') icon = '👋';
-    else if (item.type === 'verification_reminder') icon = '🛡️';
-    else if (item.type === 'escrow_funding') icon = '🔒';
-    else if (item.type === 'escrow_payout') icon = '💸';
-    else if (item.type === 'escrow_payin') icon = '💰';
-    else if (item.type === 'proposal') icon = '📄';
-    else if (item.type === 'message') icon = '💬';
+    let iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>';
+    if (item.type === 'welcome') {
+      iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+    } else if (item.type === 'verification_reminder') {
+      iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>';
+    } else if (item.type === 'escrow_funding' || item.type === 'escrow_payout' || item.type === 'escrow_payin') {
+      iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>';
+    } else if (item.type === 'proposal') {
+      iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
+    } else if (item.type === 'message') {
+      iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
+    }
 
     const safeTitle = typeof escapeHTML === 'function' ? escapeHTML(item.title) : item.title;
     const safeMsg = typeof escapeHTML === 'function' ? escapeHTML(item.message) : item.message;
@@ -1501,7 +1505,7 @@ function renderNotificationsPanel() {
     return `
       <div class="notif-item" style="${bgStyle}; cursor:pointer;" onclick="handleNotificationClick('${safeId}', '${safeLink}', event)">
         ${unreadDot}
-        <div style="font-size:18px; line-height:1; flex-shrink:0; margin-top:2px;">${icon}</div>
+        <div style="display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:8px; background:rgba(19,117,111,0.08); color:var(--teal); flex-shrink:0; margin-top:2px;">${iconSvg}</div>
         <div style="flex:1; min-width:0;">
           <div class="notif-item-text">
             <strong>${safeTitle}</strong><br>
@@ -1614,7 +1618,7 @@ function initNotificationsRealtime() {
               renderNotificationsPanel();
             }
             if (typeof showToast === 'function') {
-              showToast(`🔔 ${n.title}: ${n.message}`, 'info');
+              showToast(`${n.title}: ${n.message}`, 'info');
             }
           }
         }
@@ -1642,7 +1646,7 @@ function checkAndTriggerWelcomeAndVerificationNotifications() {
       : 'Welcome to Collekt! Explore open opportunities, surf around our marketplace, and complete your professional profile to get verified.';
     addUserNotification({
       type: 'welcome',
-      title: 'Welcome to Collekt! 👋',
+      title: 'Welcome to Collekt!',
       message: welcomeMsg,
       link: profileLink
     });
@@ -1661,7 +1665,7 @@ function checkAndTriggerWelcomeAndVerificationNotifications() {
       localStorage.setItem(reminderKey, Date.now().toString());
       addUserNotification({
         type: 'verification_reminder',
-        title: 'Complete Your Profile to Get Verified 🛡️',
+        title: 'Complete Your Profile to Get Verified',
         message: 'Finish setting up your profile details and documents to receive your Verified Trust Badge and unlock full escrow privileges.',
         link: profileLink
       });
@@ -2765,9 +2769,9 @@ function updateLiveUnreadMessageBadges() {
   const qlMsg = document.getElementById('quickLinkMessages');
   if (qlMsg) {
     if (count > 0) {
-      qlMsg.innerHTML = `💬 Messages <span style="background:#ef4444; color:#fff; font-size:11px; font-weight:800; padding:2px 8px; border-radius:99px; margin-left:4px;">(${count} unread)</span>`;
+      qlMsg.innerHTML = `Messages <span style="background:#ef4444; color:#fff; font-size:11px; font-weight:800; padding:2px 8px; border-radius:99px; margin-left:4px;">(${count} unread)</span>`;
     } else {
-      qlMsg.innerHTML = `💬 Messages`;
+      qlMsg.innerHTML = `Messages`;
     }
   }
 
@@ -2928,7 +2932,7 @@ function recallMessage(conversationId, msgId) {
     if (conv) {
       const activeMsgs = msgs.filter(m => m.conversation_id === conversationId);
       const lastM = activeMsgs.length ? activeMsgs[activeMsgs.length - 1] : null;
-      conv.last_message = lastM ? (lastM.recalled ? '🚫 Message recalled' : lastM.body) : 'No messages yet';
+      conv.last_message = lastM ? (lastM.recalled ? 'Message recalled' : lastM.body) : 'No messages yet';
       conv.last_at = lastM ? lastM.created_at : conv.last_at;
       saveAllConversations(convs);
     }
@@ -2950,7 +2954,7 @@ function deleteMessage(conversationId, msgId) {
     if (conv) {
       const activeMsgs = msgs.filter(m => m.conversation_id === conversationId);
       const lastM = activeMsgs.length ? activeMsgs[activeMsgs.length - 1] : null;
-      conv.last_message = lastM ? (lastM.recalled ? '🚫 Message recalled' : lastM.body) : 'No messages yet';
+      conv.last_message = lastM ? (lastM.recalled ? 'Message recalled' : lastM.body) : 'No messages yet';
       conv.last_at = lastM ? lastM.created_at : conv.last_at;
       saveAllConversations(convs);
     }
@@ -3183,7 +3187,7 @@ async function generateVirtualBankAccount(targetUser, reloadPage = true) {
   } catch(e){}
 
   if (reloadPage) {
-    showToast('🎉 Dedicated Virtual Account ready! Account: ' + user.wallet.account_number);
+    showToast('Dedicated Virtual Account ready! Account: ' + user.wallet.account_number);
     setTimeout(() => window.location.reload(), 600);
   }
 }
@@ -4100,7 +4104,7 @@ function requireAuth() {
   }
   if (user.suspended === true || user.status === 'suspended') {
     clearUser();
-    alert('⛔ Your account has been suspended by Collekt administration. Please contact support@collekt.ng.');
+    alert('Your account has been suspended by Collekt administration. Please contact support@collekt.ng.');
     window.location.replace('login.html?suspended=1');
     return false;
   }
@@ -4109,7 +4113,7 @@ function requireAuth() {
   const isLinkedIn = user.linkedin_linked === true || user.provider === 'linkedin' || user.provider === 'linkedin_oidc';
   const isJustVerified = sessionStorage.getItem('collekt_just_verified') === 'true';
   if (user.role !== 'admin' && !isLinkedIn && user.otp_verified !== true && !isJustVerified) {
-    console.warn('🔒 Unverified account: redirecting to complete verification');
+    console.warn('Unverified account: redirecting to complete verification');
     window.location.replace('register.html?verify_pending=true');
     return false;
   }
@@ -4354,8 +4358,8 @@ function renderGlobalProfileStrength(target, customUser) {
 
     data.checks.forEach(item => {
       const checkIcon = item.done 
-        ? `<span class="ci-icon" style="color:#16a34a; font-weight:900; font-size:11px; flex-shrink:0; width:14px; text-align:center;">✓</span>`
-        : `<span class="ci-icon" style="color:var(--muted); font-size:11px; flex-shrink:0; width:14px; text-align:center; opacity:0.6;">○</span>`;
+        ? `<span class="ci-icon" style="color:#16a34a; display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>`
+        : `<span class="ci-icon" style="color:var(--muted); display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; flex-shrink:0; opacity:0.6;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle></svg></span>`;
       
       const textColor = item.done ? 'var(--ink)' : 'var(--muted)';
       const fontWeight = item.done ? '700' : '500';
@@ -4449,7 +4453,7 @@ function triggerProfileStrengthAction(action) {
 window.COLLEKT_SKILLS_LIBRARY = [
   {
     category: 'Soft Skills & Leadership',
-    icon: '🧠',
+    icon: '',
     skills: [
       'Critical Thinking & Problem Solving',
       'Commercial Negotiation & Deal Structuring',
@@ -4467,7 +4471,7 @@ window.COLLEKT_SKILLS_LIBRARY = [
   },
   {
     category: 'Oil, Gas & Offshore',
-    icon: '🛢️',
+    icon: '',
     skills: [
       'Pipeline Integrity & Maintenance',
       'HAZOP & Process Safety Management',
@@ -4481,7 +4485,7 @@ window.COLLEKT_SKILLS_LIBRARY = [
   },
   {
     category: 'Renewable Energy & Power',
-    icon: '☀️',
+    icon: '',
     skills: [
       'Commercial Solar PV Design & Installation',
       'Mini-Grid & Microgrid Architecture',
@@ -4494,7 +4498,7 @@ window.COLLEKT_SKILLS_LIBRARY = [
   },
   {
     category: 'Civil, Structural & EPC',
-    icon: '🏗️',
+    icon: '',
     skills: [
       'Structural Steel Fabrication & Certified Welding',
       'Mechanical Piping & Flow Systems (ASME / API)',
@@ -4507,7 +4511,7 @@ window.COLLEKT_SKILLS_LIBRARY = [
   },
   {
     category: 'Commercial & Compliance',
-    icon: '💼',
+    icon: '',
     skills: [
       'Technical Procurement & Vendor Sourcing',
       'BOQ (Bill of Quantities) & Cost Estimation',
@@ -4520,7 +4524,7 @@ window.COLLEKT_SKILLS_LIBRARY = [
   },
   {
     category: 'Automation, Digital & Safety',
-    icon: '💻',
+    icon: '',
     skills: [
       'PLC Programming & Industrial Automation',
       'CAD Drafting & 3D Plant Modeling',
@@ -4566,7 +4570,7 @@ window.openSkillPickerModal = function(options = {}) {
       <div class="modal-card" style="max-width:680px; width:100%; border-radius:24px; padding:24px 28px; background:var(--white); box-shadow:0 30px 90px rgba(0,0,0,0.35); font-family:'Manrope',sans-serif; position:relative;">
         <button class="modal-close" onclick="closeModal('skillPickerModal')" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:24px; color:var(--muted); cursor:pointer;">&times;</button>
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
-          <span style="font-size:24px;">📋</span>
+          
           <div>
             <h3 style="margin:0; font-size:18px; font-weight:900; color:var(--ink);">Collekt Professional Skills Library</h3>
             <p style="margin:2px 0 0; font-size:12px; color:var(--muted);">Select your technical disciplines, certifications, and leadership soft skills.</p>
@@ -4574,7 +4578,7 @@ window.openSkillPickerModal = function(options = {}) {
         </div>
 
         <div style="margin:16px 0 10px;">
-          <input type="text" class="form-input" id="skillSearchInput" placeholder="🔍 Search skills (e.g. Negotiation, Solar, Pipeline, Critical Thinking)..." style="width:100%; font-size:13px; font-weight:700; padding:10px 16px; border-radius:99px;" oninput="filterSkillsLibrary(this.value)">
+          <input type="text" class="form-input" id="skillSearchInput" placeholder="Search skills (e.g. Negotiation, Solar, Pipeline, Critical Thinking)..." style="width:100%; font-size:13px; font-weight:700; padding:10px 16px; border-radius:99px;" oninput="filterSkillsLibrary(this.value)">
         </div>
 
         <div class="skill-lib-cat-bar" id="skillLibCatBar"></div>
@@ -4611,7 +4615,7 @@ window.renderSkillPickerCategories = function() {
   if (!catBar) return;
   const categories = ['All', ...window.COLLEKT_SKILLS_LIBRARY.map(c => c.category)];
   catBar.innerHTML = categories.map((cat, idx) => {
-    const icon = cat === 'All' ? '✨' : (window.COLLEKT_SKILLS_LIBRARY.find(c => c.category === cat)?.icon || '🔹');
+    const icon = '';
     return `<button class="skill-lib-cat-btn ${idx === 0 ? 'active' : ''}" onclick="selectSkillCategory('${escapeHTML(cat)}', this)">${icon} ${escapeHTML(cat)}</button>`;
   }).join('');
 };
@@ -4661,7 +4665,7 @@ window.renderSkillPickerPills = function(category = 'All', filterQuery = '') {
   grid.innerHTML = list.map(item => {
     const isSelected = activeSkills.includes(item.name.toLowerCase());
     return `<span class="skill-lib-pill ${isSelected ? 'selected' : ''}" data-skill="${escapeHTML(item.name)}" onclick="toggleSkillFromLibrary('${escapeHTML(item.name).replace(/'/g, "\\'")}', this)">
-      <span class="pill-indicator">${isSelected ? '✓' : '+'}</span> ${escapeHTML(item.name)}
+      <span class="pill-indicator">${isSelected ? 'Added' : '+'}</span> ${escapeHTML(item.name)}
     </span>`;
   }).join('');
 };
@@ -4709,7 +4713,7 @@ window.toggleSkillFromLibrary = function(skillName, pillEl) {
       if (pillEl) {
         pillEl.classList.add('selected');
         const ind = pillEl.querySelector('.pill-indicator');
-        if (ind) ind.textContent = '✓';
+        if (ind) ind.textContent = 'Added';
       }
       if (typeof _persistSkillsFromUI === 'function') _persistSkillsFromUI();
     }
@@ -4732,7 +4736,7 @@ window.toggleSkillFromLibrary = function(skillName, pillEl) {
       if (pillEl) {
         pillEl.classList.add('selected');
         const ind = pillEl.querySelector('.pill-indicator');
-        if (ind) ind.textContent = '✓';
+        if (ind) ind.textContent = 'Added';
       }
     }
     input.value = current.join(', ');
@@ -4774,7 +4778,7 @@ window.quickAddSkill = function(skillName) {
   if (wrap) {
     const existing = getActiveUserSkillsList();
     if (existing.includes(skillName.toLowerCase())) {
-      if (typeof showToast === 'function') showToast(`ℹ️ "${skillName}" is already on your profile.`, 'info');
+      if (typeof showToast === 'function') showToast(`"${skillName}" is already on your profile.`, 'info');
       return;
     }
     const emptyMsg = wrap.querySelector('.empty-msg');
@@ -4788,7 +4792,7 @@ window.quickAddSkill = function(skillName) {
 
     if (typeof _persistSkillsFromUI === 'function') _persistSkillsFromUI();
     if (typeof renderProfileStrength === 'function') renderProfileStrength();
-    if (typeof showToast === 'function') showToast(`✨ Added "${skillName}"!`);
+    if (typeof showToast === 'function') showToast(`Added "${skillName}"!`);
   }
 };
 
@@ -5205,13 +5209,13 @@ function showInAppMessagePopup(msgData) {
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:8px;">
       <div style="display:flex; align-items:center; gap:8px;">
         <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#22c55e; box-shadow:0 0 10px #22c55e;"></span>
-        <span style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:#4ade80;">💬 NEW IN-APP MESSAGE</span>
+        <span style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:#4ade80;">NEW IN-APP MESSAGE</span>
       </div>
-      <button onclick="dismissInAppMessagePopup()" style="background:none; border:none; color:#94a3b8; font-size:16px; cursor:pointer; padding:2px 6px; border-radius:4px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#94a3b8'">✕</button>
+      <button onclick="dismissInAppMessagePopup()" style="background:none; border:none; color:#94a3b8; cursor:pointer; padding:2px 6px; border-radius:4px; display:inline-flex; align-items:center; justify-content:center;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#94a3b8'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
 
     <div style="font-size:13px; font-weight:800; color:#f8fafc; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-      🔒 ${escapeHTML(senderName)}
+      ${escapeHTML(senderName)}
     </div>
 
     <div style="font-size:12px; color:#cbd5e1; line-height:1.5; margin-bottom:12px; word-break:break-word;">
@@ -5225,7 +5229,7 @@ function showInAppMessagePopup(msgData) {
           <div style="font-size:22px; font-weight:900; letter-spacing:0.22em; color:#ffffff; font-family:monospace; margin-top:2px;">${otpCode}</div>
         </div>
         <button onclick="copyInAppOtpCode('${otpCode}')" style="background:#22c55e; color:#0d1f1e; border:none; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer; transition:.2s;" onmouseover="this.style.background='#4ade80'" onmouseout="this.style.background='#22c55e'">
-          ⚡ Auto-Fill / Copy OTP
+          Auto-Fill / Copy OTP
         </button>
       </div>
     ` : ''}
@@ -5233,7 +5237,7 @@ function showInAppMessagePopup(msgData) {
     <div style="display:flex; justify-content:flex-end; gap:10px;">
       <button onclick="dismissInAppMessagePopup()" style="background:rgba(255,255,255,0.1); color:#cbd5e1; border:none; padding:7px 14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">Dismiss</button>
       <a href="messages.html${conversationId ? '?conv=' + conversationId : ''}" style="background:#0E3B35; color:#4ade80; border:1px solid #16a34a; padding:7px 16px; border-radius:8px; font-size:12px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-        👁️ Open Messages &rarr;
+        Open Messages &rarr;
       </a>
     </div>
   `;
@@ -5256,9 +5260,9 @@ function copyInAppOtpCode(code) {
   if (otpInput) {
     otpInput.value = code;
     otpInput.focus();
-    showToast('✅ OTP code auto-filled into verification box!');
+    showToast('OTP code auto-filled into verification box!');
   } else {
-    showToast('📋 OTP code copied to clipboard: ' + code);
+    showToast('OTP code copied to clipboard: ' + code);
   }
 }
 
@@ -5377,7 +5381,7 @@ function updateThemeButton() {
   document.querySelectorAll('.drawer-theme-item').forEach(item => {
     const icon = item.querySelector('.drawer-theme-icon');
     const text = item.querySelector('.drawer-theme-text');
-    if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+    if (icon) icon.innerHTML = getThemeIconHTML(isDark);
     if (text) text.textContent = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
   });
 
@@ -5802,7 +5806,7 @@ function buildLiquidGlassNav(activePageKey) {
           if (window.location.pathname.includes('messages')) {
             e.preventDefault();
             if (typeof showToast === 'function') {
-              showToast('📞 Voice & Video Calls: Select any conversation to begin an encrypted call.');
+              showToast('Voice & Video Calls: Select any conversation to begin an encrypted call.');
             }
             return;
           }
@@ -5911,7 +5915,7 @@ function buildTopbar() {
           </div>
           <div id="notifItemsContainer" style="max-height:360px; overflow-y:auto;">
             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:36px 20px; text-align:center; color:var(--muted);">
-              <div style="font-size:28px; margin-bottom:8px;">🔔</div>
+              <div style="width:40px; height:40px; border-radius:12px; background:rgba(19,117,111,0.08); display:flex; align-items:center; justify-content:center; margin-bottom:10px; color:var(--teal);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div>
               <div style="font-size:13px; font-weight:800; color:var(--ink); margin-bottom:4px;">No New Notifications</div>
               <p style="font-size:11px; color:var(--muted); margin:0;">You're all caught up!</p>
             </div>
@@ -6009,7 +6013,7 @@ function initMobileNav() {
       toggleItem.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:12px 16px; margin-top:16px; border-radius:14px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.16); cursor:pointer; touch-action:manipulation;';
       toggleItem.innerHTML = `
         <span style="display:flex; align-items:center; gap:10px; font-size:13.5px; font-weight:800; color:#fff;">
-          <span class="drawer-theme-icon" style="font-size:18px;">${isDark ? '☀️' : '🌙'}</span>
+          <span class="drawer-theme-icon" style="display:inline-flex; align-items:center;">${getThemeIconHTML(isDark)}</span>
           <span class="drawer-theme-text">${isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</span>
         </span>
         <button type="button" class="theme-btn" style="width:36px; height:36px; min-height:36px; min-width:36px; padding:0;" title="Toggle theme">${getThemeIconHTML(isDark)}</button>
@@ -6376,12 +6380,12 @@ function formatFileSize(bytes) {
 // Helper: get icon for file type
 function getFileTypeIcon(type, name) {
   const ext = (name || '').split('.').pop().toLowerCase();
-  if (type && type.startsWith('image/')) return '🖼️';
-  if (ext === 'pdf' || type === 'application/pdf') return '📄';
-  if (['doc', 'docx'].includes(ext)) return '📝';
-  if (['xls', 'xlsx'].includes(ext)) return '📊';
-  if (['ppt', 'pptx'].includes(ext)) return '📊';
-  return '📎';
+  if (type && type.startsWith('image/')) return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>';
+  if (ext === 'pdf' || type === 'application/pdf') return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line></svg>';
+  if (['doc', 'docx'].includes(ext)) return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line></svg>';
+  if (['xls', 'xlsx'].includes(ext)) return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" x2="16" y1="13" y2="13"></line><line x1="8" x2="16" y1="17" y2="17"></line></svg>';
+  if (['ppt', 'pptx'].includes(ext)) return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
+  return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>';
 }
 
 // Helper: format Naira currency
@@ -6589,7 +6593,7 @@ async function openDocumentViewer(docData) {
             ${escapeHTML(category)} ${sizeStr ? '• ' + sizeStr : ''} &bull; Uploaded Document
           </div>
         </div>
-        <button onclick="closeDocumentViewer()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted, #888); width:36px; height:36px; border-radius:50%; display:grid; place-items:center;">✕</button>
+        <button onclick="closeDocumentViewer()" style="background:none; border:none; cursor:pointer; color:var(--muted, #888); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
 
       <!-- Document Body Viewport -->
@@ -6867,7 +6871,7 @@ function openEscrowDisputeModal(contractId, projectTitle = 'Active Project Tende
       <div class="modal-card" style="position:relative; max-width:540px; width:100%; border-radius:24px; padding:28px; background:var(--white); font-family:'Manrope',sans-serif;">
         <button class="modal-close" onclick="closeModal('escrowDisputeModal')">&times;</button>
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
-          <div style="width:40px; height:40px; border-radius:12px; background:#fee2e2; color:#dc2626; display:grid; place-items:center; font-size:20px;">⚖️</div>
+          <div style="width:40px; height:40px; border-radius:12px; background:#fee2e2; color:#dc2626; display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg></div>
           <div>
             <div style="font-size:18px; font-weight:900; color:var(--ink);">Open Formal Escrow Dispute</div>
             <div style="font-size:12px; color:var(--muted);" id="disputeProjectSub">Project Escrow Protection System</div>
@@ -6875,7 +6879,7 @@ function openEscrowDisputeModal(contractId, projectTitle = 'Active Project Tende
         </div>
 
         <p style="font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:16px; background:#fff7ed; border:1px solid #ffedd5; padding:10px 14px; border-radius:10px;">
-          ⚠️ <strong>Escrow Lock Notice</strong>: Opening a dispute temporarily locks escrow funds until our Collekt Arbitration Panel completes legal &amp; milestone review.
+          <strong>Escrow Lock Notice</strong>: Opening a dispute temporarily locks escrow funds until our Collekt Arbitration Panel completes legal &amp; milestone review.
         </p>
 
         <div class="form-group" style="margin-bottom:14px;">
@@ -6897,7 +6901,7 @@ function openEscrowDisputeModal(contractId, projectTitle = 'Active Project Tende
         <div style="display:flex; gap:12px;">
           <button class="btn btn-outline" style="flex:1;" onclick="closeModal('escrowDisputeModal')">Cancel</button>
           <button class="btn btn-primary" style="flex:1; background:#dc2626; border:none; font-weight:800;" onclick="submitEscrowDispute()">
-            ⚖️ File Dispute Claim
+            File Dispute Claim
           </button>
         </div>
       </div>
@@ -6917,7 +6921,7 @@ async function submitEscrowDispute() {
   const statement = document.getElementById('disputeReasonText')?.value.trim();
 
   if (!statement || statement.length < 15) {
-    if (typeof showToast === 'function') showToast('⚠️ Please provide a detailed statement (min 15 characters)', 'warning');
+    if (typeof showToast === 'function') showToast('Please provide a detailed statement (min 15 characters)', 'warning');
     return;
   }
 
@@ -6947,7 +6951,7 @@ async function submitEscrowDispute() {
     });
     apiResult = await res.json();
     if (!res.ok && res.status !== 401) {
-      if (typeof showToast === 'function') showToast(`⚠️ ${apiResult.error || 'Failed to file dispute'}`, 'error');
+      if (typeof showToast === 'function') showToast(`${apiResult.error || 'Failed to file dispute'}`, 'error');
       return;
     }
   } catch (apiErr) {
@@ -6995,7 +6999,7 @@ async function submitEscrowDispute() {
   syncDisputeToSupabase(disputeRecord);
 
   closeModal('escrowDisputeModal');
-  if (typeof showToast === 'function') showToast(`⚖️ Dispute #${disputeRecord.id} filed! Escrow funds frozen under Collekt Arbitration.`);
+  if (typeof showToast === 'function') showToast(`Dispute #${disputeRecord.id} filed! Escrow funds frozen under Collekt Arbitration.`);
   if (typeof renderAdminEngagementsTable === 'function') renderAdminEngagementsTable();
   if (typeof renderEscrowMilestones === 'function') renderEscrowMilestones();
 }
@@ -7035,7 +7039,7 @@ function ensureAwardContractModalExists() {
       <button class="modal-close" onclick="closeModal('awardContractEscrowModal')" style="top:16px; right:16px; width:32px; height:32px; border-radius:50%;">&times;</button>
 
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
-        <div style="width:44px; height:44px; border-radius:12px; background:rgba(19,117,111,0.14); color:var(--teal); display:grid; place-items:center; font-size:22px; flex-shrink:0;">🔒</div>
+        <div style="width:44px; height:44px; border-radius:12px; background:rgba(19,117,111,0.14); color:var(--teal); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
         <div>
           <div style="font-size:18px; font-weight:900; color:var(--ink); line-height:1.25;">Award Contract &amp; Configure Escrow</div>
           <div style="font-size:12px; color:var(--muted); margin-top:2px;" id="awardModalSubHeader">Define your milestone release schedule or choose lump-sum upon completion.</div>
@@ -7051,7 +7055,7 @@ function ensureAwardContractModalExists() {
         </div>
         <div style="text-align:right;">
           <span style="font-size:10.5px; font-weight:800; background:rgba(22,163,74,0.12); color:#16a34a; padding:4px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
-            🛡️ Escrow Protected
+            Escrow Protected
           </span>
         </div>
       </div>
@@ -7061,8 +7065,8 @@ function ensureAwardContractModalExists() {
         <div class="form-group" style="margin:0;">
           <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">Currency</label>
           <select class="form-input form-select" id="awardModalCurrency" onchange="onAwardCurrencyOrAmountChange()" style="font-weight:800; font-size:13px; min-height:42px; padding:8px 10px; border-radius:10px;">
-            <option value="NGN">🇳🇬 NGN (₦)</option>
-            <option value="USD">🇺🇸 USD ($)</option>
+            <option value="NGN">NGN (₦)</option>
+            <option value="USD">USD ($)</option>
           </select>
         </div>
         <div class="form-group" style="margin:0;">
@@ -7076,13 +7080,13 @@ function ensureAwardContractModalExists() {
         <label class="form-label" style="font-size:12px; font-weight:800; margin-bottom:6px; display:block;">Select Escrow Payout Structure</label>
         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; background:var(--paper); padding:5px; border-radius:12px; border:1px solid var(--line);">
           <button type="button" id="awardModeBtn2Ms" onclick="selectAwardPayoutStructure('milestones_2')" style="padding:9px 8px; border-radius:9px; border:none; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.2s;">
-            📊 2 Milestones
+            2 Milestones
           </button>
           <button type="button" id="awardModeBtn3Ms" onclick="selectAwardPayoutStructure('milestones_3')" style="padding:9px 8px; border-radius:9px; border:none; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.2s;">
-            📊 3 Milestones
+            3 Milestones
           </button>
           <button type="button" id="awardModeBtnLump" onclick="selectAwardPayoutStructure('lump_sum')" style="padding:9px 8px; border-radius:9px; border:none; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.2s;">
-            🎯 Lump-Sum (100%)
+            Lump-Sum (100%)
           </button>
         </div>
       </div>
@@ -7095,7 +7099,7 @@ function ensureAwardContractModalExists() {
             <div style="font-size:11px; color:var(--muted);">Funds are held in escrow and disbursed only as you approve each completed milestone.</div>
           </div>
           <span id="awardModalTotalBadge" style="font-size:11px; font-weight:800; padding:4px 10px; border-radius:99px; background:rgba(22,163,74,0.12); color:#16a34a;">
-            ✓ Total: 100%
+            Total: 100%
           </span>
         </div>
 
@@ -7109,7 +7113,7 @@ function ensureAwardContractModalExists() {
       <!-- VIEW 2: Lump-Sum Payout Notice -->
       <div id="awardLumpSumWrap" style="display:none; background:rgba(19,117,111,0.06); border:1px solid rgba(19,117,111,0.22); border-radius:14px; padding:14px 16px; margin-bottom:16px;">
         <div style="display:flex; align-items:flex-start; gap:10px;">
-          <span style="font-size:20px; line-height:1;">🎯</span>
+          
           <div>
             <div style="font-size:13px; font-weight:900; color:var(--ink); margin-bottom:3px;">100% Lump-Sum Payout After Job Completion</div>
             <div style="font-size:12px; color:var(--muted); line-height:1.5;">
@@ -7134,7 +7138,7 @@ function ensureAwardContractModalExists() {
           <strong style="color:#16a34a; font-size:13.5px;" id="awardSummaryNet">₦0.00</strong>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; font-size:11px; color:var(--muted);">
-          <span>🏛️ <strong>Escrow Custody:</strong> NOVA Commercial Bank</span>
+          <span><strong>Escrow Custody:</strong> NOVA Commercial Bank</span>
           <span style="font-family:monospace; font-weight:800; color:var(--teal);">COLLEKT NG &bull; 1001025797</span>
         </div>
       </div>
@@ -7142,7 +7146,7 @@ function ensureAwardContractModalExists() {
       <div style="display:flex; gap:10px; justify-content:flex-end;">
         <button type="button" class="btn btn-outline" onclick="closeModal('awardContractEscrowModal')" style="font-weight:800; border-radius:12px; padding:10px 18px;">Cancel</button>
         <button type="button" class="btn btn-primary" id="btnConfirmAwardContract" onclick="confirmAndExecuteContractAward()" style="background:var(--teal); border:none; font-weight:900; border-radius:12px; padding:10px 22px; flex:1; max-width:320px;">
-          🔒 Award Job &amp; Lock Escrow Schedule
+          Award Job &amp; Lock Escrow Schedule
         </button>
       </div>
     </div>
@@ -7411,11 +7415,11 @@ function updateAwardModalSummary() {
     if (sum === 100) {
       badgeEl.style.background = 'rgba(22,163,74,0.12)';
       badgeEl.style.color = '#16a34a';
-      badgeEl.textContent = `✓ Total: 100% (${sym}${totalAmt.toLocaleString()})`;
+      badgeEl.textContent = `Total: 100% (${sym}${totalAmt.toLocaleString()})`;
     } else {
       badgeEl.style.background = 'rgba(239,68,68,0.12)';
       badgeEl.style.color = '#ef4444';
-      badgeEl.textContent = `⚠️ Total: ${sum}% (Must equal 100%)`;
+      badgeEl.textContent = `Total: ${sum}% (Must equal 100%)`;
     }
   }
 }
@@ -7423,7 +7427,7 @@ function updateAwardModalSummary() {
 async function confirmAndExecuteContractAward() {
   const totalAmt = Number(_awardModalState.amount || 0);
   if (!totalAmt || totalAmt < 100) {
-    if (typeof showToast === 'function') showToast('⚠️ Please enter a valid contract amount (minimum ₦100).', 'warning');
+    if (typeof showToast === 'function') showToast('Please enter a valid contract amount (minimum ₦100).', 'warning');
     return;
   }
 
@@ -7434,7 +7438,7 @@ async function confirmAndExecuteContractAward() {
   if (_awardModalState.paymentMode === 'milestones') {
     const sum = _awardModalState.milestones.reduce((acc, m) => acc + (Number(m.percentage) || 0), 0);
     if (sum !== 100) {
-      if (typeof showToast === 'function') showToast(`⚠️ Milestone percentages must equal 100% (currently ${sum}%).`, 'warning');
+      if (typeof showToast === 'function') showToast(`Milestone percentages must equal 100% (currently ${sum}%).`, 'warning');
       return;
     }
     finalMilestones = _awardModalState.milestones.map((m, idx) => {
@@ -7467,7 +7471,7 @@ async function confirmAndExecuteContractAward() {
   const btn = document.getElementById('btnConfirmAwardContract');
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = '⏳ Locking Escrow Schedule...';
+    btn.innerHTML = 'Locking Escrow Schedule...';
   }
 
   try {
@@ -7491,7 +7495,7 @@ async function confirmAndExecuteContractAward() {
           ? `${finalMilestones.length} Custom Milestones (${finalMilestones.map(m => m.percentage + '%').join(' / ')})`
           : '100% Lump-Sum on Completion';
         if (typeof showToast === 'function') {
-          showToast(`🎉 Contract Awarded! Escrow Schedule Locked: ${modeLabel}.`);
+          showToast(`Contract Awarded! Escrow Schedule Locked: ${modeLabel}.`);
         }
         if (typeof dispatchEscrowFundingNotification === 'function') {
           try {
@@ -7512,17 +7516,17 @@ async function confirmAndExecuteContractAward() {
         }
       } else {
         if (typeof showToast === 'function') {
-          showToast('⚠️ ' + (res?.error || 'Failed to award contract.'), 'error');
+          showToast((res?.error || 'Failed to award contract.'), 'error');
         }
       }
     }
   } catch (err) {
     console.error('confirmAndExecuteContractAward error:', err);
-    if (typeof showToast === 'function') showToast('⚠️ Could not complete contract award.', 'error');
+    if (typeof showToast === 'function') showToast('Could not complete contract award.', 'error');
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = '🔒 Award Job &amp; Lock Escrow Schedule';
+      btn.innerHTML = 'Award Job &amp; Lock Escrow Schedule';
     }
   }
 }
@@ -7557,7 +7561,7 @@ function openReviewSubmissionModal(targetUserId, targetUserName = 'Contractor', 
   // 1. Require authenticated user or company
   if (!currentUser || (!currentUser.id && !currentUser.email)) {
     if (typeof showToast === 'function') {
-      showToast('🔒 Please log in as a company or registered user to leave a review.', 'warning');
+      showToast('Please log in as a company or registered user to leave a review.', 'warning');
     }
     return;
   }
@@ -7565,7 +7569,7 @@ function openReviewSubmissionModal(targetUserId, targetUserName = 'Contractor', 
   // 2. Strictly block self-reviews (even in "View as" preview mode)
   if (isSelfReviewTarget(currentUser, targetUserId, targetUserName)) {
     if (typeof showToast === 'function') {
-      showToast('⚠️ You cannot leave a review for yourself. Only companies and other users can review your profile.', 'warning');
+      showToast('You cannot leave a review for yourself. Only companies and other users can review your profile.', 'warning');
     }
     return;
   }
@@ -7582,17 +7586,17 @@ function openReviewSubmissionModal(targetUserId, targetUserName = 'Contractor', 
       <div class="modal-card" style="position:relative; max-width:520px; width:100%; border-radius:24px; padding:28px; background:var(--white); font-family:'Manrope',sans-serif;">
         <button class="modal-close" onclick="closeModal('clientReviewModal')">&times;</button>
         <div style="text-align:center; margin-bottom:16px;">
-          <div style="font-size:32px; margin-bottom:4px;">⭐</div>
+          <div style="width:44px; height:44px; border-radius:12px; background:rgba(245,158,11,0.12); color:#f59e0b; display:flex; align-items:center; justify-content:center; margin:0 auto 8px auto;"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
           <div style="font-size:18px; font-weight:900; color:var(--ink);" id="reviewModalTitle">Leave a Client Review</div>
           <div style="font-size:12px; color:var(--muted);" id="reviewModalSub">Rate performance for your completed project</div>
         </div>
 
         <div style="display:flex; justify-content:center; gap:8px; margin-bottom:20px;" id="starRatingSelector">
-          <span style="font-size:32px; cursor:pointer; color:var(--amber);" onclick="setReviewStarRating(1)">★</span>
-          <span style="font-size:32px; cursor:pointer; color:var(--amber);" onclick="setReviewStarRating(2)">★</span>
-          <span style="font-size:32px; cursor:pointer; color:var(--amber);" onclick="setReviewStarRating(3)">★</span>
-          <span style="font-size:32px; cursor:pointer; color:var(--amber);" onclick="setReviewStarRating(4)">★</span>
-          <span style="font-size:32px; cursor:pointer; color:var(--amber);" onclick="setReviewStarRating(5)">★</span>
+          <button type="button" class="star-rating-btn" style="background:none; border:none; cursor:pointer; padding:4px; color:var(--amber);" onclick="setReviewStarRating(1)"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
+          <button type="button" class="star-rating-btn" style="background:none; border:none; cursor:pointer; padding:4px; color:var(--amber);" onclick="setReviewStarRating(2)"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
+          <button type="button" class="star-rating-btn" style="background:none; border:none; cursor:pointer; padding:4px; color:var(--amber);" onclick="setReviewStarRating(3)"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
+          <button type="button" class="star-rating-btn" style="background:none; border:none; cursor:pointer; padding:4px; color:var(--amber);" onclick="setReviewStarRating(4)"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
+          <button type="button" class="star-rating-btn" style="background:none; border:none; cursor:pointer; padding:4px; color:var(--amber);" onclick="setReviewStarRating(5)"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
@@ -7612,7 +7616,7 @@ function openReviewSubmissionModal(targetUserId, targetUserName = 'Contractor', 
         </div>
 
         <button class="btn btn-primary" onclick="submitClientReview()" style="width:100%; min-height:44px; font-weight:800; background:var(--amber); color:#fff; border:none; box-shadow:0 6px 20px rgba(212,146,11,0.3);">
-          ⭐ Submit Official Review
+          Submit Official Review
         </button>
       </div>
     `;
@@ -7643,7 +7647,7 @@ function openReviewSubmissionModal(targetUserId, targetUserName = 'Contractor', 
 
 function setReviewStarRating(stars) {
   _selectedStarRating = stars;
-  const starsEl = document.querySelectorAll('#starRatingSelector span');
+  const starsEl = document.querySelectorAll('#starRatingSelector .star-rating-btn');
   starsEl.forEach((star, index) => {
     star.style.color = index < stars ? 'var(--amber)' : '#cbd5e1';
   });
@@ -7719,13 +7723,13 @@ async function submitClientReview() {
   const projectTitle = _activeReviewTarget?.projectTitle || 'Completed Project';
 
   if (!reviewer || (!reviewer.id && !reviewer.email)) {
-    if (typeof showToast === 'function') showToast('🔒 You must be logged in as a company or user to leave a review.', 'warning');
+    if (typeof showToast === 'function') showToast('You must be logged in as a company or user to leave a review.', 'warning');
     closeModal('clientReviewModal');
     return;
   }
 
   if (isSelfReviewTarget(reviewer, targetId, targetName)) {
-    if (typeof showToast === 'function') showToast('⚠️ You cannot leave a review for yourself. Only companies and other users can review your profile.', 'warning');
+    if (typeof showToast === 'function') showToast('You cannot leave a review for yourself. Only companies and other users can review your profile.', 'warning');
     closeModal('clientReviewModal');
     return;
   }
@@ -7734,7 +7738,7 @@ async function submitClientReview() {
   const comment = document.getElementById('reviewCommentText')?.value.trim();
 
   if (!comment || comment.length < 10) {
-    if (typeof showToast === 'function') showToast('⚠️ Please write a review comment (min 10 characters)', 'warning');
+    if (typeof showToast === 'function') showToast('Please write a review comment (min 10 characters)', 'warning');
     return;
   }
 
@@ -7760,7 +7764,7 @@ async function submitClientReview() {
   syncReviewToSupabase(reviewRecord);
 
   closeModal('clientReviewModal');
-  if (typeof showToast === 'function') showToast(`⭐ Thank you! Your ${_selectedStarRating}-star review for ${targetName} has been published.`);
+  if (typeof showToast === 'function') showToast(`Thank you! Your ${_selectedStarRating}-star review for ${targetName} has been published.`);
 
   // Immediately re-render UI on open pages
   if (typeof _renderUserToPublicProfile === 'function' && updatedTarget) {
@@ -7880,22 +7884,22 @@ function initKollyAiAssistant() {
     </div>
     
     <div class="ai-skills-bar" id="kollySkillsBar" title="Click to trigger autonomous AI skills">
-      <span class="ai-skill-pill" onclick="triggerKollySkill('draft_escrow')">📜 Escrow Drafter</span>
-      <span class="ai-skill-pill" onclick="triggerKollySkill('estimate_boq')">📊 BOQ Estimator</span>
-      <span class="ai-skill-pill" onclick="triggerKollySkill('dispute_review')">⚖️ Dispute Review</span>
-      <span class="ai-skill-pill" onclick="triggerKollySkill('tax_calc')">🧮 Tax &amp; Fees</span>
-      <span class="ai-skill-pill" onclick="triggerKollySkill('trust_profile')">🛡️ Trust Profiler</span>
+      <span class="ai-skill-pill" onclick="triggerKollySkill('draft_escrow')">Escrow Drafter</span>
+      <span class="ai-skill-pill" onclick="triggerKollySkill('estimate_boq')">BOQ Estimator</span>
+      <span class="ai-skill-pill" onclick="triggerKollySkill('dispute_review')">Dispute Review</span>
+      <span class="ai-skill-pill" onclick="triggerKollySkill('tax_calc')">Tax &amp; Fees</span>
+      <span class="ai-skill-pill" onclick="triggerKollySkill('trust_profile')">Trust Profiler</span>
     </div>
 
     <div class="ai-chat-body" id="collektAiChatBody">
       <div class="ai-msg bot">
-        👋 Hi, I'm <strong>Kolly</strong>, your AI Assistant on Collekt! How can I help you search talent, draft proposal pitches, post project specs, or answer platform questions today?
+        Hi, I'm <strong>Kolly</strong>, your AI Assistant on Collekt! How can I help you search talent, draft proposal pitches, post project specs, or answer platform questions today?
       </div>
       <div style="display:flex; flex-wrap:wrap; gap:6px; margin:4px 0;" id="aiQuickChips">
-        <span class="ai-chip-prompt" onclick="sendAiChipQuery('Find me an Instrumentation Engineer in Lagos')">🔍 Find Engineers</span>
-        <span class="ai-chip-prompt" onclick="sendAiChipQuery('How do I complete my profile score to 100%?')">📝 Profile Strength</span>
-        <span class="ai-chip-prompt" onclick="sendAiChipQuery('What are the company subscription prices?')">💰 Membership Fees</span>
-        <span class="ai-chip-prompt" onclick="sendAiChipQuery('How does Shield Verification work?')">🛡️ Verification Help</span>
+        <span class="ai-chip-prompt" onclick="sendAiChipQuery('Find me an Instrumentation Engineer in Lagos')">Find Engineers</span>
+        <span class="ai-chip-prompt" onclick="sendAiChipQuery('How do I complete my profile score to 100%?')">Profile Strength</span>
+        <span class="ai-chip-prompt" onclick="sendAiChipQuery('What are the company subscription prices?')">Membership Fees</span>
+        <span class="ai-chip-prompt" onclick="sendAiChipQuery('How does Shield Verification work?')">Verification Help</span>
       </div>
     </div>
 
@@ -8213,7 +8217,7 @@ async function submitCollektAiQuery(explicitSkill = null) {
   const typingDiv = document.createElement('div');
   typingDiv.className = 'ai-msg bot';
   typingDiv.id = 'kollyChatTypingIndicator';
-  typingDiv.innerHTML = '<span style="display:inline-flex; align-items:center; gap:6px;">🦖 <em>Kolly is processing with Gemini AI...</em></span>';
+  typingDiv.innerHTML = '<span style="display:inline-flex; align-items:center; gap:6px;"><em>Kolly is processing with Gemini AI...</em></span>';
   body.appendChild(typingDiv);
   body.scrollTop = body.scrollHeight;
 
@@ -8232,7 +8236,7 @@ async function submitCollektAiQuery(explicitSkill = null) {
     if (tInd) tInd.remove();
     const botDiv = document.createElement('div');
     botDiv.className = 'ai-msg bot';
-    botDiv.innerHTML = `⚡ <strong>Kolly AI</strong>: I'm here! You can explore verified specialists on the <a href="marketplace.html" style="color:var(--teal); font-weight:800;">Marketplace</a>, or check your profile completeness on <a href="profile.html" style="color:var(--teal); font-weight:800;">Profile</a>!`;
+    botDiv.innerHTML = `<strong>Kolly AI</strong>: I'm here! You can explore verified specialists on the <a href="marketplace.html" style="color:var(--teal); font-weight:800;">Marketplace</a>, or check your profile completeness on <a href="profile.html" style="color:var(--teal); font-weight:800;">Profile</a>!`;
     body.appendChild(botDiv);
     body.scrollTop = body.scrollHeight;
   }
@@ -8276,18 +8280,18 @@ async function processAiCopilotQuery(query, explicitSkill = null) {
     const portFiles = typeof getUploadedFiles === 'function' ? getUploadedFiles('portfolio') : [];
     const isVerified = !!(u && (u.verified === true || u.is_verified === true || u.verification_status === 'verified'));
 
-    const cvStatus = cvFiles.length > 0 ? `✅ CV Uploaded (<em>${escapeHTML(cvFiles[0].name)}</em>)` : '❌ CV Missing';
-    const certStatus = certFiles.length > 0 ? `✅ Certifications Uploaded (${certFiles.length} file)` : '❌ Certifications Missing';
-    const portStatus = portFiles.length > 0 ? `✅ Portfolio Added (${portFiles.length} items)` : '❌ Portfolio Items Missing';
-    const idStatus = isVerified ? '✅ Identity Verified 🛡️' : '❌ Identity Unverified';
+    const cvStatus = cvFiles.length > 0 ? `CV Uploaded (<em>${escapeHTML(cvFiles[0].name)}</em>)` : 'CV Missing';
+    const certStatus = certFiles.length > 0 ? `Certifications Uploaded (${certFiles.length} file)` : 'Certifications Missing';
+    const portStatus = portFiles.length > 0 ? `Portfolio Added (${portFiles.length} items)` : 'Portfolio Items Missing';
+    const idStatus = isVerified ? 'Identity Verified' : 'Identity Unverified';
 
-    return `🦖 <strong>Kolly Profile &amp; Upload Inspection</strong>:<br>Overall Profile Completion: <strong>${score}%</strong><br><br>
-📁 <strong>Upload Status</strong>:<br>
+    return `<strong>Kolly Profile &amp; Upload Inspection</strong>:<br>Overall Profile Completion: <strong>${score}%</strong><br><br>
+<strong>Upload Status</strong>:<br>
 &bull; ${cvStatus}<br>
 &bull; ${certStatus}<br>
 &bull; ${portStatus}<br>
 &bull; ${idStatus}<br><br>
-💡 <em>Kolly's Advice</em>: All your uploaded files stay permanently saved in your profile. You can view existing files or upload replacement versions anytime on your <a href="profile.html" style="color:var(--teal); font-weight:800;">Profile Page →</a>`;
+<em>Kolly's Advice</em>: All your uploaded files stay permanently saved in your profile. You can view existing files or upload replacement versions anytime on your <a href="profile.html" style="color:var(--teal); font-weight:800;">Profile Page →</a>`;
   }
 
   // Talent search query check
@@ -8295,7 +8299,7 @@ async function processAiCopilotQuery(query, explicitSkill = null) {
     const pros = users.filter(usr => (usr.role || '').toLowerCase() !== 'company');
     if (pros.length > 0) {
       const topMatch = pros[0];
-      return `🔍 <strong>Kolly AI Talent Match Result</strong>:<br>Found <strong>${pros.length} qualified professionals</strong> in Collekt DB.<br><br>🏆 <strong>Top Recommended</strong>: ${escapeHTML(topMatch.name)} (${escapeHTML(topMatch.title || 'Senior Engineer')}) &bull; ${topMatch.verified ? 'Shield Verified 🛡️' : 'Unverified'}<br><a href="marketplace.html" style="color:var(--teal); font-weight:800;">View candidates on Marketplace →</a>`;
+      return `<strong>Kolly AI Talent Match Result</strong>:<br>Found <strong>${pros.length} qualified professionals</strong> in Collekt DB.<br><br><strong>Top Recommended</strong>: ${escapeHTML(topMatch.name)} (${escapeHTML(topMatch.title || 'Senior Engineer')}) &bull; ${topMatch.verified ? 'Shield Verified' : 'Unverified'}<br><a href="marketplace.html" style="color:var(--teal); font-weight:800;">View candidates on Marketplace →</a>`;
     }
   }
 
@@ -8324,22 +8328,22 @@ async function processAiCopilotQuery(query, explicitSkill = null) {
 
   // Autonomous Smart Fallback Templates for Skills
   if (skillAction === 'draft_escrow') {
-    return `📜 <strong>Kolly Smart Escrow &amp; Milestone Agreement</strong>:<br>
+    return `<strong>Kolly Smart Escrow &amp; Milestone Agreement</strong>:<br>
 <strong>Jurisdiction</strong>: Federal Republic of Nigeria (Arbitration &amp; Mediation Act 2023)<br>
 <strong>Platform Escrow Provider</strong>: Collekt Technologies Ltd<br><br>
-🔹 <strong>Milestone 1: Mobilization &amp; Site Assessment (30% &bull; ₦1,500,000)</strong><br>
+<strong>Milestone 1: Mobilization &amp; Site Assessment (30% &bull; ₦1,500,000)</strong><br>
 &bull; <em>Deliverable</em>: Preliminary technical assessment, HAZOP checklist &amp; approved work schedule.<br>
 &bull; <em>Verification</em>: Submission of stamped technical memo.<br><br>
-🔹 <strong>Milestone 2: Execution &amp; Testing (50% &bull; ₦2,500,000)</strong><br>
+<strong>Milestone 2: Execution &amp; Testing (50% &bull; ₦2,500,000)</strong><br>
 &bull; <em>Deliverable</em>: Physical inspection, non-destructive testing (NDT), and calibrated diagnostic log.<br>
 &bull; <em>Verification</em>: Factory Acceptance Test (FAT) / Site Acceptance Test (SAT) report.<br><br>
-🔹 <strong>Milestone 3: Final Sign-off &amp; Closeout (20% &bull; ₦1,000,000)</strong><br>
+<strong>Milestone 3: Final Sign-off &amp; Closeout (20% &bull; ₦1,000,000)</strong><br>
 &bull; <em>Deliverable</em>: Certified closeout documentation and 48-hour client inspection period.<br><br>
-⚖️ <strong>Escrow Protection</strong>: Funds remain securely locked until the client issues milestone confirmation or the 48-hour inspection timer elapses without formal dispute.`;
+<strong>Escrow Protection</strong>: Funds remain securely locked until the client issues milestone confirmation or the 48-hour inspection timer elapses without formal dispute.`;
   }
 
   if (skillAction === 'estimate_boq') {
-    return `📊 <strong>Kolly Engineering BOQ &amp; Cost Estimation</strong>:<br>
+    return `<strong>Kolly Engineering BOQ &amp; Cost Estimation</strong>:<br>
 <strong>Project</strong>: 50kW Commercial Solar PV Mini-Grid (Lagos State)<br><br>
 1. <strong>Solar PV Tier-1 Modules (550W Monocrystalline x 92 units)</strong>: ₦7,800,000<br>
 2. <strong>Hybrid Inverters (2 x 25kW High-Voltage Inverters)</strong>: ₦6,400,000<br>
@@ -8348,55 +8352,55 @@ async function processAiCopilotQuery(query, explicitSkill = null) {
 5. <strong>Certified COREN Electrical Labor &amp; Commissioning</strong>: ₦2,200,000<br>
 6. <strong>Logistics &amp; Transport within Lagos / Ogun</strong>: ₦850,000<br>
 7. <strong>Contingency Reserve (7.5%)</strong>: ₦2,553,750<br><br>
-💰 <strong>Estimated Total Contract Sum</strong>: <strong>₦36,603,750</strong><br>
-💡 <em>Recommended Contractor Markup</em>: 15% (₦5,490,560) for competitive tender submission.`;
+<strong>Estimated Total Contract Sum</strong>: <strong>₦36,603,750</strong><br>
+<em>Recommended Contractor Markup</em>: 15% (₦5,490,560) for competitive tender submission.`;
   }
 
   if (skillAction === 'dispute_review') {
-    return `⚖️ <strong>Kolly Escrow Dispute Mediation Analysis</strong>:<br>
+    return `<strong>Kolly Escrow Dispute Mediation Analysis</strong>:<br>
 <strong>Case Summary</strong>: Buyer claims delivered subsea power cable failed insulation resistance testing, while vendor provided signed transport waybill.<br><br>
-📋 <strong>Evidence Review</strong>:<br>
+<strong>Evidence Review</strong>:<br>
 &bull; <strong>Waybill Proof</strong>: Confirms physical custody transfer, but does not guarantee technical compliance.<br>
 &bull; <strong>Inspection Period</strong>: Notice of defect was filed within the mandatory 48-hour inspection window.<br><br>
-🎯 <strong>Impartial Mediation Ruling</strong>:<br>
+<strong>Impartial Mediation Ruling</strong>:<br>
 1. <strong>Escrow Hold</strong>: Funds remain locked in Collekt Escrow &mdash; no immediate disbursement.<br>
 2. <strong>Cure Period (5 Business Days)</strong>: Vendor is granted 5 business days to send an accredited technician to re-test in the presence of both parties or dispatch replacement spool.<br>
 3. <strong>Conditional Release</strong>: If replacement passes SAT, release 100% of Milestone funds; if vendor fails to remediate, 100% principal is refunded to the Buyer.`;
   }
 
   if (skillAction === 'tax_calc') {
-    return `🧮 <strong>Nigerian Tax &amp; Collekt Fee Breakdown</strong>:<br>
+    return `<strong>Nigerian Tax &amp; Collekt Fee Breakdown</strong>:<br>
 <strong>Gross Contract Amount</strong>: ₦3,500,000.00<br><br>
 &bull; <strong>Withholding Tax (WHT @ 10% for Corporate Technical Services)</strong>: -₦350,000.00<br>
 &bull; <strong>Value Added Tax (VAT @ 7.5% remitted to FIRS)</strong>: +₦262,500.00 (charged to client)<br>
 &bull; <strong>Collekt Escrow &amp; Platform Fee (15%)</strong>: -₦525,000.00<br><br>
-💵 <strong>Net Payout to Vendor</strong>: <strong>₦2,625,000.00</strong><br>
-🧾 <strong>Total Invoiced to Client</strong>: <strong>₦3,762,500.00</strong><br>
-💡 <em>Compliance Note</em>: WHT credit notes are issued directly to vendor's FIRS Tax Identification Number (TIN).`;
+<strong>Net Payout to Vendor</strong>: <strong>₦2,625,000.00</strong><br>
+<strong>Total Invoiced to Client</strong>: <strong>₦3,762,500.00</strong><br>
+<em>Compliance Note</em>: WHT credit notes are issued directly to vendor's FIRS Tax Identification Number (TIN).`;
   }
 
   if (skillAction === 'trust_profile') {
-    return `🛡️ <strong>Kolly Vendor Trust &amp; Safety Rating</strong>:<br>
-Overall Trust Score: <strong>96 / 100 &bull; EXCELLENT</strong> 🛡️<br><br>
-✅ <strong>CAC Incorporation</strong>: RC 1928412 verified with Corporate Affairs Commission.<br>
-✅ <strong>Tax Identification (TIN)</strong>: Active on FIRS portal with valid status.<br>
-✅ <strong>Identity Verification</strong>: Director NIN biometric validation passed.<br>
-✅ <strong>Professional Standing</strong>: COREN / NOGICD registered engineering practice.<br>
-✅ <strong>Dispute Metric</strong>: 0% dispute rate across previous engagements.<br><br>
-🏅 <strong>Platform Badge</strong>: Awarded <strong>Shield Verified Vendor 🛡️</strong> status. Highly recommended for high-value escrow contracts.`;
+    return `<strong>Kolly Vendor Trust &amp; Safety Rating</strong>:<br>
+Overall Trust Score: <strong>96 / 100 &bull; EXCELLENT</strong><br><br>
+<strong>CAC Incorporation</strong>: RC 1928412 verified with Corporate Affairs Commission.<br>
+<strong>Tax Identification (TIN)</strong>: Active on FIRS portal with valid status.<br>
+<strong>Identity Verification</strong>: Director NIN biometric validation passed.<br>
+<strong>Professional Standing</strong>: COREN / NOGICD registered engineering practice.<br>
+<strong>Dispute Metric</strong>: 0% dispute rate across previous engagements.<br><br>
+<strong>Platform Badge</strong>: Awarded <strong>Shield Verified Vendor</strong> status. Highly recommended for high-value escrow contracts.`;
   }
 
   // Fallback PRD knowledge
   if (q.includes('price') || q.includes('subscription') || q.includes('fee') || q.includes('cost')) {
-    return `💰 <strong>Collekt Membership &amp; Pricing (PRD Specification)</strong>:<br>&bull; <strong>Professional Plus</strong>: ₦19,999 / month (Save 5% Quarterly, 10% Bi-Annually, 17% Annually)<br>&bull; <strong>Company Business</strong>: ₦74,999 / month (Save 5% Quarterly, 10% Bi-Annually, 17% Annually)<br>&bull; <strong>Platform Commission Fee</strong>: 15% on completed project engagements.`;
+    return `<strong>Collekt Membership &amp; Pricing (PRD Specification)</strong>:<br>&bull; <strong>Professional Plus</strong>: ₦19,999 / month (Save 5% Quarterly, 10% Bi-Annually, 17% Annually)<br>&bull; <strong>Company Business</strong>: ₦74,999 / month (Save 5% Quarterly, 10% Bi-Annually, 17% Annually)<br>&bull; <strong>Platform Commission Fee</strong>: 15% on completed project engagements.`;
   }
 
   if (q.includes('verify') || q.includes('verification') || q.includes('shield') || q.includes('nin') || q.includes('cac')) {
-    return `🛡️ <strong>Shield Verification Framework</strong>:<br>Identity (NIN), COREN Engineering Licenses, and CAC Incorporation Documents are submitted on your profile page and reviewed by Collekt Admins. Verified accounts receive the <strong>Shield Verified Logo 🛡️</strong>.`;
+    return `<strong>Shield Verification Framework</strong>:<br>Identity (NIN), COREN Engineering Licenses, and CAC Incorporation Documents are submitted on your profile page and reviewed by Collekt Admins. Verified accounts receive the <strong>Shield Verified Logo</strong>.`;
   }
 
-  return `⚡ <strong>Kolly AI Assistant</strong>: I am trained on Collekt's Nigerian marketplace operations and infused with Google Gemini. You can trigger my 5 specialized skills anytime using the skills bar above:<br>
-&bull; 📜 <strong>Escrow Drafter</strong> &bull; 📊 <strong>BOQ Estimator</strong> &bull; ⚖️ <strong>Dispute Review</strong> &bull; 🧮 <strong>Tax &amp; Fees</strong> &bull; 🛡️ <strong>Trust Profiler</strong>!`;
+  return `<strong>Kolly AI Assistant</strong>: I am trained on Collekt's Nigerian marketplace operations and infused with Google Gemini. You can trigger my 5 specialized skills anytime using the skills bar above:<br>
+&bull; <strong>Escrow Drafter</strong> &bull; <strong>BOQ Estimator</strong> &bull; <strong>Dispute Review</strong> &bull; <strong>Tax &amp; Fees</strong> &bull; <strong>Trust Profiler</strong>!`;
 }
 
 // Global Gemini Helpers for Platform-wide Integration
@@ -8439,7 +8443,7 @@ window.matchTalentWithKolly = async function(job, candidates) {
     const finalScore = Math.min(98, Math.max(40, score));
     const reasons = [];
     if (matchedSkills.length > 0) reasons.push(`Matches skills: ${matchedSkills.slice(0, 3).join(', ')}`);
-    if (c.verified || c.is_verified) reasons.push('Shield Verified 🛡️');
+    if (c.verified || c.is_verified) reasons.push('Shield Verified');
     if (jobLoc && cLoc && (jobLoc.includes(cLoc) || cLoc.includes(jobLoc))) reasons.push(`Location: ${c.location}`);
     if (!reasons.length) reasons.push('Professional discipline alignment');
 
@@ -8519,7 +8523,7 @@ function generateAiMatchInsight(proId, jobId) {
 
       <div style="background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:20px; text-align:center;">
         <div style="font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;">Overall Compatibility Match</div>
-        <div style="font-size:36px; font-weight:900; color:var(--teal); margin:4px 0;">${score}% Match ⚡</div>
+        <div style="font-size:36px; font-weight:900; color:var(--teal); margin:4px 0;">${score}% Match</div>
         <div style="font-size:13px; font-weight:800; color:var(--ink);">${escapeHTML(pro.name)} &bull; ${escapeHTML(pro.title || 'Engineering Specialist')}</div>
       </div>
 
@@ -8527,13 +8531,13 @@ function generateAiMatchInsight(proId, jobId) {
       <ul style="font-size:12px; color:var(--muted); line-height:1.6; padding-left:20px; margin-bottom:20px;">
         <li><strong>Discipline Alignment</strong>: High match for Engineering &amp; Operations scope.</li>
         <li><strong>Experience Match</strong>: ${pro.years_experience || 8}+ years engineering experience.</li>
-        <li><strong>Verification Status</strong>: ${pro.verified ? 'Shield Verified Account 🛡️' : 'Identity Verification Pending'}.</li>
+        <li><strong>Verification Status</strong>: ${pro.verified ? 'Shield Verified Account' : 'Identity Verification Pending'}.</li>
         <li><strong>Availability</strong>: Available for immediate deployment.</li>
       </ul>
 
       <div style="display:flex; gap:10px;">
         <button class="btn btn-outline btn-sm" style="flex:1;" onclick="document.getElementById('aiMatchModal').style.display='none'">Close Insights</button>
-        <button class="btn btn-primary btn-sm" style="flex:1;" onclick="showToast('⭐ Candidate shortlisted!'); document.getElementById('aiMatchModal').style.display='none';">Shortlist Candidate</button>
+        <button class="btn btn-primary btn-sm" style="flex:1;" onclick="showToast('Candidate shortlisted!'); document.getElementById('aiMatchModal').style.display='none';">Shortlist Candidate</button>
       </div>
     </div>
   `;
@@ -8545,16 +8549,16 @@ async function generateAiProposalDraft(jobTitle = 'Engineering Tender', targetIn
   const u = typeof getUser === 'function' ? getUser() : null;
   const el = document.getElementById(targetInputId);
   if (el) {
-    el.placeholder = '✨ Kolly AI is crafting your proposal pitch...';
+    el.placeholder = 'Kolly AI is crafting your proposal pitch...';
   }
-  if (typeof showToast === 'function') showToast('🦖 Kolly AI is generating proposal pitch...');
+  if (typeof showToast === 'function') showToast('Kolly AI is generating proposal pitch...');
 
   try {
     const jobObj = { title: jobTitle, description: jobTitle };
     const pitch = await window.generatePitchWithKolly(jobObj, u);
     if (pitch && el) {
       el.value = pitch;
-      if (typeof showToast === 'function') showToast('✨ Kolly AI proposal cover letter auto-generated!');
+      if (typeof showToast === 'function') showToast('Kolly AI proposal cover letter auto-generated!');
       return;
     }
   } catch(e) {
@@ -8563,11 +8567,11 @@ async function generateAiProposalDraft(jobTitle = 'Engineering Tender', targetIn
 
   const name = u?.name || 'Specialist';
   const title = u?.title || 'Senior Engineer';
-  const text = `Dear Hiring Committee,\n\nI am writing to submit my formal bid proposal for the ${jobTitle} opportunity on Collekt. As a ${title} with extensive hands-on industry experience in Oil & Gas and EPC projects, I possess the exact technical discipline required to deliver this scope safely, efficiently, and on schedule.\n\nMy qualifications include:\n- COREN Engineering License & NIN Verified Identity 🛡️\n- Proven track record executing complex offshore/onshore engineering assignments\n- Commitment to strict HSEQ and engineering standards\n\nI look forward to reviewing project milestones and initiating this engagement.\n\nSincerely,\n${name}`;
+  const text = `Dear Hiring Committee,\n\nI am writing to submit my formal bid proposal for the ${jobTitle} opportunity on Collekt. As a ${title} with extensive hands-on industry experience in Oil & Gas and EPC projects, I possess the exact technical discipline required to deliver this scope safely, efficiently, and on schedule.\n\nMy qualifications include:\n- COREN Engineering License & NIN Verified Identity\n- Proven track record executing complex offshore/onshore engineering assignments\n- Commitment to strict HSEQ and engineering standards\n\nI look forward to reviewing project milestones and initiating this engagement.\n\nSincerely,\n${name}`;
 
   if (el) {
     el.value = text;
-    if (typeof showToast === 'function') showToast('✨ Kolly AI proposal cover letter auto-generated!');
+    if (typeof showToast === 'function') showToast('Kolly AI proposal cover letter auto-generated!');
   }
 }
 
@@ -8578,15 +8582,15 @@ async function generateAiTenderSpec(titleInputId = 'jobTitle', descInputId = 'jo
   const titleVal = titleEl?.value.trim() || 'Instrumentation & Control Systems Specialist';
 
   if (descEl) {
-    descEl.placeholder = '✨ Kolly AI is drafting tender scope and deliverables...';
+    descEl.placeholder = 'Kolly AI is drafting tender scope and deliverables...';
   }
-  if (typeof showToast === 'function') showToast('🦖 Kolly AI is drafting tender specifications...');
+  if (typeof showToast === 'function') showToast('Kolly AI is drafting tender specifications...');
 
   try {
     const draft = await window.draftJobScopeWithKolly(titleVal);
     if (draft && descEl) {
       descEl.value = draft;
-      if (typeof showToast === 'function') showToast('✨ Kolly AI Tender Specification generated!');
+      if (typeof showToast === 'function') showToast('Kolly AI Tender Specification generated!');
       if (typeof updateLivePreview === 'function') updateLivePreview();
       return;
     }
@@ -8594,11 +8598,11 @@ async function generateAiTenderSpec(titleInputId = 'jobTitle', descInputId = 'jo
     console.warn('generateAiTenderSpec error:', e);
   }
 
-  const specText = `PROJECT SCOPE & OBJECTIVES:\nWe require a qualified ${titleVal} to manage EPC engineering deliverables, commissioning oversight, and field operations for our energy project in Nigeria.\n\nKEY RESPONSIBILITIES:\n1. Execute detailed technical designs, P&ID inspections, and field instrumentation setups.\n2. Ensure full adherence to Department of Petroleum Resources (DPR) and COREN standards.\n3. Supervise subcontractor installation, loop checking, and HAZOP reviews.\n\nREQUIRED QUALIFICATIONS:\n- COREN / NSE Engineering Registration & Shield Verification 🛡️\n- Minimum 5+ years relevant Oil & Gas industry experience\n- Degree in Engineering (Electrical/Mechanical/Instrumentation)`;
+  const specText = `PROJECT SCOPE & OBJECTIVES:\nWe require a qualified ${titleVal} to manage EPC engineering deliverables, commissioning oversight, and field operations for our energy project in Nigeria.\n\nKEY RESPONSIBILITIES:\n1. Execute detailed technical designs, P&ID inspections, and field instrumentation setups.\n2. Ensure full adherence to Department of Petroleum Resources (DPR) and COREN standards.\n3. Supervise subcontractor installation, loop checking, and HAZOP reviews.\n\nREQUIRED QUALIFICATIONS:\n- COREN / NSE Engineering Registration & Shield Verification\n- Minimum 5+ years relevant Oil & Gas industry experience\n- Degree in Engineering (Electrical/Mechanical/Instrumentation)`;
 
   if (descEl) {
     descEl.value = specText;
-    if (typeof showToast === 'function') showToast('✨ Kolly AI Tender Specification generated!');
+    if (typeof showToast === 'function') showToast('Kolly AI Tender Specification generated!');
     if (typeof updateLivePreview === 'function') updateLivePreview();
   }
 }
@@ -8944,7 +8948,7 @@ function initModernCookieBanner() {
     banner.innerHTML = `
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
         <div style="display:flex; align-items:center; gap:7px;">
-          <span style="font-size:17px; line-height:1;">🍪</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--teal);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
           <strong style="font-size:13.5px; color:#ffffff; font-weight:800; letter-spacing:.01em;">
             Cookie &amp; Privacy
           </strong>
@@ -8970,7 +8974,7 @@ function initModernCookieBanner() {
 
       <div style="display:flex; align-items:center; justify-content:space-between; font-size:11.5px; padding-top:2px;">
         <button onclick="openCookiePreferencesModal()" class="collekt-cookie-btn-customize" id="btnCookieCustomize">
-          ⚙️ Customize Preferences
+          Customize Preferences
         </button>
         <a href="javascript:void(0)" onclick="openLegalQuickView('privacy')" style="color:#64748b; font-size:11px; text-decoration:underline; font-weight:600;">
           NDPA Summary
@@ -9006,7 +9010,7 @@ function showCookieToast(msg) {
   const toast = document.createElement('div');
   toast.id = 'collektCookieToast';
   toast.className = 'collekt-cookie-toast';
-  toast.innerHTML = `<span style="font-size:16px;">✓</span> <span>${msg}</span>`;
+  toast.innerHTML = `<span>${msg}</span>`;
   document.body.appendChild(toast);
   setTimeout(() => {
     if (toast && toast.parentNode) toast.parentNode.removeChild(toast);
@@ -9046,7 +9050,7 @@ function openCookiePreferencesModal() {
       <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px;">
         <div style="display:flex; align-items:center; gap:12px;">
           <div style="width:44px; height:44px; border-radius:12px; background:rgba(20,184,166,0.18); border:1px solid rgba(45,212,191,0.4); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;">
-            🍪
+            
           </div>
           <div>
             <h3 style="margin:0; font-size:18px; font-weight:800; color:#ffffff;">Cookie &amp; Tracking Preferences</h3>
@@ -9196,7 +9200,7 @@ function openLegalQuickView(type = 'terms') {
 
   const isTerms = (type === 'terms');
   const title = isTerms ? 'Collekt Terms of Service & Escrow Charter' : 'Privacy Policy & NDPA 2023 Data Notice';
-  const tag = isTerms ? '⚖️ Nigerian Legal Framework &bull; CAMA 2020' : '🛡️ NDPA 2023 Data Protection Notice';
+  const tag = isTerms ? 'Nigerian Legal Framework &bull; CAMA 2020' : 'NDPA 2023 Data Protection Notice';
 
   const bodyContent = isTerms ? `
     <div style="font-size:13px; line-height:1.75; color:var(--ink);">
@@ -9276,7 +9280,7 @@ function acceptTermsFromModal() {
   const modal = document.getElementById('legalQuickViewModal');
   if (modal) modal.style.display = 'none';
   if (typeof showToast === 'function') {
-    showToast('✓ Collekt Terms & Privacy Policy accepted.');
+    showToast('Collekt Terms & Privacy Policy accepted.');
   }
 }
 
@@ -9377,9 +9381,7 @@ const CollektSessionManager = (function() {
 
     modal.innerHTML = `
       <div style="background:#0c1816; border:1.5px solid rgba(19,117,111,0.35); border-radius:24px; padding:32px 28px; max-width:440px; width:100%; text-align:center; box-shadow:0 32px 80px rgba(0,0,0,0.6); position:relative; font-family:'Manrope',sans-serif;">
-        <div style="width:64px; height:64px; border-radius:50%; background:rgba(212,146,11,0.15); border:2px solid rgba(212,146,11,0.5); display:grid; place-items:center; font-size:30px; margin:0 auto 20px auto;">
-          🛡️
-        </div>
+        <div style="width:64px; height:64px; border-radius:50%; background:rgba(212,146,11,0.15); border:2px solid rgba(212,146,11,0.5); display:flex; align-items:center; justify-content:center; margin:0 auto 20px auto;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#d4920b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
         <div style="font-size:20px; font-weight:900; color:#fff; letter-spacing:-0.4px; margin-bottom:8px;">
           Session Inactivity Notice
         </div>
@@ -9795,10 +9797,10 @@ const CollektCalling = (() => {
 
         <div style="display:flex; gap:12px; margin-top:4px;">
           <button type="button" class="btn btn-sm" onclick="CollektCalling.declineCall()" style="flex:1; background:#ef4444; color:#fff; font-weight:800; border:none; border-radius:12px; min-height:42px; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
-            <span style="font-size:16px;">🚫</span> Decline
+            Decline
           </button>
           <button type="button" class="btn btn-sm" onclick="CollektCalling.acceptCall()" style="flex:1; background:#22c55e; color:#fff; font-weight:900; border:none; border-radius:12px; min-height:42px; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 16px rgba(34,197,94,0.45); cursor:pointer;">
-            <span style="font-size:16px;">📞</span> Accept
+            Accept
           </button>
         </div>
       `;
@@ -9834,10 +9836,10 @@ const CollektCalling = (() => {
         </div>
 
         <div class="call-controls">
-          <button class="call-btn" id="callSpeakerBtn" title="Speaker" onclick="CollektCalling.toggleSpeaker()">🔊</button>
-          <button class="call-btn" id="callCamBtn" title="Toggle Camera" onclick="CollektCalling.toggleCam()" style="display:none;">📹</button>
-          <button class="call-btn" id="callMuteBtn" title="Mute Microphone" onclick="CollektCalling.toggleMute()">🎙️</button>
-          <button class="call-btn end-call" title="End Call" onclick="CollektCalling.endCall()">📞</button>
+          <button class="call-btn" id="callSpeakerBtn" title="Speaker" onclick="CollektCalling.toggleSpeaker()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
+          <button class="call-btn" id="callCamBtn" title="Toggle Camera" onclick="CollektCalling.toggleCam()" style="display:none;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect width="14" height="12" x="1" y="6" rx="2" ry="2"></rect></svg></button>
+          <button class="call-btn" id="callMuteBtn" title="Mute Microphone" onclick="CollektCalling.toggleMute()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg></button>
+          <button class="call-btn end-call" title="End Call" onclick="CollektCalling.endCall()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"></path><line x1="22" x2="2" y1="2" y2="22"></line></svg></button>
         </div>
       `;
       document.body.appendChild(overlay);
@@ -9982,7 +9984,7 @@ const CollektCalling = (() => {
 
       const isVideo = (packet.callType === 'video');
       if (nameEl) nameEl.textContent = packet.senderName || 'Collekt Member';
-      if (roleEl) roleEl.textContent = packet.senderRole === 'company' ? '🏢 Verified Enterprise' : '👷 Verified Professional Specialist';
+      if (roleEl) roleEl.textContent = packet.senderRole === 'company' ? 'Verified Enterprise' : 'Verified Professional Specialist';
       if (badgeEl) {
         badgeEl.innerHTML = `<span style="width:6px; height:6px; border-radius:50%; background:#4ade80;"></span> ${isVideo ? 'INCOMING HD VIDEO CALL' : 'INCOMING ENCRYPTED VOICE CALL'}`;
       }
@@ -10174,7 +10176,7 @@ const CollektCalling = (() => {
     callTimeoutTimer = setTimeout(() => {
       if (activeCall && activeCall.id === callId && activeCall.isCaller) {
         const statusEl = document.getElementById('callStatusText');
-        if (statusEl) statusEl.innerHTML = `<span style="color:#f59e0b;">⏳ No Answer</span>`;
+        if (statusEl) statusEl.innerHTML = `<span style="color:#f59e0b;">No Answer</span>`;
         playTone('busy');
         setTimeout(() => endCall(true), 1500);
       }
@@ -10302,7 +10304,7 @@ const CollektCalling = (() => {
     if (callTimeoutTimer) clearTimeout(callTimeoutTimer);
     playTone('declined');
     const statusText = document.getElementById('callStatusText');
-    if (statusText) statusText.innerHTML = `<span style="color:#ef4444;">🚫 Call Declined</span>`;
+    if (statusText) statusText.innerHTML = `<span style="color:#ef4444;">Call Declined</span>`;
     setTimeout(() => endCall(false), 1500);
   }
 
@@ -10311,7 +10313,7 @@ const CollektCalling = (() => {
     if (callTimeoutTimer) clearTimeout(callTimeoutTimer);
     playTone('busy');
     const statusText = document.getElementById('callStatusText');
-    if (statusText) statusText.innerHTML = `<span style="color:#f59e0b;">⏳ User Busy on Another Call</span>`;
+    if (statusText) statusText.innerHTML = `<span style="color:#f59e0b;">User Busy on Another Call</span>`;
     setTimeout(() => endCall(false), 1500);
   }
 
@@ -10375,7 +10377,7 @@ const CollektCalling = (() => {
     const btn = document.getElementById('callMuteBtn');
     if (btn) {
       btn.classList.toggle('active', activeCall.isMuted);
-      btn.innerHTML = activeCall.isMuted ? '🔇' : '🎙️';
+      btn.innerHTML = activeCall.isMuted ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" x2="22" y1="2" y2="22"></line><path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2"></path><path d="M5 10v2a7 7 0 0 0 12 5"></path><path d="M15 9.34V5a3 3 0 0 0-5.68-1.33"></path><path d="M9 9v3a3 3 0 0 0 5.12 2.12"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>';
     }
     if (localMediaStream) {
       localMediaStream.getAudioTracks().forEach(t => t.enabled = !activeCall.isMuted);
@@ -10388,7 +10390,7 @@ const CollektCalling = (() => {
     const btn = document.getElementById('callCamBtn');
     if (btn) {
       btn.classList.toggle('active', activeCall.isVideoOff);
-      btn.innerHTML = activeCall.isVideoOff ? '🚫' : '📹';
+      btn.innerHTML = activeCall.isVideoOff ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" x2="22" y1="2" y2="22"></line><path d="M10.66 6H14a2 2 0 0 1 2 2v2.34l1 1L23 7v10"></path><path d="M16 16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2l10 10Z"></path></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect width="14" height="12" x="1" y="6" rx="2" ry="2"></rect></svg>';
     }
     if (localMediaStream) {
       localMediaStream.getVideoTracks().forEach(t => t.enabled = !activeCall.isVideoOff);
@@ -10401,7 +10403,7 @@ const CollektCalling = (() => {
     const btn = document.getElementById('callSpeakerBtn');
     if (btn) {
       btn.classList.toggle('active', !isSpeakerActive);
-      btn.innerHTML = isSpeakerActive ? '🔊' : '🔈';
+      btn.innerHTML = isSpeakerActive ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="22" x2="16" y1="9" y2="15"></line><line x1="16" x2="22" y1="9" y2="15"></line></svg>';
     }
     const audio = document.getElementById('collektRemoteAudio');
     if (audio) {
@@ -10453,7 +10455,7 @@ const CollektCalling = (() => {
     if (incModal) incModal.style.display = 'none';
 
     if (activeCall && activeCall.conversationId && typeof sendMessage === 'function') {
-      const typeLabel = activeCall.type === 'video' ? '📹 Video call' : '📞 Voice call';
+      const typeLabel = activeCall.type === 'video' ? 'Video call' : 'Voice call';
       const durText = callSeconds > 0 ? `${Math.floor(callSeconds / 60)}m ${callSeconds % 60}s` : 'no answer';
       try {
         sendMessage(activeCall.conversationId, `${typeLabel} ended • ${durText}`);

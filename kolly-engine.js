@@ -374,7 +374,7 @@
       location: 'Port Harcourt, Rivers State',
       yearsExp: 11,
       skills: ['Mechanical Piping Design', 'Caesar II Stress Analysis', 'AutoCAD Plant 3D', 'PDMS/E3D', 'ASME B31.3', 'P&ID & Isometric Packages', 'MTO / BOQ Preparation'],
-      verifiedStatus: 'Shield Verified 🛡️',
+      verifiedStatus: 'Shield Verified',
       verifiedCredentials: ['NIN Biometric Identity Verified', 'COREN Registered Engineer (R.48219)', 'NSE Corporate Member'],
       selfReportedClaims: ['11 years brownfield/greenfield EPC experience across Bonny, Escravos & Port Harcourt flowstations', 'Previously Lead Piping Engineer on 3 JV gas gathering tie-ins'],
       indicativeRate: '₦2,200,000 – ₦3,500,000 per package'
@@ -386,7 +386,7 @@
       location: 'Lagos / Port Harcourt',
       yearsExp: 8,
       skills: ['Mechanical Piping', 'Process Simulation (HYSYS)', 'HAZOP Documentation', 'Equipment Sizing', 'API 650 / ASME VIII', 'Procurement Technical Bid Evaluation (TBE)'],
-      verifiedStatus: 'Shield Verified 🛡️',
+      verifiedStatus: 'Shield Verified',
       verifiedCredentials: ['NIN Biometric Identity Verified', 'COREN Registered Engineer (R.53904)', 'NEBOSH IGC Certified'],
       selfReportedClaims: ['8 years experience in modular refinery and gas processing plant design'],
       indicativeRate: '₦1,800,000 – ₦2,900,000 per package'
@@ -646,7 +646,7 @@
 
     if (isAutonomousFinancialCommand || isAlterBankCommand) {
       return sanitizeInternalDetails(
-        `### 🔒 Financial & Escrow Security Guardrail${nameAddress}\n\n` +
+        `### Financial & Escrow Security Guardrail${nameAddress}\n\n` +
         `**I cannot autonomously release escrow funds, execute wallet transfers, approve milestone payouts, or modify bank account details on your behalf.**\n\n` +
         `For your financial protection and regulatory compliance on Collekt:\n` +
         `* **Human-in-the-Loop Authorization Required:** Every milestone release, escrow lock, or withdrawal requires direct action by the authenticated account holder inside **Wallet** or **Collektions**.\n` +
@@ -661,7 +661,7 @@
     // B. Nova Bank / Unconfirmed Banking Partnership Verification Guardrail
     if (/\b(nova\s*bank|is\s+nova\s+bank\s+live|bank\s+partnership\s+live|cbn\s+escrow\s+license)\b/i.test(lower)) {
       return sanitizeInternalDetails(
-        `### 🏦 Banking & Escrow Infrastructure Status${nameAddress}\n\n` +
+        `### Banking & Escrow Infrastructure Status${nameAddress}\n\n` +
         `In accordance with Collekt’s strict verification standards:\n\n` +
         `* **Current Operational Payment Gateways:** Wallet deposits, Dedicated Virtual Accounts (NUBAN), and bank settlements currently operate through integrated **Paystack** and **KoraPay** payment rails configured in the platform.\n` +
         `* **Nova Bank & Direct Bank-Partnered Escrow Status:** While Collekt is developing expanded banking and institutional escrow structures (including discussions involving **Nova Bank**), **no direct Nova Bank escrow API integration is represented as live without formal documentary and API confirmation**.\n` +
@@ -713,13 +713,13 @@
     const complianceRows = activeReqs.map((r, idx) => {
       const hasMatch = userCerts.some(c => r.name.toLowerCase().includes(c.toLowerCase().split(' ')[0]));
       const statusBadge = hasMatch
-        ? '✅ **Confirmed in Your Memory Profile**'
-        : (r.found ? '⚠️ **Mandatory — Verify & Attach Document**' : '📋 **Standard Statutory Check**');
+        ? '**Confirmed in Your Memory Profile**'
+        : (r.found ? '**Mandatory — Verify & Attach Document**' : '**Standard Statutory Check**');
       return `* **${idx + 1}. ${r.name}** *(Source: ${r.ref})* — ${statusBadge}`;
     }).join('\n');
 
     return sanitizeInternalDetails(
-      `### 📄 Executive Tender / RFQ Intelligence Report${nameAddress}\n` +
+      `### Executive Tender / RFQ Intelligence Report${nameAddress}\n` +
       `**Reference:** \`${tenderRef}\` • **Package:** *${tenderTitle}*\n\n` +
       `#### 1. Extracted Scope of Work & Deliverables *(Source: SOW Section)*\n` +
       `* **Primary Technical Scope:** Execution of specified engineering/technical deliverables, compliance verification, and milestone-based handover as detailed in the uploaded tender text.\n` +
@@ -965,11 +965,11 @@
     if (supersededChange && !/\b(what|which|find|show|are\s+there|opportunities|projects)\b/i.test(lower)) {
       const supList = memoryChanges
         .filter(c => c.superseded)
-        .map(c => `* **Updated \`${c.superseded.key}\`:** \`${c.superseded.previousValue}\` ➔ **\`${c.superseded.newValue}\`** *(previous entry marked superseded)*`)
+        .map(c => `* **Updated \`${c.superseded.key}\`:** \`${c.superseded.previousValue}\` -> **\`${c.superseded.newValue}\`** *(previous entry marked superseded)*`)
         .join('\n');
       const newCertText = mem.certifications.length ? `\n* **Active Certifications:** **${mem.certifications.join(', ')}**` : '';
       return sanitizeInternalDetails(
-        `### 🧠 Personal Memory Profile Updated${nameAddress}\n\n` +
+        `### Personal Memory Profile Updated${nameAddress}\n\n` +
         `I have updated your authoritative professional context and archived the superseded record:\n\n` +
         `${supList}` +
         `${newCertText}\n` +
@@ -981,7 +981,7 @@
 
     if (learnedSpecOrExp && !/\b(what|which|find|show|are\s+there|opportunities|projects|how\s+much)\b/i.test(lower)) {
       return sanitizeInternalDetails(
-        `### 🧠 Professional Context Saved${nameAddress}\n\n` +
+        `### Professional Context Saved${nameAddress}\n\n` +
         `I’ve recorded your background in your isolated Collekt memory profile:\n\n` +
         `* **Specialization:** **${mem.specialization || mem.userIndustry || 'Engineering & Technical Services'}**\n` +
         `* **Experience:** **${mem.yearsOfExperience ? mem.yearsOfExperience + ' years' : 'Not specified yet'}**\n` +
@@ -1105,7 +1105,7 @@
         : '* No custom notes saved yet (you can tell me *"Remember that..."* anytime).';
       const supNote = (mem.supersedesHistory && mem.supersedesHistory.length)
         ? `\n\n**Memory Update Audit Trail (Superseded Entries):**\n` +
-          mem.supersedesHistory.map(s => `* \`${s.key}\`: \`${s.previousValue}\` ➔ **\`${s.newValue}\`**`).join('\n')
+          mem.supersedesHistory.map(s => `* \`${s.key}\`: \`${s.previousValue}\` -> **\`${s.newValue}\`**`).join('\n')
         : '';
       return sanitizeInternalDetails(
         `Here is what I currently have stored in your isolated personal memory profile${nameAddress}:\n\n` +
@@ -1116,7 +1116,7 @@
         `* **Recorded Certifications:** ${mem.certifications && mem.certifications.length ? mem.certifications.join(', ') : 'None recorded yet'}\n` +
         `* **Primary Location:** ${mem.location || 'Nigeria'}\n` +
         `* **Reference Budget:** ${mem.userBudget ? '₦' + mem.userBudget.toLocaleString() : 'None specified yet'}\n` +
-        `* **Persistent Memory Consent:** ${mem.memoryConsent ? 'Enabled ✅' : 'Disabled ⏸️'}\n\n` +
+        `* **Persistent Memory Consent:** ${mem.memoryConsent ? 'Enabled' : 'Disabled'}\n\n` +
         `**Saved Notes:**\n${factsList}${supNote}`
       );
     }
@@ -1153,8 +1153,8 @@
         }
 
         const gapLine = missingReqs.length
-          ? `⚠️ **Verification / Qualification Gaps to Complete Before Award:** ${missingReqs.join('; ')}.`
-          : `✅ **Qualification Match:** Your **${years} years** experience and **${certs.join(', ')}** credentials meet the technical pre-qualification criteria.`;
+          ? `**Verification / Qualification Gaps to Complete Before Award:** ${missingReqs.join('; ')}.`
+          : `**Qualification Match:** Your **${years} years** experience and **${certs.join(', ')}** credentials meet the technical pre-qualification criteria.`;
 
         return (
           `#### ${idx + 1}. ${opp.title} (\`${opp.id}\`)\n` +
@@ -1168,7 +1168,7 @@
       }).join('\n\n');
 
       return sanitizeInternalDetails(
-        `### 🎯 Personalized Collekt Opportunity Matches${nameAddress}\n\n` +
+        `### Personalized Collekt Opportunity Matches${nameAddress}\n\n` +
         `**Retrieved from Your Memory Profile:**\n` +
         `* **Specialization:** \`${mem.specialization || mem.userIndustry || 'General Engineering & Contracting'}\`\n` +
         `* **Experience:** \`${years ? years + ' years' : 'Not yet specified'}\`\n` +
@@ -1187,15 +1187,15 @@
         return (
           `#### ${i + 1}. ${c.name} — *${c.title}* (${c.location})\n` +
           `* **Verification Tier:** **${c.verifiedStatus}**\n` +
-          `* **✅ Collekt-Verified Credentials:** ${c.verifiedCredentials.join(' • ')}\n` +
-          `* **📝 Self-Reported Profile Claims *(Require Client Technical Review)*:** ${c.selfReportedClaims.join('; ')}\n` +
+          `* **Collekt-Verified Credentials:** ${c.verifiedCredentials.join(' • ')}\n` +
+          `* **Self-Reported Profile Claims *(Require Client Technical Review)*:** ${c.selfReportedClaims.join('; ')}\n` +
           `* **Core Skills:** ${c.skills.join(', ')}\n` +
           `* **Indicative Package Benchmark:** \`${c.indicativeRate}\``
         );
       }).join('\n\n');
 
       return sanitizeInternalDetails(
-        `### 🛡️ Candidate Evaluation & Verification Matrix${nameAddress}\n\n` +
+        `### Candidate Evaluation & Verification Matrix${nameAddress}\n\n` +
         `Below is the ranked shortlist comparing **Collekt Shield-Verified credentials** against **self-reported profile claims**:\n\n` +
         `${candidateCards}\n\n` +
         `#### Recommended Technical Interview & Vetting Questions\n` +
@@ -1212,7 +1212,7 @@
 
     if (asksRegulatoryOrResearch) {
       return sanitizeInternalDetails(
-        `### 🌐 Grounded Nigerian Regulatory & Industry Research${nameAddress}\n\n` +
+        `### Grounded Nigerian Regulatory & Industry Research${nameAddress}\n\n` +
         `Here are the verified statutory frameworks and official regulatory sources relevant to your query (*"${clean}"*):\n\n` +
         `1. **Upstream Oil & Gas Permits (NUPRC / OGISP):**\n` +
         `   * Contractors providing engineering, procurement, construction, or maintenance services in Nigeria's upstream petroleum sector must hold an active **Oil and Gas Industry Service Permit (OGISP)** issued by the **Nigerian Upstream Petroleum Regulatory Commission (NUPRC)** under the *Petroleum Industry Act (PIA) 2021*.\n` +
@@ -1379,7 +1379,7 @@
 
       if (isRfqOrTender) {
         return appendNamePromptIfNeeded(
-          `### 📋 Executive RFQ / Tender Technical & Commercial Proposal ("Collektion" Draft)\n\n` +
+          `### Executive RFQ / Tender Technical & Commercial Proposal ("Collektion" Draft)\n\n` +
           `Here is a ready-to-submit **RFQ Proposal & Milestone Schedule**${nameAddress} tailored for **${domain}** on **Collekt**:\n\n` +
           `#### 1. Executive Summary & Technical Compliance Statement\n` +
           `> *"We confirm full technical and commercial compliance with the Request for Quotation (RFQ) scope of work. All engineering, execution, and quality assurance deliverables will be executed in strict accordance with applicable Nigerian statutory standards (COREN / NUPRC / NCDMB / SON) and governed under Collekt’s 3-Stage Milestone Escrow."* \n\n` +
@@ -1388,9 +1388,9 @@
           `* **Quality & Review Cycle:** Submission of **Issued for Review (IFR)** package within Milestone 1, incorporation of client technical comments during **Issued for Approval (IFA)** in Milestone 2, and final **Approved for Construction / Implementation (AFC)** handover in Milestone 3.\n` +
           `* **Assigned Lead Qualifications:** ${mem.yearsOfExperience ? `${mem.yearsOfExperience}+ years experience` : 'Verified Senior Specialist'}${mem.certifications && mem.certifications.length ? ` • Credentials: **${mem.certifications.join(', ')}**` : ' • **Collekt Shield Verified**'}.\n\n` +
           `#### 3. Statutory & Mandatory RFQ Attachments Checklist\n` +
-          `* ✅ **Technical Credentials:** Valid **COREN / ICAN / PMP / HSE** Practicing License & Lead CV\n` +
-          `* ✅ **Corporate & Tax Compliance:** CAC Status Report, **FIRS Tax Clearance Certificate (TCC)**, and VAT/TIN registration\n` +
-          `* ✅ **Sector Permits (If Upstream/EPC):** Valid **NUPRC OGISP** permit and **NCDMB NOGIC JQS / NCEC** registration\n\n` +
+          `* **Technical Credentials:** Valid **COREN / ICAN / PMP / HSE** Practicing License & Lead CV\n` +
+          `* **Corporate & Tax Compliance:** CAC Status Report, **FIRS Tax Clearance Certificate (TCC)**, and VAT/TIN registration\n` +
+          `* **Sector Permits (If Upstream/EPC):** Valid **NUPRC OGISP** permit and **NCDMB NOGIC JQS / NCEC** registration\n\n` +
           `#### 4. Commercial Bid & 3-Stage Collekt Milestone Escrow Schedule (Ref: ₦${total.toLocaleString()})\n` +
           `* **Milestone 1 — 30% (\`₦${Math.round(total * 0.30).toLocaleString()}\`): Mobilization, Kickoff & Basis of Design (IFR)**\n` +
           `  * *Release Trigger:* Client approval of inception report, schedule, and technical specification.\n` +

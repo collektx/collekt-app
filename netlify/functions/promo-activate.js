@@ -184,7 +184,7 @@ exports.handler = async (event, context) => {
           trialEndsAt: trialEndsAt,
           remainingSlots: remaining - 1,
           subscription: updateData,
-          message: '🎉 Congratulations! Your 60-day Founding Member free trial is now active and starts counting immediately.'
+          message: 'Congratulations! Your 60-day Founding Member free trial is now active and starts counting immediately.'
         })
       };
     }

@@ -506,10 +506,10 @@
     <div class="edition-switch-wrapper">
       <div class="edition-switch">
         <button id="switch-regal" class="switch-btn active" onclick="switchEdition('regal')">
-          👑 Regal Heritage Edition
+          Regal Heritage Edition
         </button>
         <button id="switch-tech" class="switch-btn" onclick="switchEdition('tech')">
-          ⚡ Velvet Tech Edition
+          Velvet Tech Edition
         </button>
       </div>
     </div>
@@ -521,7 +521,7 @@
       <div class="card-perspective-box">
         <div class="flyer-card" id="flyerCard">
           <div class="card-floating-badge" id="cardBadge">
-            <span id="badgeIcon">🌟</span> <span id="badgeTitle">Haute Couture Daylight</span>
+            <span id="badgeIcon"></span> <span id="badgeTitle">Haute Couture Daylight</span>
           </div>
 
           <div class="flyer-img-container">
@@ -539,7 +539,7 @@
               Download HD Flyer
             </a>
             <button onclick="triggerConfettiBurst(event)" class="btn-action btn-secondary">
-              🎉 Burst Joy
+              Burst Joy
             </button>
           </div>
         </div>
@@ -550,7 +550,7 @@
         <div class="panel-card">
           <div class="panel-header">
             <h2 class="panel-title">
-              <span>✍️</span> Ready-to-Publish Copy Kit
+              Ready-to-Publish Copy Kit
             </h2>
             <span class="panel-badge">Plug & Play</span>
           </div>
@@ -561,13 +561,13 @@
               <span>Instagram / Facebook / Threads</span>
               <button class="btn-copy" onclick="copyText('copy-social')">Copy</button>
             </div>
-            <div class="copy-text" id="copy-social">66 Years of Grace, Grit, and Glory. 🇳🇬✨
+            <div class="copy-text" id="copy-social">66 Years of Grace, Grit, and Glory.
 
 From the bustling streets of Lagos to the rolling hills of Jos, across the Niger and the Benue — our heartbeat remains one: resilient, radiant, and relentlessly ambitious.
 
 Today, we celebrate the land that raised us, the heritage that grounds us, and the audacious dreams shaping our tomorrow.
 
-Happy Independence Day to every Nigerian across the globe! 🦅💚🤍💚
+Happy Independence Day to every Nigerian across the globe!
 #NigeriaAt66 #HappyIndependenceDay #ProudlyNigerian #GiantOfAfrica #October1st</div>
           </div>
 
@@ -577,13 +577,13 @@ Happy Independence Day to every Nigerian across the globe! 🦅💚🤍💚
               <span>LinkedIn / Corporate / Executive</span>
               <button class="btn-copy" onclick="copyText('copy-corporate')">Copy</button>
             </div>
-            <div class="copy-text" id="copy-corporate">Honoring Our Roots, Powering Our Shared Future. Happy Independence Day, Nigeria! 🇳🇬
+            <div class="copy-text" id="copy-corporate">Honoring Our Roots, Powering Our Shared Future. Happy Independence Day, Nigeria!
 
 At the intersection of rich cultural heritage and bold technological innovation, Nigeria stands as a testament to what happens when human ingenuity refuses to be confined by limits.
 
 As we commemorate 66 years of nationhood, we salute the entrepreneurs, builders, creators, and everyday heroes working tirelessly to engineer a prosperous future.
 
-Wishing our team, clients, and partners a peaceful and inspiring Independence Day celebration. Forward together. 🚀
+Wishing our team, clients, and partners a peaceful and inspiring Independence Day celebration. Forward together.
 
 #NigeriaIndependenceDay #Innovation #EconomicGrowth #Leadership #AfricaRising</div>
           </div>
@@ -594,11 +594,11 @@ Wishing our team, clients, and partners a peaceful and inspiring Independence Da
               <span>X (Twitter) & WhatsApp Status</span>
               <button class="btn-copy" onclick="copyText('copy-short')">Copy</button>
             </div>
-            <div class="copy-text" id="copy-short">Green is our strength. White is our peace. Gold is our future. 🇳🇬🔥
+            <div class="copy-text" id="copy-short">Green is our strength. White is our peace. Gold is our future.
 
 Happy 66th Independence Day to 200+ million dreamers and doers making magic happen every single day!
 
-Drop your green heart if you're proud today! 💚🤍💚 #NigeriaAt66 #IndependenceDay</div>
+Celebrate with pride today! #NigeriaAt66 #IndependenceDay</div>
           </div>
 
         </div>
@@ -609,7 +609,7 @@ Drop your green heart if you're proud today! 💚🤍💚 #NigeriaAt66 #Independ
     <!-- Celebration & Anthem Audio Bar -->
     <div class="celebration-bar">
       <div class="celebration-info">
-        <h4>🎺 Independence Anthem Fanfare</h4>
+        <h4>Independence Anthem Fanfare</h4>
         <p>Synthesized celebratory brass chord progression with celebratory green & gold confetti.</p>
       </div>
       <div class="celebration-actions">
@@ -618,14 +618,14 @@ Drop your green heart if you're proud today! 💚🤍💚 #NigeriaAt66 #Independ
           Play Fanfare
         </button>
         <button class="btn-confetti" onclick="triggerConfettiBurst(event)">
-          ✨ Release Confetti
+          Release Confetti
         </button>
       </div>
     </div>
   </div>
 
   <div id="toast" class="toast">
-    <span>✅</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
     <span id="toastMessage">Caption copied to clipboard!</span>
   </div>
 
@@ -635,13 +635,13 @@ Drop your green heart if you're proud today! 💚🤍💚 #NigeriaAt66 #Independ
       regal: {
         src: 'assets/campaigns/nigeria_independence_regal.jpg',
         badge: 'Haute Couture Daylight',
-        icon: '👑',
+        icon: '',
         downloadName: 'Nigeria_Independence_Regal_Edition_HD.jpg'
       },
       tech: {
         src: 'assets/campaigns/nigeria_independence_tech.jpg',
         badge: 'Velvet Tech Glassmorphism',
-        icon: '⚡',
+        icon: '',
         downloadName: 'Nigeria_Independence_Tech_Edition_HD.jpg'
       }
     };
@@ -758,7 +758,7 @@ Drop your green heart if you're proud today! 💚🤍💚 #NigeriaAt66 #Independ
       });
 
       triggerConfettiBurst();
-      showToast("🎺 Celebrating 66 Years of Independence!");
+      showToast("Celebrating 66 Years of Independence!");
     }
 
     // Confetti and Particle System

@@ -167,11 +167,15 @@
     transition: all 0.25s cubic-bezier(.22,.61,.36,1);
   }
   .sett-checkbox:checked {
-    background: #D4920B; border-color: #D4920B;
+    background-color: #D4920B; border-color: #D4920B;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 14px 14px;
     box-shadow: 0 2px 8px rgba(212, 146, 11, 0.35);
   }
   .sett-checkbox:checked::after {
-    content: '✓'; color: #fff; font-size: 13px; font-weight: 900;
+    content: none;
   }
 
   /* -- Select / Dropdown ---------- */
@@ -794,7 +798,7 @@
         if (window.sb && curr && curr.id) {
           sb.from('profiles').update({ login_alerts: on }).eq('id', curr.id).then(()=>{}).catch(()=>{});
         }
-        const msg = on ? '🔔 Login alerts turned ON. You will receive an email on new logins.' : '🔕 Login alerts turned OFF. No login notification emails will be sent.';
+        const msg = on ? 'Login alerts turned ON. You will receive an email on new logins.' : 'Login alerts turned OFF. No login notification emails will be sent.';
         if (typeof showToast === 'function') showToast(msg);
       });
     }
@@ -915,7 +919,7 @@
       userBox.innerHTML = `
         <div class="review-user-card" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 14px; border-radius:14px; margin-bottom:14px;">
           <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:36px; height:36px; border-radius:50%; background:rgba(19,117,111,0.2); color:#13756F; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;">👤</div>
+            <div style="width:36px; height:36px; border-radius:50%; background:rgba(19,117,111,0.2); color:#13756F; display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
             <div>
               <div class="sett-field-label" style="margin-bottom:0; font-size:13px;">Community Feedback</div>
               <div class="sett-desc-text" style="margin-bottom:0; font-size:11.5px;">Not logged in &bull; Submit as guest or <a href="login.html" style="color:#13756F; font-weight:700; text-decoration:underline;">sign in</a></div>
@@ -941,7 +945,7 @@
         <div style="flex:1; min-width:0;">
           <div class="sett-field-label" style="display:flex; align-items:center; gap:6px; margin-bottom:2px; font-size:13.5px;">
             <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${authorName}</span>
-            <span style="font-size:10.5px; padding:2px 8px; border-radius:8px; background:rgba(16,185,129,0.15); color:#10b981; font-weight:800; white-space:nowrap; border:1px solid rgba(16,185,129,0.3);">✓ Verified Member</span>
+            <span style="font-size:10.5px; padding:2px 8px; border-radius:8px; background:rgba(16,185,129,0.15); color:#10b981; font-weight:800; white-space:nowrap; border:1px solid rgba(16,185,129,0.3);">Verified Member</span>
           </div>
           <div class="sett-desc-text" style="margin-bottom:0; font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${authorRole}</div>
         </div>
@@ -957,7 +961,7 @@
       <div class="settings-panel" style="max-width:540px;">
         <div class="settings-header">
           <div class="settings-title" id="reviewModalTitle">
-            <span>⭐</span> Review Website &amp; Performance
+            Review Website &amp; Performance
           </div>
           <button class="settings-close" id="websiteReviewCloseBtn" onclick="closeWebsiteReviewModal()" aria-label="Close review dialog">&times;</button>
         </div>
@@ -975,11 +979,11 @@
             <label class="sett-field-label">Overall Platform Rating</label>
             <div style="display:flex; align-items:center; gap:12px;">
               <div id="settingsStarPicker" style="display:flex; gap:6px; font-size:26px; cursor:pointer; color:#f59e0b; user-select:none;">
-                <span onclick="setWebsiteRating(1)" onmouseover="hoverWebsiteRating(1)" onmouseout="resetWebsiteHoverRating()">★</span>
-                <span onclick="setWebsiteRating(2)" onmouseover="hoverWebsiteRating(2)" onmouseout="resetWebsiteHoverRating()">★</span>
-                <span onclick="setWebsiteRating(3)" onmouseover="hoverWebsiteRating(3)" onmouseout="resetWebsiteHoverRating()">★</span>
-                <span onclick="setWebsiteRating(4)" onmouseover="hoverWebsiteRating(4)" onmouseout="resetWebsiteHoverRating()">★</span>
-                <span onclick="setWebsiteRating(5)" onmouseover="hoverWebsiteRating(5)" onmouseout="resetWebsiteHoverRating()">★</span>
+                <span onclick="setWebsiteRating(1)" onmouseover="hoverWebsiteRating(1)" onmouseout="resetWebsiteHoverRating()" style="display:inline-flex; align-items:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                <span onclick="setWebsiteRating(2)" onmouseover="hoverWebsiteRating(2)" onmouseout="resetWebsiteHoverRating()" style="display:inline-flex; align-items:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                <span onclick="setWebsiteRating(3)" onmouseover="hoverWebsiteRating(3)" onmouseout="resetWebsiteHoverRating()" style="display:inline-flex; align-items:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                <span onclick="setWebsiteRating(4)" onmouseover="hoverWebsiteRating(4)" onmouseout="resetWebsiteHoverRating()" style="display:inline-flex; align-items:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                <span onclick="setWebsiteRating(5)" onmouseover="hoverWebsiteRating(5)" onmouseout="resetWebsiteHoverRating()" style="display:inline-flex; align-items:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
               </div>
               <span id="settingsRatingScoreText" class="sett-field-label" style="font-size:14px; font-weight:800; margin-bottom:0;">5.0 / 5.0</span>
             </div>
@@ -987,14 +991,14 @@
 
           <!-- Speed & Performance Rating -->
           <div style="margin-bottom:16px;">
-            <label class="sett-field-label">⚡ Website Speed &amp; UI Responsiveness</label>
+            <label class="sett-field-label">Website Speed &amp; UI Responsiveness</label>
             <div style="display:flex; align-items:center; gap:12px;">
               <div id="settingsPerfPicker" style="display:flex; gap:6px; font-size:22px; cursor:pointer; color:#d4920b; user-select:none;">
-                <span onclick="setWebsitePerfRating(1)" onmouseover="hoverWebsitePerfRating(1)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
-                <span onclick="setWebsitePerfRating(2)" onmouseover="hoverWebsitePerfRating(2)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
-                <span onclick="setWebsitePerfRating(3)" onmouseover="hoverWebsitePerfRating(3)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
-                <span onclick="setWebsitePerfRating(4)" onmouseover="hoverWebsitePerfRating(4)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
-                <span onclick="setWebsitePerfRating(5)" onmouseover="hoverWebsitePerfRating(5)" onmouseout="resetWebsitePerfHoverRating()">⚡</span>
+                <span onclick="setWebsitePerfRating(1)" onmouseover="hoverWebsitePerfRating(1)" onmouseout="resetWebsitePerfHoverRating()" style="display:inline-flex; align-items:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+                <span onclick="setWebsitePerfRating(2)" onmouseover="hoverWebsitePerfRating(2)" onmouseout="resetWebsitePerfHoverRating()" style="display:inline-flex; align-items:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+                <span onclick="setWebsitePerfRating(3)" onmouseover="hoverWebsitePerfRating(3)" onmouseout="resetWebsitePerfHoverRating()" style="display:inline-flex; align-items:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+                <span onclick="setWebsitePerfRating(4)" onmouseover="hoverWebsitePerfRating(4)" onmouseout="resetWebsitePerfHoverRating()" style="display:inline-flex; align-items:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+                <span onclick="setWebsitePerfRating(5)" onmouseover="hoverWebsitePerfRating(5)" onmouseout="resetWebsitePerfHoverRating()" style="display:inline-flex; align-items:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
               </div>
               <span id="settingsPerfScoreText" class="sett-desc-text" style="font-size:13px; font-weight:700; margin-bottom:0;">Ultra Fast (5.0)</span>
             </div>
@@ -1004,11 +1008,11 @@
           <div style="margin-bottom:16px;">
             <label class="sett-field-label">Feedback Category</label>
             <select class="sett-select" id="settingsReviewCategory" style="width:100%; max-width:100%;">
-              <option value="performance">⚡ Platform Speed &amp; Performance</option>
-              <option value="pro">💼 Professional Freelancer Experience</option>
-              <option value="company">🏢 Company &amp; Hiring Experience</option>
-              <option value="escrow">🛡️ Escrow Payouts &amp; Milestone Security</option>
-              <option value="ui">✨ UI / UX &amp; Mobile Responsiveness</option>
+              <option value="performance">Platform Speed &amp; Performance</option>
+              <option value="pro">Professional Freelancer Experience</option>
+              <option value="company">Company &amp; Hiring Experience</option>
+              <option value="escrow">Escrow Payouts &amp; Milestone Security</option>
+              <option value="ui">UI / UX &amp; Mobile Responsiveness</option>
             </select>
           </div>
 
@@ -1027,7 +1031,7 @@
           <!-- Trustpilot Promotion Callout -->
           <div class="sett-trustpilot-card" style="margin-bottom:20px; padding:12px 14px; border-radius:14px; background:rgba(0,182,122,0.08); border:1px solid rgba(0,182,122,0.25); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:10px;">
-              <span style="font-size:20px;">⭐</span>
+              <span style="display:inline-flex; align-items:center; color:#00b67a;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
               <div>
                 <div class="sett-trustpilot-title" style="font-size:12.5px; font-weight:800;">Rate us on Trustpilot too!</div>
                 <div class="sett-desc-text" style="font-size:11px; margin-bottom:0;">Help build global verified trust for Nigerian specialists</div>
@@ -1150,11 +1154,11 @@
     const title = document.getElementById('settingsReviewTitle')?.value.trim();
     const quote = document.getElementById('settingsReviewQuote')?.value.trim();
     const cat = document.getElementById('settingsReviewCategory')?.value || 'performance';
-    const catName = document.getElementById('settingsReviewCategory')?.selectedOptions[0]?.textContent || '⚡ Performance';
+    const catName = document.getElementById('settingsReviewCategory')?.selectedOptions[0]?.textContent || 'Performance';
 
     if (!quote || quote.length < 5) {
       if (typeof showToast === 'function') {
-        showToast('⚠️ Please write a brief review feedback before submitting', 'warning');
+        showToast('Please write a brief review feedback before submitting', 'warning');
       } else if (typeof alert === 'function') {
         alert('Please write a brief review feedback before submitting.');
       }
@@ -1218,9 +1222,9 @@
     closeWebsiteReviewModal();
 
     if (typeof showToast === 'function') {
-      showToast('⭐ Thank you for your review! Your feedback is now live on Collekt.', 'success');
+      showToast('Thank you for your review! Your feedback is now live on Collekt.', 'success');
     } else if (typeof alert === 'function') {
-      alert('⭐ Thank you for your review! Your feedback is now live on Collekt.');
+      alert('Thank you for your review! Your feedback is now live on Collekt.');
     }
 
     if (typeof renderCommunityReviews === 'function') {
@@ -1239,16 +1243,16 @@
       <div class="settings-panel" style="max-width:520px; border-color:rgba(239,68,68,0.35); box-shadow:0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(239,68,68,0.2);">
         <div class="settings-header" style="border-bottom-color:rgba(239,68,68,0.15);">
           <div class="settings-title" style="color:#dc2626;">
-            <span style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:rgba(239,68,68,0.12); color:#dc2626; font-size:15px;">⚠️</span>
+            <span style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:rgba(239,68,68,0.12); color:#dc2626;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
             Permanently Delete Account
           </div>
-          <button class="settings-close" id="closeAccountDeletionBtn" type="button" aria-label="Close">✕</button>
+          <button class="settings-close" id="closeAccountDeletionBtn" type="button" aria-label="Close">&times;</button>
         </div>
         
         <div class="settings-body" style="padding:22px 28px 24px; display:flex; flex-direction:column; gap:16px;">
           <!-- Statutory Compliance Badge -->
           <div style="display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:800; color:#dc2626; background:rgba(239,68,68,0.08); padding:6px 12px; border-radius:8px; border:1px solid rgba(239,68,68,0.2); width:fit-content;">
-            <span>🇳🇬</span> NDPA 2023 Section 34 &bull; Right to Erasure
+            NDPA 2023 Section 34 &bull; Right to Erasure
           </div>
 
           <!-- Description -->
@@ -1324,7 +1328,7 @@
     execBtn?.addEventListener('click', async () => {
       if (execBtn.disabled) return;
       execBtn.disabled = true;
-      execBtn.innerHTML = '<span>⏳</span> Erasing account...';
+      execBtn.innerHTML = 'Erasing account...';
       if (errBox) errBox.style.display = 'none';
 
       try {
@@ -1377,7 +1381,7 @@
           return;
         }
 
-        execBtn.textContent = '✓ Account Erased';
+        execBtn.textContent = 'Account Erased';
         execBtn.style.background = '#059669';
         execBtn.style.borderColor = '#047857';
 
@@ -1470,7 +1474,7 @@
       btn.style.opacity = '0.7';
     }
     if (text) text.textContent = 'Generating Archive...';
-    if (icon) icon.textContent = '⏳';
+    
 
     try {
       // 1. Get auth token from Supabase session
@@ -1515,10 +1519,10 @@
       window.URL.revokeObjectURL(downloadUrl);
 
       if (text) text.textContent = 'Exported!';
-      if (icon) icon.textContent = '✅';
+      
       setTimeout(() => {
         if (text) text.textContent = 'Export JSON';
-        if (icon) icon.textContent = '📥';
+        
         if (btn) {
           btn.disabled = false;
           btn.style.opacity = '1';
@@ -1526,9 +1530,9 @@
       }, 3000);
     } catch (err) {
       console.error('[NDPA Data Export Error]:', err);
-      alert(`⚠️ Data Export Notice: ${err.message || 'Please check your connection and sign in to export your data.'}`);
+      alert(`Data Export Notice: ${err.message || 'Please check your connection and sign in to export your data.'}`);
       if (text) text.textContent = 'Export JSON';
-      if (icon) icon.textContent = '📥';
+      
       if (btn) {
         btn.disabled = false;
         btn.style.opacity = '1';
@@ -1553,7 +1557,7 @@
       <div class="settings-panel" style="max-width:440px; padding:24px 28px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:22px;">🛡️</span>
+            <span style="display:inline-flex; align-items:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0E3B35" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
             <div style="font-size:18px; font-weight:800; color:#0D1F1E;">Two-Factor Authentication</div>
           </div>
           <button type="button" class="settings-close-btn" onclick="closeTwoFactorModal()" style="font-size:22px; background:none; border:none; cursor:pointer;">&times;</button>
@@ -1564,7 +1568,7 @@
         <div style="margin-bottom:16px;">
           <input type="text" id="twoFactorOtpCode" maxlength="6" inputmode="numeric" placeholder="1 2 3 4 5 6" autocomplete="one-time-code" style="width:100%; height:48px; border-radius:12px; border:1px solid rgba(0,0,0,0.18); text-align:center; font-size:22px; font-weight:900; letter-spacing:0.35em; background:rgba(255,255,255,0.95); box-sizing:border-box;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:12px;">
-            <span id="twoFactorTimer" style="color:#888;">⏱ Valid for 10 minutes</span>
+            <span id="twoFactorTimer" style="color:#888;">Valid for 10 minutes</span>
             <button type="button" id="twoFactorResendBtn" onclick="resendTwoFactorOtp()" style="background:none; border:none; color:#0E3B35; font-weight:800; cursor:pointer; text-decoration:underline;">Resend Code</button>
           </div>
           <div id="twoFactorErrBox" style="display:none; color:#dc2626; font-size:12px; font-weight:700; margin-top:6px;"></div>
@@ -1583,7 +1587,7 @@
     if (!twoFactorModalBuilt) buildTwoFactorModal();
     const user = (typeof getUser === 'function' ? getUser() : null) || JSON.parse(localStorage.getItem('collekt_user') || '{}');
     if (!user || !user.email) {
-      if (typeof showToast === 'function') showToast('⚠️ Please log in to enable Two-Factor Authentication.', 'warning');
+      if (typeof showToast === 'function') showToast('Please log in to enable Two-Factor Authentication.', 'warning');
       else alert('Please log in to enable Two-Factor Authentication.');
       return;
     }
@@ -1609,7 +1613,7 @@
       })
     }).then(r => r.json()).then(d => {
       if (d.success && typeof showToast === 'function') {
-        showToast('📧 2FA verification code sent to ' + user.email, 'info');
+        showToast('2FA verification code sent to ' + user.email, 'info');
       }
     }).catch(e => console.warn('2FA OTP dispatch error:', e));
 
@@ -1650,7 +1654,7 @@
       });
       const d = await res.json();
       if (d.success) {
-        if (typeof showToast === 'function') showToast('📧 New code sent to ' + user.email, 'success');
+        if (typeof showToast === 'function') showToast('New code sent to ' + user.email, 'success');
         let count = 30;
         const timer = setInterval(() => {
           count--;
@@ -1664,7 +1668,7 @@
           }
         }, 1000);
       } else {
-        if (typeof showToast === 'function') showToast('⚠️ ' + (d.error || 'Please wait before resending.'), 'warning');
+        if (typeof showToast === 'function') showToast((d.error || 'Please wait before resending.'), 'warning');
         if (btn) { btn.disabled = false; btn.textContent = 'Resend Code'; }
       }
     } catch(e) {
@@ -1713,7 +1717,7 @@
         }
 
         closeTwoFactorModal();
-        if (typeof showToast === 'function') showToast('🛡️ Two-Factor Authentication enabled successfully!', 'success');
+        if (typeof showToast === 'function') showToast('Two-Factor Authentication enabled successfully!', 'success');
         else alert('Two-Factor Authentication enabled successfully!');
       } else {
         if (errBox) { errBox.textContent = d.error || 'Invalid or expired verification code.'; errBox.style.display = 'block'; }
@@ -1743,7 +1747,7 @@
       <div class="settings-panel" style="max-width:440px; padding:24px 28px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:22px;">🔑</span>
+            <span style="display:inline-flex; align-items:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0E3B35" stroke-width="2"><path d="m21 2-2 2m-1.5 1.5L14 9l-2-2-4 4 2 2-4 4-2-2-4 4 1.5 1.5L5 22l6-6-2-2 4-4 2 2 3.5-3.5M20 7l-3-3"/></svg></span>
             <div style="font-size:18px; font-weight:800; color:#0D1F1E;" id="changePwModalTitle">Change Password</div>
           </div>
           <button type="button" class="settings-close-btn" onclick="closeChangePasswordModal()" style="font-size:22px; background:none; border:none; cursor:pointer;">&times;</button>
@@ -1757,7 +1761,7 @@
           <div style="margin-bottom:16px;">
             <input type="text" id="changePwOtpCode" maxlength="6" inputmode="numeric" placeholder="1 2 3 4 5 6" autocomplete="one-time-code" style="width:100%; height:48px; border-radius:12px; border:1px solid rgba(0,0,0,0.18); text-align:center; font-size:22px; font-weight:900; letter-spacing:0.35em; background:rgba(255,255,255,0.95); box-sizing:border-box;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:12px;">
-              <span id="changePwTimer" style="color:#888;">⏱ Valid for 10 minutes</span>
+              <span id="changePwTimer" style="color:#888;">Valid for 10 minutes</span>
               <button type="button" id="changePwResendBtn" onclick="resendChangePwOtp()" style="background:none; border:none; color:#0E3B35; font-weight:800; cursor:pointer; text-decoration:underline;">Resend Code</button>
             </div>
             <div id="changePwErrBox" style="display:none; color:#dc2626; font-size:12px; font-weight:700; margin-top:6px;"></div>
@@ -1771,7 +1775,7 @@
         <!-- STEP 2: ENTER NEW PASSWORD -->
         <div id="changePwStepInputs" style="display:none;">
           <p style="font-size:13px; color:#555; margin-bottom:14px; line-height:1.4;">
-            ✅ Authorization verified! Choose a new secure password (minimum 8 characters).
+            Authorization verified! Choose a new secure password (minimum 8 characters).
           </p>
           <div style="margin-bottom:12px;">
             <label style="font-size:12px; font-weight:700; color:#333; display:block; margin-bottom:4px;">New Password</label>
@@ -1798,7 +1802,7 @@
     if (!changePwModalBuilt) buildChangePasswordModal();
     const user = (typeof getUser === 'function' ? getUser() : null) || JSON.parse(localStorage.getItem('collekt_user') || '{}');
     if (!user || !user.email) {
-      if (typeof showToast === 'function') showToast('⚠️ Please log in to change your password.', 'warning');
+      if (typeof showToast === 'function') showToast('Please log in to change your password.', 'warning');
       else alert('Please log in to change your password.');
       return;
     }
@@ -1838,7 +1842,7 @@
       })
     }).then(r => r.json()).then(d => {
       if (d.success && typeof showToast === 'function') {
-        showToast('📧 Password change authorization code sent to ' + user.email, 'info');
+        showToast('Password change authorization code sent to ' + user.email, 'info');
       }
     }).catch(e => console.warn('Password change OTP error:', e));
 
@@ -1879,7 +1883,7 @@
       });
       const d = await res.json();
       if (d.success) {
-        if (typeof showToast === 'function') showToast('📧 New code sent to ' + user.email, 'success');
+        if (typeof showToast === 'function') showToast('New code sent to ' + user.email, 'success');
         let count = 30;
         const timer = setInterval(() => {
           count--;
@@ -1893,7 +1897,7 @@
           }
         }, 1000);
       } else {
-        if (typeof showToast === 'function') showToast('⚠️ ' + (d.error || 'Please wait before resending.'), 'warning');
+        if (typeof showToast === 'function') showToast((d.error || 'Please wait before resending.'), 'warning');
         if (btn) { btn.disabled = false; btn.textContent = 'Resend Code'; }
       }
     } catch(e) {
@@ -1932,7 +1936,7 @@
         const stepInputs = document.getElementById('changePwStepInputs');
         if (stepOtp) stepOtp.style.display = 'none';
         if (stepInputs) stepInputs.style.display = 'block';
-        if (typeof showToast === 'function') showToast('✅ Authorization verified! Please choose your new password.', 'success');
+        if (typeof showToast === 'function') showToast('Authorization verified! Please choose your new password.', 'success');
         const newPass = document.getElementById('changePwNewPass');
         setTimeout(() => { if (newPass) newPass.focus(); }, 100);
       } else {
@@ -1986,7 +1990,7 @@
       }
 
       closeChangePasswordModal();
-      if (typeof showToast === 'function') showToast('🎉 Password successfully updated!', 'success');
+      if (typeof showToast === 'function') showToast('Password successfully updated!', 'success');
       else alert('Password successfully updated!');
 
     } catch (e) {

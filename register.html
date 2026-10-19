@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=183.0">
-<link rel="stylesheet" href="shared.css?v=183.0">
-<link rel="stylesheet" href="glass.css?v=183.0">
+<link rel="stylesheet" href="style.css?v=184.0">
+<link rel="stylesheet" href="shared.css?v=184.0">
+<link rel="stylesheet" href="glass.css?v=184.0">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -444,7 +444,7 @@ html.dark .success-h { color: #e2efed; }
             if (stepEl) stepEl.classList.toggle('active', i === n);
             var dot = document.getElementById('dot' + i);
             if (dot) {
-              if (i < n) { dot.className = 'step-dot done'; dot.textContent = '✓'; }
+              if (i < n) { dot.className = 'step-dot done'; dot.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'; }
               else if (i === n) { dot.className = 'step-dot active'; dot.textContent = i; }
               else { dot.className = 'step-dot pending'; dot.textContent = i; }
             }
@@ -614,11 +614,11 @@ html.dark .success-h { color: #e2efed; }
               <div class="pw-strength-segment" id="pwBar4"></div>
             </div>
             <div class="pw-criteria-list">
-              <div class="pw-criterion invalid" id="critLength"><span class="pw-criterion-icon">✕</span> 8+ characters</div>
-              <div class="pw-criterion invalid" id="critUpper"><span class="pw-criterion-icon">✕</span> Uppercase letter</div>
-              <div class="pw-criterion invalid" id="critLower"><span class="pw-criterion-icon">✕</span> Lowercase letter</div>
-              <div class="pw-criterion invalid" id="critNumber"><span class="pw-criterion-icon">✕</span> Number (0-9)</div>
-              <div class="pw-criterion invalid" id="critSpecial" style="grid-column: span 2;"><span class="pw-criterion-icon">✕</span> Special symbol (!@#$%^&amp;*...)</div>
+              <div class="pw-criterion invalid" id="critLength"><span class="pw-criterion-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span> 8+ characters</div>
+              <div class="pw-criterion invalid" id="critUpper"><span class="pw-criterion-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span> Uppercase letter</div>
+              <div class="pw-criterion invalid" id="critLower"><span class="pw-criterion-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span> Lowercase letter</div>
+              <div class="pw-criterion invalid" id="critNumber"><span class="pw-criterion-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span> Number (0-9)</div>
+              <div class="pw-criterion invalid" id="critSpecial" style="grid-column: span 2;"><span class="pw-criterion-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span> Special symbol (!@#$%^&amp;*...)</div>
             </div>
           </div>
         </div>
@@ -667,7 +667,7 @@ html.dark .success-h { color: #e2efed; }
     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
       <div>
         <div style="display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:800; color:var(--teal); background:rgba(20,184,166,0.14); border:1px solid rgba(20,184,166,0.3); padding:3px 10px; border-radius:99px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">
-          ⚖️ Nigerian Legal Framework &bull; NDPA 2023
+          Nigerian Legal Framework &bull; NDPA 2023
         </div>
         <div style="font-size:17px; font-weight:900; color:var(--ink); letter-spacing:-0.02em;">Collekt User Agreement &amp; Privacy Policy</div>
       </div>
@@ -843,7 +843,7 @@ html.dark .success-h { color: #e2efed; }
 
     <!-- Scroll Indicator Hint -->
     <div id="scrollHint" style="display:flex; align-items:center; justify-content:center; gap:5px; font-size:10.5px; font-weight:700; color:var(--teal); margin-top:6px; cursor:pointer;" onclick="scrollTermsToBottom()">
-      <span>⬇️ Scroll down to review and complete security verification</span>
+      <span>Scroll down to review and complete security verification</span>
     </div>
 
     <!-- Security & Agreement Bottom Box -->
@@ -881,9 +881,7 @@ html.dark .success-h { color: #e2efed; }
   <div class="modal-card" style="max-width:460px; width:100%; border-radius:20px; padding:32px 24px; background:var(--white, #0c1d1a); border:1.5px solid var(--line, rgba(20,184,166,0.25)); position:relative; font-family:'Plus Jakarta Sans','Manrope',sans-serif; display:flex; flex-direction:column; box-shadow:0 24px 70px rgba(0,0,0,0.6); animation:fadeSlideIn .35s ease; text-align:center;">
     
     <!-- Lock / Security Badge -->
-    <div style="width:52px; height:52px; border-radius:50%; background:rgba(20,184,166,0.12); border:1.5px solid rgba(20,184,166,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:24px;">
-      🔐
-    </div>
+    <div style="width:52px; height:52px; border-radius:50%; background:rgba(20,184,166,0.12); border:1.5px solid rgba(20,184,166,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; color:var(--teal);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
 
     <div style="display:inline-block; margin:0 auto 8px; font-size:10px; font-weight:800; color:var(--amber, #D4920B); background:rgba(212,146,11,0.14); border:1px solid rgba(212,146,11,0.3); padding:3px 12px; border-radius:99px; text-transform:uppercase; letter-spacing:0.06em;">
       Security Verification
@@ -928,7 +926,7 @@ html.dark .success-h { color: #e2efed; }
     </div>
 
     <div style="margin-top:14px; font-size:11.5px; color:var(--muted, #64748b);">
-      ⏱ Code expires in 10 minutes &bull; Protected by NDPA 2023
+      Code expires in 10 minutes &bull; Protected by NDPA 2023
     </div>
   </div>
 </div>
@@ -967,8 +965,8 @@ html.dark .success-h { color: #e2efed; }
   }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=183.0"></script>
-<script src="app.js?v=183.0"></script>
+<script src="supabase.js?v=184.0"></script>
+<script src="app.js?v=184.0"></script>
 <script>
   // Detect if arriving from OAuth callback
   const regHash = window.location.hash || '';
@@ -1020,7 +1018,7 @@ html.dark .success-h { color: #e2efed; }
       if (stepEl) stepEl.classList.toggle('active', i === n);
       const dot = document.getElementById('dot' + i);
       if (dot) {
-        if (i < n) { dot.className = 'step-dot done'; dot.textContent = '✓'; }
+        if (i < n) { dot.className = 'step-dot done'; dot.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'; }
         else if (i === n) { dot.className = 'step-dot active'; dot.textContent = i; }
         else { dot.className = 'step-dot pending'; dot.textContent = i; }
       }
@@ -1192,7 +1190,7 @@ html.dark .success-h { color: #e2efed; }
         box.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
       }
       if (label) {
-        label.textContent = 'Verification Successful ✓';
+        label.textContent = 'Verification Successful';
         label.style.color = '#10B981';
       }
       if (sub) sub.textContent = 'Verified Human Session';
@@ -1310,11 +1308,11 @@ html.dark .success-h { color: #e2efed; }
         if (valid) {
           el.className = 'pw-criterion valid';
           const icon = el.querySelector('.pw-criterion-icon');
-          if (icon) icon.textContent = '✓';
+          if (icon) icon.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
         } else {
           el.className = 'pw-criterion invalid';
           const icon = el.querySelector('.pw-criterion-icon');
-          if (icon) icon.textContent = '✕';
+          if (icon) icon.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
         }
       }
     };
@@ -1408,7 +1406,7 @@ html.dark .success-h { color: #e2efed; }
     // Show verification loading state on confirmation button
     const confirmBtn = document.getElementById('confirmRegBtn');
     if (confirmBtn) {
-      confirmBtn.innerHTML = '<span>Verifying security challenge... ⏳</span>';
+      confirmBtn.innerHTML = '<span>Verifying security challenge...</span>';
       confirmBtn.disabled = true;
     }
 
@@ -1481,7 +1479,7 @@ html.dark .success-h { color: #e2efed; }
 
     // Show account creation state
     if (confirmBtn) {
-      confirmBtn.innerHTML = '<span>Creating account... ⏳</span>';
+      confirmBtn.innerHTML = '<span>Creating account...</span>';
       confirmBtn.disabled = true;
     }
 
@@ -1632,7 +1630,7 @@ html.dark .success-h { color: #e2efed; }
         const digits = String(data.fallback_code).slice(0, 6);
         boxes.forEach((b, i) => { b.value = digits[i] || ''; });
         if (succBox) {
-          succBox.innerHTML = `✓ Instant Verification Code generated: <strong>${digits}</strong> (pre-filled below).`;
+          succBox.innerHTML = `Instant Verification Code generated: <strong>${digits}</strong> (pre-filled below).`;
           succBox.style.display = 'block';
         }
       } else if (!data.success && errBox) {
@@ -1741,11 +1739,11 @@ html.dark .success-h { color: #e2efed; }
           const boxes = document.querySelectorAll('.otp-box');
           boxes.forEach((b, i) => { b.value = digits[i] || ''; });
           if (succBox) {
-            succBox.innerHTML = `✓ Fresh Verification Code generated: <strong>${digits}</strong> (pre-filled below).`;
+            succBox.innerHTML = `Fresh Verification Code generated: <strong>${digits}</strong> (pre-filled below).`;
             succBox.style.display = 'block';
           }
         } else if (succBox) {
-          succBox.textContent = '✓ A fresh 6-digit code has been sent to your email.';
+          succBox.textContent = 'A fresh 6-digit code has been sent to your email.';
           succBox.style.display = 'block';
         }
         startOtpCooldown(60);
@@ -1789,7 +1787,7 @@ html.dark .success-h { color: #e2efed; }
     const submitBtn = document.getElementById('submitOtpBtn');
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Verifying code... ⏳</span>';
+      submitBtn.innerHTML = '<span>Verifying code...</span>';
     }
 
     try {
@@ -1835,10 +1833,10 @@ html.dark .success-h { color: #e2efed; }
       // Successful OTP Verification: Enforce 2-second countdown wait before granting dashboard access
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>✓ Verified! Entering Dashboard in 2s...</span>';
+        submitBtn.innerHTML = '<span>Verified! Entering Dashboard in 2s...</span>';
       }
       if (succBox) {
-        succBox.innerHTML = '🎉 <strong>Code Verified!</strong> Welcome email sent to your inbox. Loading dashboard in <strong>2s</strong>...';
+        succBox.innerHTML = '<strong>Code Verified!</strong> Welcome email sent to your inbox. Loading dashboard in <strong>2s</strong>...';
         succBox.style.display = 'block';
       }
 
@@ -1877,12 +1875,12 @@ html.dark .success-h { color: #e2efed; }
       } catch(e) {}
 
       if (typeof showToast === 'function') {
-        showToast('🎉 Account verified! Welcome to Collekt.');
+        showToast('Account verified! Welcome to Collekt.');
       }
 
       setTimeout(() => {
-        if (submitBtn) submitBtn.innerHTML = '<span>✓ Verified! Entering Dashboard in 1s...</span>';
-        if (succBox) succBox.innerHTML = '🎉 <strong>Code Verified!</strong> Welcome email sent to your inbox. Loading dashboard in <strong>1s</strong>...';
+        if (submitBtn) submitBtn.innerHTML = '<span>Verified! Entering Dashboard in 1s...</span>';
+        if (succBox) succBox.innerHTML = '<strong>Code Verified!</strong> Welcome email sent to your inbox. Loading dashboard in <strong>1s</strong>...';
       }, 1000);
 
       setTimeout(() => {

@@ -37,9 +37,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=183.0">
-<link rel="stylesheet" href="shared.css?v=183.0">
-<link rel="stylesheet" href="glass.css?v=183.0">
+<link rel="stylesheet" href="style.css?v=184.0">
+<link rel="stylesheet" href="shared.css?v=184.0">
+<link rel="stylesheet" href="glass.css?v=184.0">
 
 <style>
   body { background: var(--paper); }
@@ -328,28 +328,28 @@
                   <label class="form-label" style="margin-bottom:0;">Transaction PIN</label>
                   <div id="pinStatusBadge">
                     <span style="background:rgba(234,88,12,0.12); color:#ea580c; font-weight:800; font-size:11px; padding:3px 10px; border-radius:99px;">
-                      ⚠️ Checking PIN...
+                      Checking PIN...
                     </span>
                   </div>
                 </div>
 
                 <div style="position:relative;">
                   <input class="form-input" type="password" id="transPinDisplay" value="" maxlength="4" placeholder="No PIN set yet" style="letter-spacing:0.35em; font-weight:900; font-size:16px; cursor:pointer;" readonly onclick="onPinDisplayClick()" title="Click to manage PIN">
-                  <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:14px; opacity:.6; pointer-events:none;">🔒</span>
+                  
                 </div>
                 
                 <div id="pinActiveActions" style="display:none; gap:10px; margin-top:10px; align-items:center; flex-wrap:wrap;">
                   <button type="button" class="btn btn-outline btn-sm" onclick="openChangePinModal()" style="font-size:12px; font-weight:800; padding:6px 14px; cursor:pointer;">
-                    🔄 Change PIN
+                    Change PIN
                   </button>
                   <button type="button" class="btn btn-ghost btn-sm" onclick="openForgotPinModal()" style="font-size:12px; font-weight:800; color:#ea580c; padding:6px 12px; cursor:pointer;">
-                    🔑 Reset PIN
+                    Reset PIN
                   </button>
                 </div>
 
                 <div id="pinNewUserActions" style="display:block; margin-top:10px;">
                   <button type="button" class="btn btn-primary btn-sm" onclick="openCreatePinModal()" style="font-size:12.5px; font-weight:900; background:var(--teal); border:none; padding:10px 18px; border-radius:10px; box-shadow:0 4px 12px rgba(19,117,111,0.22); cursor:pointer;">
-                    🔒 Create 4-Digit Transaction PIN &rarr;
+                    Create 4-Digit Transaction PIN &rarr;
                   </button>
                   <div style="font-size:11.5px; color:var(--muted); margin-top:6px;">Required to authorize withdrawals and milestone payouts.</div>
                 </div>
@@ -358,7 +358,7 @@
             </div>
 
             <div style="margin-bottom:28px;">
-              <button type="button" class="btn btn-outline" onclick="saveBasicWalletSettings()" style="font-weight:800;">💾 Save Security Settings</button>
+              <button type="button" class="btn btn-outline" onclick="saveBasicWalletSettings()" style="font-weight:800;">Save Security Settings</button>
             </div>
 
           </div>
@@ -379,7 +379,7 @@
   <div class="modal-card" style="position:relative; width:min(440px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
     <button class="modal-close" onclick="closeModal('fundModal')" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-      <span style="font-size:20px;">💳</span>
+      
       <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Fund Your Wallet</div>
     </div>
     <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">Instant automated wallet crediting powered by Korapay secure multi-rail checkout.</p>
@@ -387,10 +387,10 @@
     <!-- Payment Method Selector Tabs -->
     <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-bottom:14px; background:var(--paper); padding:4px; border-radius:12px; border:1px solid var(--line);">
       <button type="button" class="fund-method-pill active" id="methodBtnKorapay" onclick="selectFundMethod('korapay')" style="padding:8px 6px; font-size:12px; font-weight:800; border-radius:9px; border:none; background:var(--white); color:var(--ink); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.06); transition:all .2s; display:flex; align-items:center; justify-content:center; gap:6px;">
-        💳 Korapay Checkout
+        Korapay Checkout
       </button>
       <button type="button" class="fund-method-pill" id="methodBtnTransfer" onclick="selectFundMethod('bank_transfer')" style="padding:8px 6px; font-size:12px; font-weight:800; border-radius:9px; border:none; background:transparent; color:var(--muted); cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:6px;">
-        🏛️ Direct Bank Transfer
+        Direct Bank Transfer
       </button>
     </div>
 
@@ -421,12 +421,12 @@
         </div>
         <div style="display:flex; justify-content:space-between; font-size:12px;">
           <span style="color:var(--muted);">Gateway Security:</span>
-          <span style="color:#16a34a; font-weight:800; font-size:11px;">🔒 Korapay 256-Bit Encrypted Checkout</span>
+          <span style="color:#16a34a; font-weight:800; font-size:11px;">Korapay 256-Bit Encrypted Checkout</span>
         </div>
       </div>
 
       <button type="button" class="btn btn-primary" id="btnSubmitOnlineFund" onclick="executeOnlineFunding()" style="width:100%; min-height:42px; border-radius:12px; font-size:13.5px; font-weight:900; background:var(--teal); border:none; box-shadow:0 6px 18px rgba(19,117,111,0.25);">
-        <span id="btnFundSubmitText">🔒 Proceed to Korapay Checkout &rarr;</span>
+        <span id="btnFundSubmitText">Proceed to Korapay Checkout &rarr;</span>
       </button>
     </div>
 
@@ -445,7 +445,7 @@
   <div class="modal-card" style="position:relative; width:min(440px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
     <button class="modal-close" onclick="closeModal('withdrawModal')" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-      <span style="font-size:20px;">🏛️</span>
+      
       <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Withdraw Funds</div>
     </div>
     <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">Direct instant payout to any verified Nigerian Bank or Digital Neobank account.</p>
@@ -467,7 +467,7 @@
         </div>
         <select class="form-input form-select" id="withdrawBankSelect" onchange="onWithdrawBankChanged()" style="border-radius:12px; font-weight:800; font-size:13px; min-height:42px; padding:8px 12px; background:var(--white); color:var(--ink); cursor:pointer;">
           <option value="" disabled selected>-- Choose Destination Bank / Wallet --</option>
-          <optgroup label="⭐ Popular Commercial Banks" id="optgroupCommercial">
+          <optgroup label="Popular Commercial Banks" id="optgroupCommercial">
             <option value="044" data-name="Access Bank">Access Bank</option>
             <option value="058" data-name="Guaranty Trust Bank (GTBank)">Guaranty Trust Bank (GTBank)</option>
             <option value="057" data-name="Zenith Bank">Zenith Bank</option>
@@ -488,7 +488,7 @@
             <option value="303" data-name="Lotus Bank">Lotus Bank</option>
             <option value="102" data-name="Titan Trust Bank">Titan Trust Bank</option>
           </optgroup>
-          <optgroup label="⚡ Digital Neobanks & Wallets" id="optgroupDigital">
+          <optgroup label="Digital Neobanks & Wallets" id="optgroupDigital">
             <option value="305" data-name="OPay (Paycom)">OPay (Paycom)</option>
             <option value="100033" data-name="PalmPay">PalmPay</option>
             <option value="090405" data-name="Moniepoint Microfinance Bank">Moniepoint Microfinance Bank</option>
@@ -499,7 +499,7 @@
             <option value="50322" data-name="Dot Microfinance Bank">Dot Microfinance Bank</option>
             <option value="125" data-name="Rubies MFB">Rubies MFB</option>
           </optgroup>
-          <optgroup label="🏛️ Other Microfinance & Regional Banks" id="optgroupOthers">
+          <optgroup label="Other Microfinance & Regional Banks" id="optgroupOthers">
             <!-- Loaded dynamically from /api/banks -->
           </optgroup>
         </select>
@@ -513,7 +513,7 @@
 
       <!-- Live Verified Account Name Display -->
       <div id="verifiedAccountBox" style="display:none; background:#dcfce7; border:1px solid #16a34a; border-radius:12px; padding:10px 12px; margin-bottom:11px;">
-        <div style="font-size:10.5px; font-weight:800; color:#15803d; text-transform:uppercase;" id="verifiedAccountStatusLabel">✓ Verified Recipient Account Name</div>
+        <div style="font-size:10.5px; font-weight:800; color:#15803d; text-transform:uppercase;" id="verifiedAccountStatusLabel">Verified Recipient Account Name</div>
         <div style="font-size:13px; font-weight:900; color:#14532d; margin-top:2px;" id="verifiedAccountNameText">VERIFIED ACCOUNT HOLDER</div>
       </div>
 
@@ -556,7 +556,7 @@
   <div class="modal-card" style="position:relative; width:min(440px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
     <button class="modal-close" onclick="cancelLinkNovaModal()" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-      <span style="font-size:20px;">🏛️</span>
+      
       <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Link Your NOVA Bank Account</div>
     </div>
     <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">Enter your <strong>10-Digit NOVA Commercial Bank</strong> account details. All earnings and payouts will be transferred directly to this account.</p>
@@ -579,7 +579,7 @@
 
     <div style="display:flex; gap:10px;">
       <button class="btn btn-outline" style="flex:1; border-radius:12px; height:42px; font-size:13px; font-weight:800;" onclick="cancelLinkNovaModal()">Cancel</button>
-      <button class="btn btn-primary" style="flex:1; border-radius:12px; height:42px; font-size:13px; background:var(--teal); font-weight:900;" onclick="submitLinkNovaForm()">💾 Save Account</button>
+      <button class="btn btn-primary" style="flex:1; border-radius:12px; height:42px; font-size:13px; background:var(--teal); font-weight:900;" onclick="submitLinkNovaForm()">Save Account</button>
     </div>
   </div>
 </div>
@@ -590,7 +590,7 @@
     <button class="modal-close" onclick="closeModal('activateVirtualAccountModal')" style="top:18px; right:18px; width:32px; height:32px; border-radius:50%;">&times;</button>
     
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-      <div style="width:44px; height:44px; border-radius:14px; background:rgba(20,184,166,0.12); color:var(--teal); display:grid; place-items:center; font-size:22px;">🏛️</div>
+      <div style="width:44px; height:44px; border-radius:14px; background:rgba(20,184,166,0.12); color:var(--teal); display:flex; align-items:center; justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M3 10h18"></path><path d="M5 6l7-3 7 3"></path><path d="M4 10v11"></path><path d="M20 10v11"></path><path d="M8 14v4"></path><path d="M12 14v4"></path><path d="M16 14v4"></path></svg></div>
       <div>
         <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Activate Dedicated Virtual NUBAN</div>
         <div style="font-size:12px; color:var(--muted); margin-top:2px;">Permanent 10-digit Nigerian bank account for instant wallet funding 24/7</div>
@@ -600,7 +600,7 @@
     <!-- Regulatory Security Notice -->
     <div style="background:rgba(20,184,166,0.06); border:1px solid rgba(20,184,166,0.22); border-radius:14px; padding:12px 14px; margin:12px 0 16px;">
       <div style="display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:800; color:var(--teal); margin-bottom:4px;">
-        <span>🔒</span> CBN Tier-2 KYC &amp; NDPA 2023 Compliant
+        CBN Tier-2 KYC &amp; NDPA 2023 Compliant
       </div>
       <div style="font-size:11px; color:var(--muted); line-height:1.45;">
         Under Central Bank of Nigeria (CBN) regulations on permanent virtual bank accounts, customer identity linking via BVN or NIN is mandatory. Your data is encrypted with 256-bit SSL and used strictly for NUBAN generation.
@@ -657,7 +657,7 @@
       <div style="display:flex; gap:10px; margin-top:18px;">
         <button type="button" class="btn btn-outline" style="flex:1; border-radius:12px; height:44px; font-size:13px; font-weight:800;" onclick="closeModal('activateVirtualAccountModal')">Cancel</button>
         <button type="submit" class="btn btn-primary" id="btnSubmitActivateDva" style="flex:1.4; border-radius:12px; height:44px; font-size:13px; background:linear-gradient(135deg, #0e3b35 0%, #13756f 100%); font-weight:900; border:none; color:#fff; box-shadow:0 6px 20px rgba(19,117,111,0.3); touch-action:manipulation;">
-          ⚡ Activate &amp; Generate NUBAN
+          Activate &amp; Generate NUBAN
         </button>
       </div>
     </form>
@@ -691,7 +691,7 @@
     <div class="form-group" style="margin-bottom:16px; display:none;" id="payoutOtpGroup">
       <div style="background:rgba(13,148,136,0.08); border:1px solid rgba(13,148,136,0.25); border-radius:12px; padding:10px 12px; margin-bottom:8px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:11px; font-weight:800; color:var(--teal);">🛡️ CBN High-Value Step-Up Security</span>
+          <span style="font-size:11px; font-weight:800; color:var(--teal);">CBN High-Value Step-Up Security</span>
           <span style="font-size:10px; background:var(--teal); color:#fff; font-weight:900; padding:1px 6px; border-radius:4px;">MFA</span>
         </div>
         <p style="font-size:11px; color:var(--muted); margin:4px 0 0 0; line-height:1.3;">
@@ -721,7 +721,7 @@
     <button class="modal-close" onclick="closeModal('submitDeliverableModal')" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
     
     <div style="text-align:center; margin-bottom:16px;">
-      <div style="font-size:32px; margin-bottom:4px;">📤</div>
+      
       <h3 style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Submit Milestone Deliverable</h3>
       <p style="font-size:12px; color:var(--muted); margin-top:3px; margin-bottom:0;" id="deliverableMilestoneSub">Deliverable Review &amp; Escrow Inspection</p>
     </div>
@@ -729,7 +729,7 @@
     <!-- Statutory 7-Day SLA Banner -->
     <div style="background:rgba(19,117,111,0.08); border:1px solid rgba(19,117,111,0.25); border-radius:12px; padding:12px 14px; margin-bottom:16px;">
       <div style="font-size:12px; font-weight:800; color:var(--teal); margin-bottom:3px; display:flex; align-items:center; gap:6px;">
-        <span>⏱️</span> 7-Business-Day Inspection Window
+        7-Business-Day Inspection Window
       </div>
       <div style="font-size:11.5px; color:var(--muted); line-height:1.45;">
         Once submitted, your client has <strong>7 business days</strong> to inspect your work and release escrow. If inactive without raising a formal dispute, Collekt Admin will auto-accept and release funds directly to your wallet.
@@ -754,7 +754,7 @@
     <div style="display:flex; gap:10px;">
       <button class="btn btn-outline" style="flex:1; border-radius:12px; height:42px; font-size:13px; font-weight:800;" onclick="closeModal('submitDeliverableModal')">Cancel</button>
       <button class="btn btn-primary" id="btnSubmitDeliverableAction" style="flex:1.5; border-radius:12px; height:42px; font-size:13px; background:linear-gradient(135deg,#0E3B35,#13756F); font-weight:900;" onclick="confirmSubmitDeliverable()">
-        📤 Submit for 7-Day Review
+        Submit for 7-Day Review
       </button>
     </div>
   </div>
@@ -772,7 +772,7 @@
     <!-- STEP 1: EMAIL OTP AUTHORIZATION -->
     <div id="createPinStepOtp">
       <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-        <span style="font-size:22px;">🔐</span>
+        
         <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Verify Email to Create PIN</div>
       </div>
       <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.45;">
@@ -783,7 +783,7 @@
         <label class="form-label" style="font-size:11.5px; font-weight:800; margin-bottom:4px;">6-Digit Security Code (OTP)</label>
         <input class="form-input" type="text" id="createPinOtpCode" maxlength="6" inputmode="numeric" placeholder="1 2 3 4 5 6" autocomplete="one-time-code" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; font-size:22px; min-height:46px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:11px;">
-          <span id="createPinOtpTimer" style="color:var(--muted);">⏱ Valid for 10 minutes</span>
+          <span id="createPinOtpTimer" style="color:var(--muted);">Valid for 10 minutes</span>
           <button type="button" id="createPinResendBtn" onclick="resendPinCreationOtp()" style="background:none; border:none; color:var(--teal); font-weight:800; cursor:pointer; padding:0; text-decoration:underline;">Resend Code</button>
         </div>
       </div>
@@ -799,17 +799,17 @@
     <!-- STEP 2: CHOOSE & CONFIRM 4-DIGIT PIN -->
     <div id="createPinStepForm" style="display:none;">
       <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-        <span style="font-size:22px;">🔒</span>
+        
         <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Create 4-Digit Transaction PIN</div>
       </div>
       <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">
-        ✅ Email verified. Now choose a secure 4-digit PIN. This PIN will protect your earnings, withdrawals, and escrow authorizations.
+        Email verified. Now choose a secure 4-digit PIN. This PIN will protect your earnings, withdrawals, and escrow authorizations.
       </p>
 
       <div class="form-group" style="margin-bottom:12px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <label class="form-label" style="font-size:11.5px; font-weight:800; margin:0;">Choose 4-Digit PIN</label>
-          <button type="button" onclick="togglePinVisibility('newCreatePin', this)" style="background:none; border:none; color:var(--teal); font-size:11px; font-weight:800; cursor:pointer;">👁️ Show PIN</button>
+          <button type="button" onclick="togglePinVisibility('newCreatePin', this)" style="background:none; border:none; color:var(--teal); font-size:11px; font-weight:800; cursor:pointer;">Show PIN</button>
         </div>
         <input class="form-input" type="password" id="newCreatePin" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; font-size:20px; min-height:42px;">
         <div style="font-size:10.5px; color:var(--muted); margin-top:3px;">Enter exactly 4 numeric digits (0-9).</div>
@@ -818,7 +818,7 @@
       <div class="form-group" style="margin-bottom:16px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <label class="form-label" style="font-size:11.5px; font-weight:800; margin:0;">Confirm 4-Digit PIN</label>
-          <button type="button" onclick="togglePinVisibility('confirmCreatePin', this)" style="background:none; border:none; color:var(--teal); font-size:11px; font-weight:800; cursor:pointer;">👁️ Show PIN</button>
+          <button type="button" onclick="togglePinVisibility('confirmCreatePin', this)" style="background:none; border:none; color:var(--teal); font-size:11px; font-weight:800; cursor:pointer;">Show PIN</button>
         </div>
         <input class="form-input" type="password" id="confirmCreatePin" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="off" style="border-radius:12px; letter-spacing:0.35em; font-weight:900; text-align:center; font-size:20px; min-height:42px;">
       </div>
@@ -826,7 +826,7 @@
       <div style="display:flex; gap:10px;">
         <button type="button" class="btn btn-outline" style="flex:1; border-radius:12px; height:42px; font-size:13px; font-weight:800;" onclick="closeModal('createPinModal')">Cancel</button>
         <button type="button" class="btn btn-primary" id="btnSubmitCreatePin" style="flex:1.2; border-radius:12px; height:42px; font-size:13px; background:var(--teal); font-weight:900;" onclick="executeCreatePin()">
-          🔒 Lock &amp; Activate PIN
+          Lock &amp; Activate PIN
         </button>
       </div>
     </div>
@@ -839,7 +839,7 @@
   <div class="modal-card" style="position:relative; width:min(420px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
     <button class="modal-close" onclick="closeModal('changePinModal')" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-      <span style="font-size:20px;">🔄</span>
+      
       <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Change Transaction PIN</div>
     </div>
     <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">Update your 4-digit PIN for withdrawals and escrow authorizations.</p>
@@ -873,7 +873,7 @@
   <div class="modal-card" style="position:relative; width:min(420px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--white); border-radius:20px; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.35);">
     <button class="modal-close" onclick="closeModal('forgotPinModal')" style="top:16px; right:16px; width:30px; height:30px; border-radius:50%;">&times;</button>
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-      <span style="font-size:20px;">🔑</span>
+      
       <div class="modal-title" style="font-size:18px; font-weight:900; color:var(--ink); margin:0;">Reset Transaction PIN</div>
     </div>
     <p style="font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.4;">
@@ -910,7 +910,7 @@
     <div style="display:flex; gap:10px;">
       <button type="button" class="btn btn-outline" style="flex:1; border-radius:12px; height:42px; font-size:13px; font-weight:800;" onclick="closeModal('forgotPinModal')">Cancel</button>
       <button type="button" class="btn btn-primary" id="btnSubmitResetPin" style="flex:1; border-radius:12px; height:42px; font-size:13px; background:#ea580c; border:none; font-weight:900; color:#fff;" onclick="executeResetPin()">
-        🔑 Reset PIN
+        Reset PIN
       </button>
     </div>
   </div>
@@ -925,7 +925,7 @@
     <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--line); padding-bottom:16px; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
       <div>
         <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:24px;">🏛️</span>
+          
           <span style="font-size:18px; font-weight:900; color:var(--ink); letter-spacing:-0.02em;">COLLEKT TECHNOLOGIES LTD</span>
         </div>
         <div style="font-size:11px; color:var(--muted); margin-top:3px; line-height:1.4;">
@@ -935,7 +935,7 @@
       </div>
       <div style="text-align:right;">
         <span style="font-size:10px; background:rgba(19,117,111,0.12); color:var(--teal); border:1px solid rgba(19,117,111,0.25); padding:3px 9px; border-radius:99px; font-weight:800; text-transform:uppercase;" id="invStatusBadge">
-          ✓ Paid &amp; Settled
+          Paid &amp; Settled
         </span>
         <div style="font-size:16px; font-weight:900; color:var(--ink); margin-top:6px; font-family:monospace;" id="invRefText">COL-INV-20260929-E49A</div>
         <div style="font-size:11px; color:var(--muted); margin-top:2px;" id="invDateText">29 Sep 2026</div>
@@ -964,7 +964,7 @@
         <div style="font-size:10.5px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Payee / Specialist Contractor</div>
         <div style="font-weight:900; font-size:13.5px; color:var(--ink);" id="invProName">Professional Specialist</div>
         <div style="font-size:11px; color:var(--muted); margin-top:2px;" id="invProMeta">COREN / NIN Verified &bull; TIN: Active</div>
-        <div style="font-size:11px; color:#16a34a; font-weight:800; margin-top:1px;">🛡️ Shield Verified Specialist</div>
+        <div style="font-size:11px; color:#16a34a; font-weight:800; margin-top:1px;">Shield Verified Specialist</div>
       </div>
     </div>
 
@@ -980,7 +980,7 @@
         <span style="color:var(--muted);">Settlement Rail:</span> <strong style="color:var(--forest);">Nova Commercial Bank Escrow (NUBAN)</strong>
       </div>
       <div id="invFxRatePill" style="display:none; color:#0284c7; font-weight:800;">
-        🔒 Locked FX Benchmark: 1 USD = ₦1,550 NGN
+        Locked FX Benchmark: 1 USD = ₦1,550 NGN
       </div>
     </div>
 
@@ -1013,13 +1013,13 @@
         Close
       </button>
       <button type="button" class="btn btn-outline" style="border-radius:10px; font-size:12px; font-weight:800; padding:8px 14px;" onclick="copyTaxScheduleText()">
-        📋 Copy Tax Schedule
+        Copy Tax Schedule
       </button>
       <button type="button" class="btn btn-outline" style="border-radius:10px; font-size:12px; font-weight:800; padding:8px 14px;" onclick="exportTaxInvoiceJson()">
-        📥 Export ERP JSON
+        Export ERP JSON
       </button>
       <button type="button" class="btn btn-primary" style="background:var(--teal); border:none; border-radius:10px; font-size:12px; font-weight:900; padding:8px 18px; color:#fff;" onclick="printTaxInvoice()">
-        🖨️ Print / Save as PDF
+        Print / Save as PDF
       </button>
     </div>
   </div>
@@ -1027,10 +1027,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="supabase.js?v=183.0"></script>
-<script src="app.js?v=183.0"></script>
-<script src="collekt-ai.js?v=183.0"></script>
-<script src="settings-popup.js?v=183.0"></script>
+<script src="supabase.js?v=184.0"></script>
+<script src="app.js?v=184.0"></script>
+<script src="collekt-ai.js?v=184.0"></script>
+<script src="settings-popup.js?v=184.0"></script>
 <script>
   let isHideBalance = false;
   try {
@@ -1231,11 +1231,11 @@
     const acctName = document.getElementById('linkNovaAccountName')?.value.trim();
 
     if (!acctNo || acctNo.replace(/\D/g, '').length !== 10) {
-      showToast('⚠️ Please enter a valid 10-digit NOVA Bank account number.', 'warning');
+      showToast('Please enter a valid 10-digit NOVA Bank account number.', 'warning');
       return;
     }
     if (!acctName || acctName.length < 3) {
-      showToast('⚠️ Please enter the official account name registered with NOVA Bank.', 'warning');
+      showToast('Please enter the official account name registered with NOVA Bank.', 'warning');
       return;
     }
 
@@ -1244,7 +1244,7 @@
     const res = linkUserNovaAccount(user, cleanAcct, acctName);
     if (res && res.success) {
       closeModal('linkNovaModal');
-      showToast('🎉 NOVA Bank Account linked and verified!');
+      showToast('NOVA Bank Account linked and verified!');
       const updatedUser = getUser();
 
       // Refresh overview dashboard card
@@ -1268,7 +1268,7 @@
         openWithdrawModal();
       }
     } else {
-      showToast('⚠️ ' + (res?.message || 'Could not link account.'), 'error');
+      showToast((res?.message || 'Could not link account.'), 'error');
     }
   };
 
@@ -1291,15 +1291,15 @@
             <div>
               <div style="font-size:10.5px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.75);">Your Registered NOVA Account</div>
               <div style="font-size:14px; font-weight:900; color:#fff; display:flex; align-items:center; gap:6px; margin-top:2px;">
-                <span>🏛️ NOVA Commercial Bank</span>
+                <span>NOVA Commercial Bank</span>
               </div>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
               <span style="font-size:10.5px; background:rgba(34,197,94,0.2); border:1px solid rgba(34,197,94,0.4); color:#86efac; padding:3px 10px; border-radius:99px; font-weight:800; display:flex; align-items:center; gap:4px;">
-                <span>✓</span> Linked Account
+                Linked Account
               </span>
               <button type="button" onclick="openLinkNovaModal('fund')" style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); color:#fff; font-size:11px; font-weight:800; padding:4px 10px; border-radius:8px; cursor:pointer;" title="Change NOVA Account">
-                ✏️ Edit Account
+                Edit Account
               </button>
             </div>
           </div>
@@ -1309,7 +1309,7 @@
             <div style="display:flex; align-items:center; justify-content:space-between;">
               <span style="font-family:monospace; font-size:24px; font-weight:900; letter-spacing:0.08em; color:#fff;">${acctNo}</span>
               <button type="button" onclick="copyToClipboard('${acctNo}', 'NOVA Account Number copied!')" style="background:rgba(255,255,255,0.2); border:none; color:#fff; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:6px; touch-action:manipulation;">
-                📋 Copy
+                Copy
               </button>
             </div>
           </div>
@@ -1331,7 +1331,7 @@
         <div style="background:#fffbeb; border:2px dashed #f59e0b; border-radius:18px; padding:22px 20px; text-align:center;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
             <div style="display:flex; align-items:center; gap:6px;">
-              <span style="font-size:18px;">🏛️</span>
+              
               <span style="font-size:12px; font-weight:800; color:#92400e; text-transform:uppercase;">NOVA Commercial Bank</span>
             </div>
             <span style="font-size:10px; background:#fef3c7; border:1px solid #fde68a; color:#b45309; padding:2px 9px; border-radius:99px; font-weight:800;">NOT LINKED YET</span>
@@ -1343,7 +1343,7 @@
               You have not linked your NOVA Bank account. Enter your 10-digit NOVA Bank details now to deposit, receive milestone payouts, and withdraw funds seamlessly.
             </p>
             <button type="button" class="btn btn-primary" onclick="openLinkNovaModal('fund')" style="background:var(--teal); font-weight:900; font-size:13px; border:none; padding:11px 24px; border-radius:12px; box-shadow:0 4px 14px rgba(19,117,111,0.3); cursor:pointer; color:#fff;">
-              🔗 Link Your NOVA Bank Account &rarr;
+              Link Your NOVA Bank Account &rarr;
             </button>
           </div>
         </div>
@@ -1391,7 +1391,7 @@
         railLabel.textContent = 'Korapay Multi-Rail (Cards, Bank Transfer, Pay with Bank)';
       }
       if (submitBtnText) {
-        submitBtnText.textContent = '🔒 Proceed to Korapay Checkout →';
+        submitBtnText.textContent = 'Proceed to Korapay Checkout →';
       }
     }
   };
@@ -1409,7 +1409,7 @@
     const btn = document.getElementById('btnSubmitOnlineFund');
 
     if (!amt || isNaN(amt) || amt < 100) {
-      showToast('⚠️ Minimum funding amount is ₦100.', 'warning');
+      showToast('Minimum funding amount is ₦100.', 'warning');
       return;
     }
 
@@ -1445,14 +1445,14 @@
 
     const checkoutUrl = res?.data?.authorization_url || res?.data?.checkout_url;
     if (res && res.success && checkoutUrl) {
-      showToast(`🔒 Redirecting to Korapay secure checkout...`);
+      showToast('Redirecting to Korapay secure checkout...');
       window.location.href = checkoutUrl;
     } else {
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = `<span>🔒 Proceed to Korapay Checkout &rarr;</span>`;
+        btn.innerHTML = `<span>Proceed to Korapay Checkout &rarr;</span>`;
       }
-      showToast('⚠️ ' + (res?.error || 'Could not initialize Korapay payment session. Please check your connection.'), 'error');
+      showToast((res?.error || 'Could not initialize Korapay payment session. Please check your connection.'), 'error');
     }
   };
 
@@ -1495,7 +1495,7 @@
     const btn = document.getElementById('btnSubmitTransferFund');
 
     if (!amt || isNaN(amt) || amt < 100) {
-      showToast('⚠️ Minimum funding amount is ₦100.', 'warning');
+      showToast('Minimum funding amount is ₦100.', 'warning');
       return;
     }
 
@@ -1541,20 +1541,20 @@
       const resData = await res.json();
       if (resData.status && resData.data?.account_number) {
         renderLiveBankTransferCard(resData.data, amt);
-        showToast('🏛️ Real Sterling Bank account generated! Transfer funds now to credit your wallet.', 'success', 5000);
+        showToast('Real Sterling Bank account generated! Transfer funds now to credit your wallet.', 'success', 5000);
       } else {
-        showToast('⚠️ ' + (resData?.message || resData?.error || 'Could not generate transfer account. Please try again.'), 'error');
+        showToast((resData?.message || resData?.error || 'Could not generate transfer account. Please try again.'), 'error');
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = '<span>🏛️ Generate Live Bank Transfer Account &rarr;</span>';
+          btn.innerHTML = '<span>Generate Live Bank Transfer Account &rarr;</span>';
         }
       }
     } catch (err) {
       console.error('executeTransferFunding error:', err);
-      showToast('⚠️ Network connection issue. Please try again.', 'error');
+      showToast('Network connection issue. Please try again.', 'error');
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = '<span>🏛️ Generate Live Bank Transfer Account &rarr;</span>';
+        btn.innerHTML = '<span>Generate Live Bank Transfer Account &rarr;</span>';
       }
     }
   };
@@ -1577,7 +1577,7 @@
           <div>
             <div style="font-size:10px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.7);">Bank Transfer Deposit Rail</div>
             <div style="font-size:15px; font-weight:900; color:#fff; display:flex; align-items:center; gap:6px; margin-top:2px;">
-              <span>🏛️ ${bankName}</span>
+              <span>${bankName}</span>
               <span style="font-size:9.5px; background:rgba(34,197,94,0.2); border:1px solid rgba(34,197,94,0.4); color:#4ade80; padding:2px 8px; border-radius:99px; font-weight:800;">LIVE NIBSS RAIL</span>
             </div>
           </div>
@@ -1592,7 +1592,7 @@
           <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.06); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15);">
             <span style="font-family:monospace; font-size:24px; font-weight:900; letter-spacing:0.08em; color:#fff;">${acctNo}</span>
             <button type="button" onclick="copyToClipboard('${acctNo}', 'Sterling Bank Account Number copied!')" style="background:var(--teal); border:none; color:#fff; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">
-              📋 Copy
+              Copy
             </button>
           </div>
         </div>
@@ -1604,18 +1604,18 @@
           </div>
           <div>
             <div style="font-size:9.5px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase;">Settlement</div>
-            <div style="font-size:12px; font-weight:800; color:#5eead4;">⚡ Instant Auto-Credit</div>
+            <div style="font-size:12px; font-weight:800; color:#5eead4;">Instant Auto-Credit</div>
           </div>
         </div>
       </div>
 
       <div style="background:rgba(20,184,166,0.08); border:1px solid rgba(20,184,166,0.2); border-radius:12px; padding:12px 14px; margin-bottom:14px; font-size:11.5px; color:var(--ink); line-height:1.45;">
-        💡 <strong>Next Step:</strong> Open your banking app (OPay, Kuda, GTBank, Zenith, Access, PalmPay, etc.), select <strong>Sterling Bank</strong>, and transfer <strong>${formattedAmt}</strong>. Your Collekt balance will update automatically within seconds of sending.
+        <strong>Next Step:</strong> Open your banking app (OPay, Kuda, GTBank, Zenith, Access, PalmPay, etc.), select <strong>Sterling Bank</strong>, and transfer <strong>${formattedAmt}</strong>. Your Collekt balance will update automatically within seconds of sending.
       </div>
 
       <div style="display:flex; gap:8px;">
         <button type="button" class="btn btn-primary" id="btnVerifyTransferNow" onclick="verifyLiveBankTransfer('${ref}', ${amt})" style="flex:1.4; background:var(--teal); font-weight:800; min-height:42px; border-radius:12px; border:none; color:#fff;">
-          🔄 I Have Transferred (Check Status)
+          I Have Transferred (Check Status)
         </button>
         <button type="button" class="btn btn-outline" onclick="loadAndRenderFundModalDva()" style="flex:1; font-weight:800; min-height:42px; border-radius:12px; border-color:var(--line); color:var(--ink);">
           Back
@@ -1636,7 +1636,7 @@
         const cJson = await check.json();
         if (cJson.status === 'successful' || cJson.verified === true) {
           clearInterval(liveTransferPollTimer);
-          showToast(`🎉 Deposit of ${formattedAmt} confirmed! Your wallet is credited.`, 'success', 7000);
+          showToast(`Deposit of ${formattedAmt} confirmed! Your wallet is credited.`, 'success', 7000);
           if (typeof addUserNotification === 'function') {
             addUserNotification({
               type: 'escrow_funding',
@@ -1664,7 +1664,7 @@
       const data = await res.json();
       if (data.status === 'successful' || data.verified === true) {
         if (liveTransferPollTimer) clearInterval(liveTransferPollTimer);
-        showToast(`🎉 Deposit confirmed! ₦${Number(amt).toLocaleString()} credited to your wallet balance.`, 'success', 7000);
+        showToast(`Deposit confirmed! ₦${Number(amt).toLocaleString()} credited to your wallet balance.`, 'success', 7000);
         if (typeof addUserNotification === 'function') {
           addUserNotification({
             type: 'escrow_funding',
@@ -1676,14 +1676,14 @@
         closeModal('fundModal');
         if (typeof fetchWalletDetails === 'function') fetchWalletDetails();
       } else {
-        showToast('⏳ Transfer not detected yet. Please ensure you sent funds to the Sterling Bank account, then click again in 10-20 seconds.', 'info', 6000);
+        showToast('Transfer not detected yet. Please ensure you sent funds to the Sterling Bank account, then click again in 10-20 seconds.', 'info', 6000);
       }
     } catch (err) {
-      showToast('⚠️ Could not check transfer status. Please try again.', 'error');
+      showToast('Could not check transfer status. Please try again.', 'error');
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = '🔄 I Have Transferred (Check Status)';
+        btn.innerHTML = 'I Have Transferred (Check Status)';
       }
     }
   };
@@ -1699,7 +1699,7 @@
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
           <div>
             <div style="font-size:10px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.7);">Collekt Official Escrow Settlement Account</div>
-            <div style="font-size:14px; font-weight:900; color:#fff; margin-top:2px;">🏛️ NOVA Commercial Bank</div>
+            <div style="font-size:14px; font-weight:900; color:#fff; margin-top:2px;">NOVA Commercial Bank</div>
           </div>
           <span style="font-size:9.5px; background:rgba(20,184,166,0.25); border:1px solid rgba(20,184,166,0.45); color:#5eead4; padding:2px 8px; border-radius:99px; font-weight:800;">ESCROW CUSTODY</span>
         </div>
@@ -1709,18 +1709,18 @@
             <div id="fundModalAccount" style="font-family:monospace; font-size:20px; font-weight:900; letter-spacing:0.08em; color:#fff;">1001025797</div>
           </div>
           <button type="button" onclick="copyToClipboard('1001025797', 'NOVA Bank Account 1001025797 (COLLEKT NG) copied!')" style="background:var(--teal); border:none; color:#fff; padding:6px 12px; border-radius:8px; font-size:11.5px; font-weight:800; cursor:pointer;">
-            📋 Copy
+            Copy
           </button>
         </div>
         <div style="display:flex; justify-content:space-between; font-size:11.5px;">
           <span style="color:rgba(255,255,255,0.7);">Account Name: <strong style="color:#fff;">COLLEKT NG</strong></span>
-          <span style="color:#5eead4; font-weight:800;">✓ Korapay &amp; Direct Wire</span>
+          <span style="color:#5eead4; font-weight:800;">Korapay &amp; Direct Wire</span>
         </div>
       </div>
 
       <div style="background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px;">
         <div style="font-size:12px; font-weight:800; color:var(--forest); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-          <span>🏛️</span> Direct Bank Transfer to NOVA Commercial Bank
+          Direct Bank Transfer to NOVA Commercial Bank
         </div>
         <p style="font-size:11px; color:var(--muted); margin-bottom:10px; line-height:1.4;">
           Transfer your deposit amount to <strong>COLLEKT NG (1001025797 — NOVA Commercial Bank)</strong> above, or use instant Korapay bank transfer below.
@@ -1742,10 +1742,10 @@
 
         <div style="display:flex; flex-direction:column; gap:8px;">
           <button type="button" class="btn btn-primary" id="btnSubmitTransferFund" onclick="executeTransferFunding()" style="width:100%; min-height:40px; border-radius:12px; font-size:12.5px; font-weight:900; background:var(--teal); border:none; box-shadow:0 6px 18px rgba(19,117,111,0.25);">
-            <span>⚡ Instant Auto-Credit Transfer &rarr;</span>
+            <span>Instant Auto-Credit Transfer &rarr;</span>
           </button>
           <button type="button" class="btn btn-outline" onclick="submitDirectNovaWireConfirmation()" style="width:100%; min-height:38px; border-radius:12px; font-size:12px; font-weight:800;">
-            <span>🏛️ I Sent a Direct Wire to COLLEKT NG (1001025797)</span>
+            <span>I Sent a Direct Wire to COLLEKT NG (1001025797)</span>
           </button>
         </div>
       </div>
@@ -1755,7 +1755,7 @@
   window.submitDirectNovaWireConfirmation = function() {
     const amt = Number(document.getElementById('transferDepositAmount')?.value || document.getElementById('fundDepositAmount')?.value || 0);
     if (!amt || amt < 100) {
-      showToast('⚠️ Please enter the amount you transferred to COLLEKT NG (1001025797).', 'warning');
+      showToast('Please enter the amount you transferred to COLLEKT NG (1001025797).', 'warning');
       return;
     }
     const user = getUser() || {};
@@ -1768,12 +1768,12 @@
       });
       if (res && res.success) {
         closeModal('fundModal');
-        showToast(`✅ Direct NOVA Bank transfer of ₦${amt.toLocaleString()} logged (Ref: ${res.deposit.reference})! Your wallet will be credited upon verification.`, 'success', 6000);
+        showToast(`Direct NOVA Bank transfer of ₦${amt.toLocaleString()} logged (Ref: ${res.deposit.reference})! Your wallet will be credited upon verification.`, 'success', 6000);
         return;
       }
     }
     closeModal('fundModal');
-    showToast(`✅ Transfer notification of ₦${amt.toLocaleString()} to COLLEKT NG (1001025797) submitted!`, 'success');
+    showToast(`Transfer notification of ₦${amt.toLocaleString()} to COLLEKT NG (1001025797) submitted!`, 'success');
   };
 
   window.copyDvaAccountModal = function() {
@@ -1796,7 +1796,7 @@
     const acctEl = document.getElementById('fundModalAccount') || document.getElementById('virtualAccountNo');
     const acctNo = acctEl ? acctEl.textContent.trim() : '';
     const bankEl = document.querySelector('.sbank-val span') || document.getElementById('proDvaBank');
-    const bankName = bankEl ? bankEl.textContent.replace('🏛️', '').trim() : 'Fidelity Bank';
+    const bankName = bankEl ? bankEl.textContent.replace('', '').trim() : 'Fidelity Bank';
     const shareText = `Pay into my Collekt Virtual Account:\nBank: ${bankName}\nAccount No: ${acctNo}\nAccount Name: COLLEKT / ${displayName.toUpperCase()}`;
 
     if (navigator.share) {
@@ -1868,8 +1868,8 @@
         noticeEl.innerHTML = `
           <div style="background:linear-gradient(135deg, #0e3b35 0%, #134e4a 100%); border-radius:16px; padding:14px 16px; color:#fff; position:relative; overflow:hidden; box-shadow:0 6px 18px rgba(14,59,53,0.18);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <div style="font-size:10.5px; font-weight:800; color:#86efac; text-transform:uppercase; letter-spacing:0.04em;">⚡ Saved Primary Payout Destination</div>
-              <span style="font-size:10px; background:rgba(34,197,94,0.25); color:#86efac; padding:2px 8px; border-radius:99px; font-weight:800;">✓ Verified</span>
+              <div style="font-size:10.5px; font-weight:800; color:#86efac; text-transform:uppercase; letter-spacing:0.04em;">Saved Primary Payout Destination</div>
+              <span style="font-size:10px; background:rgba(34,197,94,0.25); color:#86efac; padding:2px 8px; border-radius:99px; font-weight:800;">Verified</span>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:flex-end;">
               <div>
@@ -1941,7 +1941,7 @@
     }
     if (statusLabel) {
       statusLabel.style.color = '#b45309';
-      statusLabel.textContent = '⏳ Querying NIBSS Database...';
+      statusLabel.textContent = 'Querying NIBSS Database...';
     }
     if (nameText) {
       nameText.style.color = '#78350f';
@@ -1984,7 +1984,7 @@
             }
             if (statusLabel) {
               statusLabel.style.color = '#15803d';
-              statusLabel.innerHTML = `✓ Verified Recipient Account &bull; <span style="font-weight:700; color:#166534;">Identity Match: ${matchResult.score}%</span>`;
+              statusLabel.innerHTML = `Verified Recipient Account &bull; <span style="font-weight:700; color:#166534;">Identity Match: ${matchResult.score}%</span>`;
             }
             if (nameText) {
               nameText.style.color = '#14532d';
@@ -2004,14 +2004,14 @@
             }
             if (statusLabel) {
               statusLabel.style.color = '#b91c1c';
-              statusLabel.innerHTML = '🚨 Name Mismatch Fraud Warning &bull; Withdrawal Blocked';
+              statusLabel.innerHTML = 'Name Mismatch Fraud Warning &bull; Withdrawal Blocked';
             }
             if (nameText) {
               nameText.style.color = '#7f1d1d';
               nameText.innerHTML = `
                 <div style="font-weight:800; font-size:13px; margin-bottom:4px;">Destination Account: ${escapeHTML(res.account_name)}</div>
                 <div style="font-size:11.5px; line-height:1.4; color:#991b1b;">
-                  ❌ Destination account does not match your registered identity (<strong>${escapeHTML(profileName || 'Your Profile')}</strong>).
+                  Destination account does not match your registered identity (<strong>${escapeHTML(profileName || 'Your Profile')}</strong>).
                   <br>Under <strong>CBN AML/CFT Regulations 2022</strong>, disbursements to third-party accounts are strictly prohibited.
                 </div>
               `;
@@ -2030,7 +2030,7 @@
           }
           if (statusLabel) {
             statusLabel.style.color = '#b91c1c';
-            statusLabel.textContent = '❌ Account Verification Failed';
+            statusLabel.textContent = 'Account Verification Failed';
           }
           if (nameText) {
             nameText.style.color = '#7f1d1d';
@@ -2050,7 +2050,7 @@
         }
         if (statusLabel) {
           statusLabel.style.color = '#b91c1c';
-          statusLabel.textContent = '❌ Verification Error';
+          statusLabel.textContent = 'Verification Error';
         }
         if (nameText) {
           nameText.style.color = '#7f1d1d';
@@ -2076,25 +2076,25 @@
     const narration = document.getElementById('withdrawNarration')?.value.trim() || 'Collekt Earnings Withdrawal';
 
     if (!amount || amount < 500) {
-      showToast('⚠️ Minimum withdrawal amount is ₦500', 'warning');
+      showToast('Minimum withdrawal amount is ₦500', 'warning');
       return;
     }
     if (!bankCode) {
-      showToast('⚠️ Please select destination bank / neobank', 'warning');
+      showToast('Please select destination bank / neobank', 'warning');
       return;
     }
     if (!acctNo || acctNo.length !== 10) {
-      showToast('⚠️ Please enter a valid 10-digit NUBAN account number', 'warning');
+      showToast('Please enter a valid 10-digit NUBAN account number', 'warning');
       return;
     }
     if (amount > rawBalance) {
-      showToast(`❌ Insufficient funds. Available: ₦${rawBalance.toLocaleString()}`, 'error');
+      showToast(`Insufficient funds. Available: ₦${rawBalance.toLocaleString()}`, 'error');
       return;
     }
 
     if (typeof hasUserTransactionPin === 'function' && !hasUserTransactionPin(user)) {
       closeModal('withdrawModal');
-      showToast('🔒 Please create your 4-digit Transaction PIN to secure withdrawals.', 'warning');
+      showToast('Please create your 4-digit Transaction PIN to secure withdrawals.', 'warning');
       openCreatePinModal(() => {
         openWithdrawModal();
       });
@@ -2104,7 +2104,7 @@
     // If recipient not yet resolved, do an instant resolution check
     let resolvedName = verifiedWithdrawalRecipient?.account_name;
     if (!resolvedName) {
-      showToast('⏳ Verifying account details with NIBSS...', 'info');
+      showToast('Verifying account details with NIBSS...', 'info');
       const res = typeof resolveBankAccount === 'function' 
         ? await resolveBankAccount({ account_number: acctNo, bank_code: bankCode })
         : { success: false };
@@ -2117,7 +2117,7 @@
           account_name: resolvedName
         };
       } else {
-        showToast('❌ Could not verify destination bank account details. Please check your account number and selected bank.', 'error');
+        showToast('Could not verify destination bank account details. Please check your account number and selected bank.', 'error');
         return;
       }
     }
@@ -2136,7 +2136,7 @@
       : { isMatch: true, score: 100 };
 
     if (!nameCheck.isMatch) {
-      showToast(`🚨 AML Fraud Block: Bank account "${resolvedName}" does not match your registered identity ("${profileName}"). Third-party payouts are prohibited under CBN regulations.`, 'error', 6000);
+      showToast(`AML Fraud Block: Bank account "${resolvedName}" does not match your registered identity ("${profileName}"). Third-party payouts are prohibited under CBN regulations.`, 'error', 6000);
       return;
     }
 
@@ -2158,7 +2158,7 @@
     const boxEl = document.getElementById('confirmActionSummaryBox');
 
     if (titleEl) titleEl.textContent = 'Confirm Bank Withdrawal';
-    if (iconEl) iconEl.textContent = '🏛️';
+    if (iconEl) iconEl.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M3 10h18"></path><path d="M5 6l7-3 7 3"></path><path d="M4 10v11"></path><path d="M20 10v11"></path><path d="M8 14v4"></path><path d="M12 14v4"></path><path d="M16 14v4"></path></svg>';
     if (subEl) subEl.textContent = `Direct transfer to ${escapeHTML(bankName)} (${acctNo})`;
 
     if (boxEl) {
@@ -2167,7 +2167,7 @@
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Destination Bank:</span> <strong>${escapeHTML(bankName)}</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Account Number:</span> <strong style="font-family:monospace;">${acctNo}</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Account Name:</span> <strong style="color:var(--forest);">${escapeHTML(resolvedName)}</strong></div>
-        <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Identity Verification:</span> <strong style="color:#16a34a;">✓ Name Match Confirmed (${nameCheck.score || 100}%)</strong></div>
+        <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Identity Verification:</span> <strong style="color:#16a34a;">Name Match Confirmed (${nameCheck.score || 100}%)</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Transfer Fee:</span> <strong style="color:#16a34a;">₦0.00 (Zero Fee)</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:14px; border-top:1px solid var(--line); padding-top:6px;"><span style="font-weight:800;">Net Payout:</span> <strong style="color:var(--forest); font-size:16px;">₦${amount.toLocaleString()}</strong></div>
       `;
@@ -2346,7 +2346,7 @@
     const link = document.getElementById('deliverableLinkInput')?.value.trim();
 
     if (!title) {
-      showToast('⚠️ Please enter a deliverable title.', 'warning');
+      showToast('Please enter a deliverable title.', 'warning');
       return;
     }
 
@@ -2386,7 +2386,7 @@
     updateMilestonesInList('collekt_awarded_contracts');
 
     closeModal('submitDeliverableModal');
-    showToast('🎉 Deliverable submitted! Client 7-business-day inspection window has started.');
+    showToast('Deliverable submitted! Client 7-business-day inspection window has started.');
     renderEscrowMilestones();
   };
 
@@ -2497,7 +2497,7 @@
     if (fxPillEl) {
       if (isUsd) {
         fxPillEl.style.display = 'block';
-        fxPillEl.textContent = `🔒 Locked FX Benchmark: 1 USD = ₦${fxRate.toLocaleString()} NGN`;
+        fxPillEl.textContent = `Locked FX Benchmark: 1 USD = ₦${fxRate.toLocaleString()} NGN`;
       } else {
         fxPillEl.style.display = 'none';
       }
@@ -2573,7 +2573,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     `.trim();
 
     navigator.clipboard.writeText(text).then(() => {
-      showToast('📋 FIRS Tax Schedule copied to clipboard!', 'success');
+      showToast('FIRS Tax Schedule copied to clipboard!', 'success');
     }).catch(() => {
       showToast('Copied text to clipboard', 'info');
     });
@@ -2588,7 +2588,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     document.body.appendChild(dlAnchor);
     dlAnchor.click();
     dlAnchor.remove();
-    showToast('📥 FIRS Tax Invoice JSON exported for ERP records!', 'success');
+    showToast('FIRS Tax Invoice JSON exported for ERP records!', 'success');
   };
 
   function renderEscrowMilestones() {
@@ -2725,7 +2725,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
             </svg>
           </div>
           <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(19, 117, 111, 0.12); border:1px solid rgba(45, 212, 191, 0.35); border-radius:99px; padding:4px 14px; margin-bottom:12px;">
-            <span style="font-size:11px;">🛡️</span>
+            
             <span style="font-size:11px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.06em;">CBN &bull; NOVA BANK PROTECTED ESCROW VAULT</span>
           </div>
           <div style="font-size:16px; font-weight:900; color:var(--ink); margin-bottom:6px;">No Active Escrow Milestones</div>
@@ -2758,12 +2758,12 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
       const pctDisbursed = totalContractAmt > 0 ? Math.min(100, Math.round((releasedAmt / totalContractAmt) * 100)) : 0;
       const isLumpSum = c.payment_mode === 'lump_sum' || msArr.length === 1;
       const modeBadgeText = isLumpSum
-        ? '🎯 Lump-Sum on Completion (100%)'
-        : `📊 ${msArr.length} Custom Milestones (${msArr.map(m => (m.percentage || Math.round(100 / msArr.length)) + '%').join(' / ')})`;
+        ? 'Lump-Sum on Completion (100%)'
+        : `${msArr.length} Custom Milestones (${msArr.map(m => (m.percentage || Math.round(100 / msArr.length)) + '%').join(' / ')})`;
 
       const totalHeldLabel = heldAmt > 0
         ? (isUsd ? `$${heldAmt.toLocaleString()} USD Held (~₦${Math.round(heldAmt * fx).toLocaleString()})` : `₦${heldAmt.toLocaleString()} Held in Escrow`)
-        : `✅ 100% Disbursed (${sym}${totalContractAmt.toLocaleString()})`;
+        : `100% Disbursed (${sym}${totalContractAmt.toLocaleString()})`;
 
       return `
       <div class="escrow-milestone-card">
@@ -2778,9 +2778,9 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
           </div>
           <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
             <div class="escrow-status-pill funded">&#128274; ${totalHeldLabel}</div>
-            ${isUsd ? `<div style="font-size:10.5px; color:#38bdf8; font-weight:700;">🔒 FX Rate Locked @ ₦${fx.toLocaleString()}/$</div>` : ''}
+            ${isUsd ? `<div style="font-size:10.5px; color:#38bdf8; font-weight:700;">FX Rate Locked @ ₦${fx.toLocaleString()}/$</div>` : ''}
             <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}')" style="font-size:11px; font-weight:800; padding:3px 9px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:8px; display:inline-flex; align-items:center; gap:4px; background:rgba(16,185,129,0.06); cursor:pointer;" title="View FIRS Electronic Tax Invoice & Escrow Schedule">
-              🧾 Tax Invoice
+              Tax Invoice
             </button>
           </div>
         </div>
@@ -2788,9 +2788,9 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
         <!-- Held vs Disbursed Escrow Progress Bar -->
         <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-top:8px; margin-bottom:4px;">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:11.5px; margin-bottom:6px;">
-            <span>🔒 <strong>Held in Escrow:</strong> <strong style="color:var(--amber);">${sym}${heldAmt.toLocaleString()}</strong></span>
-            <span>✅ <strong>Disbursed:</strong> <strong style="color:#16a34a;">${sym}${releasedAmt.toLocaleString()} (${pctDisbursed}%)</strong></span>
-            <span>🏛️ <strong>NOVA Bank Escrow:</strong> <code style="font-weight:800; color:var(--teal);">COLLEKT NG &bull; 1001025797</code></span>
+            <span><strong>Held in Escrow:</strong> <strong style="color:var(--amber);">${sym}${heldAmt.toLocaleString()}</strong></span>
+            <span><strong>Disbursed:</strong> <strong style="color:#16a34a;">${sym}${releasedAmt.toLocaleString()} (${pctDisbursed}%)</strong></span>
+            <span><strong>NOVA Bank Escrow:</strong> <code style="font-weight:800; color:var(--teal);">COLLEKT NG &bull; 1001025797</code></span>
           </div>
           <div style="width:100%; height:6px; background:var(--line); border-radius:99px; overflow:hidden;">
             <div style="width:${pctDisbursed}%; height:100%; background:linear-gradient(90deg, var(--teal), #16a34a); transition:width 0.35s ease;"></div>
@@ -2815,17 +2815,17 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
             let statusLabel = escapeHTML(m.status || 'Funded in Escrow');
             let statusColor = 'var(--amber)';
             if (isReleased) {
-              statusLabel = 'Released ✅';
+              statusLabel = 'Released';
               statusColor = '#16a34a';
             } else if (isDisputed) {
-              statusLabel = 'Under Arbitration ⚖️';
+              statusLabel = 'Under Arbitration';
               statusColor = '#ef4444';
             } else if (isUnderReview) {
               if (daysLeft === 0) {
-                statusLabel = '⏱️ 7-Day Window Lapsed (Pending Admin Auto-Accept)';
+                statusLabel = '7-Day Window Lapsed (Pending Admin Auto-Accept)';
                 statusColor = '#f59e0b';
               } else {
-                statusLabel = `⏱️ Under Review (${daysLeft} business day${daysLeft === 1 ? '' : 's'} remaining)`;
+                statusLabel = `Under Review (${daysLeft} business day${daysLeft === 1 ? '' : 's'} remaining)`;
                 statusColor = 'var(--teal)';
               }
             }
@@ -2839,21 +2839,21 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
                   Amount: <strong>${mAmtFormatted}</strong> &bull; 
                   Status: <span style="color:${statusColor}; font-weight:800;">${statusLabel}</span>
                 </div>
-                ${m.deliverable_title ? `<div style="font-size:11px; color:var(--teal); margin-top:3px; font-weight:700;">📄 Deliverable: ${escapeHTML(m.deliverable_title)}</div>` : ''}
+                ${m.deliverable_title ? `<div style="font-size:11px; color:var(--teal); margin-top:3px; font-weight:700;">Deliverable: ${escapeHTML(m.deliverable_title)}</div>` : ''}
               </div>
               <div>
                 ${isCompany ? `
                   ${isDisputed ? `
                     <span style="font-size:11px; font-weight:800; color:#ef4444; background:rgba(239,68,68,0.12); padding:4px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
-                      ⚖️ Under Arbitration (Locked)
+                      Under Arbitration (Locked)
                     </span>
                   ` : (isReleased ? `
                     <div style="display:flex; align-items:center; gap:6px;">
                       <span style="font-size:11px; font-weight:800; color:#16a34a; background:rgba(22,163,74,0.12); padding:4px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
-                        ✅ Released
+                        Released
                       </span>
                       <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}', ${idx})" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06); cursor:pointer;" title="View Milestone FIRS Tax Receipt">
-                        🧾 Receipt
+                        Receipt
                       </button>
                     </div>
                   ` : (isUnderReview ? `
@@ -2862,10 +2862,10 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
                         &#128275; Approve &amp; Release
                       </button>
                       <button class="btn btn-outline btn-sm" onclick="openEscrowDisputeModal('${c.id}', '${escapeHTML(c.title || m.name)}', ${m.amount})" style="font-weight:800; font-size:11px; color:#ef4444; border-color:rgba(239,68,68,0.4); padding:6px 10px;" title="Dispute deliverable if substandard">
-                        ⚖️ Dispute
+                        Dispute
                       </button>
                       <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}', ${idx})" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06); cursor:pointer;" title="Preview Milestone Tax Invoice">
-                        🧾 Invoice
+                        Invoice
                       </button>
                     </div>
                   ` : `
@@ -2874,40 +2874,40 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
                         &#128275; Approve &amp; Release Escrow
                       </button>
                       <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}', ${idx})" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06); cursor:pointer;" title="Preview Milestone Tax Invoice">
-                        🧾 Invoice
+                        Invoice
                       </button>
                     </div>
                   `))}
                 ` : `
                   ${isDisputed ? `
                     <span style="font-size:11px; font-weight:800; color:#ef4444; background:rgba(239,68,68,0.12); padding:4px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
-                      ⚖️ Under Arbitration (Locked)
+                      Under Arbitration (Locked)
                     </span>
                   ` : (isReleased ? `
                     <div style="display:flex; align-items:center; gap:6px;">
                       <span style="font-size:11px; font-weight:800; color:#16a34a; background:rgba(22,163,74,0.12); padding:4px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
-                        ✅ Released
+                        Released
                       </span>
                       <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}', ${idx})" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06); cursor:pointer;" title="View Milestone FIRS Tax Receipt">
-                        🧾 Receipt
+                        Receipt
                       </button>
                     </div>
                   ` : (isUnderReview ? `
                     <div style="display:flex; align-items:center; gap:6px;">
                       <span style="font-size:11px; color:var(--teal); font-weight:800; background:rgba(19,117,111,0.08); padding:5px 12px; border-radius:8px;">
-                        📤 Submitted ${daysLeft > 0 ? `(${daysLeft}d left)` : `(Awaiting Admin)`}
+                        Submitted ${daysLeft > 0 ? `(${daysLeft}d left)` : `(Awaiting Admin)`}
                       </span>
                       <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}', ${idx})" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06); cursor:pointer;" title="Preview Milestone Tax Invoice">
-                        🧾 Invoice
+                        Invoice
                       </button>
                     </div>
                   ` : `
                     <div style="display:flex; align-items:center; gap:6px;">
                       <button class="btn btn-outline btn-sm" onclick="openDeliverableSubmissionModal('${c.id}', '${m.id || ('ms_' + (idx + 1))}', '${escapeHTML(m.name)}', ${m.amount || 0}, '${mCur}', ${mFx})" style="font-weight:800; font-size:12px; padding:6px 14px;">
-                        📤 Submit Deliverable
+                        Submit Deliverable
                       </button>
                       <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal('${c.id}', ${idx})" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.06); cursor:pointer;" title="Preview Milestone Tax Invoice">
-                        🧾 Invoice
+                        Invoice
                       </button>
                     </div>
                   `))}
@@ -2924,13 +2924,13 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
 
   window.promptReleaseMilestone = function(contractId, amount, milestoneName, contractorName, contractStatus, currency = 'NGN', fxRate = 1550) {
     if (contractStatus === 'under_arbitration' || contractStatus === 'disputed') {
-      showToast('⚖️ Contract is currently locked under Collekt Arbitration. Escrow releases are suspended until resolution.', 'error');
+      showToast('Contract is currently locked under Collekt Arbitration. Escrow releases are suspended until resolution.', 'error');
       return;
     }
 
     const user = getUser();
     if (typeof hasUserTransactionPin === 'function' && !hasUserTransactionPin(user)) {
-      showToast('🔒 Please create your 4-digit Transaction PIN to authorize escrow releases.', 'warning');
+      showToast('Please create your 4-digit Transaction PIN to authorize escrow releases.', 'warning');
       openCreatePinModal(() => {
         promptReleaseMilestone(contractId, amount, milestoneName, contractorName, contractStatus, currency, fxRate);
       });
@@ -2967,7 +2967,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Milestone:</span> <strong>${escapeHTML(milestoneName)}</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Contractor Recipient:</span> <strong>${escapeHTML(contractorName)}</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Total Escrow Amount:</span> <strong style="color:var(--forest); font-size:15px;">${sym}${amount.toLocaleString()} ${isUsd ? 'USD' : ''}</strong></div>
-        ${isUsd ? `<div style="display:flex; justify-content:space-between; font-size:12px; color:#38bdf8;"><span>🔒 Locked FX Rate:</span> <strong>1 USD = ₦${fxRate.toLocaleString()} NGN</strong></div>` : ''}
+        ${isUsd ? `<div style="display:flex; justify-content:space-between; font-size:12px; color:#38bdf8;"><span>Locked FX Rate:</span> <strong>1 USD = ₦${fxRate.toLocaleString()} NGN</strong></div>` : ''}
         <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Platform Service Fee (15%):</span> <strong style="color:var(--muted);">${sym}${commission.toLocaleString()} ${isUsd ? 'USD' : ''}</strong></div>
         <div style="display:flex; justify-content:space-between; font-size:14px; border-top:1px solid var(--line); padding-top:6px;"><span style="font-weight:800;">Specialist Net Disbursal:</span> <strong style="color:#16a34a; font-size:16px;">${sym}${netPayout.toLocaleString()} ${isUsd ? `USD (~₦${ngnEquivNet.toLocaleString()})` : ''}</strong></div>
       `;
@@ -3000,32 +3000,32 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
 
     if (timerEl) {
       let left = otpData.expiresInSeconds || 300;
-      timerEl.textContent = `⏱️ Code expires in ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+      timerEl.textContent = `Code expires in ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
       clearInterval(window._payoutOtpTimerInterval);
       window._payoutOtpTimerInterval = setInterval(() => {
         left -= 1;
         if (left <= 0) {
           clearInterval(window._payoutOtpTimerInterval);
-          timerEl.textContent = '⚠️ Code expired. Please request a new code.';
+          timerEl.textContent = 'Code expired. Please request a new code.';
           if (btn) {
             btn.disabled = false;
             btn.style.opacity = '1';
             btn.textContent = 'Resend Code';
           }
         } else {
-          timerEl.textContent = `⏱️ Code expires in ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+          timerEl.textContent = `Code expires in ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
         }
       }, 1000);
     }
 
     if (typeof showInAppMessagePopup === 'function') {
       showInAppMessagePopup({
-        title: '🛡️ CBN High-Value Step-Up Security Code',
+        title: 'CBN High-Value Step-Up Security Code',
         body: `Your one-time authorization code is [${otpData.code}]. Enter this code to authorize your transfer.`,
         code: otpData.code
       });
     } else {
-      showToast(`🔐 Step-Up Authorization Code sent to ${user.email || 'your account'}! Check notifications.`);
+      showToast(`Step-Up Authorization Code sent to ${user.email || 'your account'}! Check notifications.`);
     }
 
     const otpInput = document.getElementById('payoutOtpInput');
@@ -3046,10 +3046,10 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     if (lockout.isLocked) {
       const pinWarning = document.getElementById('pinLockoutWarning');
       if (pinWarning) {
-        pinWarning.textContent = `🔒 PIN entry locked for ${lockout.remainingSeconds}s.`;
+        pinWarning.textContent = `PIN entry locked for ${lockout.remainingSeconds}s.`;
         pinWarning.style.display = 'block';
       }
-      showToast(`🔒 PIN verification locked. Please wait ${lockout.remainingMinutes} minutes or reset your PIN.`, 'error');
+      showToast(`PIN verification locked. Please wait ${lockout.remainingMinutes} minutes or reset your PIN.`, 'error');
       return;
     }
 
@@ -3060,20 +3060,20 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     if (!pinRes.success) {
       if (pinRes.no_pin) {
         closeModal('confirmFinancialActionModal');
-        showToast('🔒 Please create your 4-digit Transaction PIN first.', 'warning');
+        showToast('Please create your 4-digit Transaction PIN first.', 'warning');
         openCreatePinModal();
         return;
       }
       const pinWarning = document.getElementById('pinLockoutWarning');
       if (pinWarning) {
         if (pinRes.locked) {
-          pinWarning.textContent = `🔒 PIN verification locked for 5 minutes.`;
+          pinWarning.textContent = `PIN verification locked for 5 minutes.`;
         } else if (pinRes.attemptsRemaining !== undefined) {
-          pinWarning.textContent = `⚠️ ${pinRes.attemptsRemaining} attempt${pinRes.attemptsRemaining !== 1 ? 's' : ''} remaining before lockout.`;
+          pinWarning.textContent = `${pinRes.attemptsRemaining} attempt${pinRes.attemptsRemaining !== 1 ? 's' : ''} remaining before lockout.`;
         }
         pinWarning.style.display = 'block';
       }
-      showToast('❌ ' + (pinRes.message || 'Invalid Transaction PIN. Please check and try again.'), 'error');
+      showToast((pinRes.message || 'Invalid Transaction PIN. Please check and try again.'), 'error');
       if (pinInput) {
         pinInput.value = '';
         pinInput.focus();
@@ -3088,7 +3088,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
       const otpInput = document.getElementById('payoutOtpInput');
       const enteredOtp = otpInput ? otpInput.value.trim() : '';
       if (!enteredOtp) {
-        showToast('⚠️ CBN Step-Up Multi-Factor Authorization required for ₦50,000+. Please enter the 6-digit OTP code.', 'warning');
+        showToast('CBN Step-Up Multi-Factor Authorization required for ₦50,000+. Please enter the 6-digit OTP code.', 'warning');
         if (otpInput) otpInput.focus();
         return;
       }
@@ -3096,7 +3096,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
         ? verifyStepUpOtp(user, enteredOtp, 'payout')
         : { success: enteredOtp.length === 6 };
       if (!verifyRes.success) {
-        showToast('❌ ' + (verifyRes.error || 'Invalid 6-digit authorization code.'), 'error');
+        showToast((verifyRes.error || 'Invalid 6-digit authorization code.'), 'error');
         if (otpInput) {
           otpInput.value = '';
           otpInput.focus();
@@ -3138,7 +3138,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
           : { success: false, error: 'Withdrawal client function not found' };
 
         if (!res.success) {
-          showToast(`❌ Withdrawal failed: ${res.error || 'Could not process payout.'}`, 'error');
+          showToast(`Withdrawal failed: ${res.error || 'Could not process payout.'}`, 'error');
           if (btn) {
             btn.disabled = false;
             btn.innerHTML = 'Confirm & Authorize';
@@ -3179,7 +3179,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
           setTimeout(initTransactions, 500);
         }
 
-        showToast(`🎉 ₦${amt.toLocaleString()} withdrawal to ${bankName} (${acct}) successfully authorized and queued for bank settlement!`);
+        showToast(`₦${amt.toLocaleString()} withdrawal to ${bankName} (${acct}) successfully authorized and queued for bank settlement!`);
 
       } else if (pendingFinancialAction.type === 'escrow_release') {
         const amt = pendingFinancialAction.amount;
@@ -3219,7 +3219,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
           });
           serverDisbursal = await resp.json();
           if (!resp.ok) {
-            showToast(`❌ ${serverDisbursal.error || 'Milestone release failed'}`, 'error');
+            showToast(`${serverDisbursal.error || 'Milestone release failed'}`, 'error');
             if (btn) {
               btn.disabled = false;
               btn.innerHTML = 'Confirm & Authorize';
@@ -3302,7 +3302,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
         });
 
         const toastAmt = isUsd ? `$${amt.toLocaleString()} USD (~₦${ngnEquivAmt.toLocaleString()} NGN)` : `₦${amt.toLocaleString()}`;
-        showToast(`🎉 ${toastAmt} Escrow Released to ${contractor}! Deliverable marked Approved.`);
+        showToast(`${toastAmt} Escrow Released to ${contractor}! Deliverable marked Approved.`);
 
         if (typeof dispatchEscrowPayoutNotification === 'function') {
           try {
@@ -3338,7 +3338,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
 
     } catch (err) {
       console.error('executeConfirmedFinancialAction error:', err);
-      showToast(`❌ An error occurred: ${err.message || 'Execution error'}`, 'error');
+      showToast(`An error occurred: ${err.message || 'Execution error'}`, 'error');
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = 'Confirm & Authorize';
@@ -3415,8 +3415,8 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     if (!tbody && !mobileList) return;
 
     if (list.length === 0) {
-      if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:36px 20px; color:var(--muted); font-size:13px;"><div style="font-size:24px; margin-bottom:8px;">💳</div>No transactions recorded yet.<br><span style="font-size:11.5px; opacity:0.8;">Fund your wallet or complete project milestones to see transaction records here.</span></td></tr>`;
-      if (mobileList) mobileList.innerHTML = `<div style="text-align:center; padding:28px 16px; color:var(--muted); font-size:13px;"><div style="font-size:24px; margin-bottom:8px;">💳</div>No transactions recorded yet.<br><span style="font-size:11.5px; opacity:0.8;">Fund your wallet or complete milestones to see transaction activity here.</span></div>`;
+      if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:36px 20px; color:var(--muted); font-size:13px;">No transactions recorded yet.<br><span style="font-size:11.5px; opacity:0.8;">Fund your wallet or complete project milestones to see transaction records here.</span></td></tr>`;
+      if (mobileList) mobileList.innerHTML = `<div style="text-align:center; padding:28px 16px; color:var(--muted); font-size:13px;">No transactions recorded yet.<br><span style="font-size:11.5px; opacity:0.8;">Fund your wallet or complete milestones to see transaction activity here.</span></div>`;
       return;
     }
 
@@ -3452,7 +3452,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
             </td>
             <td style="text-align:right;">
               <button class="btn btn-outline btn-sm" onclick="openCorporateInvoiceModal(null, null, '${escapeHTML(tx.id || '')}', ${Number(tx.amount || 0)}, '${escapeHTML(tx.title || '')}', '${escapeHTML(tx.date || '')}')" style="font-size:11px; font-weight:800; padding:4px 8px; border-color:rgba(16,185,129,0.35); color:#10b981; border-radius:6px; display:inline-flex; align-items:center; gap:3px; background:rgba(16,185,129,0.04); cursor:pointer;" title="View FIRS Tax Invoice & Receipt">
-                🧾 Invoice
+                Invoice
               </button>
             </td>
           </tr>
@@ -3493,7 +3493,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
                   &#10003; ${escapeHTML(tx.status || 'Successful')}
                 </span>
                 <button onclick="openCorporateInvoiceModal(null, null, '${escapeHTML(tx.id || '')}', ${Number(tx.amount || 0)}, '${escapeHTML(tx.title || '')}', '${escapeHTML(tx.date || '')}')" class="btn btn-outline btn-sm" style="font-size:10px; padding:2px 6px; border-color:rgba(16,185,129,0.4); color:#10b981; border-radius:6px; background:rgba(16,185,129,0.06); cursor:pointer;" title="View FIRS Invoice">
-                  🧾 Invoice
+                  Invoice
                 </button>
               </div>
             </div>
@@ -3541,7 +3541,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     a.download = `collekt_statement_${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('📊 Statement report downloaded successfully!');
+    showToast('Statement report downloaded successfully!');
   };
 
   window.shareDvaDetails = function() {
@@ -3556,7 +3556,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     const acctEl = document.getElementById('virtualAccountNo') || document.getElementById('fundModalAccount');
     const acctNo = acctEl ? acctEl.textContent.trim() : '';
     const bankEl = document.querySelector('.sbank-val span') || document.getElementById('proDvaBank');
-    const bankName = bankEl ? bankEl.textContent.replace('🏛️', '').trim() : 'Wema Bank';
+    const bankName = bankEl ? bankEl.textContent.replace('', '').trim() : 'Wema Bank';
     const shareText = `Pay into my Collekt Virtual Account:\nBank: ${bankName}\nAccount No: ${acctNo}\nAccount Name: COLLEKT / ${displayName.toUpperCase()}`;
 
     if (navigator.share) {
@@ -3637,7 +3637,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     const statusBox = document.getElementById('activateDvaStatusBox');
 
     if (!idVal || idVal.length !== 11) {
-      showToast(`⚠️ Please enter a valid 11-digit ${idType.toUpperCase()} number.`, 'warning');
+      showToast(`Please enter a valid 11-digit ${idType.toUpperCase()} number.`, 'warning');
       if (idInput) idInput.focus();
       return;
     }
@@ -3706,7 +3706,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
         setUser(user);
 
         closeModal('activateVirtualAccountModal');
-        showToast('🎉 Dedicated NUBAN activated successfully! You can now receive bank transfers 24/7.', 'success', 6000);
+        showToast('Dedicated NUBAN activated successfully! You can now receive bank transfers 24/7.', 'success', 6000);
         renderVirtualBankDetails(user.wallet);
         loadAndRenderFundModalDva();
       } else {
@@ -3733,7 +3733,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
             setUser(user);
 
             closeModal('activateVirtualAccountModal');
-            showToast('🎉 Dedicated NUBAN activated successfully! You can now receive bank transfers 24/7.', 'success', 6000);
+            showToast('Dedicated NUBAN activated successfully! You can now receive bank transfers 24/7.', 'success', 6000);
             renderVirtualBankDetails(user.wallet);
             loadAndRenderFundModalDva();
             recovered = true;
@@ -3741,16 +3741,16 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
         }
         if (!recovered) {
           closeModal('activateVirtualAccountModal');
-          showToast('⚠️ ' + (resData?.message || resData?.error || 'Could not complete activation. Please try again.'), 'error');
+          showToast((resData?.message || resData?.error || 'Could not complete activation. Please try again.'), 'error');
         }
       }
     } catch (err) {
       console.error('submitActivateVirtualAccount error:', err);
-      showToast('❌ Could not process activation. Please try again.', 'error');
+      showToast('Could not process activation. Please try again.', 'error');
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = '⚡ Activate &amp; Generate NUBAN';
+        btn.innerHTML = 'Activate &amp; Generate NUBAN';
       }
     }
   };
@@ -3782,13 +3782,13 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
       if (hasPin) {
         badgeEl.innerHTML = `
           <span style="background:rgba(22,163,74,0.12); color:#16a34a; font-weight:800; font-size:11px; padding:3px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
-            ✓ Active PIN (••••)
+            Active PIN (••••)
           </span>
         `;
       } else {
         badgeEl.innerHTML = `
           <span style="background:rgba(234,88,12,0.12); color:#ea580c; font-weight:800; font-size:11px; padding:3px 10px; border-radius:99px; display:inline-flex; align-items:center; gap:4px;">
-            ⚠️ No PIN Created Yet
+            No PIN Created Yet
           </span>
         `;
       }
@@ -3860,7 +3860,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
         })
       }).then(r => r.json()).then(data => {
         if (data.success) {
-          showToast('📧 6-digit verification code sent to ' + user.email, 'info');
+          showToast('6-digit verification code sent to ' + user.email, 'info');
         }
       }).catch(err => console.warn('PIN OTP dispatch warning:', err));
     }
@@ -3872,7 +3872,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
   window.resendPinCreationOtp = async function() {
     const user = getUser() || {};
     if (!user.email) {
-      showToast('⚠️ No registered email found for this account.', 'error');
+      showToast('No registered email found for this account.', 'error');
       return;
     }
     const btn = document.getElementById('createPinResendBtn');
@@ -3890,7 +3890,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
       });
       const data = await res.json();
       if (data.success) {
-        showToast('📧 New verification code sent to ' + user.email, 'success');
+        showToast('New verification code sent to ' + user.email, 'success');
         let count = 30;
         const timer = setInterval(() => {
           count--;
@@ -3904,11 +3904,11 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
           }
         }, 1000);
       } else {
-        showToast('⚠️ ' + (data.error || 'Please wait before resending.'), 'warning');
+        showToast((data.error || 'Please wait before resending.'), 'warning');
         if (btn) { btn.disabled = false; btn.textContent = 'Resend Code'; }
       }
     } catch(e) {
-      showToast('⚠️ Could not send code. Please try again.', 'error');
+      showToast('Could not send code. Please try again.', 'error');
       if (btn) { btn.disabled = false; btn.textContent = 'Resend Code'; }
     }
   };
@@ -3917,7 +3917,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     const user = getUser() || {};
     const code = document.getElementById('createPinOtpCode')?.value.trim();
     if (!code || code.length !== 6 || !/^\d{6}$/.test(code)) {
-      showToast('⚠️ Please enter the 6-digit numeric verification code.', 'warning');
+      showToast('Please enter the 6-digit numeric verification code.', 'warning');
       return;
     }
 
@@ -3941,14 +3941,14 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
         const stepForm = document.getElementById('createPinStepForm');
         if (stepOtp) stepOtp.style.display = 'none';
         if (stepForm) stepForm.style.display = 'block';
-        showToast('✅ Email authorization verified! Choose your 4-digit PIN.', 'success');
+        showToast('Email authorization verified! Choose your 4-digit PIN.', 'success');
         const pin1 = document.getElementById('newCreatePin');
         setTimeout(() => { if (pin1) pin1.focus(); }, 100);
       } else {
-        showToast('❌ ' + (data.error || 'Invalid or expired verification code.'), 'error');
+        showToast((data.error || 'Invalid or expired verification code.'), 'error');
       }
     } catch (e) {
-      showToast('❌ Verification service error. Please try again.', 'error');
+      showToast('Verification service error. Please try again.', 'error');
     } finally {
       if (verifyBtn) { verifyBtn.disabled = false; verifyBtn.innerHTML = 'Verify &amp; Proceed &rarr;'; }
     }
@@ -3956,7 +3956,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
 
   window.executeCreatePin = function() {
     if (!window._pinCreateOtpVerified) {
-      showToast('⚠️ Email verification required before setting PIN.', 'warning');
+      showToast('Email verification required before setting PIN.', 'warning');
       const stepOtp = document.getElementById('createPinStepOtp');
       const stepForm = document.getElementById('createPinStepForm');
       if (stepOtp) stepOtp.style.display = 'block';
@@ -3968,11 +3968,11 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     const pin2 = document.getElementById('confirmCreatePin')?.value.trim();
 
     if (!pin1 || !/^\d{4}$/.test(pin1)) {
-      showToast('⚠️ PIN must be exactly 4 numeric digits (0-9).', 'warning');
+      showToast('PIN must be exactly 4 numeric digits (0-9).', 'warning');
       return;
     }
     if (pin1 !== pin2) {
-      showToast('⚠️ PINs do not match. Please re-enter both carefully.', 'warning');
+      showToast('PINs do not match. Please re-enter both carefully.', 'warning');
       return;
     }
 
@@ -3984,7 +3984,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     if (res && res.success) {
       window._pinCreateOtpVerified = false;
       closeModal('createPinModal');
-      showToast('🎉 Transaction PIN created and activated successfully!');
+      showToast('Transaction PIN created and activated successfully!');
       renderWalletPinSettings();
 
       if (typeof window._pinCreatedCallback === 'function') {
@@ -3993,7 +3993,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
         cb();
       }
     } else {
-      showToast('❌ ' + (res?.message || 'Could not save PIN.'), 'error');
+      showToast((res?.message || 'Could not save PIN.'), 'error');
     }
   };
 
@@ -4014,15 +4014,15 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     const pin2 = document.getElementById('changePinConfirm')?.value.trim();
 
     if (!cur) {
-      showToast('⚠️ Please enter your current 4-digit PIN.', 'warning');
+      showToast('Please enter your current 4-digit PIN.', 'warning');
       return;
     }
     if (!pin1 || !/^\d{4}$/.test(pin1)) {
-      showToast('⚠️ New PIN must be exactly 4 numeric digits (0-9).', 'warning');
+      showToast('New PIN must be exactly 4 numeric digits (0-9).', 'warning');
       return;
     }
     if (pin1 !== pin2) {
-      showToast('⚠️ New PINs do not match. Please re-enter.', 'warning');
+      showToast('New PINs do not match. Please re-enter.', 'warning');
       return;
     }
 
@@ -4033,10 +4033,10 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
 
     if (res && res.success) {
       closeModal('changePinModal');
-      showToast('✅ Transaction PIN updated successfully!');
+      showToast('Transaction PIN updated successfully!');
       renderWalletPinSettings();
     } else {
-      showToast('❌ ' + (res?.message || 'Could not update PIN.'), 'error');
+      showToast((res?.message || 'Could not update PIN.'), 'error');
     }
   };
 
@@ -4113,33 +4113,33 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     if (countdown) {
       countdown.style.display = 'block';
       let left = 300;
-      countdown.textContent = `⏱️ Verification code valid for 5:00`;
+      countdown.textContent = `Verification code valid for 5:00`;
       clearInterval(window._pinResetOtpInterval);
       window._pinResetOtpInterval = setInterval(() => {
         left -= 1;
         if (left <= 0) {
           clearInterval(window._pinResetOtpInterval);
           window._expectedPinOtp = null;
-          countdown.textContent = '⚠️ Security code expired. Please request a new code.';
+          countdown.textContent = 'Security code expired. Please request a new code.';
           if (btn) {
             btn.disabled = false;
             btn.style.opacity = '1';
             btn.textContent = 'Resend Security Code';
           }
         } else {
-          countdown.textContent = `⏱️ Verification code valid for ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+          countdown.textContent = `Verification code valid for ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
         }
       }, 1000);
     }
 
     if (typeof showInAppMessagePopup === 'function') {
       showInAppMessagePopup({
-        title: '🔐 Transaction PIN Reset Code',
+        title: 'Transaction PIN Reset Code',
         body: `Your one-time PIN reset security code is [${otpData.code}]. Valid for 5 minutes. Do not share.`,
         code: otpData.code
       });
     } else {
-      showToast(`🔑 Security verification code dispatched to ${user.email || 'your account'}! Check notifications.`);
+      showToast(`Security verification code dispatched to ${user.email || 'your account'}! Check notifications.`);
     }
   };
 
@@ -4150,7 +4150,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     const user = getUser() || {};
 
     if (!authVal) {
-      showToast('⚠️ Please enter your account password or security OTP code.', 'warning');
+      showToast('Please enter your account password or security OTP code.', 'warning');
       return;
     }
 
@@ -4160,13 +4160,13 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     if (window._expectedPinOtp) {
       if (Date.now() > (window._pinOtpExpiresAt || 0)) {
         window._expectedPinOtp = null;
-        showToast('⚠️ Verification code has expired. Please request a new OTP code.', 'error');
+        showToast('Verification code has expired. Please request a new OTP code.', 'error');
         return;
       }
       window._pinOtpAttempts = (window._pinOtpAttempts || 0) + 1;
       if (window._pinOtpAttempts > 5) {
         window._expectedPinOtp = null;
-        showToast('❌ Too many failed verification attempts. Please request a new code.', 'error');
+        showToast('Too many failed verification attempts. Please request a new code.', 'error');
         return;
       }
       if (authVal === window._expectedPinOtp) {
@@ -4194,16 +4194,16 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     }
 
     if (!authorized) {
-      showToast('❌ Authorization failed: Incorrect account password or security code.', 'error');
+      showToast('Authorization failed: Incorrect account password or security code.', 'error');
       return;
     }
 
     if (!pin1 || !/^\d{4}$/.test(pin1)) {
-      showToast('⚠️ New PIN must be exactly 4 numeric digits (0-9).', 'warning');
+      showToast('New PIN must be exactly 4 numeric digits (0-9).', 'warning');
       return;
     }
     if (pin1 !== pin2) {
-      showToast('⚠️ New PINs do not match. Please re-enter.', 'warning');
+      showToast('New PINs do not match. Please re-enter.', 'warning');
       return;
     }
 
@@ -4220,10 +4220,10 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     if (res && res.success) {
       closeModal('forgotPinModal');
       if (window._pinResetOtpInterval) clearInterval(window._pinResetOtpInterval);
-      showToast('🎉 Transaction PIN reset and activated successfully!');
+      showToast('Transaction PIN reset and activated successfully!');
       renderWalletPinSettings();
     } else {
-      showToast('❌ ' + (res?.message || 'Could not reset PIN.'), 'error');
+      showToast((res?.message || 'Could not reset PIN.'), 'error');
     }
   };
 
@@ -4233,7 +4233,7 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     if (!user.wallet) user.wallet = {};
     user.wallet.auto_payout_threshold = Number(thresh || 50000);
     if (typeof setUser === 'function') setUser(user);
-    showToast('💾 Security and payout settings saved successfully!');
+    showToast('Security and payout settings saved successfully!');
   };
 
   window.togglePinVisibility = function(inputId, btn) {
@@ -4241,10 +4241,10 @@ Statutory Reference: Section 13 VAT Act / WHT Regulations 2024
     if (!input) return;
     if (input.type === 'password') {
       input.type = 'text';
-      if (btn) btn.textContent = '🙈 Hide PIN';
+      if (btn) btn.textContent = 'Hide PIN';
     } else {
       input.type = 'password';
-      if (btn) btn.textContent = '👁️ Show PIN';
+      if (btn) btn.textContent = 'Show PIN';
     }
   };
 

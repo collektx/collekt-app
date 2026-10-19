@@ -13,13 +13,13 @@ const https = require('https');
 const DEFAULT_GEMINI_KEY = process.env.GEMINI_API_KEY || '';
 
 const KOLLY_SYSTEM_PROMPT = `
-You are Kolly 🦖, the official intelligent AI Copilot and Mascot for Collekt (collekt.ng).
+You are Kolly, the official intelligent AI Copilot and Mascot for Collekt (collekt.ng).
 Collekt is Nigeria's premier engineering, procurement, and talent marketplace connecting verified corporate employers in energy, oil & gas, EPC, and infrastructure with licensed professional specialists (engineers, project managers, HSE officers, subsea specialists, welders, geologists).
 
 Key Platform Facts to Know:
 - Currency: Nigerian Naira (NGN, ₦)
 - Escrow & Wallets: Powered by Paystack dedicated virtual accounts and NOVA Bank settlements. Escrow protects both client and contractor.
-- Verification: Shield Verified Badge 🛡️ awarded for CAC corporate registration, FIRS TIN, Director NIN, and COREN/NSE/NUPRC engineering licenses.
+- Verification: Shield Verified Badge awarded for CAC corporate registration, FIRS TIN, Director NIN, and COREN/NSE/NUPRC engineering licenses.
 - Local Content: Full adherence to the Nigerian Oil & Gas Industry Content Development (NOGICD) Act.
 
 Tone: Professional, technically knowledgeable, concise, encouraging, and tailored to Nigerian industrial operations. Use clear Markdown with bullet points where appropriate.
@@ -120,7 +120,7 @@ function localMatchTalent(job, candidates) {
     const finalScore = Math.min(98, Math.max(45, score));
     const reasons = [];
     if (matchedSkills.length > 0) reasons.push(`Matches skills: ${matchedSkills.slice(0, 3).join(', ')}`);
-    if (c.verified) reasons.push('Shield Verified with approved credentials 🛡️');
+    if (c.verified) reasons.push('Shield Verified with approved credentials');
     if (jobLoc && cLoc.includes(jobLoc)) reasons.push(`Proximity: Based in ${c.location}`);
     if (!reasons.length) reasons.push('Strong general engineering discipline overlap');
 
@@ -332,7 +332,7 @@ Requirements: Under 160 words, professional, covers milestone deliverables and s
           return res.status(200).json({
             success: true,
             source: 'kolly_engine',
-            response: `✨ **Kolly AI Assistant**:\n\nHello! I am **Kolly**, your Collekt Mascot & AI Copilot 🦖.\n\nRegarding: "*${prompt}*"\n\n• **Talent & Tenders**: Collekt enables licensed engineers and corporate enterprises to connect across Nigeria and Africa.\n• **Shield Verification**: Submit your CAC, TIN, and NIN under Profile to earn the verified badge 🛡️.\n• **Escrow & Funding**: Fund your wallet instantly via Paystack bank transfer or NOVA commercial settlements.\n\nNeed technical assistance or candidate matching? Ask me anything!`
+            response: `**Kolly AI Assistant**:\n\nHello! I am **Kolly**, your Collekt Mascot & AI Copilot.\n\nRegarding: "*${prompt}*"\n\n• **Talent & Tenders**: Collekt enables licensed engineers and corporate enterprises to connect across Nigeria and Africa.\n• **Shield Verification**: Submit your CAC, TIN, and NIN under Profile to earn the verified badge.\n• **Escrow & Funding**: Fund your wallet instantly via Paystack bank transfer or NOVA commercial settlements.\n\nNeed technical assistance or candidate matching? Ask me anything!`
           });
         }
       }

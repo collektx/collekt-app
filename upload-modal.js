@@ -494,7 +494,7 @@
       existingBanner = `
         <div style="background:rgba(19,117,111,0.08); border:1.5px dashed rgba(19,117,111,0.4); border-radius:12px; padding:12px 16px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
           <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
-            <span style="font-size:22px; flex-shrink:0;">📄</span>
+            <span style="display:inline-flex; align-items:center; flex-shrink:0;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
             <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
               <div style="font-size:13px; font-weight:800; color:var(--ink, #111918); overflow:hidden; text-overflow:ellipsis;">${_escHtml(latest.name || 'Uploaded_Document.pdf')}</div>
               <div style="font-size:11px; color:#16a34a; font-weight:800;">Current file on profile</div>
@@ -530,7 +530,7 @@
 
       <div class="cv-preview" id="cvPreview">
         <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
-          <div class="cv-icon-large" id="cvIconLarge">📄</div>
+          <div class="cv-icon-large" id="cvIconLarge" style="display:flex; justify-content:center; align-items:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
           <div style="min-width:0; flex:1;">
             <div class="cv-filename" id="cvFilename">Selected file</div>
             <div class="cv-filesize" id="cvFilesize">Ready to upload</div>
@@ -999,7 +999,7 @@
         if (isImage && _selectedDataURL) {
           iconEl.innerHTML = `<img src="${_selectedDataURL}" alt="Preview" style="width:76px; height:76px; object-fit:cover; border-radius:12px; border:2px solid #16a34a; box-shadow:0 4px 14px rgba(0,0,0,0.12);">`;
         } else {
-          iconEl.innerHTML = `<div style="width:56px; height:56px; border-radius:14px; background:rgba(22,163,74,0.15); color:#16a34a; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:900;">✓</div>`;
+          iconEl.innerHTML = `<div style="width:56px; height:56px; border-radius:14px; background:rgba(22,163,74,0.15); color:#16a34a; display:flex; align-items:center; justify-content:center;"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>`;
         }
       }
       if (mainText) {
@@ -1030,7 +1030,7 @@
     const icon = document.getElementById('cvIconLarge');
     if (preview && fname && fsize) {
       if (icon) {
-        icon.innerHTML = isImage ? '🖼️' : (ext === 'pdf' ? '📄' : '📝');
+        icon.innerHTML = isImage ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
       }
       fname.textContent = file.name || 'Document';
       fsize.textContent = `${sizeText} • Loaded & Ready`;
