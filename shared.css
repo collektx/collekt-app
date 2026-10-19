@@ -2457,12 +2457,19 @@ html, body, button, a, input, select, textarea,
 
   /* 3. Floating Bottom Nav Clearance & iOS Safe Area Ergonomics */
   .app-main {
-    padding-bottom: calc(96px + env(safe-area-inset-bottom, 16px)) !important;
+    padding-bottom: calc(108px + env(safe-area-inset-bottom, 16px)) !important;
   }
   .page-inner,
-  .page-inner-msg,
+  .prop-container,
   .mkt-container {
-    padding-bottom: calc(96px + env(safe-area-inset-bottom, 16px)) !important;
+    padding-bottom: calc(108px + env(safe-area-inset-bottom, 16px)) !important;
+  }
+  body:not(.in-active-chat) .page-inner-msg {
+    padding-bottom: calc(78px + env(safe-area-inset-bottom, 12px)) !important;
+  }
+  body.in-active-chat .app-main,
+  body.in-active-chat .page-inner-msg {
+    padding-bottom: 0 !important;
   }
 
   /* 4. Safari Auto-Zoom Prevention */
@@ -2485,17 +2492,212 @@ html, body, button, a, input, select, textarea,
   }
 }
 
-/* 5. Mobile Modals Grid Auto-Collapse on screens <= 640px */
+/* ═══════════════════════════════════════════════════════════════════
+   UNIVERSAL MOBILE APP FIT-TO-SCREEN & ZERO-OVERLAP ENGINE
+   Ensures native app shell containment, zero horizontal overflow,
+   and zero floating-widget collisions across all mobile viewports
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  html,
+  body {
+    width: 100% !important;
+    max-width: 100dvw !important;
+    overflow-x: clip !important;
+    overscroll-behavior-x: none !important;
+    -webkit-text-size-adjust: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .app-page,
+  .app-main,
+  .page-inner,
+  .prop-container,
+  .mkt-container {
+    width: 100% !important;
+    max-width: 100dvw !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow-x: clip !important;
+    box-sizing: border-box !important;
+  }
+
+  .app-topbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 95 !important;
+    width: 100% !important;
+    max-width: 100dvw !important;
+    height: 56px !important;
+    padding: 0 12px !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Hide bottom nav & floating AI button when any modal, drawer, or active chat is open */
+  body.in-active-chat .liquid-glass-nav,
+  body.in-active-chat .kolly-fab-btn,
+  body:has(.modal-overlay.open) .liquid-glass-nav,
+  body:has(.modal-overlay.open) .kolly-fab-btn,
+  body:has(.modal-overlay[style*="display: flex"]) .liquid-glass-nav,
+  body:has(.modal-overlay[style*="display: flex"]) .kolly-fab-btn,
+  body:has(.modal-overlay[style*="display:flex"]) .liquid-glass-nav,
+  body:has(.modal-overlay[style*="display:flex"]) .kolly-fab-btn,
+  body:has(.upload-backdrop.open) .liquid-glass-nav,
+  body:has(.upload-backdrop.open) .kolly-fab-btn,
+  body:has(.settings-backdrop.open) .liquid-glass-nav,
+  body:has(.settings-backdrop.open) .kolly-fab-btn,
+  body:has(.sidebar-backdrop.open) .liquid-glass-nav,
+  body:has(.sidebar-backdrop.open) .kolly-fab-btn {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    transform: translateY(20px) scale(0.9) !important;
+  }
+
+  /* Keep toast notifications above bottom navigation without overflowing screen */
+  .toast,
+  #toast {
+    bottom: calc(84px + env(safe-area-inset-bottom, 12px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    width: max-content !important;
+    white-space: normal !important;
+    text-align: center !important;
+    line-height: 1.4 !important;
+    padding: 10px 16px !important;
+    font-size: 12.5px !important;
+    z-index: 10005 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* Mobile Modals, Grids, Dropdowns & Card Anti-Overlap Rules (<= 640px) */
 @media (max-width: 640px) {
+  .page-inner,
+  .prop-container,
+  .mkt-container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    padding-top: 14px !important;
+  }
+
+  /* Topbar Dropdowns: Fixed inside mobile viewport so they never clip or overlap off-screen */
+  .notif-panel {
+    position: fixed !important;
+    top: 62px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 140px) !important;
+    z-index: 9995 !important;
+    box-sizing: border-box !important;
+  }
+
+  .profile-menu {
+    position: fixed !important;
+    top: 62px !important;
+    right: 10px !important;
+    left: auto !important;
+    width: min(260px, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+    z-index: 9995 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Collapse all inline and class-based multi-column grids to single column to prevent squeezing/overlap */
   .modal-card div[style*="grid-template-columns"],
   .upload-modal-card div[style*="grid-template-columns"],
   .settings-panel div[style*="grid-template-columns"],
   .modal-card .form-row,
   div[style*="grid-template-columns: 1fr 1fr"],
   div[style*="grid-template-columns:1fr 1fr"],
-  div[style*="grid-template-columns: repeat(2, 1fr)"],
-  div[style*="grid-template-columns:repeat(2, 1fr)"] {
+  div[style*="grid-template-columns: repeat(2"],
+  div[style*="grid-template-columns:repeat(2"],
+  div[style*="grid-template-columns: repeat(3"],
+  div[style*="grid-template-columns:repeat(3"],
+  div[style*="grid-template-columns: repeat(4"],
+  div[style*="grid-template-columns:repeat(4"],
+  div[style*="minmax(300px"],
+  div[style*="minmax(280px"],
+  div[style*="minmax(260px"],
+  div[style*="minmax(250px"],
+  div[style*="minmax(240px"],
+  div[style*="1.8fr"],
+  div[style*="1.2fr"],
+  div[style*="1.15fr"] {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
+  }
+
+  /* Ensure all cards, banners, and flex rows wrap cleanly without horizontal bleed */
+  .card,
+  .stat-card,
+  .job-manage-card,
+  .prop-card,
+  .form-section-card,
+  .preview-card,
+  .welcome-banner,
+  .jobs-hero-banner,
+  .post-header-banner,
+  .prop-header-banner {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+  }
+
+  .jobs-hero-banner,
+  .post-header-banner,
+  .prop-header-banner {
+    padding: 18px 16px !important;
+    border-radius: 16px !important;
+    gap: 12px !important;
+  }
+
+  .jobs-hero-banner h1,
+  .post-header-banner h1,
+  .prop-header-banner h1 {
+    font-size: 20px !important;
+    line-height: 1.25 !important;
+  }
+
+  .job-manage-card,
+  .prop-card,
+  .form-section-card,
+  .preview-card {
+    padding: 16px 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .prop-filter-bar > div[style*="min-width:240px"],
+  .prop-filter-bar > div[style*="min-width: 240px"] {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Public landing / auth top navbar fit-to-screen */
+  .nav-wrap {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    top: 8px !important;
+  }
+  .nav-bar {
+    padding: 8px 12px !important;
+    gap: 8px !important;
+  }
+  .nav-logo-img {
+    height: 32px !important;
+  }
+  .nav-actions {
+    gap: 6px !important;
+  }
+  .nav-actions .btn-amber,
+  .nav-actions .btn-primary {
+    padding: 0 10px !important;
+    min-height: 34px !important;
+    font-size: 11.5px !important;
+    white-space: nowrap !important;
   }
 }

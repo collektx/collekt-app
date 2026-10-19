@@ -957,17 +957,22 @@ function initCollektAICopilot() {
       .kolly-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
       @media (max-width: 900px) {
         .kolly-fab-btn {
-          bottom: 84px;
-          right: 16px;
-          width: 48px;
-          height: 48px;
-          font-size: 19px;
+          bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+          right: 12px;
+          width: 44px;
+          height: 44px;
+          font-size: 17px;
+          z-index: 9985;
         }
         .kolly-drawer-panel {
-          bottom: 140px;
-          right: 14px;
-          width: calc(100vw - 28px);
-          height: min(510px, calc(100dvh - 160px));
+          bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+          left: 10px !important;
+          right: 10px !important;
+          top: auto !important;
+          width: calc(100vw - 20px) !important;
+          max-width: calc(100vw - 20px) !important;
+          height: min(480px, calc(100dvh - 148px)) !important;
+          box-sizing: border-box !important;
         }
       }
     `;
@@ -1021,6 +1026,7 @@ function initCollektAICopilot() {
     let fabInitLeft = 0, fabInitTop = 0;
 
     function syncPanelNearFab(left, top) {
+      if (window.innerWidth <= 900) return;
       if (panel.getAttribute('data-custom-drag') === 'true') return;
       const pW = panel.offsetWidth || Math.min(410, window.innerWidth - 28);
       const pH = panel.offsetHeight || Math.min(580, window.innerHeight - 110);
@@ -1037,11 +1043,22 @@ function initCollektAICopilot() {
       panel.style.setProperty('right', 'auto', 'important');
     }
 
+    function resetMobileFabPos() {
+      fabBtn.style.removeProperty('left');
+      fabBtn.style.removeProperty('top');
+      fabBtn.style.removeProperty('bottom');
+      fabBtn.style.removeProperty('right');
+    }
+
     function applyFabPos(left, top) {
-      const maxL = Math.max(8, window.innerWidth - 58);
-      const maxT = Math.max(8, window.innerHeight - 58);
-      const sL = Math.max(8, Math.min(left, maxL));
-      const sT = Math.max(8, Math.min(top, maxT));
+      const isMob = window.innerWidth <= 900;
+      const btnSize = isMob ? 44 : 52;
+      const minL = 8;
+      const maxL = Math.max(8, window.innerWidth - btnSize - 8);
+      const minT = isMob ? 64 : 8;
+      const maxT = Math.max(minT, window.innerHeight - (isMob ? 132 : 58));
+      const sL = Math.max(minL, Math.min(left, maxL));
+      const sT = Math.max(minT, Math.min(top, maxT));
       fabBtn.style.setProperty('left', sL + 'px', 'important');
       fabBtn.style.setProperty('top', sT + 'px', 'important');
       fabBtn.style.setProperty('bottom', 'auto', 'important');
@@ -1051,10 +1068,19 @@ function initCollektAICopilot() {
 
     try {
       const savedFab = JSON.parse(localStorage.getItem('kolly_fab_pos_v3') || 'null');
+      const isMob = window.innerWidth <= 900;
       if (savedFab && typeof savedFab.left === 'number' && typeof savedFab.top === 'number') {
-        applyFabPos(savedFab.left, savedFab.top);
+        if (!isMob || (savedFab.isMobile === true && savedFab.top >= 64 && savedFab.top <= window.innerHeight - 132)) {
+          applyFabPos(savedFab.left, savedFab.top);
+        }
       }
     } catch (e) {}
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 900) {
+        resetMobileFabPos();
+      }
+    });
 
     function onFabDown(e) {
       if (e.button && e.button !== 0) return;
@@ -1097,7 +1123,11 @@ function initCollektAICopilot() {
 
       const rect = fabBtn.getBoundingClientRect();
       try {
-        localStorage.setItem('kolly_fab_pos_v3', JSON.stringify({ left: rect.left, top: rect.top }));
+        localStorage.setItem('kolly_fab_pos_v3', JSON.stringify({
+          left: rect.left,
+          top: rect.top,
+          isMobile: window.innerWidth <= 900
+        }));
       } catch (e) {}
     }
 

@@ -5589,14 +5589,16 @@ function positionLiquidGlassLens(targetItem, animate = true) {
 
   if (isDocked) {
     // Vertical track in sidebar dock
+    lens.style.width = '';
     const y = targetItem.offsetTop;
     lens.style.transform = `translate3d(0, ${y}px, 0)`;
   } else {
     // Horizontal track in floating bottom pill bar
     const itemOffsetLeft = targetItem.offsetLeft;
-    const itemWidth = targetItem.offsetWidth;
-    const lensWidth = lens.offsetWidth || 72;
-    const x = itemOffsetLeft + (itemWidth - lensWidth) / 2;
+    const itemWidth = targetItem.offsetWidth || 64;
+    const dynamicLensWidth = Math.min(62, Math.max(48, itemWidth - 6));
+    lens.style.width = dynamicLensWidth + 'px';
+    const x = itemOffsetLeft + (itemWidth - dynamicLensWidth) / 2;
     lens.style.transform = `translate3d(${x}px, 0, 0)`;
   }
 

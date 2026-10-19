@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=178.0">
-<link rel="stylesheet" href="shared.css?v=178.0">
-<link rel="stylesheet" href="glass.css?v=178.0">
+<link rel="stylesheet" href="style.css?v=179.0">
+<link rel="stylesheet" href="shared.css?v=179.0">
+<link rel="stylesheet" href="glass.css?v=179.0">
 
 <style>
   body { background: var(--paper); }
@@ -101,6 +101,23 @@
   .filter-chip.active { background: var(--teal); color: #fff; border-color: var(--teal); }
   
   @media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } .profile-stats-bar { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) {
+    .profile-grid { grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+    .profile-stats-bar { grid-template-columns: repeat(2, 1fr); padding: 12px 14px; gap: 12px; }
+    .co-profile-cover { height: 132px; }
+    .co-profile-cover > button { top: 10px !important; right: 10px !important; padding: 6px 12px !important; font-size: 11px !important; }
+    .co-logo-wrap { left: 16px; bottom: -30px; width: 80px; height: 80px; }
+    .co-logo { border-radius: 18px; font-size: 32px; }
+    .profile-info-bar { padding: 38px 16px 18px; flex-direction: column; align-items: stretch; gap: 14px; }
+    .profile-info-bar > div:last-child { width: 100%; display: flex; flex-wrap: wrap; gap: 8px !important; }
+    .profile-info-bar > div:last-child .btn { flex: 1 1 calc(50% - 4px); justify-content: center; text-align: center; }
+    .profile-name { font-size: 20px; }
+    .profile-tabs-bar { padding: 0 10px; gap: 2px; }
+    .profile-tab { padding: 12px 12px; font-size: 12.5px; }
+    .content-section { padding: 16px 14px; margin-bottom: 14px; }
+    .detail-grid { grid-template-columns: 1fr; gap: 10px; }
+    .doc-item { flex-wrap: wrap; padding: 12px; gap: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -788,11 +805,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=178.0"></script>
-<script src="app.js?v=178.0"></script>
-<script src="collekt-ai.js?v=178.0"></script>
-<script src="settings-popup.js?v=178.0"></script>
-<script src="upload-modal.js?v=178.0"></script>
+<script src="supabase.js?v=179.0"></script>
+<script src="app.js?v=179.0"></script>
+<script src="collekt-ai.js?v=179.0"></script>
+<script src="settings-popup.js?v=179.0"></script>
+<script src="upload-modal.js?v=179.0"></script>
 <script>
   requireCompany();
 

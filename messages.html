@@ -37,14 +37,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=178.0">
-<link rel="stylesheet" href="shared.css?v=178.0">
-<link rel="stylesheet" href="glass.css?v=178.0">
+<link rel="stylesheet" href="style.css?v=179.0">
+<link rel="stylesheet" href="shared.css?v=179.0">
+<link rel="stylesheet" href="glass.css?v=179.0">
 
 <style>
   html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
-  .app-page { height: 100vh; max-height: 100vh; display: flex; overflow: hidden; }
-  .app-main { flex: 1; display: flex; flex-direction: column; height: 100vh; max-height: 100vh; overflow: hidden; }
+  .app-page { height: 100vh; height: 100dvh; max-height: 100vh; max-height: 100dvh; display: flex; overflow: hidden; }
+  .app-main { flex: 1; display: flex; flex-direction: column; height: 100vh; height: 100dvh; max-height: 100vh; max-height: 100dvh; overflow: hidden; }
   .page-inner-msg { flex: 1; padding: 18px 24px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
   .msg-layout { display: flex; flex: 1; min-height: 0; height: 100%; overflow: hidden; background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
   html.dark .msg-layout { background: #0f2220; border-color: rgba(255,255,255,.08); }
@@ -508,18 +508,30 @@
   .mobile-back-btn { display: none !important; }
 
   @media (max-width: 768px) {
-    .msg-sidebar { width: 100%; }
+    .page-inner-msg {
+      padding: 0 0 calc(72px + env(safe-area-inset-bottom, 8px)) 0 !important;
+    }
+    body.in-active-chat .page-inner-msg {
+      padding: 0 !important;
+    }
+    .msg-layout {
+      border-radius: 0 !important;
+      border-left: none !important;
+      border-right: none !important;
+    }
+    .msg-sidebar { width: 100%; border-right: none; }
     .chat-pane { display: none; }
     .msg-sidebar.mobile-hide { display: none; }
-    .chat-pane.mobile-show { display: flex; width: 100%; flex-direction: column; }
+    .chat-pane.mobile-show { display: flex; width: 100%; flex-direction: column; height: 100%; }
     .mobile-back-btn {
-      display: flex; align-items: center; gap: 6px;
-      background: none; border: none; padding: 8px 0 12px;
+      display: flex !important; align-items: center; gap: 6px;
+      background: none; border: none; padding: 6px 0 10px;
       font-size: 13px; font-weight: 800; color: var(--teal);
       cursor: pointer; font-family: inherit; width: 100%;
     }
     .mobile-back-btn:hover { color: var(--forest); }
-    .chat-header { flex-wrap: wrap; }
+    .chat-header { padding: 10px 14px; gap: 8px; flex-wrap: nowrap; }
+    .chat-input-bar { padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 4px)) 10px; gap: 6px; }
     .bubble-wrap { max-width: 85% !important; }
     .bubble { font-size: 13.5px !important; line-height: 18.5px !important; padding: 5px 8px 4px 8px !important; }
   }
@@ -730,10 +742,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=178.0"></script>
-<script src="app.js?v=178.0"></script>
-<script src="collekt-ai.js?v=178.0"></script>
-<script src="settings-popup.js?v=178.0"></script>
+<script src="supabase.js?v=179.0"></script>
+<script src="app.js?v=179.0"></script>
+<script src="collekt-ai.js?v=179.0"></script>
+<script src="settings-popup.js?v=179.0"></script>
 <script>
   requireAuth();
 

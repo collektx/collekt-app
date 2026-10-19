@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=178.0">
-<link rel="stylesheet" href="shared.css?v=178.0">
-<link rel="stylesheet" href="glass.css?v=178.0">
+<link rel="stylesheet" href="style.css?v=179.0">
+<link rel="stylesheet" href="shared.css?v=179.0">
+<link rel="stylesheet" href="glass.css?v=179.0">
 
 <style>
   body { background: var(--paper); }
@@ -109,14 +109,19 @@
 
   @media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } .profile-stats-bar { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 600px) {
-    .profile-grid { grid-template-columns: 1fr; }
-    .profile-stats-bar { grid-template-columns: repeat(2, 1fr); padding: 12px 16px; }
-    .profile-cover-wrap { height: 140px; }
-    .profile-avatar-wrapper { left: 16px; bottom: -28px; width: 84px; height: 84px; }
-    .profile-info-bar { padding: 40px 16px 20px; }
-    .profile-tabs-bar { padding: 0 12px; }
-    .profile-tab { padding: 12px 14px; font-size: 13px; }
-    .content-section { padding: 18px 14px; }
+    .profile-grid { grid-template-columns: 1fr; gap: 16px; }
+    .profile-stats-bar { grid-template-columns: repeat(2, 1fr); padding: 12px 14px; gap: 12px; }
+    .ps-stat .val { font-size: 18px; }
+    .profile-cover-wrap { height: 132px; }
+    .profile-cover-wrap > button { top: 10px !important; right: 10px !important; padding: 6px 12px !important; font-size: 11px !important; }
+    .profile-avatar-wrapper { left: 16px; bottom: -30px; width: 80px; height: 80px; }
+    .profile-info-bar { padding: 38px 16px 18px; flex-direction: column; align-items: stretch; gap: 14px; }
+    .profile-info-bar > div:last-child { width: 100%; display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px !important; }
+    .profile-info-bar > div:last-child .btn { width: 100%; justify-content: center; text-align: center; }
+    .profile-name { font-size: 20px; }
+    .profile-tabs-bar { padding: 0 10px; gap: 2px; }
+    .profile-tab { padding: 12px 12px; font-size: 12.5px; }
+    .content-section { padding: 16px 14px; margin-bottom: 14px; }
     .cert-card-row { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; }
     .cert-card-actions { width: 100% !important; justify-content: flex-end !important; padding-top: 8px !important; border-top: 1px dashed var(--line) !important; }
   }
@@ -1092,9 +1097,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=178.0"></script>
-<script src="app.js?v=178.0"></script>
-<script src="collekt-ai.js?v=178.0"></script>
+<script src="supabase.js?v=179.0"></script>
+<script src="app.js?v=179.0"></script>
+<script src="collekt-ai.js?v=179.0"></script>
 <script>
   requireAuth();
 
@@ -3470,8 +3475,8 @@
     </div>
   </div>
 </div>
-<script src="settings-popup.js?v=178.0"></script>
-<script src="upload-modal.js?v=178.0"></script>
+<script src="settings-popup.js?v=179.0"></script>
+<script src="upload-modal.js?v=179.0"></script>
 </body>
 </html>
 

@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=178.0">
-<link rel="stylesheet" href="shared.css?v=178.0">
-<link rel="stylesheet" href="glass.css?v=178.0">
+<link rel="stylesheet" href="style.css?v=179.0">
+<link rel="stylesheet" href="shared.css?v=179.0">
+<link rel="stylesheet" href="glass.css?v=179.0">
 
 <style>
   body {
@@ -443,6 +443,74 @@
   html.dark .comparison-table td.paid-col {
     background: rgba(20, 184, 166, 0.06);
   }
+
+  @media (max-width: 640px) {
+    .upgrade-container {
+      padding: 4px 0 40px;
+    }
+    .upgrade-hero {
+      margin-bottom: 22px;
+    }
+    .upgrade-title {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    .upgrade-sub {
+      font-size: 13.5px;
+    }
+    .billing-toggle-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100%;
+      border-radius: 16px;
+      padding: 6px;
+      gap: 6px;
+      margin-top: 16px;
+      box-sizing: border-box;
+    }
+    .billing-toggle-btn {
+      padding: 10px 8px;
+      font-size: 12px;
+      border-radius: 11px;
+      justify-content: center;
+      width: 100%;
+    }
+    .plan-card,
+    .payment-card,
+    .comparison-section-card {
+      padding: 18px 14px;
+      border-radius: 18px;
+    }
+    .plan-header-banner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 18px 16px;
+      margin-bottom: 20px;
+    }
+    .plan-header-banner > div:last-child {
+      text-align: left !important;
+      width: 100%;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.16);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .plan-price-large {
+      font-size: 28px;
+    }
+    .comparison-table {
+      min-width: 480px;
+    }
+    .comparison-table th,
+    .comparison-table td {
+      padding: 10px 10px;
+      font-size: 12px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -730,9 +798,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=178.0"></script>
-<script src="app.js?v=178.0"></script>
-<script src="settings-popup.js?v=178.0"></script>
+<script src="supabase.js?v=179.0"></script>
+<script src="app.js?v=179.0"></script>
+<script src="settings-popup.js?v=179.0"></script>
 
 <script>
   let activeRole = 'professional';

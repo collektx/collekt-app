@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -26,9 +26,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=178.0">
-<link rel="stylesheet" href="shared.css?v=178.0">
-<link rel="stylesheet" href="glass.css?v=178.0">
+<link rel="stylesheet" href="style.css?v=179.0">
+<link rel="stylesheet" href="shared.css?v=179.0">
+<link rel="stylesheet" href="glass.css?v=179.0">
 <style>
 /* ═ PAGE ═ */
 body { background: var(--paper); }
@@ -391,9 +391,14 @@ body { background: var(--paper); }
   .pub-nav-links { display: none; }
   .portfolio-grid { grid-template-columns: 1fr; }
   .pub-footer-top { grid-template-columns: 1fr; }
-  .profile-cta-btns { padding-left: 0; }
+  .profile-avatar-wrap { flex-direction: column; align-items: flex-start; gap: 10px; padding: 0 16px 18px !important; }
+  .profile-id-block { padding-left: 0; width: 100%; margin-top: 2px; }
+  .profile-cta-btns { padding-left: 0; width: 100%; display: flex; flex-wrap: wrap; gap: 8px; }
+  .profile-cta-btns > * { flex: 1 1 calc(50% - 4px); justify-content: center; text-align: center; }
   .profile-name { font-size: 19px; }
   .profile-title-text { font-size: 13px; }
+  .content-card, .hire-card { padding: 16px 14px; }
+  .cert-row-item { flex-wrap: wrap; padding: 12px; gap: 10px; }
 }
 
 /* ═ REVEAL ANIMATION ═ */
@@ -666,9 +671,9 @@ body { background: var(--paper); }
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=178.0"></script>
-<script src="app.js?v=178.0"></script>
-<script src="settings-popup.js?v=178.0"></script>
+<script src="supabase.js?v=179.0"></script>
+<script src="app.js?v=179.0"></script>
+<script src="settings-popup.js?v=179.0"></script>
 <script>
   /* ═ TAB SWITCHER ═ */
   function switchPubTab(tab, el) {
