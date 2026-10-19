@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -12,23 +12,25 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=184.0">
-<link rel="stylesheet" href="shared.css?v=184.0">
-<link rel="stylesheet" href="glass.css?v=184.0">
+<link rel="stylesheet" href="style.css?v=185.0">
+<link rel="stylesheet" href="shared.css?v=185.0">
+<link rel="stylesheet" href="glass.css?v=185.0">
 
 <style>
   :root {
-    --law-paper: #051412;
-    --law-card: rgba(14, 59, 53, 0.28);
-    --law-line: rgba(255, 255, 255, 0.09);
-    --law-ink: #e2efed;
-    --law-muted: #94a3b8;
-    --law-accent: #14b8a6;
-    --law-gold: #f59e0b;
+    --law-desk: #f1f5f9;
+    --law-paper: #ffffff;
+    --law-line: #e2e8f0;
+    --law-line-strong: #cbd5e1;
+    --law-ink-primary: #0f172a;
+    --law-ink-body: #334155;
+    --law-ink-muted: #64748b;
+    --law-accent: #0f766e;
+    --law-accent-hover: #0d9488;
   }
-  body {
-    background: var(--paper, var(--law-paper));
-    color: var(--ink, var(--law-ink));
+  html, html.dark, body, html.dark body {
+    background: #f1f5f9 !important;
+    color: #334155 !important;
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.8;
     margin: 0;
@@ -36,16 +38,16 @@
     -webkit-font-smoothing: antialiased;
   }
   .policy-header {
-    background: linear-gradient(160deg, #030c0b 0%, #0a201d 50%, #061513 100%);
-    border-bottom: 1px solid var(--law-line);
-    padding: 20px 24px;
+    background: #081a17;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 16px 24px;
     position: sticky;
     top: 0;
     z-index: 100;
     backdrop-filter: blur(12px);
   }
   .header-nav {
-    max-width: 1040px;
+    max-width: 960px;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -66,20 +68,21 @@
     object-fit: contain;
   }
   .policy-container {
-    max-width: 1040px;
+    max-width: 960px;
     margin: 0 auto;
     padding: 40px 24px 100px;
   }
-  .policy-card {
-    background: var(--law-card);
-    border: 1px solid var(--law-line);
-    border-radius: 24px;
-    padding: 48px 44px;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  .policy-card, html.dark .policy-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 56px 64px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 20px 25px -5px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03);
+    color: #334155 !important;
   }
-  @media (max-width: 680px) {
-    .policy-card { padding: 28px 18px; border-radius: 16px; }
+  @media (max-width: 768px) {
+    .policy-container { padding: 20px 14px 60px; }
+    .policy-card, html.dark .policy-card { padding: 32px 20px; border-radius: 10px; }
   }
   .badge-tag {
     display: inline-flex;
@@ -87,88 +90,99 @@
     gap: 6px;
     padding: 6px 14px;
     border-radius: 99px;
-    background: rgba(20, 184, 166, 0.2);
-    border: 1px solid rgba(20, 184, 166, 0.45);
-    color: #2dd4bf;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
     font-size: 11.5px;
     font-weight: 800;
     letter-spacing: .06em;
     text-transform: uppercase;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
-  h1 {
-    font-size: 34px;
-    font-weight: 900;
-    color: #fff;
+  h1, html.dark .policy-card h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a !important;
     margin: 0 0 10px 0;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     line-height: 1.25;
   }
   .last-updated {
-    font-size: 13px;
-    color: var(--law-muted);
-    margin-bottom: 32px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--law-line);
+    font-size: 13.5px;
+    color: #64748b;
+    margin-bottom: 28px;
+    padding-bottom: 18px;
+    border-bottom: 1.5px solid #e2e8f0;
+  }
+  .last-updated strong {
+    color: #1e293b;
+    font-weight: 700;
   }
   .statutory-notice-box {
-    background: rgba(19, 117, 111, 0.15);
-    border-left: 4px solid var(--law-accent);
-    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-left: 4px solid #0f766e;
+    border-radius: 8px;
     padding: 18px 22px;
-    margin: 24px 0 36px 0;
-    font-size: 13.5px;
-    color: #ccfbf1;
-    line-height: 1.65;
+    margin: 24px 0 32px 0;
+    font-size: 14px;
+    color: #1e293b;
+    line-height: 1.7;
   }
   .toc-box {
-    background: rgba(0,0,0,0.25);
-    border: 1px solid var(--law-line);
-    border-radius: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
     padding: 24px 28px;
-    margin-bottom: 40px;
+    margin-bottom: 36px;
   }
   .toc-title {
-    font-size: 14px;
+    font-size: 12.5px;
     font-weight: 800;
-    color: #fff;
+    color: #0f172a;
     text-transform: uppercase;
     letter-spacing: .08em;
     margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
   }
   .toc-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 8px 20px;
   }
   .toc-link {
-    font-size: 13px;
-    color: #93c5fd;
+    font-size: 13.5px;
+    color: #0f766e;
     text-decoration: none;
+    font-weight: 600;
+    padding: 3px 0;
+    transition: color .15s ease;
   }
   .toc-link:hover {
-    color: #67e8f9;
+    color: #0d9488;
     text-decoration: underline;
   }
-  h2 {
-    font-size: 21px;
-    font-weight: 900;
-    color: #fff;
-    margin-top: 44px;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--law-line);
-  }
-  h3 {
-    font-size: 16px;
+  h2, html.dark .policy-card h2 {
+    font-size: 20px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: #0f172a !important;
+    margin-top: 48px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid #e2e8f0;
+    letter-spacing: -0.015em;
+  }
+  h3, html.dark .policy-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a !important;
     margin-top: 24px;
     margin-bottom: 10px;
   }
-  p, li {
-    font-size: 14.5px;
-    color: #cbd5e1;
+  p, li, html.dark .policy-card p, html.dark .policy-card li {
+    font-size: 15px;
+    color: #334155 !important;
     line-height: 1.8;
   }
   ul, ol {
@@ -178,25 +192,101 @@
   li {
     margin-bottom: 10px;
   }
-  strong {
-    color: #fff;
+  strong, html.dark .policy-card strong {
+    color: #0f172a !important;
+    font-weight: 700;
   }
+  a {
+    color: #0f766e;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 600;
+    transition: color .15s ease;
+  }
+  a:hover {
+    color: #0d9488;
+  }
+  .info-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: #1e293b;
+    line-height: 1.7;
+  }
+  .doc-btn-emerald {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    color: #166534 !important;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+  .doc-btn-emerald:hover { background: #dcfce7; color: #14532d !important; text-decoration: none; }
+  .doc-btn-blue {
+    background: #eff6ff;
+    border: 1px solid #93c5fd;
+    color: #1e40af !important;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+  .doc-btn-blue:hover { background: #dbeafe; color: #1e3a8a !important; text-decoration: none; }
+  .doc-btn-red {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b !important;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+  .doc-btn-red:hover { background: #fee2e2; color: #7f1d1d !important; text-decoration: none; }
+  .doc-btn-neutral {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+    transition: all 0.2s;
+  }
+  .doc-btn-neutral:hover { background: #f1f5f9; border-color: #94a3b8; }
   .footer-meta {
     margin-top: 56px;
     padding-top: 28px;
-    border-top: 1px solid var(--law-line);
+    border-top: 1.5px solid #e2e8f0;
     font-size: 13px;
-    color: var(--law-muted);
+    color: #64748b;
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     align-items: center;
   }
   .footer-meta a {
-    color: var(--law-accent);
+    color: #0f766e;
     text-decoration: none;
-    font-weight: 700;
+    font-weight: 600;
+  }
+  .footer-meta a:hover {
+    text-decoration: underline;
   }
 </style>
 </head>
@@ -217,7 +307,7 @@
 
 <main class="policy-container">
   <div class="policy-card">
-    <div class="badge-tag">&#128737;&#65039; Nigeria Data Protection Act (NDPA) 2023 Compliant</div>
+    <div class="badge-tag">Nigeria Data Protection Act (NDPA) 2023 Compliant</div>
     <h1>Privacy Policy &amp; Data Protection Notice</h1>
     <div class="last-updated">
       <strong>Effective Date:</strong> September 10, 2026 &bull; <strong>Supervising Authority:</strong> Nigeria Data Protection Commission (NDPC) &bull; <strong>Version:</strong> 2026.1
@@ -248,11 +338,11 @@
     </div>
 
     <h2 id="p-sec-1">1. Scope &amp; Data Controller</h2>
-    <p>This Privacy Policy applies to all users visiting or registered on Collekt (<a href="https://collektng.com" style="color:#2dd4bf;">https://collektng.com</a>). The designated Data Controller responsible for your personal data is:</p>
-    <div style="background:rgba(0,0,0,0.3); border:1px solid var(--law-line); border-radius:12px; padding:16px; margin:12px 0;">
+    <p>This Privacy Policy applies to all users visiting or registered on Collekt (<a href="https://collektng.com">https://collektng.com</a>). The designated Data Controller responsible for your personal data is:</p>
+    <div class="info-card">
       <strong>Collekt Technologies Ltd</strong><br>
       Data Protection Office<br>
-      Email: <a href="mailto:collektng@gmail.com" style="color:#2dd4bf;">collektng@gmail.com</a>
+      Email: <a href="mailto:collektng@gmail.com">collektng@gmail.com</a>
     </div>
 
     <h2 id="p-sec-2">2. Lawful Bases of Processing</h2>
@@ -275,7 +365,7 @@
     </ul>
 
     <h2 id="p-sec-4">4. Sensitive KYC Verification Data &amp; Regulatory Checks</h2>
-    <p>To establish the Shield Verification status (&#128737;&#65039;), Users may voluntarily submit high-integrity identity documents:</p>
+    <p>To establish the Shield Verification status, Users may voluntarily submit high-integrity identity documents:</p>
     <ul>
       <li><strong>National Identification Number (NIN):</strong> Used exclusively to authenticate individual identity against NIMC standards.</li>
       <li><strong>CAC Incorporation Documents:</strong> Used to confirm corporate legal existence and operational status with the Corporate Affairs Commission.</li>
@@ -320,41 +410,41 @@
       <li><strong>Right to Erasure ("Right to be Forgotten"):</strong> Request deletion of your account and personal records, subject to ongoing legal/escrow dispute holds.</li>
       <li><strong>Right to Restrict Processing:</strong> Request temporary restriction of data processing while a dispute is being investigated.</li>
       <li><strong>Right to Data Portability:</strong> Receive your profile data in a structured, machine-readable format.</li>
-      <li><strong>Right to Lodge a Complaint:</strong> Lodge a formal grievance with the <strong>Nigeria Data Protection Commission (NDPC)</strong> at <a href="https://ndpc.gov.ng" target="_blank" style="color:#2dd4bf;">https://ndpc.gov.ng</a> if you believe your privacy rights have been violated.</li>
+      <li><strong>Right to Lodge a Complaint:</strong> Lodge a formal grievance with the <strong>Nigeria Data Protection Commission (NDPC)</strong> at <a href="https://ndpc.gov.ng" target="_blank">https://ndpc.gov.ng</a> if you believe your privacy rights have been violated.</li>
     </ul>
 
     <div style="display:flex; gap:12px; flex-wrap:wrap; margin:16px 0 24px 0;">
-      <a href="profile.html" style="background:rgba(20,184,166,0.18); border:1px solid #14b8a6; color:#2dd4bf; padding:8px 16px; border-radius:10px; font-size:12px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+      <a href="profile.html" class="doc-btn-emerald">
         Manage Privacy &amp; Profile Data
       </a>
-      <a href="/api/account-export" style="background:rgba(59,130,246,0.18); border:1px solid #3b82f6; color:#93c5fd; padding:8px 16px; border-radius:10px; font-size:12px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+      <a href="/api/account-export" class="doc-btn-blue">
         Download Account Data (NDPA Sec 33)
       </a>
-      <a href="profile.html#danger-zone" style="background:rgba(239,68,68,0.18); border:1px solid #ef4444; color:#fca5a5; padding:8px 16px; border-radius:10px; font-size:12px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+      <a href="profile.html#danger-zone" class="doc-btn-red">
         Request Account Erasure (NDPA Sec 34)
       </a>
     </div>
 
-    <div style="background:rgba(20,184,166,0.1); border-left:4px solid var(--law-accent); border-radius:10px; padding:14px 18px; margin:16px 0; font-size:13px; line-height:1.6; color:#ccfbf1;">
+    <div class="statutory-notice-box">
       <strong>STATUTORY CBN &amp; FCCPA NOTICE:</strong><br>
       Collekt Technologies Ltd is an independent software technology marketplace facilitator, not a commercial deposit-taking bank. Escrow clearing and payout transactions are performed via CBN-licensed payment partners. Consumer dispute resolutions comply strictly with Sections 114–116 of the Federal Competition and Consumer Protection Act (FCCPA 2018) with a 14-day turnaround time.
     </div>
 
     <h2 id="p-sec-11">11. Cookies &amp; Local Storage</h2>
     <p>Collekt uses strictly essential session cookies and local storage to keep you securely signed in, preserve your dark/light theme preference, and manage active messaging threads. You can manage or reject non-essential cookies at any time under the Nigeria Data Protection Act (NDPA 2023).</p>
-    <div style="margin:12px 0 16px 0;">
-      <button onclick="openCookiePreferencesModal()" style="background:rgba(20,184,166,0.16); border:1px solid rgba(45,212,191,0.4); color:#2dd4bf; padding:8px 18px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer; font-family:'Manrope',sans-serif; transition:all 0.2s;">
+    <div style="margin:14px 0 20px 0;">
+      <button onclick="openCookiePreferencesModal()" class="doc-btn-neutral">
         Manage Cookie &amp; Privacy Preferences
       </button>
     </div>
 
     <h2 id="p-sec-12">12. Data Protection Officer (DPO) Contact</h2>
     <p>To exercise your privacy rights, lodge an inquiry, or request data deletion, contact our Data Protection Officer:</p>
-    <div style="background:rgba(0,0,0,0.3); border:1px solid var(--law-line); border-radius:14px; padding:20px; font-size:14px; line-height:1.7;">
+    <div class="info-card">
       <strong>Data Protection Officer (DPO)</strong><br>
       Collekt Technologies Ltd<br>
-      <strong>Emails:</strong> <a href="mailto:dpo@collektng.com" style="color:#2dd4bf; text-decoration:underline;">dpo@collektng.com</a> &bull; <a href="mailto:compliance@collektng.com" style="color:#2dd4bf; text-decoration:underline;">compliance@collektng.com</a> &bull; <a href="mailto:collektng@gmail.com" style="color:#2dd4bf; text-decoration:underline;">collektng@gmail.com</a><br>
-      <strong>Supervising Authority:</strong> Nigeria Data Protection Commission (NDPC) &bull; <a href="https://ndpc.gov.ng" target="_blank" style="color:#2dd4bf; text-decoration:underline;">https://ndpc.gov.ng</a>
+      <strong>Emails:</strong> <a href="mailto:dpo@collektng.com">dpo@collektng.com</a> &bull; <a href="mailto:compliance@collektng.com">compliance@collektng.com</a> &bull; <a href="mailto:collektng@gmail.com">collektng@gmail.com</a><br>
+      <strong>Supervising Authority:</strong> Nigeria Data Protection Commission (NDPC) &bull; <a href="https://ndpc.gov.ng" target="_blank">https://ndpc.gov.ng</a>
     </div>
 
     <div class="footer-meta">
@@ -375,6 +465,6 @@
   </div><!-- /.policy-card -->
 </main>
 
-<script src="app.js?v=184.0"></script>
+<script src="app.js?v=185.0"></script>
 </body>
 </html>

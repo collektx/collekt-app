@@ -12,23 +12,25 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=184.0">
-<link rel="stylesheet" href="shared.css?v=184.0">
-<link rel="stylesheet" href="glass.css?v=184.0">
+<link rel="stylesheet" href="style.css?v=185.0">
+<link rel="stylesheet" href="shared.css?v=185.0">
+<link rel="stylesheet" href="glass.css?v=185.0">
 
 <style>
   :root {
-    --law-paper: #051412;
-    --law-card: rgba(14, 59, 53, 0.28);
-    --law-line: rgba(255, 255, 255, 0.09);
-    --law-ink: #e2efed;
-    --law-muted: #94a3b8;
-    --law-accent: #14b8a6;
-    --law-gold: #f59e0b;
+    --law-desk: #f1f5f9;
+    --law-paper: #ffffff;
+    --law-line: #e2e8f0;
+    --law-line-strong: #cbd5e1;
+    --law-ink-primary: #0f172a;
+    --law-ink-body: #334155;
+    --law-ink-muted: #64748b;
+    --law-accent: #0f766e;
+    --law-accent-hover: #0d9488;
   }
-  body {
-    background: var(--paper, var(--law-paper));
-    color: var(--ink, var(--law-ink));
+  html, html.dark, body, html.dark body {
+    background: #f1f5f9 !important;
+    color: #334155 !important;
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.8;
     margin: 0;
@@ -36,16 +38,16 @@
     -webkit-font-smoothing: antialiased;
   }
   .policy-header {
-    background: linear-gradient(160deg, #030c0b 0%, #0a201d 50%, #061513 100%);
-    border-bottom: 1px solid var(--law-line);
-    padding: 20px 24px;
+    background: #081a17;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 16px 24px;
     position: sticky;
     top: 0;
     z-index: 100;
     backdrop-filter: blur(12px);
   }
   .header-nav {
-    max-width: 1040px;
+    max-width: 960px;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -66,20 +68,21 @@
     object-fit: contain;
   }
   .policy-container {
-    max-width: 1040px;
+    max-width: 960px;
     margin: 0 auto;
     padding: 40px 24px 100px;
   }
-  .policy-card {
-    background: var(--law-card);
-    border: 1px solid var(--law-line);
-    border-radius: 24px;
-    padding: 48px 44px;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  .policy-card, html.dark .policy-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 56px 64px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 20px 25px -5px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03);
+    color: #334155 !important;
   }
-  @media (max-width: 680px) {
-    .policy-card { padding: 28px 18px; border-radius: 16px; }
+  @media (max-width: 768px) {
+    .policy-container { padding: 20px 14px 60px; }
+    .policy-card, html.dark .policy-card { padding: 32px 20px; border-radius: 10px; }
   }
   .badge-tag {
     display: inline-flex;
@@ -87,92 +90,165 @@
     gap: 6px;
     padding: 6px 14px;
     border-radius: 99px;
-    background: rgba(212,146,11,0.22);
-    border: 1px solid rgba(212,146,11,0.45);
-    color: #fbbf24;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    color: #92400e;
     font-size: 11.5px;
     font-weight: 800;
     letter-spacing: .06em;
     text-transform: uppercase;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
-  h1 {
-    font-size: 34px;
-    font-weight: 900;
-    color: #fff;
+  h1, html.dark .policy-card h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a !important;
     margin: 0 0 10px 0;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     line-height: 1.25;
   }
   .last-updated {
-    font-size: 13px;
-    color: var(--law-muted);
-    margin-bottom: 32px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--law-line);
+    font-size: 13.5px;
+    color: #64748b;
+    margin-bottom: 28px;
+    padding-bottom: 18px;
+    border-bottom: 1.5px solid #e2e8f0;
+  }
+  .last-updated strong {
+    color: #1e293b;
+    font-weight: 700;
   }
   .statutory-notice-box {
-    background: rgba(19, 117, 111, 0.15);
-    border-left: 4px solid var(--law-accent);
-    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-left: 4px solid #0f766e;
+    border-radius: 8px;
     padding: 18px 22px;
-    margin: 24px 0 36px 0;
+    margin: 24px 0 32px 0;
+    font-size: 14px;
+    color: #1e293b;
+    line-height: 1.7;
+  }
+  .callout-shield, .callout-warning {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-left: 4px solid #d97706;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 18px 0;
+    font-size: 14px;
+    color: #78350f;
+    line-height: 1.7;
+  }
+  .callout-shield strong, .callout-warning strong {
+    color: #78350f !important;
+  }
+  .callout-fccpa {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-left: 4px solid #d97706;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 18px 0;
     font-size: 13.5px;
-    color: #ccfbf1;
-    line-height: 1.65;
+    color: #78350f;
+    line-height: 1.7;
+  }
+  .callout-fccpa strong {
+    color: #78350f !important;
+  }
+  .callout-aml {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #16a34a;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 18px 0;
+    font-size: 13.5px;
+    color: #14532d;
+    line-height: 1.7;
+  }
+  .callout-aml strong {
+    color: #166534 !important;
+  }
+  .callout-tax {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-left: 4px solid #0284c7;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 18px 0;
+    font-size: 13.5px;
+    color: #0369a1;
+    line-height: 1.7;
+  }
+  .callout-tax strong {
+    color: #075985 !important;
+  }
+  .info-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: #1e293b;
+    line-height: 1.7;
   }
   .toc-box {
-    background: rgba(0,0,0,0.25);
-    border: 1px solid var(--law-line);
-    border-radius: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
     padding: 24px 28px;
-    margin-bottom: 40px;
+    margin-bottom: 36px;
   }
   .toc-title {
-    font-size: 14px;
+    font-size: 12.5px;
     font-weight: 800;
-    color: #fff;
+    color: #0f172a;
     text-transform: uppercase;
     letter-spacing: .08em;
     margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
   }
   .toc-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 8px 20px;
   }
   .toc-link {
-    font-size: 13px;
-    color: #93c5fd;
+    font-size: 13.5px;
+    color: #0f766e;
     text-decoration: none;
-    transition: color .2s;
+    font-weight: 600;
+    padding: 3px 0;
+    transition: color .15s ease;
   }
   .toc-link:hover {
-    color: #67e8f9;
+    color: #0d9488;
     text-decoration: underline;
   }
-  h2 {
-    font-size: 21px;
-    font-weight: 900;
-    color: #fff;
-    margin-top: 44px;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--law-line);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  h3 {
-    font-size: 16px;
+  h2, html.dark .policy-card h2 {
+    font-size: 20px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: #0f172a !important;
+    margin-top: 48px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid #e2e8f0;
+    letter-spacing: -0.015em;
+  }
+  h3, html.dark .policy-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a !important;
     margin-top: 24px;
     margin-bottom: 10px;
   }
-  p, li {
-    font-size: 14.5px;
-    color: #cbd5e1;
+  p, li, html.dark .policy-card p, html.dark .policy-card li {
+    font-size: 15px;
+    color: #334155 !important;
     line-height: 1.8;
   }
   ul, ol {
@@ -182,34 +258,36 @@
   li {
     margin-bottom: 10px;
   }
-  strong {
-    color: #fff;
+  strong, html.dark .policy-card strong {
+    color: #0f172a !important;
+    font-weight: 700;
   }
-  .callout-shield {
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin: 16px 0;
-    font-size: 13.5px;
-    color: #fde68a;
+  a {
+    color: #0f766e;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 600;
+    transition: color .15s ease;
+  }
+  a:hover {
+    color: #0d9488;
   }
   .footer-meta {
     margin-top: 56px;
     padding-top: 28px;
-    border-top: 1px solid var(--law-line);
+    border-top: 1.5px solid #e2e8f0;
     font-size: 13px;
-    color: var(--law-muted);
+    color: #64748b;
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     align-items: center;
   }
   .footer-meta a {
-    color: var(--law-accent);
+    color: #0f766e;
     text-decoration: none;
-    font-weight: 700;
+    font-weight: 600;
   }
   .footer-meta a:hover {
     text-decoration: underline;
@@ -233,7 +311,7 @@
 
 <main class="policy-container">
   <div class="policy-card">
-    <div class="badge-tag">&#9878;&#65039; Legal Contract &bull; Federal Republic of Nigeria</div>
+    <div class="badge-tag">Legal Contract &bull; Federal Republic of Nigeria</div>
     <h1>Terms of Service</h1>
     <div class="last-updated">
       <strong>Effective Date:</strong> September 10, 2026 &bull; <strong>Governing Jurisdiction:</strong> Federal Republic of Nigeria &bull; <strong>Version:</strong> 2026.1
@@ -241,7 +319,7 @@
 
     <div class="statutory-notice-box">
       <strong>IMPORTANT STATUTORY NOTICE:</strong><br>
-      Please read these Terms of Service carefully before accessing or using Collekt (<a href="https://collektng.com" style="color:#2dd4bf; text-decoration:underline;">https://collektng.com</a>). By registering an account, logging in via email, OTP, or Google OAuth, posting tenders, bidding on projects, or transferring funds into escrow, you confirm that you have read, understood, and agreed to be legally bound by these Terms and our <a href="privacy.html" style="color:#2dd4bf; text-decoration:underline;">Privacy Policy</a> pursuant to the <strong>Evidence Act 2011 (Section 84)</strong> and the <strong>Nigeria Data Protection Act (NDPA) 2023</strong>. If you do not agree, you must immediately cease all use of the platform.
+      Please read these Terms of Service carefully before accessing or using Collekt (<a href="https://collektng.com">https://collektng.com</a>). By registering an account, logging in via email, OTP, or Google OAuth, posting tenders, bidding on projects, or transferring funds into escrow, you confirm that you have read, understood, and agreed to be legally bound by these Terms and our <a href="privacy.html">Privacy Policy</a> pursuant to the <strong>Evidence Act 2011 (Section 84)</strong> and the <strong>Nigeria Data Protection Act (NDPA) 2023</strong>. If you do not agree, you must immediately cease all use of the platform.
     </div>
 
     <!-- Table of Contents -->
@@ -305,7 +383,7 @@
       <li><strong>No Quality Guarantee by Intermediary:</strong> While Collekt implements Shield Verification, background audits, and AI matching, Collekt does not personally supervise field execution, verify structural engineering math, inspect physical worksites, or guarantee the perfection of deliverables.</li>
       <li><strong>Tax Responsibilities:</strong> Each User is exclusively responsible for declaring and remitting their statutory taxes, including Withholding Tax (WHT), Value Added Tax (VAT), Pay-As-You-Earn (PAYE), and Company Income Tax (CIT) to the Federal Inland Revenue Service (FIRS) and respective State Internal Revenue Services (SIRS).</li>
     </ul>
-    <div style="background:rgba(20,184,166,0.12); border-left:4px solid var(--law-accent); border-radius:10px; padding:14px 18px; margin:16px 0; font-size:13px; line-height:1.6; color:#ccfbf1;">
+    <div class="statutory-notice-box">
       <strong>STATUTORY CBN NON-BANK DISCLAIMER:</strong><br>
       Collekt Technologies Ltd is an independent software technology company and marketplace facilitator. Collekt is NOT a commercial deposit-taking bank, payment service bank, or financial institution licensed by the Central Bank of Nigeria (CBN). Custody, clearing, and disbursement of escrowed milestone funds are performed exclusively through CBN-licensed payment partners (Paystack Payments Limited, Korapay Technologies Limited) and commercial settlement partner banks.
     </div>
@@ -324,8 +402,8 @@
     <p>Collekt maintains the highest standard of corporate and identity integrity across Nigeria:</p>
     <ul>
       <li><strong>Submission of Sensitive KYC Records:</strong> In accordance with the <strong>Nigeria Data Protection Act (NDPA) 2023</strong>, when you submit your National Identification Number (NIN), Tax Identification Number (TIN), CAC Registration Certificate, or Director identification, you provide explicit, informed consent for Collekt Technologies Ltd and its certified verification partners to confirm these records against official databases (NIMC, CAC, FIRS, and NIBSS).</li>
-      <li><strong>Shield Verification Marks:</strong> The Shield Verification Badge (&#128737;&#65039;) signifies that administrative identity matching has occurred. It is not an absolute warranty of character, performance, or financial solvency.</li>
-      <li><strong>Credential Security:</strong> You are solely responsible for maintaining the confidentiality of your credentials, OTPs, and API tokens. You must immediately notify <a href="mailto:collektng@gmail.com" style="color:#2dd4bf;">collektng@gmail.com</a> if you suspect unauthorized access.</li>
+      <li><strong>Shield Verification Marks:</strong> The Shield Verification Badge signifies that administrative identity matching has occurred. It is not an absolute warranty of character, performance, or financial solvency.</li>
+      <li><strong>Credential Security:</strong> You are solely responsible for maintaining the confidentiality of your credentials, OTPs, and API tokens. You must immediately notify <a href="mailto:collektng@gmail.com">collektng@gmail.com</a> if you suspect unauthorized access.</li>
     </ul>
 
     <!-- Section 6 -->
@@ -357,21 +435,21 @@
       </li>
       <li><strong>Chargebacks &amp; Payment Disputes:</strong> Attempting fraudulent bank reversals or unauthorized chargebacks on funded escrow milestones constitutes a material breach of this Agreement and may lead to debt recovery actions, credit bureau reporting, and legal proceedings under the <strong>Dishonoured Cheques (Offences) Act</strong> and relevant commercial statutes.</li>
     </ul>
-    <div style="background:rgba(245,158,11,0.12); border-left:4px solid var(--law-gold); border-radius:10px; padding:14px 18px; margin:16px 0; font-size:13px; line-height:1.6; color:#fef3c7;">
+    <div class="callout-fccpa">
       <strong>FEDERAL COMPETITION &amp; CONSUMER PROTECTION ACT (FCCPA 2018) DISCLOSURES:</strong><br>
       Pursuant to Sections 114–116 of the FCCPA 2018:
       <ul style="margin:8px 0 0 16px; padding:0; list-style-type:disc;">
         <li><strong>Transparent Pricing:</strong> All fees are transparently disclosed prior to payment authorization. Collekt deducts a fixed 15% platform service commission on completed milestone disbursements. Zero hidden fees, non-consensual surcharges, or unsolicited recurring debits.</li>
         <li><strong>Consumer Cancellation &amp; Refund Rights:</strong> Clients retain the unconditional statutory right to cancel a funded milestone prior to contractor commencement or deliverable submission, receiving a 100% refund of the unreleased escrow balance without penalty.</li>
-        <li><strong>Dispute Resolution SLA:</strong> Consumer dispute grievances submitted to <a href="mailto:compliance@collektng.com" style="color:#fbbf24; text-decoration:underline;">compliance@collektng.com</a> receive formal acknowledgment within 24 hours and a mediated resolution proposal within fourteen (14) business days.</li>
+        <li><strong>Dispute Resolution SLA:</strong> Consumer dispute grievances submitted to <a href="mailto:compliance@collektng.com">compliance@collektng.com</a> receive formal acknowledgment within 24 hours and a mediated resolution proposal within fourteen (14) business days.</li>
       </ul>
     </div>
 
     <!-- Section 7.5 -->
-    <div style="background:rgba(16,185,129,0.08); border-left:4px solid #10b981; border-radius:10px; padding:14px 18px; margin:16px 0; font-size:13px; line-height:1.6; color:#d1fae5;">
-      <strong style="color:#34d399;">SECTION 7.5 &mdash; ANTI-MONEY LAUNDERING (AML), FRAUD PREVENTION &amp; THIRD-PARTY WITHDRAWAL RESTRICTIONS:</strong><br>
+    <div class="callout-aml">
+      <strong>SECTION 7.5 &mdash; ANTI-MONEY LAUNDERING (AML), FRAUD PREVENTION &amp; THIRD-PARTY WITHDRAWAL RESTRICTIONS:</strong><br>
       Pursuant to the <strong>Money Laundering (Prevention and Prohibition) Act 2022</strong>, the <strong>Central Bank of Nigeria (CBN) Anti-Money Laundering and Countering the Financing of Terrorism (AML/CFT) Regulations 2022</strong>, and the <strong>CBN Consumer Protection Framework</strong>:
-      <ul style="margin:8px 0 0 16px; padding:0; list-style-type:disc; color:#ecfdf5;">
+      <ul style="margin:8px 0 0 16px; padding:0; list-style-type:disc;">
         <li><strong>Mandatory 1-to-1 NUBAN Account Name Matching:</strong> All wallet withdrawals and escrow payouts must be disbursed strictly to a verified Nigerian commercial bank or neobank account bearing the exact legal name matching the User's verified profile identity (or registered corporate name). Disbursements to third-party accounts, proxy accounts, or unverified recipient names are strictly prohibited and automatically blocked by our automated NUBAN identity matching engine.</li>
         <li><strong>Mandatory 4-Digit Transaction PIN:</strong> All financial disbursements require two-factor authorization via the User's confidential 4-digit Transaction PIN. Automated brute-force lockout mechanisms lock PIN verification for five (5) minutes following five (5) consecutive failed attempts.</li>
         <li><strong>CBN Step-Up Multi-Factor Authorization (MFA OTP):</strong> In compliance with Section 4.2 of the CBN Cybersecurity Guidelines, disbursements of fifty thousand Naira (₦50,000) and above, or withdrawals following destination account modifications, require secondary time-bound One-Time Password (OTP) authorization.</li>
@@ -380,10 +458,10 @@
     </div>
 
     <!-- Section 7.6 -->
-    <div style="background:rgba(14,165,233,0.08); border-left:4px solid #0284c7; border-radius:10px; padding:14px 18px; margin:16px 0; font-size:13px; line-height:1.6; color:#e0f2fe;">
-      <strong style="color:#38bdf8;">SECTION 7.6 &mdash; CORPORATE INVOICING, WITHHOLDING TAX (WHT: 5%) &amp; VALUE ADDED TAX (VAT: 7.5%) COMPLIANCE:</strong><br>
+    <div class="callout-tax">
+      <strong>SECTION 7.6 &mdash; CORPORATE INVOICING, WITHHOLDING TAX (WHT: 5%) &amp; VALUE ADDED TAX (VAT: 7.5%) COMPLIANCE:</strong><br>
       Pursuant to the <strong>Companies Income Tax Act (CITA) Cap C21 LFN 2004</strong>, the <strong>Value Added Tax (VAT) Act Cap V1 LFN 2004 (as amended by Finance Acts)</strong>, and the <strong>Withholding Tax Regulations 2024</strong> promulgated by the Federal Inland Revenue Service (FIRS):
-      <ul style="margin:8px 0 0 16px; padding:0; list-style-type:disc; color:#f0f9ff;">
+      <ul style="margin:8px 0 0 16px; padding:0; list-style-type:disc;">
         <li><strong>FIRS Electronic Tax Invoicing:</strong> For every milestone disbursement or corporate project engagement on Collekt, an audit-ready, serialized Electronic Tax Invoice and Settlement Receipt (Format: <code>COL-INV-YYYYMMDD-XXXX-MX</code>) is generated. Invoices feature Collekt Technologies Ltd's corporate incorporation (RC 1928412), FIRS Tax Identification Number (TIN: 24891029-0001), Client CAC/TIN, Specialist verified identity/TIN, and automated cryptographic verification hashes.</li>
         <li><strong>Value Added Tax (VAT 7.5%):</strong> In accordance with Section 13 of the VAT Act, corporate technical, engineering, and consulting services are subject to 7.5% VAT payable by the Corporate Client. The VAT amount is explicitly itemized on the client invoice for proper statutory reporting and remittance to the FIRS.</li>
         <li><strong>Withholding Tax (WHT 5.0%):</strong> Pursuant to the Withholding Tax Regulations 2024 for technical, consulting, and specialized professional services, a 5.0% Withholding Tax is deducted at source from the gross professional fee. Corporate Clients and Collekt acknowledge that this deduction serves as an advance tax payment credited directly to the Specialist Contractor's FIRS Tax Identification Number (TIN) via an official FIRS Credit Note.</li>
@@ -471,7 +549,7 @@
     <h2 id="sec-15">15. Dispute Resolution &amp; Binding Arbitration</h2>
     <p>To provide a swift, professional, and cost-effective forum for resolving disputes, all controversies between Users, or between any User and Collekt, shall be resolved through this mandatory three-tier framework:</p>
     <ol>
-      <li><strong>Tier 1: Informal Good-Faith Negotiation:</strong> The aggrieved party shall deliver written notice to the other party and Collekt (<a href="mailto:collektng@gmail.com" style="color:#2dd4bf;">collektng@gmail.com</a>). The parties shall engage in good-faith amicable negotiation for a minimum of fourteen (14) calendar days.</li>
+      <li><strong>Tier 1: Informal Good-Faith Negotiation:</strong> The aggrieved party shall deliver written notice to the other party and Collekt (<a href="mailto:collektng@gmail.com">collektng@gmail.com</a>). The parties shall engage in good-faith amicable negotiation for a minimum of fourteen (14) calendar days.</li>
       <li><strong>Tier 2: Collekt Escrow Mediation:</strong> If negotiation fails, Collekt shall review submitted project briefs, chat logs, and deliverables, providing a non-binding mediator's proposal within ten (10) business days.</li>
       <li><strong>Tier 3: Final Binding Arbitration:</strong> If the dispute remains unresolved, it shall be referred to and finally determined by binding commercial arbitration in accordance with the <strong>Arbitration and Mediation Act 2023</strong> of the Federal Republic of Nigeria:
         <ul>
@@ -495,12 +573,12 @@
     <!-- Section 17 -->
     <h2>17. Contact &amp; Legal Notices</h2>
     <p>All legal inquiries, notices, and communications should be directed to:</p>
-    <div style="background:rgba(0,0,0,0.3); border:1px solid var(--law-line); border-radius:14px; padding:20px; font-size:14px; line-height:1.7;">
+    <div class="info-card">
       <strong>Collekt Technologies Ltd</strong><br>
       Legal &amp; Regulatory Compliance Directorate<br>
       Lagos &bull; Abuja &bull; Port Harcourt, Nigeria<br>
-      <strong>Email:</strong> <a href="mailto:collektng@gmail.com" style="color:#2dd4bf; text-decoration:underline;">collektng@gmail.com</a><br>
-      <strong>Website:</strong> <a href="https://collektng.com" style="color:#2dd4bf; text-decoration:underline;">https://collektng.com</a>
+      <strong>Email:</strong> <a href="mailto:collektng@gmail.com">collektng@gmail.com</a><br>
+      <strong>Website:</strong> <a href="https://collektng.com">https://collektng.com</a>
     </div>
 
     <div class="footer-meta">
@@ -521,6 +599,6 @@
   </div><!-- /.policy-card -->
 </main>
 
-<script src="app.js?v=184.0"></script>
+<script src="app.js?v=185.0"></script>
 </body>
 </html>
