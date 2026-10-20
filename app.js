@@ -5872,988 +5872,1151 @@ function initCollektDoodleCanvas() {
   canvas.className = 'collekt-doodle-canvas';
   canvas.setAttribute('aria-hidden', 'true');
 
-  canvas.innerHTML = `
-    <!-- ════════ TOP GUTTER OVERLAPPING BANDS (Y: 4 - 40px) ════════ -->
-    <div class="doodle-tag doodle-teal doodle-lg" style="top:5px; left:1.2%; transform:rotate(-3deg);">
-      ✦ Verified Nigerian Talent
+    canvas.innerHTML = `
+    <!-- ════════ ORGANICALLY SCATTERED DOODLE WALLPAPER (Y: 8px - 2150px) ════════ -->
+    <div class="doodle-tag doodle-teal doodle-lg" style="top:17px; left:3.5%; transform:rotate(-14.5deg);">
+      Engineers & BIM Specialists
     </div>
-    <div class="doodle-tag doodle-amber doodle-md" style="top:16px; left:5.5%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:7px; left:26.5%; transform:rotate(11deg);">
+      Quantity Surveyors & BOQ
+    </div>
+    <div class="doodle-tag doodle-slate doodle-sm" style="top:14px; left:31%; transform:rotate(-8deg);">
+      Pipeline & HAZOP Compliance
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xl hide-mobile" style="top:4px; left:57.5%; transform:rotate(15deg);">
+      Fabrication & Heavy Rigging
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xs" style="top:11px; left:81.5%; transform:rotate(-16.5deg);">
+      Geologists & Site Surveyors ✎
+    </div>
+    <div class="doodle-tag doodle-amber doodle-lg" style="top:47px; left:14%; transform:rotate(9.5deg);">
+      Energy & Infrastructure
+    </div>
+    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:54px; left:18.5%; transform:rotate(-12deg);">
+      Oil & Gas EPC Tenders ★
+    </div>
+    <div class="doodle-tag doodle-forest doodle-sm" style="top:44px; left:43.5%; transform:rotate(14deg);">
+      Corporate Tenders & Projects
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xl hide-mobile" style="top:51px; left:68.5%; transform:rotate(-7.5deg);">
+      Direct Enterprise Hiring ★
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xs" style="top:41px; left:73%; transform:rotate(13deg);">
+      Offshore & Deepwater Logistics
+    </div>
+    <div class="doodle-tag doodle-slate doodle-lg" style="top:79px; left:2%; transform:rotate(-15deg);">
       100% Escrow Protected ✓
-      <svg class="doodle-sketch" width="42" height="10" viewBox="0 0 42 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8c8-6 18-6 38-1"/></svg>
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:4px; left:17%; transform:rotate(-5deg);">
-      { Zero Middlemen }
-    </div>
-
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:5px; left:27%; transform:rotate(-2deg);">
-      Energy &amp; Infrastructure
-    </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:16px; left:33%; transform:rotate(5deg);">
-      EPC Consortiums ⤳
-      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
-    </div>
-
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:6px; left:46%; transform:rotate(-3.5deg);">
-      NOVA Bank Guaranteed
-    </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:19px; left:51%; transform:rotate(4deg);">
-      Fast Turnaround ⚡
-    </div>
-
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:5px; left:62%; transform:rotate(3deg);">
-      Oil &amp; Gas EPC Tenders ★
-    </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:18px; left:69%; transform:rotate(-4.5deg);">
-      Deepwater &amp; Subsea 🤿
-    </div>
-
-    <div class="doodle-tag doodle-slate doodle-lg" style="top:6px; left:81%; transform:rotate(3.5deg);">
-      Win Bigger Contracts!
-    </div>
-    <div class="doodle-tag doodle-forest doodle-sm" style="top:21px; left:87%; transform:rotate(-6deg);">
-      Direct SLA ✓ Authentic Bids
-    </div>
-
-
-    <!-- ════════ COLUMN BAND 1: LEFT GUTTER & MARGIN (Left: 1% - 17%) ════════ -->
-    <!-- Group 1A: Engineering & BIM (Y: 55 - 170px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:55px; left:1.5%; transform:rotate(-8deg);">
-      Engineers &amp; BIM Specialists
-    </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:78px; left:3%; transform:rotate(5deg);">
-      AutoCAD 3D • Civil • Structural
-    </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:104px; left:2%; transform:rotate(-3deg);">
-      ✦ Top 1% Verified Experts
-      <svg class="doodle-sketch" width="46" height="8" viewBox="0 0 46 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t20 0"/></svg>
-    </div>
-    <svg class="doodle-sketch hide-mobile" style="position:absolute; top:130px; left:3.8%; transform:rotate(12deg);" width="36" height="24" viewBox="0 0 36 24" fill="none" stroke="rgba(45,212,191,0.35)" stroke-width="1.8"><path d="M4 4c8 10 18 12 26 12m-6-8l6 8-8 2"/></svg>
-
-    <!-- Group 1B: Milestones & Fair Bidding (Y: 175 - 280px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:175px; left:1.2%; transform:rotate(7deg);">
+    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:86px; left:35.5%; transform:rotate(10deg);">
       Milestone Releases ⚡
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:200px; left:2.6%; transform:rotate(-6deg);">
-      Fair Bidding Platform ✓
+    <div class="doodle-tag doodle-teal doodle-sm" style="top:76px; left:51.5%; transform:rotate(-11.5deg);">
+      NOVA Bank Escrow Guaranteed
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:228px; left:1.8%; transform:rotate(3deg);">
-      Zero Delay Approvals ⤳
+    <div class="doodle-tag doodle-amber doodle-xl hide-mobile" style="top:83px; left:56%; transform:rotate(16deg);">
+      Win Bigger Contracts! ⤳
     </div>
-
-    <!-- Group 1C: Quantity Surveyors & BOQ (Y: 275 - 380px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:275px; left:1.5%; transform:rotate(-7.5deg);">
-      Quantity Surveyors &amp; BOQ
-    </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:300px; left:3%; transform:rotate(6deg);">
-      Cost Engineering • Auditing
-      <svg class="doodle-sketch" width="34" height="10" viewBox="0 0 34 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
-    </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:328px; left:2%; transform:rotate(-4deg);">
-      { Transparent Escrow Estimates }
-    </div>
-
-    <!-- Group 1D: Pipeline & HAZOP (Y: 380 - 490px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:380px; left:1.2%; transform:rotate(6deg);">
-      Pipeline &amp; HAZOP Compliance
-    </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:406px; left:2.6%; transform:rotate(-5.5deg);">
-      Safety First ✦ ISO 45001
-    </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:435px; left:1.5%; transform:rotate(4deg);">
-      Certified Welders &amp; Riggers (ASME)
-    </div>
-
-    <!-- Group 1E: Offshore Drilling & FPSO (Y: 485 - 600px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:485px; left:1%; transform:rotate(-8deg);">
-      Offshore Drilling Specialists
-    </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:512px; left:2.8%; transform:rotate(5.5deg);">
-      FPSO &amp; Subsea Architecture ⤳
-    </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:540px; left:1.6%; transform:rotate(-3.5deg);">
-      Marine Safety &amp; QA/QC ✓
-    </div>
-
-    <!-- Group 1F: 24hr Bid Turnaround (Y: 595 - 710px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:595px; left:1.5%; transform:rotate(-6.5deg);">
+    <div class="doodle-tag doodle-slate doodle-xs" style="top:90px; left:87.5%; transform:rotate(-13deg);">
       24hr Bid Turnaround ⚡
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:622px; left:3%; transform:rotate(7deg);">
+    <div class="doodle-tag doodle-forest doodle-lg" style="top:113px; left:8.5%; transform:rotate(8.5deg);">
+      AutoCAD 3D • Civil • Structural
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:120px; left:22%; transform:rotate(-9.5deg);">
+      ✦ Top 1% Verified Experts
+    </div>
+    <div class="doodle-tag doodle-amber doodle-sm" style="top:127px; left:39.5%; transform:rotate(12.5deg);">
+      Zero Delay Approvals ⤳
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xl hide-mobile" style="top:117px; left:44%; transform:rotate(-17deg);">
+      Cost Engineering • Auditing
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xs" style="top:124px; left:63.5%; transform:rotate(10.5deg);">
+      { Transparent Escrow Estimates }
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:114px; left:78.5%; transform:rotate(-6deg);">
+      Safety First ✦ ISO 45001
+    </div>
+    <div class="doodle-tag doodle-amber doodle-md" style="top:166px; left:16.5%; transform:rotate(14.5deg);">
+      Certified Welders & Riggers (ASME)
+    </div>
+    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:156px; left:33%; transform:rotate(-13.5deg);">
+      Offshore Drilling Specialists
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xl" style="top:163px; left:37.5%; transform:rotate(11.5deg);">
+      FPSO & Subsea Architecture ⤳
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xs hide-mobile" style="top:153px; left:59.5%; transform:rotate(-15.5deg);">
+      Marine Safety & QA/QC ✓
+    </div>
+    <div class="doodle-tag doodle-amber doodle-lg" style="top:160px; left:71.5%; transform:rotate(12deg);">
       Collektions Instant Shortlist
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:650px; left:1.8%; transform:rotate(-4deg);">
+    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:167px; left:84.5%; transform:rotate(-14.5deg);">
       Direct Messaging • Secure NDA
     </div>
-
-    <!-- Group 1G: HSE & Heavy Rigging (Y: 705 - 820px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:705px; left:1.2%; transform:rotate(5.5deg);">
-      HSE Officers &amp; Risk Managers
+    <div class="doodle-tag doodle-forest doodle-sm" style="top:195px; left:5.5%; transform:rotate(11deg);">
+      HSE Officers & Risk Managers
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:732px; left:2.6%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-teal doodle-xl hide-mobile" style="top:185px; left:25%; transform:rotate(-8deg);">
       Zero Incident Standards ★
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:760px; left:1.6%; transform:rotate(4deg);">
-      Fabrication &amp; Heavy Rigging
-    </div>
-
-    <!-- Group 1H: Geologists & Bathymetry (Y: 815 - 930px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:815px; left:1%; transform:rotate(-7deg);">
-      Geologists &amp; Site Surveyors ✎
-    </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:842px; left:2.5%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-amber doodle-xs" style="top:192px; left:47.5%; transform:rotate(15deg);">
       GIS Mapping • Bathymetry
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:870px; left:1.4%; transform:rotate(-4.5deg);">
+    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:199px; left:52%; transform:rotate(-16.5deg);">
       West Africa Top Energy Pool ✦
     </div>
-
-    <!-- Group 1I: Instrumentation & Substation (Y: 925 - 1040px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:925px; left:1.5%; transform:rotate(6deg);">
-      Instrumentation &amp; SCADA
+    <div class="doodle-tag doodle-forest doodle-md" style="top:189px; left:76.5%; transform:rotate(9.5deg);">
+      Instrumentation & SCADA
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:952px; left:2.8%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:196px; left:89.5%; transform:rotate(-12deg);">
       Commissioning Specialists ✓
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:980px; left:1.8%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-amber doodle-xl" style="top:226px; left:12%; transform:rotate(14deg);">
       Substation Automation ⚡
     </div>
-
-    <!-- Group 1J: Dredging & Coastal Protection (Y: 1045 - 1160px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:1045px; left:1.2%; transform:rotate(-6deg);">
-      Dredging &amp; Coastal Engineering
+    <div class="doodle-tag doodle-slate doodle-xs hide-mobile" style="top:233px; left:17.5%; transform:rotate(-7.5deg);">
+      Dredging & Coastal Engineering
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:1072px; left:2.6%; transform:rotate(5.5deg);">
-      Coastal Protection &amp; Piling ⤳
+    <div class="doodle-tag doodle-forest doodle-lg" style="top:223px; left:41%; transform:rotate(13deg);">
+      Coastal Protection & Piling ⤳
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:1100px; left:1.5%; transform:rotate(-3.5deg);">
+    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:230px; left:62.5%; transform:rotate(-15deg);">
       Port Infrastructure Masters
     </div>
-
-    <!-- Group 1K: Corrosion Control & NDT (Y: 1165 - 1280px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:1165px; left:1.5%; transform:rotate(6.5deg);">
-      Corrosion Control &amp; NDT
+    <div class="doodle-tag doodle-amber doodle-sm" style="top:220px; left:67%; transform:rotate(10deg);">
+      Corrosion Control & NDT
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:1192px; left:2.8%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-slate doodle-xl hide-mobile" style="top:227px; left:82.5%; transform:rotate(-11.5deg);">
       Cathodic Protection Systems
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:1220px; left:1.8%; transform:rotate(4deg);">
-      Ultrasonic Testing (UT) &amp; MPI ✓
+    <div class="doodle-tag doodle-forest doodle-xs" style="top:259px; left:3%; transform:rotate(16deg);">
+      Ultrasonic Testing (UT) & MPI ✓
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
     </div>
-
-    <!-- Group 1L: Geotechnical Deep Foundation (Y: 1285 - 1400px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:1285px; left:1%; transform:rotate(-7.5deg);">
-      Geotechnical Soil Lab &amp; CPT
+    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:266px; left:28.5%; transform:rotate(-13deg);">
+      Geotechnical Soil Lab & CPT
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:1312px; left:2.5%; transform:rotate(5deg);">
-      Foundation &amp; Retaining Walls ✎
+    <div class="doodle-tag doodle-amber doodle-md" style="top:273px; left:33%; transform:rotate(8.5deg);">
+      Foundation & Retaining Walls ✎
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:1340px; left:1.6%; transform:rotate(-4deg);">
+    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:263px; left:56.5%; transform:rotate(-9.5deg);">
       Borehole Drilling Specialists
     </div>
-
-    <!-- Group 1M: Solar EPC & Renewables (Y: 1405 - 1520px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:1405px; left:1.5%; transform:rotate(5.5deg);">
-      Solar EPC &amp; Mini-Grids ✦
+    <div class="doodle-tag doodle-forest doodle-xl" style="top:270px; left:74.5%; transform:rotate(12.5deg);">
+      Solar EPC & Mini-Grids ✦
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:1432px; left:2.8%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-teal doodle-xs hide-mobile" style="top:260px; left:86.5%; transform:rotate(-17deg);">
       Inverters • Batteries • SCADA
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:1460px; left:1.8%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-amber doodle-lg" style="top:311px; left:19%; transform:rotate(10.5deg);">
       Clean Renewable Megawatts ⚡
     </div>
-
-    <!-- Group 1N: Telecoms & Fiber Backbone (Y: 1525 - 1640px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:1525px; left:1.2%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:301px; left:36.5%; transform:rotate(-6deg);">
       Telecoms Tower Engineering
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:1552px; left:2.6%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-forest doodle-sm" style="top:308px; left:49.5%; transform:rotate(14.5deg);">
       Fiber Optic Metro Backbone ⤳
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:1580px; left:1.5%; transform:rotate(-3.5deg);">
+    <div class="doodle-tag doodle-teal doodle-xl hide-mobile" style="top:298px; left:65%; transform:rotate(-13.5deg);">
       5G Infrastructure Rollouts
     </div>
-
-    <!-- Group 1O: Marine Warranty Surveyors (Y: 1645 - 1760px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:1645px; left:1.5%; transform:rotate(6.5deg);">
+    <div class="doodle-tag doodle-amber doodle-xs" style="top:305px; left:69.5%; transform:rotate(11.5deg);">
       Marine Warranty Surveyors (MWS)
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:1672px; left:2.8%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:312px; left:88%; transform:rotate(-15.5deg);">
       Loadout • Towing • Installation
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:1700px; left:1.8%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-forest doodle-md" style="top:339px; left:7%; transform:rotate(12deg);">
       Certified Vessel Approvals ✓
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
     </div>
-
-    <!-- Group 1P: Water Treatment & Effluent (Y: 1765 - 1900px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:1765px; left:1%; transform:rotate(-7deg);">
-      Water &amp; Effluent Treatment
+    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:329px; left:23.5%; transform:rotate(-14.5deg);">
+      Water & Effluent Treatment
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:1792px; left:2.5%; transform:rotate(5.5deg);">
+    <div class="doodle-tag doodle-amber doodle-xl" style="top:336px; left:45%; transform:rotate(11deg);">
       Reverse Osmosis • Filtration
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:1820px; left:1.6%; transform:rotate(-4deg);">
+    <div class="doodle-tag doodle-slate doodle-xs hide-mobile" style="top:343px; left:49.5%; transform:rotate(-8deg);">
       Zero Liquid Discharge (ZLD) ★
     </div>
-
-
-    <!-- ════════ COLUMN BAND 2: LEFT-CENTER ZONE (Left: 18% - 37%) ════════ -->
-    <!-- Group 2A: Pipeline & HAZOP Culture (Y: 55 - 175px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:55px; left:19%; transform:rotate(-4deg);">
-      Pipeline &amp; HAZOP Compliance
-    </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:80px; left:22%; transform:rotate(5deg);">
-      Safety First ✦ ISO 45001
-      <svg class="doodle-sketch" width="38" height="8" viewBox="0 0 38 8" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
-    </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:108px; left:20%; transform:rotate(-3deg);">
-      { Zero Incident Standards }
-    </div>
-
-    <!-- Group 2B: Subsea Wellhead & ROV (Y: 165 - 285px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:165px; left:21%; transform:rotate(6deg);">
+    <div class="doodle-tag doodle-forest doodle-lg" style="top:333px; left:72%; transform:rotate(15deg);">
       Offshore Deepwater Operations
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-tablet" style="top:192px; left:24%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:340px; left:85%; transform:rotate(-16.5deg);">
       Subsea Wellhead Installation ⤳
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:220px; left:22%; transform:rotate(3.5deg);">
-      ROV Pilots &amp; Dynamic Positioning
+    <div class="doodle-tag doodle-amber doodle-sm" style="top:369px; left:3.5%; transform:rotate(9.5deg);">
+      ROV Pilots & Dynamic Positioning
     </div>
-
-    <!-- Group 2C: Structural Steel & Precast (Y: 275 - 395px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-tablet" style="top:275px; left:20%; transform:rotate(-6deg);">
-      Structural Steel &amp; Precast ✎
+    <div class="doodle-tag doodle-slate doodle-xl hide-mobile" style="top:376px; left:26.5%; transform:rotate(-12deg);">
+      Structural Steel & Precast ✎
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:302px; left:23%; transform:rotate(5.5deg);">
+    <div class="doodle-tag doodle-forest doodle-xs" style="top:366px; left:31%; transform:rotate(14deg);">
       Tekla 3D Detailing • PE Stamp
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:330px; left:21%; transform:rotate(-4deg);">
+    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:373px; left:57.5%; transform:rotate(-7.5deg);">
       Fabrication Yard Audited ✓
     </div>
-
-    <!-- Group 2D: Commercial BOQs & NIQS (Y: 385 - 505px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:385px; left:22%; transform:rotate(5deg);">
-      Commercial BOQs &amp; Pricing Models
+    <div class="doodle-tag doodle-amber doodle-md" style="top:363px; left:81.5%; transform:rotate(13deg);">
+      Commercial BOQs & Pricing Models
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-tablet" style="top:412px; left:25%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-slate doodle-sm" style="top:401px; left:14%; transform:rotate(-15deg);">
       Quantity Surveyors Institute (NIQS)
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-tablet" style="top:440px; left:23%; transform:rotate(3.5deg);">
+    <div class="doodle-tag doodle-forest doodle-xl hide-mobile" style="top:408px; left:18.5%; transform:rotate(10deg);">
       Zero Hidden Variation Costs ⚡
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
     </div>
-
-    <!-- Group 2E: Electrical Substations 330kV (Y: 495 - 615px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:495px; left:20%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-teal doodle-xs" style="top:398px; left:43.5%; transform:rotate(-11.5deg);">
       Electrical HV Substations 330kV
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:522px; left:23%; transform:rotate(4.5deg);">
+    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:405px; left:68.5%; transform:rotate(16deg);">
       Transformers • Switchgears • Protection
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:550px; left:21%; transform:rotate(-3deg);">
+    <div class="doodle-tag doodle-slate doodle-md" style="top:412px; left:73%; transform:rotate(-13deg);">
       Transmission Grid Experts ✦
     </div>
-
-    <!-- Group 2F: Collektions Shortlisting (Y: 605 - 725px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:605px; left:22%; transform:rotate(6.5deg);">
+    <div class="doodle-tag doodle-forest doodle-sm" style="top:452px; left:2%; transform:rotate(8.5deg);">
       Collektions Instant Shortlisting
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:632px; left:25%; transform:rotate(-5deg);">
-      Direct Messaging • Signed NDA
-    </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:660px; left:23%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-teal doodle-xl hide-mobile" style="top:442px; left:35.5%; transform:rotate(-9.5deg);">
       Peer-Reviewed Engineering Talent
     </div>
-
-    <!-- Group 2G: Nigerian Content & NOGICD (Y: 715 - 835px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:715px; left:20%; transform:rotate(-7deg);">
+    <div class="doodle-tag doodle-amber doodle-xs" style="top:449px; left:51.5%; transform:rotate(12.5deg);">
       NOGICD Nigerian Content Leader
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-tablet" style="top:742px; left:24%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:439px; left:56%; transform:rotate(-17deg);">
       100% In-Country Value (ICV) ✓
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-tablet" style="top:770px; left:21%; transform:rotate(-4deg);">
-      Capacity Building &amp; Skill Transfer
+    <div class="doodle-tag doodle-forest doodle-md" style="top:446px; left:87.5%; transform:rotate(10.5deg);">
+      Capacity Building & Skill Transfer
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
     </div>
-
-    <!-- Group 2H: Gas Flare Monetization (Y: 825 - 945px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:825px; left:22%; transform:rotate(5.5deg);">
+    <div class="doodle-tag doodle-teal doodle-sm" style="top:488px; left:8.5%; transform:rotate(-6deg);">
       Gas Flare Monetization Projects
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-tablet" style="top:852px; left:25%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-amber doodle-xl hide-mobile" style="top:478px; left:22%; transform:rotate(14.5deg);">
       CNG • LNG • LPG Processing ⤳
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:880px; left:23%; transform:rotate(3.5deg);">
+    <div class="doodle-tag doodle-slate doodle-xs" style="top:485px; left:39.5%; transform:rotate(-13.5deg);">
       Clean Gas Compression Hubs
     </div>
-
-    <!-- Group 2I: Environmental Impact EIA (Y: 935 - 1055px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-tablet" style="top:935px; left:21%; transform:rotate(-5.5deg);">
+    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:492px; left:44%; transform:rotate(11.5deg);">
       Environmental Impact Studies (EIA)
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:962px; left:24%; transform:rotate(4.5deg);">
+    <div class="doodle-tag doodle-teal doodle-md" style="top:482px; left:63.5%; transform:rotate(-15.5deg);">
       Federal Ministry of Env. Certified
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-tablet" style="top:990px; left:22%; transform:rotate(-3deg);">
-      Effluent &amp; Dispersion Modeling
+    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:489px; left:78.5%; transform:rotate(12deg);">
+      Effluent & Dispersion Modeling
     </div>
-
-    <!-- Group 2J: Bridge & Post-Tensioned (Y: 1045 - 1165px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:1045px; left:20%; transform:rotate(6deg);">
-      Bridge Engineering &amp; Flyovers ✎
+    <div class="doodle-tag doodle-slate doodle-xl" style="top:517px; left:16.5%; transform:rotate(-14.5deg);">
+      Bridge Engineering & Flyovers ✎
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-tablet" style="top:1072px; left:23%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-forest doodle-xs hide-mobile" style="top:524px; left:33%; transform:rotate(11deg);">
       Post-Tensioned Concrete Decks
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:1100px; left:21%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-teal doodle-lg" style="top:514px; left:37.5%; transform:rotate(-8deg);">
       Highway Expansion Specialists
     </div>
-
-    <!-- Group 2K: Rig Move & AHTS Vessels (Y: 1155 - 1275px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:1155px; left:22%; transform:rotate(-6.5deg);">
-      Rig Move &amp; Towing Master Mariners
+    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:521px; left:59.5%; transform:rotate(15deg);">
+      Rig Move & Towing Master Mariners
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-tablet" style="top:1182px; left:25%; transform:rotate(5.5deg);">
+    <div class="doodle-tag doodle-slate doodle-sm" style="top:511px; left:71.5%; transform:rotate(-16.5deg);">
       Anchor Handling Tug Supply (AHTS)
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:1210px; left:23%; transform:rotate(-3.5deg);">
-      Deep Sea Mooring &amp; Winches ✓
+    <div class="doodle-tag doodle-forest doodle-xl hide-mobile" style="top:518px; left:84.5%; transform:rotate(9.5deg);">
+      Deep Sea Mooring & Winches ✓
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
     </div>
-
-    <!-- Group 2L: Industrial PLC & SCADA (Y: 1265 - 1385px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:1265px; left:20%; transform:rotate(5deg);">
-      Industrial Automation &amp; PLC/DCS
+    <div class="doodle-tag doodle-teal doodle-xs" style="top:548px; left:5.5%; transform:rotate(-12deg);">
+      Industrial Automation & PLC/DCS
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:1292px; left:24%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:555px; left:25%; transform:rotate(14deg);">
       Siemens • Allen-Bradley • Yokogawa
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-tablet" style="top:1320px; left:21%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-slate doodle-md" style="top:545px; left:47.5%; transform:rotate(-7.5deg);">
       Factory Acceptance Testing (FAT) ⚡
     </div>
-
-    <!-- Group 2M: Heavy Lift Plans (Y: 1375 - 1495px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-tablet" style="top:1375px; left:22%; transform:rotate(-7deg);">
-      Heavy Lift &amp; Rigging Plans
+    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:552px; left:52%; transform:rotate(13deg);">
+      Heavy Lift & Rigging Plans
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:1402px; left:25%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-teal doodle-xl" style="top:559px; left:76.5%; transform:rotate(-15deg);">
       500-Ton Crawler Cranes • CAD Sims
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-tablet" style="top:1430px; left:23%; transform:rotate(-4deg);">
+    <div class="doodle-tag doodle-amber doodle-xs hide-mobile" style="top:549px; left:89.5%; transform:rotate(10deg);">
       Tandem Lifts • Safety Audited ✓
     </div>
-
-    <!-- Group 2N: Commercial Towers (Y: 1485 - 1605px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:1485px; left:21%; transform:rotate(6deg);">
+    <div class="doodle-tag doodle-slate doodle-lg" style="top:581px; left:12%; transform:rotate(-11.5deg);">
       Commercial Real Estate Development
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-tablet" style="top:1512px; left:24%; transform:rotate(-5.5deg);">
-      Mixed-Use Towers • Lekki &amp; VI
+    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:588px; left:17.5%; transform:rotate(16deg);">
+      Mixed-Use Towers • Lekki & VI
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:1540px; left:22%; transform:rotate(3.5deg);">
+    <div class="doodle-tag doodle-teal doodle-sm" style="top:595px; left:41%; transform:rotate(-13deg);">
       LEED Gold Certified Architecture
     </div>
-
-    <!-- Group 2O: Solar Lithium Storage (Y: 1595 - 1715px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:1595px; left:20%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-amber doodle-xl hide-mobile" style="top:585px; left:62.5%; transform:rotate(8.5deg);">
       Off-Grid Solar Storage Systems
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-tablet" style="top:1622px; left:23%; transform:rotate(6deg);">
+    <div class="doodle-tag doodle-slate doodle-xs" style="top:592px; left:67%; transform:rotate(-9.5deg);">
       Lithium Iron Phosphate (LFP) Banks
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:1650px; left:21%; transform:rotate(-3.5deg);">
+    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:582px; left:82.5%; transform:rotate(12.5deg);">
       Industrial Micro-Grids ✦
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
     </div>
-
-    <!-- Group 2P: Pipeline Smart PIG (Y: 1705 - 1825px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:1705px; left:22%; transform:rotate(5.5deg);">
-      Pipeline Pigging &amp; In-Line Inspection
+    <div class="doodle-tag doodle-teal doodle-md" style="top:633px; left:3%; transform:rotate(-17deg);">
+      Pipeline Pigging & In-Line Inspection
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-tablet" style="top:1732px; left:25%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:623px; left:28.5%; transform:rotate(10.5deg);">
       Smart PIG MFL • Ultrasonic Caliper
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-tablet" style="top:1760px; left:23%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-slate doodle-xl" style="top:630px; left:33%; transform:rotate(-6deg);">
       Corrosion Defect Assessment (ASME B31G)
     </div>
-
-    <!-- Group 2Q: Mining & Minerals (Y: 1815 - 1935px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:1815px; left:21%; transform:rotate(-6.5deg);">
-      Mining &amp; Mineral Beneficiation
+    <div class="doodle-tag doodle-forest doodle-xs hide-mobile" style="top:620px; left:56.5%; transform:rotate(14.5deg);">
+      Mining & Mineral Beneficiation
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:1842px; left:24%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-teal doodle-lg" style="top:627px; left:74.5%; transform:rotate(-13.5deg);">
       Lithium • Tin • Coal • Tantalite
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:1870px; left:22%; transform:rotate(-4deg);">
+    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:634px; left:86.5%; transform:rotate(11.5deg);">
       Geochemical Exploration Surveys ✓
     </div>
-
-
-    <!-- ════════ COLUMN BAND 3: CENTER ZONE (Left: 38% - 57%) ════════ -->
-    <!-- Group 3A: Corporate Tenders & Projects (Y: 60 - 180px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:60px; left:39%; transform:rotate(3deg);">
-      Corporate Tenders &amp; EPC Projects
+    <div class="doodle-tag doodle-slate doodle-sm" style="top:661px; left:19%; transform:rotate(-15.5deg);">
+      Corporate Tenders & EPC Projects
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:86px; left:42%; transform:rotate(-5deg);">
-      Direct Enterprise SOW &amp; Bidding
+    <div class="doodle-tag doodle-forest doodle-xl hide-mobile" style="top:668px; left:36.5%; transform:rotate(12deg);">
+      Direct Enterprise SOW & Bidding
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-tablet" style="top:114px; left:40%; transform:rotate(6deg);">
+    <div class="doodle-tag doodle-teal doodle-xs" style="top:658px; left:49.5%; transform:rotate(-14.5deg);">
       ★ Multi-Billion ₦ Contract Pipeline
-      <svg class="doodle-sketch" width="44" height="9" viewBox="0 0 44 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5c10-4 20 4 40-1"/></svg>
     </div>
-
-    <!-- Group 3B: NOVA Bank Guaranteed & Escrow (Y: 170 - 290px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:170px; left:41%; transform:rotate(-6deg);">
-      NOVA Bank Escrow Guaranteed
-    </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:196px; left:44%; transform:rotate(4.5deg);">
+    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:665px; left:65%; transform:rotate(11deg);">
       100% Milestones Protected 🔒
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:224px; left:42%; transform:rotate(-3deg);">
+    <div class="doodle-tag doodle-slate doodle-md" style="top:655px; left:69.5%; transform:rotate(-8deg);">
       Instant NUBAN Settlement • Zero Fraud
     </div>
-
-    <!-- Group 3C: Milestone Payouts (Y: 280 - 400px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:280px; left:39%; transform:rotate(5.5deg);">
+    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:662px; left:88%; transform:rotate(15deg);">
       Smart Milestone Payouts ⚡
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:308px; left:43%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-teal doodle-xl" style="top:691px; left:7%; transform:rotate(-16.5deg);">
       Deliverable Approved ➔ Balance Released
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:336px; left:40%; transform:rotate(3.5deg);">
+    <div class="doodle-tag doodle-amber doodle-xs hide-mobile" style="top:698px; left:23.5%; transform:rotate(9.5deg);">
       { Zero Delayed Client Invoices }
     </div>
-
-    <!-- Group 3D: Civil Infrastructure (Y: 390 - 510px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-tablet" style="top:390px; left:42%; transform:rotate(-5deg);">
-      Civil Engineering &amp; Infrastructure
+    <div class="doodle-tag doodle-slate doodle-lg" style="top:688px; left:45%; transform:rotate(-12deg);">
+      Civil Engineering & Infrastructure
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:418px; left:45%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:695px; left:49.5%; transform:rotate(14deg);">
       Roads • Bridges • Drainage • Culverts ✎
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-tablet" style="top:446px; left:43%; transform:rotate(-4deg);">
-      Site Surveyors &amp; Total Station (Leica)
+    <div class="doodle-tag doodle-teal doodle-sm" style="top:702px; left:72%; transform:rotate(-7.5deg);">
+      Site Surveyors & Total Station (Leica)
     </div>
-
-    <!-- Group 3E: Verified Contractors 1% (Y: 500 - 620px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:500px; left:40%; transform:rotate(6deg);">
+    <div class="doodle-tag doodle-amber doodle-xl hide-mobile" style="top:692px; left:85%; transform:rotate(13deg);">
       Top 1% Verified Contractors ✦
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-tablet" style="top:528px; left:43%; transform:rotate(-5.5deg);">
-      Audited Tax Clearance &amp; CAC Records
+    <div class="doodle-tag doodle-slate doodle-xs" style="top:723px; left:3.5%; transform:rotate(-15deg);">
+      Audited Tax Clearance & CAC Records
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:556px; left:41%; transform:rotate(4deg);">
-      COREN &amp; QSRBN Certified Leaders ✓
+    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:730px; left:26.5%; transform:rotate(10deg);">
+      COREN & QSRBN Certified Leaders ✓
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
     </div>
-
-    <!-- Group 3F: West Africa Energy Corridor (Y: 610 - 730px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:610px; left:42%; transform:rotate(-6.5deg);">
+    <div class="doodle-tag doodle-teal doodle-md" style="top:737px; left:31%; transform:rotate(-11.5deg);">
       West Africa Energy Corridor ★
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-tablet" style="top:638px; left:45%; transform:rotate(5.5deg);">
+    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:727px; left:57.5%; transform:rotate(16deg);">
       Lagos • Port Harcourt • Warri • Abuja
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-tablet" style="top:666px; left:43%; transform:rotate(-3.5deg);">
+    <div class="doodle-tag doodle-slate doodle-xl" style="top:734px; left:81.5%; transform:rotate(-13deg);">
       Eket • Bonny Island • Escravos Terminals
     </div>
-
-    <!-- Group 3G: Authentic Escrow Economy (Y: 720 - 840px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:720px; left:39%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-forest doodle-xs" style="top:774px; left:14%; transform:rotate(8.5deg);">
       Transparent • Authentic • Escrow Protected ✓
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:748px; left:42%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:764px; left:18.5%; transform:rotate(-9.5deg);">
       Powering Nigeria's Project Economy ★
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:776px; left:40%; transform:rotate(3.5deg);">
+    <div class="doodle-tag doodle-amber doodle-md" style="top:771px; left:43.5%; transform:rotate(12.5deg);">
       Collektions Verified Workspace
     </div>
-
-    <!-- Group 3H: EPC Consortiums & Turnkey (Y: 830 - 950px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:830px; left:41%; transform:rotate(-5.5deg);">
-      EPC Consortiums &amp; Joint Ventures ⤳
+    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:761px; left:68.5%; transform:rotate(-17deg);">
+      EPC Consortiums & Joint Ventures ⤳
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-tablet" style="top:858px; left:44%; transform:rotate(4.5deg);">
+    <div class="doodle-tag doodle-forest doodle-xl" style="top:768px; left:73%; transform:rotate(10.5deg);">
       Turnkey Delivery • Plant Commissioning
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:886px; left:42%; transform:rotate(-3deg);">
-      Performance Bond &amp; Bank Guarantees
+    <div class="doodle-tag doodle-teal doodle-xs" style="top:810px; left:2%; transform:rotate(-6deg);">
+      Performance Bond & Bank Guarantees
     </div>
-
-    <!-- Group 3I: Subsea Fiber Optic (Y: 940 - 1060px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:940px; left:39%; transform:rotate(6.5deg);">
-      Subsea Cable Laying &amp; Trenching
+    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:800px; left:35.5%; transform:rotate(14.5deg);">
+      Subsea Cable Laying & Trenching
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:968px; left:43%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-slate doodle-md" style="top:807px; left:51.5%; transform:rotate(-13.5deg);">
       Equiano • 2Africa • MainOne Landings 🤿
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:996px; left:41%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:814px; left:56%; transform:rotate(11.5deg);">
       Deepwater Fiber Optic Protection
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
     </div>
-
-    <!-- Group 3J: Refinery Turnaround (Y: 1050 - 1170px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:1050px; left:42%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-teal doodle-xl" style="top:804px; left:87.5%; transform:rotate(-15.5deg);">
       Refinery Turnaround Maintenance (TAM)
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-tablet" style="top:1078px; left:45%; transform:rotate(5.5deg);">
+    <div class="doodle-tag doodle-amber doodle-xs" style="top:839px; left:8.5%; transform:rotate(12deg);">
       Distillation Columns • Heat Exchangers
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-tablet" style="top:1106px; left:43%; transform:rotate(-3.5deg);">
+    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:846px; left:22%; transform:rotate(-14.5deg);">
       Critical Path Shutdown Management ⚡
     </div>
-
-    <!-- Group 3K: Smart Contracts & VAT (Y: 1160 - 1280px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:1160px; left:40%; transform:rotate(5deg);">
-      Smart Contracts &amp; Milestone Ledger
+    <div class="doodle-tag doodle-forest doodle-md" style="top:836px; left:39.5%; transform:rotate(11deg);">
+      Smart Contracts & Milestone Ledger
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:1188px; left:43%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:843px; left:44%; transform:rotate(-8deg);">
       Double-Entry Accounting Verification
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:1216px; left:41%; transform:rotate(4deg);">
-      Automated VAT &amp; Withholding Receipts
+    <div class="doodle-tag doodle-amber doodle-xl" style="top:833px; left:63.5%; transform:rotate(15deg);">
+      Automated VAT & Withholding Receipts
     </div>
-
-    <!-- Group 3L: Deep Bored Piles (Y: 1270 - 1390px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-tablet" style="top:1270px; left:41%; transform:rotate(-7deg);">
+    <div class="doodle-tag doodle-slate doodle-xs hide-mobile" style="top:840px; left:78.5%; transform:rotate(-16.5deg);">
       Geotechnical Deep Foundation Piling
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-tablet" style="top:1298px; left:44%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-forest doodle-lg" style="top:870px; left:16.5%; transform:rotate(9.5deg);">
       Bored Piles • Continuous Flight Auger
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:1326px; left:42%; transform:rotate(-4deg);">
+    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:877px; left:33%; transform:rotate(-12deg);">
       Static Pile Load Tests (5000 kN) ✓
     </div>
-
-    <!-- Group 3M: API 650 Storage Tanks (Y: 1380 - 1500px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:1380px; left:39%; transform:rotate(6deg);">
+    <div class="doodle-tag doodle-amber doodle-sm" style="top:884px; left:37.5%; transform:rotate(14deg);">
       Hydrocarbon Storage Tank Farms
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:1408px; left:43%; transform:rotate(-5.5deg);">
+    <div class="doodle-tag doodle-slate doodle-xl hide-mobile" style="top:874px; left:59.5%; transform:rotate(-7.5deg);">
       API 650 Welded Storage Tanks
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:1436px; left:40%; transform:rotate(3.5deg);">
+    <div class="doodle-tag doodle-forest doodle-xs" style="top:881px; left:71.5%; transform:rotate(13deg);">
       Floating Roofs • Fire Deluge Systems
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
     </div>
-
-    <!-- Group 3N: Lattice Transmission Towers (Y: 1490 - 1610px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:1490px; left:42%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:871px; left:84.5%; transform:rotate(-15deg);">
       High-Voltage Transmission Towers
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-tablet" style="top:1518px; left:45%; transform:rotate(6deg);">
-      Lattice Steel Towers • Sag &amp; Tension
+    <div class="doodle-tag doodle-amber doodle-md" style="top:920px; left:5.5%; transform:rotate(10deg);">
+      Lattice Steel Towers • Sag & Tension
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-tablet" style="top:1546px; left:43%; transform:rotate(-3.5deg);">
+    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:910px; left:25%; transform:rotate(-11.5deg);">
       TCN Grid Interconnection Approvals
     </div>
-
-    <!-- Group 3O: Cleanrooms & Medical Gas (Y: 1600 - 1720px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:1600px; left:40%; transform:rotate(5.5deg);">
-      Hospital &amp; Medical Gas Infrastructure
+    <div class="doodle-tag doodle-forest doodle-xl" style="top:917px; left:47.5%; transform:rotate(16deg);">
+      Hospital & Medical Gas Infrastructure
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:1628px; left:43%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-teal doodle-xs hide-mobile" style="top:907px; left:52%; transform:rotate(-13deg);">
       Oxygen Generation • HVAC Cleanrooms
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:1656px; left:41%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-amber doodle-lg" style="top:914px; left:76.5%; transform:rotate(8.5deg);">
       HTM 02-01 Compliance Certified ✓
     </div>
-
-    <!-- Group 3P: CCGT Power Plants (Y: 1710 - 1830px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:1710px; left:41%; transform:rotate(-6.5deg);">
+    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:921px; left:89.5%; transform:rotate(-9.5deg);">
       Gas-Fired Combined Cycle Power (CCGT)
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:1738px; left:44%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-forest doodle-sm" style="top:955px; left:12%; transform:rotate(12.5deg);">
       Gas Turbines • Heat Recovery Steam (HRSG)
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:1766px; left:42%; transform:rotate(-4deg);">
-      Black-Start Systems &amp; Synchronization
+    <div class="doodle-tag doodle-teal doodle-xl hide-mobile" style="top:945px; left:17.5%; transform:rotate(-17deg);">
+      Black-Start Systems & Synchronization
     </div>
-
-    <!-- Group 3Q: CBN & Paystack Escrow (Y: 1820 - 1940px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:1820px; left:39%; transform:rotate(6deg);">
-      Zero Fraud • CBN &amp; Paystack Backed
+    <div class="doodle-tag doodle-amber doodle-xs" style="top:952px; left:41%; transform:rotate(10.5deg);">
+      Zero Fraud • CBN & Paystack Backed
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:1848px; left:42%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:959px; left:62.5%; transform:rotate(-6deg);">
       Bank-Grade Escrow Vault Security 🔒
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-tablet" style="top:1876px; left:40%; transform:rotate(3.5deg);">
+    <div class="doodle-tag doodle-forest doodle-md" style="top:949px; left:67%; transform:rotate(14.5deg);">
       { Trust Built On Transparent Results }
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
     </div>
-
-
-    <!-- ════════ COLUMN BAND 4: RIGHT-CENTER ZONE (Left: 58% - 77%) ════════ -->
-    <!-- Group 4A: Top 1% & NOGICD (Y: 55 - 175px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:55px; left:59%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:956px; left:82.5%; transform:rotate(-13.5deg);">
       Top 1% Contractors ✦
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:80px; left:62%; transform:rotate(5.5deg);">
-      Verified Credentials &amp; Certs
+    <div class="doodle-tag doodle-amber doodle-xl" style="top:983px; left:3%; transform:rotate(11.5deg);">
+      Verified Credentials & Certs
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-tablet" style="top:108px; left:60%; transform:rotate(-3.5deg);">
+    <div class="doodle-tag doodle-slate doodle-xs hide-mobile" style="top:990px; left:28.5%; transform:rotate(-15.5deg);">
       Background Audited • NOGICD ✓
-      <svg class="doodle-sketch" width="34" height="8" viewBox="0 0 34 8" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4q8-4 16 0t14 0"/></svg>
     </div>
-
-    <!-- Group 4B: NOVA Bank Guaranteed (Y: 165 - 285px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:165px; left:61%; transform:rotate(7deg);">
-      NOVA Bank Escrow Guaranteed
-    </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:192px; left:64%; transform:rotate(-5deg);">
-      Milestones Protected 100% 🔒
-    </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:220px; left:62%; transform:rotate(3.5deg);">
-      Instant Settlement • Zero Friction
-    </div>
-
-    <!-- Group 4C: Win Bigger Contracts (Y: 275 - 395px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-tablet" style="top:275px; left:59%; transform:rotate(-7.5deg);">
-      Win Bigger Contracts! ⤳
-    </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:302px; left:63%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-forest doodle-lg" style="top:980px; left:33%; transform:rotate(12deg);">
       Direct Enterprise Bidding
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-tablet" style="top:330px; left:60%; transform:rotate(-4deg);">
+    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:987px; left:56.5%; transform:rotate(-14.5deg);">
       Verified Client Budgets ✦
     </div>
-
-    <!-- Group 4D: Enterprise Hiring (Y: 385 - 505px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:385px; left:61%; transform:rotate(6deg);">
-      Direct Enterprise Hiring ★
-    </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-tablet" style="top:412px; left:64%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-amber doodle-sm" style="top:977px; left:74.5%; transform:rotate(11deg);">
       Zero Intermediaries • Fast Payouts
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:440px; left:62%; transform:rotate(4deg);">
-      SLA Protected • Deliver &amp; Earn
+    <div class="doodle-tag doodle-slate doodle-xl hide-mobile" style="top:984px; left:86.5%; transform:rotate(-8deg);">
+      SLA Protected • Deliver & Earn
     </div>
-
-    <!-- Group 4E: Offshore Logistics (Y: 495 - 615px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:495px; left:59%; transform:rotate(-5deg);">
-      Offshore &amp; Deepwater Logistics
-    </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:522px; left:62%; transform:rotate(6deg);">
+    <div class="doodle-tag doodle-forest doodle-xs" style="top:1013px; left:19%; transform:rotate(15deg);">
       Marine QA • Supply Vessels
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:550px; left:60%; transform:rotate(-3.5deg);">
-      Port Operations &amp; Rigging 🤿
+    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:1020px; left:36.5%; transform:rotate(-16.5deg);">
+      Port Operations & Rigging 🤿
     </div>
-
-    <!-- Group 4F: Smart Contracts Payouts (Y: 605 - 725px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:605px; left:61%; transform:rotate(5.5deg);">
-      Smart Contracts &amp; Payouts ⚡
+    <div class="doodle-tag doodle-amber doodle-md" style="top:1010px; left:49.5%; transform:rotate(9.5deg);">
+      Smart Contracts & Payouts ⚡
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:632px; left:64%; transform:rotate(-5.5deg);">
+    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:1017px; left:65%; transform:rotate(-12deg);">
       Automatic NUBAN Bank Settlement
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-tablet" style="top:660px; left:62%; transform:rotate(3.5deg);">
+    <div class="doodle-tag doodle-forest doodle-xl" style="top:1024px; left:69.5%; transform:rotate(14deg);">
       Audit Trail • Encrypted Records ✓
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
     </div>
-
-    <!-- Group 4G: Clean Energy Specialists (Y: 715 - 835px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:715px; left:59%; transform:rotate(-6.5deg);">
-      Power &amp; Renewables Hub ✦
+    <div class="doodle-tag doodle-teal doodle-xs hide-mobile" style="top:1014px; left:88%; transform:rotate(-7.5deg);">
+      Power & Renewables Hub ✦
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:742px; left:63%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-amber doodle-lg" style="top:1062px; left:7%; transform:rotate(13deg);">
       Solar Grid • Hybrid Power Solutions
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:770px; left:60%; transform:rotate(-4deg);">
+    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:1052px; left:23.5%; transform:rotate(-15deg);">
       Clean Energy EPC Specialists
     </div>
-
-    <!-- Group 4H: Lagos to Abuja Pipeline (Y: 825 - 945px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-tablet" style="top:825px; left:61%; transform:rotate(7deg);">
+    <div class="doodle-tag doodle-forest doodle-sm" style="top:1059px; left:45%; transform:rotate(10deg);">
       West Africa's #1 Project Hub ★
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-tablet" style="top:852px; left:64%; transform:rotate(-5.5deg);">
-      Lagos • Port Harcourt • Warri • Abuja
-    </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:880px; left:62%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-teal doodle-xl hide-mobile" style="top:1049px; left:49.5%; transform:rotate(-11.5deg);">
       Engineering Excellence Delivered ✓
     </div>
-
-    <!-- Group 4I: BIM Coordination (Y: 935 - 1055px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:935px; left:59%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-amber doodle-xs" style="top:1056px; left:72%; transform:rotate(16deg);">
       BIM Level 2 Coordination
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:962px; left:63%; transform:rotate(5.5deg);">
+    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:1046px; left:85%; transform:rotate(-13deg);">
       Navisworks Clash Detection • 4D
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:990px; left:60%; transform:rotate(-3.5deg);">
+    <div class="doodle-tag doodle-forest doodle-md" style="top:1096px; left:3.5%; transform:rotate(8.5deg);">
       Zero On-Site Rework Guaranteed
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
     </div>
-
-    <!-- Group 4J: ASME Boilers (Y: 1045 - 1165px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:1045px; left:62%; transform:rotate(6.5deg);">
-      Boiler &amp; Steam Turbine Overhaul
+    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:1086px; left:26.5%; transform:rotate(-9.5deg);">
+      Boiler & Steam Turbine Overhaul
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-tablet" style="top:1072px; left:65%; transform:rotate(-5deg);">
-      ASME Boiler &amp; Pressure Vessel (BPVC)
+    <div class="doodle-tag doodle-amber doodle-xl" style="top:1093px; left:31%; transform:rotate(12.5deg);">
+      ASME Boiler & Pressure Vessel (BPVC)
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-tablet" style="top:1100px; left:63%; transform:rotate(3.5deg);">
+    <div class="doodle-tag doodle-slate doodle-xs hide-mobile" style="top:1100px; left:57.5%; transform:rotate(-17deg);">
       Non-Destructive Eddy Current Testing
     </div>
-
-    <!-- Group 4K: Cryogenic Tanks (Y: 1155 - 1275px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:1155px; left:60%; transform:rotate(-6deg);">
-      LNG Bunkering &amp; Cryogenic Tanks
+    <div class="doodle-tag doodle-forest doodle-lg" style="top:1090px; left:81.5%; transform:rotate(10.5deg);">
+      LNG Bunkering & Cryogenic Tanks
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:1182px; left:63%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-teal doodle-md" style="top:1132px; left:14%; transform:rotate(-6deg);">
       Perlite Insulation • Double-Wall
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:1210px; left:61%; transform:rotate(-4deg);">
+    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:1139px; left:18.5%; transform:rotate(14.5deg);">
       BOG Recondenser Systems ✓
     </div>
-
-    <!-- Group 4L: Airport Runway Engineering (Y: 1265 - 1385px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:1265px; left:61%; transform:rotate(5.5deg);">
-      Airport Runway &amp; Apron Pavement
+    <div class="doodle-tag doodle-slate doodle-xl" style="top:1129px; left:43.5%; transform:rotate(-13.5deg);">
+      Airport Runway & Apron Pavement
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:1292px; left:64%; transform:rotate(-6deg);">
-      FAA &amp; ICAO Category 1 Standards
+    <div class="doodle-tag doodle-forest doodle-xs hide-mobile" style="top:1136px; left:68.5%; transform:rotate(11.5deg);">
+      FAA & ICAO Category 1 Standards
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:1320px; left:62%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-teal doodle-lg" style="top:1126px; left:73%; transform:rotate(-15.5deg);">
       Airfield Ground Lighting (AGL) ⚡
     </div>
-
-    <!-- Group 4M: Nitrogen Purging (Y: 1375 - 1495px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-tablet" style="top:1375px; left:59%; transform:rotate(-7deg);">
+    <div class="doodle-tag doodle-amber doodle-md" style="top:1161px; left:2%; transform:rotate(12deg);">
       Pre-Commissioning Nitrogen Purging
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-tablet" style="top:1402px; left:63%; transform:rotate(5.5deg);">
+    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:1168px; left:35.5%; transform:rotate(-14.5deg);">
       Dew Point -40°C • Helium Leak Check
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-tablet" style="top:1430px; left:60%; transform:rotate(-3.5deg);">
-      Flange Management &amp; Torqueing ✓
+    <div class="doodle-tag doodle-forest doodle-xl" style="top:1158px; left:51.5%; transform:rotate(11deg);">
+      Flange Management & Torqueing ✓
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
     </div>
-
-    <!-- Group 4N: Subsea Tieback & Manifolds (Y: 1485 - 1605px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-tablet" style="top:1485px; left:62%; transform:rotate(6deg);">
-      Subsea Tieback &amp; Manifolds
+    <div class="doodle-tag doodle-teal doodle-xs hide-mobile" style="top:1165px; left:56%; transform:rotate(-8deg);">
+      Subsea Tieback & Manifolds
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-tablet" style="top:1512px; left:65%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-amber doodle-lg" style="top:1172px; left:87.5%; transform:rotate(15deg);">
       Electro-Hydraulic Umbilicals (EHU)
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-tablet" style="top:1540px; left:63%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-slate doodle-md" style="top:1192px; left:8.5%; transform:rotate(-16.5deg);">
       Subsea Choke Valves • 10,000 PSI
     </div>
-
-    <!-- Group 4O: Biogas & Waste-to-Energy (Y: 1595 - 1715px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-tablet" style="top:1595px; left:60%; transform:rotate(-5.5deg);">
-      Waste-To-Energy &amp; Biogas Plants
+    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:1199px; left:22%; transform:rotate(9.5deg);">
+      Waste-To-Energy & Biogas Plants
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:1622px; left:63%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-teal doodle-xl" style="top:1206px; left:39.5%; transform:rotate(-12deg);">
       Anaerobic Digesters • Methane Scrubbing
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-tablet" style="top:1650px; left:61%; transform:rotate(-4deg);">
+    <div class="doodle-tag doodle-amber doodle-xs hide-mobile" style="top:1196px; left:44%; transform:rotate(14deg);">
       Circular Green Energy Grid ✦
     </div>
-
-    <!-- Group 4P: Firefighting NFPA (Y: 1705 - 1825px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-tablet" style="top:1705px; left:61%; transform:rotate(6.5deg);">
-      Firefighting &amp; Deluge Systems NFPA
+    <div class="doodle-tag doodle-slate doodle-lg" style="top:1203px; left:63.5%; transform:rotate(-7.5deg);">
+      Firefighting & Deluge Systems NFPA
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-tablet" style="top:1732px; left:64%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:1193px; left:78.5%; transform:rotate(13deg);">
       Foam Monitors • Deluge Valves • FM200
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-tablet" style="top:1760px; left:62%; transform:rotate(3.5deg);">
+    <div class="doodle-tag doodle-teal doodle-sm" style="top:1242px; left:16.5%; transform:rotate(-15deg);">
       Life Safety Code Approvals ✓
     </div>
-
-    <!-- Group 4Q: Port Logistics Incoterms (Y: 1815 - 1935px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-tablet" style="top:1815px; left:59%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-amber doodle-xl hide-mobile" style="top:1232px; left:33%; transform:rotate(10deg);">
       Fast-Track Procurement Logistics
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-tablet" style="top:1842px; left:63%; transform:rotate(5.5deg);">
+    <div class="doodle-tag doodle-slate doodle-xs" style="top:1239px; left:37.5%; transform:rotate(-11.5deg);">
       Customs Clearance • Bonded Terminals
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-tablet" style="top:1870px; left:60%; transform:rotate(-3.5deg);">
+    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:1229px; left:59.5%; transform:rotate(16deg);">
       Incoterms DDP • Zero Port Demurrage
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
     </div>
-
-
-    <!-- ════════ COLUMN BAND 5: RIGHT MARGIN & RAIL (Left: 78% - 97%) ════════ -->
-    <!-- Group 5A: Corporate Tenders (Y: 55 - 175px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:55px; left:79%; transform:rotate(7.5deg);">
-      Corporate Tenders &amp; Projects
-    </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:80px; left:81%; transform:rotate(-6deg);">
-      EPC Consortiums • Direct SLA
-    </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:108px; left:80%; transform:rotate(4deg);">
-      ★ Multi-Billion ₦ Contract Pipeline
-    </div>
-    <svg class="doodle-sketch hide-mobile" style="position:absolute; top:130px; left:83%; transform:rotate(-15deg);" width="38" height="22" viewBox="0 0 38 22" fill="none" stroke="rgba(217,155,38,0.35)" stroke-width="1.8"><path d="M34 4C24 14 14 16 4 16m6-8l-6 8 8 2"/></svg>
-
-    <!-- Group 5B: Top 1% Contractors (Y: 165 - 285px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:165px; left:80%; transform:rotate(-8deg);">
-      Top 1% Contractors ✦
-    </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:192px; left:82%; transform:rotate(5.5deg);">
-      Verified Credentials &amp; Certs
-    </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:220px; left:81%; transform:rotate(-3deg);">
-      Background Audited • NOGICD ✓
-    </div>
-
-    <!-- Group 5C: Escrow Guaranteed (Y: 275 - 395px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:275px; left:79%; transform:rotate(6.5deg);">
-      NOVA Bank Escrow Guaranteed
-    </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:302px; left:81%; transform:rotate(-6deg);">
-      Milestones Protected 100% 🔒
-      <svg class="doodle-sketch" width="38" height="8" viewBox="0 0 38 8" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4q9-4 18 0t16 0"/></svg>
-    </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:330px; left:80%; transform:rotate(4deg);">
-      Instant Settlement • Zero Friction
-    </div>
-
-    <!-- Group 5D: Win Bigger Contracts (Y: 385 - 505px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:385px; left:80%; transform:rotate(-8.5deg);">
-      Win Bigger Contracts! ⤳
-    </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:412px; left:82%; transform:rotate(5.5deg);">
-      Direct Enterprise Bidding
-    </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:440px; left:81%; transform:rotate(-3.5deg);">
-      Verified Client Budgets ✦
-    </div>
-
-    <!-- Group 5E: Enterprise Hiring (Y: 495 - 615px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:495px; left:79%; transform:rotate(7deg);">
-      Direct Enterprise Hiring ★
-    </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:522px; left:82%; transform:rotate(-5.5deg);">
-      Zero Intermediaries • Fast Payouts
-    </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:550px; left:80%; transform:rotate(4deg);">
-      SLA Protected • Deliver &amp; Earn
-    </div>
-
-    <!-- Group 5F: Deepwater Logistics (Y: 605 - 725px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:605px; left:80%; transform:rotate(-6.5deg);">
-      Offshore &amp; Deepwater Logistics
-    </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:632px; left:82%; transform:rotate(6.5deg);">
-      Marine QA • Supply Vessels
-    </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:660px; left:81%; transform:rotate(-4deg);">
-      Port Operations &amp; Rigging 🤿
-    </div>
-
-    <!-- Group 5G: Smart Payouts NUBAN (Y: 715 - 835px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:715px; left:79%; transform:rotate(5.5deg);">
-      Smart Contracts &amp; Payouts ⚡
-    </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:742px; left:82%; transform:rotate(-6deg);">
-      Automatic NUBAN Bank Settlement
-    </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:770px; left:80%; transform:rotate(3.5deg);">
-      Audit Trail • Encrypted Records ✓
-    </div>
-
-    <!-- Group 5H: Power & Renewables (Y: 825 - 945px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:825px; left:80%; transform:rotate(-7deg);">
-      Power &amp; Renewables Hub ✦
-    </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:852px; left:82%; transform:rotate(5deg);">
-      Solar Grid • Hybrid Power Solutions
-    </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:880px; left:81%; transform:rotate(-4.5deg);">
-      Clean Energy EPC Specialists
-    </div>
-
-    <!-- Group 5I: West Africa #1 Hub (Y: 935 - 1055px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:935px; left:79%; transform:rotate(7.5deg);">
-      West Africa's #1 Project Hub ★
-    </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:962px; left:82%; transform:rotate(-5.5deg);">
-      Lagos • Port Harcourt • Warri • Abuja
-    </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:990px; left:80%; transform:rotate(4deg);">
-      Bonny Island • Escravos Corridor
-    </div>
-
-    <!-- Group 5J: Chiller Plants & HVAC (Y: 1045 - 1165px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:1045px; left:80%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-teal doodle-md" style="top:1236px; left:71.5%; transform:rotate(-13deg);">
       HVAC Chiller Plant Engineering
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:1072px; left:82%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:1243px; left:84.5%; transform:rotate(8.5deg);">
       Centrifugal Chillers • VAV Units
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:1100px; left:81%; transform:rotate(-3.5deg);">
+    <div class="doodle-tag doodle-slate doodle-xl" style="top:1277px; left:5.5%; transform:rotate(-9.5deg);">
       ASHRAE 90.1 Energy Optimization
     </div>
-
-    <!-- Group 5K: Chemical & HYSYS (Y: 1155 - 1275px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:1155px; left:79%; transform:rotate(6.5deg);">
-      Chemical &amp; Process Plant Design
+    <div class="doodle-tag doodle-forest doodle-xs hide-mobile" style="top:1284px; left:25%; transform:rotate(12.5deg);">
+      Chemical & Process Plant Design
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:1182px; left:82%; transform:rotate(-5.5deg);">
-      Aspen HYSYS Simulations • P&amp;ID
+    <div class="doodle-tag doodle-teal doodle-lg" style="top:1274px; left:47.5%; transform:rotate(-17deg);">
+      Aspen HYSYS Simulations • P&ID
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:1210px; left:80%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:1281px; left:52%; transform:rotate(10.5deg);">
       Relief Valve Sizing (API 520) ✓
     </div>
-
-    <!-- Group 5L: Railway Standards (Y: 1265 - 1385px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:1265px; left:80%; transform:rotate(-7deg);">
-      Railway &amp; Light Rail Transit (LRT)
+    <div class="doodle-tag doodle-slate doodle-sm" style="top:1271px; left:76.5%; transform:rotate(-6deg);">
+      Railway & Light Rail Transit (LRT)
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:1292px; left:82%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-forest doodle-xl hide-mobile" style="top:1278px; left:89.5%; transform:rotate(14.5deg);">
       Standard Gauge • Catenary Systems
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:1320px; left:81%; transform:rotate(-4deg);">
-      Signaling &amp; Interlocking (ETCS)
+    <div class="doodle-tag doodle-teal doodle-xs" style="top:1305px; left:12%; transform:rotate(-13.5deg);">
+      Signaling & Interlocking (ETCS)
     </div>
-
-    <!-- Group 5M: Maritime Patrol NIMASA (Y: 1375 - 1495px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:1375px; left:79%; transform:rotate(5.5deg);">
-      Maritime Security &amp; Escort Vessels
+    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:1312px; left:17.5%; transform:rotate(11.5deg);">
+      Maritime Security & Escort Vessels
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:1402px; left:82%; transform:rotate(-6deg);">
+    <div class="doodle-tag doodle-slate doodle-md" style="top:1302px; left:41%; transform:rotate(-15.5deg);">
       Ballistic Patrol Boats • NIMASA
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:1430px; left:80%; transform:rotate(3.5deg);">
+    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:1309px; left:62.5%; transform:rotate(12deg);">
       Offshore Asset Perimeter Defense ✓
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
     </div>
-
-    <!-- Group 5N: Structural Health FBG (Y: 1485 - 1605px) -->
-    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:1485px; left:80%; transform:rotate(-5.5deg);">
+    <div class="doodle-tag doodle-teal doodle-xl" style="top:1316px; left:67%; transform:rotate(-14.5deg);">
       Structural Health Monitoring (SHM)
     </div>
-    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:1512px; left:82%; transform:rotate(6deg);">
+    <div class="doodle-tag doodle-amber doodle-xs hide-mobile" style="top:1306px; left:82.5%; transform:rotate(11deg);">
       Fiber Bragg Grating (FBG) Sensors
     </div>
-    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:1540px; left:81%; transform:rotate(-3.5deg);">
+    <div class="doodle-tag doodle-slate doodle-lg" style="top:1335px; left:3%; transform:rotate(-8deg);">
       Real-Time Vibrational Modal Sims
     </div>
-
-    <!-- Group 5O: Cement Manufacturing (Y: 1595 - 1715px) -->
-    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:1595px; left:79%; transform:rotate(6deg);">
-      Cement &amp; Clinker Manufacturing
+    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:1342px; left:28.5%; transform:rotate(15deg);">
+      Cement & Clinker Manufacturing
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
     </div>
-    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:1622px; left:82%; transform:rotate(-5deg);">
+    <div class="doodle-tag doodle-teal doodle-sm" style="top:1349px; left:33%; transform:rotate(-16.5deg);">
       Rotary Kilns • Ball Mills • Preheaters
     </div>
-    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:1650px; left:80%; transform:rotate(4deg);">
+    <div class="doodle-tag doodle-amber doodle-xl hide-mobile" style="top:1339px; left:56.5%; transform:rotate(9.5deg);">
       Automated Palletizing Lines
     </div>
-
-    <!-- Group 5P: Grain Silos SS316 (Y: 1705 - 1825px) -->
-    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:1705px; left:80%; transform:rotate(-6.5deg);">
-      Grain Silos &amp; Agro-Processing Mills
+    <div class="doodle-tag doodle-slate doodle-xs" style="top:1346px; left:74.5%; transform:rotate(-12deg);">
+      Grain Silos & Agro-Processing Mills
     </div>
-    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:1732px; left:82%; transform:rotate(5deg);">
+    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:1336px; left:86.5%; transform:rotate(14deg);">
       Aeration Cables • Dust Extraction
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
     </div>
-    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:1760px; left:81%; transform:rotate(-4deg);">
+    <div class="doodle-tag doodle-teal doodle-md" style="top:1384px; left:19%; transform:rotate(-7.5deg);">
       Food Grade Stainless Steel (SS316)
     </div>
-
-    <!-- Group 5Q: Tier III Data Centers (Y: 1815 - 1935px) -->
-    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:1815px; left:79%; transform:rotate(5.5deg);">
+    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:1374px; left:36.5%; transform:rotate(13deg);">
       Data Center Tier III Infrastructure
     </div>
-    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:1842px; left:82%; transform:rotate(-5.5deg);">
+    <div class="doodle-tag doodle-slate doodle-xl" style="top:1381px; left:49.5%; transform:rotate(-15deg);">
       N+1 Redundant UPS • Precision CRAC
     </div>
-    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:1870px; left:80%; transform:rotate(3.5deg);">
+    <div class="doodle-tag doodle-forest doodle-xs hide-mobile" style="top:1371px; left:65%; transform:rotate(10deg);">
       Uptime Institute Certified Facility ✓
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-lg" style="top:1378px; left:69.5%; transform:rotate(-11.5deg);">
+      ✦ Verified Nigerian Talent
+    </div>
+    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:1385px; left:88%; transform:rotate(16deg);">
+      { Zero Middlemen }
+    </div>
+    <div class="doodle-tag doodle-slate doodle-sm" style="top:1418px; left:7%; transform:rotate(-13deg);">
+      Fast Turnaround ⚡
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xl hide-mobile" style="top:1408px; left:23.5%; transform:rotate(8.5deg);">
+      Deepwater & Subsea 🤿
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xs" style="top:1415px; left:45%; transform:rotate(-9.5deg);">
+      Direct SLA ✓ Authentic Bids
+    </div>
+    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:1422px; left:49.5%; transform:rotate(12.5deg);">
+      Engineers & BIM Specialists
+    </div>
+    <div class="doodle-tag doodle-slate doodle-md" style="top:1412px; left:72%; transform:rotate(-17deg);">
+      Quantity Surveyors & BOQ
+    </div>
+    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:1419px; left:85%; transform:rotate(10.5deg);">
+      Pipeline & HAZOP Compliance
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xl" style="top:1454px; left:3.5%; transform:rotate(-6deg);">
+      Fabrication & Heavy Rigging
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xs hide-mobile" style="top:1461px; left:26.5%; transform:rotate(14.5deg);">
+      Geologists & Site Surveyors ✎
+    </div>
+    <div class="doodle-tag doodle-slate doodle-lg" style="top:1451px; left:31%; transform:rotate(-13.5deg);">
+      Energy & Infrastructure
+    </div>
+    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:1458px; left:57.5%; transform:rotate(11.5deg);">
+      Oil & Gas EPC Tenders ★
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-sm" style="top:1448px; left:81.5%; transform:rotate(-15.5deg);">
+      Corporate Tenders & Projects
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xl" style="top:1483px; left:14%; transform:rotate(12deg);">
+      Direct Enterprise Hiring ★
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xs hide-mobile" style="top:1490px; left:18.5%; transform:rotate(-14.5deg);">
+      Offshore & Deepwater Logistics
+    </div>
+    <div class="doodle-tag doodle-forest doodle-lg" style="top:1497px; left:43.5%; transform:rotate(11deg);">
+      100% Escrow Protected ✓
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:1487px; left:68.5%; transform:rotate(-8deg);">
+      Milestone Releases ⚡
+    </div>
+    <div class="doodle-tag doodle-amber doodle-sm" style="top:1494px; left:73%; transform:rotate(15deg);">
+      NOVA Bank Escrow Guaranteed
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xl" style="top:1531px; left:2%; transform:rotate(-16.5deg);">
+      Win Bigger Contracts! ⤳
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xs hide-mobile" style="top:1521px; left:35.5%; transform:rotate(9.5deg);">
+      24hr Bid Turnaround ⚡
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-lg" style="top:1528px; left:51.5%; transform:rotate(-12deg);">
+      AutoCAD 3D • Civil • Structural
+    </div>
+    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:1518px; left:56%; transform:rotate(14deg);">
+      ✦ Top 1% Verified Experts
+    </div>
+    <div class="doodle-tag doodle-slate doodle-sm" style="top:1525px; left:87.5%; transform:rotate(-7.5deg);">
+      Zero Delay Approvals ⤳
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xl" style="top:1564px; left:8.5%; transform:rotate(13deg);">
+      Cost Engineering • Auditing
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xs hide-mobile" style="top:1554px; left:22%; transform:rotate(-15deg);">
+      { Transparent Escrow Estimates }
+    </div>
+    <div class="doodle-tag doodle-amber doodle-lg" style="top:1561px; left:39.5%; transform:rotate(10deg);">
+      Safety First ✦ ISO 45001
+    </div>
+    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:1568px; left:44%; transform:rotate(-11.5deg);">
+      Certified Welders & Riggers (ASME)
+    </div>
+    <div class="doodle-tag doodle-forest doodle-sm" style="top:1558px; left:63.5%; transform:rotate(16deg);">
+      Offshore Drilling Specialists
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xl hide-mobile" style="top:1565px; left:78.5%; transform:rotate(-13deg);">
+      FPSO & Subsea Architecture ⤳
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xs" style="top:1599px; left:16.5%; transform:rotate(8.5deg);">
+      Marine Safety & QA/QC ✓
+    </div>
+    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:1606px; left:33%; transform:rotate(-9.5deg);">
+      Collektions Instant Shortlist
+    </div>
+    <div class="doodle-tag doodle-forest doodle-md" style="top:1596px; left:37.5%; transform:rotate(12.5deg);">
+      Direct Messaging • Secure NDA
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:1603px; left:59.5%; transform:rotate(-17deg);">
+      HSE Officers & Risk Managers
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xl" style="top:1593px; left:71.5%; transform:rotate(10.5deg);">
+      Zero Incident Standards ★
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xs hide-mobile" style="top:1600px; left:84.5%; transform:rotate(-6deg);">
+      GIS Mapping • Bathymetry
+    </div>
+    <div class="doodle-tag doodle-forest doodle-lg" style="top:1627px; left:5.5%; transform:rotate(14.5deg);">
+      West Africa Top Energy Pool ✦
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:1634px; left:25%; transform:rotate(-13.5deg);">
+      Instrumentation & SCADA
+    </div>
+    <div class="doodle-tag doodle-amber doodle-sm" style="top:1624px; left:47.5%; transform:rotate(11.5deg);">
+      Commissioning Specialists ✓
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xl hide-mobile" style="top:1631px; left:52%; transform:rotate(-15.5deg);">
+      Substation Automation ⚡
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xs" style="top:1638px; left:76.5%; transform:rotate(12deg);">
+      Dredging & Coastal Engineering
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:1628px; left:89.5%; transform:rotate(-14.5deg);">
+      Coastal Protection & Piling ⤳
+    </div>
+    <div class="doodle-tag doodle-amber doodle-md" style="top:1674px; left:12%; transform:rotate(11deg);">
+      Port Infrastructure Masters
+    </div>
+    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:1664px; left:17.5%; transform:rotate(-8deg);">
+      Corrosion Control & NDT
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xl" style="top:1671px; left:41%; transform:rotate(15deg);">
+      Cathodic Protection Systems
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xs hide-mobile" style="top:1661px; left:62.5%; transform:rotate(-16.5deg);">
+      Ultrasonic Testing (UT) & MPI ✓
+    </div>
+    <div class="doodle-tag doodle-amber doodle-lg" style="top:1668px; left:67%; transform:rotate(9.5deg);">
+      Geotechnical Soil Lab & CPT
+    </div>
+    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:1658px; left:82.5%; transform:rotate(-12deg);">
+      Foundation & Retaining Walls ✎
+    </div>
+    <div class="doodle-tag doodle-forest doodle-sm" style="top:1706px; left:3%; transform:rotate(14deg);">
+      Borehole Drilling Specialists
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xl hide-mobile" style="top:1696px; left:28.5%; transform:rotate(-7.5deg);">
+      Solar EPC & Mini-Grids ✦
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xs" style="top:1703px; left:33%; transform:rotate(13deg);">
+      Inverters • Batteries • SCADA
+    </div>
+    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:1710px; left:56.5%; transform:rotate(-15deg);">
+      Clean Renewable Megawatts ⚡
+    </div>
+    <div class="doodle-tag doodle-forest doodle-md" style="top:1700px; left:74.5%; transform:rotate(10deg);">
+      Telecoms Tower Engineering
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-sm hide-mobile" style="top:1707px; left:86.5%; transform:rotate(-11.5deg);">
+      Fiber Optic Metro Backbone ⤳
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xl" style="top:1740px; left:19%; transform:rotate(16deg);">
+      5G Infrastructure Rollouts
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xs hide-mobile" style="top:1747px; left:36.5%; transform:rotate(-13deg);">
+      Marine Warranty Surveyors (MWS)
+    </div>
+    <div class="doodle-tag doodle-forest doodle-lg" style="top:1737px; left:49.5%; transform:rotate(8.5deg);">
+      Loadout • Towing • Installation
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:1744px; left:65%; transform:rotate(-9.5deg);">
+      Certified Vessel Approvals ✓
+    </div>
+    <div class="doodle-tag doodle-amber doodle-sm" style="top:1734px; left:69.5%; transform:rotate(12.5deg);">
+      Water & Effluent Treatment
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xl hide-mobile" style="top:1741px; left:88%; transform:rotate(-17deg);">
+      Reverse Osmosis • Filtration
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xs" style="top:1776px; left:7%; transform:rotate(10.5deg);">
+      Zero Liquid Discharge (ZLD) ★
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-lg hide-mobile" style="top:1783px; left:23.5%; transform:rotate(-6deg);">
+      Offshore Deepwater Operations
+    </div>
+    <div class="doodle-tag doodle-amber doodle-md" style="top:1773px; left:45%; transform:rotate(14.5deg);">
+      Subsea Wellhead Installation ⤳
+    </div>
+    <div class="doodle-tag doodle-slate doodle-sm hide-mobile" style="top:1780px; left:49.5%; transform:rotate(-13.5deg);">
+      ROV Pilots & Dynamic Positioning
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xl" style="top:1787px; left:72%; transform:rotate(11.5deg);">
+      Structural Steel & Precast ✎
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xs hide-mobile" style="top:1777px; left:85%; transform:rotate(-15.5deg);">
+      Tekla 3D Detailing • PE Stamp
+    </div>
+    <div class="doodle-tag doodle-amber doodle-lg" style="top:1805px; left:3.5%; transform:rotate(12deg);">
+      Fabrication Yard Audited ✓
+    </div>
+    <div class="doodle-tag doodle-slate doodle-md hide-mobile" style="top:1812px; left:26.5%; transform:rotate(-14.5deg);">
+      Commercial BOQs & Pricing Models
+    </div>
+    <div class="doodle-tag doodle-forest doodle-sm" style="top:1819px; left:31%; transform:rotate(11deg);">
+      Quantity Surveyors Institute (NIQS)
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xl hide-mobile" style="top:1809px; left:57.5%; transform:rotate(-8deg);">
+      Zero Hidden Variation Costs ⚡
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xs" style="top:1816px; left:81.5%; transform:rotate(15deg);">
+      Electrical HV Substations 330kV
+    </div>
+    <div class="doodle-tag doodle-slate doodle-lg" style="top:1853px; left:14%; transform:rotate(-16.5deg);">
+      Transformers • Switchgears • Protection
+    </div>
+    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:1843px; left:18.5%; transform:rotate(9.5deg);">
+      Transmission Grid Experts ✦
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-sm" style="top:1850px; left:43.5%; transform:rotate(-12deg);">
+      Collektions Instant Shortlisting
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xl hide-mobile" style="top:1840px; left:68.5%; transform:rotate(14deg);">
+      Peer-Reviewed Engineering Talent
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xs" style="top:1847px; left:73%; transform:rotate(-7.5deg);">
+      NOGICD Nigerian Content Leader
+    </div>
+    <div class="doodle-tag doodle-forest doodle-lg" style="top:1886px; left:2%; transform:rotate(13deg);">
+      100% In-Country Value (ICV) ✓
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-md hide-mobile" style="top:1893px; left:35.5%; transform:rotate(-15deg);">
+      Capacity Building & Skill Transfer
+    </div>
+    <div class="doodle-tag doodle-amber doodle-sm" style="top:1883px; left:51.5%; transform:rotate(10deg);">
+      Gas Flare Monetization Projects
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xl hide-mobile" style="top:1890px; left:56%; transform:rotate(-11.5deg);">
+      CNG • LNG • LPG Processing ⤳
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xs" style="top:1880px; left:87.5%; transform:rotate(16deg);">
+      Clean Gas Compression Hubs
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-lg" style="top:1921px; left:8.5%; transform:rotate(-13deg);">
+      Environmental Impact Studies (EIA)
+    </div>
+    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:1928px; left:22%; transform:rotate(8.5deg);">
+      Federal Ministry of Env. Certified
+    </div>
+    <div class="doodle-tag doodle-slate doodle-sm" style="top:1918px; left:39.5%; transform:rotate(-9.5deg);">
+      Effluent & Dispersion Modeling
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xl hide-mobile" style="top:1925px; left:44%; transform:rotate(12.5deg);">
+      Bridge Engineering & Flyovers ✎
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xs" style="top:1932px; left:63.5%; transform:rotate(-17deg);">
+      Post-Tensioned Concrete Decks
+    </div>
+    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:1922px; left:78.5%; transform:rotate(10.5deg);">
+      Highway Expansion Specialists
+    </div>
+    <div class="doodle-tag doodle-slate doodle-md" style="top:1949px; left:16.5%; transform:rotate(-6deg);">
+      Rig Move & Towing Master Mariners
+    </div>
+    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:1956px; left:33%; transform:rotate(14.5deg);">
+      Anchor Handling Tug Supply (AHTS)
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xl" style="top:1963px; left:37.5%; transform:rotate(-13.5deg);">
+      Deep Sea Mooring & Winches ✓
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xs hide-mobile" style="top:1953px; left:59.5%; transform:rotate(11.5deg);">
+      Industrial Automation & PLC/DCS
+    </div>
+    <div class="doodle-tag doodle-slate doodle-lg" style="top:1960px; left:71.5%; transform:rotate(-15.5deg);">
+      Siemens • Allen-Bradley • Yokogawa
+    </div>
+    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:1950px; left:84.5%; transform:rotate(12deg);">
+      Factory Acceptance Testing (FAT) ⚡
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-sm" style="top:1996px; left:5.5%; transform:rotate(-14.5deg);">
+      Heavy Lift & Rigging Plans
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xl hide-mobile" style="top:1986px; left:25%; transform:rotate(11deg);">
+      500-Ton Crawler Cranes • CAD Sims
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xs" style="top:1993px; left:47.5%; transform:rotate(-8deg);">
+      Tandem Lifts • Safety Audited ✓
+    </div>
+    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:1983px; left:52%; transform:rotate(15deg);">
+      Commercial Real Estate Development
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-md" style="top:1990px; left:76.5%; transform:rotate(-16.5deg);">
+      Mixed-Use Towers • Lekki & VI
+    </div>
+    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:1997px; left:89.5%; transform:rotate(9.5deg);">
+      LEED Gold Certified Architecture
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xl" style="top:2028px; left:12%; transform:rotate(-12deg);">
+      Off-Grid Solar Storage Systems
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xs hide-mobile" style="top:2018px; left:17.5%; transform:rotate(14deg);">
+      Lithium Iron Phosphate (LFP) Banks
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-lg" style="top:2025px; left:41%; transform:rotate(-7.5deg);">
+      Industrial Micro-Grids ✦
+    </div>
+    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:2032px; left:62.5%; transform:rotate(13deg);">
+      Pipeline Pigging & In-Line Inspection
+    </div>
+    <div class="doodle-tag doodle-slate doodle-sm" style="top:2022px; left:67%; transform:rotate(-15deg);">
+      Smart PIG MFL • Ultrasonic Caliper
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xl hide-mobile" style="top:2029px; left:82.5%; transform:rotate(10deg);">
+      Corrosion Defect Assessment (ASME B31G)
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xs" style="top:2062px; left:3%; transform:rotate(-11.5deg);">
+      Mining & Mineral Beneficiation
+    </div>
+    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:2069px; left:28.5%; transform:rotate(16deg);">
+      Lithium • Tin • Coal • Tantalite
+    </div>
+    <div class="doodle-tag doodle-slate doodle-md" style="top:2059px; left:33%; transform:rotate(-13deg);">
+      Geochemical Exploration Surveys ✓
+    </div>
+    <div class="doodle-tag doodle-forest doodle-sm hide-mobile" style="top:2066px; left:56.5%; transform:rotate(8.5deg);">
+      Corporate Tenders & EPC Projects
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xl" style="top:2056px; left:74.5%; transform:rotate(-9.5deg);">
+      Direct Enterprise SOW & Bidding
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xs hide-mobile" style="top:2063px; left:86.5%; transform:rotate(12.5deg);">
+      ★ Multi-Billion ₦ Contract Pipeline
+    </div>
+    <div class="doodle-tag doodle-slate doodle-lg" style="top:2098px; left:19%; transform:rotate(-17deg);">
+      100% Milestones Protected 🔒
+    </div>
+    <div class="doodle-tag doodle-forest doodle-md hide-mobile" style="top:2105px; left:36.5%; transform:rotate(10.5deg);">
+      Instant NUBAN Settlement • Zero Fraud
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-sm" style="top:2112px; left:49.5%; transform:rotate(-6deg);">
+      Smart Milestone Payouts ⚡
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xl hide-mobile" style="top:2102px; left:65%; transform:rotate(14.5deg);">
+      Deliverable Approved ➔ Balance Released
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xs" style="top:2109px; left:69.5%; transform:rotate(-13.5deg);">
+      { Zero Delayed Client Invoices }
+    </div>
+    <div class="doodle-tag doodle-forest doodle-lg hide-mobile" style="top:2099px; left:88%; transform:rotate(11.5deg);">
+      Civil Engineering & Infrastructure
+      <svg class="doodle-sketch" width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 16-6 24-2m-4-6l4 6-6 3"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-md" style="top:2144px; left:7%; transform:rotate(-15.5deg);">
+      Roads • Bridges • Drainage • Culverts ✎
+    </div>
+    <div class="doodle-tag doodle-amber doodle-sm hide-mobile" style="top:2134px; left:23.5%; transform:rotate(12deg);">
+      Site Surveyors & Total Station (Leica)
+    </div>
+    <div class="doodle-tag doodle-slate doodle-xl" style="top:2141px; left:45%; transform:rotate(-14.5deg);">
+      Top 1% Verified Contractors ✦
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xs hide-mobile" style="top:2131px; left:49.5%; transform:rotate(11deg);">
+      Audited Tax Clearance & CAC Records
+      <svg class="doodle-sketch" width="38" height="10" viewBox="0 0 38 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7c8-5 18-5 34-1"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-lg" style="top:2138px; left:72%; transform:rotate(-8deg);">
+      COREN & QSRBN Certified Leaders ✓
+    </div>
+    <div class="doodle-tag doodle-amber doodle-md hide-mobile" style="top:2145px; left:85%; transform:rotate(15deg);">
+      West Africa Energy Corridor ★
+    </div>
+    <div class="doodle-tag doodle-slate doodle-sm" style="top:2175px; left:3.5%; transform:rotate(-16.5deg);">
+      Lagos • Port Harcourt • Warri • Abuja
+    </div>
+    <div class="doodle-tag doodle-forest doodle-xl hide-mobile" style="top:2165px; left:26.5%; transform:rotate(9.5deg);">
+      Eket • Bonny Island • Escravos Terminals
+      <svg class="doodle-sketch" width="36" height="20" viewBox="0 0 36 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4c8 8 18 10 26 10m-6-6l6 6-6 2"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xs" style="top:2172px; left:31%; transform:rotate(-12deg);">
+      Transparent • Authentic • Escrow Protected ✓
+    </div>
+    <div class="doodle-tag doodle-amber doodle-lg hide-mobile" style="top:2179px; left:57.5%; transform:rotate(14deg);">
+      Powering Nigeria's Project Economy ★
+    </div>
+    <div class="doodle-tag doodle-slate doodle-md" style="top:2169px; left:81.5%; transform:rotate(-7.5deg);">
+      Collektions Verified Workspace
+    </div>
+    <div class="doodle-tag doodle-forest doodle-sm" style="top:2208px; left:14%; transform:rotate(13deg);">
+      EPC Consortiums & Joint Ventures ⤳
+      <svg class="doodle-sketch" width="34" height="9" viewBox="0 0 34 9" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c8-5 16 5 24 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal doodle-xl hide-mobile" style="top:2215px; left:18.5%; transform:rotate(-15deg);">
+      Turnkey Delivery • Plant Commissioning
+    </div>
+    <div class="doodle-tag doodle-amber doodle-xs" style="top:2205px; left:43.5%; transform:rotate(10deg);">
+      Performance Bond & Bank Guarantees
+    </div>
+    <div class="doodle-tag doodle-slate doodle-lg hide-mobile" style="top:2212px; left:68.5%; transform:rotate(-11.5deg);">
+      Subsea Cable Laying & Trenching
+    </div>
+    <div class="doodle-tag doodle-forest doodle-md" style="top:2202px; left:73%; transform:rotate(16deg);">
+      Equiano • 2Africa • MainOne Landings 🤿
+      <svg class="doodle-sketch" width="44" height="8" viewBox="0 0 44 8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4q11 4 22 0t18 0"/></svg>
     </div>
   `;
 
