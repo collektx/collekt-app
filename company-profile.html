@@ -42,9 +42,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=194.0">
-<link rel="stylesheet" href="shared.css?v=194.0">
-<link rel="stylesheet" href="glass.css?v=194.0">
+<link rel="stylesheet" href="style.css?v=195.0">
+<link rel="stylesheet" href="shared.css?v=195.0">
+<link rel="stylesheet" href="glass.css?v=195.0">
 
 <style>
   body { background: var(--paper); }
@@ -145,7 +145,7 @@
           </button>
           <div class="co-logo-wrap">
             <div class="co-logo" id="coLogoInitial" onclick="openLogoPhotoOptionsModal()" title="Click to edit or upload company logo" style="cursor:pointer;">
-              <span>C</span>
+              <span></span>
               <div class="avatar-hover-overlay" style="position:absolute; inset:0; background:rgba(4,14,13,0.55); backdrop-filter:blur(3px); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; transition:opacity .2s ease; z-index:3; border-radius:16px;">
                 <span style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em;">Edit Logo</span>
               </div>
@@ -155,14 +155,14 @@
         <div class="profile-info-bar">
           <div>
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-              <div class="profile-name" id="coProfileName">Company Account</div>
+              <div class="profile-name" id="coProfileName"></div>
               <span id="coProfileShield"></span>
             </div>
-            <div style="font-size:14px; color:var(--muted); margin-bottom:10px; font-weight:600;" id="coSubIndustry">Energy Enterprise</div>
+            <div style="font-size:14px; color:var(--muted); margin-bottom:10px; font-weight:600;" id="coSubIndustry"></div>
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
               <div class="verified-badge" id="coVerifiedBadge" style="display:none;"></div>
-              <div style="display:flex; align-items:center; gap:4px; font-size:13px; color:var(--muted); font-weight:600;" id="coMetaLocation">Location not specified</div>
-              <div style="display:flex; align-items:center; gap:4px; font-size:13px; color:var(--muted); font-weight:600;" id="coMetaWebsite">Website not added</div>
+              <div style="display:flex; align-items:center; gap:4px; font-size:13px; color:var(--muted); font-weight:600;" id="coMetaLocation"></div>
+              <div style="display:flex; align-items:center; gap:4px; font-size:13px; color:var(--muted); font-weight:600;" id="coMetaWebsite"></div>
             </div>
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -171,6 +171,41 @@
             <button class="btn btn-amber btn-sm" onclick="location.href='company-dashboard.html'" style="font-weight:800;">Dashboard</button>
           </div>
         </div>
+        <script>
+          (function() {
+            try {
+              var raw = localStorage.getItem('collekt_user');
+              if (!raw) return;
+              var u = JSON.parse(raw);
+              if (!u) return;
+              var name = u.company_name || u.name || '';
+              var ind = u.tagline || u.industry || u.title || 'Enterprise';
+              var loc = u.location || (u.state ? u.state + ', Nigeria' : 'Nigeria');
+              var logo = (typeof resolveUserAvatarSrc === 'function' ? resolveUserAvatarSrc(u) : '') || u.company_logo || u.avatar || '';
+              
+              var isPrem = u.is_premium || u.subscription_status === 'active' || u.subscription_status === 'active_trial' || u.subscription_tier === 'company_enterprise';
+              var badgeHtml = isPrem ? '<span class="shield-badge collekt-verified-check" title="Premium Subscriber Verified" style="margin-left:6px; margin-right:2px; vertical-align:middle; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; transform:translateY(-1px);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;"><path d="M4.5 12.8L9.5 17.5L19.5 6.5" stroke="#16a34a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' : '';
+
+              var nameEl = document.getElementById('coProfileName');
+              if (nameEl && name) {
+                nameEl.innerHTML = '<span style="vertical-align:middle;">' + name + '</span>' + badgeHtml;
+              }
+              var indEl = document.getElementById('coSubIndustry');
+              if (indEl && ind) indEl.textContent = ind;
+              var locEl = document.getElementById('coMetaLocation');
+              if (locEl && loc) locEl.textContent = loc;
+              var logoEl = document.getElementById('coLogoInitial');
+              if (logoEl) {
+                if (logo) {
+                  logoEl.innerHTML = '<img src="' + logo + '" alt="Company Logo" style="width:100%; height:100%; object-fit:cover; border-radius:20px;">';
+                } else if (name) {
+                  var span = logoEl.querySelector('span');
+                  if (span) span.textContent = name.charAt(0).toUpperCase();
+                }
+              }
+            } catch(e) {}
+          })();
+        </script>
 
         <!-- Stats Bar -->
         <div class="profile-stats-bar">
@@ -805,11 +840,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=194.0"></script>
-<script src="app.js?v=194.0"></script>
-<script src="collekt-ai.js?v=194.0"></script>
-<script src="settings-popup.js?v=194.0"></script>
-<script src="upload-modal.js?v=194.0"></script>
+<script src="supabase.js?v=195.0"></script>
+<script src="app.js?v=195.0"></script>
+<script src="collekt-ai.js?v=195.0"></script>
+<script src="settings-popup.js?v=195.0"></script>
+<script src="upload-modal.js?v=195.0"></script>
 <script>
   requireCompany();
 
