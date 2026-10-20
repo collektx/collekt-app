@@ -2715,11 +2715,15 @@ html, body, button, a, input, select, textarea,
   left: 0;
   width: 100%;
   height: 100%;
+  min-height: 100vh;
   pointer-events: none !important;
   overflow: hidden;
   z-index: 0;
   user-select: none;
   contain: layout style;
+  filter: blur(0.85px);
+  -webkit-filter: blur(0.85px);
+  transform: translateZ(0);
 }
 
 /* Ensure foreground content stays above doodle backdrop */
@@ -2740,22 +2744,32 @@ html, body, button, a, input, select, textarea,
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.06));
 }
 
-.doodle-lg { font-size: 24px; font-weight: 700; }
-.doodle-md { font-size: 17px; font-weight: 700; }
-.doodle-sm { font-size: 13px; font-weight: 600; opacity: 0.85; }
+.doodle-xl { font-size: 27px; font-weight: 700; }
+.doodle-lg { font-size: 22px; font-weight: 700; }
+.doodle-md { font-size: 16.5px; font-weight: 700; }
+.doodle-sm { font-size: 13px; font-weight: 600; opacity: 0.88; }
+.doodle-xs { font-size: 11.5px; font-weight: 600; opacity: 0.82; }
+
+/* Depth blur modifier classes */
+.doodle-blur-soft { filter: blur(0.45px); }
+.doodle-blur-deep { filter: blur(1.35px); opacity: 0.72; }
 
 /* Light Theme Doodle Ink (Multiply for natural pen/marker crossover) */
 .doodle-teal {
-  color: rgba(19, 117, 111, 0.34);
+  color: rgba(19, 117, 111, 0.36);
+  text-shadow: 0 0 10px rgba(19, 117, 111, 0.12);
 }
 .doodle-amber {
-  color: rgba(195, 125, 20, 0.36);
+  color: rgba(195, 125, 20, 0.38);
+  text-shadow: 0 0 10px rgba(195, 125, 20, 0.12);
 }
 .doodle-slate {
-  color: rgba(45, 68, 65, 0.28);
+  color: rgba(45, 68, 65, 0.30);
+  text-shadow: 0 0 10px rgba(45, 68, 65, 0.10);
 }
 .doodle-forest {
-  color: rgba(14, 59, 53, 0.35);
+  color: rgba(14, 59, 53, 0.36);
+  text-shadow: 0 0 10px rgba(14, 59, 53, 0.12);
 }
 html:not(.dark) .doodle-tag {
   mix-blend-mode: multiply;
@@ -2764,17 +2778,19 @@ html:not(.dark) .doodle-tag {
 /* Dark Theme Doodle Ink (Screen blend mode for vibrant overlapping luminescence) */
 html.dark .doodle-teal {
   color: rgba(45, 212, 191, 0.32);
-  text-shadow: 0 0 14px rgba(45, 212, 191, 0.16);
+  text-shadow: 0 0 16px rgba(45, 212, 191, 0.20);
 }
 html.dark .doodle-amber {
   color: rgba(217, 155, 38, 0.34);
-  text-shadow: 0 0 14px rgba(217, 155, 38, 0.16);
+  text-shadow: 0 0 16px rgba(217, 155, 38, 0.20);
 }
 html.dark .doodle-slate {
   color: rgba(184, 199, 197, 0.26);
+  text-shadow: 0 0 12px rgba(184, 199, 197, 0.14);
 }
 html.dark .doodle-forest {
-  color: rgba(94, 234, 212, 0.28);
+  color: rgba(94, 234, 212, 0.30);
+  text-shadow: 0 0 16px rgba(94, 234, 212, 0.18);
 }
 html.dark .doodle-tag {
   mix-blend-mode: screen;

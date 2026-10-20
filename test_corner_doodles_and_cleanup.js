@@ -25,6 +25,13 @@ if (!sharedCss.includes('.collekt-doodle-canvas') || !sharedCss.includes('.doodl
   console.log('  ✅ .collekt-doodle-canvas & .doodle-tag CSS definitions confirmed');
 }
 
+if (!sharedCss.includes('filter: blur') && !sharedCss.includes('-webkit-filter: blur')) {
+  console.error('❌ FAIL: Soft blur filter missing on doodle canvas in shared.css');
+  failed = true;
+} else {
+  console.log('  ✅ Soft blur filter confirmed on .collekt-doodle-canvas');
+}
+
 if (!sharedCss.includes('overflow-x: hidden') || !sharedCss.includes('position: relative')) {
   console.error('❌ FAIL: .app-main positioning / overflow-x containment missing in shared.css');
   failed = true;
