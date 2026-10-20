@@ -1080,10 +1080,21 @@ function syncUserDisplayEverywhere() {
     if (el) el.textContent = name;
   });
 
-  // 2. Profile Names
+  // Welcome badges on dashboards
+  ['welcomeBadge', 'coWelcomeBadge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.innerHTML = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(22, u) : '';
+    }
+  });
+
+  // 2. Profile Names (Standard Green Checkmark next to name for premium subscribers)
   ['profileName', 'coProfileName', 'userProfileName'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.textContent = name;
+    if (el) {
+      const badge = typeof getShieldBadgeHTML === 'function' ? getShieldBadgeHTML(22, u) : '';
+      el.innerHTML = `<span style="vertical-align:middle;">${escapeHTML(name)}</span>${badge}`;
+    }
   });
 
   // 3. Topbar Profile Menu & Sidebar Displays
@@ -5886,37 +5897,89 @@ function buildPublicNav() {
   initMobileNav();
 }
 
+/* ═════════════════════════════════════════════════════════
+   PREMIUM SUBSCRIBER GREEN CHECK MARK ENGINE
+   - Promocode premium trial users (e.g. 60-day trial) & paid premium users receive green check mark
+   - Non-premium subscribers NEVER receive this green check mark
+   ═════════════════════════════════════════════════════════ */
+function isUserPremiumSubscriber(user) {
+  const u = user || (typeof getUser === 'function' ? getUser() : null);
+  if (!u) return false;
+
+  const nowMs = Date.now();
+
+  // 1. Promo Code / Founding Member Free Trial
+  const isTrial = u.subscription_status === 'active_trial' || 
+                  u.subscription_cycle === 'trial_60_days' || 
+                  Boolean(u.promo_code_used && u.trial_ends_at);
+
+  if (isTrial || (u.is_premium && u.trial_ends_at)) {
+    if (u.trial_ends_at) {
+      const trialEndMs = new Date(u.trial_ends_at).getTime();
+      if (!isNaN(trialEndMs) && trialEndMs < nowMs) {
+        // Expired trial! Check if user subsequently renewed via active paid subscription
+        if (u.subscription_status === 'active') {
+          if (u.subscription_expiry) {
+            const expMs = new Date(u.subscription_expiry).getTime();
+            if (!isNaN(expMs) && expMs >= nowMs) return true;
+          } else {
+            return true;
+          }
+        }
+        return false;
+      }
+    }
+    return true; // Active trial from promo code
+  }
+
+  // 2. Paid Premium Subscription
+  if (u.subscription_status === 'active') {
+    if (u.subscription_expiry) {
+      const expMs = new Date(u.subscription_expiry).getTime();
+      if (!isNaN(expMs) && expMs < nowMs) return false;
+    }
+    return true;
+  }
+
+  // 3. Paid Tier & is_premium flag
+  const isPaidTier = u.subscription_tier === 'pro_plus' || u.subscription_tier === 'company_enterprise';
+  if (u.is_premium === true || isPaidTier) {
+    const expDate = u.subscription_expiry || u.trial_ends_at;
+    if (expDate) {
+      const expMs = new Date(expDate).getTime();
+      if (!isNaN(expMs) && expMs < nowMs) return false;
+    }
+    return true;
+  }
+
+  return false;
+}
+
 function getShieldBadgeHTML(size = 16, user = null) {
   const u = user || (typeof getUser === 'function' ? getUser() : null);
   if (!u) return '';
 
-  // Strict laid-down rule: No user is given verification unless their profile is 100% complete AND officially verified
-  const isCompany = u.role === 'company' || (!u.role && u.company_name);
-  const strength = isCompany 
-    ? (typeof calculateCompanyProfileStrength === 'function' ? calculateCompanyProfileStrength(u) : null)
-    : (typeof calculateUserProfileStrength === 'function' ? calculateUserProfileStrength(u) : null);
-
-  // Any profile under 100% (including 0% profiles) MUST NEVER receive a verification mark
-  if (!strength || typeof strength.percent !== 'number' || strength.percent < 100) {
+  // Standard rule: The green check mark ONLY shows for premium subscribers (promo code or paying)
+  // This green check should NEVER show in a user that is not a premium subscriber
+  if (!isUserPremiumSubscriber(u)) {
     return '';
   }
-
-  const isVerified = (u.verification_status === 'verified' && (u.is_verified === true || u.identity_verified === true));
-  if (!isVerified) return '';
-  if (isCompany && !(u.cac || u.rc_number || u.rcNumber)) return '';
 
   return _renderShieldBadgeMarkup(size);
 }
 
 function _renderShieldBadgeMarkup(size = 16) {
-  const h = Math.round(size * 1.15);
-  return `<span class="shield-badge" title="Collekt Shield Verified Account" style="margin-left:5px; margin-right:2px; vertical-align:middle; display:inline-flex; align-items:center; flex-shrink:0; transform:translateY(-1px);">
-    <svg width="${size}" height="${h}" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
-      <path d="M12 2L3 6V12C3 17.55 6.84 22.74 12 24C17.16 22.74 21 17.55 21 12V6L12 2Z" stroke="#16a34a" stroke-width="2.4" fill="rgba(22,163,74,0.08)"/>
-      <text x="12" y="15" font-family="'Manrope', sans-serif" font-weight="900" font-size="13" fill="#16a34a" text-anchor="middle" dominant-baseline="middle">c</text>
+  return `<span class="shield-badge collekt-verified-check" title="Premium Subscriber Verified" style="margin-left:6px; margin-right:2px; vertical-align:middle; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; transform:translateY(-1px);">
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
+      <circle cx="12" cy="12" r="10" fill="#16a34a"/>
+      <path d="M7.8 12.3L10.6 15.1L16.2 9.4" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </span>`;
 }
+
+window.isUserPremiumSubscriber = isUserPremiumSubscriber;
+window.getShieldBadgeHTML = getShieldBadgeHTML;
+window._renderShieldBadgeMarkup = _renderShieldBadgeMarkup;
 
 // -- SIDEBAR (app pages) -------------------------------
 function buildSidebar(activePage) {

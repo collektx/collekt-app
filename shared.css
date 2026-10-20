@@ -90,8 +90,9 @@ html.dark .notif-item-text, html.dark .profile-menu-item { color: #DCE5E4; }
 html.dark .notif-item-text strong { color: #F1F5F4; }
 
 
-/* ── TRANSPARENT SHIELD VERIFICATION BADGE ────────── */
-.shield-badge {
+/* ── TRANSPARENT SHIELD & GREEN CHECKMARK VERIFICATION BADGE ────────── */
+.shield-badge,
+.collekt-verified-check {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -101,9 +102,10 @@ html.dark .notif-item-text strong { color: #F1F5F4; }
   cursor: pointer;
   transition: transform 0.2s ease, filter 0.2s ease;
 }
-.shield-badge:hover {
-  transform: scale(1.1);
-  filter: drop-shadow(0 0 6px rgba(22, 163, 74, 0.4));
+.shield-badge:hover,
+.collekt-verified-check:hover {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 6px rgba(22, 163, 74, 0.45));
 }
 .shield-badge svg path {
   stroke: #16a34a;
