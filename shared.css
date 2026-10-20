@@ -2,6 +2,8 @@
    COLLEKT SHARED PLATFORM CSS
    Extends style.css for app pages
 ───────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Kalam:wght@700&display=swap');
+
 
 /* ── DARK MODE TOKENS & TYPOGRAPHY ───────────────── */
 html.dark {
@@ -203,7 +205,7 @@ html.dark .shield-badge svg text {
 .sidebar-logout { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: rgba(255,255,255,.45); font-size: 13px; font-weight: 600; cursor: pointer; border-radius: var(--r); }
 .sidebar-logout:hover { background: rgba(192,57,43,.15); color: #e74c3c; }
 
-.app-main { flex: 1; margin-left: 240px; min-height: 100%; }
+.app-main { flex: 1; margin-left: 240px; min-height: 100%; position: relative; overflow-x: hidden; }
 
 .app-topbar {
   height: 64px;
@@ -2699,5 +2701,94 @@ html, body, button, a, input, select, textarea,
     min-height: 34px !important;
     font-size: 11.5px !important;
     white-space: nowrap !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   COLLEKT CORNER DOODLE ARTWORK & ECOSYSTEM TYPOGRAPHY
+   Subtle hand-drawn sketches, words & annotations in
+   margins, gutters & corners for post-signup portal
+───────────────────────────────────────────────────── */
+.collekt-doodle-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none !important;
+  overflow: hidden;
+  z-index: 0;
+  user-select: none;
+  contain: layout style;
+}
+
+/* Ensure foreground content stays above doodle backdrop */
+.page-inner {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.doodle-tag {
+  position: absolute;
+  font-family: 'Caveat', 'Kalam', cursive, sans-serif;
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap;
+  pointer-events: none !important;
+  user-select: none;
+  transition: opacity 0.3s ease;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.06));
+}
+
+/* Light Theme Doodle Ink */
+.doodle-teal {
+  color: rgba(19, 117, 111, 0.28);
+}
+.doodle-amber {
+  color: rgba(195, 125, 20, 0.30);
+}
+.doodle-slate {
+  color: rgba(45, 68, 65, 0.24);
+}
+.doodle-forest {
+  color: rgba(14, 59, 53, 0.30);
+}
+
+/* Dark Theme Doodle Ink (Velvet Matte Obsidian) */
+html.dark .doodle-teal {
+  color: rgba(45, 212, 191, 0.26);
+  text-shadow: 0 0 12px rgba(45, 212, 191, 0.12);
+}
+html.dark .doodle-amber {
+  color: rgba(217, 155, 38, 0.28);
+  text-shadow: 0 0 12px rgba(217, 155, 38, 0.12);
+}
+html.dark .doodle-slate {
+  color: rgba(184, 199, 197, 0.20);
+}
+html.dark .doodle-forest {
+  color: rgba(94, 234, 212, 0.22);
+}
+
+.doodle-sketch {
+  display: inline-block;
+  vertical-align: middle;
+  pointer-events: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1280px) {
+  .doodle-tag.hide-tablet {
+    display: none !important;
+  }
+}
+@media (max-width: 900px) {
+  .doodle-tag.hide-mobile {
+    display: none !important;
+  }
+  .collekt-doodle-canvas {
+    opacity: 0.65;
   }
 }

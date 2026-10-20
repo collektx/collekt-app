@@ -5612,6 +5612,9 @@ function buildSidebar(activePage) {
     if (typeof updateLiveUnreadMessageBadges === 'function') {
       updateLiveUnreadMessageBadges();
     }
+
+    // Mount corner doodle writing artwork layer
+    initCollektDoodleCanvas();
   } catch (err) {
     console.error("Error building sidebar:", err);
   }
@@ -5858,6 +5861,102 @@ function buildLiquidGlassNav(activePageKey) {
   }
 }
 
+// ── COLLEKT CORNER DOODLE ARTWORK & ECOSYSTEM TYPOGRAPHY ──
+function initCollektDoodleCanvas() {
+  const main = document.querySelector('.app-main');
+  if (!main) return;
+  if (document.getElementById('collektDoodleBackdrop')) return;
+
+  const canvas = document.createElement('div');
+  canvas.id = 'collektDoodleBackdrop';
+  canvas.className = 'collekt-doodle-canvas';
+  canvas.setAttribute('aria-hidden', 'true');
+
+  canvas.innerHTML = `
+    <!-- Top Gutter Doodles (between topbar & cards) -->
+    <div class="doodle-tag doodle-teal" style="top:12px; left:28px; transform:rotate(-3deg); font-size:18px;">
+      ✦ Verified Nigerian Talent
+      <svg class="doodle-sketch" width="36" height="12" viewBox="0 0 36 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9c8-6 18-6 32-1"/></svg>
+    </div>
+    <div class="doodle-tag doodle-amber hide-tablet" style="top:10px; left:32%; transform:rotate(2.5deg); font-size:17px;">
+      Energy &amp; Infrastructure ⤳
+    </div>
+    <div class="doodle-tag doodle-teal hide-tablet" style="top:12px; right:35%; transform:rotate(-2deg); font-size:17px;">
+      Escrow Protected ✓
+      <svg class="doodle-sketch" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <div class="doodle-tag doodle-amber" style="top:12px; right:24px; transform:rotate(3.5deg); font-size:18px;">
+      Oil &amp; Gas EPC Tenders ★
+    </div>
+
+    <!-- Left Gutter Doodles (between sidebar & cards) -->
+    <div class="doodle-tag doodle-slate hide-mobile" style="top:95px; left:14px; transform:rotate(-7deg); font-size:17px;">
+      Engineers &amp; BIM Specialists
+      <div style="font-size:11px; opacity:0.8; letter-spacing:0.04em;">AutoCAD • Subsea • Design</div>
+    </div>
+    <div class="doodle-tag doodle-teal hide-mobile" style="top:220px; left:12px; transform:rotate(5deg); font-size:16px;">
+      Milestone Releases ⚡
+      <svg class="doodle-sketch" width="48" height="10" viewBox="0 0 48 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5q11 6 22 0t22 0"/></svg>
+    </div>
+    <div class="doodle-tag doodle-amber hide-mobile" style="top:360px; left:16px; transform:rotate(-5deg); font-size:17px;">
+      Quantity Surveyors • Welders
+    </div>
+    <div class="doodle-tag doodle-forest hide-mobile" style="top:500px; left:14px; transform:rotate(6deg); font-size:16.5px;">
+      Pipeline &amp; HAZOP Compliance ✓
+    </div>
+    <div class="doodle-tag doodle-teal hide-mobile" style="top:640px; left:12px; transform:rotate(-4deg); font-size:17px;">
+      24hr Bid Turnaround ⤳
+      <svg class="doodle-sketch" width="28" height="14" viewBox="0 0 28 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 10c8-6 16-6 22-2m-4-6l4 6-6 3"/></svg>
+    </div>
+    <div class="doodle-tag doodle-slate hide-mobile" style="top:780px; left:16px; transform:rotate(4deg); font-size:16px;">
+      Fabrication &amp; Rigging Specialists ★
+    </div>
+    <div class="doodle-tag doodle-amber hide-mobile" style="top:920px; left:14px; transform:rotate(-5.5deg); font-size:16.5px;">
+      Geologists &amp; Site Surveyors ✎
+    </div>
+
+    <!-- Right Gutter Doodles (along right screen edge) -->
+    <div class="doodle-tag doodle-amber hide-mobile" style="top:105px; right:16px; transform:rotate(6.5deg); font-size:18px;">
+      Top 1% Contractors ✦
+      <svg class="doodle-sketch" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </div>
+    <div class="doodle-tag doodle-teal hide-mobile" style="top:240px; right:14px; transform:rotate(-5.5deg); font-size:17px;">
+      Corporate Tenders &amp; Projects
+      <div style="font-size:11px; opacity:0.8;">EPC Consortiums • Joint Ventures</div>
+    </div>
+    <div class="doodle-tag doodle-amber hide-mobile" style="top:390px; right:18px; transform:rotate(5deg); font-size:16.5px;">
+      NOVA Bank Escrow Guaranteed
+      <svg class="doodle-sketch" width="52" height="12" viewBox="0 0 52 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6c12-5 24 7 48-1"/></svg>
+    </div>
+    <div class="doodle-tag doodle-slate hide-mobile" style="top:530px; right:14px; transform:rotate(-7deg); font-size:17.5px;">
+      Win Bigger Contracts! ⤳
+    </div>
+    <div class="doodle-tag doodle-teal hide-mobile" style="top:670px; right:16px; transform:rotate(4.5deg); font-size:16.5px;">
+      Direct Enterprise Hiring ★
+      <div style="font-size:11px; opacity:0.8;">Zero intermediaries • Direct SLA</div>
+    </div>
+    <div class="doodle-tag doodle-forest hide-mobile" style="top:810px; right:18px; transform:rotate(-3.5deg); font-size:16px;">
+      Offshore &amp; Deepwater Logistics
+    </div>
+    <div class="doodle-tag doodle-amber hide-mobile" style="top:950px; right:16px; transform:rotate(5deg); font-size:17px;">
+      Smart Contracts &amp; Payouts ⚡
+    </div>
+
+    <!-- Backdrop Gap Doodles (visible in spacing between cards on widescreen) -->
+    <div class="doodle-tag doodle-amber hide-tablet" style="top:305px; left:48%; transform:rotate(-3deg); font-size:15.5px; opacity:0.75;">
+      Smart Milestone Payouts ⚡
+    </div>
+    <div class="doodle-tag doodle-teal hide-tablet" style="top:740px; right:28%; transform:rotate(3deg); font-size:16px; opacity:0.75;">
+      West Africa's #1 Project Hub ✦
+    </div>
+    <div class="doodle-tag doodle-slate hide-tablet" style="top:1100px; left:38%; transform:rotate(-2deg); font-size:16px; opacity:0.75;">
+      Transparent • Authentic • Escrow Protected ✓
+    </div>
+  `;
+
+  main.insertBefore(canvas, main.firstChild);
+}
+
 // Auto-run buildSidebar on DOMContentLoaded if element exists and is empty
 document.addEventListener('DOMContentLoaded', () => {
   try { scrubSyntheticUploads(); } catch(e){}
@@ -5868,6 +5967,7 @@ document.addEventListener('DOMContentLoaded', () => {
     buildLiquidGlassNav();
   }
   initMobileNav();
+  initCollektDoodleCanvas();
 });
 try { scrubSyntheticUploads(); } catch(e){}
 
@@ -5978,6 +6078,9 @@ function buildTopbar() {
   if (typeof updateLiveNotificationBadge === 'function') {
     updateLiveNotificationBadge();
   }
+
+  // Mount corner doodle writing artwork layer
+  initCollektDoodleCanvas();
 }
 
 function toggleMobileSidebar(e) {

@@ -80,10 +80,10 @@
 <title>Company Dashboard &mdash; Collekt</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=187.0">
-<link rel="stylesheet" href="shared.css?v=187.0">
-<link rel="stylesheet" href="glass.css?v=187.0">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Caveat:wght@600;700&family=Kalam:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=188.0">
+<link rel="stylesheet" href="shared.css?v=188.0">
+<link rel="stylesheet" href="glass.css?v=188.0">
 
 <style>
   html, body {
@@ -265,11 +265,11 @@
       <div class="co-welcome fade-in">
         <div>
           <div style="font-size:11px; font-weight:800; color:var(--amber); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;">Company Dashboard</div>
-          <h1 style="font-size:22px; font-weight:900; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">Welcome, <span id="companyWelcomeName">Company Account</span><span id="coWelcomeBadge"></span> &#x1F44F;</h1>
+          <h1 style="font-size:22px; font-weight:900; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">Welcome, <span id="companyWelcomeName">Company Account</span><span id="coWelcomeBadge"></span></h1>
           <p style="font-size:14px; color:rgba(255,255,255,.7);">Find top talent, post opportunities and manage contracts &mdash; all in one place.</p>
         </div>
         <div class="co-welcome-actions">
-          <a href="marketplace.html" class="btn btn-ghost btn-sm" style="min-height:40px;">&#x1F50D; Browse Talent</a>
+          <a href="marketplace.html" class="btn btn-ghost btn-sm" style="min-height:40px; display:inline-flex; align-items:center; gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Browse Talent</a>
           <a href="wallet.html" class="btn btn-outline btn-sm" style="min-height:40px; color:#fff; border-color:rgba(255,255,255,0.3); font-weight:800; display:inline-flex; align-items:center; gap:6px;">Pay Professionals</a>
           <a href="post-job.html" class="btn btn-amber" style="min-height:40px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center;">+ Post Opportunity</a>
         </div>
@@ -377,10 +377,10 @@
             <h4 style="font-size:14px; font-weight:800; margin-bottom:14px;">Quick Actions</h4>
             <div style="display:flex; flex-direction:column; gap:10px;">
               <a href="post-job.html" class="btn btn-amber" style="width:100%; min-height:40px; font-size:13px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">+ Post Opportunity</a>
-              <a href="marketplace.html" class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center;">&#x1F91D; Browse All Professionals</a>
-              <a href="messages.html" id="quickLinkMessages" class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center;">&#x1F4AC; Open Messages</a>
-              <a href="wallet.html" class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center;">&#x1F4B0; Manage Payments</a>
-              <button class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center;" onclick="openUploadModal('company-docs', onDashDocUploaded)">&#x1F4C4; Upload Document</button>
+              <a href="marketplace.html" class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center; display:inline-flex; align-items:center; gap:8px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Browse All Professionals</a>
+              <a href="messages.html" id="quickLinkMessages" class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center; display:inline-flex; align-items:center; gap:8px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Open Messages</a>
+              <a href="wallet.html" class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center; display:inline-flex; align-items:center; gap:8px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><circle cx="18" cy="15" r="1.5"/></svg> Manage Payments</a>
+              <button class="btn btn-outline" style="width:100%; min-height:40px; font-size:13px; justify-content:center; display:inline-flex; align-items:center; gap:8px;" onclick="openUploadModal('company-docs', onDashDocUploaded)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Upload Document</button>
             </div>
           </div>
 
@@ -630,9 +630,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=187.0"></script>
-<script src="app.js?v=187.0"></script>
-<script src="collekt-ai.js?v=187.0"></script>
+<script src="supabase.js?v=188.0"></script>
+<script src="app.js?v=188.0"></script>
+<script src="collekt-ai.js?v=188.0"></script>
 <script>
   requireCompany();
   
@@ -860,7 +860,7 @@
       if (contracts.length === 0) {
         contractsContainer.innerHTML = `
           <div style="padding:30px 20px; text-align:center;">
-            <div style="font-size:32px; margin-bottom:12px;">&#x1F6E1;&#xFE0F;</div>
+            <div style="width:52px; height:52px; border-radius:14px; background:rgba(19,117,111,0.12); color:var(--teal); display:inline-flex; align-items:center; justify-content:center; margin-bottom:12px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
             <h4 style="font-size:15px; font-weight:800; color:var(--ink); margin-bottom:8px;">No Active Contracts</h4>
             <p style="font-size:13px; color:var(--muted); max-width:300px; margin:0 auto;">When you accept a collekt request from a professional, your contract and engagement status will appear here.</p>
           </div>
@@ -1899,8 +1899,8 @@
   </div>
 </div>
 
-<script src="settings-popup.js?v=187.0"></script>
-<script src="upload-modal.js?v=187.0"></script>
+<script src="settings-popup.js?v=188.0"></script>
+<script src="upload-modal.js?v=188.0"></script>
 </body>
 </html>
 

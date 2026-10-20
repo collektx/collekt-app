@@ -80,10 +80,10 @@
 <title>Dashboard &mdash; Collekt</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=187.0">
-<link rel="stylesheet" href="shared.css?v=187.0">
-<link rel="stylesheet" href="glass.css?v=187.0">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Caveat:wght@600;700&family=Kalam:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=188.0">
+<link rel="stylesheet" href="shared.css?v=188.0">
+<link rel="stylesheet" href="glass.css?v=188.0">
 
 <style>
   body { background: var(--paper); }
@@ -144,7 +144,7 @@
 
       <div class="dash-welcome fade-in">
         <div>
-          <h1 style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">Welcome back, <span id="welcomeName">Professional</span><span id="welcomeBadge"></span>! &#x1F44B;</h1>
+          <h1 style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">Welcome back, <span id="welcomeName">Professional</span><span id="welcomeBadge"></span>!</h1>
           <p id="welcomeMessage">Ready to win your first project?</p>
         </div>
         <a href="marketplace.html" class="btn btn-ghost">Browse Tenders &rarr;</a>
@@ -155,25 +155,25 @@
         <!-- Stats -->
         <div class="stats-row fade-in">
           <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='proposals.html'" title="View All Collektions">
-            <div class="stat-icon">&#x1F4CC;</div>
+            <div class="stat-icon" style="color:var(--teal);"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
             <div class="stat-value" id="statActiveProposals">0</div>
             <div class="stat-label">Active Collektions &rarr;</div>
             <div class="stat-change" style="background:var(--paper); color:var(--muted); font-weight:700; padding:2px 8px; border-radius:99px; font-size:11px; display:inline-block;">View All</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon">&#x1F3C6;</div>
+            <div class="stat-icon" style="color:var(--amber);"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H8v4h8v-4h-1c-.55 0-1-.45-1-1v-2.34"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></div>
             <div class="stat-value" id="statProjectsWon">0</div>
             <div class="stat-label">Projects Won</div>
             <div class="stat-change" style="background:var(--paper); color:var(--muted); font-weight:700; padding:2px 8px; border-radius:99px; font-size:11px; display:inline-block;">Clean slate</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon">&#x1F4B0;</div>
+            <div class="stat-icon" style="color:var(--teal-mid);"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><circle cx="18" cy="15" r="1.5"/></svg></div>
             <div class="stat-value" id="statTotalEarnings">&#x20A6;0</div>
             <div class="stat-label">Total Earnings</div>
             <div class="stat-change" style="background:var(--paper); color:var(--muted); font-weight:700; padding:2px 8px; border-radius:99px; font-size:11px; display:inline-block;">New Account</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon">&#x1F441;</div>
+            <div class="stat-icon" style="color:var(--forest);"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
             <div class="stat-value" id="statProfileViews">0</div>
             <div class="stat-label">Profile Views</div>
             <div class="stat-change" style="background:var(--paper); color:var(--muted); font-weight:700; padding:2px 8px; border-radius:99px; font-size:11px; display:inline-block;">New Account</div>
@@ -271,10 +271,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=187.0"></script>
-<script src="app.js?v=187.0"></script>
-<script src="collekt-ai.js?v=187.0"></script>
-<script src="settings-popup.js?v=187.0"></script>
+<script src="supabase.js?v=188.0"></script>
+<script src="app.js?v=188.0"></script>
+<script src="collekt-ai.js?v=188.0"></script>
+<script src="settings-popup.js?v=188.0"></script>
 <script>
   requireAuth();
 
@@ -444,8 +444,8 @@
           <div class="rec-card">
             <div class="rec-badge badge-new">New</div>
             <div class="rec-title">${title}</div>
-            <div class="rec-company">&#x1F3E2; ${company}</div>
-            <div class="rec-meta"><span>&#x1F4CC; ${budget}</span></div>
+            <div class="rec-company" style="display:flex; align-items:center; gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/></svg> ${company}</div>
+            <div class="rec-meta" style="display:flex; align-items:center; gap:6px;"><span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>${budget}</span></div>
             <a href="marketplace.html" class="btn btn-primary btn-sm" style="width:100%;">View Details &rarr;</a>
           </div>
         `;
@@ -586,7 +586,7 @@
     if (balEl) balEl.textContent = (typeof formatNaira === 'function') ? formatNaira(avail, true) : '₦' + avail.toLocaleString();
   }
 </script>
-<script src="upload-modal.js?v=187.0"></script>
+<script src="upload-modal.js?v=188.0"></script>
 </body>
 </html>
 

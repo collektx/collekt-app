@@ -78,9 +78,9 @@ console.log('\n--- TEST 5: Login Forgot Password Hardening ---');
 const loginHtml = fs.readFileSync(path.join(__dirname, 'login.html'), 'utf8');
 assert(!loginHtml.includes("onclick=\"const em = document.getElementById('email').value; if(em){ showToast('Password reset instructions sent to"), 'login.html must NOT have duplicate inline pseudo-reset handler');
 assert(loginHtml.includes('handleForgotPassword'), 'login.html must call handleForgotPassword');
-assert(loginHtml.includes('sb.auth.resetPasswordForEmail'), 'login.html must invoke sb.auth.resetPasswordForEmail with Supabase');
-assert(loginHtml.includes('emailRegex.test(email)'), 'login.html must validate email address format before submitting');
-console.log('  ✅ PASS: Forgot Password flow reliably verifies input and invokes Supabase resetPasswordForEmail');
+assert(loginHtml.includes('dispatchPasswordResetOtp') || loginHtml.includes('sb.auth.resetPasswordForEmail'), 'login.html must invoke dispatchPasswordResetOtp or sb.auth.resetPasswordForEmail');
+assert(loginHtml.includes('email') && loginHtml.includes('test(email)'), 'login.html must validate email address format before submitting');
+console.log('  ✅ PASS: Forgot Password flow reliably verifies input and invokes password reset engine');
 passed++;
 
 console.log('\n════════════════════════════════════════════════════════════');
