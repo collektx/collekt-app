@@ -68,3 +68,5 @@ https://www.collektng.xyz/* https://collektng.com/:splat 301!
 /api/admin/directory /.netlify/functions/admin-directory 200
 /api/auth-otp /.netlify/functions/auth-otp 200
 /api/auth/otp /.netlify/functions/auth-otp 200
+/api/feedback-submit /.netlify/functions/feedback-submit 200
+/api/feedback/submit /.netlify/functions/feedback-submit 200

@@ -1494,6 +1494,12 @@ function renderNotificationsPanel() {
       iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
     } else if (item.type === 'message') {
       iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
+    } else if (item.type === 'trial_feedback') {
+      iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>';
+    } else if (item.type === 'trial_renewal') {
+      iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
+    } else if (item.type === 'trial_activated') {
+      iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
     }
 
     const safeTitle = typeof escapeHTML === 'function' ? escapeHTML(item.title) : item.title;
@@ -1525,7 +1531,27 @@ function handleNotificationClick(notifId, link, event) {
   // 1. Immediately mark as read and reduce badge number
   markNotificationAsRead(notifId);
 
-  // 2. If item has a destination link, close panel and navigate smoothly
+  // 2. Intercept trial feedback or renewal modal triggers
+  if (link && link.startsWith('#trial-feedback-day')) {
+    const day = parseInt(link.replace('#trial-feedback-day', ''), 10) || 15;
+    const panel = document.getElementById('notifPanel');
+    if (panel) panel.classList.remove('open');
+    if (typeof openTrialFeedbackModal === 'function') {
+      openTrialFeedbackModal(day);
+    }
+    return;
+  }
+  if (link && link.startsWith('#trial-renewal-day')) {
+    const day = parseInt(link.replace('#trial-renewal-day', ''), 10) || 59;
+    const panel = document.getElementById('notifPanel');
+    if (panel) panel.classList.remove('open');
+    if (typeof openTrialRenewalModal === 'function') {
+      openTrialRenewalModal(day);
+    }
+    return;
+  }
+
+  // 3. If item has a destination link, close panel and navigate smoothly
   if (link && link !== 'null' && link !== 'undefined' && link !== '' && link !== '#' && !link.startsWith('javascript:')) {
     const panel = document.getElementById('notifPanel');
     if (panel) panel.classList.remove('open');
@@ -1671,6 +1697,11 @@ function checkAndTriggerWelcomeAndVerificationNotifications() {
       });
     }
   }
+
+  // 3. 60-Day Trial Lifecycle Milestones (Days 15, 30, 45, 59, 60)
+  if (typeof checkTrialLifecycleMilestones === 'function') {
+    checkTrialLifecycleMilestones();
+  }
 }
 
 function dispatchEscrowFundingNotification({ companyName, professionalId, professionalName, amount, projectTitle }) {
@@ -1732,6 +1763,378 @@ function dispatchEscrowPayoutNotification({ companyId, companyName, professional
   }
 }
 
+/* ═════════════════════════════════════════════════════════
+   60-DAY FOUNDING MEMBER TRIAL LIFECYCLE & MILESTONE ENGINE
+   Milestones: Day 15, Day 30, Day 45 (Feedback & Satisfaction)
+   Milestones: Day 59, Day 60 (Subscription Continuation & Renewal)
+   ═════════════════════════════════════════════════════════ */
+let _currentTrialFeedbackRating = 5;
+let _selectedFeedbackChips = new Set(['AI Matching', 'Platform Speed']);
+
+function checkTrialLifecycleMilestones() {
+  const user = typeof getUser === 'function' ? getUser() : null;
+  if (!user || (!user.id && !user.email)) return;
+
+  const isTrialActive = user.subscription_status === 'active_trial' || 
+    (user.is_premium && (user.promo_code_used || user.subscription_cycle === 'trial_60_days' || user.trial_ends_at));
+  if (!isTrialActive) return;
+
+  const nowMs = Date.now();
+  let startMs = null;
+  if (user.trial_started_at) {
+    startMs = new Date(user.trial_started_at).getTime();
+  } else if (user.trial_ends_at) {
+    startMs = new Date(user.trial_ends_at).getTime() - (60 * 24 * 60 * 60 * 1000);
+  } else if (user.subscription_expiry) {
+    startMs = new Date(user.subscription_expiry).getTime() - (60 * 24 * 60 * 60 * 1000);
+  }
+
+  if (!startMs || isNaN(startMs)) return;
+
+  // Day 1 is the first 24h, Day 15 is 14 days elapsed + 1, etc.
+  const diffDays = Math.floor((nowMs - startMs) / (24 * 60 * 60 * 1000)) + 1;
+  const daysPassed = Math.max(1, diffDays);
+
+  const uId = user.id || user.email;
+  const milestonesKey = `collekt_trial_milestones_${uId}`;
+  let triggered = [];
+  try {
+    triggered = JSON.parse(localStorage.getItem(milestonesKey) || '[]');
+    if (!Array.isArray(triggered)) triggered = [];
+  } catch (e) {
+    triggered = [];
+  }
+
+  const milestones = [15, 30, 45, 59, 60];
+  let updatedTriggered = false;
+
+  for (const m of milestones) {
+    if (daysPassed >= m && !triggered.includes(m)) {
+      triggered.push(m);
+      updatedTriggered = true;
+
+      if (m === 15 || m === 30 || m === 45) {
+        // Feedback Milestones (Days 15, 30, 45)
+        addUserNotification({
+          type: 'trial_feedback',
+          title: `Day ${m} Check-In: How Is Your Collekt Experience?`,
+          message: `You have reached Day ${m} of your 60-Day Founding Member trial! Share how you are enjoying the platform and your premium privileges.`,
+          link: `#trial-feedback-day${m}`,
+          metadata: { milestoneDay: m, type: 'feedback' }
+        });
+
+        // Trigger interactive modal once per session
+        const sessionKey = `collekt_trial_modal_shown_${uId}_day_${m}`;
+        if (!sessionStorage.getItem(sessionKey)) {
+          sessionStorage.setItem(sessionKey, 'true');
+          setTimeout(() => {
+            if (typeof openTrialFeedbackModal === 'function') {
+              openTrialFeedbackModal(m);
+            }
+          }, 1200);
+        }
+      } else if (m === 59 || m === 60) {
+        // Renewal Milestones (Days 59, 60)
+        const isLastDay = m === 60;
+        addUserNotification({
+          type: 'trial_renewal',
+          title: isLastDay ? 'Final Day of Free Trial: Maintain Your Premium Status' : 'Trial Ends Tomorrow: Keep Your Premium Access Active',
+          message: isLastDay
+            ? 'Today is Day 60 of your Founding Member pass! Continue your subscription to keep top search placement, 50% commission discounts, and unlimited proposals without interruption.'
+            : 'Your 60-Day Free Trial ends tomorrow! Continue your subscription now to preserve all premium privileges seamlessly.',
+          link: `#trial-renewal-day${m}`,
+          metadata: { milestoneDay: m, type: 'renewal' }
+        });
+
+        // Trigger interactive renewal modal once per session
+        const sessionKey = `collekt_trial_modal_shown_${uId}_day_${m}`;
+        if (!sessionStorage.getItem(sessionKey)) {
+          sessionStorage.setItem(sessionKey, 'true');
+          setTimeout(() => {
+            if (typeof openTrialRenewalModal === 'function') {
+              openTrialRenewalModal(m);
+            }
+          }, 1200);
+        }
+      }
+    }
+  }
+
+  if (updatedTriggered) {
+    try {
+      localStorage.setItem(milestonesKey, JSON.stringify(triggered));
+    } catch (e) {}
+  }
+}
+
+function openTrialFeedbackModal(milestoneDay = 15) {
+  let modal = document.getElementById('trialFeedbackModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.id = 'trialFeedbackModal';
+    modal.style.cssText = 'position:fixed; inset:0; z-index:10050; display:flex; align-items:center; justify-content:center; background:rgba(10,13,18,0.78); backdrop-filter:blur(8px); padding:20px;';
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeTrialFeedbackModal();
+    });
+    document.body.appendChild(modal);
+  }
+
+  _currentTrialFeedbackRating = 5;
+  _selectedFeedbackChips = new Set(['AI Matching', 'Platform Speed']);
+
+  const user = (typeof getUser === 'function' ? getUser() : null) || {};
+  const isCompany = user.role === 'company' || localStorage.getItem('collekt_last_role') === 'company';
+  const roleLabel = isCompany ? 'Company Enterprise' : 'Professional Plus';
+
+  modal.innerHTML = `
+    <div class="modal-card" style="position:relative; max-width:520px; width:100%; border-radius:24px; padding:28px; background:var(--surface, #15181e); border:1px solid rgba(255,255,255,0.12); color:var(--text, #f1f5f9); font-family:'Manrope',sans-serif; box-shadow:0 24px 60px rgba(0,0,0,0.6);">
+      <button class="modal-close" onclick="closeTrialFeedbackModal()" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.08); border:none; color:var(--muted,#94a3b8); width:32px; height:32px; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px;">&times;</button>
+      
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <div style="width:44px; height:44px; border-radius:14px; background:rgba(19,117,111,0.2); border:1px solid rgba(19,117,111,0.4); color:var(--teal, #14b8a6); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+        </div>
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:11px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:var(--teal, #14b8a6); background:rgba(20,184,166,0.12); padding:2px 8px; border-radius:99px;">Day ${milestoneDay} Check-In</span>
+            <span style="font-size:11px; color:var(--muted,#94a3b8);">${roleLabel}</span>
+          </div>
+          <h3 style="font-size:18px; font-weight:900; margin:2px 0 0 0; color:#fff;">How Are You Enjoying Collekt?</h3>
+        </div>
+      </div>
+
+      <p style="font-size:13px; color:var(--muted,#94a3b8); line-height:1.5; margin:0 0 18px 0;">
+        You have reached <strong>Day ${milestoneDay} of your 60-Day Founding Member Free Trial</strong>. Your feedback directly guides how we improve features, match you with opportunities, and elevate your premium experience.
+      </p>
+
+      <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:16px; margin-bottom:18px; text-align:center;">
+        <div style="font-size:12px; font-weight:700; color:var(--muted,#94a3b8); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.05em;">Rate Your Platform Experience</div>
+        <div id="trialFeedbackStars" style="display:flex; justify-content:center; gap:8px; margin-bottom:6px;">
+          ${[1, 2, 3, 4, 5].map(star => `
+            <button type="button" onclick="setTrialFeedbackStar(${star})" style="background:none; border:none; cursor:pointer; padding:4px; color:#f59e0b; transition:transform 0.15s ease;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="${star <= _currentTrialFeedbackRating ? '#f59e0b' : 'none'}" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="starSvg_${star}"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </button>
+          `).join('')}
+        </div>
+        <div id="trialStarLabel" style="font-size:13px; font-weight:800; color:#f59e0b;">Exceptional Experience (5/5)</div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-size:12px; font-weight:700; color:var(--muted,#94a3b8); margin-bottom:8px;">What features have been most valuable?</label>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          ${['AI Matching', 'Platform Speed', 'Verified Network', 'Escrow Security', 'Zero Fees / Discounts', 'Clean Interface'].map(chip => `
+            <button type="button" class="trial-feedback-chip ${['AI Matching', 'Platform Speed'].includes(chip) ? 'active' : ''}" onclick="toggleFeedbackChip(this, '${chip}')" style="font-size:12px; font-weight:700; padding:6px 12px; border-radius:99px; border:1px solid ${['AI Matching', 'Platform Speed'].includes(chip) ? 'rgba(20,184,166,0.6)' : 'rgba(255,255,255,0.12)'}; background:${['AI Matching', 'Platform Speed'].includes(chip) ? 'rgba(20,184,166,0.18)' : 'rgba(255,255,255,0.04)'}; color:${['AI Matching', 'Platform Speed'].includes(chip) ? '#14b8a6' : '#cbd5e1'}; cursor:pointer; transition:all 0.15s ease;">
+              ${chip}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:block; font-size:12px; font-weight:700; color:var(--muted,#94a3b8); margin-bottom:8px;">Any comments or suggestions?</label>
+        <textarea id="trialFeedbackInput" rows="3" placeholder="Tell us how we can make your premium experience even better..." style="width:100%; border-radius:12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); color:#fff; font-family:'Manrope',sans-serif; font-size:13px; padding:12px; box-sizing:border-box; resize:none; outline:none; transition:border-color 0.2s;"></textarea>
+      </div>
+
+      <div style="display:flex; gap:12px;">
+        <button type="button" class="btn" onclick="closeTrialFeedbackModal()" style="flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; border-radius:12px; height:44px; font-weight:700; font-size:13px; cursor:pointer;">
+          Remind Later
+        </button>
+        <button type="button" id="submitFeedbackBtn" class="btn btn-primary" onclick="submitTrialFeedback(${milestoneDay})" style="flex:1.5; background:linear-gradient(135deg, #13756f, #14b8a6); border:none; color:#fff; border-radius:12px; height:44px; font-weight:800; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+          Submit Feedback &rarr;
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.style.display = 'flex';
+  modal.classList.add('open');
+}
+
+function setTrialFeedbackStar(rating) {
+  _currentTrialFeedbackRating = rating;
+  const labels = {
+    1: 'Needs Improvement (1/5)',
+    2: 'Fair (2/5)',
+    3: 'Good Platform (3/5)',
+    4: 'Very Good (4/5)',
+    5: 'Exceptional Experience (5/5)'
+  };
+  const labelEl = document.getElementById('trialStarLabel');
+  if (labelEl) labelEl.textContent = labels[rating] || `${rating}/5`;
+
+  for (let i = 1; i <= 5; i++) {
+    const star = document.getElementById(`starSvg_${i}`);
+    if (star) {
+      star.setAttribute('fill', i <= rating ? '#f59e0b' : 'none');
+    }
+  }
+}
+
+function toggleFeedbackChip(btn, chip) {
+  if (_selectedFeedbackChips.has(chip)) {
+    _selectedFeedbackChips.delete(chip);
+    btn.style.background = 'rgba(255,255,255,0.04)';
+    btn.style.borderColor = 'rgba(255,255,255,0.12)';
+    btn.style.color = '#cbd5e1';
+  } else {
+    _selectedFeedbackChips.add(chip);
+    btn.style.background = 'rgba(20,184,166,0.18)';
+    btn.style.borderColor = 'rgba(20,184,166,0.6)';
+    btn.style.color = '#14b8a6';
+  }
+}
+
+function closeTrialFeedbackModal() {
+  const modal = document.getElementById('trialFeedbackModal');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
+}
+
+async function submitTrialFeedback(milestoneDay) {
+  const user = (typeof getUser === 'function' ? getUser() : null) || {};
+  const feedbackInput = document.getElementById('trialFeedbackInput');
+  const comment = (feedbackInput?.value || '').trim();
+  const btn = document.getElementById('submitFeedbackBtn');
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+  }
+
+  const payload = {
+    userId: user.id || null,
+    email: user.email || null,
+    role: user.role || 'professional',
+    milestoneDay: Number(milestoneDay) || 15,
+    rating: _currentTrialFeedbackRating,
+    sentiment: _currentTrialFeedbackRating >= 4 ? 'positive' : (_currentTrialFeedbackRating === 3 ? 'neutral' : 'negative'),
+    tags: Array.from(_selectedFeedbackChips),
+    feedbackText: comment,
+    promoCode: user.promo_code_used || 'COLLEKT60'
+  };
+
+  try {
+    await fetch('/api/feedback-submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.warn('Feedback submit network note:', err);
+  }
+
+  try {
+    const key = `collekt_feedback_submitted_${user.id || user.email || 'anon'}_day_${milestoneDay}`;
+    localStorage.setItem(key, JSON.stringify({ submitted_at: new Date().toISOString(), ...payload }));
+  } catch (e) {}
+
+  closeTrialFeedbackModal();
+  if (typeof showToast === 'function') {
+    showToast('Thank you! Your feedback has been received.', 'success');
+  }
+}
+
+function openTrialRenewalModal(milestoneDay = 59) {
+  let modal = document.getElementById('trialRenewalModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.id = 'trialRenewalModal';
+    modal.style.cssText = 'position:fixed; inset:0; z-index:10050; display:flex; align-items:center; justify-content:center; background:rgba(10,13,18,0.78); backdrop-filter:blur(8px); padding:20px;';
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeTrialRenewalModal();
+    });
+    document.body.appendChild(modal);
+  }
+
+  const user = (typeof getUser === 'function' ? getUser() : null) || {};
+  const isCompany = user.role === 'company' || localStorage.getItem('collekt_last_role') === 'company';
+  const role = isCompany ? 'company' : 'professional';
+  const priceDisplay = isCompany ? '₦74,999 / month' : '₦19,999 / month';
+  const planName = isCompany ? 'Company Enterprise' : 'Professional Plus';
+  const isFinalDay = milestoneDay === 60;
+
+  modal.innerHTML = `
+    <div class="modal-card" style="position:relative; max-width:540px; width:100%; border-radius:24px; padding:30px; background:var(--surface, #15181e); border:1px solid rgba(255,255,255,0.12); color:var(--text, #f1f5f9); font-family:'Manrope',sans-serif; box-shadow:0 24px 60px rgba(0,0,0,0.6);">
+      <button class="modal-close" onclick="closeTrialRenewalModal()" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.08); border:none; color:var(--muted,#94a3b8); width:32px; height:32px; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px;">&times;</button>
+
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <div style="width:46px; height:46px; border-radius:14px; background:rgba(245,158,11,0.18); border:1px solid rgba(245,158,11,0.4); color:#f59e0b; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:11px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:#f59e0b; background:rgba(245,158,11,0.14); padding:2px 8px; border-radius:99px;">
+              ${isFinalDay ? 'Final Day (Day 60 of 60)' : 'Trial Expiring (Day 59 of 60)'}
+            </span>
+            <span style="font-size:11px; color:var(--muted,#94a3b8);">${planName}</span>
+          </div>
+          <h3 style="font-size:19px; font-weight:900; margin:2px 0 0 0; color:#fff;">
+            ${isFinalDay ? 'Maintain Your Premium Advantages Today' : 'Your 60-Day Free Trial Ends Tomorrow'}
+          </h3>
+        </div>
+      </div>
+
+      <p style="font-size:13px; color:var(--muted,#94a3b8); line-height:1.5; margin:0 0 18px 0;">
+        ${isFinalDay 
+          ? 'Today marks the final day of your 60-day Founding Member free trial! To ensure uninterrupted access to top client search visibility, 50% commission discounts, and unlimited proposals, continue your subscription now.'
+          : 'Your 60-day Founding Member free trial concludes tomorrow! Keep your verified premium badge, priority RFP invitations, and lowered fee tier active with a seamless subscription.'}
+      </p>
+
+      <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:16px; margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px;">
+          <div>
+            <div style="font-size:14px; font-weight:800; color:#fff;">${planName} Plan</div>
+            <div style="font-size:12px; color:var(--muted,#94a3b8);">Full Suite Platform Privileges</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:17px; font-weight:900; color:#10b981;">${priceDisplay}</div>
+            <div style="font-size:11px; color:var(--muted,#94a3b8);">Billed monthly &bull; Cancel anytime</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#e2e8f0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>${isCompany ? 'Unlimited tender postings & candidate talent searches' : 'Top featured placement across Nigerian employers & recruiters'}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#e2e8f0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>${isCompany ? 'Verified Enterprise Trust badge & dedicated escrow manager' : '50% platform commission discount on every milestone payout'}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#e2e8f0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Unlimited proposals, instant client messaging & priority dispute support</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px;">
+        <button type="button" class="btn" onclick="closeTrialRenewalModal()" style="flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; border-radius:12px; height:46px; font-weight:700; font-size:13px; cursor:pointer;">
+          Remind Later
+        </button>
+        <button type="button" class="btn btn-primary" onclick="window.location.href='upgrade.html?role=${role}&renew=true'" style="flex:1.7; background:linear-gradient(135deg, #f59e0b, #d97706); border:none; color:#111827; border-radius:12px; height:46px; font-weight:900; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+          Continue Premium (${priceDisplay}) &rarr;
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.style.display = 'flex';
+  modal.classList.add('open');
+}
+
+function closeTrialRenewalModal() {
+  const modal = document.getElementById('trialRenewalModal');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
+}
+
 window.getUserNotifications = getUserNotifications;
 window.saveUserNotifications = saveUserNotifications;
 window.addUserNotification = addUserNotification;
@@ -1743,8 +2146,17 @@ window.handleNotificationClick = handleNotificationClick;
 window.syncNotificationsFromSupabase = syncNotificationsFromSupabase;
 window.initNotificationsRealtime = initNotificationsRealtime;
 window.checkAndTriggerWelcomeAndVerificationNotifications = checkAndTriggerWelcomeAndVerificationNotifications;
+window.checkTrialLifecycleMilestones = checkTrialLifecycleMilestones;
+window.openTrialFeedbackModal = openTrialFeedbackModal;
+window.closeTrialFeedbackModal = closeTrialFeedbackModal;
+window.setTrialFeedbackStar = setTrialFeedbackStar;
+window.toggleFeedbackChip = toggleFeedbackChip;
+window.submitTrialFeedback = submitTrialFeedback;
+window.openTrialRenewalModal = openTrialRenewalModal;
+window.closeTrialRenewalModal = closeTrialRenewalModal;
 window.dispatchEscrowFundingNotification = dispatchEscrowFundingNotification;
 window.dispatchEscrowPayoutNotification = dispatchEscrowPayoutNotification;
+
 
 // -- USER DIRECTORY (shared registry of all platform accounts) --
 function registerUserInDirectory(user) {
@@ -4939,22 +5351,69 @@ function renderPremiumUpgradeCard(containerId, forcedRole) {
 
   targets.forEach(target => {
     if (isPremium) {
-      target.innerHTML = `
-        <div style="background:${bgGrad}; border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.12); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=${role}'">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span style="font-size:10px; font-weight:800; letter-spacing:0.06em; opacity:0.85;">${tierTag}</span>
-            <span style="background:rgba(255,255,255,0.25); color:#fff; font-size:11px; font-weight:800; padding:3px 10px; border-radius:99px;">ACTIVE SUBSCRIBER</span>
+      const isTrial = user.subscription_status === 'active_trial' || !!user.trial_ends_at || user.subscription_cycle === 'trial_60_days' || !!user.promo_code_used;
+      let daysPassed = 1;
+      let daysRemaining = 60;
+      if (isTrial) {
+        const startMs = user.trial_started_at ? new Date(user.trial_started_at).getTime() : (user.trial_ends_at ? new Date(user.trial_ends_at).getTime() - 60*24*60*60*1000 : Date.now());
+        daysPassed = Math.min(60, Math.max(1, Math.floor((Date.now() - startMs) / (24 * 60 * 60 * 1000)) + 1));
+        daysRemaining = Math.max(0, 60 - daysPassed);
+      }
+
+      if (isTrial && daysPassed >= 59) {
+        // Urgent renewal required for Day 59 and 60
+        target.innerHTML = `
+          <div style="background:linear-gradient(135deg, #b45309, #d97706); border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(217,119,6,0.25); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=${role}&renew=true'">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:10px; font-weight:800; letter-spacing:0.06em; opacity:0.9;">TRIAL EXPIRING SOON</span>
+              <span style="background:rgba(0,0,0,0.3); color:#fef08a; font-size:11px; font-weight:900; padding:3px 10px; border-radius:99px; border:1px solid rgba(254,240,138,0.3);">DAY ${daysPassed} OF 60</span>
+            </div>
+            <h4 style="font-size:15px; font-weight:900; margin-bottom:4px;">${daysRemaining === 0 ? 'Trial Ends Today' : 'Trial Ends Tomorrow'}</h4>
+            <p style="font-size:12px; opacity:.95; margin-bottom:14px; line-height:1.4;">
+              Renew your subscription for ${priceDisplay} to retain your verified search rank, 50% commission discount, and unlimited proposals without interruption.
+            </p>
+            <a href="upgrade.html?role=${role}&renew=true" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=${role}&renew=true';"
+               style="background:#fff; color:#b45309; border:none; width:100%; min-height:38px; font-size:13px; font-weight:900; justify-content:center; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20; border-radius:10px;">
+              Renew Subscription (${priceDisplay}) &rarr;
+            </a>
           </div>
-          <h4 style="font-size:15px; font-weight:900; margin-bottom:4px;">${tierName} Active</h4>
-          <p style="font-size:12px; opacity:.9; margin-bottom:14px; line-height:1.4;">
-            Your account has active search boost, ${isCompany ? 'unlimited tender postings' : '50% commission discount'} and priority support.
-          </p>
-          <a href="upgrade.html?role=${role}" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=${role}';"
-             style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.35); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">
-            Manage Subscription &rarr;
-          </a>
-        </div>
-      `;
+        `;
+      } else if (isTrial) {
+        // Active Founding Member trial (Day 1 - 58)
+        target.innerHTML = `
+          <div style="background:${bgGrad}; border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.12); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=${role}'">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:10px; font-weight:800; letter-spacing:0.06em; opacity:0.85;">FOUNDING MEMBER PASS</span>
+              <span style="background:rgba(255,255,255,0.25); color:#fff; font-size:11px; font-weight:800; padding:3px 10px; border-radius:99px;">DAY ${daysPassed} OF 60</span>
+            </div>
+            <h4 style="font-size:15px; font-weight:900; margin-bottom:4px;">60-Day Free Trial Active</h4>
+            <p style="font-size:12px; opacity:.9; margin-bottom:14px; line-height:1.4;">
+              You have ${daysRemaining} days remaining of complimentary premium access with search boost, ${isCompany ? 'unlimited tender postings' : '50% commission discount'}, and priority support.
+            </p>
+            <a href="upgrade.html?role=${role}" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=${role}';"
+               style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.35); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">
+              Manage Trial & Benefits &rarr;
+            </a>
+          </div>
+        `;
+      } else {
+        target.innerHTML = `
+          <div style="background:${bgGrad}; border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.12); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=${role}'">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:10px; font-weight:800; letter-spacing:0.06em; opacity:0.85;">${tierTag}</span>
+              <span style="background:rgba(255,255,255,0.25); color:#fff; font-size:11px; font-weight:800; padding:3px 10px; border-radius:99px;">ACTIVE SUBSCRIBER</span>
+            </div>
+            <h4 style="font-size:15px; font-weight:900; margin-bottom:4px;">${tierName} Active</h4>
+            <p style="font-size:12px; opacity:.9; margin-bottom:14px; line-height:1.4;">
+              Your account has active search boost, ${isCompany ? 'unlimited tender postings' : '50% commission discount'} and priority support.
+            </p>
+            <a href="upgrade.html?role=${role}" class="btn" onclick="event.stopPropagation(); window.location.href='upgrade.html?role=${role}';"
+               style="background:rgba(255,255,255,.28); color:#fff; border:1px solid rgba(255,255,255,.35); width:100%; min-height:38px; font-size:13px; font-weight:800; justify-content:center; text-decoration:none; display:flex; align-items:center; position:relative; z-index:20;">
+              Manage Subscription &rarr;
+            </a>
+          </div>
+        `;
+      }
     } else {
       target.innerHTML = `
         <div style="background:${bgGrad}; border-radius:var(--r-lg); padding:20px; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.12); position:relative; z-index:10; cursor:pointer;" onclick="window.location.href='upgrade.html?role=${role}'">
@@ -7986,6 +8445,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (typeof checkAndTriggerWelcomeAndVerificationNotifications === 'function') {
     checkAndTriggerWelcomeAndVerificationNotifications();
+  }
+  if (typeof checkTrialLifecycleMilestones === 'function') {
+    checkTrialLifecycleMilestones();
   }
   if (typeof syncNotificationsFromSupabase === 'function') {
     syncNotificationsFromSupabase();

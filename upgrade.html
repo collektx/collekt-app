@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=191.0">
-<link rel="stylesheet" href="shared.css?v=191.0">
-<link rel="stylesheet" href="glass.css?v=191.0">
+<link rel="stylesheet" href="style.css?v=192.0">
+<link rel="stylesheet" href="shared.css?v=192.0">
+<link rel="stylesheet" href="glass.css?v=192.0">
 
 <style>
   body {
@@ -845,9 +845,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js?v=191.0"></script>
-<script src="app.js?v=191.0"></script>
-<script src="settings-popup.js?v=191.0"></script>
+<script src="supabase.js?v=192.0"></script>
+<script src="app.js?v=192.0"></script>
+<script src="settings-popup.js?v=192.0"></script>
 
 <script>
   let activeRole = 'professional';
@@ -1025,15 +1025,28 @@
 
   async function initPromoState() {
     const user = getUser() || {};
+    const urlParams = new URLSearchParams(window.location.search);
+    const isRenew = urlParams.get('renew') === 'true';
 
-    // 1. Check if user already has an active trial
+    // 1. Check if user already has an active trial or is renewing
     if (user.is_premium && user.trial_ends_at) {
       const trialMs = new Date(user.trial_ends_at).getTime() - Date.now();
       const daysLeft = Math.max(0, Math.ceil(trialMs / (1000 * 60 * 60 * 24)));
-      if (daysLeft > 0) {
-        const banner = document.getElementById('promoTrialBanner');
-        if (banner) {
-          banner.style.display = 'block';
+      const banner = document.getElementById('promoTrialBanner');
+      if (banner) {
+        banner.style.display = 'block';
+        if (isRenew || daysLeft <= 2) {
+          banner.style.background = 'rgba(245, 158, 11, 0.12)';
+          banner.style.border = '1px solid rgba(245, 158, 11, 0.35)';
+          banner.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <strong style="color:#d97706; font-size:13.5px;">Renew Your Founding Member Subscription</strong>
+            </div>
+            <div style="font-size:12px; color:var(--ink); line-height:1.4;">
+              Your 60-day complimentary pass is concluding (${daysLeft === 0 ? 'ends today' : daysLeft + ' day remaining'}). Continue your monthly subscription below to keep top search placement, 50% commission discounts, and priority invitations active without interruption.
+            </div>
+          `;
+        } else if (daysLeft > 0) {
           banner.innerHTML = `
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
               <strong style="color:#15803d; font-size:13.5px;">Active Founding Member Free Trial (${daysLeft} Days Remaining)</strong>
@@ -1554,6 +1567,7 @@
         premium_plan: activeRole,
         subscription_tier: activeRole === 'company' ? 'company_enterprise' : 'pro_plus',
         subscription_cycle: 'trial_60_days',
+        trial_started_at: now.toISOString(),
         trial_ends_at: trialEndsAt,
         subscription_expiry: trialEndsAt,
         promo_code_used: appliedPromo.code,
@@ -1562,6 +1576,21 @@
       };
       setUser(updatedUser);
 
+      // Add activation notification to bell
+      if (typeof addUserNotification === 'function') {
+        addUserNotification({
+          type: 'trial_activated',
+          title: 'Founding Member Pass Activated! (60-Day Trial)',
+          message: `Your 60-Day Free Trial (${appliedPromo.code}) is now active and starts counting immediately! Enjoy full premium privileges with zero platform fees.`,
+          link: activeRole === 'company' ? 'company-dashboard.html' : 'dashboard.html'
+        });
+      }
+
+      // Check milestones immediately
+      if (typeof checkTrialLifecycleMilestones === 'function') {
+        checkTrialLifecycleMilestones();
+      }
+
       // Update Supabase profiles table directly if available
       if (window.sb && user.id) {
         try {
@@ -1569,6 +1598,7 @@
             is_premium: true,
             premium_plan: activeRole,
             subscription_tier: activeRole === 'company' ? 'company_enterprise' : 'pro_plus',
+            trial_started_at: now.toISOString(),
             trial_ends_at: trialEndsAt,
             subscription_expiry: trialEndsAt,
             promo_code_used: appliedPromo.code,

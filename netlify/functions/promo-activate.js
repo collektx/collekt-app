@@ -137,6 +137,7 @@ exports.handler = async (event, context) => {
         is_premium: true,
         subscription_tier: (role === 'company') ? 'company_enterprise' : 'pro_plus',
         subscription_cycle: 'trial_60_days',
+        trial_started_at: now.toISOString(),
         trial_ends_at: trialEndsAt,
         subscription_expiry: trialEndsAt,
         promo_code_used: inputCode,
