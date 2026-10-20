@@ -75,7 +75,7 @@ const promoUser = {
 
 assert.strictEqual(isUserPremiumSubscriber(promoUser), true, 'Promo code trial user must be recognized as subscribed');
 const promoBadge = getShieldBadgeHTML(22, promoUser);
-assert(promoBadge.includes('fill="#16a34a"'), 'Promo user badge must contain green fill #16a34a');
+assert(promoBadge.includes('stroke="#16a34a"'), 'Promo user badge must contain green stroke #16a34a');
 assert(promoBadge.includes('collekt-verified-check'), 'Promo user badge must contain collekt-verified-check class');
 assert(promoBadge.includes('svg width="22"'), 'Promo user badge must have size 22');
 console.log('PASS: Promo code subscriber successfully receives green check mark.');
@@ -93,7 +93,7 @@ const paidProUser = {
 
 assert.strictEqual(isUserPremiumSubscriber(paidProUser), true, 'Paid pro user must be recognized as subscribed');
 const paidProBadge = getShieldBadgeHTML(20, paidProUser);
-assert(paidProBadge.includes('fill="#16a34a"'), 'Paid pro badge must contain green fill');
+assert(paidProBadge.includes('stroke="#16a34a"'), 'Paid pro badge must contain green stroke');
 console.log('PASS: Paying professional subscriber successfully receives green check mark.');
 
 // Test 3: Company paying for enterprise tier
@@ -109,7 +109,7 @@ const paidCoUser = {
 
 assert.strictEqual(isUserPremiumSubscriber(paidCoUser), true, 'Paid company enterprise must be recognized as subscribed');
 const paidCoBadge = getShieldBadgeHTML(22, paidCoUser);
-assert(paidCoBadge.includes('fill="#16a34a"'), 'Paid company badge must contain green fill');
+assert(paidCoBadge.includes('stroke="#16a34a"'), 'Paid company badge must contain green stroke');
 console.log('PASS: Paying company subscriber successfully receives green check mark.');
 
 // Test 4: Free tier user (NOT subscribed)

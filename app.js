@@ -5971,8 +5971,7 @@ function getShieldBadgeHTML(size = 16, user = null) {
 function _renderShieldBadgeMarkup(size = 16) {
   return `<span class="shield-badge collekt-verified-check" title="Premium Subscriber Verified" style="margin-left:6px; margin-right:2px; vertical-align:middle; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; transform:translateY(-1px);">
     <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
-      <circle cx="12" cy="12" r="10" fill="#16a34a"/>
-      <path d="M7.8 12.3L10.6 15.1L16.2 9.4" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M4.5 12.8L9.5 17.5L19.5 6.5" stroke="#16a34a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </span>`;
 }

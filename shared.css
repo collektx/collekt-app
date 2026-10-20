@@ -107,19 +107,23 @@ html.dark .notif-item-text strong { color: #F1F5F4; }
   transform: scale(1.12);
   filter: drop-shadow(0 0 6px rgba(22, 163, 74, 0.45));
 }
-.shield-badge svg path {
+.shield-badge svg path,
+.collekt-verified-check svg path {
   stroke: #16a34a;
   transition: stroke 0.2s;
 }
-.shield-badge svg text {
+.shield-badge svg text,
+.collekt-verified-check svg text {
   fill: #16a34a;
   font-weight: 900;
   transition: fill 0.2s;
 }
-html.dark .shield-badge svg path {
+html.dark .shield-badge svg path,
+html.dark .collekt-verified-check svg path {
   stroke: #22c55e;
 }
-html.dark .shield-badge svg text {
+html.dark .shield-badge svg text,
+html.dark .collekt-verified-check svg text {
   fill: #22c55e;
 }
 
