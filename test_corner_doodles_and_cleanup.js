@@ -73,6 +73,15 @@ if (missingEcoTerms.length > 0) {
   console.log('  ✅ Ecosystem terms (Escrow Protected, Milestones, NOVA Bank, Turnaround) verified');
 }
 
+// Check doodle tag count
+const doodleTagMatches = (appJs.match(/class="doodle-tag/g) || []).length;
+if (doodleTagMatches < 40) {
+  console.error(`❌ FAIL: Expected at least 40 overlapping doodle items, found ${doodleTagMatches}`);
+  failed = true;
+} else {
+  console.log(`  ✅ Overlapping doodle density verified: ${doodleTagMatches} layered items active!`);
+}
+
 // 3. Verify zero unwanted emojis in dashboard.html
 console.log('\n▶ Test 3: Dashboard.html Cleanliness');
 const dashHtml = fs.readFileSync(path.join(__dirname, 'dashboard.html'), 'utf8');
